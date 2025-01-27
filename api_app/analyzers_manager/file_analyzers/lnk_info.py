@@ -7,7 +7,7 @@ import re
 import pylnk3
 
 from api_app.analyzers_manager.classes import FileAnalyzer
-from api_app.analyzers_manager.constants import ObservableTypes
+from api_app.choices import Classification
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class LnkInfo(FileAnalyzer):
             if arguments := getattr(parsed, "arguments", None):
                 args = arguments.split()
                 for a in args:
-                    if ObservableTypes.calculate(a) == ObservableTypes.URL:
+                    if Classification.calculate_observable(a) == Classification.URL:
                         # remove strings delimiters used in commands
                         a = re.sub(r"[\"\']", "", a)
                         result["uris"].append(a)

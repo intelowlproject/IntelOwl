@@ -3,8 +3,9 @@ from django.db import transaction
 from django.utils.timezone import now
 from kombu import uuid
 
-from api_app.analyzers_manager.constants import ObservableTypes
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
+from api_app.choices import Classification
 from api_app.data_model_manager.models import IPDataModel
 from api_app.engines_manager.models import EngineConfig
 from api_app.models import Job
@@ -27,12 +28,16 @@ class EngineConfigTestCase(CustomTestCase):
         config.delete()
 
     def test_run_empty(self):
+        an1 = Analyzable.objects.create(
+            name="8.8.8.8",
+            classification=Classification.IP,
+        )
+
         config = EngineConfig.objects.first()
         job = Job.objects.create(
             user=self.user,
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS.value,
-            observable_name="8.8.8.8",
-            observable_classification=ObservableTypes.IP,
+            analyzable=an1,
             received_request_time=now(),
         )
         config.run(job)
@@ -43,14 +48,19 @@ class EngineConfigTestCase(CustomTestCase):
         )
         job.delete()
         config.delete()
+        an1.delete()
 
     def test_run_value(self):
+        an1 = Analyzable.objects.create(
+            name="8.8.8.8",
+            classification=Classification.IP,
+        )
+
         config = EngineConfig.objects.first()
         job = Job.objects.create(
             user=self.user,
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS.value,
-            observable_name="8.8.8.8",
-            observable_classification=ObservableTypes.IP,
+            analyzable=an1,
             received_request_time=now(),
         )
         ar2 = AnalyzerReport.objects.create(

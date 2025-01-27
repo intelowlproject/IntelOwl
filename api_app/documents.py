@@ -38,6 +38,7 @@ class JobDocument(Document):
     tlp = fields.KeywordField()
     observable_name = fields.KeywordField()
     observable_classification = fields.KeywordField()
+    is_sample = fields.BooleanField()
     file_name = fields.KeywordField()
     file_mimetype = fields.KeywordField()
     # Nested (ForeignKey) fields
@@ -74,7 +75,6 @@ class JobDocument(Document):
 
         # The fields of the model you want to be indexed in Elasticsearch
         fields = [
-            "is_sample",
             "received_request_time",
             "finished_analysis_time",
             "process_time",

@@ -10,6 +10,7 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from certego_saas.apps.user.models import User
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
@@ -174,14 +175,14 @@ class DNSdb(classes.ObservableAnalyzer):
         api_version = self._get_version_endpoint(self.api_version)
         observable_to_check = self.observable_name
         # for URLs we are checking the relative domain
-        if self.observable_classification == self.ObservableTypes.URL:
+        if self.observable_classification == Classification.URL:
             observable_to_check = urlparse(self.observable_name).hostname
 
-        if self.observable_classification == self.ObservableTypes.IP:
+        if self.observable_classification == Classification.IP:
             endpoint = "rdata/ip"
         elif self.observable_classification in [
-            self.ObservableTypes.DOMAIN,
-            self.ObservableTypes.URL,
+            Classification.DOMAIN,
+            Classification.URL,
         ]:
             if self.query_type == "domain":
                 endpoint = "rrset/name"

@@ -8,6 +8,7 @@ import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -95,11 +96,11 @@ class UrlDNA(ObservableAnalyzer):
     def __urldna_search(self):
         uri = "/search"
         data = {"query": f"{self.observable_name}"}
-        if self.observable_classification == self.ObservableTypes.URL:
+        if self.observable_classification == Classification.URL:
             data["query"] = f"submitted_url = {self.observable_name}"
-        elif self.observable_classification == self.ObservableTypes.DOMAIN:
+        elif self.observable_classification == Classification.DOMAIN:
             data["query"] = f"domain = {self.observable_name}"
-        elif self.observable_classification == self.ObservableTypes.IP:
+        elif self.observable_classification == Classification.IP:
             data["query"] = f"ip = {self.observable_name}"
         else:
             data["query"] = f"{self.observable_name}"

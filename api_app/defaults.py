@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.utils import timezone
 
 
 def config_default():
@@ -16,5 +15,4 @@ def default_runtime():
 
 
 def file_directory_path(instance, filename):
-    now = timezone.now().strftime("%Y_%m_%d_%H_%M_%S")
-    return f"job_{now}_{filename}"
+    return instance.md5

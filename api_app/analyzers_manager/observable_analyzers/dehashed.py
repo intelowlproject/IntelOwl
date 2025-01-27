@@ -9,7 +9,7 @@ import requests
 from requests.structures import CaseInsensitiveDict
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.analyzers_manager.constants import ObservableTypes
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -56,13 +56,14 @@ class DehashedSearch(ObservableAnalyzer):
         }
 
     def __identify_search_operator(self):
-        if self.observable_classification == ObservableTypes.IP:
+        if self.observable_classification == Classification.IP:
             self.operator = "ip_address"
-        elif self.observable_classification == ObservableTypes.DOMAIN:
+        elif self.observable_classification in [
+            Classification.DOMAIN,
+            Classification.URL,
+        ]:
             self.operator = "domain"
-        elif self.observable_classification == ObservableTypes.URL:
-            self.operator = "domain"
-        elif self.observable_classification == ObservableTypes.GENERIC:
+        elif self.observable_classification == Classification.GENERIC:
             if re.match(r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$", self.observable_name):
                 self.operator = "email"
             # order matters! it's important "address" is placed before "phone"

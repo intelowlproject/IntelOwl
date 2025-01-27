@@ -1,4 +1,6 @@
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.choices import Classification
 from api_app.models import Job, PythonModule
 from api_app.pivots_manager.models import PivotConfig, PivotMap
 from api_app.pivots_manager.serializers import PivotConfigSerializer, PivotMapSerializer
@@ -10,16 +12,23 @@ from tests.mock_utils import MockUpRequest
 class PivotMapSerializerTestCase(CustomTestCase):
     def setUp(self) -> None:
         super().setUp()
+        self.an1 = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+        self.an2 = Analyzable.objects.create(
+            name="test2.com",
+            classification=Classification.DOMAIN,
+        )
+
         self.j1 = Job.objects.create(
             user=self.user,
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=self.an1,
             status="reported_without_fails",
         )
         self.j2 = Job.objects.create(
             user=self.user,
-            observable_name="test2.com",
-            observable_classification="domain",
+            analyzable=self.an2,
             status="reported_without_fails",
         )
         self.pc = PivotConfig.objects.create(
@@ -33,6 +42,8 @@ class PivotMapSerializerTestCase(CustomTestCase):
     def tearDown(self) -> None:
         super().tearDown()
         self.j1.delete()
+        self.an1.delete()
+        self.an2.delete()
         self.j2.delete()
         self.pc.delete()
 

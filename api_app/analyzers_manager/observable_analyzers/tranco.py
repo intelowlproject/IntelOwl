@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 import requests
 
 from api_app.analyzers_manager import classes
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
@@ -18,7 +19,7 @@ class Tranco(classes.ObservableAnalyzer):
 
     def run(self):
         observable_to_analyze = self.observable_name
-        if self.observable_classification == self.ObservableTypes.URL:
+        if self.observable_classification == Classification.URL:
             observable_to_analyze = urlparse(self.observable_name).hostname
 
         url = self.url + observable_to_analyze

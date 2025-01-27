@@ -66,7 +66,7 @@ class Talos(classes.ObservableAnalyzer):
         found = self.report.report.get("found", False)
         if found:
             data_model.external_references.append(
-                f"https://www.talosintelligence.com/reputation_center/lookup?search={self.report.job.observable_name}"
+                f"https://www.talosintelligence.com/reputation_center/lookup?search={self.report.job.analyzable.name}"
             )
             data_model.evaluation = (
                 self.report.data_model_class.EVALUATIONS.MALICIOUS.value

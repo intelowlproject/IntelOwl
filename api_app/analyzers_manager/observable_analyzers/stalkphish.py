@@ -5,6 +5,7 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
@@ -25,12 +26,12 @@ class Stalkphish(classes.ObservableAnalyzer):
         obs_clsfn = self.observable_classification
 
         if obs_clsfn in [
-            self.ObservableTypes.DOMAIN,
-            self.ObservableTypes.URL,
-            self.ObservableTypes.GENERIC,
+            Classification.DOMAIN,
+            Classification.URL,
+            Classification.GENERIC,
         ]:
             uri = f"search/url/{self.observable_name}"
-        elif obs_clsfn == self.ObservableTypes.IP:
+        elif obs_clsfn == Classification.IP:
             uri = f"search/ipv4/{self.observable_name}"
         else:
             raise AnalyzerRunException(

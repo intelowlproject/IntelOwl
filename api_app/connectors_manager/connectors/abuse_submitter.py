@@ -7,7 +7,7 @@ class AbuseSubmitter(EmailSender):
     def subject(self) -> str:
         return (
             "Takedown domain request for "
-            f"{self._job.parent_job.parent_job.observable_name}"
+            f"{self._job.parent_job.parent_job.analyzable.name}"
         )
 
     @property
@@ -18,7 +18,7 @@ class AbuseSubmitter(EmailSender):
                 "This analyzer must be run only with the playbook Takedown_Request to work properly"
             )
         return (
-            f"Domain {self._job.parent_job.parent_job.observable_name} "
+            f"Domain {self._job.parent_job.parent_job.analyzable.name} "
             "has been detected as malicious by our team. We kindly request you to take "
             "it down as soon as possible."
         )

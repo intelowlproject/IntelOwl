@@ -28,7 +28,7 @@ class EmailSender(Connector):
         base_eml = EmailMessage(
             subject=self.subject,
             from_email=sender,
-            to=[self._job.observable_name],
+            to=[self._job.analyzable.name],
             body=body,
             cc=self.CCs if self.CCs else [],
         )

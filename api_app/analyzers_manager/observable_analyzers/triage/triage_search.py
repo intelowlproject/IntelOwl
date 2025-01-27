@@ -5,7 +5,6 @@ import logging
 import time
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
@@ -13,6 +12,7 @@ from api_app.analyzers_manager.exceptions import (
 from api_app.analyzers_manager.observable_analyzers.triage.triage_base import (
     TriageMixin,
 )
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ class TriageSearch(ObservableAnalyzer, TriageMixin):
         return self.final_report
 
     def __triage_search(self):
-        if self.observable_classification == self.ObservableTypes.HASH:
+        if self.observable_classification == Classification.HASH:
             query = self.observable_name
         else:
             query = f"{self.observable_classification}:{self.observable_name}"
@@ -47,8 +47,8 @@ class TriageSearch(ObservableAnalyzer, TriageMixin):
 
     def __triage_submit(self):
         data = {
-            "kind": ObservableTypes.URL,
-            ObservableTypes.URL: f"{self.observable_name}",
+            "kind": Classification.URL,
+            Classification.URL: f"{self.observable_name}",
         }
 
         logger.info(f"triage {self.observable_name} sending URL for analysis")

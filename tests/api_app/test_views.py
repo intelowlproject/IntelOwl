@@ -12,9 +12,9 @@ from elasticsearch_dsl.query import Bool, Exists, Range, Term
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from api_app.analyzers_manager.constants import ObservableTypes
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.choices import ReportStatus
+from api_app.choices import Classification, ReportStatus
 from api_app.models import Comment, Job, Parameter, PluginConfig, Tag
 from api_app.playbooks_manager.models import PlaybookConfig
 from certego_saas.apps.organization.membership import Membership
@@ -30,18 +30,13 @@ class CommentViewSetTestCase(CustomViewSetTestCase):
 
     def setUp(self):
         super().setUp()
-        self.job = Job.objects.create(
-            user=self.superuser,
-            is_sample=False,
-            observable_name="8.8.8.8",
-            observable_classification=ObservableTypes.IP,
+        self.an1 = Analyzable.objects.create(
+            name="8.8.8.8",
+            classification=Classification.IP,
         )
-        self.job2 = Job.objects.create(
-            user=self.superuser,
-            is_sample=False,
-            observable_name="8.8.8.8",
-            observable_classification=ObservableTypes.IP,
-        )
+
+        self.job = Job.objects.create(user=self.superuser, analyzable=self.an1)
+        self.job2 = Job.objects.create(user=self.superuser, analyzable=self.an1)
         self.comment = Comment.objects.create(
             job=self.job, user=self.superuser, content="test"
         )
@@ -51,6 +46,7 @@ class CommentViewSetTestCase(CustomViewSetTestCase):
         super().tearDown()
         self.job.delete()
         self.job2.delete()
+        self.an1.delete()
         self.comment.delete()
 
     def test_list_200(self):
@@ -109,17 +105,19 @@ class JobViewSetTests(CustomViewSetTestCase):
             "django.utils.timezone.now",
             return_value=datetime.datetime(2024, 11, 28, tzinfo=datetime.timezone.utc),
         ):
-            self.job, _ = Job.objects.get_or_create(
+            self.analyzable = Analyzable.objects.create(
+                name="1.2.3.4", classification=Classification.IP
+            )
+            self.job = Job.objects.create(
                 **{
                     "user": self.superuser,
                     "is_sample": False,
-                    "observable_name": "1.2.3.4",
-                    "observable_classification": "ip",
+                    "analyzable": self.analyzable,
                     "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
                     "tlp": Job.TLP.CLEAR.value,
                 }
             )
-            self.job2, _ = Job.objects.get_or_create(
+            self.job2 = Job.objects.create(
                 **{
                     "user": self.superuser,
                     "is_sample": True,
@@ -130,6 +128,11 @@ class JobViewSetTests(CustomViewSetTestCase):
                     "tlp": Job.TLP.GREEN.value,
                 }
             )
+
+    def tearDown(self):
+        self.job2.delete()
+        self.job.delete()
+        self.analyzable.delete()
 
     def test_recent_scan(self):
         j1 = Job.objects.create(
@@ -150,7 +153,9 @@ class JobViewSetTests(CustomViewSetTestCase):
                 "finished_analysis_time": now() - datetime.timedelta(hours=2),
             }
         )
-        response = self.client.post(self.jobs_recent_scans_uri, data={"md5": j1.md5})
+        response = self.client.post(
+            self.jobs_recent_scans_uri, data={"md5": j1.analyzable.md5}
+        )
         content = response.json()
         msg = (response, content)
         self.assertEqual(200, response.status_code, msg=msg)
@@ -304,7 +309,7 @@ class JobViewSetTests(CustomViewSetTestCase):
         msg = (resp, content)
 
         self.assertEqual(resp.status_code, 200, msg)
-        for field in ["date", *ObservableTypes.values]:
+        for field in ["date", *Classification.values[:-1]]:
             self.assertIn(
                 field,
                 content[0],

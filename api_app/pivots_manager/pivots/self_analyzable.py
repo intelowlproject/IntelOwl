@@ -30,6 +30,5 @@ class SelfAnalyzable(Pivot):
 
     def get_value_to_pivot_to(self) -> Any:
         if self._job.is_sample:
-            return File(self._job.analyzed_object, name=self._job.analyzed_object_name)
-        else:
-            return self._job.analyzed_object_name
+            return File(self._job.analyzable.file, name=self._job.analyzable.name)
+        return self._job.analyzable.name

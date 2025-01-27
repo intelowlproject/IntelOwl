@@ -14,7 +14,7 @@ class BaseDataModelQuerySet(QuerySet):
         Base method of merge of multiple data models.
         :return: BaseDataModel
         """
-        result_obj = self.model.objects.create()
+        result_obj: BaseDataModel = self.model.objects.create()
         for obj in self:
             result_obj.merge(obj, append=append)
         return result_obj

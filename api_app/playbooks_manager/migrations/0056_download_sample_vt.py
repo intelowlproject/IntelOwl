@@ -2,7 +2,6 @@ import datetime
 
 from django.db import migrations
 
-from api_app.analyzers_manager.constants import AllTypes
 from api_app.choices import TLP
 
 
@@ -12,7 +11,7 @@ def migrate(apps, schema_editor):
     playbook_download_sample_vt, _ = PlaybookConfig.objects.get_or_create(
         name="Download_File_VT",
         description="Download a sample from VT",
-        type=[AllTypes.HASH.value],
+        type=["hash"],
         tlp=TLP.AMBER.value,
         scan_check_time=datetime.timedelta(days=14),
     )

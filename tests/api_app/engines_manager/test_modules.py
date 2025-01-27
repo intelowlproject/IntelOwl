@@ -1,8 +1,9 @@
 from django.utils.timezone import now
 from kombu import uuid
 
-from api_app.analyzers_manager.constants import ObservableTypes
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
+from api_app.choices import Classification
 from api_app.data_model_manager.models import IPDataModel
 from api_app.engines_manager.engines.evaluation import EvaluationEngineModule
 from api_app.engines_manager.engines.malware_family import MalwareFamilyEngineModule
@@ -13,12 +14,15 @@ from tests import CustomTestCase
 class EngineModuleTestCase(CustomTestCase):
 
     def setUp(self) -> None:
+        self.an = Analyzable.objects.create(
+            name="8.8.8.8",
+            classification=Classification.IP,
+        )
         self.job = Job.objects.create(
             user=self.user,
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS.value,
-            observable_name="8.8.8.8",
-            observable_classification=ObservableTypes.IP,
             received_request_time=now(),
+            analyzable=self.an,
         )
         self.ars = []
 
@@ -48,7 +52,7 @@ class EngineModuleTestCase(CustomTestCase):
                 job=self.job,
                 task_id=uuid(),
                 config=AnalyzerConfig.objects.filter(
-                    observable_supported__contains=[ObservableTypes.IP.value]
+                    observable_supported__contains=[Classification.IP.value]
                 )[i],
             )
             ar.data_model = dm
@@ -59,6 +63,7 @@ class EngineModuleTestCase(CustomTestCase):
 
     def tearDown(self) -> None:
         self.job.delete()
+        self.an.delete()
         for ar in self.ars:
             ar.delete()
 

@@ -8,20 +8,20 @@ from django.conf import settings
 from pycti.api.opencti_api_client import File
 
 from api_app import helpers
-from api_app.analyzers_manager.constants import ObservableTypes
+from api_app.choices import Classification
 from api_app.connectors_manager import classes
 from tests.mock_utils import if_mock_connections, patch
 
 INTELOWL_OPENCTI_TYPE_MAP = {
-    ObservableTypes.IP: {
+    Classification.IP: {
         "v4": "ipv4-addr",
         "v6": "ipv6-addr",
     },
-    ObservableTypes.DOMAIN: "domain-name",
-    ObservableTypes.URL: "url",
+    Classification.DOMAIN: "domain-name",
+    Classification.URL: "url",
     # type hash is missing because it is combined with "file"
     # "generic" is misc field, so keeping text
-    ObservableTypes.GENERIC: "x-opencti-text",
+    Classification.GENERIC: "x-opencti-text",
     "file": "file",  # hashes: md5, sha-1, sha-256
 }
 
@@ -36,8 +36,8 @@ class OpenCTI(classes.Connector):
     def get_observable_type(self) -> str:
         if self._job.is_sample:
             obs_type = INTELOWL_OPENCTI_TYPE_MAP["file"]
-        elif self._job.observable_classification == ObservableTypes.HASH:
-            matched_hash_type = helpers.get_hash_type(self._job.observable_name)
+        elif self._job.analyzable.classification == Classification.HASH:
+            matched_hash_type = helpers.get_hash_type(self._job.analyzable.name)
             if matched_hash_type in [
                 "md5",
                 "sha-1",
@@ -45,38 +45,38 @@ class OpenCTI(classes.Connector):
             ]:  # sha-512 not supported
                 obs_type = INTELOWL_OPENCTI_TYPE_MAP["file"]
             else:
-                obs_type = INTELOWL_OPENCTI_TYPE_MAP[ObservableTypes.GENERIC]  # text
-        elif self._job.observable_classification == ObservableTypes.IP:
-            ip_version = helpers.get_ip_version(self._job.observable_name)
+                obs_type = INTELOWL_OPENCTI_TYPE_MAP[Classification.GENERIC]  # text
+        elif self._job.analyzable.classification == Classification.IP:
+            ip_version = helpers.get_ip_version(self._job.analyzable.name)
             if ip_version in [4, 6]:
-                obs_type = INTELOWL_OPENCTI_TYPE_MAP[ObservableTypes.IP][
+                obs_type = INTELOWL_OPENCTI_TYPE_MAP[Classification.IP][
                     f"v{ip_version}"
                 ]  # v4/v6
             else:
-                obs_type = INTELOWL_OPENCTI_TYPE_MAP[ObservableTypes.GENERIC]  # text
+                obs_type = INTELOWL_OPENCTI_TYPE_MAP[Classification.GENERIC]  # text
         else:
-            obs_type = INTELOWL_OPENCTI_TYPE_MAP[self._job.observable_classification]
+            obs_type = INTELOWL_OPENCTI_TYPE_MAP[self._job.analyzable.classification]
 
         return obs_type
 
     def generate_observable_data(self) -> dict:
         observable_data = {"type": self.get_observable_type()}
         if self._job.is_sample:
-            observable_data["name"] = self._job.file_name
+            observable_data["name"] = self._job.analyzable.name
             observable_data["hashes"] = {
-                "md5": self._job.md5,
-                "sha-1": self._job.sha1,
-                "sha-256": self._job.sha256,
+                "md5": self._job.analyzable.md5,
+                "sha-1": self._job.analyzable.sha1,
+                "sha-256": self._job.analyzable.sha256,
             }
         elif (
-            self._job.observable_classification == ObservableTypes.HASH
+            self._job.analyzable.classification == Classification.HASH
             and observable_data["type"] == "file"
         ):
             # add hash instead of value
-            matched_type = helpers.get_hash_type(self._job.observable_name)
-            observable_data["hashes"] = {matched_type: self._job.observable_name}
+            matched_type = helpers.get_hash_type(self._job.analyzable.name)
+            observable_data["hashes"] = {matched_type: self._job.analyzable.name}
         else:
-            observable_data["value"] = self._job.observable_name
+            observable_data["value"] = self._job.analyzable.name
 
         return observable_data
 

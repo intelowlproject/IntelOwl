@@ -10,9 +10,8 @@ from django.core.cache import cache
 from rest_framework.response import Response
 
 from api_app.analyzers_manager.classes import BaseAnalyzerMixin
-from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from api_app.choices import ObservableClassification
+from api_app.choices import Classification
 from certego_saas.ext.pagination import CustomPageNumberPagination
 
 logger = logging.getLogger(__name__)
@@ -84,7 +83,6 @@ class VirusTotalv3BaseMixin(metaclass=abc.ABCMeta):
     # If you want to query a specific subpath of the base endpoint, i.e: `analyses`
     url_sub_path: str
     _api_key_name: str
-    ObservableTypes = ObservableTypes
 
     @property
     def headers(self) -> dict:
@@ -147,7 +145,7 @@ class VirusTotalv3BaseMixin(metaclass=abc.ABCMeta):
     @classmethod
     def _get_relationship_for_classification(cls, obs_clfn: str, iocs: bool) -> List:
         # reference: https://developers.virustotal.com/reference/metadata
-        if obs_clfn == cls.ObservableTypes.DOMAIN:
+        if obs_clfn == Classification.DOMAIN:
             relationships = [
                 "communicating_files",
                 "historical_whois",
@@ -158,7 +156,7 @@ class VirusTotalv3BaseMixin(metaclass=abc.ABCMeta):
                 "collections",
                 "historical_ssl_certificates",
             ]
-        elif obs_clfn == cls.ObservableTypes.IP:
+        elif obs_clfn == Classification.IP:
             relationships = [
                 "communicating_files",
                 "historical_whois",
@@ -167,13 +165,13 @@ class VirusTotalv3BaseMixin(metaclass=abc.ABCMeta):
                 "collections",
                 "historical_ssl_certificates",
             ]
-        elif obs_clfn == cls.ObservableTypes.URL:
+        elif obs_clfn == Classification.URL:
             relationships = [
                 "last_serving_ip_address",
                 "collections",
                 "network_location",
             ]
-        elif obs_clfn == cls.ObservableTypes.HASH:
+        elif obs_clfn == Classification.HASH:
             if iocs:
                 relationships = [
                     "contacted_domains",
@@ -216,16 +214,16 @@ class VirusTotalv3BaseMixin(metaclass=abc.ABCMeta):
         relationships_requested = self._get_relationship_for_classification(
             obs_clfn, iocs
         )
-        if obs_clfn == self.ObservableTypes.DOMAIN:
+        if obs_clfn == Classification.DOMAIN:
             uri = f"domains/{observable_name}"
-        elif obs_clfn == self.ObservableTypes.IP:
+        elif obs_clfn == Classification.IP:
             uri = f"ip_addresses/{observable_name}"
-        elif obs_clfn == self.ObservableTypes.URL:
+        elif obs_clfn == Classification.URL:
             url_id = (
                 base64.urlsafe_b64encode(observable_name.encode()).decode().strip("=")
             )
             uri = f"urls/{url_id}"
-        elif obs_clfn == self.ObservableTypes.HASH:
+        elif obs_clfn == Classification.HASH:
             uri = f"files/{observable_name}"
         else:
             raise AnalyzerRunException(
@@ -292,7 +290,7 @@ class VirusTotalv3BaseMixin(metaclass=abc.ABCMeta):
     def _vt_get_iocs_from_file(self, sample_hash: str) -> Dict:
         try:
             params, uri, relationships_requested = self._get_requests_params_and_uri(
-                self.ObservableTypes.HASH, sample_hash, True
+                Classification.HASH, sample_hash, True
             )
             logger.info(f"Requesting IOCs {relationships_requested} from {uri}")
             result, response = self._perform_get_request(
@@ -409,14 +407,14 @@ class VirusTotalv3AnalyzerMixin(
             )
 
     def _get_url_prefix_postfix(self, result: Dict) -> Tuple[str, str]:
-        uri_postfix = self._job.observable_name
-        if self._job.observable_classification == ObservableClassification.DOMAIN.value:
+        uri_postfix = self._job.analyzable.name
+        if self._job.analyzable.classification == Classification.DOMAIN.value:
             uri_prefix = "domain"
-        elif self._job.observable_classification == ObservableClassification.IP.value:
+        elif self._job.analyzable.classification == Classification.IP.value:
             uri_prefix = "ip-address"
-        elif self._job.observable_classification == ObservableClassification.URL.value:
+        elif self._job.analyzable.classification == Classification.URL.value:
             uri_prefix = "url"
-            uri_postfix = result.get("data", {}).get("id", self._job.sha256)
+            uri_postfix = result.get("data", {}).get("id", self._job.analyzable.sha256)
         else:  # hash
             uri_prefix = "search"
         return uri_prefix, uri_postfix
@@ -431,8 +429,7 @@ class VirusTotalv3AnalyzerMixin(
         else:
             logger.info(f"(Job: {self.job_id}, {md5}) -> VT analyzer requested scan")
             try:
-                self._job.file.seek(0)
-                binary = self._job.file.read()
+                binary = self._job.analyzable.read()
                 logger.debug(f"BINARY: {binary}")
             except Exception:
                 raise AnalyzerRunException(
@@ -481,7 +478,7 @@ class VirusTotalv3AnalyzerMixin(
         if got_result:
             # retrieve the FULL report, not only scans results.
             # If it's a new sample, it's free of charge.
-            result = self._vt_get_report(self.ObservableTypes.HASH, md5)
+            result = self._vt_get_report(Classification.HASH, md5)
         else:
             message = (
                 f"[POLLING] (Job: {self.job_id}, {md5}) -> "
@@ -515,7 +512,7 @@ class VirusTotalv3AnalyzerMixin(
             )
 
             # if it is not a file, we don't need to perform any scan
-            if obs_clfn != self.ObservableTypes.HASH:
+            if obs_clfn != Classification.HASH:
                 break
 
             # this is an option to force active scan...
@@ -647,7 +644,7 @@ class VirusTotalv3AnalyzerMixin(
             obs_clfn,
         )
 
-        if obs_clfn == self.ObservableTypes.HASH:
+        if obs_clfn == Classification.HASH:
             # Include behavioral report, if flag enabled
             # Attention: this will cost additional quota!
             if self.include_behaviour_summary:

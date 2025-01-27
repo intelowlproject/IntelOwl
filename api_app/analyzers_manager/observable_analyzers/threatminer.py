@@ -5,6 +5,7 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
@@ -21,11 +22,11 @@ class Threatminer(classes.ObservableAnalyzer):
         if self.rt_value:
             params["rt"] = self.rt_value
 
-        if self.observable_classification == self.ObservableTypes.DOMAIN:
+        if self.observable_classification == Classification.DOMAIN:
             uri = "domain.php"
-        elif self.observable_classification == self.ObservableTypes.IP:
+        elif self.observable_classification == Classification.IP:
             uri = "host.php"
-        elif self.observable_classification == self.ObservableTypes.HASH:
+        elif self.observable_classification == Classification.HASH:
             uri = "sample.php"
         else:
             raise AnalyzerRunException(

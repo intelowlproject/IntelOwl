@@ -5,8 +5,9 @@ from unittest.mock import patch
 
 from kombu import uuid
 
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
-from api_app.choices import PythonModuleBasePaths
+from api_app.choices import Classification, PythonModuleBasePaths
 from api_app.connectors_manager.classes import Connector
 from api_app.connectors_manager.exceptions import ConnectorRunException
 from api_app.connectors_manager.models import ConnectorConfig
@@ -58,9 +59,13 @@ class ConnectorTestCase(CustomTestCase):
             def run(self) -> dict:
                 return {}
 
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             status=Job.STATUSES.CONNECTORS_RUNNING.value,
         )
         AnalyzerReport.objects.create(
@@ -92,6 +97,7 @@ class ConnectorTestCase(CustomTestCase):
         muc.before_run()
         cc.delete()
         job.delete()
+        an.delete()
 
     def test_subclasses(self):
         def handler(signum, frame):
@@ -100,10 +106,13 @@ class ConnectorTestCase(CustomTestCase):
         import signal
 
         signal.signal(signal.SIGALRM, handler)
+        an1 = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
 
         job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an1,
             status="reported_without_fails",
             user=self.superuser,
         )
@@ -143,3 +152,4 @@ class ConnectorTestCase(CustomTestCase):
                 finally:
                     signal.alarm(0)
         job.delete()
+        an1.delete()

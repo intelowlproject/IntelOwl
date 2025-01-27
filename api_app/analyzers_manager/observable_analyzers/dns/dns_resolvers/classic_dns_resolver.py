@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 import dns.resolver
 
 from api_app.analyzers_manager import classes
+from api_app.choices import Classification
 
 from ..dns_responses import dns_resolver_response
 
@@ -25,7 +26,7 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
     def run(self):
         resolutions = []
         timeout = False
-        if self.observable_classification == self.ObservableTypes.IP:
+        if self.observable_classification == Classification.IP:
             try:
                 ipaddress.ip_address(self.observable_name)
                 hostname, alias, _ = socket.gethostbyaddr(self.observable_name)
@@ -49,12 +50,12 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
                 timeout = True
 
         elif self.observable_classification in [
-            self.ObservableTypes.DOMAIN,
-            self.ObservableTypes.URL,
+            Classification.DOMAIN,
+            Classification.URL,
         ]:
             observable = self.observable_name
             # for URLs we are checking the relative domain
-            if self.observable_classification == self.ObservableTypes.URL:
+            if self.observable_classification == Classification.URL:
                 observable = urlparse(self.observable_name).hostname
 
             try:

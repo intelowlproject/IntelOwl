@@ -2,7 +2,7 @@ from logging import getLogger
 from typing import Dict
 
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, ObservableAnalyzer
-from api_app.analyzers_manager.constants import ObservableTypes
+from api_app.choices import Classification
 from api_app.models import PythonConfig
 
 logger = getLogger(__name__)
@@ -32,7 +32,7 @@ class PhishingExtractor(ObservableAnalyzer, DockerBasedAnalyzer):
         target = self.observable_name
         # handle domain names by appending default
         # protocol. selenium opens only URL types
-        if self.observable_classification == ObservableTypes.DOMAIN:
+        if self.observable_classification == Classification.DOMAIN:
             target = "http://" + target
         self.args.append(f"--target={target}")
         if self.proxy_address:

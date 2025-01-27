@@ -1,6 +1,6 @@
 from django.db import migrations
 
-from api_app.analyzers_manager.constants import ObservableTypes, TypeChoices
+from api_app.analyzers_manager.constants import TypeChoices
 from api_app.choices import TLP
 
 
@@ -15,7 +15,7 @@ def migrate(apps, schema_editor):
         python_module=PythonModule.objects.get(
             module="vt.vt3_sample_download.VirusTotalv3SampleDownload"
         ),
-        observable_supported=[ObservableTypes.HASH.value],
+        observable_supported=["hash"],
     )
 
 

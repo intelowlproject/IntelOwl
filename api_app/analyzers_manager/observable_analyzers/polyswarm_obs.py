@@ -6,6 +6,8 @@ from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import if_mock_connections, patch
 
+from ...choices import Classification
+
 logger = logging.getLogger(__name__)
 
 from ..file_analyzers.polyswarm import PolyswarmBase
@@ -14,15 +16,15 @@ from ..file_analyzers.polyswarm import PolyswarmBase
 class PolyswarmObs(ObservableAnalyzer, PolyswarmBase):
     def run(self):
         api = PolyswarmAPI(key=self._api_key, community=self.polyswarm_community)
-        if self.observable_classification == self.ObservableTypes.HASH.value:
+        if self.observable_classification == Classification.HASH.value:
             results = api.search(self.observable_name)
             result = self.get_results(results)
             return result
-        elif self.observable_classification == self.ObservableTypes.DOMAIN.value:
+        elif self.observable_classification == Classification.DOMAIN.value:
             # https://docs.polyswarm.io/consumers/polyswarm-customer-api-v3#ioc-searching
             return api.check_known_hosts(domains=[self.observable_name])[0].json()
 
-        elif self.observable_classification == self.ObservableTypes.IP.value:
+        elif self.observable_classification == Classification.IP.value:
             return api.check_known_hosts(ips=[self.observable_name])[0].json()
 
     def get_results(self, results):

@@ -13,7 +13,7 @@ from api_app.data_model_manager.models import (
 class IETFReportSerializer(FlexFieldsModelSerializer):
     class Meta:
         model = IETFReport
-        fields = "__all__"
+        exclude = ["id"]
 
     def create(self, validated_data):
         instance, _ = self.Meta.model.objects.get_or_create(**validated_data)
@@ -23,7 +23,7 @@ class IETFReportSerializer(FlexFieldsModelSerializer):
 class SignatureSerializer(FlexFieldsModelSerializer):
     class Meta:
         model = Signature
-        fields = "__all__"
+        exclude = ["id"]
 
     def create(self, validated_data):
         instance, _ = self.Meta.model.objects.get_or_create(**validated_data)

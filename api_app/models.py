@@ -1,6 +1,5 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-import base64
 import datetime
 import json
 import logging
@@ -15,12 +14,7 @@ from django_celery_beat.models import ClockedSchedule, CrontabSchedule, Periodic
 from solo.models import SingletonModel
 from treebeard.mp_tree import MP_Node
 
-from api_app.data_model_manager.models import (
-    BaseDataModel,
-    DomainDataModel,
-    FileDataModel,
-    IPDataModel,
-)
+from api_app.analyzables_manager.models import Analyzable
 from api_app.data_model_manager.queryset import BaseDataModelQuerySet
 from api_app.interfaces import OwnershipAbstractModel
 
@@ -43,7 +37,6 @@ from django.utils.module_loading import import_string
 
 from api_app.choices import (
     TLP,
-    ObservableClassification,
     ParamTypes,
     PythonModuleBasePaths,
     ReportStatus,
@@ -54,8 +47,8 @@ from api_app.choices import (
 if typing.TYPE_CHECKING:
     from api_app.classes import Plugin
 
-from api_app.defaults import default_runtime, file_directory_path
-from api_app.helpers import calculate_sha1, calculate_sha256, deprecated, get_now
+from api_app.defaults import default_runtime
+from api_app.helpers import deprecated, get_now
 from api_app.queryset import (
     AbstractConfigQuerySet,
     AbstractReportQuerySet,
@@ -296,8 +289,8 @@ class Comment(models.Model):
     class Meta:
         ordering = ["created_at"]
 
-    job = models.ForeignKey(
-        "Job",
+    analyzable = models.ForeignKey(
+        "analyzables_manager.Analyzable",
         on_delete=models.CASCADE,
         related_name="comments",
     )
@@ -336,7 +329,6 @@ class Job(MP_Node):
             models.Index(fields=["data_model_content_type", "data_model_object_id"]),
             models.Index(
                 fields=[
-                    "md5",
                     "status",
                 ]
             ),
@@ -368,14 +360,11 @@ class Job(MP_Node):
         on_delete=models.CASCADE,
         null=True,  # for backwards compatibility
     )
-    is_sample = models.BooleanField(blank=False, default=False)
-    md5 = models.CharField(max_length=32, blank=False)
-    observable_name = models.CharField(max_length=512, blank=True)
-    observable_classification = models.CharField(
-        max_length=12, blank=True, choices=ObservableClassification.choices
+
+    analyzable = models.ForeignKey(
+        Analyzable, related_name="jobs", on_delete=models.CASCADE
     )
-    file_name = models.CharField(max_length=512, blank=True)
-    file_mimetype = models.CharField(max_length=80, blank=True)
+
     status = models.CharField(
         max_length=32, blank=False, choices=STATUSES.choices, default="pending"
     )
@@ -432,7 +421,6 @@ class Job(MP_Node):
     warnings = pg_fields.ArrayField(
         models.TextField(), blank=True, default=list, null=True
     )
-    file = models.FileField(blank=True, upload_to=file_directory_path)
     tags = models.ManyToManyField(Tag, related_name="jobs", blank=True)
 
     scan_mode = models.IntegerField(
@@ -459,7 +447,7 @@ class Job(MP_Node):
     data_model = GenericForeignKey("data_model_content_type", "data_model_object_id")
 
     def __str__(self):
-        return f'{self.__class__.__name__}(#{self.pk}, "{self.analyzed_object_name}")'
+        return f'{self.__class__.__name__}(#{self.pk}, "{self.analyzable.name}")'
 
     def get_root(self):
         if self.is_root():
@@ -471,22 +459,9 @@ class Job(MP_Node):
             # this is not a really valid solution, but it will work for now
             return self.objects.filter(path=self.path[0 : self.steplen]).first()  # noqa
 
-    @property
-    def analyzed_object_name(self):
-        return self.file_name if self.is_sample else self.observable_name
-
-    @property
-    def analyzed_object(self):
-        return self.file if self.is_sample else self.observable_name
-
     @cached_property
-    def sha256(self) -> str:
-        """
-        Calculate and return the SHA-256 hash of the file or observable name.
-        """
-        return calculate_sha256(
-            self.file.read() if self.is_sample else self.observable_name.encode("utf-8")
-        )
+    def is_sample(self) -> bool:
+        return self.analyzable.is_sample
 
     @cached_property
     def parent_job(self) -> Optional["Job"]:
@@ -494,24 +469,6 @@ class Job(MP_Node):
         Return the parent job if it exists, otherwise return None.
         """
         return self.get_parent()
-
-    @cached_property
-    def sha1(self) -> str:
-        """
-        Calculate and return the SHA-1 hash of the file or observable name.
-        """
-        return calculate_sha1(
-            self.file.read() if self.is_sample else self.observable_name.encode("utf-8")
-        )
-
-    @cached_property
-    def b64(self) -> str:
-        """
-        Return the Base64 encoded string of the file or observable name.
-        """
-        return base64.b64encode(
-            self.file.read() if self.is_sample else self.observable_name.encode("utf-8")
-        ).decode("utf-8")
 
     def get_absolute_url(self):
         """
@@ -745,23 +702,6 @@ class Job(MP_Node):
             self.visualizers_to_execute.all(),
         )
         runner()
-
-    def get_data_model_class(self) -> Type[BaseDataModel]:
-        if (
-            self.is_sample
-            or self.observable_classification == ObservableClassification.HASH.value
-        ):
-            return FileDataModel
-        if self.observable_classification == ObservableClassification.IP.value:
-            return IPDataModel
-        if self.observable_classification in [
-            ObservableClassification.DOMAIN.value,
-            ObservableClassification.URL.value,
-        ]:
-            return DomainDataModel
-        raise NotImplementedError(
-            f"Unable to find data model for {self.observable_classification}"
-        )
 
     def get_analyzers_data_models(self) -> BaseDataModelQuerySet:
         return self.analyzerreports.get_data_models(self)

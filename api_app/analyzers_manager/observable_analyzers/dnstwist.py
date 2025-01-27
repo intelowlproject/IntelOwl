@@ -12,6 +12,7 @@ from django.conf import settings
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from tests.mock_utils import if_mock_connections
 
 logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ class DNStwist(classes.ObservableAnalyzer):
 
     def run(self):
         domain = self.observable_name
-        if self.observable_classification == self.ObservableTypes.URL:
+        if self.observable_classification == Classification.URL:
             domain = urlparse(self.observable_name).hostname
             try:
                 IPv4Address(domain)

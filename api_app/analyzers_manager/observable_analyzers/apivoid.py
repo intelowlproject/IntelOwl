@@ -4,6 +4,7 @@
 import requests
 
 from api_app.analyzers_manager import classes
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
@@ -15,21 +16,21 @@ class ApiVoidAnalyzer(classes.ObservableAnalyzer):
         pass
 
     def run(self):
-        if self.observable_classification == self.ObservableTypes.DOMAIN.value:
+        if self.observable_classification == Classification.DOMAIN.value:
             url = (
                 self.url
                 + f"""/domainbl/v1/pay-as-you-go/
                 ?key={self._api_key}
                 &host={self.observable_name}"""
             )
-        elif self.observable_classification == self.ObservableTypes.IP.value:
+        elif self.observable_classification == Classification.IP.value:
             url = (
                 self.url
                 + f"""/iprep/v1/pay-as-you-go/
                 ?key={self._api_key}
                 &ip={self.observable_name}"""
             )
-        elif self.observable_classification == self.ObservableTypes.URL.value:
+        elif self.observable_classification == Classification.URL.value:
             url = (
                 self.url
                 + f"""/urlrep/v1/pay-as-you-go/

@@ -6,6 +6,7 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
@@ -24,7 +25,7 @@ class BinaryEdge(classes.ObservableAnalyzer):
 
     def run(self):
         results = {}
-        if self.observable_classification == self.ObservableTypes.IP:
+        if self.observable_classification == Classification.IP:
             try:
                 response_recent_ip_info = requests.get(
                     self.url + "ip/" + self.observable_name, headers=self.headers
@@ -44,7 +45,7 @@ class BinaryEdge(classes.ObservableAnalyzer):
                 "ip_recent_report": response_recent_ip_info.json(),
                 "ip_query_report": response_query_ip.json(),
             }
-        elif self.observable_classification == self.ObservableTypes.DOMAIN:
+        elif self.observable_classification == Classification.DOMAIN:
             try:
                 response_domain_report = requests.get(
                     self.url + "domains/subdomain/" + self.observable_name,

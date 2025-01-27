@@ -1,6 +1,8 @@
 from django.utils.timezone import now
 
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.choices import Classification
 from api_app.models import Job
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.playbooks_manager.queryset import PlaybookConfigQuerySet
@@ -14,11 +16,15 @@ class PlaybookConfigQuerySetTestCase(CustomTestCase):
         self.pc = PlaybookConfig.objects.create(
             name="testplaybook", type=["ip"], description="test"
         )
+        self.an1 = Analyzable.objects.create(
+            name="test3.com",
+            classification=Classification.DOMAIN,
+        )
+
         self.pc.analyzers.set([AnalyzerConfig.objects.first()])
         self.j1 = Job.objects.create(
             user=self.superuser,
-            observable_name="test3.com",
-            observable_classification="domain",
+            analyzable=self.an1,
             status="reported_without_fails",
             playbook_to_execute=self.pc,
             finished_analysis_time=now(),
@@ -26,20 +32,24 @@ class PlaybookConfigQuerySetTestCase(CustomTestCase):
 
         self.j2 = Job.objects.create(
             user=self.user,
-            observable_name="test3.com",
-            observable_classification="domain",
+            analyzable=self.an1,
             status="reported_without_fails",
             playbook_to_execute=self.pc,
             finished_analysis_time=now(),
         )
         self.j3 = Job.objects.create(
             user=self.superuser,
-            observable_name="test3.com",
-            observable_classification="domain",
+            analyzable=self.an1,
             status="reported_without_fails",
             playbook_to_execute=self.pc,
             finished_analysis_time=now(),
         )
+
+    def tearDown(self):
+        self.an1.delete()
+        self.j1.delete()
+        self.j2.delete()
+        self.j3.delete()
 
     def test__subquery_user(self):
         subq = PlaybookConfigQuerySet._subquery_weight_user(self.user)
@@ -80,16 +90,14 @@ class PlaybookConfigQuerySetTestCase(CustomTestCase):
 
         Job.objects.create(
             user=self.user,
-            observable_name="test3.com",
-            observable_classification="domain",
+            analyzable=self.an1,
             status="reported_without_fails",
             playbook_to_execute=self.pc,
             finished_analysis_time=now(),
         )
         Job.objects.create(
             user=self.user,
-            observable_name="test3.com",
-            observable_classification="domain",
+            analyzable=self.an1,
             status="reported_without_fails",
             playbook_to_execute=self.pc,
             finished_analysis_time=now(),
@@ -97,16 +105,14 @@ class PlaybookConfigQuerySetTestCase(CustomTestCase):
 
         Job.objects.create(
             user=self.user,
-            observable_name="test3.com",
-            observable_classification="domain",
+            analyzable=self.an1,
             status="reported_without_fails",
             playbook_to_execute=pc3,
             finished_analysis_time=now(),
         )
         Job.objects.create(
             user=self.user,
-            observable_name="test3.com",
-            observable_classification="domain",
+            analyzable=self.an1,
             status="reported_without_fails",
             playbook_to_execute=pc4,
             finished_analysis_time=now(),

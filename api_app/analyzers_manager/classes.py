@@ -14,10 +14,10 @@ from django.conf import settings
 from certego_saas.apps.user.models import User
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
-from ..choices import PythonModuleBasePaths
+from ..choices import Classification, PythonModuleBasePaths
 from ..classes import Plugin
 from ..models import PythonConfig
-from .constants import HashChoices, ObservableTypes, TypeChoices
+from .constants import HashChoices, TypeChoices
 from .exceptions import AnalyzerConfigurationException, AnalyzerRunException
 from .models import AnalyzerConfig, AnalyzerReport
 
@@ -32,7 +32,6 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     """
 
     HashChoices = HashChoices
-    ObservableTypes = ObservableTypes
     TypeChoices = TypeChoices
 
     MALICIOUS_EVALUATION = 75
@@ -54,7 +53,7 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         return evaluation
 
     def _do_create_data_model(self) -> bool:
-        if self.report.job.observable_classification == ObservableTypes.GENERIC:
+        if self.report.job.analyzable.classification == Classification.GENERIC.value:
             return False
         if (
             not self._config.mapping_data_model
@@ -190,16 +189,16 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         super().config(runtime_configuration)
         self._config: AnalyzerConfig
         if self._job.is_sample and self._config.run_hash:
-            self.observable_classification = ObservableTypes.HASH
+            self.observable_classification = Classification.HASH
             # check which kind of hash the analyzer needs
             run_hash_type = self._config.run_hash_type
             if run_hash_type == HashChoices.SHA256:
-                self.observable_name = self._job.sha256
+                self.observable_name = self._job.analyzable.sha256
             else:
-                self.observable_name = self._job.md5
+                self.observable_name = self._job.analyzable.md5
         else:
-            self.observable_name = self._job.observable_name
-            self.observable_classification = self._job.observable_classification
+            self.observable_name = self._job.analyzable.name
+            self.observable_classification = self._job.analyzable.classification
 
     @classmethod
     @property
@@ -242,13 +241,13 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
 
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
-        self.md5 = self._job.md5
-        self.filename = self._job.file_name
+        self.md5 = self._job.analyzable.md5
+        self.filename = self._job.analyzable.name
         # this is updated in the filepath property, like a cache decorator.
         # if the filepath is requested, it means that the analyzer downloads...
         # ...the file from AWS because it requires a path and it needs to be deleted
         self.__filepath = None
-        self.file_mimetype = self._job.file_mimetype
+        self.file_mimetype = self._job.analyzable.mimetype
 
     @classmethod
     @property
@@ -256,8 +255,7 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         return PythonModuleBasePaths[FileAnalyzer.__name__].value
 
     def read_file_bytes(self) -> bytes:
-        self._job.file.seek(0)
-        return self._job.file.read()
+        return self._job.analyzable.read()
 
     @property
     def filepath(self) -> str:
@@ -267,9 +265,7 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             str: The file path.
         """
         if not self.__filepath:
-            self.__filepath = self._job.file.storage.retrieve(
-                file=self._job.file, analyzer=self.analyzer_name
-            )
+            self.__filepath = self._job.analyzable.file.path
         return self.__filepath
 
     def before_run(self):

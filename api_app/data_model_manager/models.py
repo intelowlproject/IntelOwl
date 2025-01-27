@@ -109,7 +109,7 @@ class BaseDataModel(models.Model):
         object_id_field="data_model_object_id",
         content_type_field="data_model_content_type",
     )
-    job = GenericRelation(
+    jobs = GenericRelation(
         to="api_app.Job",
         object_id_field="data_model_object_id",
         content_type_field="data_model_content_type",
@@ -170,6 +170,24 @@ class BaseDataModel(models.Model):
             setattr(self, field_name, result_attr)
         self.save()
         return self
+
+    def __sub__(self, other: "BaseDataModel") -> "BaseDataModel":
+        from deepdiff import DeepDiff
+
+        if not isinstance(other, BaseDataModel):
+            raise TypeError(f"Different class between {self} and {type(other)}")
+        dict1 = self.serialize()
+        dict2 = other.serialize()
+        result = DeepDiff(
+            dict1,
+            dict2,
+            ignore_order=True,
+            verbose_level=1,
+            exclude_paths=["id", "analyzers_report", "jobs", "date"],
+        )
+
+        new = self.__class__.objects.create()
+        return new.merge(result)
 
     @classmethod
     def get_content_type(cls) -> ContentType:

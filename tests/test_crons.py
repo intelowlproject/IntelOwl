@@ -5,7 +5,7 @@ import os
 from django.conf import settings
 from django.utils.timezone import now
 
-from api_app.analyzers_manager.constants import ObservableTypes
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.file_analyzers import quark_engine, yara_scan
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.analyzers_manager.observable_analyzers import (
@@ -18,7 +18,7 @@ from api_app.analyzers_manager.observable_analyzers import (
     tor,
     tweetfeeds,
 )
-from api_app.choices import PythonModuleBasePaths
+from api_app.choices import Classification, PythonModuleBasePaths
 from api_app.models import Job, Parameter, PluginConfig, PythonModule
 from intel_owl.tasks import check_stuck_analysis, remove_old_jobs
 
@@ -32,11 +32,14 @@ class CronTests(CustomTestCase):
     def test_check_stuck_analysis(self):
         import datetime
 
+        an = Analyzable.objects.create(
+            name="8.8.8.8",
+            classification=Classification.IP,
+        )
         _job = Job.objects.create(
             user=self.user,
             status=Job.STATUSES.RUNNING.value,
-            observable_name="8.8.8.8",
-            observable_classification=ObservableTypes.IP,
+            analyzable=an,
             received_request_time=now(),
         )
         self.assertCountEqual(check_stuck_analysis(), [])
@@ -54,15 +57,20 @@ class CronTests(CustomTestCase):
         _job.save()
         self.assertCountEqual(check_stuck_analysis(check_pending=False), [_job.pk])
         _job.delete()
+        an.delete()
 
     def test_remove_old_jobs(self):
         import datetime
 
+        an = Analyzable.objects.create(
+            name="8.8.8.8",
+            classification=Classification.IP,
+        )
+
         _job = Job.objects.create(
             user=self.user,
             status=Job.STATUSES.FAILED.value,
-            observable_name="8.8.8.8",
-            observable_classification=ObservableTypes.IP,
+            analyzable=an,
             received_request_time=now(),
             finished_analysis_time=now(),
         )
@@ -73,6 +81,7 @@ class CronTests(CustomTestCase):
         self.assertEqual(remove_old_jobs(), 1)
 
         _job.delete()
+        an.delete()
 
     @if_mock_connections(skip("not working without connection"))
     def test_maxmind_updater(self):

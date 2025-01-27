@@ -16,7 +16,7 @@ class AnalyzerReportQuerySet(AbstractReportQuerySet):
         return AnalyzerReportBISerializer
 
     def get_data_models(self, job) -> QuerySet:
-        DataModel = job.get_data_model_class()  # noqa
+        DataModel = job.analyzable.get_data_model_class()  # noqa
         return DataModel.objects.filter(
             pk__in=self.values_list("data_model_object_id", flat=True)
         )

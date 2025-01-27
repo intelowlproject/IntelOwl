@@ -9,14 +9,10 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from api_app.analyzers_manager.constants import (
-    HashChoices,
-    ObservableTypes,
-    TypeChoices,
-)
+from api_app.analyzers_manager.constants import HashChoices, TypeChoices
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 from api_app.analyzers_manager.queryset import AnalyzerReportQuerySet
-from api_app.choices import TLP, PythonModuleBasePaths
+from api_app.choices import TLP, Classification, PythonModuleBasePaths
 from api_app.data_model_manager.models import BaseDataModel
 from api_app.fields import ChoiceArrayField
 from api_app.models import AbstractReport, PythonConfig, PythonModule
@@ -58,7 +54,7 @@ class AnalyzerReport(AbstractReport):
 
     @property
     def data_model_class(self) -> Type[BaseDataModel]:
-        return self.job.get_data_model_class()
+        return self.job.analyzable.get_data_model_class()
 
     def _validation_before_data_model(self) -> bool:
         if not self.status == self.STATUSES.SUCCESS.value:
@@ -111,6 +107,8 @@ class AnalyzerReport(AbstractReport):
         return result
 
     def create_data_model(self) -> Optional[BaseDataModel]:
+        # TODO we don't need to actually crate a new object every time.
+        #  if the report is the same of the previous one, we can just link it
         if not self._validation_before_data_model():
             return None
         dictionary = self._create_data_model_dictionary()
@@ -254,7 +252,9 @@ class AnalyzerConfig(PythonConfig):
     )
     # obs
     observable_supported = ChoiceArrayField(
-        models.CharField(null=False, choices=ObservableTypes.choices, max_length=30),
+        models.CharField(
+            null=False, choices=Classification.choices[:-1], max_length=30
+        ),
         default=list,
         blank=True,
     )

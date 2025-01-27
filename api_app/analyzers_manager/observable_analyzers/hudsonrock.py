@@ -5,6 +5,7 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -56,7 +57,7 @@ class HudsonRock(classes.ObservableAnalyzer):
             "api-key": self._api_key_name,
             "Content-Type": "application/json",
         }
-        if self.observable_classification == self.ObservableTypes.IP:
+        if self.observable_classification == Classification.IP:
             url = (
                 self.url
                 + "/search-by-ip"
@@ -75,7 +76,7 @@ class HudsonRock(classes.ObservableAnalyzer):
                 url, headers=headers, json={"ip": self.observable_name}
             )
 
-        elif self.observable_classification == self.ObservableTypes.DOMAIN:
+        elif self.observable_classification == Classification.DOMAIN:
             url = (
                 self.url
                 + "/search-by-domain"
@@ -97,7 +98,7 @@ class HudsonRock(classes.ObservableAnalyzer):
                 url, headers=headers, json={"domains": [self.observable_name]}
             )
 
-        elif self.observable_classification == self.ObservableTypes.GENERIC:
+        elif self.observable_classification == Classification.GENERIC:
             # checking for email
             regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b"
             if re.fullmatch(regex, self.observable_name):

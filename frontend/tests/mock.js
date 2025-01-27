@@ -315,6 +315,7 @@ export const mockedPlugins = {
     run_hash: false,
     run_hash_type: "",
     not_supported_filetypes: [],
+    mapping_data_model: {},
     params: {
       query_type: {
         type: "str",

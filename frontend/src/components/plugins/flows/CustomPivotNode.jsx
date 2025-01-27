@@ -10,7 +10,12 @@ function CustomPivotNode({ data }) {
     <>
       <NodeToolbar position="top" align="start" isVisible offset={3}>
         <Badge className="bg-advisory">Pivot</Badge>
-        {data?.warning && <IoMdWarning className="text-warning my-1 ms-1" />}
+        {data?.warning && (
+          <IoMdWarning
+            id="pivot-warning-icon"
+            className="text-warning my-1 ms-1"
+          />
+        )}
       </NodeToolbar>
       {/* Info */}
       <NodeToolbar

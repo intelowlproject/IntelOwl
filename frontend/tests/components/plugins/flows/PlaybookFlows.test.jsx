@@ -132,7 +132,7 @@ describe("test PlaybookFlows", () => {
         details: "Ready to use!",
         missing_secrets: [],
       },
-    })
+    });
     mockedPlaybooks.TEST_PLAYBOOK_DOMAIN.pivots = ["TEST_PIVOT_ERROR"];
 
     const { container } = render(
@@ -157,7 +157,9 @@ describe("test PlaybookFlows", () => {
     const pivotWarningIcon = container.querySelector("#pivot-warning-icon");
     expect(pivotWarningIcon).toBeInTheDocument();
     // second playbook
-    const secondPlaybookNode = container.querySelector("#playbook-NO_CONFIGURED_PLAYBOOK");
+    const secondPlaybookNode = container.querySelector(
+      "#playbook-NO_CONFIGURED_PLAYBOOK",
+    );
     expect(secondPlaybookNode).toBeInTheDocument();
     expect(secondPlaybookNode.textContent).toBe("NO_CONFIGURED_PLAYBOOK");
     const secondPlaybookBadge = screen.getAllByText("Playbook")[1];

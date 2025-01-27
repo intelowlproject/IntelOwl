@@ -487,7 +487,7 @@ describe("PlaybookFlowsButton test", () => {
   });
 });
 
-describe.only("DataModel mapping test", () => {
+describe("DataModel mapping test", () => {
   test("DataModel mapping button", async () => {
     const userAction = userEvent.setup();
     const data = {

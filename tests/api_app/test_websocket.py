@@ -68,8 +68,8 @@ class JobConsumerTestCase(WebsocketTestCase):
 
     def tearDown(self) -> None:
         self.user.delete()
-        self.job.delete()
-        self.an.delete()
+        Job.objects.all().delete()
+        Analyzable.objects.all().delete()
 
     async def test_job_unauthorized(self, *args, **kwargs):
         self.assertEqual(await sync_to_async(Job.objects.filter(id=1027).count)(), 1)
@@ -214,8 +214,6 @@ class JobConsumerTestCase(WebsocketTestCase):
             )
             self.assertIsNotNone(job_report_terminated["analyzer_reports"])
             self.assertIsNotNone(job_report_terminated["finished_analysis_time"])
-            job.delete()
-            analyzable.delete()
 
     async def test_job_killed(self, *args, **kwargs):
         analyzable = await sync_to_async(Analyzable.objects.create)(

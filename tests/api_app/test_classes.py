@@ -22,7 +22,9 @@ class PluginTestCase(CustomTestCase):
             classification=Classification.IP,
         )
         self.job, _ = Job.objects.get_or_create(
-            user=self.user, status=Job.STATUSES.REPORTED_WITHOUT_FAILS, analyzable=self.an
+            user=self.user,
+            status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
+            analyzable=self.an,
         )
         self.cc, _ = ConnectorConfig.objects.get_or_create(
             name="test",

@@ -349,7 +349,7 @@ class Job(MP_Node):
     STATUSES = Status
     investigation = models.ForeignKey(
         "investigations_manager.Investigation",
-        on_delete=models.PROTECT,
+        on_delete=models.SET_NULL,
         related_name="jobs",
         null=True,
         blank=True,

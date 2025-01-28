@@ -405,7 +405,7 @@ class CommentViewSet(ModelViewSet):
         analyzables = (
             Job.objects.visible_for_user(self.request.user)
             .values("analyzable")
-            .distnct()
+            .distinct()
             .values("analyzable__pk")
         )
         return queryset.filter(analyzable__in=analyzables)
@@ -537,10 +537,10 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             raise ValidationError({"detail": "is_sample is required"})
         is_sample = request.data["is_sample"]
         jobs = Job.objects.filter(user__pk=request.user.pk)
-        if is_sample:
-            jobs = jobs.filter(analyzable__classification=Classification.FILE.value)
+        if is_sample == "True":
+            jobs = jobs.filter(analyzable__classification=Classification.FILE)
         else:
-            jobs = jobs.exclude(analyzable__classification=Classification.FILE.value)
+            jobs = jobs.exclude(analyzable__classification=Classification.FILE)
         jobs = jobs.annotate_importance(request.user).order_by(
             "-importance", "-finished_analysis_time"
         )[:limit]

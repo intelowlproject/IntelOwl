@@ -44,7 +44,7 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         self.assertEqual(job.analyzable.name, "test.0")
         self.assertEqual(job.playbook_to_execute, self.c.playbooks_choice.first())
         self.assertEqual(job.tlp, "CLEAR")
-        self.assertEqual(job.analyzable.file.read(), b"test")
+        self.assertEqual(job.read(), b"test")
         self.assertIsNone(job.investigation)
         self.assertIsNotNone(parent_job.investigation)
         parent_job.delete()

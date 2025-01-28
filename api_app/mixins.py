@@ -679,7 +679,7 @@ class AbuseCHMixin:
 
     @property
     def authentication_header(self) -> dict:
-        if self._service_api_key:
+        if hasattr(self, "_service_api_key") and self._service_api_key:
             logger.debug("Found auth key for abuse.ch request")
             return {"Auth-Key": self._service_api_key}
 

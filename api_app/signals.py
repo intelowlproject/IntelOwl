@@ -53,7 +53,7 @@ def post_delete_job(sender, instance: Job, **kwargs):
         instance (Job): The instance of the model being deleted.
         **kwargs: Additional keyword arguments.
     """
-    if instance.investigation and instance.investigation.jobs.count() == 0:
+    if instance.investigation_id and instance.investigation.jobs.count() == 0:
         instance.investigation.delete()
 
 

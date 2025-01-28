@@ -39,7 +39,7 @@ class CommentViewSetTestCase(CustomViewSetTestCase):
         self.job = Job.objects.create(user=self.superuser, analyzable=self.an1)
         self.job2 = Job.objects.create(user=self.superuser, analyzable=self.an1)
         self.comment = Comment.objects.create(
-            job=self.job, user=self.superuser, content="test"
+            analyzable=self.an1, user=self.superuser, content="test"
         )
         self.comment.save()
 
@@ -173,7 +173,6 @@ class JobViewSetTests(CustomViewSetTestCase):
         j1 = Job.objects.create(
             **{
                 "user": self.user,
-                "is_sample": False,
                 "analyzable": self.analyzable,
                 "finished_analysis_time": datetime.datetime(
                     2024, 11, 28, tzinfo=datetime.timezone.utc
@@ -183,7 +182,6 @@ class JobViewSetTests(CustomViewSetTestCase):
         j2 = Job.objects.create(
             **{
                 "user": self.superuser,
-                "is_sample": False,
                 "analyzable": self.analyzable,
                 "finished_analysis_time": datetime.datetime(
                     2024, 11, 28, tzinfo=datetime.timezone.utc

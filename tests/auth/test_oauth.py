@@ -67,8 +67,7 @@ class TestOAuth(CustomOAuthTestCase):
         response = self.client.get(self.google_auth_callback_uri, follow=False)
         msg = response.url
         self.assertEqual(response.status_code, 302, msg)
-        response_redirect = urlparse(response.url)
-        print(response_redirect)
+        urlparse(response.url)
         self.assertEqual(Session.objects.count(), 1)
         session = Session.objects.all().first()
         session_data = session.get_decoded()

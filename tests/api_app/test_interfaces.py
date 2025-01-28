@@ -27,7 +27,7 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         )
 
         parent_job = Job.objects.create(
-            analyzer=an,
+            analyzable=an,
             user=self.user,
         )
         serializer = self.c._get_file_serializer(

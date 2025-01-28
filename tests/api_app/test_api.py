@@ -290,6 +290,7 @@ class ApiViewTests(CustomViewSetTestCase):
             list(job.analyzers_to_execute.all().values_list("name", flat=True)),
             msg=msg,
         )
+        job.delete()
 
     def test_observable_no_analyzers_only_connector(self):
         models.PluginConfig.objects.create(

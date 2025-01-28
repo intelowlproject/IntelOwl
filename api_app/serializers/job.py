@@ -836,6 +836,7 @@ class FileJobSerializer(_AbstractJobCreateSerializer):
         file_obj = attrs["file"].file
         file_obj.seek(0)
         file_buffer = file_obj.read()
+        attrs["file_mimetype"] = MimeTypes.calculate(file_buffer, attrs["file_name"])
         attrs["md5"] = calculate_md5(file_buffer)
         attrs = super().validate(attrs)
         logger.debug(f"after attrs: {attrs}")
@@ -848,6 +849,7 @@ class FileJobSerializer(_AbstractJobCreateSerializer):
             defaults={
                 "name": validated_data.pop("file_name"),
                 "file": validated_data.pop("file"),
+                "mimetype": validated_data.pop("file_mimetype"),
                 "md5": md5,
                 "classification": Classification.FILE.value,
             },

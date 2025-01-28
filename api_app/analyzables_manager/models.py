@@ -80,7 +80,8 @@ class Analyzable(models.Model):
             if not self.file:
                 raise ValidationError("File must be set for samples")
             content = self.read()
-            self.mimetype = MimeTypes.calculate(content, self.name)
+            if not self.mimetype:
+                self.mimetype = MimeTypes.calculate(content, self.name)
         else:
             if self.mimetype or self.file:
                 raise ValidationError(

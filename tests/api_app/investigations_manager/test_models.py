@@ -10,6 +10,7 @@ class InvestigationTestCase(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         cls.an = Analyzable.objects.create(
             name="test.com",
             classification=Classification.DOMAIN,
@@ -17,6 +18,7 @@ class InvestigationTestCase(CustomTestCase):
 
     @classmethod
     def tearDownClass(cls):
+        super().tearDownClass()
         cls.an.delete()
 
     def test_set_correct_status_created(self):

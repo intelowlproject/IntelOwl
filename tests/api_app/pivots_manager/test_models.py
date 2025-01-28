@@ -101,7 +101,7 @@ class PivotConfigTestCase(CustomTestCase):
         self.assertEqual("PivotOnTest.0", jobs[0].analyzable.name)
         self.assertEqual(
             "application/vnd.microsoft.portable-executable",
-            jobs[0].analyzable.file_mimetype,
+            jobs[0].analyzable.mimetype,
         )
 
     def test_create_job(self):

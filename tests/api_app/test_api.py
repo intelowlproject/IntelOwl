@@ -331,7 +331,7 @@ class ApiViewTests(CustomViewSetTestCase):
 
         job_id = int(content["job_id"])
         job = models.Job.objects.get(pk=job_id)
-        self.assertEqual(data["observables"][0][1], job.observable_name, msg=msg)
+        self.assertEqual(data["observables"][0][1], job.analyzable.name, msg=msg)
         self.assertEqual(job.analyzers_requested.count(), 0)
         self.assertEqual(job.pivots_to_execute.count(), 0)
 
@@ -339,14 +339,14 @@ class ApiViewTests(CustomViewSetTestCase):
         self.assertEqual(models.Job.objects.count(), 0)
         filename = "file.exe"
         uploaded_file, md5 = self.__get_test_file(filename)
+        analyzable = models.Analyzable.objects.create(
+            name=filename,
+            file=uploaded_file,
+            classification="file",
+            mimetype="application/vnd.microsoft.portable-executable",
+        )
         job = models.Job.objects.create(
-            **{
-                "md5": md5,
-                "is_sample": True,
-                "file_name": filename,
-                "file_mimetype": "application/vnd.microsoft.portable-executable",
-                "file": uploaded_file,
-            }
+            analyzable=analyzable,
         )
         self.assertEqual(models.Job.objects.count(), 1)
         response = self.client.get(f"/api/jobs/{job.id}/download_sample")
@@ -355,6 +355,8 @@ class ApiViewTests(CustomViewSetTestCase):
             response.get("Content-Disposition"),
             f'attachment; filename="{job.analyzable.name}"',
         )
+        job.delete()
+        analyzable.delete()
 
     def test_download_sample_404(self):
         # requesting for an ID that we know does not exist in DB
@@ -572,7 +574,9 @@ class ApiViewTests(CustomViewSetTestCase):
         an.delete()
 
     def test_job_rescan__sample_analyzers(self):
-        an = Analyzable.objects.create(file=self.uploaded_file, name="file.exe")
+        an = Analyzable.objects.create(
+            file=self.uploaded_file, name="file.exe", classification="file"
+        )
         job = models.Job.objects.create(
             tlp="CLEAR",
             user=self.user,
@@ -624,7 +628,9 @@ class ApiViewTests(CustomViewSetTestCase):
         an.delete()
 
     def test_job_rescan__sample_playbook(self):
-        an = Analyzable.objects.create(file=self.uploaded_file, name="file.exe")
+        an = Analyzable.objects.create(
+            file=self.uploaded_file, name="file.exe", classification="file"
+        )
         job = models.Job.objects.create(
             tlp="CLEAR",
             user=self.user,

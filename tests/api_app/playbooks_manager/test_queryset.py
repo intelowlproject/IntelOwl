@@ -22,6 +22,10 @@ class PlaybookConfigQuerySetTestCase(CustomTestCase):
             name="test3.com",
             classification=Classification.DOMAIN,
         )
+        self.an2 = Analyzable.objects.create(
+            name="test_robot.com",
+            classification=Classification.DOMAIN,
+        )
 
         self.pc.analyzers.set([AnalyzerConfig.objects.first()])
         self.j1 = Job.objects.create(
@@ -49,6 +53,7 @@ class PlaybookConfigQuerySetTestCase(CustomTestCase):
 
     def tearDown(self):
         self.an1.delete()
+        self.an2.delete()
         self.j1.delete()
         self.j2.delete()
         self.j3.delete()
@@ -138,24 +143,21 @@ class PlaybookConfigQuerySetTestCase(CustomTestCase):
         # robot jobs
         Job.objects.create(
             user=robot,
-            observable_name="test_robot.com",
-            observable_classification="domain",
+            analyzable=self.an2,
             status="reported_without_fails",
             playbook_to_execute=pc2,
             finished_analysis_time=now(),
         )
         Job.objects.create(
             user=robot,
-            observable_name="test_robot.com",
-            observable_classification="domain",
+            analyzable=self.an2,
             status="reported_without_fails",
             playbook_to_execute=pc2,
             finished_analysis_time=now(),
         )
         Job.objects.create(
             user=robot,
-            observable_name="test_robot.com",
-            observable_classification="domain",
+            analyzable=self.an2,
             status="reported_without_fails",
             playbook_to_execute=pc2,
             finished_analysis_time=now(),
@@ -163,16 +165,14 @@ class PlaybookConfigQuerySetTestCase(CustomTestCase):
 
         Job.objects.create(
             user=robot,
-            observable_name="test_robot.com",
-            observable_classification="domain",
+            analyzable=self.an2,
             status="reported_without_fails",
             playbook_to_execute=pc2,
             finished_analysis_time=now(),
         )
         Job.objects.create(
             user=robot,
-            observable_name="test_robot.com",
-            observable_classification="domain",
+            analyzable=self.an2,
             status="reported_without_fails",
             playbook_to_execute=pc2,
             finished_analysis_time=now(),

@@ -94,7 +94,7 @@ class InvestigationViewSetTestCase(CustomViewSetTestCase, ViewSetTestCaseMixin):
             name="test.com", classification=Classification.DOMAIN
         )
         job = Job.objects.create(
-            anaylzable=an,
+            analyzable=an,
             user=self.superuser,
         )
         response = self.client.post(

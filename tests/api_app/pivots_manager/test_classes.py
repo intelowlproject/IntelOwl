@@ -47,7 +47,7 @@ class PivotTestCase(CustomTestCase):
                     f"Testing with config {config.name}"
                     f" for {timeout_seconds} seconds"
                 )
-                job = Job.objects.get(observable_classification="domain")
+                job = Job.objects.get(analyzable__classification="domain")
                 sub = subclass(config)
                 signal.alarm(timeout_seconds)
                 try:

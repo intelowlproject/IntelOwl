@@ -56,6 +56,7 @@ class DomainDataModelViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase
 
     @classmethod
     def tearDownClass(cls):
+        super().tearDownClass()
         Analyzable.objects.all().delete()
 
     @classmethod
@@ -94,6 +95,7 @@ class IPDataModelViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
 
     @classmethod
     def tearDownClass(cls):
+        super().tearDownClass()
         Analyzable.objects.all().delete()
 
     def test_get_superuser(self):
@@ -123,6 +125,7 @@ class FileDataModelViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
 
     @classmethod
     def tearDownClass(cls):
+        super().tearDownClass()
         Analyzable.objects.all().delete()
 
     def test_get_superuser(self):

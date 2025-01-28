@@ -14,6 +14,7 @@ from tests import CustomTestCase
 class EngineModuleTestCase(CustomTestCase):
 
     def setUp(self) -> None:
+        super().setUp()
         self.an = Analyzable.objects.create(
             name="8.8.8.8",
             classification=Classification.IP,
@@ -92,6 +93,7 @@ class EngineModuleTestCase(CustomTestCase):
 
         ip1.delete()
         ip2.delete()
+        ip3.delete()
 
     def test_evaluation(self):
         config = EvaluationEngineModule(self.job)

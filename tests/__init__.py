@@ -32,6 +32,10 @@ class CustomTestCase(TestCase):
         super().setUp()
         settings.DEBUG = True
 
+    def tearDown(self):
+        super().tearDown()
+        Analyzable.objects.all().delete()
+
     def _create_job_from_file(self, sample, mimetype, analyzer_config) -> Job:
         try:
             with open(sample, "rb") as f:

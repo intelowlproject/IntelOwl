@@ -585,7 +585,7 @@ class CommentSerializerTestCase(CustomTestCase):
     def setUp(self):
         super().setUp()
         self.an = Analyzable.objects.create(
-            domain="test.com", classification=Classification.DOMAIN
+            name="test.com", classification=Classification.DOMAIN
         )
         self.job = Job.objects.create(
             analyzable=self.an,
@@ -621,7 +621,7 @@ class JobResponseSerializerTestCase(CustomTestCase):
 
     def test_job(self):
         an = Analyzable.objects.create(
-            domain="test.com",
+            name="test.com",
             classification=Classification.DOMAIN,
         )
         job = Job.objects.create(
@@ -637,11 +637,11 @@ class JobResponseSerializerTestCase(CustomTestCase):
 
     def test_many(self):
         an = Analyzable.objects.create(
-            domain="test.com",
+            name="test.com",
             classification=Classification.DOMAIN,
         )
         an2 = Analyzable.objects.create(
-            domain="test2.com",
+            name="test2.com",
             classification=Classification.DOMAIN,
         )
 

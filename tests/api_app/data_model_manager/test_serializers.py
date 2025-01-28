@@ -39,7 +39,7 @@ class TestDomainDataModelSerializer(CustomTestCase):
 
         ser = DomainDataModelSerializer(dm)
         result = ser.data
-        self.assertEqual(result["evaluation"], "MALICIOUS")
+        self.assertEqual(result["evaluation"], "malicious")
 
         dm.delete()
         ar.delete()

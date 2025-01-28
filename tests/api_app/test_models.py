@@ -11,7 +11,7 @@ from django_celery_beat.models import PeriodicTask
 
 from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.choices import PythonModuleBasePaths
+from api_app.choices import Classification, PythonModuleBasePaths
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.models import (
     AbstractConfig,
@@ -271,7 +271,8 @@ class AbstractConfigTestCase(CustomTestCase):
         org.delete()
 
     def test_get_signature_without_runnable(self):
-        job, _ = Job.objects.get_or_create(user=self.user)
+        an = Analyzable.objects.create(name="8.8.8.8", classification=Classification.IP)
+        job, _ = Job.objects.get_or_create(user=self.user, analyzable=an)
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
@@ -289,9 +290,12 @@ class AbstractConfigTestCase(CustomTestCase):
                 self.fail("Stop iteration should not be raised")
         muc.delete()
         job.delete()
+        an.delete()
 
     def test_get_signature_disabled(self):
-        job, _ = Job.objects.get_or_create(user=self.user)
+        an = Analyzable.objects.create(name="8.8.8.8", classification=Classification.IP)
+        job, _ = Job.objects.get_or_create(user=self.user, analyzable=an)
+
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
@@ -313,9 +317,12 @@ class AbstractConfigTestCase(CustomTestCase):
                 self.fail("Stop iteration should not be raised")
         muc.delete()
         job.delete()
+        an.delete()
 
     def test_get_signature(self):
-        job, _ = Job.objects.get_or_create(user=self.user)
+        an = Analyzable.objects.create(name="8.8.8.8", classification=Classification.IP)
+        job, _ = Job.objects.get_or_create(user=self.user, analyzable=an)
+
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
@@ -337,6 +344,7 @@ class AbstractConfigTestCase(CustomTestCase):
         self.assertIsInstance(signature, Signature)
         muc.delete()
         job.delete()
+        an.delete()
 
 
 class PluginConfigTestCase(CustomTestCase):

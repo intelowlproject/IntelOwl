@@ -75,9 +75,12 @@ class Analyzable(models.Model):
 
     def clean(self):
         if self.classification == Classification.FILE.value:
-            if not self.mimetype or not self.file:
-                raise ValidationError("Mimetype and file must be set for samples")
+            from api_app.analyzers_manager.models import MimeTypes
+
+            if not self.file:
+                raise ValidationError("File must be set for samples")
             content = self.read()
+            self.mimetype = MimeTypes.calculate(content, self.name)
         else:
             if self.mimetype or self.file:
                 raise ValidationError(

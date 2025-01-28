@@ -43,7 +43,7 @@ class EngineConfigTestCase(CustomTestCase):
         config.run(job)
         job.refresh_from_db()
         self.assertIsNotNone(job.data_model)
-        self.assertEqual(job.data_model.evaluation, None)
+        self.assertEqual(job.data_model.evaluation, "clean")
         job.delete()
         config.delete()
         an1.delete()

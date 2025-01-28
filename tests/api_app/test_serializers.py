@@ -244,7 +244,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
             self.ajcs.check_previous_jobs(
                 validated_data={
                     "scan_check_time": datetime.timedelta(days=1),
-                    "md5": "72cf478e87b031233091d8c00a38ce00",
+                    "analyzable": an,
                     "analyzers_to_execute": [],
                 }
             ),
@@ -254,7 +254,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
             self.ajcs.check_previous_jobs(
                 validated_data={
                     "scan_check_time": datetime.timedelta(days=1),
-                    "md5": "72cf478e87b031233091d8c00a38ce00",
+                    "analyzable": an,
                     "analyzers_to_execute": [a1],
                 }
             ),
@@ -264,7 +264,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
             self.ajcs.check_previous_jobs(
                 validated_data={
                     "scan_check_time": datetime.timedelta(days=1),
-                    "md5": "72cf478e87b031233091d8c00a38ce00",
+                    "analyzable": an,
                     "analyzers_to_execute": [a1, a2],
                 }
             ),
@@ -273,7 +273,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
             self.ajcs.check_previous_jobs(
                 validated_data={
                     "scan_check_time": datetime.timedelta(days=1),
-                    "md5": "72cf478e87b031233091d8c00a38ce00",
+                    "analyzable": an,
                     "analyzers_to_execute": [a1, a2, a3],
                 }
             )

@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 from zoneinfo import ZoneInfo
 
 from django.contrib.auth import get_user_model
+from django.core.files import File
 from django.test import override_settings
 from django.utils.timezone import now
 from elasticsearch_dsl.query import Bool, Exists, Range, Term
@@ -108,10 +109,17 @@ class JobViewSetTests(CustomViewSetTestCase):
             self.analyzable = Analyzable.objects.create(
                 name="1.2.3.4", classification=Classification.IP
             )
+            with open("test_files/file.exe", "rb") as f:
+                self.an2 = Analyzable.objects.create(
+                    name="test.file",
+                    classification=Classification.FILE,
+                    mimetype="application/vnd.microsoft.portable-executable",
+                    file=File(f),
+                )
+
             self.job = Job.objects.create(
                 **{
                     "user": self.superuser,
-                    "is_sample": False,
                     "analyzable": self.analyzable,
                     "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
                     "tlp": Job.TLP.CLEAR.value,
@@ -120,10 +128,7 @@ class JobViewSetTests(CustomViewSetTestCase):
             self.job2 = Job.objects.create(
                 **{
                     "user": self.superuser,
-                    "is_sample": True,
-                    "md5": "test.file",
-                    "file_name": "test.file",
-                    "file_mimetype": "application/vnd.microsoft.portable-executable",
+                    "analyzable": self.an2,
                     "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
                     "tlp": Job.TLP.GREEN.value,
                 }
@@ -133,23 +138,20 @@ class JobViewSetTests(CustomViewSetTestCase):
         self.job2.delete()
         self.job.delete()
         self.analyzable.delete()
+        self.an2.delete()
 
     def test_recent_scan(self):
         j1 = Job.objects.create(
             **{
                 "user": self.user,
-                "is_sample": False,
-                "observable_name": "gigatest.com",
-                "observable_classification": "domain",
+                "analyzable": self.analyzable,
                 "finished_analysis_time": now() - datetime.timedelta(days=2),
             }
         )
         j2 = Job.objects.create(
             **{
                 "user": self.user,
-                "is_sample": False,
-                "observable_name": "gigatest.com",
-                "observable_classification": "domain",
+                "analyzable": self.analyzable,
                 "finished_analysis_time": now() - datetime.timedelta(hours=2),
             }
         )
@@ -172,8 +174,7 @@ class JobViewSetTests(CustomViewSetTestCase):
             **{
                 "user": self.user,
                 "is_sample": False,
-                "observable_name": "gigatest.com",
-                "observable_classification": "domain",
+                "analyzable": self.analyzable,
                 "finished_analysis_time": datetime.datetime(
                     2024, 11, 28, tzinfo=datetime.timezone.utc
                 ),
@@ -183,8 +184,7 @@ class JobViewSetTests(CustomViewSetTestCase):
             **{
                 "user": self.superuser,
                 "is_sample": False,
-                "observable_name": "gigatest.com",
-                "observable_classification": "domain",
+                "analyzable": self.analyzable,
                 "finished_analysis_time": datetime.datetime(
                     2024, 11, 28, tzinfo=datetime.timezone.utc
                 ),
@@ -238,7 +238,7 @@ class JobViewSetTests(CustomViewSetTestCase):
         job = Job.objects.create(
             status=Job.STATUSES.RUNNING,
             user=self.superuser,
-            observable_classification="ip",
+            analyzable=self.analyzable,
         )
         self.assertEqual(job.status, Job.STATUSES.RUNNING)
         uri = reverse("jobs-kill", args=[job.pk])
@@ -257,7 +257,7 @@ class JobViewSetTests(CustomViewSetTestCase):
         job = Job.objects.create(
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
             user=self.superuser,
-            observable_classification="ip",
+            analyzable=self.analyzable,
         )
         uri = reverse("jobs-kill", args=[job.pk])
         self.client.force_authenticate(user=self.job.user)

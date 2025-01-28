@@ -526,8 +526,6 @@ class JobTreeSerializer(ModelSerializer):
             "evaluation",
         ]
 
-
-
     def to_representation(self, instance):
         instance: Job
         data = super().to_representation(instance)
@@ -1189,7 +1187,9 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
         # check availability of the case where all
         # analyzers were run but no playbooks were
         # triggered.
-        query = Q(analyzable__md5=validated_data["md5"]) & Q(status__in=statuses_to_check)
+        query = Q(analyzable__md5=validated_data["md5"]) & Q(
+            status__in=statuses_to_check
+        )
         if validated_data.get("playbooks", []):
             query &= Q(playbook_requested__name__in=validated_data["playbooks"])
         else:

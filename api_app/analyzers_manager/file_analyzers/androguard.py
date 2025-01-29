@@ -18,7 +18,7 @@ class AndroguardAnalyzer(FileAnalyzer):
             _, _, dx = session.addDEX(self._job.analyzable.name, self.read_file_bytes())
             results = {}
         else:
-            apk = session.addAPK(self._job.analyzable.name, self.read_file_bytes())
+            _, apk = session.addAPK(self._job.analyzable.name, self.read_file_bytes())
             results = {
                 "app_name": apk.get_app_name(),
                 "permissions": apk.get_permissions(),

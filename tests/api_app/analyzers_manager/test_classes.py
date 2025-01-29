@@ -100,15 +100,17 @@ class FileAnalyzerTestCase(CustomTestCase):
                 with open(f"test_files/{sample_name}", "rb") as f:
                     an = Analyzable.objects.create(
                         file=File(f),
+                        name=sample_name,
                         mimetype=mimetype,
                     )
                     Job.objects.create(
                         analyzable=an,
+                        classification=Classification.FILE,
                         user=self.superuser,
                     )
                     print(f"Created job for {sample_name}, with mimetype {mimetype}")
             except Exception:
-                print(f"No defined file for mimetype {mimetype}")
+                self.fail(f"No defined file for mimetype {mimetype}")
 
     def test_subclasses(self):
         def handler(signum, frame):
@@ -132,8 +134,6 @@ class FileAnalyzerTestCase(CustomTestCase):
                 timeout_seconds = config.soft_time_limit
                 timeout_seconds = min(timeout_seconds, 30)
                 print(f"\tTesting with config {config.name}")
-                found_one = False
-                skipped = False
                 for mimetype in MimeTypes.values:
                     if (
                         config.supported_filetypes
@@ -152,11 +152,16 @@ class FileAnalyzerTestCase(CustomTestCase):
                     )
                     if config.docker_based and not sub.health_check():
                         print(f"skipping {subclass.__name__} cause health check failed")
-                        skipped = True
                         continue
-                    jobs = Job.objects.filter(analyzable__mimetype=mimetype)
-                    if jobs.exists():
-                        found_one = True
+                    jobs = Job.objects.filter(
+                        analyzable__mimetype=mimetype,
+                        analyzable__classification=Classification.FILE,
+                    )
+                    if not jobs.exists():
+                        self.fail(
+                            f"No valid job found for analyzer {subclass.__name__}"
+                            f" with configuration {config.name}"
+                        )
                     for job in jobs:
                         job.analyzers_to_execute.set([config])
                         print(
@@ -175,16 +180,10 @@ class FileAnalyzerTestCase(CustomTestCase):
                             )
                         finally:
                             signal.alarm(0)
-                if not found_one and not skipped:
-                    self.fail(
-                        f"No valid job found for analyzer {subclass.__name__}"
-                        f" with configuration {config.name}"
-                    )
 
-    @staticmethod
-    def tearDown() -> None:
+    def tearDown(self):
         Job.objects.all().delete()
-        Analyzable.objects.all().delete()
+        super().tearDown()
 
 
 class ObservableAnalyzerTestCase(CustomTestCase):

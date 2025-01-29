@@ -10,6 +10,7 @@ from django.db import models
 from django.dispatch import receiver
 
 from api_app.decorators import prevent_signal_recursion
+from api_app.investigations_manager.models import Investigation
 from api_app.models import (
     Job,
     ListCachable,
@@ -53,8 +54,13 @@ def post_delete_job(sender, instance: Job, **kwargs):
         instance (Job): The instance of the model being deleted.
         **kwargs: Additional keyword arguments.
     """
-    if instance.investigation_id and instance.investigation.jobs.count() == 0:
-        instance.investigation.delete()
+    # Try/catch is needed for multiple delete of jobs in the same investigation
+    # because the signals is called _after_ every deletion
+    try:
+        if instance.investigation_id and instance.investigation.jobs.count() == 0:
+            instance.investigation.delete()
+    except Investigation.DoesNotExist:
+        pass
 
 
 @receiver(migrate_finished)

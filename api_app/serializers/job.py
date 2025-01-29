@@ -511,13 +511,13 @@ class JobTreeSerializer(ModelSerializer):
         many=False,
         required=False,
     )
-    name = rfs.CharField(source="analyzable.name", read_only=True)
+    analyzed_object_name = rfs.CharField(source="analyzable.name", read_only=True)
 
     class Meta:
         model = Job
         fields = [
             "pk",
-            "name",
+            "analyzed_object_name",
             "pivot_config",
             "playbook",
             "status",

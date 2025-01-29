@@ -102,12 +102,13 @@ class FileAnalyzerTestCase(CustomTestCase):
                         file=File(f),
                         name=sample_name,
                         mimetype=mimetype,
+                        classification=Classification.FILE,
                     )
                     Job.objects.create(
                         analyzable=an,
-                        classification=Classification.FILE,
                         user=self.superuser,
                     )
+
                     print(f"Created job for {sample_name}, with mimetype {mimetype}")
             except Exception:
                 self.fail(f"No defined file for mimetype {mimetype}")

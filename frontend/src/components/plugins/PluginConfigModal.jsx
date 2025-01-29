@@ -9,6 +9,7 @@ import { AnalyzerConfigForm } from "./forms/AnalyzerConfigForm";
 import { PivotConfigForm } from "./forms/PivotConfigForm";
 import { PlaybookConfigForm } from "./forms/PlaybookConfigForm";
 import { PluginConfigContainer } from "./PluginConfigContainer";
+import { INTELOWL_DOCS_URL } from "../../constants/environment";
 
 export function PluginConfigModal({
   pluginConfig,
@@ -45,7 +46,7 @@ export function PluginConfigModal({
         <br />
         For more info check the{" "}
         <Link
-          to="https://intelowlproject.github.io/docs/IntelOwl/usage/#parameters"
+          to={`${INTELOWL_DOCS_URL}IntelOwl/usage/#parameters`}
           target="_blank"
         >
           official doc.

@@ -30,6 +30,10 @@ import { deleteConfiguration } from "../pluginsApi";
 import { PluginsTypes } from "../../../constants/pluginConst";
 import { PluginConfigModal } from "../PluginConfigModal";
 import { PlaybookFlows } from "../flows/PlaybookFlows";
+import {
+  INTELOWL_DOCS_URL,
+  INTELOWL_REPO_URL,
+} from "../../../constants/environment";
 
 export function PluginHealthCheckButton({ pluginName, pluginType_ }) {
   const { checkPluginHealth } = usePluginConfigurationStore(
@@ -525,7 +529,7 @@ export function MappingDataModel({ data, type, pythonModule }) {
                 <br />
                 For more info check the{" "}
                 <Link
-                  to="https://intelowlproject.github.io/docs/IntelOwl/usage/#datamodels"
+                  to={`${INTELOWL_DOCS_URL}IntelOwl/usage/#datamodels`}
                   target="_blank"
                 >
                   official doc.
@@ -543,7 +547,7 @@ export function MappingDataModel({ data, type, pythonModule }) {
             <small>
               For more info check the{" "}
               <Link
-                to={`https://github.com/intelowlproject/IntelOwl/blob/master/api_app/analyzers_manager/${type}_analyzers/${pythonModuleName}.py`}
+                to={`${INTELOWL_REPO_URL}tree/master/api_app/analyzers_manager/${type}_analyzers/${pythonModuleName}.py`}
                 target="_blank"
               >
                 analyzer&apos;s source code.

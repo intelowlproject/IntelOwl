@@ -344,6 +344,7 @@ class ApiViewTests(CustomViewSetTestCase):
             name=filename,
             file=uploaded_file,
             classification="file",
+            md5=md5,
             mimetype="application/vnd.microsoft.portable-executable",
         )
         job = models.Job.objects.create(

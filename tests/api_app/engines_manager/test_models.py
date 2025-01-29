@@ -15,9 +15,8 @@ from tests import CustomTestCase
 class EngineConfigTestCase(CustomTestCase):
 
     def test_create_multiple_config(self):
-        with self.assertRaises(Exception):
-            with transaction.atomic():
-                EngineConfig.objects.create()
+        with self.assertRaises(Exception), transaction.atomic():
+            EngineConfig.objects.create()
         self.assertEqual(EngineConfig.objects.count(), 1)
 
     def test_clean(self):

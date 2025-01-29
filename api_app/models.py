@@ -52,6 +52,7 @@ from api_app.helpers import deprecated, get_now
 from api_app.queryset import (
     AbstractConfigQuerySet,
     AbstractReportQuerySet,
+    CommentQuerySet,
     JobQuerySet,
     OrganizationPluginConfigurationQuerySet,
     ParameterQuerySet,
@@ -297,6 +298,8 @@ class Comment(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = CommentQuerySet.as_manager()
 
 
 class Job(MP_Node):

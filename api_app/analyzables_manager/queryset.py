@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 class AnalyzableQuerySet(QuerySet):
 
     def visible_for_user(self, user):
+
         from api_app.models import Job
 
         jobs = (

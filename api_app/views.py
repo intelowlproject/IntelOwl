@@ -402,13 +402,8 @@ class CommentViewSet(ModelViewSet):
         - Filtered queryset of comments.
         """
         queryset = super().get_queryset()
-        analyzables = (
-            Job.objects.visible_for_user(self.request.user)
-            .values("analyzable")
-            .distinct()
-            .values("analyzable__pk")
-        )
-        return queryset.filter(analyzable__in=analyzables)
+
+        return queryset.visible_for_user(self.request.user)
 
 
 @add_docs(

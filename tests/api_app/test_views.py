@@ -37,9 +37,9 @@ class CommentViewSetTestCase(CustomViewSetTestCase):
         )
 
         self.job = Job.objects.create(user=self.superuser, analyzable=self.an1)
-        self.job2 = Job.objects.create(user=self.superuser, analyzable=self.an1)
+        self.job2 = Job.objects.create(user=self.user, analyzable=self.an1)
         self.comment = Comment.objects.create(
-            analyzable=self.an1, user=self.superuser, content="test"
+            analyzable=self.an1, user=self.user, content="test"
         )
         self.comment.save()
 
@@ -63,7 +63,7 @@ class CommentViewSetTestCase(CustomViewSetTestCase):
 
     def test_delete(self):
         response = self.client.delete(f"{self.comment_url}/{self.comment.pk}")
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
         self.client.force_authenticate(self.superuser)
         response = self.client.delete(f"{self.comment_url}/{self.comment.pk}")
         self.assertEqual(response.status_code, 204)
@@ -71,7 +71,7 @@ class CommentViewSetTestCase(CustomViewSetTestCase):
 
     def test_get(self):
         response = self.client.get(f"{self.comment_url}/{self.comment.pk}")
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
         self.client.force_authenticate(self.superuser)
         response = self.client.get(f"{self.comment_url}/{self.comment.pk}")
         self.assertEqual(response.status_code, 200)

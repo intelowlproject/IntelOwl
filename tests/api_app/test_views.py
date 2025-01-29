@@ -41,38 +41,41 @@ class CommentViewSetTestCase(CustomViewSetTestCase):
         self.comment = Comment.objects.create(
             analyzable=self.an1, user=self.user, content="test"
         )
-        self.comment.save()
 
     def tearDown(self) -> None:
         super().tearDown()
+        self.comment.delete()
         self.job.delete()
         self.job2.delete()
         self.an1.delete()
-        self.comment.delete()
 
     def test_list_200(self):
+        self.client.force_authenticate(self.user)
         response = self.client.get(self.comment_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json().get("count"), 1)
 
     def test_create_201(self):
-        data = {"job_id": self.job.id, "content": "test2"}
+        self.client.force_authenticate(self.user)
+        data = {"job_id": self.job2.id, "content": "test2"}
         response = self.client.post(self.comment_url, data)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json().get("content"), "test2")
 
     def test_delete(self):
+        self.client.force_authenticate(self.superuser)
         response = self.client.delete(f"{self.comment_url}/{self.comment.pk}")
         self.assertEqual(response.status_code, 404)
-        self.client.force_authenticate(self.superuser)
+        self.client.force_authenticate(self.user)
         response = self.client.delete(f"{self.comment_url}/{self.comment.pk}")
         self.assertEqual(response.status_code, 204)
         self.assertEqual(0, Comment.objects.all().count())
 
     def test_get(self):
+        self.client.force_authenticate(self.superuser)
         response = self.client.get(f"{self.comment_url}/{self.comment.pk}")
         self.assertEqual(response.status_code, 404)
-        self.client.force_authenticate(self.superuser)
+        self.client.force_authenticate(self.user)
         response = self.client.get(f"{self.comment_url}/{self.comment.pk}")
         self.assertEqual(response.status_code, 200)
 

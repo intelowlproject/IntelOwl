@@ -11,13 +11,13 @@ class AnalyzableQuerySet(QuerySet):
 
         from api_app.models import Job
 
-        jobs = (
+        analyzables = (
             Job.objects.visible_for_user(user)
             .values("analyzable")
             .distinct()
-            .values_list("pk", flat=True)
+            .values_list("analyzable__pk", flat=True)
         )
-        return self.filter(pk__in=jobs)
+        return self.filter(pk__in=analyzables)
 
     def create(self, *args, **kwargs):
         obj = self.model(**kwargs)

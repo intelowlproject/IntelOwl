@@ -2,10 +2,14 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { ContentSection, CustomJsonInput } from "@certego/certego-ui";
+import {
+  ContentSection,
+  // CustomJsonInput
+} from "@certego/certego-ui";
 
 import { markdownToHtml } from "../markdownToHtml";
 import { ScanTypes } from "../../../constants/advancedSettingsConst";
+import { JsonEditor } from "../JsonEditor";
 
 export function runtimeConfigurationParam(
   formik,
@@ -189,19 +193,23 @@ export function EditRuntimeConfiguration(props) {
         <small className="text-muted">
           Note: Edit this only if you know what you are doing!
         </small>
-        <CustomJsonInput
+        <JsonEditor
+          runtimeConfiguration={editableConfig}
+          onChange={setJsonInput}
+        />
+        {/* <CustomJsonInput
           id="edit_runtime_configuration-modal"
           placeholder={editableConfig}
-          onChange={setJsonInput}
-          /* waitAfterKeyPress=1000 is the default value and we cannot change it:
+          onChange={setJsonInput} */}
+        {/* waitAfterKeyPress=1000 is the default value and we cannot change it:
               with this value (or higher) in case the user press "save & close" too fast it doesn't take changes.
               If we decrease it (min allowed 100) we don't have this problems, but it's not possible to edit:
               The library auto refresh and move the cursor too fast to make it editable.
-            */
-          waitAfterKeyPress={1000}
+            */}
+        {/* waitAfterKeyPress={1000}
           height="590px"
           width="450px"
-        />
+        /> */}
       </ContentSection>
       {/* lateral menu with the type and description of each param */}
       <ContentSection

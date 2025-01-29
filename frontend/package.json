@@ -14,6 +14,7 @@
     "flag-icons": "^7.2.3",
     "formik": "^2.4.6",
     "js-cookie": "^3.0.5",
+    "jsoneditor": "^10.1.2",
     "md5": "^2.3.0",
     "prop-types": "^15.8.1",
     "react": "^17.0.2",

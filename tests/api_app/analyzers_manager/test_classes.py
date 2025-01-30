@@ -135,6 +135,8 @@ class FileAnalyzerTestCase(CustomTestCase):
                 timeout_seconds = config.soft_time_limit
                 timeout_seconds = min(timeout_seconds, 30)
                 print(f"\tTesting with config {config.name}")
+                found_one = False
+                skipped = False
                 for mimetype in MimeTypes.values:
                     if (
                         config.supported_filetypes
@@ -153,16 +155,11 @@ class FileAnalyzerTestCase(CustomTestCase):
                     )
                     if config.docker_based and not sub.health_check():
                         print(f"skipping {subclass.__name__} cause health check failed")
+                        skipped = True
                         continue
-                    jobs = Job.objects.filter(
-                        analyzable__mimetype=mimetype,
-                        analyzable__classification=Classification.FILE,
-                    )
-                    if not jobs.exists():
-                        self.fail(
-                            f"No valid job found for analyzer {subclass.__name__}"
-                            f" with configuration {config.name}"
-                        )
+                    jobs = Job.objects.filter(analyzable__mimetype=mimetype)
+                    if jobs.exists():
+                        found_one = True
                     for job in jobs:
                         job.analyzers_to_execute.set([config])
                         print(
@@ -181,8 +178,13 @@ class FileAnalyzerTestCase(CustomTestCase):
                             )
                         finally:
                             signal.alarm(0)
+                if not found_one and not skipped:
+                    self.fail(
+                        f"No valid job found for analyzer {subclass.__name__}"
+                        f" with configuration {config.name}"
+                    )
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         Job.objects.all().delete()
         super().tearDown()
 

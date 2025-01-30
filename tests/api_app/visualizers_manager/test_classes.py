@@ -497,7 +497,7 @@ class VisualizerTestCase(CustomTestCase):
         )
         v = MockUpVisualizer(vc)
         v.job_id = job.pk
-        self.assertEqual(list(v.analyzer_reports()), [ar])
+        self.assertEqual(list(v.get_analyzer_reports()), [ar])
         ar.delete()
         job.delete()
         vc.delete()

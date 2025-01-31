@@ -1,13 +1,17 @@
-#!/bin/bash
+#!/bin/sh
 
-# Ensure proper permissions for logs
-chown -R ${USER}:${USER} ${LOG_PATH}
+# Update Nuclei templates
+nuclei -update-template-dir /opt/nuclei-api/nuclei-templates -update-templates
+sleep 60
+TEMPLATES_DIR="/opt/nuclei-api/nuclei-templates"
 
-# Run any initialization logic for Nuclei
-echo "Starting Nuclei Analyzer Service..."
+echo "Waiting for Nuclei templates to be available..."
+while [ ! -d "$TEMPLATES_DIR" ] || [ -z "$(ls -A $TEMPLATES_DIR)" ]; do
+    echo "Templates not found, retrying in 10 seconds..."
+    sleep 10
+done
 
-# Run the Flask application with Gunicorn
-exec gunicorn --bind 0.0.0.0:4008 \
-              --timeout 1200 \
-              --log-level info \
-              app:app
+echo "Templates downloaded successfully. Starting Flask app..."
+
+# Start the Flask app
+exec gunicorn -b 0.0.0.0:4008 --timeout 120 --access-logfile - "app:app"

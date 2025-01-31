@@ -1,240 +1,71 @@
-import json
 import logging
 import os
-import subprocess
-import uuid
-from datetime import datetime
-from threading import Thread
-from typing import Any, Dict, Tuple
 
-from flask import Flask, jsonify, request
+from flask import Flask
+from flask_executor import Executor
+from flask_shell2http import Shell2HTTP
 
-app = Flask(__name__)
+# Logger configuration
+LOG_NAME = "nuclei_scanner"
+logger = logging.getLogger("flask_shell2http")
 
-log_path = os.getenv("LOG_PATH", "/var/log/intel_owl/nuclei_analyzers")
+# Create formatter
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+
+# Set log level from environment variable or default to INFO
+log_level = os.getenv("LOG_LEVEL", logging.INFO)
+log_path = os.getenv("LOG_PATH", f"/var/log/{LOG_NAME}")
+
+# Ensure log directory exists
 os.makedirs(log_path, exist_ok=True)
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.FileHandler(f"{log_path}/nuclei_analyzer.log"),
-        logging.StreamHandler(),
-    ],
+# Create file handlers for both general logs and errors
+fh = logging.FileHandler(f"{log_path}/{LOG_NAME}.log")
+fh.setFormatter(formatter)
+fh.setLevel(log_level)
+
+fh_err = logging.FileHandler(f"{log_path}/{LOG_NAME}_errors.log")
+fh_err.setFormatter(formatter)
+fh_err.setLevel(logging.ERROR)
+
+# Add handlers to logger
+logger.addHandler(fh)
+logger.addHandler(fh_err)
+logger.setLevel(log_level)
+
+# Flask application instance with secret key
+app = Flask(__name__)
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", os.urandom(24).hex())
+
+# Initialize the Executor for background task processing
+executor = Executor(app)
+
+# Initialize the Shell2HTTP for exposing shell commands as HTTP endpoints
+shell2http = Shell2HTTP(app=app, executor=executor)
+
+
+def my_callback_fn(context, future):
+    """
+    Callback function to handle Nuclei scan results
+    """
+    try:
+        result = future.result()
+        logger.info(f"Nuclei scan completed for context: {context}")
+        logger.debug(f"Scan result: {result}")
+        # return result
+    except Exception as e:
+        logger.error(f"Error in callback function: {str(e)}", exc_info=True)
+        raise
+
+
+# Register the 'nuclei' command
+shell2http.register_command(
+    endpoint="run-nuclei",
+    command_name="nuclei -j -ud /opt/nuclei-api/nuclei-templates -u",
+    callback_fn=my_callback_fn,
 )
-logger = logging.getLogger("nuclei-analyzer")
-
-# In-memory store for task reports
-task_store = {}
-
-temp_dirs = {
-    "cloud",
-    "code",
-    "cves",
-    "vulnerabilities",
-    "dns",
-    "file",
-    "headless",
-    "helpers",
-    "http",
-    "javascript",
-    "network",
-    "passive",
-    "profiles",
-    "ssl",
-    "workflows",
-    "exposures",
-}
-
-
-def run_nuclei_command(
-    url: str, template_dirs: list = None
-) -> Tuple[bool, Dict[str, Any]]:
-    try:
-        logger.info(f"Starting Nuclei scan for URL: {url}")
-        logger.info(f"Template directories: {template_dirs}")
-
-        # Assumes nuclei is in PATH or current directory
-        nuclei_path = "./nuclei" if os.path.exists("./nuclei") else "nuclei"
-        command = [
-            nuclei_path,
-            "-ud",
-            "/opt/nuclei-api/nuclei-templates",
-            "-u",
-            url,
-            "-jsonl",
-        ]
-
-        if template_dirs:
-            for template_dir in template_dirs:
-                if template_dir not in temp_dirs:
-                    return False, {
-                        "success": False,
-                        "error": "Invalid template directory",
-                        "details": f"Invalid template directory: {template_dir}",
-                    }
-                else:
-                    command.extend(["-t", template_dir])
-
-        logger.info(f"Running command: {' '.join(command)}")
-
-        report = subprocess.run(
-            command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            timeout=1200,
-            check=True,
-        )
-
-        if report.returncode != 0:
-            error_msg = report.stderr.strip()
-            return False, {
-                "success": False,
-                "error": "Failed to run Nuclei",
-                "details": error_msg,
-            }
-
-        output_lines = [
-            line.strip() for line in report.stdout.split("\n") if line.strip()
-        ]
-        parsed_reports = []
-
-        for line in output_lines:
-            try:
-                parsed_reports.append(json.loads(line))
-            except json.JSONDecodeError as e:
-                logger.warning(f"Failed to parse JSON line: {line}, error: {str(e)}")
-                continue
-
-        return True, {
-            "success": True,
-            "result": parsed_reports,
-            "scan_status": "COMPLETED",
-            "statistics": {"total_findings": len(parsed_reports)},
-        }
-
-    except subprocess.TimeoutExpired:
-        return False, {
-            "success": False,
-            "error": "Scan timed out",
-            "scan_status": "TIMEOUT",
-        }
-    except Exception as e:
-        return False, {
-            "success": False,
-            "error": "An unexpected error occurred",
-            "details": str(e),
-            "scan_status": "ERROR",
-        }
-
-
-def async_nuclei_scan(task_id: str, url: str, template_dirs: list = None):
-    try:
-        _, report = run_nuclei_command(url, template_dirs)
-
-        task_store[task_id].update(
-            {
-                "status": "completed",
-                "report": report,
-                "completed_at": datetime.utcnow().isoformat(),
-            }
-        )
-        logger.info(f"Task {task_id} reports stored successfully")
-    except Exception as e:
-        task_store[task_id].update(
-            {
-                "status": "error",
-                "error": str(e),
-                "completed_at": datetime.utcnow().isoformat(),
-            }
-        )
-
-
-@app.route("/run-nuclei", methods=["GET"])
-def get_nuclei_scan_status():
-    task_id = request.args.get("key")
-    if not task_id:
-        return jsonify({"success": False, "error": "Missing task key parameter"}), 400
-
-    if task_id not in task_store:
-        return jsonify({"success": False, "error": "Invalid task key"}), 404
-
-    task_info = task_store[task_id]
-
-    if task_info["status"] == "running":
-        return (
-            jsonify({"status": "running", "started_at": task_info["started_at"]}),
-            200,
-        )
-
-    return (
-        jsonify(
-            {
-                "status": task_info["status"],
-                "report": task_info.get("report"),
-                "error": task_info.get("error"),
-                "started_at": task_info["started_at"],
-                "completed_at": task_info["completed_at"],
-            }
-        ),
-        200,
-    )
-
-
-@app.route("/run-nuclei", methods=["POST"])
-def start_nuclei_scan():
-    try:
-        data = request.get_json()
-
-        if not data or "observable" not in data:
-            return (
-                jsonify(
-                    {
-                        "success": False,
-                        "error": "Invalid request, 'observable' field is required",
-                    }
-                ),
-                400,
-            )
-
-        obs = data["observable"]
-        template_dirs = data.get("template_dirs", [])
-
-        if not isinstance(template_dirs, list):
-            return (
-                jsonify(
-                    {
-                        "success": False,
-                        "error": "Invalid request, 'template_dirs' must be a list",
-                    }
-                ),
-                400,
-            )
-
-        task_id = str(uuid.uuid4())
-        task_store[task_id] = {
-            "status": "running",
-            "started_at": datetime.utcnow().isoformat(),
-        }
-
-        thread = Thread(target=async_nuclei_scan, args=(task_id, obs, template_dirs))
-        thread.start()
-
-        return jsonify({"status": "accepted", "key": task_id}), 200
-
-    except Exception as e:
-        return (
-            jsonify(
-                {
-                    "success": False,
-                    "error": "An unexpected error occurred",
-                    "details": str(e),
-                }
-            ),
-            500,
-        )
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=4008)
+    logger.info("Starting Nuclei scanner API server")
+    app.run(host="0.0.0.0", port=4008, debug=True)

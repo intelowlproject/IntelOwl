@@ -15,7 +15,7 @@ plugin = {
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },
     "name": "Nuclei",
-    "description": "A fast and customisable vulnerability scanner powered by simple YAML-based templates",
+    "description": "A fast and customisable vulnerability scanner powered by simple YAML-based templates. At its core, Nuclei uses templates—expressed as straightforward YAML files, that delineate methods for detecting, ranking, and addressing specific security flaws.",
     "disabled": False,
     "soft_time_limit": 1200,
     "routing_key": "default",

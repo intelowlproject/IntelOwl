@@ -1,48 +1,26 @@
-FROM python:3.12.3
+# Use the official Nuclei image as the base
+FROM projectdiscovery/nuclei:latest
 
-# Set environment variables
-ENV PROJECT_PATH=/opt/nuclei-api
 ENV LOG_PATH=/var/log/nuclei_analyzer
 ENV USER=nuclei-user
 
-# Install required packages and download nuclei
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    ca-certificates \
-    wget \
-    unzip && \
-    wget --progress=dot:giga https://github.com/projectdiscovery/nuclei/releases/download/v3.3.7/nuclei_3.3.7_linux_amd64.zip && \
-    unzip nuclei_3.3.7_linux_amd64.zip && \
-    mv nuclei /usr/local/bin/ && \
-    chmod +x /usr/local/bin/nuclei && \
-    rm nuclei_3.3.7_linux_amd64.zip && \
-    nuclei -update-template-dir /opt/nuclei-api/nuclei-templates -update-templates && \
-    useradd -ms /bin/bash ${USER} && \ 
-    mkdir -p ${PROJECT_PATH} ${LOG_PATH}
+# Install required packages using apk (Alpine Package Keeper)
+RUN apk add --no-cache python3 py3-pip
 
-# Set working directory
-WORKDIR ${PROJECT_PATH}
+# Create a working directory
+WORKDIR /app
 
-# Copy application files
+# Copy the requirements file and install dependencies
 COPY requirements.txt .
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+# Copy the Flask API code
 COPY app.py .
-COPY entrypoint.sh .
 
-# Set proper permissions
-RUN chmod +x entrypoint.sh && \
-    chown -R ${USER}:${USER} ${PROJECT_PATH} && \
-    chown -R ${USER}:${USER} ${LOG_PATH} && \
-    chmod 755 ${PROJECT_PATH} && \
-    chmod 755 ${LOG_PATH}
+# Expose the API port
+EXPOSE 5000
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Switch to non-root user
-USER ${USER}
-
-# Expose port
-EXPOSE 4008
-
-# Use full path to entrypoint script (this is another key fix)
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]

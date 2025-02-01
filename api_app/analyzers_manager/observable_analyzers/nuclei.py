@@ -52,6 +52,7 @@ class NucleiAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
 
         # Execute the request
         response = self._docker_run(req_data=req_data, req_files=None)
+        print(response)
         json_objects = []
         for line in response.strip().split("\n"):
             try:

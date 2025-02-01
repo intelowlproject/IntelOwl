@@ -1,5 +1,5 @@
 # Use the official Nuclei image as the base
-FROM projectdiscovery/nuclei:latest
+FROM projectdiscovery/nuclei:v3.3.8
 
 ENV LOG_PATH=/var/log/nuclei_analyzer
 ENV USER=nuclei-user

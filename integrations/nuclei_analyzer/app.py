@@ -52,7 +52,6 @@ def my_callback_fn(context, future):
         result = future.result()
         logger.info(f"Nuclei scan completed for context: {context}")
         logger.debug(f"Scan result: {result}")
-        # return result
     except Exception as e:
         logger.error(f"Error in callback function: {str(e)}", exc_info=True)
         raise
@@ -68,4 +67,4 @@ shell2http.register_command(
 
 if __name__ == "__main__":
     logger.info("Starting Nuclei scanner API server")
-    app.run(host="0.0.0.0", port=4008, debug=True)
+    app.run(host="0.0.0.0", port=4008)

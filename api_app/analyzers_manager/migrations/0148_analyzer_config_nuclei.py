@@ -154,7 +154,10 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0065_job_mpnodesearch"),
-        ("analyzers_manager", "0148_analyzer_config_nuclei"),
+        (
+            "analyzers_manager",
+            "0147_alter_analyzer_config_feodo_yaraify_urlhaus_yaraify_scan",
+        ),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

@@ -15,7 +15,7 @@ plugin = {
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },
     "name": "Nuclei",
-    "description": "A fast and customisable vulnerability scanner powered by simple YAML-based templates. At its core, Nuclei uses templates—expressed as straightforward YAML files, that delineate methods for detecting, ranking, and addressing specific security flaws.",
+    "description": "[Nuclei](https://github.com/projectdiscovery/nuclei) is a fast, customizable vulnerability scanner that leverages YAML-based templates to detect, rank, and address security flaws. It operates using structured templates that define specific security checks.",
     "disabled": False,
     "soft_time_limit": 1200,
     "routing_key": "default",
@@ -40,7 +40,7 @@ params = [
         },
         "name": "template_dirs",
         "type": "list",
-        "description": "",
+        "description": "The template_dirs parameter allows you to specify a list of directories containing templates, each focusing on a particular category of vulnerabilities, exposures, or security assessments.\r\nAvailable Template Categories:\r\ncloud\r\ncode\r\ncves\r\nvulnerabilities\r\ndns\r\nfile\r\nheadless\r\nhelpers\r\nhttp\r\njavascript\r\nnetwork\r\npassive\r\nprofiles\r\nssl\r\nworkflows\r\nexposures",
         "is_secret": False,
         "required": False,
     }
@@ -55,7 +55,7 @@ values = [
             },
             "name": "template_dirs",
             "type": "list",
-            "description": "",
+            "description": "The template_dirs parameter allows you to specify a list of directories containing templates, each focusing on a particular category of vulnerabilities, exposures, or security assessments.\r\nAvailable Template Categories:\r\ncloud\r\ncode\r\ncves\r\nvulnerabilities\r\ndns\r\nfile\r\nheadless\r\nhelpers\r\nhttp\r\njavascript\r\nnetwork\r\npassive\r\nprofiles\r\nssl\r\nworkflows\r\nexposures",
             "is_secret": False,
             "required": False,
         },
@@ -154,10 +154,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0065_job_mpnodesearch"),
-        (
-            "analyzers_manager",
-            "0147_alter_analyzer_config_feodo_yaraify_urlhaus_yaraify_scan",
-        ),
+        ("analyzers_manager", "0148_analyzer_config_nuclei"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

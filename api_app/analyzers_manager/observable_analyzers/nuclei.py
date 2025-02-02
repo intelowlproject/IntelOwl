@@ -53,11 +53,15 @@ class NucleiAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
         # Execute the request
         response = self._docker_run(req_data=req_data, req_files=None)
         print(response)
-        json_objects = []
-        for line in response.strip().split("\n"):
-            try:
-                json_objects.append(json.loads(line))
-            except json.JSONDecodeError:
-                print(f"Skipping non-JSON line: {line}")
 
-        return json_objects
+        if isinstance(response, dict):
+            response = json.dumps(response)
+            return response
+        else:
+            json_objects = []
+            for line in response.strip().split("\n"):
+                try:
+                    json_objects.append(json.loads(line))
+                except json.JSONDecodeError:
+                    print(f"Skipping non-JSON line: {line}")
+            return json_objects

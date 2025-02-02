@@ -23,4 +23,6 @@ EXPOSE 5000
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+# RUN nuclei -update-template-dir /opt/nuclei-api/nuclei-templates -update-templates
+
 ENTRYPOINT ["/entrypoint.sh"]

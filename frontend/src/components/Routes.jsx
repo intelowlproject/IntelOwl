@@ -159,9 +159,16 @@ const authRoutesLazy = [
       </Suspense>
     ),
   },
-  /* History */
   {
-    path: "/history/*",
+    path: "/history/jobs",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <History />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/history/investigations",
     element: (
       <Suspense fallback={<FallBackLoading />}>
         <History />
@@ -179,7 +186,47 @@ const authRoutesLazy = [
   },
   /* Plugins */
   {
-    path: "/plugins/*",
+    path: "/plugins/analyzers",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <PluginsContainer />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/plugins/connectors",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <PluginsContainer />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/plugins/pivots",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <PluginsContainer />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/plugins/visualizers",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <PluginsContainer />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/plugins/ingestors",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <PluginsContainer />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/plugins/playbooks",
     element: (
       <Suspense fallback={<FallBackLoading />}>
         <PluginsContainer />

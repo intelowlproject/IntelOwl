@@ -48,7 +48,7 @@ const guestLinks = (
     <NavItem>
       <RRNavLink
         id="login-btn"
-        className="btn btn-sm btn-primary nav-link"
+        className="btn btn-sm btn-primary"
         end
         to="/login"
       >
@@ -58,7 +58,7 @@ const guestLinks = (
     <NavItem className="ms-lg-2">
       <RRNavLink
         id="register-btn"
-        className="btn btn-sm btn-accent-2 nav-link"
+        className="btn btn-sm btn-accent-2"
         end
         to="/register"
       >

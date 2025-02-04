@@ -21,6 +21,7 @@ import {
   PluginDeletionButton,
   PluginConfigButton,
   PlaybookFlowsButton,
+  MappingDataModel,
 } from "./pluginActionsButtons";
 import { JobTypes } from "../../../constants/jobConst";
 import TableCell from "../../common/TableCell";
@@ -158,7 +159,22 @@ export const analyzersTableColumns = [
     Cell: ({ value }) => <TLPTag value={value} />,
     Filter: SelectOptionsFilter,
     selectOptions: TlpChoices,
+    disableSortBy: true,
     maxWidth: 80,
+  },
+  {
+    Header: "Data model",
+    id: "data_model",
+    accessor: (analyzerConfig) => analyzerConfig,
+    Cell: ({ value }) => (
+      <MappingDataModel
+        data={value.mapping_data_model}
+        type={value.type}
+        pythonModule={value.python_module}
+      />
+    ),
+    maxWidth: 70,
+    disableSortBy: true,
   },
   {
     Header: "Actions",

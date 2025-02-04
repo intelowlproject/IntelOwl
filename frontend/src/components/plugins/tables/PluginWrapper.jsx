@@ -14,6 +14,7 @@ import {
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { PluginsTypes } from "../../../constants/pluginConst";
+import { INTELOWL_DOCS_URL } from "../../../constants/environment";
 
 // table config
 const tableConfig = {};
@@ -67,7 +68,7 @@ export default function PluginWrapper({
           <span className="text-muted">
             {description} For more info check the{" "}
             <Link
-              to="https://intelowlproject.github.io/docs/IntelOwl/usage/#plugins-framework"
+              to={`${INTELOWL_DOCS_URL}IntelOwl/usage/#plugins-framework`}
               target="_blank"
             >
               official doc.

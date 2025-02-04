@@ -160,6 +160,10 @@ const authRoutesLazy = [
     ),
   },
   {
+    path: "/history",
+    element: <Navigate to="/history/jobs" replace />,
+  },
+  {
     path: "/history/jobs",
     element: (
       <Suspense fallback={<FallBackLoading />}>
@@ -185,6 +189,10 @@ const authRoutesLazy = [
     ),
   },
   /* Plugins */
+  {
+    path: "/plugins",
+    element: <Navigate to="/plugins/analyzers" replace />,
+  },
   {
     path: "/plugins/analyzers",
     element: (

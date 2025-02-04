@@ -27,7 +27,6 @@ import { TbReport, TbReportSearch } from "react-icons/tb";
 import { AxiosLoadingBar } from "@certego/certego-ui";
 
 // constants
-import { format } from "date-fns";
 import {
   INTELOWL_DOCS_URL,
   PUBLIC_URL,
@@ -41,7 +40,6 @@ import NotificationPopoverButton from "../components/jobs/notification/Notificat
 import { useAuthStore } from "../stores/useAuthStore";
 import { useGuideContext } from "../contexts/GuideContext";
 import { useOrganizationStore } from "../stores/useOrganizationStore";
-import { datetimeFormatStr } from "../constants/miscConst";
 
 const guestLinks = (
   <>
@@ -81,10 +79,7 @@ function AuthLinks() {
         </RRNavLink>
       </NavItem>
       <NavItem>
-        <RRNavLink
-          className="d-flex-start-center nav-link"
-          to={`/history/jobs?end-time=${format(new Date(), datetimeFormatStr)}`}
-        >
+        <RRNavLink className="d-flex-start-center nav-link" to="/history">
           <TbReport />
           <span className="ms-1">History</span>
         </RRNavLink>
@@ -96,10 +91,7 @@ function AuthLinks() {
         </RRNavLink>
       </NavItem>
       <NavItem>
-        <RRNavLink
-          className="d-flex-start-center nav-link"
-          to="/plugins/analyzers"
-        >
+        <RRNavLink className="d-flex-start-center nav-link" to="/plugins">
           <RiPlugFill />
           <span className="ms-1">Plugins</span>
         </RRNavLink>

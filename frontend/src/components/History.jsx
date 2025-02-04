@@ -64,7 +64,7 @@ export default function History() {
 
   return (
     <>
-      <Nav>
+      <Nav className="nav-tabs">
         <NavItem>
           <RRNavLink className="nav-link" to="/history/jobs">
             <span id="Jobs">

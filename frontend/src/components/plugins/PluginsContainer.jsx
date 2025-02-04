@@ -97,7 +97,7 @@ export default function PluginsContainer() {
 
   return (
     <>
-      <Nav>
+      <Nav className="nav-tabs">
         <NavItem>
           <RRNavLink className="nav-link" to="/plugins/analyzers">
             <span id="analyzers">

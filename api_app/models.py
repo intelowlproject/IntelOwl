@@ -287,9 +287,6 @@ class Comment(models.Model):
         related_name="comment",
     )
 
-    class Meta:
-        ordering = ["created_at"]
-
     analyzable = models.ForeignKey(
         "analyzables_manager.Analyzable",
         on_delete=models.CASCADE,
@@ -300,6 +297,9 @@ class Comment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     objects = CommentQuerySet.as_manager()
+
+    class Meta:
+        ordering = ["created_at"]
 
 
 class Job(MP_Node):

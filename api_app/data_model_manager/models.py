@@ -19,7 +19,6 @@ from api_app.data_model_manager.enums import (
 )
 from api_app.data_model_manager.fields import LowercaseCharField, SetField
 from api_app.data_model_manager.queryset import BaseDataModelQuerySet
-from certego_saas.apps.user.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -198,10 +197,6 @@ class BaseDataModel(models.Model):
         return {
             field.name: field for field in cls._meta.fields + cls._meta.many_to_many
         }
-
-    @property
-    def owner(self) -> User:
-        return self.analyzers_report.first().user
 
     @classmethod
     def get_serializer(cls) -> Type[ModelSerializer]:

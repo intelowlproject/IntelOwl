@@ -4,7 +4,8 @@ import { Navigate, useParams } from "react-router-dom";
 
 import AuthGuard from "../wrappers/AuthGuard";
 import IfAuthRedirectGuard from "../wrappers/IfAuthRedirectGuard";
-import { JobResultSections } from "../constants/miscConst";
+import { datetimeFormatStr, JobResultSections } from "../constants/miscConst";
+import { format } from "date-fns";
 
 const Home = React.lazy(() => import("./home/Home"));
 const Login = React.lazy(() => import("./auth/Login"));
@@ -161,7 +162,12 @@ const authRoutesLazy = [
   },
   {
     path: "/history",
-    element: <Navigate to="/history/jobs" replace />,
+    element: (
+      <Navigate
+        to={`/history/jobs?end-time=${format(new Date(), datetimeFormatStr)}`}
+        replace
+      />
+    ),
   },
   {
     path: "/history/jobs",

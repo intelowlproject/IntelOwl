@@ -938,7 +938,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
 
         if len(most_frequent_values):
             annotations = {
-                val: Count(field_name, filter=Q(**{field_name: val}))
+                val.replace(" ", "")
+                .replace("?", "")
+                .replace(";", ""): Count(field_name, filter=Q(**{field_name: val}))
                 for val in most_frequent_values
             }
             logger.debug(f"request: {field_name} annotations: {annotations}")

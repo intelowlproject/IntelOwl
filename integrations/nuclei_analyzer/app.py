@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 
@@ -14,10 +15,7 @@ formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messag
 
 # Set log level from environment variable or default to INFO
 log_level = os.getenv("LOG_LEVEL", logging.INFO)
-log_path = os.getenv("LOG_PATH", f"/var/log/{LOG_NAME}")
-
-# Ensure log directory exists
-os.makedirs(log_path, exist_ok=True)
+log_path = os.getenv("LOG_PATH", f"/var/log/intel_owl/{LOG_NAME}")
 
 # Create file handlers for both general logs and errors
 fh = logging.FileHandler(f"{log_path}/{LOG_NAME}.log")
@@ -50,6 +48,14 @@ def my_callback_fn(context, future):
     """
     try:
         result = future.result()
+        report = result["report"]
+        json_objects = []
+        for line in report.strip().split("\n"):
+            try:
+                json_objects.append(json.loads(line))
+            except json.JSONDecodeError:
+                print(f"Skipping non-JSON line: {line}")
+        result["report"] = {"data": json_objects}
         logger.info(f"Nuclei scan completed for context: {context}")
         logger.debug(f"Scan result: {result}")
     except Exception as e:

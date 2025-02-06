@@ -1,8 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import json
-
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, ObservableAnalyzer
 
 
@@ -52,16 +50,7 @@ class NucleiAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
 
         # Execute the request
         response = self._docker_run(req_data=req_data, req_files=None)
-        print(response)
 
-        if isinstance(response, dict):
-            response = json.dumps(response)
-            return response
-        else:
-            json_objects = []
-            for line in response.strip().split("\n"):
-                try:
-                    json_objects.append(json.loads(line))
-                except json.JSONDecodeError:
-                    print(f"Skipping non-JSON line: {line}")
-            return json_objects
+        analysis = response.get("data", [])
+
+        return analysis

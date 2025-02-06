@@ -1,13 +1,13 @@
 import logging
 from datetime import date, timedelta
 from typing import Dict
-from urllib.parse import urlparse
 
 import requests
 from faker import Faker  # skipcq: BAN-B410
 from lxml.etree import HTMLParser  # skipcq: BAN-B410
 from lxml.html import document_fromstring
 from requests import HTTPError, Response
+from requests.exceptions import MissingSchema
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.models import PythonConfig
@@ -138,25 +138,33 @@ class PhishingFormCompiler(FileAnalyzer):
                 return fake_value
 
     def extract_action_attribute(self, form) -> str:
-        if not (form_action := form.get("action", None)):
+        form_action: str = form.get("action", None)
+        if not form_action:
             logger.info(
                 f"'action' attribute not found in form. Defaulting to {self.target_site=}"
             )
             form_action = self.target_site
-
-        # if relative url extracted, clean it from '/' and concatenate everything
-        # if action was not extracted in previous step the if should not pass as it is a url
-        if not urlparse(form_action).netloc:
+        elif form_action.startswith("/"):  # pure relative url
             logger.info(f"Found relative url in {form_action=}")
+            form_action = form_action.replace("/", "", 1)
             base_site = self.target_site
+
             if base_site.endswith("/"):
                 base_site = base_site[:-1]
-            if form_action.startswith("/"):
-                form_action = form_action.replace("/", "", 1)
+            form_action = base_site + "/" + form_action
+        elif (
+            "." in form_action and "://" not in form_action
+        ):  # found a domain (relative file names such as "login.php" should start with /)
+            logger.info(f"Found a domain in form action {form_action=}")
+        else:
+            base_site = self.target_site
 
+            if base_site.endswith("/"):
+                base_site = base_site[:-1]
             form_action = base_site + "/" + form_action
 
         logger.info(f"Extracted action to post data to: {form_action}")
+
         return form_action
 
     def compile_form_field(self, form) -> dict:
@@ -200,16 +208,29 @@ class PhishingFormCompiler(FileAnalyzer):
         headers = {
             "User-Agent": self.user_agent,
         }
-        response = requests.post(
-            url=dest_url,
-            data=params,
-            headers=headers,
-            proxies=(
-                {"http": self.proxy_address, "https": self.proxy_address}
-                if self.proxy_address
-                else None
-            ),
-        )
+        try:
+            response = requests.post(
+                url=dest_url,
+                data=params,
+                headers=headers,
+                proxies=(
+                    {"http": self.proxy_address, "https": self.proxy_address}
+                    if self.proxy_address
+                    else None
+                ),
+            )
+        except MissingSchema:
+            logger.info(f"Adding default 'https://' schema to {dest_url}")
+            response = requests.post(
+                url="https://" + dest_url,
+                data=params,
+                headers=headers,
+                proxies=(
+                    {"http": self.proxy_address, "https": self.proxy_address}
+                    if self.proxy_address
+                    else None
+                ),
+            )
         logger.info(f"Request headers: {response.request.headers}")
         return response
 

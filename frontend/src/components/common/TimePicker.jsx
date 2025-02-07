@@ -28,7 +28,7 @@ export function TimePicker() {
           onChange={(event) => {
             updateFromDate(new Date(event.target.value));
           }}
-          min="1970-01-01T00:00"
+          min="1970-01-01T00:00:00"
         />
       </div>
       <div className="d-flex align-items-center">
@@ -44,7 +44,7 @@ export function TimePicker() {
           onChange={(event) => {
             updateToDate(new Date(event.target.value));
           }}
-          min="1970-01-01T00:00"
+          min="1970-01-01T00:00:00"
         />
       </div>
     </div>

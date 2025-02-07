@@ -40,6 +40,7 @@ class Plugin(metaclass=ABCMeta):
 
         # monkeypatch if in test suite
         if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
+            print("monkeypatch")
             self._monkeypatch()
 
     @property

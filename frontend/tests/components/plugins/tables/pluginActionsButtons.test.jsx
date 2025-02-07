@@ -13,14 +13,23 @@ import {
   PluginPullButton,
   PlaybooksEditButton,
   PluginConfigButton,
+  PlaybookFlowsButton,
+  MappingDataModel,
 } from "../../../../src/components/plugins/tables/pluginActionsButtons";
-import { mockedUseOrganizationStoreOwner } from "../../../mock";
+import {
+  mockedUseOrganizationStoreOwner,
+  mockedPlaybooks,
+} from "../../../mock";
 
 jest.mock("axios");
 jest.mock("../../../../src/stores/useOrganizationStore", () => ({
   useOrganizationStore: jest.fn((state) =>
     state(mockedUseOrganizationStoreOwner),
   ),
+}));
+// mock flow component
+jest.mock("../../../../src/components/plugins/flows/PlaybookFlows", () => ({
+  PlaybookFlows: jest.fn((props) => <div {...props} />),
 }));
 
 // current user must be equal to org owner
@@ -455,4 +464,81 @@ describe("Plugin Config test", () => {
       });
     },
   );
+});
+
+describe("PlaybookFlowsButton test", () => {
+  test("PlaybookFlowsButton", async () => {
+    const userAction = userEvent.setup();
+    const { container } = render(
+      <BrowserRouter>
+        <PlaybookFlowsButton playbook={mockedPlaybooks.TEST_PLAYBOOK_DOMAIN} />
+      </BrowserRouter>,
+    );
+
+    const playbookFlowsIcon = container.querySelector(
+      "#playbook-flows-btn__TEST_PLAYBOOK_DOMAIN",
+    );
+    expect(playbookFlowsIcon).toBeInTheDocument();
+
+    userAction.click(playbookFlowsIcon);
+    await waitFor(() => {
+      expect(screen.getByText("Possible playbook flows")).toBeInTheDocument();
+    });
+  });
+});
+
+describe("DataModel mapping test", () => {
+  test("DataModel mapping button", async () => {
+    const userAction = userEvent.setup();
+    const data = {
+      mapping_data_model: {
+        permalink: "external_references",
+        "data.hostnames": "resolutions",
+      },
+      type: "observable",
+      python_module: "pythonmodule.pythonclass",
+    };
+    const { container } = render(
+      <BrowserRouter>
+        <MappingDataModel
+          data={data.mapping_data_model}
+          type={data.type}
+          pythonModule={data.python_module}
+        />
+      </BrowserRouter>,
+    );
+
+    const dataModelMappingIcon = container.querySelector(
+      "#mapping-data-model__pythonmodule",
+    );
+    expect(dataModelMappingIcon).toBeInTheDocument();
+
+    userAction.click(dataModelMappingIcon);
+    await waitFor(() => {
+      expect(screen.getByText("Data model mapping")).toBeInTheDocument();
+    });
+  });
+
+  test("DataModel mapping button - disabled", async () => {
+    const data = {
+      mapping_data_model: {},
+      type: "observable",
+      python_module: "pythonmodule.pythonclass",
+    };
+    const { container } = render(
+      <BrowserRouter>
+        <MappingDataModel
+          data={data.mapping_data_model}
+          type={data.type}
+          pythonModule={data.python_module}
+        />
+      </BrowserRouter>,
+    );
+
+    const dataModelMappingIcon = container.querySelector(
+      "#mapping-data-model__pythonmodule",
+    );
+    expect(dataModelMappingIcon).toBeInTheDocument();
+    expect(dataModelMappingIcon.className).toContain("disabled");
+  });
 });

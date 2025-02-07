@@ -1,4 +1,4 @@
-import dagre from "@dagrejs/dagre";
+import { getLayoutedElements } from "../../common/flows/getLayoutedElements";
 import { JobFinalStatuses } from "../../../constants/jobConst";
 
 /* eslint-disable id-length */
@@ -53,38 +53,6 @@ function addEdge(edges, job, parentType, parentId) {
   }
 }
 
-function getLayoutedElements(nodes, edges) {
-  // needed for graph layout
-  const dagreGraph = new dagre.graphlib.Graph();
-  dagreGraph.setDefaultEdgeLabel(() => ({}));
-
-  const nodeWidth = 300;
-  const nodeHeight = 60;
-
-  dagreGraph.setGraph({ rankdir: "LR" });
-
-  nodes.forEach((node) => {
-    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
-  });
-
-  edges.forEach((edge) => {
-    dagreGraph.setEdge(edge.source, edge.target);
-  });
-
-  dagre.layout(dagreGraph);
-
-  nodes.forEach((node) => {
-    const nodeWithPosition = dagreGraph.node(node.id);
-    // eslint-disable-next-line no-param-reassign
-    node.position = {
-      x: nodeWithPosition.x - nodeWidth / 2 + 150,
-      y: nodeWithPosition.y - nodeHeight / 2 + 70,
-    };
-    return node;
-  });
-  return { nodes, edges };
-}
-
 export function getNodesAndEdges(
   investigationTree,
   investigationId,
@@ -131,6 +99,10 @@ export function getNodesAndEdges(
     const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
       jobsNodes,
       jobsEdges,
+      300,
+      60,
+      150,
+      70,
     );
     return [
       initialNode.concat(layoutedNodes),

@@ -30,6 +30,7 @@ class PlaybookConfigQuerySet(AbstractConfigQuerySet, ModelWithOwnershipQuerySet)
                 Job.objects.prefetch_related("user")
                 .filter(
                     user__membership__organization__pk=user.membership.organization.pk,
+                    user__profile__is_robot=False,
                     playbook_to_execute=OuterRef("pk"),
                     finished_analysis_time__gte=now() - datetime.timedelta(days=30),
                 )
@@ -46,16 +47,17 @@ class PlaybookConfigQuerySet(AbstractConfigQuerySet, ModelWithOwnershipQuerySet)
                 Job.objects.filter(
                     playbook_to_execute=OuterRef("pk"),
                     finished_analysis_time__gte=now() - datetime.timedelta(days=30),
+                    user__profile__is_robot=False,
                 )
                 .exclude(
-                    user__membership__organization__pk=user.membership.organization.pk
+                    user__membership__organization__pk=user.membership.organization.pk,
                 )
                 .annotate(count=Func(F("pk"), function="Count"))
                 .values("count")
             )
         return Subquery(
             Job.objects.prefetch_related("user")
-            .filter(playbook_to_execute=OuterRef("pk"))
+            .filter(playbook_to_execute=OuterRef("pk"), user__profile__is_robot=False)
             .exclude(user__pk=user.pk)
             .annotate(count=Func(F("pk"), function="Count"))
             .values("count")

@@ -22,4 +22,4 @@ export const HTTPMethods = Object.freeze({
   DELETE: "delete",
 });
 
-export const datetimeFormatStr = "yyyy-MM-dd'T'HH:mm";
+export const datetimeFormatStr = "yyyy-MM-dd'T'HH:mm:ss";

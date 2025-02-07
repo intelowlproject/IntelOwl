@@ -387,7 +387,7 @@ class JobViewSetTests(CustomViewSetTestCase):
                 "aggregation": [
                     {
                         "date": "2024-11-28T00:00:00Z",
-                        "superuser@intelowl.org": 2,
+                        "superuser@intelowl.org": 3,
                         "testspace@intelowl.org": 1,
                     },
                 ],

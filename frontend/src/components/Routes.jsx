@@ -29,6 +29,25 @@ const InvestigationResult = React.lazy(
 const History = React.lazy(() => import("./History"));
 const Search = React.lazy(() => import("./search/Search"));
 
+function CustomRedirect() {
+  /* this is a way to auto-redirect to the job page with the current date:
+   * we cannot use a button -> change the UI
+   * we cannot use a navigate -> "to" props must have a string (no function) and if we worte new Date in the to url the components is generated once so the first date is keep
+   */
+  const [date, forceUpdate] = React.useState(new Date());
+
+  React.useEffect(() => {
+    forceUpdate(new Date());
+  }, []);
+
+  return (
+    <Navigate
+      to={`/history/jobs?end-time=${format(date, datetimeFormatStr)}`}
+      replace
+    />
+  );
+}
+
 /*
 lazy imports to enable code splitting
 */
@@ -160,13 +179,13 @@ const authRoutesLazy = [
       </Suspense>
     ),
   },
+  // {
   {
     path: "/history",
     element: (
-      <Navigate
-        to={`/history/jobs?end-time=${format(new Date(), datetimeFormatStr)}`}
-        replace
-      />
+      <Suspense fallback={<FallBackLoading />}>
+        <CustomRedirect />
+      </Suspense>
     ),
   },
   {

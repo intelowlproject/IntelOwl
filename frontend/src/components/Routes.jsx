@@ -2,10 +2,10 @@ import React, { Suspense } from "react";
 import { FallBackLoading } from "@certego/certego-ui";
 import { Navigate, useParams } from "react-router-dom";
 
+import { format } from "date-fns";
 import AuthGuard from "../wrappers/AuthGuard";
 import IfAuthRedirectGuard from "../wrappers/IfAuthRedirectGuard";
 import { datetimeFormatStr, JobResultSections } from "../constants/miscConst";
-import { format } from "date-fns";
 
 const Home = React.lazy(() => import("./home/Home"));
 const Login = React.lazy(() => import("./auth/Login"));

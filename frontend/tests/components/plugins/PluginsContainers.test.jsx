@@ -29,8 +29,8 @@ describe("test PluginsContainer component", () => {
     render(
       <MemoryRouter initialEntries={["/plugins/analyzers"]}>
         <PluginsContainer />
-      </MemoryRouter>
-    )
+      </MemoryRouter>,
+    );
 
     // router tabs
     const routerTabs = screen.getByRole("list");

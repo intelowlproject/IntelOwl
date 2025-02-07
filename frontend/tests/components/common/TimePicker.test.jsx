@@ -32,8 +32,8 @@ describe("test TimePicker component", () => {
     const secondDateInput = container.querySelector("#DatePicker__lte");
     expect(secondDateInput).toBeInTheDocument();
     // datetime saves also milliseconds
-    expect(firstDateInput).toHaveValue(`${fromDateValue  }.000`);
-    expect(secondDateInput).toHaveValue(`${toDateValue  }.000`);
+    expect(firstDateInput).toHaveValue(`${fromDateValue}.000`);
+    expect(secondDateInput).toHaveValue(`${toDateValue}.000`);
 
     /* datetime-local input is editable only with fireEvent, user.type doesn't work:
     https://github.com/testing-library/user-event/issues/399#issuecomment-656084165 */

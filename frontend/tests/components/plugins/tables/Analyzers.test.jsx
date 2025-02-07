@@ -11,6 +11,7 @@ import {
   mockedUsePluginConfigurationStore,
 } from "../../../mock";
 
+jest.mock("reactflow/dist/style.css", () => {});
 jest.mock("axios");
 jest.mock("../../../../src/stores/useAuthStore", () => ({
   useAuthStore: jest.fn((state) => state(mockedUseAuthStore)),

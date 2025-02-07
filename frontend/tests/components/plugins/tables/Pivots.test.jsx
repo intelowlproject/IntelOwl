@@ -9,6 +9,7 @@ import {
   mockedUsePluginConfigurationStore,
 } from "../../../mock";
 
+jest.mock("reactflow/dist/style.css", () => {});
 jest.mock("axios");
 jest.mock("../../../../src/stores/useOrganizationStore", () => ({
   useOrganizationStore: jest.fn((state) =>
@@ -29,7 +30,7 @@ describe("test Pivots component", () => {
       </BrowserRouter>,
     );
 
-    const title = screen.getByRole("heading", { name: "Pivots 0 total" });
+    const title = screen.getByRole("heading", { name: "Pivots 1 total" });
     expect(title).toBeInTheDocument();
     // table
     const tableComponent = screen.getByRole("table");

@@ -124,13 +124,13 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         slug_field="name",
         queryset=ConnectorConfig.objects.all(),
         many=True,
-        default=ConnectorConfig.objects.none(),
+        default=[],
     )
     analyzers_requested = rfs.SlugRelatedField(
         slug_field="name",
         queryset=AnalyzerConfig.objects.all(),
         many=True,
-        default=AnalyzerConfig.objects.none(),
+        default=[],
     )
     playbook_requested = rfs.SlugRelatedField(
         slug_field="name",
@@ -944,6 +944,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
         observable_classification: str,
         **kwargs,
     ) -> List[AnalyzerConfig]:
+        logger.debug(f"{analyzers_requested=} {type(analyzers_requested)=}")
         analyzers_to_execute = analyzers_requested.copy()
 
         partially_filtered_analyzers_qs = AnalyzerConfig.objects.filter(

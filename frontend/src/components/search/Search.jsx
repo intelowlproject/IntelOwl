@@ -20,7 +20,9 @@ import { format } from "date-fns";
 import { PluginsTypes, PluginFinalStatuses } from "../../constants/pluginConst";
 import { searchTableColumns } from "./searchTableColumns";
 import { pluginReportQueries } from "./searchApi";
+
 import { datetimeFormatStr } from "../../constants/miscConst";
+import { INTELOWL_DOCS_URL } from "../../constants/environment";
 
 // table config
 const tableConfig = { enableExpanded: true, enableFlexLayout: true };
@@ -145,7 +147,7 @@ export default function Search() {
                   This section only works if Elasticsearch has been configured
                   correctly. For more info check the{" "}
                   <Link
-                    to="https://intelowlproject.github.io/docs/IntelOwl/advanced_configuration/#elasticsearch"
+                    to={`${INTELOWL_DOCS_URL}IntelOwl/advanced_configuration/#elasticsearch`}
                     target="_blank"
                   >
                     official doc.

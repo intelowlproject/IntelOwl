@@ -41,7 +41,7 @@ elasticsearch-dsl==8.17.0
 GitPython==3.1.41
 checkdmarc==5.7.9
 dnspython==2.7.0
-dnstwist[full]==20240812
+dnstwist[full]==20250130
 google>=3.0.0
 google-cloud-webrisk==1.15.0
 intezer-sdk==1.21
@@ -87,6 +87,7 @@ dotnetfile==0.2.4
 docxpy==0.8.5
 pylnk3==0.4.2
 androguard==3.4.0a1 # version >=4.x of androguard raises a dependency conflict with quark-engine==25.1.1
+wad==0.4.6
 
 # this is required because XLMMacroDeobfuscator does not pin the following packages
 pyxlsb2==0.0.8
@@ -100,4 +101,4 @@ pyzipper==0.3.6
 dateparser==1.2.0
 # phishing form compiler module
 lxml==5.3.0
-Faker==30.8.0
+Faker==35.2.0

@@ -2,7 +2,6 @@ import React from "react";
 import "@testing-library/jest-dom";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import userEvent from "@testing-library/user-event";
 import { format } from "date-fns";
 import { TimePicker } from "../../../src/components/common/TimePicker";
 import { datetimeFormatStr } from "../../../src/constants/miscConst";
@@ -15,7 +14,6 @@ describe("test TimePicker component", () => {
     const toDateValue = format(toDate, datetimeFormatStr);
     const fromDateValue = format(fromDate, datetimeFormatStr);
 
-    const user = userEvent.setup();
     const { container } = render(
       <BrowserRouter>
         <TimePicker />

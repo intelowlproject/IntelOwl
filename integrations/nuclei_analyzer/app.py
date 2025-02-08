@@ -49,6 +49,7 @@ def my_callback_fn(context, future):
     try:
         result = future.result()
         report = result["report"]
+        # The report is a string with multiple JSON objects separated by newlines
         json_objects = []
         for line in report.strip().split("\n"):
             try:

@@ -12,26 +12,45 @@ logger = logging.getLogger(__name__)
 
 
 class GreedyBear(Ingestor):
-    # API endpoint
-    url = "https://greedybear.honeynet.org/api/feeds/all/all/recent.json"
-    # Days to check. From 1 to 7
-    days: int
-    # max iocs
-    limit: int
+
+    url: str
+    feed_type: str
+    attack_type: str
+    age: str
+
+    VALID_FEED_TYPES = {"log4j", "cowrie", "all"}
+    VALID_ATTACK_TYPES = {"scanner", "payload_request", "all"}
+    VALID_AGE = {"recent", "persistent"}
 
     @classmethod
     def update(cls) -> bool:
         pass
 
     def run(self) -> Iterable[Any]:
+        if self.feed_type not in self.VALID_FEED_TYPES:
+            raise ValueError(
+                f"Invalid feed_type: {self.feed_type}. Must be one of {self.VALID_FEED_TYPES}"
+            )
+        if self.attack_type not in self.VALID_ATTACK_TYPES:
+            raise ValueError(
+                f"Invalid attack_type: {self.attack_type}. Must be one of {self.VALID_ATTACK_TYPES}"
+            )
+        if self.age not in self.VALID_AGE:
+            raise ValueError(
+                f"Invalid age: {self.age}. Must be one of {self.VALID_AGE}"
+            )
+
+        self.url = f"https://greedybear.honeynet.org/api/feeds/{self.feed_type}/{self.attack_type}/{self.age}.json"
+
         result = requests.get(self.url)
         result.raise_for_status()
         content = result.json()
-        if not isinstance(content["iocs"], list):
+        if not isinstance(content.get("iocs"), list):
             raise IngestorRunException(f"Content {content} not expected")
+
         limit = min(len(content["iocs"]), self.limit)
         for elem in content["iocs"][:limit]:
-            yield elem["value"].encode()
+            yield elem["value"]
 
     @classmethod
     def _monkeypatch(cls):

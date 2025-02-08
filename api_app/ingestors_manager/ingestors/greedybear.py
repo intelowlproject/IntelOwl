@@ -64,21 +64,12 @@ class GreedyBear(Ingestor):
                             "iocs": [
                                 {
                                     "feed_type": "suricata",
-                                    "value": "fe80:0000:0000:0000:fc98:c3ff:feb6:b148",
+                                    "value": "91.205.219.185",
                                     "scanner": True,
                                     "payload_request": False,
                                     "first_seen": "2024-05-29",
                                     "last_seen": "2025-02-01",
                                     "times_seen": 6437,
-                                },
-                                {
-                                    "feed_type": "suricata",
-                                    "value": "fe80:0000:0000:0000:fc67:4fff:fe6e:07b4",
-                                    "scanner": True,
-                                    "payload_request": False,
-                                    "first_seen": "2024-05-29",
-                                    "last_seen": "2025-02-01",
-                                    "times_seen": 6633,
                                 },
                                 {
                                     "feed_type": "suricata",

@@ -1,3 +1,4 @@
+import ipaddress
 import logging
 from typing import Any, Iterable
 from unittest.mock import patch
@@ -5,7 +6,10 @@ from unittest.mock import patch
 import requests
 
 from api_app.ingestors_manager.classes import Ingestor
-from api_app.ingestors_manager.exceptions import IngestorRunException
+from api_app.ingestors_manager.exceptions import (
+    IngestorConfigurationException,
+    IngestorRunException,
+)
 from tests.mock_utils import MockUpResponse, if_mock_connections
 
 logger = logging.getLogger(__name__)
@@ -28,21 +32,20 @@ class GreedyBear(Ingestor):
 
     def run(self) -> Iterable[Any]:
         if self.feed_type not in self.VALID_FEED_TYPES:
-            raise ValueError(
+            raise IngestorConfigurationException(
                 f"Invalid feed_type: {self.feed_type}. Must be one of {self.VALID_FEED_TYPES}"
             )
         if self.attack_type not in self.VALID_ATTACK_TYPES:
-            raise ValueError(
+            raise IngestorConfigurationException(
                 f"Invalid attack_type: {self.attack_type}. Must be one of {self.VALID_ATTACK_TYPES}"
             )
         if self.age not in self.VALID_AGE:
-            raise ValueError(
+            raise IngestorConfigurationException(
                 f"Invalid age: {self.age}. Must be one of {self.VALID_AGE}"
             )
 
-        self.url = f"https://greedybear.honeynet.org/api/feeds/{self.feed_type}/{self.attack_type}/{self.age}.json"
-
-        result = requests.get(self.url)
+        req_url = f"https://{self.url}/api/feeds/{self.feed_type}/{self.attack_type}/{self.age}.json"
+        result = requests.get(req_url)
         result.raise_for_status()
         content = result.json()
         if not isinstance(content.get("iocs"), list):
@@ -50,7 +53,12 @@ class GreedyBear(Ingestor):
 
         limit = min(len(content["iocs"]), self.limit)
         for elem in content["iocs"][:limit]:
-            yield elem["value"]
+            value = elem.get("value")
+            try:
+                ipaddress.ip_address(value)
+                yield value
+            except ValueError:
+                pass
 
     @classmethod
     def _monkeypatch(cls):

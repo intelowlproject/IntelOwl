@@ -39,6 +39,7 @@ from certego_saas.ext.mixins import SerializerActionMixin
 from certego_saas.ext.viewsets import ReadAndDeleteOnlyViewSet
 from intel_owl import tasks
 from intel_owl.celery import app as celery_app
+from intel_owl.settings._util import get_environment
 
 from .analyzers_manager.constants import ObservableTypes
 from .choices import ObservableClassification
@@ -1796,7 +1797,7 @@ class ElasticSearchView(GenericAPIView):
 
         # 3 return data
         elastic_response = (
-            Search(index="plugin-report-*")
+            Search(index=f"plugin-report-{get_environment()}*")
             .query(QElastic("bool", filter=filter_list))
             .extra(size=10000)  # max allowed size
             .execute()

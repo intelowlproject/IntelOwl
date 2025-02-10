@@ -151,6 +151,7 @@ class Migration(migrations.Migration):
         ("api_app", "0063_singleton_and_elastic_report"),
         ("pivots_manager", "0034_changed_resubmitdownloadedfile_playbook_to_execute"),
         ("playbooks_manager", "0054_playbook_config_phishinganalysis"),
+        ("analyzers_manager", "0129_analyzer_config_phishing_extractor"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

@@ -121,6 +121,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("playbooks_manager", "0054_playbook_config_phishinganalysis"),
         ("analyzers_manager", "0129_analyzer_config_phishing_extractor"),
+        ("pivots_manager", "0035_pivot_config_phishingextractortoanalysis"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

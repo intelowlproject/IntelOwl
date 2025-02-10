@@ -37,6 +37,8 @@ class AbstractBIInterface(BISerializer):
 
     @staticmethod
     def get_environment(instance):
+        # we cannot pass directly the function to the serializer's field
+        # for this reason we need a function that call another function
         return get_environment()
 
     @staticmethod

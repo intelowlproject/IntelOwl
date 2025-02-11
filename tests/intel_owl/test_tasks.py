@@ -22,6 +22,7 @@ from tests.mock_utils import MockResponseNoOp
 _now = datetime.datetime(2024, 10, 29, 11, tzinfo=datetime.UTC)
 
 
+@patch("intel_owl.tasks.get_environment", return_value="unittest")
 @patch("intel_owl.tasks.now", return_value=_now)
 @patch("intel_owl.tasks.connections.get_connection")
 class SendElasticTestCase(CustomTestCase):
@@ -210,7 +211,7 @@ class SendElasticTestCase(CustomTestCase):
                 [
                     {
                         "_op_type": "index",
-                        "_index": "plugin-report-analyzer-report-2024-10-29",
+                        "_index": "plugin-report-unittest-analyzer-report-2024-10-29",
                         "_source": {
                             "user": {"username": "test_elastic_user"},
                             "membership": {
@@ -236,7 +237,7 @@ class SendElasticTestCase(CustomTestCase):
                     },
                     {
                         "_op_type": "index",
-                        "_index": "plugin-report-analyzer-report-2024-10-29",
+                        "_index": "plugin-report-unittest-analyzer-report-2024-10-29",
                         "_source": {
                             "user": {"username": "test_elastic_user"},
                             "membership": {
@@ -262,7 +263,7 @@ class SendElasticTestCase(CustomTestCase):
                     },
                     {
                         "_op_type": "index",
-                        "_index": "plugin-report-connector-report-2024-10-29",
+                        "_index": "plugin-report-unittest-connector-report-2024-10-29",
                         "_source": {
                             "user": {"username": "test_elastic_user"},
                             "membership": {
@@ -293,7 +294,7 @@ class SendElasticTestCase(CustomTestCase):
                     },
                     {
                         "_op_type": "index",
-                        "_index": "plugin-report-pivot-report-2024-10-29",
+                        "_index": "plugin-report-unittest-pivot-report-2024-10-29",
                         "_source": {
                             "user": {
                                 "username": "test_elastic_user",
@@ -348,7 +349,7 @@ class SendElasticTestCase(CustomTestCase):
                 mocked_bulk_param,
                 [
                     {
-                        "_index": "plugin-report-analyzer-report-2024-10-29",
+                        "_index": "plugin-report-unittest-analyzer-report-2024-10-29",
                         "_op_type": "index",
                         "_source": {
                             "user": {"username": "test_elastic_user"},
@@ -374,7 +375,7 @@ class SendElasticTestCase(CustomTestCase):
                         },
                     },
                     {
-                        "_index": "plugin-report-analyzer-report-2024-10-29",
+                        "_index": "plugin-report-unittest-analyzer-report-2024-10-29",
                         "_op_type": "index",
                         "_source": {
                             "user": {"username": "test_elastic_user"},
@@ -400,7 +401,7 @@ class SendElasticTestCase(CustomTestCase):
                         },
                     },
                     {
-                        "_index": "plugin-report-connector-report-2024-10-29",
+                        "_index": "plugin-report-unittest-connector-report-2024-10-29",
                         "_op_type": "index",
                         "_source": {
                             "user": {"username": "test_elastic_user"},
@@ -431,7 +432,7 @@ class SendElasticTestCase(CustomTestCase):
                         },
                     },
                     {
-                        "_index": "plugin-report-pivot-report-2024-10-29",
+                        "_index": "plugin-report-unittest-pivot-report-2024-10-29",
                         "_op_type": "index",
                         "_source": {
                             "user": {"username": "test_elastic_user"},

@@ -15,13 +15,13 @@ RUN npm install npm@latest --location=global \
 # Stage 2: Backend
 FROM python:3.11.7 AS backend-build
 
-ENV PYTHONUNBUFFERED 1
-ENV DJANGO_SETTINGS_MODULE intel_owl.settings
-ENV PYTHONPATH /opt/deploy/intel_owl
-ENV LOG_PATH /var/log/intel_owl
+ENV PYTHONUNBUFFERED=1
+ENV DJANGO_SETTINGS_MODULE=intel_owl.settings
+ENV PYTHONPATH=/opt/deploy/intel_owl
+ENV LOG_PATH=/var/log/intel_owl
 ARG REPO_DOWNLOADER_ENABLED=true
 ARG WATCHMAN=false
-ENV watch_logs_cmd "watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
+ENV watch_logs_cmd="watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
 ARG PYCTI_VERSION=6.1.0
 
 RUN mkdir -p ${LOG_PATH} \
@@ -42,7 +42,7 @@ RUN apt-get update \
     && pip3 install --no-cache-dir --upgrade pip
 
 # perl not interactive
-ENV PERL_MM_USE_DEFAULT 1
+ENV PERL_MM_USE_DEFAULT=1
 # msgconvert
 RUN cpan -T Email::Outlook::Message
 
@@ -77,5 +77,5 @@ COPY --from=frontend-build /build /var/www/reactapp
 # HOME_DIR = f"{Path.home()}/.quark-engine/"
 # Path(HOME_DIR).mkdir(parents=True, exist_ok=True)
 # so we have to set the home env variable to allow to create its directory
-ENV HOME ${PYTHONPATH}
+ENV HOME="${PYTHONPATH}"
 

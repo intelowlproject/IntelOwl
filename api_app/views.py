@@ -39,6 +39,7 @@ from certego_saas.ext.mixins import SerializerActionMixin
 from certego_saas.ext.viewsets import ReadAndDeleteOnlyViewSet
 from intel_owl import tasks
 from intel_owl.celery import app as celery_app
+from intel_owl.settings._util import get_environment
 
 from .decorators import deprecated_endpoint
 from .filters import JobFilter
@@ -945,7 +946,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
 
         if len(most_frequent_values):
             annotations = {
-                val: Count(field_name, filter=Q(**{field_name: val}))
+                val.replace(" ", "")
+                .replace("?", "")
+                .replace(";", ""): Count(field_name, filter=Q(**{field_name: val}))
                 for val in most_frequent_values
             }
             logger.debug(f"request: {field_name} annotations: {annotations}")
@@ -1801,7 +1804,7 @@ class ElasticSearchView(GenericAPIView):
 
         # 3 return data
         elastic_response = (
-            Search(index="plugin-report-*")
+            Search(index=f"plugin-report-{get_environment()}*")
             .query(QElastic("bool", filter=filter_list))
             .extra(size=10000)  # max allowed size
             .execute()

@@ -342,17 +342,43 @@ class JobViewSetTests(CustomViewSetTestCase):
         )
 
     def test_agg_top_user_200(self):
+        u = User.objects.create(
+            username="test ;space@intelowl.org",
+            email="test ;space@intelowl.org",
+            is_superuser=False,
+        )
+        with patch(
+            "django.utils.timezone.now",
+            return_value=datetime.datetime(2024, 11, 28, tzinfo=datetime.timezone.utc),
+        ):
+
+            job, _ = Job.objects.get_or_create(
+                **{
+                    "user": u,
+                    "is_sample": False,
+                    "observable_name": "1.2.3.4",
+                    "observable_classification": "ip",
+                    "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
+                    "tlp": Job.TLP.CLEAR.value,
+                }
+            )
         resp = self.client.get(self.agg_top_user)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(
             resp.json(),
             {
-                "values": ["superuser@intelowl.org"],
+                "values": ["superuser@intelowl.org", "test ;space@intelowl.org"],
                 "aggregation": [
-                    {"date": "2024-11-28T00:00:00Z", "superuser@intelowl.org": 2}
+                    {
+                        "date": "2024-11-28T00:00:00Z",
+                        "superuser@intelowl.org": 2,
+                        "testspace@intelowl.org": 1,
+                    },
                 ],
             },
         )
+        job.delete()
+        u.delete()
 
     def test_agg_top_tlp_200(self):
         resp = self.client.get(self.agg_top_tlp)

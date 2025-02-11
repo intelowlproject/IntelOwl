@@ -6,6 +6,7 @@ from rest_framework.fields import Field
 from api_app.interfaces import OwnershipAbstractModel
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.ext.upload.elastic import BISerializer
+from intel_owl.settings._util import get_environment
 
 
 class AbstractBIInterface(BISerializer):
@@ -36,12 +37,9 @@ class AbstractBIInterface(BISerializer):
 
     @staticmethod
     def get_environment(instance):
-        if settings.STAGE_PRODUCTION:
-            return "prod"
-        elif settings.STAGE_STAGING:
-            return "stag"
-        else:
-            return "test"
+        # we cannot pass directly the function to the serializer's field
+        # for this reason we need a function that call another function
+        return get_environment()
 
     @staticmethod
     def get_index():

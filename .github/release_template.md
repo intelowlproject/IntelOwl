@@ -22,3 +22,4 @@ WARNING: The release will be live within an hour!
 published #IntelOwl vX.X.X! https://github.com/intelowlproject/IntelOwl/releases/tag/vX.X.X #ThreatIntelligence #CyberSecurity #OpenSource #OSINT #DFIR
 ```
 - [ ] If that was a major release or an important release, communicate the news to the marketing staff
+- [ ] This is a good time to check for old dangling issues and clean-up the inactive ones. Same for issues solved by this release.

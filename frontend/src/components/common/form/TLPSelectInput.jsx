@@ -14,6 +14,7 @@ import { TLPDescriptions } from "../../../constants/miscConst";
 import { TlpChoices } from "../../../constants/advancedSettingsConst";
 import { TLPTag } from "../TLPTag";
 import { TLPColors } from "../../../constants/colorConst";
+import { INTELOWL_DOCS_URL } from "../../../constants/environment";
 
 export function TLPSelectInputLabel(props) {
   const { size } = props;
@@ -36,7 +37,7 @@ export function TLPSelectInputLabel(props) {
             <br />
             For more info check the{" "}
             <Link
-              to="https://intelowlproject.github.io/docs/IntelOwl/usage/#tlp-support"
+              to={`${INTELOWL_DOCS_URL}IntelOwl/usage/#tlp-support`}
               target="_blank"
             >
               official doc.

@@ -355,9 +355,7 @@ class JobViewSetTests(CustomViewSetTestCase):
             job, _ = Job.objects.get_or_create(
                 **{
                     "user": u,
-                    "is_sample": False,
-                    "observable_name": "1.2.3.4",
-                    "observable_classification": "ip",
+                    "analyzable": self.analyzable,
                     "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
                     "tlp": Job.TLP.CLEAR.value,
                 }

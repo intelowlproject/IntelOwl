@@ -6,15 +6,16 @@ from unittest.mock import MagicMock, patch
 from zoneinfo import ZoneInfo
 
 from django.contrib.auth import get_user_model
+from django.core.files import File
 from django.test import override_settings
 from django.utils.timezone import now
 from elasticsearch_dsl.query import Bool, Exists, Range, Term
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from api_app.analyzers_manager.constants import ObservableTypes
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.choices import ReportStatus
+from api_app.choices import Classification, ReportStatus
 from api_app.models import Comment, Job, Parameter, PluginConfig, Tag
 from api_app.playbooks_manager.models import PlaybookConfig
 from certego_saas.apps.organization.membership import Membership
@@ -30,52 +31,51 @@ class CommentViewSetTestCase(CustomViewSetTestCase):
 
     def setUp(self):
         super().setUp()
-        self.job = Job.objects.create(
-            user=self.superuser,
-            is_sample=False,
-            observable_name="8.8.8.8",
-            observable_classification=ObservableTypes.IP,
+        self.an1 = Analyzable.objects.create(
+            name="8.8.8.8",
+            classification=Classification.IP,
         )
-        self.job2 = Job.objects.create(
-            user=self.superuser,
-            is_sample=False,
-            observable_name="8.8.8.8",
-            observable_classification=ObservableTypes.IP,
-        )
+
+        self.job = Job.objects.create(user=self.superuser, analyzable=self.an1)
+        self.job2 = Job.objects.create(user=self.user, analyzable=self.an1)
         self.comment = Comment.objects.create(
-            job=self.job, user=self.superuser, content="test"
+            analyzable=self.an1, user=self.user, content="test"
         )
-        self.comment.save()
 
     def tearDown(self) -> None:
         super().tearDown()
+        self.comment.delete()
         self.job.delete()
         self.job2.delete()
-        self.comment.delete()
+        self.an1.delete()
 
     def test_list_200(self):
+        self.client.force_authenticate(self.user)
         response = self.client.get(self.comment_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json().get("count"), 1)
 
     def test_create_201(self):
-        data = {"job_id": self.job.id, "content": "test2"}
+        self.client.force_authenticate(self.user)
+        data = {"job_id": self.job2.id, "content": "test2"}
         response = self.client.post(self.comment_url, data)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json().get("content"), "test2")
 
     def test_delete(self):
-        response = self.client.delete(f"{self.comment_url}/{self.comment.pk}")
-        self.assertEqual(response.status_code, 403)
         self.client.force_authenticate(self.superuser)
+        response = self.client.delete(f"{self.comment_url}/{self.comment.pk}")
+        self.assertEqual(response.status_code, 404)
+        self.client.force_authenticate(self.user)
         response = self.client.delete(f"{self.comment_url}/{self.comment.pk}")
         self.assertEqual(response.status_code, 204)
         self.assertEqual(0, Comment.objects.all().count())
 
     def test_get(self):
-        response = self.client.get(f"{self.comment_url}/{self.comment.pk}")
-        self.assertEqual(response.status_code, 403)
         self.client.force_authenticate(self.superuser)
+        response = self.client.get(f"{self.comment_url}/{self.comment.pk}")
+        self.assertEqual(response.status_code, 404)
+        self.client.force_authenticate(self.user)
         response = self.client.get(f"{self.comment_url}/{self.comment.pk}")
         self.assertEqual(response.status_code, 200)
 
@@ -109,48 +109,58 @@ class JobViewSetTests(CustomViewSetTestCase):
             "django.utils.timezone.now",
             return_value=datetime.datetime(2024, 11, 28, tzinfo=datetime.timezone.utc),
         ):
-            self.job, _ = Job.objects.get_or_create(
+            self.analyzable = Analyzable.objects.create(
+                name="1.2.3.4", classification=Classification.IP
+            )
+            with open("test_files/file.exe", "rb") as f:
+                self.an2 = Analyzable.objects.create(
+                    name="test.file",
+                    classification=Classification.FILE,
+                    mimetype="application/vnd.microsoft.portable-executable",
+                    file=File(f),
+                )
+
+            self.job = Job.objects.create(
                 **{
                     "user": self.superuser,
-                    "is_sample": False,
-                    "observable_name": "1.2.3.4",
-                    "observable_classification": "ip",
+                    "analyzable": self.analyzable,
                     "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
                     "tlp": Job.TLP.CLEAR.value,
                 }
             )
-            self.job2, _ = Job.objects.get_or_create(
+            self.job2 = Job.objects.create(
                 **{
                     "user": self.superuser,
-                    "is_sample": True,
-                    "md5": "test.file",
-                    "file_name": "test.file",
-                    "file_mimetype": "application/vnd.microsoft.portable-executable",
+                    "analyzable": self.an2,
                     "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
                     "tlp": Job.TLP.GREEN.value,
                 }
             )
 
+    def tearDown(self):
+        self.job2.delete()
+        self.job.delete()
+        self.analyzable.delete()
+        self.an2.delete()
+
     def test_recent_scan(self):
         j1 = Job.objects.create(
             **{
                 "user": self.user,
-                "is_sample": False,
-                "observable_name": "gigatest.com",
-                "observable_classification": "domain",
+                "analyzable": self.analyzable,
                 "finished_analysis_time": now() - datetime.timedelta(days=2),
             }
         )
         j2 = Job.objects.create(
             **{
                 "user": self.user,
-                "is_sample": False,
-                "observable_name": "gigatest.com",
-                "observable_classification": "domain",
+                "analyzable": self.analyzable,
                 "finished_analysis_time": now() - datetime.timedelta(hours=2),
             }
         )
-        response = self.client.post(self.jobs_recent_scans_uri, data={"md5": j1.md5})
+        response = self.client.post(
+            self.jobs_recent_scans_uri, data={"md5": j1.analyzable.md5}
+        )
         content = response.json()
         msg = (response, content)
         self.assertEqual(200, response.status_code, msg=msg)
@@ -166,9 +176,7 @@ class JobViewSetTests(CustomViewSetTestCase):
         j1 = Job.objects.create(
             **{
                 "user": self.user,
-                "is_sample": False,
-                "observable_name": "gigatest.com",
-                "observable_classification": "domain",
+                "analyzable": self.analyzable,
                 "finished_analysis_time": datetime.datetime(
                     2024, 11, 28, tzinfo=datetime.timezone.utc
                 ),
@@ -177,9 +185,7 @@ class JobViewSetTests(CustomViewSetTestCase):
         j2 = Job.objects.create(
             **{
                 "user": self.superuser,
-                "is_sample": False,
-                "observable_name": "gigatest.com",
-                "observable_classification": "domain",
+                "analyzable": self.analyzable,
                 "finished_analysis_time": datetime.datetime(
                     2024, 11, 28, tzinfo=datetime.timezone.utc
                 ),
@@ -233,7 +239,7 @@ class JobViewSetTests(CustomViewSetTestCase):
         job = Job.objects.create(
             status=Job.STATUSES.RUNNING,
             user=self.superuser,
-            observable_classification="ip",
+            analyzable=self.analyzable,
         )
         self.assertEqual(job.status, Job.STATUSES.RUNNING)
         uri = reverse("jobs-kill", args=[job.pk])
@@ -252,7 +258,7 @@ class JobViewSetTests(CustomViewSetTestCase):
         job = Job.objects.create(
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
             user=self.superuser,
-            observable_classification="ip",
+            analyzable=self.analyzable,
         )
         uri = reverse("jobs-kill", args=[job.pk])
         self.client.force_authenticate(user=self.job.user)
@@ -304,7 +310,7 @@ class JobViewSetTests(CustomViewSetTestCase):
         msg = (resp, content)
 
         self.assertEqual(resp.status_code, 200, msg)
-        for field in ["date", *ObservableTypes.values]:
+        for field in ["date", *Classification.values[:-1]]:
             self.assertIn(
                 field,
                 content[0],
@@ -349,9 +355,7 @@ class JobViewSetTests(CustomViewSetTestCase):
             job, _ = Job.objects.get_or_create(
                 **{
                     "user": u,
-                    "is_sample": False,
-                    "observable_name": "1.2.3.4",
-                    "observable_classification": "ip",
+                    "analyzable": self.analyzable,
                     "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
                     "tlp": Job.TLP.CLEAR.value,
                 }

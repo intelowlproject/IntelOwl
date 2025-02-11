@@ -17,7 +17,7 @@ class YETI(classes.ObservableAnalyzer):
     def run(self):
         # request payload
         payload = {
-            "filter": {"value": self._job.observable_name},
+            "filter": {"value": self._job.analyzable.name},
             "params": {"regex": self.regex, "range": self.results_count},
         }
         headers = {"Accept": "application/json", "X-Api-Key": self._api_key_name}

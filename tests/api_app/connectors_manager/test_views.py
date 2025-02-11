@@ -2,7 +2,8 @@
 # See the file 'LICENSE' for copying permission.
 from typing import Type
 
-from api_app.analyzers_manager.constants import ObservableTypes
+from api_app.analyzables_manager.models import Analyzable
+from api_app.choices import Classification
 from api_app.connectors_manager.models import ConnectorConfig, ConnectorReport
 from api_app.models import Job, PluginConfig
 from tests import CustomViewSetTestCase, PluginActionViewsetTestCase
@@ -61,15 +62,14 @@ class ConnectorActionViewSetTests(CustomViewSetTestCase, PluginActionViewsetTest
         super().setUp()
         self.config = ConnectorConfig.objects.get(name="MISP")
 
-    def tearDown(self) -> None:
-        super().tearDown()
-
     def init_report(self, status: str, user) -> ConnectorReport:
+        an1 = Analyzable.objects.create(
+            name="8.8.8.8",
+            classification=Classification.IP,
+        )
+
         _job = Job.objects.create(
-            user=user,
-            status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
-            observable_name="8.8.8.8",
-            observable_classification=ObservableTypes.IP,
+            user=user, status=Job.STATUSES.REPORTED_WITHOUT_FAILS, analyzable=an1
         )
         _job.connectors_to_execute.set([self.config])
         _report, _ = ConnectorReport.objects.get_or_create(

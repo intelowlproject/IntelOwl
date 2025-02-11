@@ -4,8 +4,9 @@ from unittest.mock import patch
 from django.test import override_settings
 from kombu import uuid
 
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
-from api_app.choices import PythonModuleBasePaths
+from api_app.choices import Classification, PythonModuleBasePaths
 from api_app.connectors_manager.models import ConnectorConfig, ConnectorReport
 from api_app.ingestors_manager.models import IngestorConfig, IngestorReport
 from api_app.models import Job, LastElasticReportUpdate, PythonModule
@@ -36,8 +37,13 @@ class SendElasticTestCase(CustomTestCase):
         self.membership, _ = Membership.objects.get_or_create(
             user=self.user, organization=self.organization, is_owner=True
         )
+        self.analyzable = Analyzable.objects.create(
+            name="dns.google.com", classification=Classification.DOMAIN
+        )
         self.job = Job.objects.create(
-            observable_name="dns.google.com", tlp="AMBER", user=self.user
+            tlp="AMBER",
+            user=self.user,
+            analyzable=self.analyzable,
         )
         AnalyzerReport.objects.create(  # valid
             config=AnalyzerConfig.objects.get(
@@ -185,6 +191,8 @@ class SendElasticTestCase(CustomTestCase):
         self.user.delete()
         self.organization.delete()
         self.membership.delete()
+        self.job.delete()
+        self.analyzable.delete()
 
     @override_settings(ELASTICSEARCH_DSL_ENABLED=True)
     @override_settings(ELASTICSEARCH_DSL_HOST="https://elasticsearch:9200")

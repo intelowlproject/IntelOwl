@@ -5,6 +5,7 @@ import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
@@ -27,16 +28,16 @@ class HybridAnalysisGet(ObservableAnalyzer):
         }
         obs_clsfn = self.observable_classification
 
-        if obs_clsfn == self.ObservableTypes.DOMAIN:
+        if obs_clsfn == Classification.DOMAIN:
             data = {"domain": self.observable_name}
             uri = "search/terms"
-        elif obs_clsfn == self.ObservableTypes.IP:
+        elif obs_clsfn == Classification.IP:
             data = {"host": self.observable_name}
             uri = "search/terms"
-        elif obs_clsfn == self.ObservableTypes.URL:
+        elif obs_clsfn == Classification.URL:
             data = {"url": self.observable_name}
             uri = "search/terms"
-        elif obs_clsfn == self.ObservableTypes.HASH:
+        elif obs_clsfn == Classification.HASH:
             data = {"hash": self.observable_name}
             uri = "search/hash"
         else:

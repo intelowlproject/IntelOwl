@@ -5,8 +5,9 @@
 from django.core.exceptions import ValidationError
 from kombu import uuid
 
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
-from api_app.choices import PythonModuleBasePaths
+from api_app.choices import Classification, PythonModuleBasePaths
 from api_app.data_model_manager.models import DomainDataModel, IPDataModel
 from api_app.models import Job, PythonModule
 from tests import CustomTestCase
@@ -15,9 +16,13 @@ from tests import CustomTestCase
 class AnalyzerReportTestCase(CustomTestCase):
 
     def test_get_data_models(self):
+        an1 = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an1,
             status=Job.STATUSES.ANALYZERS_RUNNING.value,
         )
         config = AnalyzerConfig.objects.first()
@@ -36,11 +41,16 @@ class AnalyzerReportTestCase(CustomTestCase):
         )
         dm = AnalyzerReport.objects.filter(pk=ar.pk).get_data_models(job)
         self.assertEqual(dm.model, DomainDataModel)
+        an1.delete()
 
     def test_clean(self):
+        an1 = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an1,
             status=Job.STATUSES.ANALYZERS_RUNNING.value,
         )
         config = AnalyzerConfig.objects.first()
@@ -66,11 +76,16 @@ class AnalyzerReportTestCase(CustomTestCase):
         ar.delete()
         job.delete()
         domain_data_model.delete()
+        an1.delete()
 
     def test_create_data_model(self):
+        an1 = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an1,
             status=Job.STATUSES.ANALYZERS_RUNNING.value,
         )
         config = AnalyzerConfig.objects.first()
@@ -103,11 +118,16 @@ class AnalyzerReportTestCase(CustomTestCase):
         data_model.delete()
         ar.delete()
         job.delete()
+        an1.delete()
 
     def test_get_value(self):
+        an1 = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an1,
             status=Job.STATUSES.ANALYZERS_RUNNING.value,
         )
         config = AnalyzerConfig.objects.first()
@@ -130,6 +150,9 @@ class AnalyzerReportTestCase(CustomTestCase):
             ar.get_value(ar.report, "urls.url".split(".")),
             ["www.intelowl.com", "www.intelowl.com"],
         )
+        ar.delete()
+        job.delete()
+        an1.delete()
 
 
 class AnalyzerConfigTestCase(CustomTestCase):

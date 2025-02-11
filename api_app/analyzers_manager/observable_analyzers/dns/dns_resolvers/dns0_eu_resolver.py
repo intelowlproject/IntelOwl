@@ -9,6 +9,7 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..dns_responses import dns_resolver_response
@@ -32,7 +33,7 @@ class DNS0EUResolver(classes.ObservableAnalyzer):
         resolutions = None
         try:
             # for URLs we are checking the relative domain
-            if self.observable_classification == self.ObservableTypes.URL:
+            if self.observable_classification == Classification.URL:
                 observable = urlparse(self.observable_name).hostname
                 try:
                     IPv4Address(observable)

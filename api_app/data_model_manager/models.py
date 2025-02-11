@@ -1,10 +1,14 @@
 import json
-from typing import Dict, Type
+import logging
+from typing import Dict, Type, Union
 
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres import fields as pg_fields
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.db.models import ForeignKey, ManyToManyField
+from django.forms import JSONField
 from django.utils.timezone import now
 from rest_framework.serializers import ModelSerializer
 
@@ -16,6 +20,8 @@ from api_app.data_model_manager.enums import (
 from api_app.data_model_manager.fields import LowercaseCharField, SetField
 from api_app.data_model_manager.queryset import BaseDataModelQuerySet
 from certego_saas.apps.user.models import User
+
+logger = logging.getLogger(__name__)
 
 
 class IETFReport(models.Model):
@@ -103,6 +109,11 @@ class BaseDataModel(models.Model):
         object_id_field="data_model_object_id",
         content_type_field="data_model_content_type",
     )
+    jobs = GenericRelation(
+        to="api_app.Job",
+        object_id_field="data_model_object_id",
+        content_type_field="data_model_content_type",
+    )
 
     TAGS = DataModelTags
 
@@ -110,6 +121,77 @@ class BaseDataModel(models.Model):
 
     class Meta:
         abstract = True
+
+    @property
+    def owner(self) -> User:
+        return self.analyzers_report.first().user
+
+    def merge(
+        self, other: Union["BaseDataModel", Dict], append: bool = True
+    ) -> "BaseDataModel":
+        if not self.pk:
+            raise ValueError("Unable to merge a model that was not saved.")
+        if not isinstance(other, (self.__class__, dict)):
+            raise TypeError(f"Different class between {self} and {type(other)}")
+        for field_name, field in self.get_fields().items():
+            if field_name == "id":
+                continue
+            result_attr = getattr(self, field_name)
+            if isinstance(other, dict):
+                try:
+                    other_attr = other[field_name]
+                except KeyError:
+                    continue
+            else:
+                other_attr = getattr(other, field_name, None)
+            if not other_attr:
+                continue
+            if append:
+                if isinstance(field, ArrayField):
+                    result_attr.extend(other_attr)
+                elif isinstance(field, (JSONField, SetField)):
+                    result_attr |= other_attr
+                elif isinstance(field, ManyToManyField):
+                    result_attr.add(*other_attr.values_list("pk", flat=True))
+                    continue
+                elif isinstance(field, ForeignKey):
+                    if isinstance(other_attr, dict):
+                        other_attr = field.related_model.objects.get_or_create(
+                            **other_attr
+                        )
+                    elif isinstance(other_attr, models.Model):
+                        pass
+                    else:
+                        logger.error(
+                            f"Field {field_name} has wrong type with value {other_attr}"
+                        )
+                        continue
+                    result_attr = other_attr
+                else:
+                    result_attr = other_attr
+            else:
+                result_attr = other_attr
+            setattr(self, field_name, result_attr)
+        self.save()
+        return self
+
+    def __sub__(self, other: "BaseDataModel") -> "BaseDataModel":
+        from deepdiff import DeepDiff
+
+        if not isinstance(other, BaseDataModel):
+            raise TypeError(f"Different class between {self} and {type(other)}")
+        dict1 = self.serialize()
+        dict2 = other.serialize()
+        result = DeepDiff(
+            dict1,
+            dict2,
+            ignore_order=True,
+            verbose_level=1,
+            exclude_paths=["id", "analyzers_report", "jobs", "date"],
+        )
+
+        new = self.__class__.objects.create()
+        return new.merge(result)
 
     @classmethod
     def get_content_type(cls) -> ContentType:
@@ -121,13 +203,12 @@ class BaseDataModel(models.Model):
             field.name: field for field in cls._meta.fields + cls._meta.many_to_many
         }
 
-    @property
-    def owner(self) -> User:
-        return self.analyzers_report.first().user
-
     @classmethod
     def get_serializer(cls) -> Type[ModelSerializer]:
         raise NotImplementedError()
+
+    def serialize(self) -> Dict:
+        return self.get_serializer()(self, read_only=True).data
 
 
 class DomainDataModel(BaseDataModel):

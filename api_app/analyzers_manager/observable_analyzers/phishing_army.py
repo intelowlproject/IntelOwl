@@ -10,6 +10,7 @@ from django.conf import settings
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -37,7 +38,7 @@ class PhishingArmy(classes.ObservableAnalyzer):
 
         db_list = db.split("\n")
         to_analyze_observable = self.observable_name
-        if self.observable_classification == self.ObservableTypes.URL:
+        if self.observable_classification == Classification.URL:
             to_analyze_observable = urlparse(self.observable_name).hostname
 
         if to_analyze_observable in db_list:

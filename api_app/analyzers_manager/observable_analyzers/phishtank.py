@@ -9,6 +9,7 @@ import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -20,7 +21,7 @@ class Phishtank(ObservableAnalyzer):
     def run(self):
         headers = {"User-Agent": "phishtank/IntelOwl"}
         observable_to_analyze = self.observable_name
-        if self.observable_classification == self.ObservableTypes.DOMAIN:
+        if self.observable_classification == Classification.DOMAIN:
             observable_to_analyze = "http://" + self.observable_name
         parsed = urlparse(observable_to_analyze)
         if not parsed.path:

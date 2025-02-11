@@ -53,7 +53,7 @@ class PhishingFormCompiler(FileAnalyzer):
         super().config(runtime_configuration)
         if hasattr(self._job, "pivot_parent"):
             # extract target site from parent job
-            self.target_site = self._job.pivot_parent.starting_job.observable_name
+            self.target_site = self._job.pivot_parent.starting_job.analyzable.name
         else:
             logger.warning(
                 f"Job #{self.job_id}: Analyzer {self.analyzer_name} should be ran from PhishingAnalysis playbook."

@@ -19,6 +19,7 @@ from api_app.data_model_manager.enums import (
 )
 from api_app.data_model_manager.fields import LowercaseCharField, SetField
 from api_app.data_model_manager.queryset import BaseDataModelQuerySet
+from certego_saas.apps.user.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -120,6 +121,10 @@ class BaseDataModel(models.Model):
 
     class Meta:
         abstract = True
+
+    @property
+    def owner(self) -> User:
+        return self.analyzers_report.first().user
 
     def merge(
         self, other: Union["BaseDataModel", Dict], append: bool = True

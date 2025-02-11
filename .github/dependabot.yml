@@ -67,8 +67,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/frontend"
     schedule:
-      interval: "weekly"
-      day: "tuesday"
+      interval: "monthly"
     target-branch: "develop"
     reviewers:
       - drosetti

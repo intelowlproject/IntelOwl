@@ -25,7 +25,7 @@ class ApiVoidAnalyzer(classes.ObservableAnalyzer):
         elif self.observable_classification == Classification.IP.value:
             path = "iprep"
             parameter = "ip"
-        elif self.observable_classification == Classifications.URL.value:
+        elif self.observable_classification == Classification.URL.value:
             path = "urlrep"
             parameter = "url"
         else:

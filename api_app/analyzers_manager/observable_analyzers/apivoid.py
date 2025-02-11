@@ -6,9 +6,8 @@
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.choices import Classification
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
-
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 

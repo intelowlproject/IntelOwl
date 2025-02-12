@@ -26,8 +26,6 @@ def migrate(apps, schema_editor):
         if job.is_sample:
             an = Analyzable.objects.create(
                 md5=job.md5,
-                sha256=job.sha256,
-                sha1=job.sha1,
                 file=job.file,
                 mimetype=job.file_mimetype,
                 name=job.file_name,

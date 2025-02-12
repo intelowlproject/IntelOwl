@@ -1,5 +1,7 @@
 import hashlib
+import io
 
+from django.core.files import File
 from django.db import migrations
 from django.db.models import F, OuterRef, Subquery, Window
 from django.db.models.functions import RowNumber
@@ -24,27 +26,20 @@ def migrate(apps, schema_editor):
     ).filter(row_number=1)
     for job in jobs:
         if job.is_sample:
+            content = job.file.read()
+
             an = Analyzable.objects.create(
                 md5=job.md5,
-                file=job.file,
+                file=File(io.BytesIO(content), name=job.md5),
                 mimetype=job.file_mimetype,
                 name=job.file_name,
                 classification="sample",
                 discovery_date=job.received_request_time,
             )
 
-            p = job.file.path
-            try:
-                p.rename(p.parent / job.md5)
-            except Exception:
-                print(f"Error: unable to rename {job}")
-            else:
-                job.file.name = job.md5
-            with open(p, "rb") as f:
-                content = f.read()
-                f.seek(0)
             an.sha1 = calculate_sha1(content)
             an.sha256 = calculate_sha256(content)
+            job.file.delete()
         else:
             an = Analyzable.objects.create(
                 md5=job.md5,

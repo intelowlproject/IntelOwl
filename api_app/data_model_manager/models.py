@@ -148,8 +148,12 @@ class BaseDataModel(models.Model):
                 continue
             if append:
                 if isinstance(field, ArrayField):
+                    if not result_attr:
+                        result_attr = []
                     result_attr.extend(other_attr)
                 elif isinstance(field, (JSONField, SetField)):
+                    if not result_attr:
+                        result_attr = {}
                     result_attr |= other_attr
                 elif isinstance(field, ManyToManyField):
                     result_attr.add(*other_attr.values_list("pk", flat=True))

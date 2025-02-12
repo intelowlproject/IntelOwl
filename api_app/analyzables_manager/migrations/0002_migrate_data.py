@@ -33,7 +33,7 @@ def migrate(apps, schema_editor):
                 file=File(io.BytesIO(content), name=job.md5),
                 mimetype=job.file_mimetype,
                 name=job.file_name,
-                classification="sample",
+                classification="file",
                 discovery_date=job.received_request_time,
             )
 

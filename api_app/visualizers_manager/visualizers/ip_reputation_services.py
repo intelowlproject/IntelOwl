@@ -20,7 +20,7 @@ class IPReputationServices(Visualizer):
     @visualizable_error_handler_with_params("VirusTotal")
     def _vt3(self):
         try:
-            analyzer_report = self.analyzer_reports().get(
+            analyzer_report = self.get_analyzer_reports().get(
                 config__name="VirusTotal_v3_Get_Observable"
             )
         except AnalyzerReport.DoesNotExist:
@@ -46,7 +46,7 @@ class IPReputationServices(Visualizer):
     @visualizable_error_handler_with_params("Greynoise")
     def _greynoise(self):
         try:
-            analyzer_report = self.analyzer_reports().get(
+            analyzer_report = self.get_analyzer_reports().get(
                 config__name="GreyNoiseCommunity"
             )
         except AnalyzerReport.DoesNotExist:
@@ -80,7 +80,7 @@ class IPReputationServices(Visualizer):
     @visualizable_error_handler_with_params("URLhaus")
     def _urlhaus(self):
         try:
-            analyzer_report = self.analyzer_reports().get(config__name="URLhaus")
+            analyzer_report = self.get_analyzer_reports().get(config__name="URLhaus")
         except AnalyzerReport.DoesNotExist:
             logger.warning("URLhaus report does not exist")
         else:
@@ -108,7 +108,7 @@ class IPReputationServices(Visualizer):
     @visualizable_error_handler_with_params("ThreatFox")
     def _threatfox(self):
         try:
-            analyzer_report = self.analyzer_reports().get(config__name="ThreatFox")
+            analyzer_report = self.get_analyzer_reports().get(config__name="ThreatFox")
         except AnalyzerReport.DoesNotExist:
             logger.warning("Threatfox report does not exist")
         else:
@@ -132,7 +132,9 @@ class IPReputationServices(Visualizer):
     @visualizable_error_handler_with_params("InQuest")
     def _inquest_repdb(self):
         try:
-            analyzer_report = self.analyzer_reports().get(config__name="InQuest_REPdb")
+            analyzer_report = self.get_analyzer_reports().get(
+                config__name="InQuest_REPdb"
+            )
         except AnalyzerReport.DoesNotExist:
             logger.warning("InQuest_REPdb report does not exist")
         else:
@@ -157,7 +159,7 @@ class IPReputationServices(Visualizer):
     @visualizable_error_handler_with_params("AbuseIPDB Categories")
     def _abuse_ipdb(self):
         try:
-            analyzer_report = self.analyzer_reports().get(config__name="AbuseIPDB")
+            analyzer_report = self.get_analyzer_reports().get(config__name="AbuseIPDB")
         except AnalyzerReport.DoesNotExist:
             logger.warning("AbuseIPDB report does not exist")
             return None, None
@@ -206,7 +208,7 @@ class IPReputationServices(Visualizer):
     @visualizable_error_handler_with_params("GreedyBear Honeypots")
     def _greedybear(self):
         try:
-            analyzer_report = self.analyzer_reports().get(config__name="GreedyBear")
+            analyzer_report = self.get_analyzer_reports().get(config__name="GreedyBear")
         except AnalyzerReport.DoesNotExist:
             logger.warning("GreedyBear report does not exist")
         else:
@@ -241,7 +243,7 @@ class IPReputationServices(Visualizer):
     )
     def _crowdsec(self):
         try:
-            analyzer_report = self.analyzer_reports().get(config__name="Crowdsec")
+            analyzer_report = self.get_analyzer_reports().get(config__name="Crowdsec")
         except AnalyzerReport.DoesNotExist:
             logger.warning("Crowdsec report does not exist")
             return None, None
@@ -291,7 +293,7 @@ class IPReputationServices(Visualizer):
     @visualizable_error_handler_with_params("OTX Alienvault")
     def _otxquery(self):
         try:
-            analyzer_report = self.analyzer_reports().get(config__name="OTXQuery")
+            analyzer_report = self.get_analyzer_reports().get(config__name="OTXQuery")
         except AnalyzerReport.DoesNotExist:
             logger.warning("OTXQuery report does not exist")
         else:
@@ -323,7 +325,9 @@ class IPReputationServices(Visualizer):
     @visualizable_error_handler_with_params("FireHol")
     def _firehol(self):
         try:
-            analyzer_report = self.analyzer_reports().get(config__name="FireHol_IPList")
+            analyzer_report = self.get_analyzer_reports().get(
+                config__name="FireHol_IPList"
+            )
         except AnalyzerReport.DoesNotExist:
             logger.warning("FireHol_IPList report does not exist")
         else:
@@ -349,7 +353,7 @@ class IPReputationServices(Visualizer):
     @visualizable_error_handler_with_params("Tor Exit Node")
     def _tor(self):
         try:
-            analyzer_report = self.analyzer_reports().get(config__name="TorProject")
+            analyzer_report = self.get_analyzer_reports().get(config__name="TorProject")
         except AnalyzerReport.DoesNotExist:
             logger.warning("TorProject report does not exist")
         else:
@@ -363,7 +367,7 @@ class IPReputationServices(Visualizer):
     @visualizable_error_handler_with_params("Talos Reputation")
     def _talos(self):
         try:
-            analyzer_report = self.analyzer_reports().get(
+            analyzer_report = self.get_analyzer_reports().get(
                 config__name="TalosReputation"
             )
         except AnalyzerReport.DoesNotExist:

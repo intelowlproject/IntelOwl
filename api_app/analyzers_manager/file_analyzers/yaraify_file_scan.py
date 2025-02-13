@@ -4,7 +4,6 @@
 import json
 import logging
 import time
-from typing import Dict
 
 import requests
 
@@ -27,7 +26,10 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
     skip_noisy: bool
     skip_known: bool
 
-    def config(self, runtime_configuration: Dict):
+    def update(self) -> bool:
+        pass
+
+    def config(self, runtime_configuration: dict):
         FileAnalyzer.config(self, runtime_configuration)
         self.query = "lookup_hash"
         YARAify.config(self, runtime_configuration)
@@ -73,7 +75,9 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
                 "file": (name_to_send, file),
             }
             logger.info(f"yara file scan md5 {self.md5} sending sample for analysis")
-            response = requests.post(self.url, files=files_)
+            response = requests.post(
+                self.url, files=files_, headers=self.authentication_header
+            )
             response.raise_for_status()
             scan_response = response.json()
             scan_query_status = scan_response.get("query_status")
@@ -92,7 +96,9 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
                             f"task_id: {task_id}"
                         )
                         data = {"query": "get_results", "task_id": task_id}
-                        response = requests.post(self.url, json=data)
+                        response = requests.post(
+                            self.url, json=data, headers=self.authentication_header
+                        )
                         response.raise_for_status()
                         task_response = response.json()
                         logger.debug(task_response)

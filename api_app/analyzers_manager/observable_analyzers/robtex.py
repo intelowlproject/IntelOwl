@@ -8,6 +8,7 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
@@ -19,16 +20,16 @@ class Robtex(classes.ObservableAnalyzer):
         pass
 
     def run(self):
-        if self.observable_classification == self.ObservableTypes.IP:
+        if self.observable_classification == Classification.IP:
             uris = [
                 f"ipquery/{self.observable_name}",
                 f"pdns/reverse/{self.observable_name}",
             ]
         elif self.observable_classification in [
-            self.ObservableTypes.URL,
-            self.ObservableTypes.DOMAIN,
+            Classification.URL,
+            Classification.DOMAIN,
         ]:
-            if self.observable_classification == self.ObservableTypes.URL:
+            if self.observable_classification == Classification.URL:
                 domain = urlparse(self.observable_name).hostname
             else:
                 domain = self.observable_name

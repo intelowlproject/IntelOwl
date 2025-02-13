@@ -9,8 +9,9 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django_celery_beat.models import PeriodicTask
 
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.choices import PythonModuleBasePaths
+from api_app.choices import Classification, PythonModuleBasePaths
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.models import (
     AbstractConfig,
@@ -270,7 +271,8 @@ class AbstractConfigTestCase(CustomTestCase):
         org.delete()
 
     def test_get_signature_without_runnable(self):
-        job, _ = Job.objects.get_or_create(user=self.user)
+        an = Analyzable.objects.create(name="8.8.8.8", classification=Classification.IP)
+        job, _ = Job.objects.get_or_create(user=self.user, analyzable=an)
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
@@ -288,9 +290,12 @@ class AbstractConfigTestCase(CustomTestCase):
                 self.fail("Stop iteration should not be raised")
         muc.delete()
         job.delete()
+        an.delete()
 
     def test_get_signature_disabled(self):
-        job, _ = Job.objects.get_or_create(user=self.user)
+        an = Analyzable.objects.create(name="8.8.8.8", classification=Classification.IP)
+        job, _ = Job.objects.get_or_create(user=self.user, analyzable=an)
+
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
@@ -312,9 +317,12 @@ class AbstractConfigTestCase(CustomTestCase):
                 self.fail("Stop iteration should not be raised")
         muc.delete()
         job.delete()
+        an.delete()
 
     def test_get_signature(self):
-        job, _ = Job.objects.get_or_create(user=self.user)
+        an = Analyzable.objects.create(name="8.8.8.8", classification=Classification.IP)
+        job, _ = Job.objects.get_or_create(user=self.user, analyzable=an)
+
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
@@ -336,6 +344,7 @@ class AbstractConfigTestCase(CustomTestCase):
         self.assertIsInstance(signature, Signature)
         muc.delete()
         job.delete()
+        an.delete()
 
 
 class PluginConfigTestCase(CustomTestCase):
@@ -462,11 +471,14 @@ class JobTestCase(CustomTestCase):
         ac = AnalyzerConfig.objects.first()
         ac2 = AnalyzerConfig.objects.exclude(pk__in=[ac.pk]).first()
         ac3 = AnalyzerConfig.objects.exclude(pk__in=[ac.pk, ac2.pk]).first()
-        j1 = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
-            user=self.user,
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification="domain",
             md5="72cf478e87b031233091d8c00a38ce00",
+        )
+        j1 = Job.objects.create(
+            user=self.user,
+            analyzable=an,
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
         )
         pc = PivotConfig.objects.create(

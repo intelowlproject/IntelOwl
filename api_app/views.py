@@ -25,7 +25,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from api_app.choices import ScanMode
+from api_app.choices import Classification, ScanMode
 from api_app.exceptions import NotImplementedException
 from api_app.websocket import JobConsumer
 from certego_saas.apps.organization.permissions import (
@@ -39,9 +39,8 @@ from certego_saas.ext.mixins import SerializerActionMixin
 from certego_saas.ext.viewsets import ReadAndDeleteOnlyViewSet
 from intel_owl import tasks
 from intel_owl.celery import app as celery_app
+from intel_owl.settings._util import get_environment
 
-from .analyzers_manager.constants import ObservableTypes
-from .choices import ObservableClassification
 from .decorators import deprecated_endpoint
 from .filters import JobFilter
 from .mixins import PaginationMixin
@@ -324,10 +323,12 @@ def analyze_multiple_observables(request):
     - 200: JSON response with the job details for each initiated analysis.
     """
     logger.info(f"received analyze_multiple_observables from user {request.user}")
+    logger.debug(f"{request.data=}")
     oas = ObservableAnalysisSerializer(
         data=request.data, many=True, context={"request": request}
     )
     oas.is_valid(raise_exception=True)
+    logger.debug(f"{oas.validated_data=}")
     parent_job = oas.validated_data[0].get("parent_job", None)
     jobs = oas.save(send_task=True, parent=parent_job)
     jrs = JobResponseSerializer(jobs, many=True).data
@@ -402,10 +403,8 @@ class CommentViewSet(ModelViewSet):
         - Filtered queryset of comments.
         """
         queryset = super().get_queryset()
-        jobs = Job.objects.visible_for_user(self.request.user).values_list(
-            "pk", flat=True
-        )
-        return queryset.filter(job__id__in=jobs)
+
+        return queryset.visible_for_user(self.request.user)
 
 
 @add_docs(
@@ -504,7 +503,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             raise ValidationError({"detail": "md5 is required"})
         max_temporal_distance = request.data.get("max_temporal_distance", 14)
         jobs = (
-            Job.objects.filter(md5=request.data["md5"])
+            Job.objects.filter(analyzable__md5=request.data["md5"])
             .visible_for_user(self.request.user)
             .filter(
                 finished_analysis_time__gte=now()
@@ -532,12 +531,15 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         limit = request.data.get("limit", 5)
         if "is_sample" not in request.data:
             raise ValidationError({"detail": "is_sample is required"})
-        jobs = (
-            Job.objects.filter(user__pk=request.user.pk)
-            .filter(is_sample=request.data["is_sample"])
-            .annotate_importance(request.user)
-            .order_by("-importance", "-finished_analysis_time")[:limit]
-        )
+        is_sample = request.data["is_sample"]
+        jobs = Job.objects.filter(user__pk=request.user.pk)
+        if is_sample == "True":
+            jobs = jobs.filter(analyzable__classification=Classification.FILE)
+        else:
+            jobs = jobs.exclude(analyzable__classification=Classification.FILE)
+        jobs = jobs.annotate_importance(request.user).order_by(
+            "-importance", "-finished_analysis_time"
+        )[:limit]
         return Response(
             JobRecentScanSerializer(jobs, many=True).data, status=status.HTTP_200_OK
         )
@@ -574,12 +576,12 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             data["analyzers_requested"] = existing_job.analyzers_requested.all()
             data["connectors_requested"] = existing_job.connectors_requested.all()
         if existing_job.is_sample:
-            data["file"] = existing_job.file
-            data["file_name"] = existing_job.file_name
+            data["file"] = existing_job.analyzable.file
+            data["file_name"] = existing_job.analyzable.name
             job_serializer = FileJobSerializer(data=data, context={"request": request})
         else:
-            data["observable_classification"] = existing_job.observable_classification
-            data["observable_name"] = existing_job.observable_name
+            data["observable_classification"] = existing_job.analyzable.classification
+            data["observable_name"] = existing_job.analyzable.name
             job_serializer = ObservableAnalysisSerializer(
                 data=data, context={"request": request}
             )
@@ -642,9 +644,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
                 {"detail": "Requested job does not have a sample associated with it."}
             )
         return FileResponse(
-            job.file,
-            filename=job.file_name,
-            content_type=job.file_mimetype,
+            job.analyzable.file,
+            filename=job.analyzable.name,
+            content_type=job.analyzable.mimetype,
             as_attachment=True,
         )
 
@@ -730,8 +732,12 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         - Aggregated count of jobs for each type.
         """
         annotations = {
-            "file": Count("is_sample", filter=Q(is_sample=True)),
-            "observable": Count("is_sample", filter=Q(is_sample=False)),
+            "file": Count(
+                "pk", filter=Q(analyzable__classification=Classification.FILE.value)
+            ),
+            "observable": Count(
+                "pk", filter=~Q(analyzable__classification=Classification.FILE.value)
+            ),
         }
         return self.__aggregation_response_static(
             annotations, users=self.get_org_members(request)
@@ -752,9 +758,15 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         """
         annotations = {
             oc.lower(): Count(
-                "observable_classification", filter=Q(observable_classification=oc)
+                "analyzable__classification", filter=Q(analyzable__classification=oc)
             )
-            for oc in ObservableTypes.values
+            for oc in [
+                Classification.DOMAIN,
+                Classification.IP,
+                Classification.HASH,
+                Classification.URL,
+                Classification.GENERIC,
+            ]
         }
         return self.__aggregation_response_static(
             annotations, users=self.get_org_members(request)
@@ -774,7 +786,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         - Aggregated count of jobs for each MIME type.
         """
         return self.__aggregation_response_dynamic(
-            "file_mimetype", users=self.get_org_members(request)
+            "analyzable__mimetype", users=self.get_org_members(request)
         )
 
     @action(
@@ -910,8 +922,6 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         filter_kwargs = {"received_request_time__gte": delta}
         if users:
             filter_kwargs["user__in"] = users
-        if field_name == "md5":
-            filter_kwargs["is_sample"] = True
 
         most_frequent_values = (
             Job.objects.filter(**filter_kwargs)
@@ -919,9 +929,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             .exclude(**{f"{field_name}__exact": ""})
             # excluding those because they could lead to SQL query errors
             .exclude(
-                observable_classification__in=[
-                    ObservableClassification.URL,
-                    ObservableClassification.GENERIC,
+                analyzable__classification__in=[
+                    Classification.URL,
+                    Classification.GENERIC,
                 ]
             )
             .annotate(count=Count(field_name))
@@ -936,7 +946,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
 
         if len(most_frequent_values):
             annotations = {
-                val: Count(field_name, filter=Q(**{field_name: val}))
+                val.replace(" ", "")
+                .replace("?", "")
+                .replace(";", ""): Count(field_name, filter=Q(**{field_name: val}))
                 for val in most_frequent_values
             }
             logger.debug(f"request: {field_name} annotations: {annotations}")
@@ -1792,7 +1804,7 @@ class ElasticSearchView(GenericAPIView):
 
         # 3 return data
         elastic_response = (
-            Search(index="plugin-report-*")
+            Search(index=f"plugin-report-{get_environment()}*")
             .query(QElastic("bool", filter=filter_list))
             .extra(size=10000)  # max allowed size
             .execute()

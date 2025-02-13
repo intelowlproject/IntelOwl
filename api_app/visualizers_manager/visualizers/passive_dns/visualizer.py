@@ -27,21 +27,25 @@ class PassiveDNS(Visualizer):
     def run(self) -> List[Dict]:
         raw_pdns_data = []
         raw_pdns_data.extend(
-            extract_otxquery_reports(self.analyzer_reports(), self._job)
+            extract_otxquery_reports(self.get_analyzer_reports(), self._job)
         )
         raw_pdns_data.extend(
-            extract_threatminer_reports(self.analyzer_reports(), self._job)
+            extract_threatminer_reports(self.get_analyzer_reports(), self._job)
         )
         raw_pdns_data.extend(
-            extract_validin_reports(self.analyzer_reports(), self._job)
+            extract_validin_reports(self.get_analyzer_reports(), self._job)
         )
-        raw_pdns_data.extend(extract_dnsdb_reports(self.analyzer_reports(), self._job))
         raw_pdns_data.extend(
-            extract_circlpdns_reports(self.analyzer_reports(), self._job)
+            extract_dnsdb_reports(self.get_analyzer_reports(), self._job)
         )
-        raw_pdns_data.extend(extract_robtex_reports(self.analyzer_reports(), self._job))
         raw_pdns_data.extend(
-            extract_mnemonicpdns_reports(self.analyzer_reports(), self._job)
+            extract_circlpdns_reports(self.get_analyzer_reports(), self._job)
+        )
+        raw_pdns_data.extend(
+            extract_robtex_reports(self.get_analyzer_reports(), self._job)
+        )
+        raw_pdns_data.extend(
+            extract_mnemonicpdns_reports(self.get_analyzer_reports(), self._job)
         )
 
         page = self.Page(name="Passive DNS")

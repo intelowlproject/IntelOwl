@@ -8,6 +8,7 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
 )
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
@@ -46,9 +47,9 @@ class Threatstream(classes.ObservableAnalyzer):
             params = {"type": "confidence", "value": self.observable_name}
             uri = "v1/inteldetails/confidence_trend/"
         elif self.threatstream_analysis == "passive_dns":
-            if self.observable_classification == self.ObservableTypes.IP:
+            if self.observable_classification == Classification.IP:
                 uri = f"v1/pdns/ip/{self.observable_name}"
-            elif self.observable_classification == self.ObservableTypes.DOMAIN:
+            elif self.observable_classification == Classification.DOMAIN:
                 uri = f"v1/pdns/domain/{self.observable_name}"
             else:
                 raise AnalyzerConfigurationException(

@@ -1,9 +1,13 @@
 # flake8: noqa
-# done for the mocked respose,
+# done for the mocked response,
 # everything else is linted and tested
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
 import requests
 
 from api_app.analyzers_manager import classes
+from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
@@ -15,28 +19,19 @@ class ApiVoidAnalyzer(classes.ObservableAnalyzer):
         pass
 
     def run(self):
-        if self.observable_classification == self.ObservableTypes.DOMAIN.value:
-            url = (
-                self.url
-                + f"""/domainbl/v1/pay-as-you-go/
-                ?key={self._api_key}
-                &host={self.observable_name}"""
-            )
-        elif self.observable_classification == self.ObservableTypes.IP.value:
-            url = (
-                self.url
-                + f"""/iprep/v1/pay-as-you-go/
-                ?key={self._api_key}
-                &ip={self.observable_name}"""
-            )
-        elif self.observable_classification == self.ObservableTypes.URL.value:
-            url = (
-                self.url
-                + f"""/urlrep/v1/pay-as-you-go/
-                ?key={self._api_key}
-                &url={self.observable_name}"""
-            )
-        r = requests.get(url)
+        if self.observable_classification == Classification.DOMAIN.value:
+            path = "domainbl"
+            parameter = "host"
+        elif self.observable_classification == Classification.IP.value:
+            path = "iprep"
+            parameter = "ip"
+        elif self.observable_classification == Classification.URL.value:
+            path = "urlrep"
+            parameter = "url"
+        else:
+            raise AnalyzerConfigurationException("not supported")
+        complete_url = f"{self.url}/{path}/v1/pay-as-you-go/?key={self._api_key}&{parameter}={self.observable_name}"
+        r = requests.get(complete_url)
         r.raise_for_status()
         return r.json()
 

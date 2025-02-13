@@ -1,5 +1,6 @@
 import React from "react";
 import { Bar } from "recharts";
+import PropTypes from "prop-types";
 
 import { getRandomColorsArray, AnyChartWidget } from "@certego/certego-ui";
 
@@ -215,3 +216,31 @@ export const JobTopTLPBarChart = React.memo((props) => {
 
   return <AnyChartWidget {...chartProps} />;
 });
+
+JobStatusBarChart.propTypes = {
+  orgName: PropTypes.string.isRequired,
+};
+
+JobTypeBarChart.propTypes = {
+  orgName: PropTypes.string.isRequired,
+};
+
+JobObsClassificationBarChart.propTypes = {
+  orgName: PropTypes.string.isRequired,
+};
+
+JobFileMimetypeBarChart.propTypes = {
+  orgName: PropTypes.string.isRequired,
+};
+
+JobTopPlaybookBarChart.propTypes = {
+  orgName: PropTypes.string.isRequired,
+};
+
+JobTopUserBarChart.propTypes = {
+  orgName: PropTypes.string.isRequired,
+};
+
+JobTopTLPBarChart.propTypes = {
+  orgName: PropTypes.string.isRequired,
+};

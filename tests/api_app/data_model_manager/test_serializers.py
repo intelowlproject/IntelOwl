@@ -1,6 +1,8 @@
 from kombu import uuid
 
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
+from api_app.choices import Classification
 from api_app.data_model_manager.models import DomainDataModel
 from api_app.data_model_manager.serializers import DomainDataModelSerializer
 from api_app.models import Job
@@ -10,10 +12,12 @@ from tests import CustomTestCase
 class TestDomainDataModelSerializer(CustomTestCase):
 
     def test_to_representation(self):
+        analyzable = Analyzable.objects.create(
+            name="test.com", classification=Classification.DOMAIN
+        )
         job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
             status=Job.STATUSES.ANALYZERS_RUNNING.value,
+            analyzable=analyzable,
         )
         config = AnalyzerConfig.objects.first()
         dm = DomainDataModel.objects.create(evaluation="malicious")
@@ -35,7 +39,9 @@ class TestDomainDataModelSerializer(CustomTestCase):
 
         ser = DomainDataModelSerializer(dm)
         result = ser.data
-        print(result)
+        self.assertEqual(result["evaluation"], "malicious")
 
         dm.delete()
         ar.delete()
+        job.delete()
+        analyzable.delete()

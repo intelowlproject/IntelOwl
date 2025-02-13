@@ -7,16 +7,16 @@ import pymisp
 from django.conf import settings
 
 from api_app import helpers
-from api_app.analyzers_manager.constants import ObservableTypes
+from api_app.choices import Classification
 from api_app.connectors_manager.classes import Connector
 from tests.mock_utils import if_mock_connections, patch
 
 INTELOWL_MISP_TYPE_MAP = {
-    ObservableTypes.IP: "ip-src",
-    ObservableTypes.DOMAIN: "domain",
-    ObservableTypes.URL: "url",
+    Classification.IP: "ip-src",
+    Classification.DOMAIN: "domain",
+    Classification.URL: "url",
     # "hash" (checked from helpers.get_hash_type)
-    ObservableTypes.GENERIC: "text",  # misc field, so keeping text
+    Classification.GENERIC: "text",  # misc field, so keeping text
     "file": "filename|md5",
 }
 
@@ -56,11 +56,11 @@ class MISP(Connector):
     def _base_attr_obj(self) -> pymisp.MISPAttribute:
         if self._job.is_sample:
             _type = INTELOWL_MISP_TYPE_MAP["file"]
-            value = f"{self._job.file_name}|{self._job.md5}"
+            value = f"{self._job.analyzable.name}|{self._job.analyzable.md5}"
         else:
-            _type = self._job.observable_classification
-            value = self._job.observable_name
-            if _type == ObservableTypes.HASH:
+            _type = self._job.analyzable.classification
+            value = self._job.analyzable.name
+            if _type == Classification.HASH:
                 matched_type = helpers.get_hash_type(value)
                 matched_type.replace("-", "")  # convert sha-x to shax
                 _type = matched_type if matched_type is not None else "text"
@@ -79,7 +79,9 @@ class MISP(Connector):
         obj_list = []
         if self._job.is_sample:
             # mime-type
-            obj_list.append(create_misp_attribute("mime-type", self._job.file_mimetype))
+            obj_list.append(
+                create_misp_attribute("mime-type", self._job.analyzable.mimetype)
+            )
         return obj_list
 
     @property

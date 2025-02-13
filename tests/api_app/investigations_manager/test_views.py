@@ -1,3 +1,5 @@
+from api_app.analyzables_manager.models import Analyzable
+from api_app.choices import Classification
 from api_app.helpers import get_now
 from api_app.investigations_manager.models import Investigation
 from api_app.models import Job
@@ -88,9 +90,11 @@ class InvestigationViewSetTestCase(CustomViewSetTestCase, ViewSetTestCaseMixin):
         self.assertEqual(
             result["errors"]["detail"], "You should set the `job` argument in the data"
         )
+        an = Analyzable.objects.create(
+            name="test.com", classification=Classification.DOMAIN
+        )
         job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             user=self.superuser,
         )
         response = self.client.post(
@@ -108,6 +112,7 @@ class InvestigationViewSetTestCase(CustomViewSetTestCase, ViewSetTestCaseMixin):
         )
         self.assertEqual(response.status_code, 400)
         job.delete()
+        an.delete()
 
     def test_remove_job(self):
         investigation = self.get_object()
@@ -117,15 +122,17 @@ class InvestigationViewSetTestCase(CustomViewSetTestCase, ViewSetTestCaseMixin):
         self.assertEqual(
             result["errors"]["detail"], "You should set the `job` argument in the data"
         )
+        an = Analyzable.objects.create(
+            name="test.com", classification=Classification.DOMAIN
+        )
+
         job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             user=self.superuser,
             finished_analysis_time=get_now(),
         )
         job2 = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             user=self.user,
             finished_analysis_time=get_now(),
         )
@@ -152,6 +159,7 @@ class InvestigationViewSetTestCase(CustomViewSetTestCase, ViewSetTestCaseMixin):
 
         job.delete()
         job2.delete()
+        an.delete()
 
     def test_get_superuser(self):
         plugin = self.get_object()

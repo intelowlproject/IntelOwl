@@ -65,7 +65,6 @@ def analyze_target(
 
         result: str = json.dumps(extract_driver_result(driver_wrapper), default=str)
         logger.debug(f"JSON dump of driver {result=}")
-        print(result)
     except Exception as e:
         logger.exception(
             f"Exception during analysis of target website {target_url}: {e}"

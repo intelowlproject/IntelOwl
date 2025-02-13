@@ -1,14 +1,19 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import logging
 
 import requests
 
-from api_app.analyzers_manager import classes
+from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
+from api_app.mixins import AbuseCHMixin
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
+logger = logging.getLogger(__name__)
 
-class URLHaus(classes.ObservableAnalyzer):
+
+class URLHaus(AbuseCHMixin, ObservableAnalyzer):
     url = "https://urlhaus-api.abuse.ch/v1/"
     disable: bool = False  # optional
 
@@ -21,12 +26,12 @@ class URLHaus(classes.ObservableAnalyzer):
 
         headers = {"Accept": "application/json"}
         if self.observable_classification in [
-            self.ObservableTypes.DOMAIN,
-            self.ObservableTypes.IP,
+            Classification.DOMAIN,
+            Classification.IP,
         ]:
             uri = "host/"
             post_data = {"host": self.observable_name}
-        elif self.observable_classification == self.ObservableTypes.URL:
+        elif self.observable_classification == Classification.URL:
             uri = "url/"
             post_data = {"url": self.observable_name}
         else:
@@ -34,7 +39,11 @@ class URLHaus(classes.ObservableAnalyzer):
                 f"not supported observable type {self.observable_classification}."
             )
 
-        response = requests.post(self.url + uri, data=post_data, headers=headers)
+        response = requests.post(
+            self.url + uri,
+            data=post_data,
+            headers=self.authentication_header | headers,
+        )
         response.raise_for_status()
 
         return response.json()

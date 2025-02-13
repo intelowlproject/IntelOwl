@@ -1,5 +1,7 @@
 from kombu import uuid
 
+from api_app.analyzables_manager.models import Analyzable
+from api_app.choices import Classification
 from api_app.models import Job
 from api_app.pivots_manager.classes import Pivot
 from api_app.pivots_manager.models import PivotConfig
@@ -12,11 +14,15 @@ class PivotTestCase(CustomTestCase):
     ]
 
     def _create_jobs(self):
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         Job.objects.create(
             user=self.superuser,
-            observable_name="test.com",
-            observable_classification="domain",
             status="reported_without_fails",
+            analyzable=an,
         )
 
     def test_subclasses(self):
@@ -41,7 +47,7 @@ class PivotTestCase(CustomTestCase):
                     f"Testing with config {config.name}"
                     f" for {timeout_seconds} seconds"
                 )
-                job = Job.objects.get(observable_classification="domain")
+                job = Job.objects.get(analyzable__classification="domain")
                 sub = subclass(config)
                 signal.alarm(timeout_seconds)
                 try:

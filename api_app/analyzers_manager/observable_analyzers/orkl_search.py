@@ -3,6 +3,7 @@ import logging
 import requests
 
 from api_app.analyzers_manager import classes
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -20,7 +21,7 @@ class OrklSearch(classes.ObservableAnalyzer):
         headers = {
             "accept": "application/json",
         }
-        if self.observable_classification == self.ObservableTypes.HASH.value:
+        if self.observable_classification == Classification.HASH.value:
             response = requests.get(
                 url=f"{self.url}/library/entry/sha1/{self.observable_name}",
                 headers=headers,

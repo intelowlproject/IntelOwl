@@ -1,8 +1,8 @@
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from api_app.analyzers_manager.constants import AllTypes
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.choices import Classification
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.models import Job, PythonModule
 from api_app.pivots_manager.models import PivotConfig
@@ -53,7 +53,6 @@ class PivotConfigTestCase(CustomTestCase):
             python_module__parameters__isnull=True,
         ).first()
         playbook.analyzers.set([ac2])
-        job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
@@ -63,22 +62,22 @@ class PivotConfigTestCase(CustomTestCase):
         jobs = list(
             pc.create_jobs(
                 ["something", "something2"],
-                job.tlp,
-                job.user,
+                tlp="AMBER",
+                user=User.objects.first(),
                 send_task=False,
                 playbook_to_execute=playbook,
             )
         )
         self.assertEqual(2, len(jobs))
-        self.assertEqual("something", jobs[0].observable_name)
-        self.assertEqual("generic", jobs[0].observable_classification)
+        self.assertEqual("something", jobs[0].analyzable.name)
+        self.assertEqual("generic", jobs[0].analyzable.classification)
 
-        self.assertEqual("something2", jobs[1].observable_name)
-        self.assertEqual("generic", jobs[1].observable_classification)
+        self.assertEqual("something2", jobs[1].analyzable.name)
+        self.assertEqual("generic", jobs[1].analyzable.classification)
         playbook.delete()
 
     def test_create_job_multiple_file(self):
-        job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
+        job = Job(tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
             name="PivotOnTest",
             python_module=PythonModule.objects.filter(
@@ -94,18 +93,19 @@ class PivotConfigTestCase(CustomTestCase):
                 job.user,
                 send_task=False,
                 playbook_to_execute=PlaybookConfig.objects.filter(
-                    disabled=False, type__icontains=AllTypes.FILE.value
+                    disabled=False, type__icontains=Classification.FILE.value
                 ).first(),
             )
         )
         self.assertEqual(1, len(jobs))
-        self.assertEqual("PivotOnTest.0", jobs[0].file_name)
+        self.assertEqual("PivotOnTest.0", jobs[0].analyzable.name)
         self.assertEqual(
-            "application/vnd.microsoft.portable-executable", jobs[0].file_mimetype
+            "application/vnd.microsoft.portable-executable",
+            jobs[0].analyzable.mimetype,
         )
 
     def test_create_job(self):
-        job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
+        job = Job(tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
@@ -123,5 +123,5 @@ class PivotConfigTestCase(CustomTestCase):
             )
         )
         self.assertEqual(1, len(jobs))
-        self.assertEqual("google.com", jobs[0].observable_name)
-        self.assertEqual("domain", jobs[0].observable_classification)
+        self.assertEqual("google.com", jobs[0].analyzable.name)
+        self.assertEqual("domain", jobs[0].analyzable.classification)

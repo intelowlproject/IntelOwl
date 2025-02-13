@@ -29,3 +29,14 @@ def set_permissions(directory: Path, force_create: bool = False):
     os.chown(directory, uid, gid)
     for path in directory.rglob("*"):
         os.chown(path, uid, gid)
+
+
+def get_environment() -> str:
+    from intel_owl.settings import STAGE_PRODUCTION, STAGE_STAGING
+
+    if STAGE_PRODUCTION:
+        return "prod"
+    elif STAGE_STAGING:
+        return "stag"
+    else:
+        return "test"

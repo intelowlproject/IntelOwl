@@ -13,7 +13,8 @@ django-prettyjson==0.4.1
 django-silk==5.3.2
 django-elasticsearch-dsl==8.0
 django-treebeard==4.7
-
+django-solo==2.4.0
+django_extensions==3.2.3
 jsonschema==4.23.0
 # django rest framework libs
 Authlib==1.4.0
@@ -41,7 +42,7 @@ elasticsearch-dsl==8.17.0
 GitPython==3.1.41
 checkdmarc==5.7.9
 dnspython==2.7.0
-dnstwist[full]==20240812
+dnstwist[full]==20250130
 google>=3.0.0
 google-cloud-webrisk==1.15.0
 intezer-sdk==1.21
@@ -99,6 +100,7 @@ pyzipper==0.3.6
 
 # others
 dateparser==1.2.0
+DeepDiff==8.1.1
 # phishing form compiler module
 lxml==5.3.0
-Faker==30.8.0
+Faker==36.1.0

@@ -4,8 +4,8 @@
 from json import dumps as json_dumps
 
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
-from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.models import MimeTypes
+from api_app.choices import Classification
 
 
 class StringsInfo(FileAnalyzer, DockerBasedAnalyzer):
@@ -84,7 +84,7 @@ class StringsInfo(FileAnalyzer, DockerBasedAnalyzer):
             import re
 
             for d in result["data"]:
-                if ObservableTypes.calculate(d) == ObservableTypes.URL:
+                if Classification.calculate_observable(d) == Classification.URL:
                     extracted_urls = re.findall(
                         r"[a-z]{1,5}://[a-z\d-]{1,200}"
                         r"(?:\.[a-zA-Z\d\u2044\u2215!#$&(-;=?-\[\]_~]{1,200})+"

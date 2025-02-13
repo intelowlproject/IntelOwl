@@ -25,6 +25,7 @@ from elasticsearch_dsl import connections
 from api_app.choices import ReportStatus, Status
 from intel_owl import secrets
 from intel_owl.celery import app, get_queue_name
+from intel_owl.settings._util import get_environment
 
 logger = logging.getLogger(__name__)
 
@@ -91,6 +92,9 @@ def remove_old_jobs():
     num_jobs_to_delete = old_jobs.count()
     logger.info(f"found {num_jobs_to_delete} old jobs to delete")
     for old_job in old_jobs.iterator():
+        # if the job that we are going to delete is the last one, and it has a file
+        if old_job.analyzable.jobs.count() == 1 and old_job.analyzable.file:
+            old_job.analyzable.file.delete()
         try:
             old_job.delete()
         except Job.DoesNotExist as e:
@@ -441,6 +445,7 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
                     "_op_type": "index",
                     "_index": (
                         "plugin-report-"
+                        f"{get_environment()}-"
                         f"{inflection.underscore(_class.__name__).replace('_', '-')}-"
                         f"{now().date()}"
                     ),

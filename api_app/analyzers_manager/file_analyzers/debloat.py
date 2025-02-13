@@ -18,6 +18,11 @@ class DebloatAnalyzer(FileAnalyzer):
 
     tool_name: str = "Debloat"
 
+    @classmethod
+    def update(cls) -> bool:
+        # Minimal implementation to satisfy the abstract method requirement.
+        return True
+
     def run(self):
         try:
             file_path = self.filepath
@@ -26,7 +31,7 @@ class DebloatAnalyzer(FileAnalyzer):
 
             command = ["debloat", file_path, "--output", file_path + "_cleaned"]
             process = subprocess.run(
-                command, capture_output=True, text=True, timeout=300
+                command, capture_output=True, text=True, timeout=300, check=False
             )
 
             if process.returncode != 0:

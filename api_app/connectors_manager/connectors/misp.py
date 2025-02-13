@@ -80,7 +80,7 @@ class MISP(Connector):
         if self._job.is_sample:
             # mime-type
             obj_list.append(
-                create_misp_attribute("mime-type", self._job.analyzable.file_mimetype)
+                create_misp_attribute("mime-type", self._job.analyzable.mimetype)
             )
         return obj_list
 

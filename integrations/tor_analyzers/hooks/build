@@ -1,5 +1,6 @@
 #!/bin/bash
 
+cd ..
 version_regex='^v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'
 if [[ "$SOURCE_BRANCH" == "test_arm" || "$SOURCE_BRANCH" =~ $version_regex ]]; then
   echo "The branch is master, proceeding with multi-arch build"

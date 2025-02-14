@@ -4,7 +4,7 @@
 
 ## [v6.3.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.3.0)
 
-This release brings official support for ARM architecture. From now on, our Docker builds are multi-platform. You can now run IntelOwl in your Mac smoothly.
+This release brings official support for ARM architecture. From now on, our Docker builds are multi-platform. You can now run IntelOwl in your favourite ARM machine smoothly, e.g. Apple Silicon Mac and Raspberry PI.
 
 We have few new analyzers that you can play with (UltraDNS, WAD) and updated Abuse.Ch analyzers to allow the configuration of your API key.
 

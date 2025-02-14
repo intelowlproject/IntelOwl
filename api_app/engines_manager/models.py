@@ -8,6 +8,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from solo.models import SingletonModel
 
+from api_app.choices import Classification
 from api_app.engines_manager.validators import validate_engine_module
 from api_app.models import Job
 from intel_owl.celery import get_queue_name
@@ -38,6 +39,9 @@ class EngineConfig(SingletonModel):
     def run(self, job: Job) -> None:
         from api_app.data_model_manager.models import BaseDataModel
 
+        if job.analyzable.classification == Classification.GENERIC:
+            # at the moment, since there are no datamodels for the generic, we are completely skipping an evaluation
+            return
         data_model_result: BaseDataModel = job.get_analyzers_data_models().merge(
             append=True
         )

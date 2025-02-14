@@ -7,8 +7,6 @@ updates:
       day: "tuesday"
     target-branch: "develop"
     ignore:
-      # ignore all patch updates since we are using ~=
-      # this does not work for security updates
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
       - dependency-name: "boto3"
@@ -23,8 +21,6 @@ updates:
       day: "tuesday"
     target-branch: "develop"
     ignore:
-      # ignore all patch updates since we are using ~=
-      # this does not work for security updates
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
 
@@ -35,8 +31,6 @@ updates:
       day: "tuesday"
     target-branch: "develop"
     ignore:
-      # ignore all patch updates since we are using ~=
-      # this does not work for security updates
       - dependency-name: "*"
         update-types: [ "version-update:semver-patch" ]
 
@@ -47,8 +41,6 @@ updates:
       day: "tuesday"
     target-branch: "develop"
     ignore:
-      # ignore all patch updates since we are using ~=
-      # this does not work for security updates
       - dependency-name: "*"
         update-types: [ "version-update:semver-patch" ]
 
@@ -59,8 +51,6 @@ updates:
       day: "tuesday"
     target-branch: "develop"
     ignore:
-      # ignore all patch updates since we are using ~=
-      # this does not work for security updates
       - dependency-name: "*"
         update-types: [ "version-update:semver-patch" ]
 
@@ -80,8 +70,6 @@ updates:
       day: "tuesday"
     target-branch: "develop"
     ignore:
-      # ignore all patch updates since we are using ~=
-      # this does not work for security updates
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
 
@@ -92,8 +80,6 @@ updates:
       day: "tuesday"
     target-branch: "develop"
     ignore:
-      # ignore all patch updates since we are using ~=
-      # this does not work for security updates
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
 
@@ -104,8 +90,6 @@ updates:
       day: "tuesday"
     target-branch: "develop"
     ignore:
-      # ignore all patch updates since we are using ~=
-      # this does not work for security updates
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
 
@@ -116,8 +100,6 @@ updates:
       day: "tuesday"
     target-branch: "develop"
     ignore:
-      # ignore all patch updates since we are using ~=
-      # this does not work for security updates
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
 
@@ -128,8 +110,6 @@ updates:
       day: "tuesday"
     target-branch: "develop"
     ignore:
-      # ignore all patch updates since we are using ~=
-      # this does not work for security updates
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
 
@@ -140,8 +120,6 @@ updates:
       day: "tuesday"
     target-branch: "develop"
     ignore:
-      # ignore all patch updates since we are using ~=
-      # this does not work for security updates
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
 
@@ -152,7 +130,5 @@ updates:
       day: "tuesday"
     target-branch: "develop"
     ignore:
-      # ignore all patch updates since we are using ~=
-      # this does not work for security updates
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]

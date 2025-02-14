@@ -1,6 +1,15 @@
 #!/bin/bash
 
+echo "display path"
+echo "$(pwd)"
+echo "display dockerfile path"
+echo $DOCKERFILE_PATH
 cd ..
+echo "display path"
+echo "$(pwd)"
+echo "current branch"
+echo "$SOURCE_BRANCH"
+
 version_regex='^v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'
 if [[ "$SOURCE_BRANCH" == "test_arm" || "$SOURCE_BRANCH" =~ $version_regex ]]; then
   echo "The branch is master, proceeding with multi-arch build"

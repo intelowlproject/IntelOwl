@@ -22,7 +22,8 @@ ENV LOG_PATH=/var/log/intel_owl
 ARG REPO_DOWNLOADER_ENABLED=true
 ARG WATCHMAN=false
 ENV watch_logs_cmd="watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
-ARG PYCTI_VERSION=6.1.0
+# This is required to allow compatibility with different OpenCTI instances
+ARG PYCTI_VERSION=6.5.1
 
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \

@@ -1,0 +1,16 @@
+# This file is used exclusively to trigger dependabot PR.
+# The update of the dependencies here has no actual effect.
+# For each updated dependency here you have to update its relative version hardcoded in the code.
+# So please add a comment for each dependency explaining where the related code must be updated.
+
+# docker/Dockerfile
+pycti==6.5.1
+# integrations/malware_tools_analyzers/Dockerfile
+flare-capa==9.0.0
+flare-floss==3.1.1
+
+# other unmanaged versions
+# droydlys - they make no new versions, we pin the commit
+# goresym - they create releases in the repo
+# boxjs - we can get that info from npm packages
+# detect it easy - multi arch builds and releases in the repo

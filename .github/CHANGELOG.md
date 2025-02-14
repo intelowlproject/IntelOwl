@@ -2,6 +2,16 @@
 
 [**Upgrade Guide**](https://intelowlproject.github.io/docs/IntelOwl/installation/#update-to-the-most-recent-version)
 
+## [v6.3.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.3.0)
+
+This release brings official support for ARM architecture. From now on, our Docker builds are multi-platform. You can now run IntelOwl in your Mac smoothly.
+
+We have few new analyzers that you can play with (UltraDNS, WAD) and updated Abuse.Ch analyzers to allow the configuration of your API key.
+
+Then we have a lot of fixes and dependencies upgrades as usual.
+
+Happy hunting!
+
 ## [v6.2.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.2.1)
 Minor fixes and dependencies upgrades
 

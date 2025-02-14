@@ -10,7 +10,7 @@ echo "$(pwd)"
 echo "current branch"
 echo "$SOURCE_BRANCH"
 
-version_regex='^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'
+version_regex='^v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'
 if [[ "$SOURCE_BRANCH" == "master" || "$SOURCE_BRANCH" =~ $version_regex ]]; then
   echo "The branch is master, proceeding with multi-arch build"
   docker buildx create --name multiarch --use

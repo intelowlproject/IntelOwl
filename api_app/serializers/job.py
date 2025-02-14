@@ -643,6 +643,8 @@ class JobSerializer(_AbstractJobViewSerializer):
         return super().get_fields()
 
     def get_analyzers_data_model(self, instance: Job):
+        if instance.analyzable.classification == Classification.GENERIC:
+            return []
         return instance.get_analyzers_data_models().serialize()
 
     def get_data_model(self, instance: Job):

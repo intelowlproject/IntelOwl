@@ -149,7 +149,7 @@ values = [
         "ingestor_config": "GreedyBear",
         "pivot_config": None,
         "for_organization": False,
-        "value": "greedybear.honeynet.org",
+        "value": "https://greedybear.honeynet.org",
         "updated_at": "2025-02-10T12:56:17.294680Z",
         "owner": None,
     },

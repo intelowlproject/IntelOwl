@@ -1,0 +1,11 @@
+#!/bin/bash
+
+version_regex='^v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'
+if [[ "$SOURCE_BRANCH" == "test_arm" || "$SOURCE_BRANCH" =~ $version_regex ]]; then
+  echo "The branch is master, proceeding with multi-arch build"
+  docker buildx create --name multiarch --use
+  docker buildx build -f "$DOCKERFILE_PATH" -t "$IMAGE_NAME" --platform linux/arm64,linux/amd64 --push .
+else
+  echo "The branch is not master, proceeding with classic build"
+  docker buildx build -f "$DOCKERFILE_PATH" -t "$IMAGE_NAME" --push .
+fi

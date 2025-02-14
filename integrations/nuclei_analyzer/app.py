@@ -42,6 +42,11 @@ executor = Executor(app)
 shell2http = Shell2HTTP(app=app, executor=executor)
 
 
+@app.route("/health", methods=["GET"])
+def health_check():
+    return {"status": "healthy"}, 200
+
+
 def my_callback_fn(context, future):
     """
     Callback function to handle Nuclei scan results
@@ -55,7 +60,7 @@ def my_callback_fn(context, future):
             try:
                 json_objects.append(json.loads(line))
             except json.JSONDecodeError:
-                print(f"Skipping non-JSON line: {line}")
+                logger.warning(f"Skipping non-JSON line: {line}")
         result["report"] = {"data": json_objects}
         logger.info(f"Nuclei scan completed for context: {context}")
         logger.debug(f"Scan result: {result}")

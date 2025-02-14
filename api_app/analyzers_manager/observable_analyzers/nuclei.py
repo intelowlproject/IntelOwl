@@ -1,7 +1,10 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import logging
 
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, ObservableAnalyzer
+
+logger = logging.getLogger(__name__)
 
 
 class NucleiAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
@@ -44,8 +47,9 @@ class NucleiAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
             if template_dir in VALID_TEMPLATE_CATEGORIES:
                 args.extend(["-t", template_dir])
             else:
-                print(f"Skipping invalid template directory: {template_dir}")
-
+                warning = f"Skipping invalid template directory: {template_dir} for observable {self.observable_name}"
+                logger.warning(warning)
+                self.report.errors.append(warning)
         req_data = {"args": args}
 
         # Execute the request

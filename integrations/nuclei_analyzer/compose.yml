@@ -2,7 +2,7 @@
 
 services:
   nuclei_analyzer:
-    image: pranjalg1310/nuclei-analyzer:{REACT_APP_INTELOWL_VERSION}
+    image: intelowlproject/nuclei_analyzer:${REACT_APP_INTELOWL_VERSION}
     container_name: nuclei_analyzer
     restart: unless-stopped
     expose:

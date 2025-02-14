@@ -3,4 +3,4 @@ services:
     build:
       context: ../integrations/nuclei_analyzer
       dockerfile: Dockerfile
-    image: pranjalg1310/nuclei-analyzer:test
+    image: intelowlproject/nuclei_analyzer:test

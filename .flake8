@@ -13,3 +13,4 @@ exclude =
     virtualenv,
     ldap_config.py
     api_app/analyzers_manager/migrations/*
+    api_app/ingestors_manager/migrations/*

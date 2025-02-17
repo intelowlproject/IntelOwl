@@ -1,0 +1,6 @@
+services:
+  nuclei_analyzer:
+    build:
+      context: ../integrations/nuclei_analyzer
+      dockerfile: Dockerfile
+    image: intelowlproject/nuclei_analyzer:test

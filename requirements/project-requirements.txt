@@ -48,7 +48,7 @@ google-cloud-webrisk==1.15.0
 intezer-sdk==1.21
 lief==0.15.1
 maxminddb==2.6.0
-geoip2==4.8.0
+geoip2==5.0.1
 mwdblib==4.5.0
 oletools==0.60.2
 OTXv2==1.5.12

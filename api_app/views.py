@@ -11,12 +11,8 @@ from django.db.models import Count, Q
 from django.db.models.functions import Trunc
 from django.http import FileResponse
 from django.utils.timezone import now
-from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema as add_docs
-from drf_spectacular.utils import inline_serializer
 from elasticsearch_dsl import Q as QElastic
 from elasticsearch_dsl import Search
-from rest_framework import serializers as rfs
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
@@ -84,25 +80,6 @@ logger = logging.getLogger(__name__)
 # REST API endpoints
 
 
-@add_docs(
-    description="""
-    This is useful to avoid repeating the same analysis multiple times.
-    By default this API checks if there are existing analysis related to the md5 in
-    status "running" or "reported_without_fails"
-    Also, you need to specify the analyzers needed because, otherwise, it is
-    highly probable that you won't get all the results that you expect""",
-    request=JobAvailabilitySerializer,
-    responses={
-        200: inline_serializer(
-            name="AskAnalysisAvailabilitySuccessResponse",
-            fields={
-                "status": rfs.StringRelatedField(),
-                "job_id": rfs.StringRelatedField(),
-                "analyzers_to_execute": OpenApiTypes.OBJECT,
-            },
-        ),
-    },
-)
 @deprecated_endpoint(deprecation_date="01-07-2023")
 @api_view(["POST"])
 def ask_analysis_availability(request):
@@ -137,17 +114,6 @@ def ask_analysis_availability(request):
     )
 
 
-@add_docs(
-    description="""
-    This is useful to avoid repeating the same analysis multiple times.
-    By default this API checks if there are existing analysis related to the md5 in
-    status "running" or "reported_without_fails"
-    Also, you need to specify the analyzers needed because, otherwise, it is
-    highly probable that you won't get all the results that you expect.
-    NOTE: This API is similar to ask_analysis_availability, but it allows multiple
-    md5s to be checked at the same time.""",
-    responses={200: JobAvailabilitySerializer(many=True)},
-)
 @api_view(["POST"])
 def ask_multi_analysis_availability(request):
     """
@@ -182,12 +148,6 @@ def ask_multi_analysis_availability(request):
     )
 
 
-@add_docs(
-    description="This endpoint allows to start a Job related for a single File."
-    " Retained for retro-compatibility",
-    request=FileJobSerializer,
-    responses={200: JobResponseSerializer(many=True)},
-)
 @api_view(["POST"])
 def analyze_file(request):
     """
@@ -196,6 +156,8 @@ def analyze_file(request):
     This endpoint initiates an analysis job for a single file and sends it to the
     specified analyzers. The file-related information and analyzers should be provided
     in the request data.
+
+    Retained for retro-compatibility
 
     Parameters:
     - request (POST): Contains file data and analyzer details.
@@ -215,24 +177,6 @@ def analyze_file(request):
     )
 
 
-@add_docs(
-    description="This endpoint allows to start Jobs related to multiple Files",
-    # It should be better to link the doc to the related MultipleFileAnalysisSerializer.
-    # It is not straightforward because you can't just add a class
-    # which extends a ListSerializer.
-    # Follow this doc to try to find a fix:
-    # https://drf-spectacular.readthedocs.io/en/latest/customization.html#declare-serializer-magic-with
-    # -openapiserializerextension
-    request=inline_serializer(
-        name="MultipleFilesSerializer",
-        fields={
-            "files": rfs.ListField(child=rfs.FileField()),
-            "file_names": rfs.ListField(child=rfs.CharField()),
-            "file_mimetypes": rfs.ListField(child=rfs.CharField()),
-        },
-    ),
-    responses={200: JobResponseSerializer},
-)
 @api_view(["POST"])
 def analyze_multiple_files(request):
     """
@@ -260,12 +204,6 @@ def analyze_multiple_files(request):
     )
 
 
-@add_docs(
-    description="This endpoint allows to start a Job related to an observable. "
-    "Retained for retro-compatibility",
-    request=ObservableAnalysisSerializer,
-    responses={200: JobResponseSerializer},
-)
 @api_view(["POST"])
 def analyze_observable(request):
     """
@@ -274,6 +212,8 @@ def analyze_observable(request):
     This endpoint initiates an analysis job for a single observable (e.g., domain, IP, URL, etc.)
     and sends it to the specified analyzers. The observable-related information and analyzers should be
     provided in the request data.
+
+    Retained for retro-compatibility
 
     Parameters:
     - request (POST): Contains observable data and analyzer details.
@@ -293,20 +233,6 @@ def analyze_observable(request):
     )
 
 
-@add_docs(
-    description="""This endpoint allows to start Jobs related to multiple observables.
-                 Observable parameter must be composed like this:
-                 [(<observable_classification>, <observable_name>), ...]""",
-    request=inline_serializer(
-        name="MultipleObservableSerializer",
-        fields={
-            "observables": rfs.ListField(
-                child=rfs.ListField(max_length=2, min_length=2)
-            )
-        },
-    ),
-    responses={200: JobResponseSerializer},
-)
 @api_view(["POST"])
 def analyze_multiple_observables(request):
     """
@@ -339,13 +265,6 @@ def analyze_multiple_observables(request):
     )
 
 
-@add_docs(
-    description="""
-    REST endpoint to fetch list of job comments or
-    retrieve/delete a job comment with job comment ID.
-    Requires authentication.
-    """
-)
 class CommentViewSet(ModelViewSet):
     """
     CommentViewSet provides the following actions:
@@ -407,12 +326,6 @@ class CommentViewSet(ModelViewSet):
         return queryset.visible_for_user(self.request.user)
 
 
-@add_docs(
-    description="""
-    REST endpoint to fetch list of jobs or retrieve/delete a job with job ID.
-    Requires authentication.
-    """
-)
 class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     """
     JobViewSet provides the following actions:
@@ -590,13 +503,6 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         logger.info(f"rescan request for job: {pk} generated job: {new_job.pk}")
         return Response(data={"id": new_job.pk}, status=status.HTTP_202_ACCEPTED)
 
-    @add_docs(
-        description="Kill running job by closing celery tasks and marking as killed",
-        request=None,
-        responses={
-            204: None,
-        },
-    )
     @action(detail=True, methods=["patch"])
     def kill(self, request, pk=None):
         """
@@ -617,11 +523,6 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         job.kill_if_ongoing()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @add_docs(
-        description="Download file/sample associated with a job",
-        request=None,
-        responses={200: OpenApiTypes.BINARY, 400: None},
-    )
     @action(detail=True, methods=["get"])
     def download_sample(self, request, pk=None):
         """
@@ -650,7 +551,6 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             as_attachment=True,
         )
 
-    @add_docs(description="Pivot a job")
     @action(
         detail=True, methods=["post"]
     )  # , url_path="pivot-(?P<pivot_config_pk>\d+)")
@@ -996,12 +896,6 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         return parse_humanized_range(range_str)
 
 
-@add_docs(
-    description="""
-    REST endpoint to perform CRUD operations on ``Tag`` model.
-    Requires authentication.
-    """
-)
 class TagViewSet(viewsets.ModelViewSet):
     """
     A viewset that provides CRUD (Create, Read, Update, Delete) operations
@@ -1077,18 +971,6 @@ class ModelWithOwnershipViewSet(viewsets.ModelViewSet):
         return permissions
 
 
-@add_docs(
-    description="""This endpoint allows organization owners
-    and members to view plugin state.""",
-    responses={
-        200: inline_serializer(
-            name="PluginStateViewerResponseSerializer",
-            fields={
-                "data": rfs.JSONField(),
-            },
-        ),
-    },
-)
 @api_view(["GET"])
 def plugin_state_viewer(request):
     """
@@ -1260,13 +1142,6 @@ class PythonReportActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         )
         runner()
 
-    @add_docs(
-        description="Kill running plugin by closing celery task and marking as killed",
-        request=None,
-        responses={
-            204: None,
-        },
-    )
     @action(detail=False, methods=["patch"])
     def kill(self, request, job_id, report_id):
         """
@@ -1301,13 +1176,6 @@ class PythonReportActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         self.perform_kill(report)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @add_docs(
-        description="Retry a plugin run if it failed/was killed previously",
-        request=None,
-        responses={
-            204: None,
-        },
-    )
     @action(detail=False, methods=["patch"])
     def retry(self, request, job_id, report_id):
         """
@@ -1372,11 +1240,6 @@ class AbstractConfigViewSet(
     ordering = ["name"]
     lookup_field = "name"
 
-    @add_docs(
-        description="Disable/Enable plugin for your organization",
-        request=None,
-        responses={201: {}, 202: {}},
-    )
     @action(
         methods=["post"],
         detail=True,
@@ -1472,19 +1335,6 @@ class PythonConfigViewSet(AbstractConfigViewSet):
             "python_module__parameters"
         )
 
-    @add_docs(
-        description="Health Check: "
-        "if server instance associated with plugin is up or not",
-        request=None,
-        responses={
-            200: inline_serializer(
-                name="PluginHealthCheckSuccessResponse",
-                fields={
-                    "status": rfs.BooleanField(allow_null=True),
-                },
-            ),
-        },
-    )
     @action(
         methods=["get"],
         detail=True,
@@ -1569,12 +1419,6 @@ class PythonConfigViewSet(AbstractConfigViewSet):
             return Response(data={"status": update_status}, status=status.HTTP_200_OK)
 
 
-@add_docs(
-    description="""
-    REST endpoint to fetch list of PluginConfig or retrieve/delete a CustomConfig.
-    Requires authentication. Allows access to only authorized CustomConfigs.
-    """
-)
 class PluginConfigViewSet(ModelWithOwnershipViewSet):
     """
     A viewset for managing `PluginConfig` objects with ownership-based access control.
@@ -1690,34 +1534,8 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-description = (
-    """This endpoint allows users to search analyzer, connector and pivot reports. ELASTIC REQUIRED""",
-)
-responses = (
-    {
-        200: inline_serializer(
-            name="ElasticResponseSerializer",
-            fields={
-                "data": rfs.JSONField(),
-            },
-        ),
-    },
-)
-
-
 class ElasticSearchView(GenericAPIView):
 
-    @add_docs(
-        description="""This endpoint allows users to search analyzer, connector and pivot reports. ELASTIC REQUIRED""",
-        responses={
-            200: inline_serializer(
-                name="ElasticResponseSerializer",
-                fields={
-                    "data": rfs.JSONField(),
-                },
-            ),
-        },
-    )
     def get(self, request):
         """
         View enabled only with elastic. Allow to perform queries in the Plugin reports.

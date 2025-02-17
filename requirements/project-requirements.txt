@@ -32,7 +32,7 @@ dataclasses==0.6
 flower==2.0.0
 uWSGI==2.0.22
 uwsgitop==0.12
-whitenoise==6.8.1
+whitenoise==6.9.0
 daphne==4.1.0
 channels==4.1.0
 channels-redis==4.2.0

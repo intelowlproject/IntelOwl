@@ -99,7 +99,7 @@ check_parameters "$@" && shift 2
 load_env "docker/.env"
 current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
 
-docker_analyzers=("pcap_analyzers" "tor_analyzers" "malware_tools_analyzers" "cyberchef" "phoneinfoga" "phishing_analyzers")
+docker_analyzers=("pcap_analyzers" "tor_analyzers" "malware_tools_analyzers" "cyberchef" "phoneinfoga" "phishing_analyzers" "nuclei_analyzer")
 
 
 for value in "${docker_analyzers[@]}"; do
@@ -145,6 +145,10 @@ while [[ $# -gt 0 ]]; do
   ;;
   --tor_analyzers)
     analyzers["tor_analyzers"]=true
+    shift 1
+    ;;
+  --nuclei_analyzer)
+    analyzers["nuclei_analyzer"]=true
     shift 1
     ;;
   --malware_tools_analyzers)

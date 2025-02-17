@@ -83,6 +83,6 @@ def intercept_thug_result(context, future: Future) -> None:
 # with this, we can make http calls to the endpoint: /thug
 shell2http.register_command(
     endpoint="thug",
-    command_name="/opt/deploy/thug/venv/bin/thug -qZF",
+    command_name="/usr/local/bin/thug -qZF",
     callback_fn=intercept_thug_result,
 )

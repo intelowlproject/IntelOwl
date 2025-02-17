@@ -13,4 +13,3 @@ flare-floss==3.1.1
 # droydlys - they make no new versions, we pin the commit
 # goresym - they create releases in the repo
 # boxjs - we can get that info from npm packages
-# detect it easy - multi arch builds and releases in the repo

@@ -21,6 +21,7 @@ ENV PYTHONPATH=/opt/deploy/intel_owl
 ENV LOG_PATH=/var/log/intel_owl
 ARG REPO_DOWNLOADER_ENABLED=true
 ARG WATCHMAN=false
+ARG TARGETARCH
 ENV watch_logs_cmd="watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
 # This is required to allow compatibility with different OpenCTI instances
 ARG PYCTI_VERSION=6.5.1
@@ -48,7 +49,13 @@ COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
 COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
 WORKDIR $PYTHONPATH
 
-RUN pip3 install --no-cache-dir --compile -r project-requirements.txt \
+# qt is required to build die-python
+RUN pip3 install aqtinstall \
+    && if [[ $TARGETARCH == "amd" ]]; \
+    then export PLATFORM="linux"; export COMPILER="gcc_64"; \
+    else export PLATFORM="mac"; export COMPILER="clang_64"; fi \
+    && python -m aqt install-qt -O ./build $PLATFORM desktop 6.6.2 $COMPILER \
+    && pip3 install --no-cache-dir --compile -r project-requirements.txt \
     && pip3 install --no-cache-dir pycti==${PYCTI_VERSION} \
     && pip3 install --no-cache-dir --compile -r certego-requirements.txt
 

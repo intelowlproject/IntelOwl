@@ -6,7 +6,7 @@
 
 This release brings official support for ARM architecture. From now on, our Docker builds are multi-platform. You can now run IntelOwl in your favourite ARM machine smoothly, e.g. Apple Silicon Mac and Raspberry PI.
 
-We have few new analyzers that you can play with (UltraDNS, WAD) and updated Abuse.Ch analyzers to allow the configuration of your API key.
+We have few new analyzers that you can play with (in particular new Vulnerability scanners like WAD, Nuclei) and updated Abuse.Ch analyzers to allow the configuration of your API key.
 
 Then we have a lot of fixes and dependencies upgrades as usual.
 

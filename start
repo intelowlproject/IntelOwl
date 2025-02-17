@@ -31,6 +31,8 @@ print_help () {
   echo "                                file."
   echo "    --malware_tools_analyzers   Uses the integrations/malware_tools_analyzers/"
   echo "                                compose.yml file."
+  echo "    --thug                      Uses the integrations/thug/compose.yml"
+  echo "                                file."
   echo "    --cyberchef                 Uses the integrations/cyberchef/compose.yml"
   echo "                                file."
   echo "    --pcap_analyzers            Uses the integrations/pcap_analyzers/compose.yml"
@@ -99,7 +101,7 @@ check_parameters "$@" && shift 2
 load_env "docker/.env"
 current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
 
-docker_analyzers=("pcap_analyzers" "tor_analyzers" "malware_tools_analyzers" "cyberchef" "phoneinfoga" "phishing_analyzers" "nuclei_analyzer")
+docker_analyzers=("pcap_analyzers" "tor_analyzers" "malware_tools_analyzers" "thug" "cyberchef" "phoneinfoga" "phishing_analyzers" "nuclei_analyzer")
 
 
 for value in "${docker_analyzers[@]}"; do
@@ -153,6 +155,10 @@ while [[ $# -gt 0 ]]; do
     ;;
   --malware_tools_analyzers)
     analyzers["malware_tools_analyzers"]=true
+    shift 1
+    ;;
+  --thug)
+    analyzers["thug"]=true
     shift 1
     ;;
   --cyberchef)

@@ -4,7 +4,6 @@ echo "display path"
 echo "$(pwd)"
 echo "display dockerfile path"
 echo $DOCKERFILE_PATH
-cd ..
 echo "current branch"
 echo "$SOURCE_BRANCH"
 

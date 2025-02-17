@@ -15,10 +15,10 @@ services:
     depends_on:
       - uwsgi
 
-  chrome-webdriver:
+  chromium-webdriver:
     # tagging convention for chrome webdriver
     # https://github.com/SeleniumHQ/docker-selenium/wiki/Tagging-Convention
-    image: selenium/node-chrome:130.0.6723.91-chromedriver-130.0.6723.91-grid-4.26.0-20241101
+    image: selenium/node-chromium:132.0.6834.159-chromedriver-132.0.6834.159-grid-4.28.1-20250202
     shm_size: 2gb # https://github.com/SeleniumHQ/docker-selenium?tab=readme-ov-file#--shm-size2g
     depends_on:
       - selenium-hub
@@ -37,7 +37,7 @@ services:
       - SE_BROWSER_LEFTOVERS_PROCESSES_SECS=86400
 
   selenium-hub:
-    image: selenium/hub:4.26.0
+    image: selenium/hub:4.28.1
     container_name: selenium-hub
     environment:
       - SE_ENABLE_TRACING=false

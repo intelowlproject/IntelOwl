@@ -104,6 +104,16 @@ updates:
         update-types: ["version-update:semver-patch"]
 
   - package-ecosystem: "docker"
+    directory: "/integrations/cyberchef"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "develop"
+    ignore:
+      - dependency-name: "*"
+        update-types: [ "version-update:semver-patch" ]
+
+  - package-ecosystem: "docker"
     directory: "/integrations/malware_tools_analyzers"
     schedule:
       interval: "weekly"

@@ -35,11 +35,12 @@ RUN mkdir -p ${LOG_PATH} \
 # python3-psycopg2 is required to use PostgresSQL with Django
 # apache2-utils is required to execute htpasswd
 # tshark is required for Hfinger file analyzer
-# libemail-outlook-message-perl is required for msgconvert
+# libemail-outlook-message-perl and libemail-address-perl are required for msgconvert
 RUN apt-get update \
     && apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev netcat-traditional \
-    vim libldap2-dev libfuzzy-dev net-tools python3-psycopg2 git apache2-utils tshark libemail-outlook-message-perl \
-    && apt-get clean \
+    vim libldap2-dev libfuzzy-dev net-tools python3-psycopg2 git apache2-utils tshark  \
+    libemail-outlook-message-perl libemail-address-perl \
+    && apt-get clean && apt-get autoclean && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/* \
     && pip3 install --no-cache-dir --upgrade pip
 

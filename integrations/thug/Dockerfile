@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM thughoneyclient/thug:v6.11
 
 ENV PROJECT_PATH=/opt/deploy
 ENV LOG_PATH=/var/log/intel_owl/thug
@@ -9,13 +9,8 @@ RUN useradd -r -s /sbin/nologin ${USER}
 
 # update and install packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update -qq \
-    && apt-get install --no-install-recommends -y git build-essential gcc \
+    && apt-get install --no-install-recommends -y git \
     && rm -rf /var/lib/apt/lists/*
-
-# Place to bind a mount point to for scratch pad work
-WORKDIR ${PROJECT_PATH}
-RUN mkdir input/ \
-    && chown -R ${USER}:${USER} input/
 
 # Cleanup
 RUN apt-get remove --purge -y git gcc \
@@ -25,7 +20,7 @@ RUN apt-get remove --purge -y git gcc \
     && rm -rf /var/lib/apt/lists/* /tmp/* /usr/share/doc/* /usr/share/man/* > /dev/null 2>&1
 
 # 2. Build Flask REST API
-WORKDIR ${PROJECT_PATH}/tor-flask
+WORKDIR ${PROJECT_PATH}/thug-flask
 COPY app.py requirements.txt entrypoint.sh ./
 
 RUN pip3 install -r requirements.txt --no-cache-dir \

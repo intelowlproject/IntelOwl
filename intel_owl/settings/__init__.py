@@ -20,7 +20,6 @@ INSTALLED_APPS = [
     "prettyjson",
     # celery, elasticsearch
     "django_celery_results",
-    "django_elasticsearch_dsl",
     # rest framework libs
     "rest_framework",
     "rest_framework_filters",

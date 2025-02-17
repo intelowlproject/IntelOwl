@@ -1622,7 +1622,10 @@ class ElasticSearchView(GenericAPIView):
 
         # 3 return data
         elastic_response = (
-            Search(index=f"plugin-report-{get_environment()}*")
+            Search(
+                using=settings.ELASTICSEARCH_DSL_CLIENT,
+                index=f"plugin-report-{get_environment()}*",
+            )
             .query(QElastic("bool", filter=filter_list))
             .extra(size=10000)  # max allowed size
             .execute()

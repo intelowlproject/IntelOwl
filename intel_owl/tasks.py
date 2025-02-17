@@ -20,7 +20,6 @@ from django.utils.timezone import now
 from django_celery_beat.models import PeriodicTask
 from elasticsearch import ApiError
 from elasticsearch.helpers import bulk
-from elasticsearch_dsl import connections
 
 from api_app.choices import ReportStatus, Status
 from intel_owl import secrets
@@ -496,7 +495,7 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
         )
         logger.info(f"documents to add to elastic: {len(all_report_document_list)}")
         try:
-            bulk(connections.get_connection(), all_report_document_list)
+            bulk(settings.ELASTICSEARCH_DSL_CLIENT, all_report_document_list)
         except ApiError as error:
             logger.critical(error)
         else:

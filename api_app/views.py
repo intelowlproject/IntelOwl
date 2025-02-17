@@ -39,6 +39,7 @@ from certego_saas.ext.mixins import SerializerActionMixin
 from certego_saas.ext.viewsets import ReadAndDeleteOnlyViewSet
 from intel_owl import tasks
 from intel_owl.celery import app as celery_app
+from intel_owl.settings._util import get_environment
 
 from .analyzers_manager.constants import ObservableTypes
 from .choices import ObservableClassification
@@ -324,10 +325,12 @@ def analyze_multiple_observables(request):
     - 200: JSON response with the job details for each initiated analysis.
     """
     logger.info(f"received analyze_multiple_observables from user {request.user}")
+    logger.debug(f"{request.data=}")
     oas = ObservableAnalysisSerializer(
         data=request.data, many=True, context={"request": request}
     )
     oas.is_valid(raise_exception=True)
+    logger.debug(f"{oas.validated_data=}")
     parent_job = oas.validated_data[0].get("parent_job", None)
     jobs = oas.save(send_task=True, parent=parent_job)
     jrs = JobResponseSerializer(jobs, many=True).data
@@ -936,7 +939,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
 
         if len(most_frequent_values):
             annotations = {
-                val: Count(field_name, filter=Q(**{field_name: val}))
+                val.replace(" ", "")
+                .replace("?", "")
+                .replace(";", ""): Count(field_name, filter=Q(**{field_name: val}))
                 for val in most_frequent_values
             }
             logger.debug(f"request: {field_name} annotations: {annotations}")
@@ -1792,7 +1797,7 @@ class ElasticSearchView(GenericAPIView):
 
         # 3 return data
         elastic_response = (
-            Search(index="plugin-report-*")
+            Search(index=f"plugin-report-{get_environment()}*")
             .query(QElastic("bool", filter=filter_list))
             .extra(size=10000)  # max allowed size
             .execute()

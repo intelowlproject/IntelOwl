@@ -20,7 +20,6 @@ class PivotConfigQuerySet(PythonConfigQuerySet):
                         analyzers.values_list("pk", flat=True)
                     )
                 )
-                | Q(related_analyzer_configs=None)
             )
         if connectors.exists():
             qs = qs.many_to_many_to_array("related_connector_configs").filter(
@@ -29,7 +28,6 @@ class PivotConfigQuerySet(PythonConfigQuerySet):
                         connectors.values_list("pk", flat=True)
                     )
                 )
-                | Q(related_connector_configs=None)
             )
         return qs.distinct()
 

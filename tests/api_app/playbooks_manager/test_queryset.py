@@ -4,8 +4,10 @@ from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.models import Job
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.playbooks_manager.queryset import PlaybookConfigQuerySet
+from authentication.models import UserProfile
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
+from certego_saas.apps.user.models import User
 from tests import CustomTestCase
 
 
@@ -69,11 +71,28 @@ class PlaybookConfigQuerySetTestCase(CustomTestCase):
         self.assertEqual(2, pc.weight)
 
     def test_ordered_for_user(self):
-        PlaybookConfig.objects.create(name="second", type=["ip"], description="test")
+        """Check user playbooks are in the correct order and the robot jobs are excluded"""
+
+        try:
+            robot = User.objects.get(is_superuser=False, username="robot")
+        except User.DoesNotExist:
+            robot = User.objects.create(
+                username="robot", email="robot@intelowl.com", password="test"
+            )
+        robot_profile = UserProfile.objects.get(user=robot)
+        robot_profile.is_robot = True
+        robot_profile.save()
+
+        org = Organization.objects.create(name="test_org")
+        Membership.objects.create(user=self.user, organization=org, is_owner=True)
+        Membership.objects.create(user=robot, organization=org)
+
+        pc2 = PlaybookConfig.objects.create(
+            name="second", type=["ip"], description="test"
+        )
         pc3 = PlaybookConfig.objects.create(
             name="third", type=["ip"], description="test"
         )
-
         pc4 = PlaybookConfig.objects.create(
             name="fourth", type=["ip"], description="test"
         )
@@ -94,7 +113,6 @@ class PlaybookConfigQuerySetTestCase(CustomTestCase):
             playbook_to_execute=self.pc,
             finished_analysis_time=now(),
         )
-
         Job.objects.create(
             user=self.user,
             observable_name="test3.com",
@@ -111,6 +129,49 @@ class PlaybookConfigQuerySetTestCase(CustomTestCase):
             playbook_to_execute=pc4,
             finished_analysis_time=now(),
         )
+        # robot jobs
+        Job.objects.create(
+            user=robot,
+            observable_name="test_robot.com",
+            observable_classification="domain",
+            status="reported_without_fails",
+            playbook_to_execute=pc2,
+            finished_analysis_time=now(),
+        )
+        Job.objects.create(
+            user=robot,
+            observable_name="test_robot.com",
+            observable_classification="domain",
+            status="reported_without_fails",
+            playbook_to_execute=pc2,
+            finished_analysis_time=now(),
+        )
+        Job.objects.create(
+            user=robot,
+            observable_name="test_robot.com",
+            observable_classification="domain",
+            status="reported_without_fails",
+            playbook_to_execute=pc2,
+            finished_analysis_time=now(),
+        )
+
+        Job.objects.create(
+            user=robot,
+            observable_name="test_robot.com",
+            observable_classification="domain",
+            status="reported_without_fails",
+            playbook_to_execute=pc2,
+            finished_analysis_time=now(),
+        )
+        Job.objects.create(
+            user=robot,
+            observable_name="test_robot.com",
+            observable_classification="domain",
+            status="reported_without_fails",
+            playbook_to_execute=pc2,
+            finished_analysis_time=now(),
+        )
+
         pcs = (
             PlaybookConfig.objects.ordered_for_user(self.user)
             .filter(description="test")

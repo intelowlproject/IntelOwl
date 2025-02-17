@@ -12,8 +12,6 @@ RUN useradd -ms /bin/bash ${USER}
 RUN DEBIAN_FRONTEND=noninteractive apt-get update -qq \
     && apt-get install -y --no-install-recommends \
     libvulkan1 libu2f-udev fonts-liberation chromium sudo \
-    && wget --progress=dot:giga https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
-    && dpkg -i google-chrome-stable_current_amd64.deb \
     && pip3 install --no-cache-dir --upgrade pip \
     # Cleanup
     && apt-get remove --purge -y gcc \

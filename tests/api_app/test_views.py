@@ -336,17 +336,43 @@ class JobViewSetTests(CustomViewSetTestCase):
         )
 
     def test_agg_top_user_200(self):
+        u = User.objects.create(
+            username="test ;space@intelowl.org",
+            email="test ;space@intelowl.org",
+            is_superuser=False,
+        )
+        with patch(
+            "django.utils.timezone.now",
+            return_value=datetime.datetime(2024, 11, 28, tzinfo=datetime.timezone.utc),
+        ):
+
+            job, _ = Job.objects.get_or_create(
+                **{
+                    "user": u,
+                    "is_sample": False,
+                    "observable_name": "1.2.3.4",
+                    "observable_classification": "ip",
+                    "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
+                    "tlp": Job.TLP.CLEAR.value,
+                }
+            )
         resp = self.client.get(self.agg_top_user)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(
             resp.json(),
             {
-                "values": ["superuser@intelowl.org"],
+                "values": ["superuser@intelowl.org", "test ;space@intelowl.org"],
                 "aggregation": [
-                    {"date": "2024-11-28T00:00:00Z", "superuser@intelowl.org": 2}
+                    {
+                        "date": "2024-11-28T00:00:00Z",
+                        "superuser@intelowl.org": 2,
+                        "testspace@intelowl.org": 1,
+                    },
                 ],
             },
         )
+        job.delete()
+        u.delete()
 
     def test_agg_top_tlp_200(self):
         resp = self.client.get(self.agg_top_tlp)
@@ -595,7 +621,6 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
 
     def setUp(self):
         super().setUp()
-        PluginConfig.objects.all().delete()
 
     def test_plugin_config(self):
         org = Organization.create("test_org", self.user)
@@ -818,7 +843,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
             if obj["attribute"] == pc0.attribute:
                 needle = obj
             # the owner cannot see configs of other orgs (pc1)
-            if "organization" in obj.keys():
+            if "organization" in obj.keys() and obj["organization"] is not None:
                 self.assertEqual(obj["organization"], "testorg0")
         self.assertIsNotNone(needle)
         self.assertIn("type", needle)
@@ -845,7 +870,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
             if obj["attribute"] == pc0.attribute:
                 needle = obj
             # an admin cannot see configs of other orgs (pc1)
-            if "organization" in obj.keys():
+            if "organization" in obj.keys() and obj["organization"] is not None:
                 self.assertEqual(obj["organization"], "testorg0")
         self.assertIsNotNone(needle)
         self.assertIn("type", needle)
@@ -872,7 +897,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
             if obj["attribute"] == pc1.attribute:
                 needle = obj
             # a user cannot see configs of other orgs (pc0)
-            if "organization" in obj.keys():
+            if "organization" in obj.keys() and obj["organization"] is not None:
                 self.assertEqual(obj["organization"], "testorg1")
         self.assertIsNotNone(needle)
         self.assertIn("type", needle)
@@ -1242,11 +1267,11 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
             user=self.user, organization=org, is_owner=False, is_admin=False
         )
         ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
-        uri = "/api/plugin-config/1"
+        uri = "/api/plugin-config"
 
         # logged out
         self.client.logout()
-        response = self.client.delete(uri, {}, format="json")
+        response = self.client.delete(f"{uri}/1", {}, format="json")
         self.assertEqual(response.status_code, 401)
 
         param = Parameter.objects.create(
@@ -1256,60 +1281,51 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
             required=True,
             type="str",
         )
-        pc = PluginConfig(
+        pc, _ = PluginConfig.objects.get_or_create(
             value="supersecret",
             for_organization=True,
             owner=self.superuser,
             parameter=param,
             analyzer_config=ac,
-            id=1,
         )
-        pc.full_clean()
-        pc.save()
         self.assertEqual(pc.owner, org.owner)
 
         # user can not delete org secret
         self.client.force_authenticate(user=self.user)
-        response = self.client.delete(uri, {}, format="json")
+        response = self.client.delete(f"{uri}/{pc.id}", {}, format="json")
         self.assertEqual(response.status_code, 403)
 
         # owner can delete org secret
         self.client.force_authenticate(user=self.superuser)
-        response = self.client.delete(uri, format="json")
+        response = self.client.delete(f"{uri}/{pc.id}", format="json")
         self.assertEqual(response.status_code, 204)
 
-        pc = PluginConfig(
+        pc, _ = PluginConfig.objects.get_or_create(
             value="supersecret",
             for_organization=True,
             owner=self.superuser,
             parameter=param,
             analyzer_config=ac,
-            id=1,
         )
-        pc.full_clean()
-        pc.save()
         self.assertEqual(pc.owner, org.owner)
 
         # admin can delete org secret
         self.client.force_authenticate(user=self.admin)
-        response = self.client.delete(uri, {}, format="json")
+        response = self.client.delete(f"{uri}/{pc.id}", {}, format="json")
         self.assertEqual(response.status_code, 204)
 
-        pc = PluginConfig(
+        pc, _ = PluginConfig.objects.get_or_create(
             value="supersecret",
             for_organization=False,
             owner=self.user,
             parameter=param,
             analyzer_config=ac,
-            id=1,
         )
-        pc.full_clean()
-        pc.save()
         self.assertEqual(pc.owner, self.user)
 
         # user can delete own personal secret
         self.client.force_authenticate(user=self.user)
-        response = self.client.delete(uri, {}, format="json")
+        response = self.client.delete(f"{uri}/{pc.id}", {}, format="json")
         self.assertEqual(response.status_code, 204)
 
     def test_get_403(self):

@@ -28,6 +28,7 @@ Please delete options that are not relevant.
     - [ ] If the plugin interacts with an external service, I have created an attribute called precisely `url` that contains this information. This is required for Health Checks. 
     - [ ] If the plugin requires mocked testing, `_monkeypatch()` was used in its class to apply the necessary decorators.
     - [ ] I have added that raw JSON sample to the `MockUpResponse` of the `_monkeypatch()` method. This serves us to provide a valid sample for testing.
+- [ ] I have inserted the copyright banner at the start of the file: ```# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl # See the file 'LICENSE' for copying permission.```
 - [ ] If external libraries/packages with restrictive licenses were used, they were added in the [Legal Notice](https://github.com/certego/IntelOwl/blob/master/.github/legal_notice.md) section.
 - [ ] Linters (`Black`, `Flake`, `Isort`) gave 0 errors. If you have correctly installed [pre-commit](https://intelowlproject.github.io/docs/IntelOwl/contribute/#how-to-start-setup-project-and-development-instance), it does these checks and adjustments on your behalf.
 - [ ] I have added tests for the feature/bug I solved (see `tests` folder). All the tests (new and old ones) gave 0 errors.
@@ -38,4 +39,4 @@ Please delete options that are not relevant.
 
 ### Important Rules
 - If you miss to compile the Checklist properly, your PR won't be reviewed by the maintainers.
-- Everytime you make changes to the PR and you think the work is done, you should explicitly ask for a review. After being reviewed and received a "change request", you should explicitly ask for a review again once you have made the requested changes.
+- Everytime you make changes to the PR and you think the work is done, you should explicitly ask for a review by using GitHub's reviewing system detailed [here](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/requesting-a-pull-request-review).

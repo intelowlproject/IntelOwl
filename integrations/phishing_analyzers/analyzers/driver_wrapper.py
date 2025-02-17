@@ -6,12 +6,13 @@ from typing import Iterator
 
 from selenium.common import WebDriverException
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.chromium.options import ChromiumOptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from seleniumwire.request import Request
 from seleniumwire.thirdparty.mitmproxy.exceptions import ServerException
-from seleniumwire.webdriver import ChromeOptions, Remote
+from seleniumwire.webdriver import Remote
 
 LOG_NAME = "driver_wrapper"
 
@@ -73,7 +74,7 @@ class DriverWrapper:
         )
 
     def _pick_free_port_from_pool(
-        self, sw_options: {}, options: ChromeOptions
+        self, sw_options: {}, options: ChromiumOptions
     ) -> Remote:
         tries: int = 0
         while tries < self.port_pool_size:
@@ -106,7 +107,7 @@ class DriverWrapper:
         self, window_width: int, window_height: int, user_agent: str
     ) -> Remote:
         logger.info(f"Adding proxy with option: {self.proxy}")
-        logger.info("Creating Chrome driver...")
+        logger.info("Creating Chromium driver...")
         sw_options: {} = {
             "auto_config": False,  # Ensure this is set to False
             "enable_har": True,
@@ -118,7 +119,7 @@ class DriverWrapper:
         if self.proxy:
             sw_options["proxy"] = {"http": self.proxy, "https": self.proxy}
 
-        options = ChromeOptions()
+        options = ChromiumOptions()
         # no_sandbox=True is a bad practice but it's almost the only way
         # to run chromium-based browsers in docker. browser is running
         # as unprivileged user and it's in a container: trade-off

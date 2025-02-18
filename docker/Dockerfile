@@ -49,12 +49,8 @@ COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
 COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
 WORKDIR $PYTHONPATH
 
-# qt is required to build die-python
-RUN pip3 install aqtinstall \
-    && if [[ $TARGETARCH == "amd" ]]; \
-    then export PLATFORM="linux"; export COMPILER="gcc_64"; \
-    else export PLATFORM="mac"; export COMPILER="clang_64"; fi \
-    && python -m aqt install-qt -O ./build $PLATFORM desktop 6.6.2 $COMPILER \
+RUN if [[ $TARGETARCH == "amd" ]]; \
+    then pip3 install --no-cache-dir --compile -r amd-only-requirements.txt; fi \
     && pip3 install --no-cache-dir --compile -r project-requirements.txt \
     && pip3 install --no-cache-dir pycti==${PYCTI_VERSION} \
     && pip3 install --no-cache-dir --compile -r certego-requirements.txt

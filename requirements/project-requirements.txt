@@ -70,7 +70,7 @@ py-tlsh==4.7.2
 quark-engine==25.1.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8
-yara-python==4.5.0
+yara-python>=4.5.0
 greynoise==2.3.0
 XLMMacroDeobfuscator[secure]==0.2.3
 thinkst-zippy==0.1.2
@@ -89,6 +89,7 @@ pylnk3==0.4.2
 androguard==3.4.0a1 # version >=4.x of androguard raises a dependency conflict with quark-engine==25.1.1
 wad==0.4.6
 die-python==0.2.0
+bbot==2.3.2
 
 # this is required because XLMMacroDeobfuscator does not pin the following packages
 pyxlsb2==0.0.8

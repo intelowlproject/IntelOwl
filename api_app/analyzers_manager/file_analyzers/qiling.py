@@ -21,6 +21,9 @@ class Qiling(FileAnalyzer, DockerBasedAnalyzer):
     shellcode: bool
     profile: str
 
+    def update(self):
+        pass
+
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
         self.args = [self.os, self.arch]

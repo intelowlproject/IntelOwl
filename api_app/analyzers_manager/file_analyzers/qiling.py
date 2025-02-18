@@ -41,4 +41,6 @@ class Qiling(FileAnalyzer, DockerBasedAnalyzer):
             raise AnalyzerRunException(report["setup_error"])
         if report.get("execution_error"):
             raise AnalyzerRunException(report["execution_error"])
+        if report.get("qiling_not_available_error"):
+            raise AnalyzerRunException(report["qiling_not_available_error"])
         return report

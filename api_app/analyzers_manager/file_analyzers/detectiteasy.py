@@ -1,6 +1,8 @@
 import json
 import logging
 
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+
 try:
     import die
 except ImportError:
@@ -31,6 +33,7 @@ class DetectItEasy(FileAnalyzer):
             message = "DIE package not imported because incompatible in ARM"
             self.report.errors.append(message)
             result = {"errors": message}
+            raise AnalyzerRunException(message)
 
         return result
 

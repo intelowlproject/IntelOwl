@@ -24,7 +24,7 @@ _now = datetime.datetime(2024, 10, 29, 11, tzinfo=datetime.UTC)
 
 @patch("intel_owl.tasks.get_environment", return_value="unittest")
 @patch("intel_owl.tasks.now", return_value=_now)
-@patch("intel_owl.tasks.connections.get_connection")
+@override_settings(ELASTICSEARCH_DSL_CLIENT=None)
 class SendElasticTestCase(CustomTestCase):
 
     def setUp(self):

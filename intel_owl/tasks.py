@@ -428,6 +428,11 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
         logger.info(
             f"add to elastic reports from: {lower_threshold} to {upper_threshold}"
         )
+        if upper_threshold - lower_threshold > datetime.timedelta(days=10):
+            logger.warning(
+                "the time range is greater than 10 days this could requires too much memory."
+                "In case this happen edit time in the db collection to reduce the range."
+            )
 
         def _convert_report_to_elastic_document(
             _class: AbstractReport,
@@ -501,6 +506,7 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
         else:
             last_elastic_report_update.last_update_datetime = upper_threshold
             last_elastic_report_update.save()
+            logger.info("documents correctly inserted! last report datetime updated")
 
 
 @shared_task(

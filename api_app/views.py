@@ -1574,7 +1574,8 @@ class ElasticSearchView(GenericAPIView):
         permission_filter = QElastic("term", user__username=request.user.username)
         if request.user.has_membership():
             permission_filter |= QElastic(
-                "term", membership__organization__name=request.user.username
+                "term",
+                membership__organization__name=request.user.membership.organization.name,
             )
         filter_list = [permission_filter]
 

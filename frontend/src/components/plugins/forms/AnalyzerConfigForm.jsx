@@ -3,7 +3,6 @@ import { FormGroup, Label, Button, Input, Form, Row, Col } from "reactstrap";
 import { Link } from "react-router-dom";
 import { useFormik, FormikProvider } from "formik";
 import PropTypes from "prop-types";
-import { CustomJsonInput } from "@certego/certego-ui";
 
 import {
   editConfiguration,
@@ -20,6 +19,7 @@ import {
   TLPSelectInputLabel,
 } from "../../common/form/TLPSelectInput";
 import { HTTPMethods } from "../../../constants/miscConst";
+import { JsonEditor } from "../../common/JsonEditor";
 
 export function AnalyzerConfigForm({ analyzerConfig, toggle, isEditing }) {
   console.debug("AnalyzerConfigForm rendered!");
@@ -137,8 +137,7 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isEditing }) {
         },
         {
           attribute: "headers",
-          value:
-            headersJsonInput?.json || JSON.stringify(formik.values.headers),
+          value: headersJsonInput || JSON.stringify(formik.values.headers),
           parameter: response.data.parameters.headers.id,
         },
         {
@@ -153,7 +152,7 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isEditing }) {
         },
         {
           attribute: "params",
-          value: paramsJsonInput?.json || JSON.stringify({}),
+          value: paramsJsonInput || JSON.stringify({}),
           parameter: response.data.parameters.params.id,
         },
       ];
@@ -412,16 +411,10 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isEditing }) {
             </Col>
             <Col md={10}>
               <div style={{ maxHeight: "150px" }}>
-                <CustomJsonInput
+                <JsonEditor
                   id="analyzer_json_param"
-                  placeholder={formik.values.params}
+                  initialJsonData={formik.values.params}
                   onChange={setParamsJsonInput}
-                  /* waitAfterKeyPress=1000 is the default value and we cannot change it:
-                          with this value (or higher) in case the user press "save & close" too fast it doesn't take changes.
-                          If we decrease it (min allowed 100) we don't have this problems, but it's not possible to edit:
-                          The library auto refresh and move the cursor too fast to make it editable.
-                        */
-                  waitAfterKeyPress={1000}
                   height="150px"
                 />
               </div>
@@ -446,16 +439,10 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isEditing }) {
             </Col>
             <Col md={10}>
               <div style={{ maxHeight: "150px" }}>
-                <CustomJsonInput
+                <JsonEditor
                   id="analyzer_header"
-                  placeholder={formik.values.headers}
+                  initialJsonData={formik.values.headers}
                   onChange={setHeadersJsonInput}
-                  /* waitAfterKeyPress=1000 is the default value and we cannot change it:
-                          with this value (or higher) in case the user press "save & close" too fast it doesn't take changes.
-                          If we decrease it (min allowed 100) we don't have this problems, but it's not possible to edit:
-                          The library auto refresh and move the cursor too fast to make it editable.
-                        */
-                  waitAfterKeyPress={1000}
                   height="150px"
                 />
               </div>

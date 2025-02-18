@@ -24,6 +24,8 @@ export function RuntimeConfigurationModal(props) {
 
   const [jsonInput, setJsonInput] = React.useState({});
 
+  console.debug(jsonInput);
+
   const [analyzers, connectors, visualizers, pivots] =
     usePluginConfigurationStore(stateSelector);
 

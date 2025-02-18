@@ -2,10 +2,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import {
-  ContentSection,
-  // CustomJsonInput
-} from "@certego/certego-ui";
+import { ContentSection } from "@certego/certego-ui";
 
 import { markdownToHtml } from "../markdownToHtml";
 import { ScanTypes } from "../../../constants/advancedSettingsConst";
@@ -158,11 +155,15 @@ export function saveRuntimeConfiguration(
   editableConfig,
 ) {
   // we only want to save configuration against plugins whose params dict is not empty or was modified
-  if (jsonInput?.jsObject) {
+  if (jsonInput !== undefined) {
+    let jsonInputToSave = {};
+    if (jsonInput?.jsObject) jsonInputToSave = jsonInput?.jsObject;
+    else jsonInputToSave = jsonInput;
+
     const runtimeConfig = {};
     Object.keys(selectedPluginsParams).forEach((pluginType) => {
       runtimeConfig[pluginType] = Object.entries(
-        jsonInput.jsObject[pluginType],
+        jsonInputToSave[pluginType],
       ).reduce(
         (acc, [pluginName, pluginParams]) =>
           // we cannot exclude empty dict or it could erase "connectors: {}" and generate an error
@@ -188,28 +189,18 @@ export function EditRuntimeConfiguration(props) {
       <ContentSection
         className="bg-darker"
         id="edit_runtime_configuration-section"
-        style={{ width: "45%", maxHeight: "590px", overflowY: "auto" }}
+        style={{ width: "45%", height: "590px", overflowY: "auto" }}
       >
         <small className="text-muted">
           Note: Edit this only if you know what you are doing!
         </small>
         <JsonEditor
-          runtimeConfiguration={editableConfig}
+          id="runtime_configuration"
+          initialJsonData={editableConfig}
           onChange={setJsonInput}
+          height="540px"
+          width="430px"
         />
-        {/* <CustomJsonInput
-          id="edit_runtime_configuration-modal"
-          placeholder={editableConfig}
-          onChange={setJsonInput} */}
-        {/* waitAfterKeyPress=1000 is the default value and we cannot change it:
-              with this value (or higher) in case the user press "save & close" too fast it doesn't take changes.
-              If we decrease it (min allowed 100) we don't have this problems, but it's not possible to edit:
-              The library auto refresh and move the cursor too fast to make it editable.
-            */}
-        {/* waitAfterKeyPress={1000}
-          height="590px"
-          width="450px"
-        /> */}
       </ContentSection>
       {/* lateral menu with the type and description of each param */}
       <ContentSection

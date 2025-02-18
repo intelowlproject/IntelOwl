@@ -49,7 +49,7 @@ COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
 COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
 WORKDIR $PYTHONPATH
 
-RUN if [[ $TARGETARCH == "amd" ]]; \
+RUN if [[ $TARGETARCH == "amd64" ]]; \
     then pip3 install --no-cache-dir --compile -r amd-only-requirements.txt; fi \
     && pip3 install --no-cache-dir --compile -r project-requirements.txt \
     && pip3 install --no-cache-dir pycti==${PYCTI_VERSION} \

@@ -25,6 +25,8 @@ ARG TARGETARCH
 ENV watch_logs_cmd="watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
 # This is required to allow compatibility with different OpenCTI instances
 ARG PYCTI_VERSION=6.5.1
+# this is required for if/else statements
+SHELL ["/bin/bash", "-c"]
 
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \
@@ -50,7 +52,7 @@ COPY requirements/amd-only-requirements.txt $PYTHONPATH/amd-only-requirements.tx
 COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
 WORKDIR $PYTHONPATH
 
-RUN if [[ $TARGETARCH == "amd64" ]]; \
+RUN if [[ "$TARGETARCH" == "amd64" ]]; \
     then pip3 install --no-cache-dir --compile -r amd-only-requirements.txt;  \
     else echo "skipping installation of AMD only requirements"; fi \
     && pip3 install --no-cache-dir --compile -r project-requirements.txt \

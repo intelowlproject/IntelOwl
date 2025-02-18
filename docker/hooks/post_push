@@ -1,5 +1,0 @@
-#!/bin/bash
-
-if [[ "$SOURCE_BRANCH" == "master" ]]; then
-  curl -d "text=A new production image has been pushed to Docker Hub" -d "channel=$SLACK_CHANNEL" -H "Authorization: Bearer $SLACK_TOKEN" -X POST https://slack.com/api/chat.postMessage
-fi

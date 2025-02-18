@@ -29,7 +29,7 @@ class DetectItEasy(FileAnalyzer):
             result = json.loads(json_report)
         else:
             message = "DIE package not imported because incompatible in ARM"
-            self.report.errors(message)
+            self.report.errors.append(message)
             result = {"errors": message}
 
         return result

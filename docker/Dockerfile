@@ -46,11 +46,13 @@ RUN apt-get update \
     && pip3 install --no-cache-dir --upgrade pip
 
 COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
+COPY requirements/amd-only-requirements.txt $PYTHONPATH/amd-only-requirements.txt
 COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
 WORKDIR $PYTHONPATH
 
 RUN if [[ $TARGETARCH == "amd64" ]]; \
-    then pip3 install --no-cache-dir --compile -r amd-only-requirements.txt; fi \
+    then pip3 install --no-cache-dir --compile -r amd-only-requirements.txt;  \
+    else echo "skipping installation of AMD only requirements"; fi \
     && pip3 install --no-cache-dir --compile -r project-requirements.txt \
     && pip3 install --no-cache-dir pycti==${PYCTI_VERSION} \
     && pip3 install --no-cache-dir --compile -r certego-requirements.txt

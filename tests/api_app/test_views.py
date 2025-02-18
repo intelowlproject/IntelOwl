@@ -1368,6 +1368,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
 
 
 @override_settings(ELASTICSEARCH_DSL_ENABLED=True)
+@override_settings(ELASTICSEARCH_DSL_CLIENT=None)
 class ElasticTestCase(CustomViewSetTestCase):
     uri = reverse("plugin-report-queries")
 

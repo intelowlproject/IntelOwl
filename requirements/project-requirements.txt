@@ -11,7 +11,6 @@ django-ses == 4.4.0
 django-iam-dbauth==0.2.1
 django-prettyjson==0.4.1
 django-silk==5.3.2
-django-elasticsearch-dsl==8.0
 django-treebeard==4.7
 django-solo==2.4.0
 django_extensions==3.2.3

@@ -64,15 +64,8 @@ def reverse_update_maximum_tlp(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-    dependencies = [
-        ("analyzers_manager", "0145_analyzer_config_ultradns_malicious_detector"),
-        ("analyzers_manager", "0002_0026_analyzer_config_dns0_eu_malicious_detector"),
-        ("analyzers_manager", "0002_0099_analyzer_config_quad9_malicious_detector"),
-        (
-            "analyzers_manager",
-            "0002_0019_analyzer_config_cloudflare_malicious_detector",
-        ),
-    ]
+    dependencies = (("analyzers_manager", "0149_alter_die_analyzer"),)
+
     operations = [
         migrations.RunPython(update_maximum_tlp, reverse_update_maximum_tlp),
     ]

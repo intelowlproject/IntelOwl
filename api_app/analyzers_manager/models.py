@@ -13,6 +13,7 @@ from api_app.analyzers_manager.constants import HashChoices, TypeChoices
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 from api_app.analyzers_manager.queryset import AnalyzerReportQuerySet
 from api_app.choices import TLP, Classification, PythonModuleBasePaths
+from api_app.data_model_manager.fields import SetField
 from api_app.data_model_manager.models import BaseDataModel
 from api_app.fields import ChoiceArrayField
 from api_app.models import AbstractReport, PythonConfig, PythonModule
@@ -93,7 +94,7 @@ class AnalyzerReport(AbstractReport):
         for report_key, data_model_key in self.config.mapping_data_model.items():
             # this is a constant
             if report_key.startswith("$"):
-                value = report_key
+                value = report_key.replace("$", "")
             # this is a field of the report
             else:
                 try:
@@ -103,7 +104,17 @@ class AnalyzerReport(AbstractReport):
                     # validation
                     self.errors.append(f"Field {report_key} not available in report")
                     continue
-            result[data_model_key] = value
+            fields = self.data_model_class.get_fields()
+            if isinstance(fields[data_model_key], SetField):
+                try:
+                    if isinstance(value, list):
+                        result[data_model_key].extend(value)
+                    else:
+                        result[data_model_key].append(value)
+                except KeyError:
+                    result[data_model_key] = [value]
+            else:
+                result[data_model_key] = value
         return result
 
     def create_data_model(self) -> Optional[BaseDataModel]:

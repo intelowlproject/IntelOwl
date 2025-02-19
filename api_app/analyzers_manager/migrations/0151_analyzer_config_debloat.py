@@ -11,7 +11,7 @@ plugin = {
     "python_module": {
         "health_check_schedule": None,
         "update_schedule": None,
-        "module": "debloat_analyzert.Debloat",
+        "module": "debloat_analyzer.Debloat",
         "base_path": "api_app.analyzers_manager.file_analyzers",
     },
     "name": "Debloat",

@@ -11,7 +11,6 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.contrib.contenttypes.models import ContentType
 from django.utils.timezone import now
 from django_celery_beat.models import ClockedSchedule, CrontabSchedule, PeriodicTask
-from solo.models import SingletonModel
 from treebeard.mp_tree import MP_Node
 
 from api_app.analyzables_manager.models import Analyzable
@@ -1793,7 +1792,3 @@ class PythonConfig(AbstractConfig):
             )[0]
             self.health_check_task = periodic_task
             self.save()
-
-
-class LastElasticReportUpdate(SingletonModel):
-    last_update_datetime = models.DateTimeField()

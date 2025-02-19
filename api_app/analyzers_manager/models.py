@@ -112,7 +112,10 @@ class AnalyzerReport(AbstractReport):
                     else:
                         result[data_model_key].append(value)
                 except KeyError:
-                    result[data_model_key] = [value]
+                    if isinstance(value, list):
+                        result[data_model_key] = value
+                    else:
+                        result[data_model_key] = [value]
             else:
                 result[data_model_key] = value
         return result

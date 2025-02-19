@@ -163,7 +163,7 @@ export default function InvestigationsTable() {
         </Col>
         <Col className="align-self-center">
           <TimePicker />
-          <div className="d-flex float-end mx-2">
+          <div className="d-flex float-end me-1">
             <div className="d-flex align-items-center">
               <Label check>Name</Label>
               <div className="ms-1 d-flex">
@@ -182,7 +182,7 @@ export default function InvestigationsTable() {
                   least one job related to an analyzable with this name.
                 </UncontrolledTooltip>
               </div>
-              <Label check className="me-2">
+              <Label check className="me-1">
                 :
               </Label>
               <Input

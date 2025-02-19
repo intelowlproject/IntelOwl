@@ -34,15 +34,21 @@ function CustomRedirect() {
    * we cannot use a button -> change the UI
    * we cannot use a navigate -> "to" props must have a string (no function) and if we worte new Date in the to url the components is generated once so the first date is keep
    */
-  const [date, forceUpdate] = React.useState(new Date());
+  const [endDatetime, forceUpdate] = React.useState(new Date());
 
   React.useEffect(() => {
     forceUpdate(new Date());
   }, []);
 
+  const startDatetime = structuredClone(endDatetime);
+  startDatetime.setDate(startDatetime.getDate() - 1);
+
   return (
     <Navigate
-      to={`/history/jobs?end-time=${format(date, datetimeFormatStr)}`}
+      to={`/history/jobs?start-time=${format(
+        startDatetime,
+        datetimeFormatStr,
+      )}&end-time=${format(endDatetime, datetimeFormatStr)}`}
       replace
     />
   );

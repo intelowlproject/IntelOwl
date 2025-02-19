@@ -16,7 +16,7 @@ export function TimePicker() {
   return (
     <div className="d-flex float-end">
       <div className="d-flex align-items-center">
-        <Label className="me-2 mb-0" for="DatePicker__gte">
+        <Label className="me-1 mb-0" for="DatePicker__gte">
           From:
         </Label>
         <Input
@@ -31,8 +31,8 @@ export function TimePicker() {
           min="1970-01-01T00:00:00"
         />
       </div>
-      <div className="d-flex align-items-center">
-        <Label className="mx-2 mb-0" for="DatePicker__lte">
+      <div className="d-flex align-items-center ms-1">
+        <Label className="me-1 mb-0" for="DatePicker__lte">
           To:
         </Label>
         <Input

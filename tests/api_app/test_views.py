@@ -1622,7 +1622,7 @@ class ElasticTestCase(CustomViewSetTestCase):
                     Bool(
                         should=[
                             Term(user__username="elastic_test_user"),
-                            Term(membership__organization__name="elastic_test_user"),
+                            Term(membership__organization__name="test_elastic_org"),
                         ]
                     ),
                     Term(config__plugin_name="analyzer"),

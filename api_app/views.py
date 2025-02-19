@@ -1554,17 +1554,8 @@ class ElasticSearchView(GenericAPIView):
         if not settings.ELASTICSEARCH_DSL_ENABLED:
             raise NotImplementedException()
 
-        page = int(request.query_params.get("page", 1))
-        page_size = int(
-            request.query_params.get("page_size", settings.REST_FRAMEWORK["PAGE_SIZE"])
-        )
-        start_page = (
-            page - 1
-        ) * page_size  # first page is 1, but results start from zero
-        end_page = (page) * page_size
-
         # 1 validate request
-        logger.info(f"{request.query_params=} {start_page=} {end_page=}")
+        logger.info(f"{request.query_params=}")
         elastic_request_serializer = ElasticRequestSerializer(data=request.query_params)
         elastic_request_serializer.is_valid(raise_exception=True)
         elastic_request_params: ElasticRequest = elastic_request_serializer.save()
@@ -1628,7 +1619,7 @@ class ElasticSearchView(GenericAPIView):
                 index=f"plugin-report-{get_environment()}*",
             )
             .query(QElastic("bool", filter=filter_list))
-            .extra(size=10000)  # max allowed size
+            .extra(size=1000)  # max allowed size is 10k
             .execute()
         )
         logger.info(f"filters: {filter_list}, total hits: {len(elastic_response)}")

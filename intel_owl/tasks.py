@@ -406,33 +406,15 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
 
     from api_app.analyzers_manager.models import AnalyzerReport
     from api_app.connectors_manager.models import ConnectorReport
-    from api_app.models import AbstractReport, LastElasticReportUpdate
+    from api_app.models import AbstractReport
     from api_app.pivots_manager.models import PivotReport
 
     if settings.ELASTICSEARCH_DSL_ENABLED and settings.ELASTICSEARCH_DSL_HOST:
         upper_threshold = now().replace(second=0, microsecond=0)
-        try:
-            last_elastic_report_update = LastElasticReportUpdate.objects.get()
-        except LastElasticReportUpdate.DoesNotExist:
-            # first time is missing, use time schedule (5 minutes)
-            first_run_start_date = upper_threshold - datetime.timedelta(minutes=5)
-            logger.warning(
-                f"not stored last update time, create it from: {first_run_start_date}"
-            )
-            last_elastic_report_update = LastElasticReportUpdate(
-                last_update_datetime=first_run_start_date
-            )
-            last_elastic_report_update.save()
-
-        lower_threshold = last_elastic_report_update.last_update_datetime
+        lower_threshold = upper_threshold - datetime.timedelta(minutes=1)
         logger.info(
             f"add to elastic reports from: {lower_threshold} to {upper_threshold}"
         )
-        if upper_threshold - lower_threshold > datetime.timedelta(days=10):
-            logger.warning(
-                "the time range is greater than 10 days this could requires too much memory."
-                "In case this happen edit time in the db collection to reduce the range."
-            )
 
         def _convert_report_to_elastic_document(
             _class: AbstractReport,
@@ -504,9 +486,7 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
         except ApiError as error:
             logger.critical(error)
         else:
-            last_elastic_report_update.last_update_datetime = upper_threshold
-            last_elastic_report_update.save()
-            logger.info("documents correctly inserted! last report datetime updated")
+            logger.info("documents correctly inserted!")
 
 
 @shared_task(

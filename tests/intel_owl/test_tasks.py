@@ -9,7 +9,7 @@ from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.choices import Classification, PythonModuleBasePaths
 from api_app.connectors_manager.models import ConnectorConfig, ConnectorReport
 from api_app.ingestors_manager.models import IngestorConfig, IngestorReport
-from api_app.models import Job, LastElasticReportUpdate, PythonModule
+from api_app.models import Job, PythonModule
 from api_app.pivots_manager.models import PivotConfig, PivotReport
 from api_app.visualizers_manager.models import VisualizerConfig, VisualizerReport
 from certego_saas.apps.organization.membership import Membership
@@ -187,7 +187,6 @@ class SendElasticTestCase(CustomTestCase):
         IngestorReport.objects.all().delete()
         PivotReport.objects.all().delete()
         VisualizerReport.objects.all().delete()
-        LastElasticReportUpdate.objects.all().delete()
         self.user.delete()
         self.organization.delete()
         self.membership.delete()
@@ -197,7 +196,6 @@ class SendElasticTestCase(CustomTestCase):
     @override_settings(ELASTICSEARCH_DSL_ENABLED=True)
     @override_settings(ELASTICSEARCH_DSL_HOST="https://elasticsearch:9200")
     def test_initial(self, *args, **kwargs):
-        self.assertEqual(LastElasticReportUpdate.objects.count(), 0)
 
         with patch(
             "intel_owl.tasks.bulk",
@@ -327,17 +325,9 @@ class SendElasticTestCase(CustomTestCase):
                 ],
             )
 
-        self.assertEqual(
-            LastElasticReportUpdate.objects.get().last_update_datetime,
-            datetime.datetime(2024, 10, 29, 11, tzinfo=datetime.UTC),
-        )
-
     @override_settings(ELASTICSEARCH_DSL_ENABLED=True)
     @override_settings(ELASTICSEARCH_DSL_HOST="https://elasticsearch:9200")
     def test_update(self, *args, **kwargs):
-        LastElasticReportUpdate.objects.create(
-            last_update_datetime=_now - datetime.timedelta(minutes=5)
-        )
         with patch(
             "intel_owl.tasks.bulk",
             return_value=MockResponseNoOp(json_data={}, status_code=200),
@@ -463,8 +453,3 @@ class SendElasticTestCase(CustomTestCase):
                     },
                 ],
             )
-
-        self.assertEqual(
-            LastElasticReportUpdate.objects.get().last_update_datetime,
-            datetime.datetime(2024, 10, 29, 11, tzinfo=datetime.UTC),
-        )

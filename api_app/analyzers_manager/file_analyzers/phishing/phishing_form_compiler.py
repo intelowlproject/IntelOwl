@@ -160,7 +160,7 @@ class PhishingFormCompiler(FileAnalyzer):
         ):  # found a domain (relative file names such as "login.php" should start with /)
             logger.info(f"Found a domain in form action {form_action=}")
         elif "://" in form_action:
-            logger.info(f"Found a whole new url {form_action=}")
+            logger.info(f"Form is sending data to a whole new url {form_action=}")
         else:
             base_site = target_site
 

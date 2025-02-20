@@ -94,7 +94,7 @@ class AnalyzerReport(AbstractReport):
         for report_key, data_model_key in self.config.mapping_data_model.items():
             # this is a constant
             if report_key.startswith("$"):
-                value = report_key.replace("$", "")
+                value = report_key[1:]
             # this is a field of the report
             else:
                 try:

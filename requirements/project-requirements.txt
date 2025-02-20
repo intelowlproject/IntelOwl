@@ -89,6 +89,7 @@ pylnk3==0.4.2
 androguard==3.4.0a1 # version >=4.x of androguard raises a dependency conflict with quark-engine==25.1.1
 wad==0.4.6
 die-python==0.2.0
+httpx[http2]
 
 # this is required because XLMMacroDeobfuscator does not pin the following packages
 pyxlsb2==0.0.8

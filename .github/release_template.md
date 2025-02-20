@@ -11,7 +11,7 @@
 ```commandline
 please refer to the [Changelog](https://github.com/intelowlproject/IntelOwl/blob/develop/.github/CHANGELOG.md#v331)
 
-WARNING: The release will be live within an hour!
+WARNING: We are building the new version of the project! The release will be officially available within 2 hours!
 ```
 
 - [ ] Wait for [dockerHub](https://hub.docker.com/repository/docker/intelowlproject/intelowl) to finish the builds

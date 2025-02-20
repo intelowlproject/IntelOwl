@@ -3,7 +3,7 @@ Django==4.2.17
 psycopg2-binary==2.9.6
 django-auth-ldap==5.1.0
 django-radius==1.5.0
-django-filter==24.3
+django-filter==25.1
 django-storages==1.14
 django-celery-beat==2.7.0
 django-celery-results==2.5.0

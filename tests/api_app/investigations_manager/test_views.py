@@ -11,9 +11,6 @@ from certego_saas.apps.user.models import User
 
 
 class InvestigationViewSetTestCase(APITestCase):
-    fixtures = [
-        "api_app/fixtures/0001_user.json",
-    ]
     URL = "/api/investigation"
 
     def setUp(self):

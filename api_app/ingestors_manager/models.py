@@ -10,7 +10,7 @@ from django_celery_beat.models import CrontabSchedule, PeriodicTask
 
 from api_app.choices import PythonModuleBasePaths
 from api_app.ingestors_manager.exceptions import IngestorConfigurationException
-from api_app.ingestors_manager.queryset import IngestorReportQuerySet
+from api_app.ingestors_manager.queryset import IngestorQuerySet, IngestorReportQuerySet
 from api_app.interfaces import CreateJobsFromPlaybookInterface
 from api_app.models import (
     AbstractReport,
@@ -20,7 +20,6 @@ from api_app.models import (
     PythonModule,
 )
 from api_app.playbooks_manager.models import PlaybookConfig
-from api_app.queryset import IngestorQuerySet
 
 logger = logging.getLogger(__name__)
 

@@ -5,8 +5,7 @@ import datetime
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from api_app.analyzers_manager.constants import AllTypes
-from api_app.choices import TLP, ScanMode
+from api_app.choices import TLP, Classification, ScanMode
 from api_app.defaults import default_runtime
 from api_app.fields import ChoiceArrayField
 from api_app.interfaces import OwnershipAbstractModel
@@ -18,7 +17,7 @@ from api_app.validators import validate_runtime_configuration
 class PlaybookConfig(AbstractConfig, OwnershipAbstractModel):
     objects = PlaybookConfigQuerySet.as_manager()
     type = ChoiceArrayField(
-        models.CharField(choices=AllTypes.choices, null=False, max_length=50)
+        models.CharField(choices=Classification.choices, null=False, max_length=50)
     )
 
     analyzers = models.ManyToManyField(
@@ -113,4 +112,4 @@ class PlaybookConfig(AbstractConfig, OwnershipAbstractModel):
         self.clean_starting()
 
     def is_sample(self) -> bool:
-        return AllTypes.FILE.value in self.type
+        return Classification.FILE.value in self.type

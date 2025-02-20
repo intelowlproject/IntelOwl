@@ -20,11 +20,11 @@ from django.utils.timezone import now
 from django_celery_beat.models import PeriodicTask
 from elasticsearch import ApiError
 from elasticsearch.helpers import bulk
-from elasticsearch_dsl import connections
 
 from api_app.choices import ReportStatus, Status
 from intel_owl import secrets
 from intel_owl.celery import app, get_queue_name
+from intel_owl.settings._util import get_environment
 
 logger = logging.getLogger(__name__)
 
@@ -91,6 +91,9 @@ def remove_old_jobs():
     num_jobs_to_delete = old_jobs.count()
     logger.info(f"found {num_jobs_to_delete} old jobs to delete")
     for old_job in old_jobs.iterator():
+        # if the job that we are going to delete is the last one, and it has a file
+        if old_job.analyzable.jobs.count() == 1 and old_job.analyzable.file:
+            old_job.analyzable.file.delete()
         try:
             old_job.delete()
         except Job.DoesNotExist as e:
@@ -403,25 +406,12 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
 
     from api_app.analyzers_manager.models import AnalyzerReport
     from api_app.connectors_manager.models import ConnectorReport
-    from api_app.models import AbstractReport, LastElasticReportUpdate
+    from api_app.models import AbstractReport
     from api_app.pivots_manager.models import PivotReport
 
     if settings.ELASTICSEARCH_DSL_ENABLED and settings.ELASTICSEARCH_DSL_HOST:
         upper_threshold = now().replace(second=0, microsecond=0)
-        try:
-            last_elastic_report_update = LastElasticReportUpdate.objects.get()
-        except LastElasticReportUpdate.DoesNotExist:
-            # first time is missing, use time schedule (5 minutes)
-            first_run_start_date = upper_threshold - datetime.timedelta(minutes=5)
-            logger.warning(
-                f"not stored last update time, create it from: {first_run_start_date}"
-            )
-            last_elastic_report_update = LastElasticReportUpdate(
-                last_update_datetime=first_run_start_date
-            )
-            last_elastic_report_update.save()
-
-        lower_threshold = last_elastic_report_update.last_update_datetime
+        lower_threshold = upper_threshold - datetime.timedelta(minutes=1)
         logger.info(
             f"add to elastic reports from: {lower_threshold} to {upper_threshold}"
         )
@@ -441,6 +431,7 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
                     "_op_type": "index",
                     "_index": (
                         "plugin-report-"
+                        f"{get_environment()}-"
                         f"{inflection.underscore(_class.__name__).replace('_', '-')}-"
                         f"{now().date()}"
                     ),
@@ -491,12 +482,11 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
         )
         logger.info(f"documents to add to elastic: {len(all_report_document_list)}")
         try:
-            bulk(connections.get_connection(), all_report_document_list)
+            bulk(settings.ELASTICSEARCH_DSL_CLIENT, all_report_document_list)
         except ApiError as error:
             logger.critical(error)
         else:
-            last_elastic_report_update.last_update_datetime = upper_threshold
-            last_elastic_report_update.save()
+            logger.info("documents correctly inserted!")
 
 
 @shared_task(

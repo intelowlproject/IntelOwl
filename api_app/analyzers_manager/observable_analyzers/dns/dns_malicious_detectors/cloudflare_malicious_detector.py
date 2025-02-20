@@ -9,6 +9,7 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..dns_responses import malicious_detector_response
@@ -24,7 +25,7 @@ class CloudFlareMaliciousDetector(classes.ObservableAnalyzer):
             is_malicious = False
             observable = self.observable_name
             # for URLs we are checking the relative domain
-            if self.observable_classification == self.ObservableTypes.URL:
+            if self.observable_classification == Classification.URL:
                 observable = urlparse(self.observable_name).hostname
 
             params = {

@@ -100,8 +100,7 @@ class Investigation(OwnershipAbstractModel, ListCachable):
         related_job_id_list = [
             job.id
             for job in Job.objects.filter(
-                models.Q(observable_name__icontains=analyzed_object_name)
-                | models.Q(file_name__icontains=analyzed_object_name)
+                analyzable__name__icontains=analyzed_object_name
             )
         ]
         return queryset.filter(jobs__in=related_job_id_list).distinct()

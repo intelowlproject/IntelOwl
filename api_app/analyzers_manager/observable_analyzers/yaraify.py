@@ -5,6 +5,7 @@ import logging
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
+from api_app.choices import Classification
 from api_app.mixins import AbuseCHMixin
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
@@ -24,7 +25,7 @@ class YARAify(AbuseCHMixin, ObservableAnalyzer):
     def run(self):
         data = {"search_term": self.observable_name, "query": self.query}
 
-        if self.observable_classification == self.ObservableTypes.GENERIC:
+        if self.observable_classification == Classification.GENERIC:
             data["result_max"] = self.result_max
 
         if getattr(self, "_api_key_name", None):

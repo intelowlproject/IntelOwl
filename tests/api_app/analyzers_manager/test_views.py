@@ -3,9 +3,9 @@
 from typing import Type
 from unittest.mock import patch
 
-from api_app.analyzers_manager.constants import ObservableTypes
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
-from api_app.choices import PythonModuleBasePaths
+from api_app.choices import Classification, PythonModuleBasePaths
 from api_app.models import Job, PythonModule
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
@@ -188,12 +188,11 @@ class AnalyzerActionViewSetTests(CustomViewSetTestCase, PluginActionViewsetTestC
 
     def init_report(self, status: str, user) -> AnalyzerReport:
         config = AnalyzerConfig.objects.get(name="HaveIBeenPwned")
-        _job = Job.objects.create(
-            user=user,
-            status=Job.STATUSES.RUNNING,
-            observable_name="8.8.8.8",
-            observable_classification=ObservableTypes.IP,
+        an = Analyzable.objects.create(
+            name="8.8.8.8",
+            classification=Classification.IP,
         )
+        _job = Job.objects.create(user=user, status=Job.STATUSES.RUNNING, analyzable=an)
         _job.analyzers_to_execute.set([config])
         _report, _ = AnalyzerReport.objects.get_or_create(
             **{

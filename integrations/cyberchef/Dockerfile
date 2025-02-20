@@ -1,5 +1,5 @@
 # Adapted from https://github.com/gchq/CyberChef-server/blob/master/Dockerfile
-FROM node:alpine3.10
+FROM node:lts-alpine3.21
 RUN apk update && apk --no-cache add git
 LABEL author = "Wes Lambert, wlambertts@gmail.com"
 LABEL description="Dockerised version of Cyberchef server (https://github.com/gchq/CyberChef-server)"

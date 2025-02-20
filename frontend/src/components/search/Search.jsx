@@ -407,9 +407,7 @@ export default function Search() {
                 size="sm"
                 color="primary"
                 type="submit"
-                disabled={
-                  !formik.isValid || formik.isSubmitting || !formik.dirty
-                }
+                disabled={!formik.isValid || formik.isSubmitting}
               >
                 {formik.isSubmitting && <Spinner size="sm" />}Search
               </Button>

@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 import requests
 
 from api_app.analyzers_manager import classes
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..dns_responses import dns_resolver_response
@@ -22,7 +23,7 @@ class Quad9DNSResolver(classes.ObservableAnalyzer):
     def run(self):
         observable = self.observable_name
         # for URLs we are checking the relative domain
-        if self.observable_classification == self.ObservableTypes.URL:
+        if self.observable_classification == Classification.URL:
             observable = urlparse(self.observable_name).hostname
 
         params = {"name": observable, "type": self.query_type}

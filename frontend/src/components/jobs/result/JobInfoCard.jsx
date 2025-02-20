@@ -75,7 +75,7 @@ export function JobInfoCard({ job }) {
               {job.is_sample ? job.file_name : job.observable_name} in the last
               30 days.
             </UncontrolledTooltip>
-            {job.investigation && (
+            {job.investigation_id && (
               <>
                 <Button
                   className="bg-darker border-1 lh-sm mx-1"
@@ -92,7 +92,8 @@ export function JobInfoCard({ job }) {
                   placement="top"
                   target="investigationOverviewBtn"
                 >
-                  This job is part of the investigation #{job.investigation}
+                  This job is part of the investigation #
+                  {job.invinvestigation_id}
                 </UncontrolledTooltip>
               </>
             )}

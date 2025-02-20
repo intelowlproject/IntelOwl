@@ -1,0 +1,6 @@
+services:
+  thug:
+    build:
+      context: ../integrations/thug
+      dockerfile: Dockerfile
+    image: intelowlproject/intelowl_thug:test

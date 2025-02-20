@@ -1,5 +1,7 @@
 from rest_framework.test import APITestCase
 
+from api_app.analyzables_manager.models import Analyzable
+from api_app.choices import Classification
 from api_app.helpers import get_now
 from api_app.investigations_manager.models import Investigation
 from api_app.models import Job
@@ -9,6 +11,9 @@ from certego_saas.apps.user.models import User
 
 
 class InvestigationViewSetTestCase(APITestCase):
+    fixtures = [
+        "api_app/fixtures/0001_user.json",
+    ]
     URL = "/api/investigation"
 
     def setUp(self):
@@ -37,9 +42,12 @@ class InvestigationViewSetTestCase(APITestCase):
         self.another_investigation = Investigation.objects.create(
             owner=self.another_org_user, name="another investigation"
         )
+        self.an, _ = Analyzable.objects.get_or_create(
+            name="test.com", classification=Classification.DOMAIN
+        )
         self.second_inv_job, _ = Job.objects.get_or_create(
             user=self.second_user,
-            observable_name="google.com",
+            analyzable=self.an,
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
             investigation=self.third_investigation,
         )
@@ -52,6 +60,7 @@ class InvestigationViewSetTestCase(APITestCase):
         self.second_investigation.delete()
         self.third_investigation.delete()
         self.another_investigation.delete()
+        self.an.delete()
         self.org.delete()
         self.first_user.delete()
         self.second_user.delete()
@@ -68,7 +77,7 @@ class InvestigationViewSetTestCase(APITestCase):
         )
         # test filter for analyzed name
         filtered_investigation_response = self.client.get(
-            self.URL, data={"analyzed_object_name": "google"}
+            self.URL, data={"analyzed_object_name": "test"}
         )
         self.assertEqual(filtered_investigation_response.status_code, 200)
         filtered_investigation_response_data = filtered_investigation_response.json()
@@ -131,9 +140,8 @@ class InvestigationViewSetTestCase(APITestCase):
             result["errors"]["detail"], "You should set the `job` argument in the data"
         )
         job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
             user=self.second_user,
+            analyzable=self.an,
         )
         response = self.client.post(
             f"{self.URL}/{self.first_investigation.pk}/add_job", data={"job": job.pk}
@@ -161,14 +169,12 @@ class InvestigationViewSetTestCase(APITestCase):
             result["errors"]["detail"], "You should set the `job` argument in the data"
         )
         job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
             user=self.second_user,
+            analyzable=self.an,
             finished_analysis_time=get_now(),
         )
         job2 = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=self.an,
             user=self.first_user,
             finished_analysis_time=get_now(),
         )

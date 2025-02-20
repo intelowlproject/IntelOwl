@@ -8,6 +8,7 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
@@ -21,9 +22,9 @@ class Hunter_How(classes.ObservableAnalyzer):
 
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
-        if self.observable_classification == self.ObservableTypes.IP:
+        if self.observable_classification == Classification.IP:
             self.query = f'ip="{self.observable_name}"'
-        elif self.observable_classification == self.ObservableTypes.DOMAIN:
+        elif self.observable_classification == Classification.DOMAIN:
             self.query = f'domain="{self.observable_name}"'
 
         self.encoded_query = base64.urlsafe_b64encode(

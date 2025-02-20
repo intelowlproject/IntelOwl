@@ -8,6 +8,7 @@ import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -80,7 +81,7 @@ class UrlScan(ObservableAnalyzer):
             "q": f'{self.observable_classification}:"{self.observable_name}"',
             "size": self.search_size,
         }
-        if self.observable_classification == self.ObservableTypes.URL:
+        if self.observable_classification == Classification.URL:
             params["q"] = "page." + params["q"]
         resp = self.session.get(self.url + "/search/", params=params)
         resp.raise_for_status()

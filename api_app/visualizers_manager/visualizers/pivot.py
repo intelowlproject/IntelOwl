@@ -108,7 +108,7 @@ class Pivot(Visualizer):
         if pivot_config:
             label += f"{pivot_config.name}: "
         label += (
-            f"Job #{job.pk} ({job.analyzed_object_name}, "
+            f"Job #{job.pk} ({job.analyzable.name}, "
             f"playbook: {job.playbook_to_execute})"
         )
         return self.Base(

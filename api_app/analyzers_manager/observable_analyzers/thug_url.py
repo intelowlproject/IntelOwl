@@ -8,7 +8,7 @@ from api_app.analyzers_manager.classes import DockerBasedAnalyzer, ObservableAna
 
 class ThugUrl(ObservableAnalyzer, DockerBasedAnalyzer):
     name: str = "Thug"
-    url: str = "http://malware_tools_analyzers:4002/thug"
+    url: str = "http://thug:4002/thug"
     # http request polling max number of tries
     max_tries: int = 15
     # interval between http request polling (in seconds)
@@ -23,6 +23,11 @@ class ThugUrl(ObservableAnalyzer, DockerBasedAnalyzer):
 
     def _thug_args_builder(self):
         user_agent = self.user_agent
+        if not user_agent:
+            user_agent = (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                "(KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/131.0.2903.86"
+            )
         dom_events = self.dom_events
         use_proxy = self.use_proxy
         proxy = self.proxy
@@ -48,6 +53,7 @@ class ThugUrl(ObservableAnalyzer, DockerBasedAnalyzer):
         tmp_dir = secrets.token_hex(4)
         tmp_dir_full_path = "/opt/deploy/thug" + tmp_dir
         # make request data
+        # the option -n is bugged and does not work https://github.com/intelowlproject/IntelOwl/issues/2656
         args.extend(["-n", tmp_dir_full_path, self.observable_name])
 
         req_data = {

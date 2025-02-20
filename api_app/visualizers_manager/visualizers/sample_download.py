@@ -32,7 +32,7 @@ class SampleDownload(Visualizer):
     def _download_button(self):
         # first attempt is download with VT
         try:
-            vt_report = self.analyzer_reports().get(
+            vt_report = self.get_analyzer_reports().get(
                 config__python_module=VirusTotalv3SampleDownload.python_module
             )
         except AnalyzerReport.DoesNotExist:
@@ -48,7 +48,7 @@ class SampleDownload(Visualizer):
 
         # second attempt is download with VT
         try:
-            uri_report = self.analyzer_reports().get(
+            uri_report = self.get_analyzer_reports().get(
                 config__python_module=DownloadFileFromUri.python_module
             )
         except AnalyzerReport.DoesNotExist:

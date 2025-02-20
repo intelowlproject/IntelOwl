@@ -39,4 +39,4 @@ Please delete options that are not relevant.
 
 ### Important Rules
 - If you miss to compile the Checklist properly, your PR won't be reviewed by the maintainers.
-- Everytime you make changes to the PR and you think the work is done, you should explicitly ask for a review. After being reviewed and received a "change request", you should explicitly ask for a review again once you have made the requested changes.
+- Everytime you make changes to the PR and you think the work is done, you should explicitly ask for a review by using GitHub's reviewing system detailed [here](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/requesting-a-pull-request-review).

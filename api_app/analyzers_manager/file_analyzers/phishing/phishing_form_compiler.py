@@ -137,17 +137,20 @@ class PhishingFormCompiler(FileAnalyzer):
             if input_name in names:
                 return fake_value
 
-    def extract_action_attribute(self, form) -> str:
+    #         guarda anche i log di errore
+
+    @staticmethod
+    def extract_action_attribute(target_site: str, form) -> str:
         form_action: str = form.get("action", None)
         if not form_action:
             logger.info(
-                f"'action' attribute not found in form. Defaulting to {self.target_site=}"
+                f"'action' attribute not found in form. Defaulting to {target_site=}"
             )
-            form_action = self.target_site
+            form_action = target_site
         elif form_action.startswith("/"):  # pure relative url
             logger.info(f"Found relative url in {form_action=}")
             form_action = form_action.replace("/", "", 1)
-            base_site = self.target_site
+            base_site = target_site
 
             if base_site.endswith("/"):
                 base_site = base_site[:-1]
@@ -156,8 +159,10 @@ class PhishingFormCompiler(FileAnalyzer):
             "." in form_action and "://" not in form_action
         ):  # found a domain (relative file names such as "login.php" should start with /)
             logger.info(f"Found a domain in form action {form_action=}")
+        elif "://" in form_action:
+            logger.info(f"Found a whole new url {form_action=}")
         else:
-            base_site = self.target_site
+            base_site = target_site
 
             if base_site.endswith("/"):
                 base_site = base_site[:-1]
@@ -203,7 +208,7 @@ class PhishingFormCompiler(FileAnalyzer):
 
     def perform_request_to_form(self, form) -> Response:
         params = self.compile_form_field(form)
-        dest_url = self.extract_action_attribute(form)
+        dest_url = self.extract_action_attribute(self.target_site, form)
         logger.info(f"Job #{self.job_id}: Sending {params=} to submit url {dest_url}")
         headers = {
             "User-Agent": self.user_agent,

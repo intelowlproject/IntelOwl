@@ -45,10 +45,11 @@ function CustomRedirect() {
 
   return (
     <Navigate
-      to={`/history/jobs?start-time=${format(
-        startDatetime,
-        datetimeFormatStr,
-      )}&end-time=${format(endDatetime, datetimeFormatStr)}`}
+      to={`/history/jobs?start-time=${encodeURIComponent(
+        format(startDatetime, datetimeFormatStr),
+      )}&end-time=${encodeURIComponent(
+        format(endDatetime, datetimeFormatStr),
+      )}`}
       replace
     />
   );

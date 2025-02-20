@@ -103,13 +103,8 @@ export default function InvestigationsTable() {
         analyzedObjectNameParam !== searchNameRequest
       ) {
         setSearchParams({
-          "start-time": decodeURIComponent(
-            format(searchFromDateValue, datetimeFormatStr),
-          ),
-          // eslint-disable-next-line id-length
-          "end-time": decodeURIComponent(
-            format(searchToDateValue, datetimeFormatStr),
-          ),
+          "start-time": format(searchFromDateValue, datetimeFormatStr),
+          "end-time": format(searchToDateValue, datetimeFormatStr),
           "analyzed-object-name": searchNameRequest,
         });
       }

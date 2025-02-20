@@ -13,13 +13,13 @@ import {
 } from "reactstrap";
 import { Link } from "react-router-dom";
 import { MdInfoOutline } from "react-icons/md";
-import { JSONTree } from "react-json-tree";
 import { Loader, DataTable } from "@certego/certego-ui";
 
 import { format } from "date-fns";
 import { PluginsTypes, PluginFinalStatuses } from "../../constants/pluginConst";
 import { searchTableColumns } from "./searchTableColumns";
 import { pluginReportQueries } from "./searchApi";
+import { JsonEditor } from "../common/JsonEditor";
 
 // table config
 const tableConfig = { enableExpanded: true, enableFlexLayout: true };
@@ -34,7 +34,12 @@ const tableProps = {
       id={`jobreport-jsoninput-${row.id}`}
       style={{ maxHeight: "50vh", overflow: "scroll" }}
     >
-      <JSONTree data={row.original?.report} keyPath={["report"]} />
+      <JsonEditor
+        id="plugin_report_json"
+        initialJsonData={row.original?.report}
+        width="100%"
+        readOnly
+      />
     </div>
   ),
 };

@@ -197,11 +197,6 @@ export function JobOverview({
             id={`jobfullreport-jsoninput-${job.id}`}
             style={{ height: "65vh", overflow: "scroll" }}
           >
-            {/* <JSONTree
-              data={job}
-              keyPath={["job"]}
-              shouldExpandNodeInitially={() => true}
-            /> */}
             <JsonEditor
               id="job_full_report_json"
               initialJsonData={job}

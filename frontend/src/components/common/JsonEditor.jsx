@@ -1,12 +1,21 @@
 import React from "react";
 import PropTypes from "prop-types";
-import "ace-builds";
-import "ace-builds/webpack-resolver";
 import AceEditor from "react-ace";
 
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/theme-solarized_dark";
 import "ace-builds/src-noconflict/ext-language_tools";
+
+const ace = require("ace-builds/src-noconflict/ace");
+
+ace.config.set(
+  "basePath",
+  "https://cdn.jsdelivr.net/npm/ace-builds@1.4.3/src-noconflict/",
+);
+ace.config.setModuleUrl(
+  "ace/mode/json_worker",
+  "https://cdn.jsdelivr.net/npm/ace-builds@1.4.3/src-noconflict/worker-json.js",
+);
 
 export function JsonEditor({
   id,
@@ -15,6 +24,7 @@ export function JsonEditor({
   height,
   width,
   readOnly,
+  levelToOpen,
 }) {
   const [currentJsonData, setCurrentJasonData] =
     React.useState(initialJsonData);
@@ -49,6 +59,11 @@ export function JsonEditor({
         tabSize: 2,
         dragEnabled: false,
       }}
+      onLoad={(editor) => {
+        const editorSession = editor.getSession();
+        if (levelToOpen !== 0) return editorSession.foldToLevel(levelToOpen);
+        return null;
+      }}
       annotations={[]}
     />
   );
@@ -61,10 +76,12 @@ JsonEditor.propTypes = {
   height: PropTypes.string,
   width: PropTypes.string,
   readOnly: PropTypes.bool,
+  levelToOpen: PropTypes.number,
 };
 
 JsonEditor.defaultProps = {
   height: "500px",
   width: "500px",
   readOnly: false,
+  levelToOpen: 0,
 };

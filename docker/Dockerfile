@@ -21,9 +21,12 @@ ENV PYTHONPATH=/opt/deploy/intel_owl
 ENV LOG_PATH=/var/log/intel_owl
 ARG REPO_DOWNLOADER_ENABLED=true
 ARG WATCHMAN=false
+ARG TARGETARCH
 ENV watch_logs_cmd="watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
 # This is required to allow compatibility with different OpenCTI instances
 ARG PYCTI_VERSION=6.5.1
+# this is required for if/else statements
+SHELL ["/bin/bash", "-c"]
 
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \
@@ -45,10 +48,14 @@ RUN apt-get update \
     && pip3 install --no-cache-dir --upgrade pip
 
 COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
+COPY requirements/amd-only-requirements.txt $PYTHONPATH/amd-only-requirements.txt
 COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
 WORKDIR $PYTHONPATH
 
-RUN pip3 install --no-cache-dir --compile -r project-requirements.txt \
+RUN if [[ "$TARGETARCH" == "amd64" ]]; \
+    then pip3 install --no-cache-dir --compile -r amd-only-requirements.txt;  \
+    else echo "skipping installation of AMD only requirements"; fi \
+    && pip3 install --no-cache-dir --compile -r project-requirements.txt \
     && pip3 install --no-cache-dir pycti==${PYCTI_VERSION} \
     && pip3 install --no-cache-dir --compile -r certego-requirements.txt
 

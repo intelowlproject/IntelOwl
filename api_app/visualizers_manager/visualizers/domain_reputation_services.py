@@ -242,7 +242,7 @@ class DomainReputationServices(Visualizer):
             third_level_elements.append(
                 self.Bool(
                     value=printable_analyzer_name,
-                    disable=not analyzer_report.report["malicious"],
+                    disable=not analyzer_report.report.get("malicious"),
                 )
             )
 

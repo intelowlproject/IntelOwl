@@ -71,9 +71,9 @@ export function JobInfoCard({ job }) {
               placement="top"
               target="investigationSearchBtn"
             >
-              Search other investigations for{" "}
+              Search investigations for{" "}
               {job.is_sample ? job.file_name : job.observable_name} in the last
-              7 days.
+              30 days.
             </UncontrolledTooltip>
             {job.investigation && (
               <>

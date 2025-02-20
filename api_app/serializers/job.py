@@ -562,7 +562,7 @@ class JobSerializer(_AbstractJobViewSerializer):
     def get_related_investigation_number(self, instance: Job) -> int:
         return Investigation.investigation_for_analyzable(
             Investigation.objects.filter(
-                start_time__gte=now() - datetime.timedelta(days=7),
+                start_time__gte=now() - datetime.timedelta(days=30),
             ),
             instance.analyzed_object_name,
         ).count()

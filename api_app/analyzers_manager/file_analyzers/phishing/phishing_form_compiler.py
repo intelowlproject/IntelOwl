@@ -1,6 +1,7 @@
 import logging
 from datetime import date, timedelta
 from typing import Dict
+from urllib.parse import urljoin
 
 import requests
 from faker import Faker  # skipcq: BAN-B410
@@ -140,21 +141,19 @@ class PhishingFormCompiler(FileAnalyzer):
     #         guarda anche i log di errore
 
     @staticmethod
-    def extract_action_attribute(target_site: str, form) -> str:
+    def extract_action_attribute(base_site: str, form) -> str:
         form_action: str = form.get("action", None)
         if not form_action:
             logger.info(
-                f"'action' attribute not found in form. Defaulting to {target_site=}"
+                f"'action' attribute not found in form. Defaulting to {base_site=}"
             )
-            form_action = target_site
-        elif form_action.startswith("/"):  # pure relative url
+            form_action = base_site
+        elif "://" in base_site and form_action.startswith(
+            "/"
+        ):  # pure relative url with target_site as url
             logger.info(f"Found relative url in {form_action=}")
-            form_action = form_action.replace("/", "", 1)
-            base_site = target_site
 
-            if base_site.endswith("/"):
-                base_site = base_site[:-1]
-            form_action = base_site + "/" + form_action
+            form_action = urljoin(base_site, form_action)
         elif (
             "." in form_action and "://" not in form_action
         ):  # found a domain (relative file names such as "login.php" should start with /)
@@ -162,8 +161,6 @@ class PhishingFormCompiler(FileAnalyzer):
         elif "://" in form_action:
             logger.info(f"Form is sending data to a whole new url {form_action=}")
         else:
-            base_site = target_site
-
             if base_site.endswith("/"):
                 base_site = base_site[:-1]
             form_action = base_site + "/" + form_action

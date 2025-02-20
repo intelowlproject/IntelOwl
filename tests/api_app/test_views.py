@@ -140,7 +140,6 @@ class JobViewSetTests(CustomViewSetTestCase):
             self.job3, _ = Job.objects.get_or_create(
                 **{
                     "user": self.superuser,
-                    "is_sample": False,
                     "analyzable": self.analyzable,
                     "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
                     "tlp": Job.TLP.AMBER.value,

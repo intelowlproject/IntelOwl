@@ -137,8 +137,6 @@ class PhishingFormCompiler(FileAnalyzer):
             if input_name in names:
                 return fake_value
 
-    #         guarda anche i log di errore
-
     @staticmethod
     def extract_action_attribute(base_site: str, form) -> str:
         # we always return an URL to prevent MissingSchema error in request

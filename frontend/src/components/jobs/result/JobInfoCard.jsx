@@ -35,12 +35,13 @@ export function JobInfoCard({ job }) {
   const [isOpenJobWarnings, setIsOpenJobWarnings] = React.useState(false);
   const [isOpenJobErrors, setIsOpenJobErrors] = React.useState(false);
 
+  const investigationTimeRange = 30;
   const endDateRelatedInvestigation = new Date();
   const startDateRelatedInvestigation = structuredClone(
     endDateRelatedInvestigation,
   );
   startDateRelatedInvestigation.setDate(
-    startDateRelatedInvestigation.getDate() - 30,
+    startDateRelatedInvestigation.getDate() - investigationTimeRange,
   );
 
   return (
@@ -73,7 +74,7 @@ export function JobInfoCard({ job }) {
             >
               Search investigations for{" "}
               {job.is_sample ? job.file_name : job.observable_name} in the last
-              30 days.
+              {` ${investigationTimeRange}`} days.
             </UncontrolledTooltip>
             {job.investigation_id && (
               <>

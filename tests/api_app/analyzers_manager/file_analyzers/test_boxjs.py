@@ -31,7 +31,7 @@ class BoxJSTestCase(CustomTestCase):
         self.assertCountEqual(
             downloader_js_report["uris"],
             [
-                "http://horus-protector.pro/c/s4.txt",
-                "http://horus-protector.pro/c/r4.txt",
+                "http://horus-protector.pro/c/s2.txt",
+                "http://horus-protector.pro/c/r2.txt",
             ],
         )

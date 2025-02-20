@@ -5,6 +5,7 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
@@ -22,9 +23,9 @@ class SecurityTrails(classes.ObservableAnalyzer):
     def run(self):
         headers = {"apikey": self._api_key_name, "Content-Type": "application/json"}
 
-        if self.observable_classification == self.ObservableTypes.IP:
+        if self.observable_classification == Classification.IP:
             uri = f"ips/nearby/{self.observable_name}"
-        elif self.observable_classification == self.ObservableTypes.DOMAIN:
+        elif self.observable_classification == Classification.DOMAIN:
             if self.securitytrails_analysis == "current":
                 if self.securitytrails_current_type == "details":
                     uri = f"domain/{self.observable_name}"

@@ -8,6 +8,7 @@ import requests
 from dns.rrset import RRset
 
 from api_app.analyzers_manager import classes
+from api_app.choices import Classification
 
 from ..dns_responses import malicious_detector_response
 
@@ -72,7 +73,7 @@ class AdGuard(classes.ObservableAnalyzer):
         logger.info(f"Running AdGuard DNS analyzer for {self.observable_name}")
         observable = self.observable_name
         # for URLs we are checking the relative domain
-        if self.observable_classification == self.ObservableTypes.URL:
+        if self.observable_classification == Classification.URL:
             logger.info(f"Extracting domain from URL {observable}")
             observable = urlparse(self.observable_name).hostname
         encoded_query = self.encode_query(observable)

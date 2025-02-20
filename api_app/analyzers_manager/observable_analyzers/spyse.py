@@ -7,6 +7,7 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from intel_owl.consts import REGEX_CVE, REGEX_EMAIL
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
@@ -21,11 +22,11 @@ class Spyse(classes.ObservableAnalyzer):
         pass
 
     def __build_spyse_api_uri(self) -> str:
-        if self.observable_classification == self.ObservableTypes.DOMAIN:
+        if self.observable_classification == Classification.DOMAIN:
             endpoint = "domain"
-        elif self.observable_classification == self.ObservableTypes.IP:
+        elif self.observable_classification == Classification.IP:
             endpoint = "ip"
-        elif self.observable_classification == self.ObservableTypes.GENERIC:
+        elif self.observable_classification == Classification.GENERIC:
             # it may be email
             if re.match(REGEX_EMAIL, self.observable_name):
                 endpoint = "email"

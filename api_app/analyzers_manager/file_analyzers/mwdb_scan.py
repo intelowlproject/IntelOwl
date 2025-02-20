@@ -90,7 +90,7 @@ class MWDB_Scan(FileAnalyzer):
     def run(self):
         result = {}
         binary = self.read_file_bytes()
-        query = self._job.sha256
+        query = self._job.analyzable.sha256
         self.mwdb = mwdblib.MWDB(api_key=self._api_key_name)
 
         if self.upload_file:

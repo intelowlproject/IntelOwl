@@ -104,6 +104,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
+        ("playbooks_manager", "0045_playbook_config_passive_dns"),
         ("visualizers_manager", "0037_4_change_primary_key"),
     ]
 

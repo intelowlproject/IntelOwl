@@ -11,7 +11,7 @@ RUN useradd -ms /bin/bash ${USER}
 # Install Google Chrome and Chromium
 RUN DEBIAN_FRONTEND=noninteractive apt-get update -qq \
     && apt-get install -y --no-install-recommends \
-    libvulkan1 libu2f-udev fonts-liberation chromium sudo \
+    libvulkan1 libu2f-udev fonts-liberation sudo \
     && pip3 install --no-cache-dir --upgrade pip \
     # Cleanup
     && apt-get remove --purge -y gcc \

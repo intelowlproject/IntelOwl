@@ -5,9 +5,10 @@
 from django.core.files import File
 from kombu import uuid
 
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.classes import FileAnalyzer, ObservableAnalyzer
-from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.models import AnalyzerConfig, MimeTypes
+from api_app.choices import Classification
 from api_app.models import Job, PluginConfig
 from tests import CustomTestCase
 
@@ -97,16 +98,20 @@ class FileAnalyzerTestCase(CustomTestCase):
         ):
             try:
                 with open(f"test_files/{sample_name}", "rb") as f:
-                    Job.objects.create(
-                        is_sample=True,
-                        file_name=sample_name,
-                        file_mimetype=mimetype,
+                    an = Analyzable.objects.create(
                         file=File(f),
+                        name=sample_name,
+                        mimetype=mimetype,
+                        classification=Classification.FILE,
+                    )
+                    Job.objects.create(
+                        analyzable=an,
                         user=self.superuser,
                     )
+
                     print(f"Created job for {sample_name}, with mimetype {mimetype}")
             except Exception:
-                print(f"No defined file for mimetype {mimetype}")
+                self.fail(f"No defined file for mimetype {mimetype}")
 
     def test_subclasses(self):
         def handler(signum, frame):
@@ -152,14 +157,14 @@ class FileAnalyzerTestCase(CustomTestCase):
                         print(f"skipping {subclass.__name__} cause health check failed")
                         skipped = True
                         continue
-                    jobs = Job.objects.filter(file_mimetype=mimetype)
+                    jobs = Job.objects.filter(analyzable__mimetype=mimetype)
                     if jobs.exists():
                         found_one = True
                     for job in jobs:
                         job.analyzers_to_execute.set([config])
                         print(
                             "\t\t"
-                            f"Testing {job.file_name} with mimetype {mimetype}"
+                            f"Testing {job.analyzable.name} with mimetype {mimetype}"
                             f" for {timeout_seconds} seconds"
                         )
                         signal.alarm(timeout_seconds)
@@ -179,9 +184,9 @@ class FileAnalyzerTestCase(CustomTestCase):
                         f" with configuration {config.name}"
                     )
 
-    @staticmethod
-    def tearDown() -> None:
+    def tearDown(self) -> None:
         Job.objects.all().delete()
+        super().tearDown()
 
 
 class ObservableAnalyzerTestCase(CustomTestCase):
@@ -191,52 +196,73 @@ class ObservableAnalyzerTestCase(CustomTestCase):
 
     def test_config(self):
         config = AnalyzerConfig.objects.first()
-        job = Job.objects.create(
-            observable_name="test.com", observable_classification="domain"
+        an1 = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
         )
+        job = Job.objects.create(analyzable=an1)
         oa = MockUpObservableAnalyzer(config)
         oa.job_id = job.pk
         oa.config({})
         self.assertEqual(oa.observable_name, "test.com")
         self.assertEqual(oa.observable_classification, "domain")
         job.delete()
+        an1.delete()
 
     def _create_jobs(self):
+        an1 = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+        an2 = Analyzable.objects.create(
+            name="8.8.8.8",
+            classification=Classification.IP,
+        )
+        an3 = Analyzable.objects.create(
+            name="https://www.honeynet.org/projects/active/intel-owl/",
+            classification=Classification.URL,
+        )
+        an4 = Analyzable.objects.create(
+            name="3edd95917241e9ef9bbfc805c2c5aff3",
+            classification=Classification.HASH,
+        )
+        an5 = Analyzable.objects.create(
+            name="test@intelowl.com",
+            classification=Classification.GENERIC,
+        )
+        an6 = Analyzable.objects.create(
+            name="CVE-2024-51181",
+            classification=Classification.GENERIC,
+        )
+
         Job.objects.create(
             user=self.superuser,
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an1,
             status="reported_without_fails",
         )
         Job.objects.create(
             user=self.superuser,
-            observable_name="8.8.8.8",
-            observable_classification="ip",
+            analyzable=an2,
             status="reported_without_fails",
         )
         Job.objects.create(
             user=self.superuser,
-            observable_name="https://www.honeynet.org/projects/active/intel-owl/",
-            observable_classification="url",
+            analyzable=an3,
             status="reported_without_fails",
         )
         Job.objects.create(
             user=self.superuser,
-            observable_name="3edd95917241e9ef9bbfc805c2c5aff3",
-            observable_classification="hash",
+            analyzable=an4,
             status="reported_without_fails",
-            md5="3edd95917241e9ef9bbfc805c2c5aff3",
         )
         Job.objects.create(
             user=self.superuser,
-            observable_name="test@intelowl.com",
-            observable_classification="generic",
+            analyzable=an5,
             status="reported_without_fails",
         ),
         Job.objects.create(
             user=self.superuser,
-            observable_name="CVE-2024-51181",
-            observable_classification="generic",
+            analyzable=an6,
             status="reported_without_fails",
         )
 
@@ -262,11 +288,11 @@ class ObservableAnalyzerTestCase(CustomTestCase):
                         f"Testing datatype {observable_supported}"
                         f" for {timeout_seconds} seconds"
                     )
-                    if observable_supported == ObservableTypes.GENERIC.value:
+                    if observable_supported == Classification.GENERIC.value:
                         # generic should handle different use cases
                         job = Job.objects.get(
-                            observable_classification=ObservableTypes.GENERIC.value,
-                            observable_name=(
+                            analyzable__classification=Classification.GENERIC.value,
+                            analyzable__name=(
                                 "CVE-2024-51181"
                                 if config.name == "NVD_CVE"
                                 else "test@intelowl.com"
@@ -274,7 +300,7 @@ class ObservableAnalyzerTestCase(CustomTestCase):
                         )
                     else:
                         job = Job.objects.get(
-                            observable_classification=observable_supported
+                            analyzable__classification=observable_supported
                         )
                     job.analyzers_to_execute.set([config])
                     sub = subclass(
@@ -296,3 +322,4 @@ class ObservableAnalyzerTestCase(CustomTestCase):
     @staticmethod
     def tearDown() -> None:
         Job.objects.all().delete()
+        Analyzable.objects.all().delete()

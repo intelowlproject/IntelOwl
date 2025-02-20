@@ -10,7 +10,9 @@ from django.db.models import Model
 from django.test import TestCase
 from rest_framework.test import APIClient
 
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.choices import Classification
 from api_app.models import AbstractReport, Job
 
 User = get_user_model()
@@ -30,14 +32,21 @@ class CustomTestCase(TestCase):
         super().setUp()
         settings.DEBUG = True
 
+    def tearDown(self):
+        super().tearDown()
+        Analyzable.objects.all().delete()
+
     def _create_job_from_file(self, sample, mimetype, analyzer_config) -> Job:
         try:
             with open(sample, "rb") as f:
-                _job = Job.objects.create(
-                    is_sample=True,
-                    file_name=sample,
-                    file_mimetype=mimetype,
+                analyzable = Analyzable.objects.create(
+                    name=sample,
+                    mimetype=mimetype,
+                    classification=Classification.FILE,
                     file=File(f),
+                )
+                _job = Job.objects.create(
+                    analyzable=analyzable,
                     user=self.superuser,
                 )
                 _job.analyzers_to_execute.set([analyzer_config])
@@ -113,6 +122,11 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         plugin type
         """
         raise NotImplementedError()
+
+    def tearDown(self):
+        super().tearDown()
+        Job.objects.all().delete()
+        Analyzable.objects.all().delete()
 
     @abstractmethod
     def init_report(self, status, user):

@@ -17,11 +17,11 @@ class YETI(classes.Connector):
     def run(self):
         # get observable value and type
         if self._job.is_sample:
-            obs_value = self._job.md5
+            obs_value = self._job.analyzable.md5
             obs_type = "file"
         else:
-            obs_value = self._job.observable_name
-            obs_type = self._job.observable_classification
+            obs_value = self._job.analyzable.name
+            obs_type = self._job.analyzable.classification
 
         # create context
         context = {

@@ -18,45 +18,59 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
 
     url = "https://www.spamhaus.org/drop/drop_v4.json"
     ipv6_url = "https://www.spamhaus.org/drop/drop_v6.json"
+    asn_url = "https://www.spamhaus.org/drop/asndrop.json"
 
     @classmethod
     def location(cls, type: str) -> str:
         if type == "ipv4":
-            db_name = "drop_v4_2.json"
+            db_name = "drop_v4_3.json"
+        elif type == "asn":
+            db_name = "drop_v6_3.json"
         else:
-            db_name = "drop_v6_2.json"
+            db_name = "asndrop_3.json"
         return f"{settings.MEDIA_ROOT}/{db_name}"
 
     def run(self):
-        ip = ipaddress.ip_address(self.observable_name)
-        if ip.version == 4:
-            print("The given observable is an IPv4 address.")
-            type = "ipv4"
+        if self.observable_name.isdigit():  # If it's numeric, treat it as an ASN
+            data_type = "asn"
+            asn = int(self.observable_name)  # Convert to integer
+            print(f"The given observable is an ASN: {asn}")
+        else:
+            try:
+                ip = ipaddress.ip_address(self.observable_name)
+                data_type = "ipv4" if ip.version == 4 else "ipv6"
+                print(f"The given observable is an {data_type} address.")
+            except ValueError:
+                raise ValueError(f"Invalid observable: {self.observable_name}")
 
-        elif ip.version == 6:
-            print("The given observable is an IPv6 address.")
-            type = "ipv6"
-
-        database_location = self.location(type)
+        database_location = self.location(data_type)
 
         if not os.path.exists(database_location):
             print(f"Database does not exist in {database_location}, initialising...")
-            self.update(type)
+            self.update(data_type)
         with open(database_location, "r") as f:
             db = json.load(f)
 
-        insertion = bisect.bisect_left(
-            db, ip, key=lambda x: ipaddress.ip_network(x["cidr"]).network_address
-        )
         matches = []
-        # Check entries at and after the insertion point
-        # there maybe one or more subnets contained in the ip
-        for i in range(insertion, len(db)):
-            network = ipaddress.ip_network(db[i]["cidr"])
-            if ip in network:
-                matches.append(db[i])
-            elif network.network_address > ip:
-                break
+
+        if data_type in ["ipv4", "ipv6"]:
+            # IP Matching
+            insertion = bisect.bisect_left(
+                db, ip, key=lambda x: ipaddress.ip_network(x["cidr"]).network_address
+            )
+
+            for i in range(insertion, len(db)):
+                network = ipaddress.ip_network(db[i]["cidr"])
+                if ip in network:
+                    matches.append(db[i])
+                elif network.network_address > ip:
+                    break
+        else:
+            # ASN Matching
+            for entry in db[:-1]:
+                if int(entry["asn"]) == asn:
+                    matches.append(entry)
+
         if matches:
             return {"found": True, "details": matches}
 
@@ -67,9 +81,16 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
         if type == "ipv4":
             logger.info(f"Updating database from {cls.url}")
             db_url = cls.url
-        else:
+        elif type == "ipv6":
             logger.info(f"Updating database from {cls.ipv6_url}")
             db_url = cls.ipv6_url
+        elif type == "asn":
+            logger.info(f"Updating database from {cls.asn_url}")
+            db_url = cls.asn_url
+        else:
+            raise AnalyzerRunException(
+                "Invalid type provided for updating the database"
+            )
         response = requests.get(url=db_url)
         response.raise_for_status()
         data = cls.convert_to_json(response.text)

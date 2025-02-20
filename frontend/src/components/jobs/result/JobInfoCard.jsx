@@ -40,7 +40,7 @@ export function JobInfoCard({ job }) {
     endDateRelatedInvestigation,
   );
   startDateRelatedInvestigation.setDate(
-    startDateRelatedInvestigation.getDate() - 7,
+    startDateRelatedInvestigation.getDate() - 30,
   );
 
   return (

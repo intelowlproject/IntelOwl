@@ -121,7 +121,7 @@ class Migration(migrations.Migration):
         ("api_app", "0065_job_mpnodesearch"),
         (
             "analyzers_manager",
-            "0147_alter_analyzer_config_feodo_yaraify_urlhaus_yaraify_scan",
+            "0150_alter_dns_malicious_detectors",
         ),
     ]
 

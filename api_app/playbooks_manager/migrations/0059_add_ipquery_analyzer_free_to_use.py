@@ -26,7 +26,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("playbooks_manager", "0058_add_ultradns_to_free_to_use_and_dns"),
-        ("analyzers_manager", "0148_analyzer_config_ipquery"),
+        ("analyzers_manager", "0151_analyzer_config_ipquery"),
     ]
 
     operations = [

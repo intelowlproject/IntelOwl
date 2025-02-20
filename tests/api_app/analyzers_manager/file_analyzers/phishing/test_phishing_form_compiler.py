@@ -148,6 +148,13 @@ class PhishingFormCompilerTestCase(TestCase):
             "https://test.com/test",
         )
 
+        self.assertEqual(
+            PhishingFormCompiler.extract_action_attribute(
+                "https://test.com:11111/test.php", {"action": "test"}
+            ),
+            "https://test.com:11111/test",
+        )
+
     def test_extract_action_attribute_domain(self):
         # for this test we'll treat "form" parameter as a dict
         self.assertEqual(
@@ -286,4 +293,11 @@ class PhishingFormCompilerTestCase(TestCase):
                 "test.com/test.php", {"action": "test"}
             ),
             "https://test.com/test",
+        )
+
+        self.assertEqual(
+            PhishingFormCompiler.extract_action_attribute(
+                "test.com:11111/test.php", {"action": "test"}
+            ),
+            "https://test.com:11111/test",
         )

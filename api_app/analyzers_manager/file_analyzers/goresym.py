@@ -60,7 +60,6 @@ class GoReSym(FileAnalyzer, DockerBasedAnalyzer):
             if found_negative_clause:
                 message = f"Not a GO-compiled file: {result['error']}"
                 logger.warning(message)
-                self.report.errors.append(message)
                 raise AnalyzerRunException(message)
             raise AnalyzerRunException(result["error"])
         return result

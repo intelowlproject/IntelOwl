@@ -21,10 +21,10 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
     asn_url = "https://www.spamhaus.org/drop/asndrop.json"
 
     @classmethod
-    def location(cls, type: str) -> str:
-        if type == "ipv4":
+    def location(cls, data_type: str) -> str:
+        if data_type == "ipv4":
             db_name = "drop_v4_3.json"
-        elif type == "asn":
+        elif data_type == "asn":
             db_name = "drop_v6_3.json"
         else:
             db_name = "asndrop_3.json"
@@ -34,19 +34,21 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
         if self.observable_name.isdigit():  # If it's numeric, treat it as an ASN
             data_type = "asn"
             asn = int(self.observable_name)  # Convert to integer
-            print(f"The given observable is an ASN: {asn}")
+            logger.info(f"The given observable is an ASN: {asn}")
         else:
             try:
                 ip = ipaddress.ip_address(self.observable_name)
                 data_type = "ipv4" if ip.version == 4 else "ipv6"
-                print(f"The given observable is an {data_type} address.")
+                logger.info(f"The given observable is an {data_type} address.")
             except ValueError:
                 raise ValueError(f"Invalid observable: {self.observable_name}")
 
         database_location = self.location(data_type)
 
         if not os.path.exists(database_location):
-            print(f"Database does not exist in {database_location}, initialising...")
+            logger.info(
+                f"Database does not exist in {database_location}, initialising..."
+            )
             self.update(data_type)
         with open(database_location, "r") as f:
             db = json.load(f)
@@ -77,14 +79,14 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
         return {"found": False}
 
     @classmethod
-    def update(cls, type: str):
-        if type == "ipv4":
+    def update(cls, data_type: str):
+        if data_type == "ipv4":
             logger.info(f"Updating database from {cls.url}")
             db_url = cls.url
-        elif type == "ipv6":
+        elif data_type == "ipv6":
             logger.info(f"Updating database from {cls.ipv6_url}")
             db_url = cls.ipv6_url
-        elif type == "asn":
+        elif data_type == "asn":
             logger.info(f"Updating database from {cls.asn_url}")
             db_url = cls.asn_url
         else:
@@ -94,11 +96,10 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
         response = requests.get(url=db_url)
         response.raise_for_status()
         data = cls.convert_to_json(response.text)
-        print("data", data)
         database_location = cls.location(type)
         with open(database_location, "w", encoding="utf-8") as f:
             json.dump(data, f)
-        print(f"Database updated at {database_location}")
+        logger.info(f"Database updated at {database_location}")
 
     @staticmethod
     def convert_to_json(input_string) -> dict:

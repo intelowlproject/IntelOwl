@@ -110,11 +110,11 @@ class MullvadDNSAnalyzer(ObservableAnalyzer):
         patches = [
             if_mock_connections(
                 patch(
-                    "httpx.Client(http2=True).get",
+                    "httpx.Client.get",
                     return_value=MockUpResponse(
-                        content=b"\x12\x34\x56\x78...", status_code=200
+                        {}, 200, content=b"\x12\x34\x56\x78..."
                     ),
                 )
             )
         ]
-        return super()._mokeypatch(patches=patches)
+        return super()._monkeypatch(patches=patches)

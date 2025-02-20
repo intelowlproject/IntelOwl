@@ -1,5 +1,6 @@
 # This base image is the one currently (02/2025) updated by the maintainer
 # but it does not support ARM
+# CAREFUL! This is still bugged and does not provide analysis.json
 FROM thughoneyclient/thug:v6.12
 
 USER root

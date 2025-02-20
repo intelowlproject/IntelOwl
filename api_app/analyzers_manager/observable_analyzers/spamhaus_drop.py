@@ -23,11 +23,11 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
     @classmethod
     def location(cls, data_type: str) -> str:
         if data_type == "ipv4":
-            db_name = "drop_v4_3.json"
+            db_name = "drop_v4.json"
         elif data_type == "asn":
-            db_name = "drop_v6_3.json"
+            db_name = "drop_v6.json"
         else:
-            db_name = "asndrop_3.json"
+            db_name = "asndrop.json"
         return f"{settings.MEDIA_ROOT}/{db_name}"
 
     def run(self):

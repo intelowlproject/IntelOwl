@@ -8,7 +8,6 @@ from faker import Faker  # skipcq: BAN-B410
 from lxml.etree import HTMLParser  # skipcq: BAN-B410
 from lxml.html import document_fromstring
 from requests import HTTPError, Response
-from requests.exceptions import MissingSchema
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.models import PythonConfig
@@ -142,29 +141,21 @@ class PhishingFormCompiler(FileAnalyzer):
 
     @staticmethod
     def extract_action_attribute(base_site: str, form) -> str:
+        # we always return an URL to prevent MissingSchema error in request
         form_action: str = form.get("action", None)
         if not form_action:
             logger.info(
                 f"'action' attribute not found in form. Defaulting to {base_site=}"
             )
-            form_action = base_site
-        elif "://" in base_site and form_action.startswith(
-            "/"
-        ):  # pure relative url with target_site as url
-            logger.info(f"Found relative url in {form_action=}")
+            return base_site
+        if "://" not in base_site:
+            # if target site is a domain add a temporary default
+            # schema so we can use urljoin as if it was an url
+            base_site = "https://" + base_site
 
-            form_action = urljoin(base_site, form_action)
-        elif (
-            "." in form_action and "://" not in form_action
-        ):  # found a domain (relative file names such as "login.php" should start with /)
-            logger.info(f"Found a domain in form action {form_action=}")
-        elif "://" in form_action:
-            logger.info(f"Form is sending data to a whole new url {form_action=}")
-        else:
-            if base_site.endswith("/"):
-                base_site = base_site[:-1]
-            form_action = base_site + "/" + form_action
-
+        form_action = urljoin(base_site, form_action)
+        if "://" not in form_action:
+            form_action = "https://" + form_action
         logger.info(f"Extracted action to post data to: {form_action}")
 
         return form_action
@@ -210,29 +201,16 @@ class PhishingFormCompiler(FileAnalyzer):
         headers = {
             "User-Agent": self.user_agent,
         }
-        try:
-            response = requests.post(
-                url=dest_url,
-                data=params,
-                headers=headers,
-                proxies=(
-                    {"http": self.proxy_address, "https": self.proxy_address}
-                    if self.proxy_address
-                    else None
-                ),
-            )
-        except MissingSchema:
-            logger.info(f"Adding default 'https://' schema to {dest_url}")
-            response = requests.post(
-                url="https://" + dest_url,
-                data=params,
-                headers=headers,
-                proxies=(
-                    {"http": self.proxy_address, "https": self.proxy_address}
-                    if self.proxy_address
-                    else None
-                ),
-            )
+        response = requests.post(
+            url=dest_url,
+            data=params,
+            headers=headers,
+            proxies=(
+                {"http": self.proxy_address, "https": self.proxy_address}
+                if self.proxy_address
+                else None
+            ),
+        )
         logger.info(f"Request headers: {response.request.headers}")
         return response
 

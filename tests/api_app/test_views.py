@@ -141,8 +141,7 @@ class JobViewSetTests(CustomViewSetTestCase):
                 **{
                     "user": self.superuser,
                     "is_sample": False,
-                    "observable_name": "1.2.3.4",
-                    "observable_classification": "ip",
+                    "analyzable": self.analyzable,
                     "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
                     "tlp": Job.TLP.AMBER.value,
                 }

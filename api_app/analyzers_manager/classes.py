@@ -10,16 +10,18 @@ from typing import Dict, Tuple
 
 import requests
 from django.conf import settings
+from django.core.files.base import ContentFile
 
 from certego_saas.apps.user.models import User
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..choices import Classification, PythonModuleBasePaths
 from ..classes import Plugin
+from ..helpers import calculate_sha256
 from ..models import PythonConfig
 from .constants import HashChoices, TypeChoices
 from .exceptions import AnalyzerConfigurationException, AnalyzerRunException
-from .models import AnalyzerConfig, AnalyzerReport
+from .models import AnalyzerConfig, AnalyzerReport, AnalyzerSourceFile
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +39,58 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     MALICIOUS_EVALUATION = 75
     SUSPICIOUS_EVALUATION = 35
     FALSE_POSITIVE = -50
+
+    @classmethod
+    def update_support_model(cls, file_name):
+        pass
+
+    @classmethod
+    def update_source_file(cls, request_data: Dict, file_name) -> bool:
+        # check if file is updated
+        logger.info(
+            f"Source file update started with request data {request_data}, file name {file_name} and python module {cls.python_module}"
+        )
+        update = False
+        response = requests.get(**request_data)
+        response.raise_for_status()
+        cfile = ContentFile(response.content, name=file_name)
+        sha_res = calculate_sha256(response.content)
+        source_file = AnalyzerSourceFile.objects.filter(
+            file_name=file_name, python_module=cls.python_module
+        ).first()
+        # check if source file exists
+        if source_file:
+            logger.info(f"Found source file {source_file}")
+            # check if source file needs to be updated
+            if source_file.sha256 != sha_res:
+                logger.info("About to update source file")
+                source_file.file.delete()
+                source_file.file = cfile
+                source_file.sha256 = sha_res
+                source_file.save()
+                update = True
+        else:
+            logger.info(
+                f"About to create new source file with file name {file_name} and python module {cls.python_module}"
+            )
+            AnalyzerSourceFile.objects.create(
+                file_name=file_name,
+                python_module=cls.python_module,
+                file=cfile,
+                sha256=sha_res,
+            )
+            update = True
+
+        return update
+
+    @classmethod
+    def update_internal_data(cls, request_data: Dict, file_name) -> bool:
+        update = cls.update_source_file(request_data, file_name)
+
+        if update:
+            cls.update_support_model(file_name)
+
+        return update
 
     def threat_to_evaluation(self, threat_level):
         # MAGIC NUMBERS HERE!!!

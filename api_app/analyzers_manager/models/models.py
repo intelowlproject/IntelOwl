@@ -347,3 +347,19 @@ class AnalyzerConfig(PythonConfig):
     @property
     def config_exception(cls):
         return AnalyzerConfigurationException
+
+
+class AnalyzerSourceFile(models.Model):
+    file_name = models.CharField(max_length=512)
+    python_module = models.ForeignKey(
+        PythonModule, related_name="source_files", on_delete=models.CASCADE
+    )
+    file = models.FileField(upload_to="analyzers_source_files")
+    sha256 = models.CharField(unique=True, max_length=64)
+    last_update = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("file_name", "python_module")
+
+    def __str__(self):
+        return f"file_name: {self.file_name}, sha256:{self.sha256}"

@@ -1,84 +1,82 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import datetime
 import logging
-import os
-import shutil
 import tarfile
+import tempfile
+from typing import Dict
+from unittest.mock import patch
 
 import maxminddb
 import requests
-from django.conf import settings
+from django.core.files import File
+from django.utils import timezone
 from geoip2.database import Reader
 from geoip2.errors import AddressNotFoundError, GeoIP2Error
 from geoip2.models import ASN, City, Country
 
 from api_app.analyzers_manager import classes
-from api_app.analyzers_manager.exceptions import (
-    AnalyzerConfigurationException,
-    AnalyzerRunException,
-)
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.models import AnalyzerSourceFile
+from api_app.helpers import calculate_sha256
 from api_app.models import PluginConfig
-from tests.mock_utils import if_mock_connections, patch
+from tests.mock_utils import if_mock_connections
 
 logger = logging.getLogger(__name__)
 
 
-class MaxmindDBManager:
+class Maxmind(classes.ObservableAnalyzer):
+    _api_key_name: str
     _supported_dbs: [str] = ["GeoLite2-Country", "GeoLite2-City", "GeoLite2-ASN"]
     _default_db_extension: str = ".mmdb"
 
-    @classmethod
-    def get_supported_dbs(cls) -> [str]:
-        return [db_name + cls._default_db_extension for db_name in cls._supported_dbs]
-
-    @classmethod
-    def update_all_dbs(cls, api_key: str) -> bool:
-        return all(cls._update_db(db, api_key) for db in cls._supported_dbs)
-
-    def query_all_dbs(self, observable_query: str, api_key: str) -> (dict, dict):
+    def run(self):
         maxmind_final_result: {} = {}
         maxmind_errors: [] = []
-        for db in self._supported_dbs:
-            maxmind_result, maxmind_error = self._query_single_db(
-                observable_query, db, api_key
-            )
+        source_files = AnalyzerSourceFile.objects.filter(
+            python_module=self.python_module
+        )
+        if not source_files:
+            raise AnalyzerRunException("No source file found")
+
+        for source_file in source_files:
+            maxmind_result, maxmind_error = self._query_single_db(source_file)
 
             if maxmind_error:
                 maxmind_errors.append(maxmind_error["error"])
             elif maxmind_result:
-                logger.info(f"maxmind result: {maxmind_result} in {db=}")
+                logger.info(
+                    f"maxmind result: {maxmind_result} in {source_file.file_name}"
+                )
                 maxmind_final_result.update(maxmind_result)
             else:
-                logger.warning(f"maxmind result not available in {db=}")
+                logger.warning(
+                    f"maxmind result not available in {source_file.file_name}"
+                )
 
-        return maxmind_final_result, maxmind_errors
+        if maxmind_errors:
+            for error_msg in maxmind_errors:
+                self.report.errors.append(error_msg)
+            self.report.save()
+        return maxmind_final_result
 
-    @classmethod
-    def _get_physical_location(cls, db: str) -> str:
-        return f"{settings.MEDIA_ROOT}/{db}{cls._default_db_extension}"
-
-    def _query_single_db(
-        self, query_ip: str, db_name: str, api_key: str
-    ) -> (dict, dict):
+    def _query_single_db(self, source_file) -> (dict, dict):
         result: ASN | City | Country
-        db_path: str = self._get_physical_location(db_name)
-        self._check_and_update_db(api_key, db_name)
 
-        logger.info(f"Query {db_name=} for {query_ip=}")
-        with Reader(db_path) as reader:
+        logger.info(f"Query {source_file.file_name} for {self.observable_name}")
+
+        with Reader(source_file.file, mode=maxminddb.MODE_FD) as reader:
             try:
-                if "ASN" in db_name:
-                    result = reader.asn(query_ip)
-                elif "Country" in db_name:
-                    result = reader.country(query_ip)
-                elif "City" in db_name:
-                    result = reader.city(query_ip)
+                if "ASN" in source_file.file_name:
+                    result = reader.asn(self.observable_name)
+                elif "Country" in source_file.file_name:
+                    result = reader.country(self.observable_name)
+                elif "City" in source_file.file_name:
+                    result = reader.city(self.observable_name)
             except AddressNotFoundError:
                 reader.close()
                 logger.info(
-                    f"Query for observable '{query_ip}' "
+                    f"Query for observable '{self.observable_name}' "
                     "didn't produce any results in any db."
                 )
                 return {}, {}
@@ -90,127 +88,16 @@ class MaxmindDBManager:
                 reader.close()
                 return result.raw, {}
 
-    def _check_and_update_db(self, api_key: str, db_name: str):
-        db_path = self._get_physical_location(db_name)
-        if not os.path.isfile(db_path) and not self._update_db(db_name, api_key):
-            raise AnalyzerRunException(
-                f"failed extraction of maxmind db {db_name},"
-                " reached max number of attempts"
-            )
-        if not os.path.exists(db_path):
-            raise maxminddb.InvalidDatabaseError(
-                f"database location '{db_path}' does not exist"
-            )
-
-    @classmethod
-    def _update_db(cls, db: str, api_key: str) -> bool:
-        if not api_key:
-            raise AnalyzerConfigurationException(
-                f"Unable to find api key for {cls.__name__}"
-            )
-
-        try:
-            logger.info(f"starting download of {db=} from maxmind")
-
-            tar_db_path = cls._download_db(db, api_key)
-            cls._extract_db_to_media_root(tar_db_path)
-            directory_found = cls._remove_old_db(db)
-
-            if not directory_found:
-                return False
-
-            logger.info(f"ended download of {db=} from maxmind")
-            return True
-
-        except Exception as e:
-            logger.exception(e)
-        return False
-
-    @classmethod
-    def _download_db(cls, db_name: str, api_key: str) -> str:
-        url = (
-            "https://download.maxmind.com/app/geoip_download?edition_id="
-            f"{db_name}&license_key={api_key}&suffix=tar.gz"
-        )
-        response = requests.get(url)
-        if response.status_code >= 300:
-            raise AnalyzerRunException(
-                f"failed request for new maxmind db {db_name}."
-                f" Status code: {response.status_code}"
-                f"\nResponse: {response.raw}"
-            )
-
-        return cls._write_db_to_filesystem(db_name, response.content)
-
-    @classmethod
-    def _write_db_to_filesystem(cls, db_name: str, content: bytes) -> str:
-        tar_db_path = f"/tmp/{db_name}.tar.gz"
-        logger.info(
-            f"starting writing db {db_name} downloaded from maxmind to {tar_db_path}"
-        )
-        with open(tar_db_path, "wb") as f:
-            f.write(content)
-
-        return tar_db_path
-
-    @classmethod
-    def _extract_db_to_media_root(cls, tar_db_path: str):
-        logger.info(f"Started extracting {tar_db_path} to {settings.MEDIA_ROOT}.")
-        tf = tarfile.open(tar_db_path)
-        tf.extractall(str(settings.MEDIA_ROOT))
-        logger.info(f"Finished extracting {tar_db_path} to {settings.MEDIA_ROOT}.")
-
-    @classmethod
-    def _remove_old_db(cls, db: str) -> bool:
-        physical_db_location = cls._get_physical_location(db)
-        today = datetime.datetime.now().date()
-        counter = 0
-        directory_found = False
-        # this is because we do not know the exact date of the db we downloaded
-        while counter < 10 or not directory_found:
-            formatted_date = (today - datetime.timedelta(days=counter)).strftime(
-                "%Y%m%d"
-            )
-            downloaded_db_path = (
-                f"{settings.MEDIA_ROOT}/"
-                f"{db}_{formatted_date}/{db}{cls._default_db_extension}"
-            )
-            try:
-                os.rename(downloaded_db_path, physical_db_location)
-            except FileNotFoundError:
-                logger.debug(f"{downloaded_db_path} not found move to the day before")
-                counter += 1
-            else:
-                directory_found = True
-                shutil.rmtree(f"{settings.MEDIA_ROOT}/" f"{db}_{formatted_date}")
-                logger.info(f"maxmind directory found {downloaded_db_path}")
-        return directory_found
-
-
-class Maxmind(classes.ObservableAnalyzer):
-    _api_key_name: str
-    _maxmind_db_manager: "MaxmindDBManager" = MaxmindDBManager()
-
-    def run(self):
-        maxmind_final_result, maxmind_errors = self._maxmind_db_manager.query_all_dbs(
-            self.observable_name, self._api_key_name
-        )
-        if maxmind_errors:
-            for error_msg in maxmind_errors:
-                self.report.errors.append(error_msg)
-            self.report.save()
-        return maxmind_final_result
-
     @classmethod
     def get_db_names(cls) -> [str]:
-        return cls._maxmind_db_manager.get_supported_dbs()
+        return [db_name + cls._default_db_extension for db_name in cls._supported_dbs]
 
     @classmethod
     def _get_api_key(cls):
         for plugin in PluginConfig.objects.filter(
             parameter__python_module=cls.python_module,
             parameter__is_secret=True,
-            parameter__name="_api_key_name",
+            parameter__name="api_key_name",
         ):
             if plugin.value:
                 return plugin.value
@@ -219,9 +106,92 @@ class Maxmind(classes.ObservableAnalyzer):
     @classmethod
     def update(cls) -> bool:
         auth_token = cls._get_api_key()
+        general_update = False
         if auth_token:
-            return cls._maxmind_db_manager.update_all_dbs(cls._api_key_name)
-        return False
+            for db_name in cls._supported_dbs:
+                request_data = {
+                    "url": (
+                        "https://download.maxmind.com/app/geoip_download?edition_id="
+                        f"{db_name}&license_key={auth_token}&suffix=tar.gz"
+                    )
+                }
+                file_name = f"{db_name}{cls._default_db_extension}"
+                update = cls.update_source_file(
+                    request_data,
+                    file_name,
+                )
+                if update:
+                    general_update = True
+        else:
+            logger.error("Missing api key")
+        return general_update
+
+    @classmethod
+    def update_source_file(cls, request_data: Dict, file_name) -> bool:
+        # check if file is updated
+        logger.info(
+            f"Source file update started with request data {request_data}, file name {file_name} and python module {cls.python_module}"
+        )
+        update = False
+        response = requests.get(**request_data)
+        response.raise_for_status()
+        # extract maxmind db file
+        db_name = file_name.replace(cls._default_db_extension, "")
+
+        with tempfile.TemporaryDirectory() as tempdirname:
+            tar_db_path = f"{tempdirname}/{db_name}.tar.gz"
+            with open(tar_db_path, "wb") as f:
+                f.write(response.content)
+            tf = tarfile.open(tar_db_path)
+            tf.extractall(tempdirname)
+
+            for counter in range(10):
+                formatted_date = (
+                    timezone.now().date() - timezone.timedelta(days=counter)
+                ).strftime("%Y%m%d")
+
+                try:
+                    file_path = f"{tempdirname}/{db_name}_{formatted_date}/{db_name}{cls._default_db_extension}"
+                    with open(
+                        file_path,
+                        "rb",
+                    ) as f:
+                        logger.info(f"Found file {file_path}")
+                        mmdb_file = File(f, name=file_name)
+
+                        sha_res = calculate_sha256(mmdb_file.file.read())
+                        source_file = AnalyzerSourceFile.objects.filter(
+                            file_name=file_name, python_module=cls.python_module
+                        ).first()
+                        # check if source file exists
+                        if source_file:
+                            logger.info(f"Found source file {source_file}")
+                            # check if source file needs to be updated
+                            if source_file.sha256 != sha_res:
+                                logger.info("About to update source file")
+                                source_file.file.delete()
+                                source_file.file = mmdb_file
+                                source_file.sha256 = sha_res
+                                source_file.save()
+                                update = True
+                        else:
+                            logger.info(
+                                f"About to create new source file with file name {file_name} and python module {cls.python_module}"
+                            )
+                            AnalyzerSourceFile.objects.create(
+                                file_name=file_name,
+                                python_module=cls.python_module,
+                                file=mmdb_file,
+                                sha256=sha_res,
+                            )
+                            update = True
+
+                    break
+                except FileNotFoundError:
+                    logger.info(f"{file_path} not found")
+                    continue
+
+        return update
 
     @classmethod
     def _monkeypatch(cls):

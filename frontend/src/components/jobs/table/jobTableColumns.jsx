@@ -166,7 +166,8 @@ export const jobTableColumns = [
   {
     Header: "SubType",
     id: "type",
-    accessor: (job) => job.observable_classification || job.file_mimetype,
+    accessor: (job) =>
+      job.is_sample ? job.file_mimetype : job.observable_classification,
     disableSortBy: true,
     maxWidth: 100,
     Filter: SelectOptionsFilter,

@@ -138,3 +138,23 @@ class EngineConfigTestCase(CustomTestCase):
         config.delete()
         job.delete()
         an1.delete()
+
+    def test_run_generic(self):
+        an1 = Analyzable.objects.create(
+            name="test@intelowl.com",
+            classification=Classification.GENERIC,
+        )
+
+        config = EngineConfig.objects.first()
+        job = Job.objects.create(
+            user=self.user,
+            status=Job.STATUSES.REPORTED_WITHOUT_FAILS.value,
+            analyzable=an1,
+            received_request_time=now(),
+        )
+        config.run(job)
+        job.refresh_from_db()
+        self.assertIsNone(job.data_model)
+        job.delete()
+        config.delete()
+        an1.delete()

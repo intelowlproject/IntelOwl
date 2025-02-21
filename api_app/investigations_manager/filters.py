@@ -10,6 +10,15 @@ class InvestigationFilter(filters.FilterSet):
     id = filters.CharFilter(method="filter_for_id")
     tlp = filters.CharFilter(method="filter_for_tlp")
     tags = filters.CharFilter(method="filter_for_tags")
+    analyzed_object_name = filters.CharFilter(method="filter_for_analyzed_object_name")
+
+    @staticmethod
+    def filter_for_analyzed_object_name(
+        queryset, value, analyzed_object_name, *args, **kwargs
+    ):
+        return Investigation.investigation_for_analyzable(
+            queryset, analyzed_object_name
+        )
 
     @staticmethod
     def filter_for_owner(queryset, value, owner, *args, **kwargs):

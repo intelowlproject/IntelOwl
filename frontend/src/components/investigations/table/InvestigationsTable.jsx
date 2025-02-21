@@ -1,16 +1,28 @@
 /* eslint-disable react/prop-types */
 import React from "react";
-import { Container, Row, Col, UncontrolledTooltip } from "reactstrap";
+import {
+  Container,
+  Row,
+  Col,
+  UncontrolledTooltip,
+  Label,
+  Input,
+  Spinner,
+} from "reactstrap";
 import { MdInfoOutline } from "react-icons/md";
+import axios from "axios";
 
-import { SyncButton, TableHintIcon, useDataTable } from "@certego/certego-ui";
+import { useDebounceInput, DataTable } from "@certego/certego-ui";
 
 import useTitle from "react-use/lib/useTitle";
 
+import { useSearchParams } from "react-router-dom";
+import { format, toDate } from "date-fns-tz";
 import { INVESTIGATION_BASE_URI } from "../../../constants/apiURLs";
 import { investigationTableColumns } from "./investigationTableColumns";
 import { TimePicker } from "../../common/TimePicker";
 import { useTimePickerStore } from "../../../stores/useTimePickerStore";
+import { datetimeFormatStr } from "../../../constants/miscConst";
 
 // constants
 const toPassTableProps = {
@@ -30,47 +42,104 @@ export default function InvestigationsTable() {
   // page title
   useTitle("IntelOwl | Investigation History", { restoreOnUnmount: true });
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const analyzedObjectNameParam =
+    searchParams.get("analyzed-object-name") || "";
+  const startTimeParam = searchParams.get("start-time");
+  const endTimeParam = searchParams.get("end-time");
+
   // store
-  const [toDateValue, fromDateValue] = useTimePickerStore((state) => [
-    state.toDateValue,
-    state.fromDateValue,
-  ]);
+  const [toDateValue, fromDateValue, updateToDate, updateFromDate] =
+    useTimePickerStore((state) => [
+      state.toDateValue,
+      state.fromDateValue,
+      state.updateToDate,
+      state.updateFromDate,
+    ]);
+  const [searchFromDateValue, setSearchFromDateValue] =
+    React.useState(fromDateValue);
+  const [searchToDateValue, setSearchToDateValue] = React.useState(toDateValue);
 
   // state
-  const [initialLoading, setInitialLoading] = React.useState(true);
+  const [paramInitialization, setParamInitialization] = React.useState(false); // used to prevent a request with wrong params
+  const [loading, setLoading] = React.useState(true);
+  const [data, setData] = React.useState({ results: [], count: 0 });
+  /* searchNameType is used to show the user typed text (this state changes for each char typed), 
+  searchNameRequest is used in the request to the backend and it's update periodically.
+  In this way we avoid a request for each char. */
+  const [searchNameType, setSearchNameType] = React.useState("");
+  const [searchNameRequest, setSearchNameRequest] = React.useState("");
 
-  // API/ Table
-  const [data, tableNode, refetch, _, loadingTable] = useDataTable(
-    {
-      url: INVESTIGATION_BASE_URI,
-      params: {
-        start_time__gte: fromDateValue,
-        start_time__lte: toDateValue,
-      },
-      initialParams: {
-        ordering: "-start_time",
-      },
-    },
-    toPassTableProps,
-  );
+  useDebounceInput(fromDateValue, 1000, setSearchFromDateValue);
+  useDebounceInput(toDateValue, 1000, setSearchToDateValue);
+  useDebounceInput(searchNameType, 1000, setSearchNameRequest);
 
   React.useEffect(() => {
-    if (!loadingTable) setInitialLoading(false);
-  }, [loadingTable]);
+    if (startTimeParam) {
+      setSearchFromDateValue(toDate(startTimeParam));
+      updateFromDate(toDate(startTimeParam));
+    }
+    if (endTimeParam) {
+      setSearchToDateValue(toDate(endTimeParam));
+      updateToDate(toDate(endTimeParam));
+    }
+    if (analyzedObjectNameParam) setSearchNameType(analyzedObjectNameParam);
+    if (analyzedObjectNameParam) setSearchNameRequest(analyzedObjectNameParam);
+    setParamInitialization(true);
+  }, [
+    analyzedObjectNameParam,
+    startTimeParam,
+    endTimeParam,
+    updateFromDate,
+    updateToDate,
+  ]);
 
   React.useEffect(() => {
-    if (!initialLoading) refetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialLoading]);
+    // this check is to avoid to send request and compare state and url params before we initialized the state
+    if (paramInitialization) {
+      if (
+        startTimeParam !== format(searchFromDateValue, datetimeFormatStr) ||
+        endTimeParam !== format(searchToDateValue, datetimeFormatStr) ||
+        analyzedObjectNameParam !== searchNameRequest
+      ) {
+        setSearchParams({
+          "start-time": format(searchFromDateValue, datetimeFormatStr),
+          "end-time": format(searchToDateValue, datetimeFormatStr),
+          "analyzed-object-name": searchNameRequest,
+        });
+      }
+      axios
+        .get(INVESTIGATION_BASE_URI, {
+          params: {
+            start_time__gte: searchFromDateValue,
+            start_time__lte: searchToDateValue,
+            analyzed_object_name: searchNameRequest,
+          },
+        })
+        .then((response) => {
+          setData(response.data);
+          setLoading(false);
+        });
+    }
+  }, [
+    setSearchParams,
+    paramInitialization,
+    searchFromDateValue,
+    searchToDateValue,
+    searchNameRequest,
+    startTimeParam,
+    endTimeParam,
+    analyzedObjectNameParam,
+  ]);
 
   return (
     <Container fluid>
       {/* Basic */}
       <Row className="mb-2">
-        <Col className="d-flex align-items-center">
+        <Col className="d-flex align-items-center" sm={5}>
           <h1 id="investigationHistory">
             Investigations History&nbsp;
-            <small className="text-gray">{data?.count} total</small>
+            <small className="text-gray">{data.count} total</small>
           </h1>
           <div className="ms-2">
             <MdInfoOutline id="investigationstable-infoicon" fontSize="20" />
@@ -89,17 +158,46 @@ export default function InvestigationsTable() {
         </Col>
         <Col className="align-self-center">
           <TimePicker />
+          <div className="d-flex float-end me-1">
+            <div className="d-flex align-items-center">
+              <Label check>Name</Label>
+              <div className="ms-1 d-flex">
+                <MdInfoOutline
+                  id="investigationstable-name-info"
+                  fontSize="15"
+                />
+                <UncontrolledTooltip
+                  trigger="hover"
+                  target="investigationstable-name-info"
+                  placement="right"
+                  fade={false}
+                  innerClassName="p-2 text-start text-nowrap md-fit-content"
+                >
+                  Filter investigations showing only the ones that contain at
+                  least one job related to an analyzable with this name.
+                </UncontrolledTooltip>
+              </div>
+              <Label check className="me-1">
+                :
+              </Label>
+              <Input
+                id="nameSearch"
+                type="text"
+                onChange={(event) => setSearchNameType(event.target.value)}
+                value={searchNameType}
+              />
+            </div>
+          </div>
         </Col>
       </Row>
-      {/* Actions */}
-      <div className="px-3 bg-dark d-flex justify-content-end align-items-center">
-        <TableHintIcon />
-        <SyncButton onClick={refetch} className="ms-auto m-0 py-1" />
-      </div>
-      <div style={{ height: "80vh", overflowY: "scroll" }}>
-        {/* Table */}
-        {tableNode}
-      </div>
+      {/* Table */}
+      {loading ? (
+        <Spinner />
+      ) : (
+        <div style={{ height: "80vh", overflowY: "scroll" }}>
+          <DataTable data={data.results} {...toPassTableProps} />
+        </div>
+      )}
     </Container>
   );
 }

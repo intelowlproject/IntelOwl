@@ -24,7 +24,7 @@ import { IoSearch } from "react-icons/io5";
 import { TbReport, TbReportSearch } from "react-icons/tb";
 
 // lib
-import { NavLink, AxiosLoadingBar } from "@certego/certego-ui";
+import { AxiosLoadingBar } from "@certego/certego-ui";
 
 // constants
 import {
@@ -71,36 +71,36 @@ function AuthLinks() {
   return (
     <>
       <NavItem>
-        <NavLink className="d-flex-start-center" end to="/dashboard">
+        <RRNavLink className="d-flex-start-center nav-link" to="/dashboard">
           <AiOutlineDashboard />
           <span className="ms-1" id="dashboard-title">
             Dashboard
           </span>
-        </NavLink>
+        </RRNavLink>
       </NavItem>
       <NavItem>
-        <NavLink className="d-flex-start-center" end to="/history">
+        <RRNavLink className="d-flex-start-center nav-link" to="/history">
           <TbReport />
           <span className="ms-1">History</span>
-        </NavLink>
+        </RRNavLink>
       </NavItem>
       <NavItem>
-        <NavLink className="d-flex-start-center" end to="/search">
+        <RRNavLink className="d-flex-start-center nav-link" to="/search">
           <TbReportSearch />
           <span className="ms-1">Search</span>
-        </NavLink>
+        </RRNavLink>
       </NavItem>
       <NavItem>
-        <NavLink className="d-flex-start-center" end to="/plugins">
+        <RRNavLink className="d-flex-start-center nav-link" to="/plugins">
           <RiPlugFill />
           <span className="ms-1">Plugins</span>
-        </NavLink>
+        </RRNavLink>
       </NavItem>
       <NavItem>
-        <NavLink className="d-flex-start-center" end to="/scan">
+        <RRNavLink className="d-flex-start-center nav-link" to="/scan">
           <IoSearch />
           <span className="ms-1">Scan</span>
-        </NavLink>
+        </RRNavLink>
       </NavItem>
     </>
   );
@@ -260,10 +260,10 @@ function AppHeader() {
           {/* Navbar Left Side */}
           <Nav navbar id="navbar-left-side">
             <NavItem>
-              <NavLink className="d-flex-start-center" end to="/">
+              <RRNavLink className="d-flex-start-center nav-link" end to="/">
                 <MdHome />
                 <span className="ms-1">Home</span>
-              </NavLink>
+              </RRNavLink>
             </NavItem>
             {isAuthenticated && (
               <AuthLinks isInOrganization={isInOrganization} />

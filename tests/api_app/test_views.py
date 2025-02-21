@@ -16,6 +16,7 @@ from rest_framework.test import APIClient
 from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import Classification, ReportStatus
+from api_app.investigations_manager.models import Investigation
 from api_app.models import Comment, Job, Parameter, PluginConfig, Tag
 from api_app.playbooks_manager.models import PlaybookConfig
 from certego_saas.apps.organization.membership import Membership
@@ -136,6 +137,22 @@ class JobViewSetTests(CustomViewSetTestCase):
                     "tlp": Job.TLP.GREEN.value,
                 }
             )
+            self.job3, _ = Job.objects.get_or_create(
+                **{
+                    "user": self.superuser,
+                    "analyzable": self.analyzable,
+                    "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
+                    "tlp": Job.TLP.AMBER.value,
+                }
+            )
+            self.investigation1, _ = Investigation.objects.get_or_create(
+                name="test_investigation1", owner=self.superuser
+            )
+            self.investigation1.jobs.add(self.job)
+            self.investigation2, _ = Investigation.objects.get_or_create(
+                name="test_investigation2", owner=self.superuser
+            )
+            self.investigation2.jobs.add(self.job3)
 
     def tearDown(self):
         self.job2.delete()
@@ -223,15 +240,18 @@ class JobViewSetTests(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(content["id"], self.job.id, msg=msg)
         self.assertEqual(content["status"], self.job.status, msg=msg)
+        self.assertEqual(content["investigation_id"], self.investigation1.pk)
+        self.assertEqual(content["investigation_name"], self.investigation1.name)
+        self.assertEqual(content["related_investigation_number"], 2)
 
     def test_delete(self):
-        self.assertEqual(Job.objects.count(), 2)
+        self.assertEqual(Job.objects.count(), 3)
         response = self.client.delete(f"{self.jobs_list_uri}/{self.job.id}")
         self.assertEqual(response.status_code, 403)
         self.client.force_authenticate(user=self.job.user)
         response = self.client.delete(f"{self.jobs_list_uri}/{self.job.id}")
         self.assertEqual(response.status_code, 204)
-        self.assertEqual(Job.objects.count(), 1)
+        self.assertEqual(Job.objects.count(), 2)
 
     # @action endpoints
 
@@ -282,7 +302,7 @@ class JobViewSetTests(CustomViewSetTestCase):
             [
                 {
                     "date": "2024-11-28T00:00:00Z",
-                    "pending": 2,
+                    "pending": 3,
                     "failed": 0,
                     "reported_with_fails": 0,
                     "reported_without_fails": 0,
@@ -337,7 +357,7 @@ class JobViewSetTests(CustomViewSetTestCase):
             resp.json(),
             {
                 "values": ["Dns"],
-                "aggregation": [{"date": "2024-11-28T00:00:00Z", "Dns": 2}],
+                "aggregation": [{"date": "2024-11-28T00:00:00Z", "Dns": 3}],
             },
         )
 
@@ -369,7 +389,7 @@ class JobViewSetTests(CustomViewSetTestCase):
                 "aggregation": [
                     {
                         "date": "2024-11-28T00:00:00Z",
-                        "superuser@intelowl.org": 2,
+                        "superuser@intelowl.org": 3,
                         "testspace@intelowl.org": 1,
                     },
                 ],
@@ -384,9 +404,9 @@ class JobViewSetTests(CustomViewSetTestCase):
         self.assertEqual(
             resp.json(),
             {
-                "values": ["CLEAR", "GREEN"],
+                "values": ["AMBER", "CLEAR", "GREEN"],
                 "aggregation": [
-                    {"date": "2024-11-28T00:00:00Z", "CLEAR": 1, "GREEN": 1}
+                    {"date": "2024-11-28T00:00:00Z", "CLEAR": 1, "GREEN": 1, "AMBER": 1}
                 ],
             },
         )

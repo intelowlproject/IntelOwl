@@ -2,9 +2,10 @@ import React, { Suspense } from "react";
 import { FallBackLoading } from "@certego/certego-ui";
 import { Navigate, useParams } from "react-router-dom";
 
+import { format } from "date-fns";
 import AuthGuard from "../wrappers/AuthGuard";
 import IfAuthRedirectGuard from "../wrappers/IfAuthRedirectGuard";
-import { JobResultSections } from "../constants/miscConst";
+import { datetimeFormatStr, JobResultSections } from "../constants/miscConst";
 
 const Home = React.lazy(() => import("./home/Home"));
 const Login = React.lazy(() => import("./auth/Login"));
@@ -27,6 +28,32 @@ const InvestigationResult = React.lazy(
 );
 const History = React.lazy(() => import("./History"));
 const Search = React.lazy(() => import("./search/Search"));
+
+function CustomRedirect() {
+  /* this is a way to auto-redirect to the job page with the current date:
+   * we cannot use a button -> change the UI
+   * we cannot use a navigate -> "to" props must have a string (no function) and if we worte new Date in the to url the components is generated once so the first date is keep
+   */
+  const [endDatetime, forceUpdate] = React.useState(new Date());
+
+  React.useEffect(() => {
+    forceUpdate(new Date());
+  }, []);
+
+  const startDatetime = structuredClone(endDatetime);
+  startDatetime.setDate(startDatetime.getDate() - 1);
+
+  return (
+    <Navigate
+      to={`/history/jobs?start-time=${encodeURIComponent(
+        format(startDatetime, datetimeFormatStr),
+      )}&end-time=${encodeURIComponent(
+        format(endDatetime, datetimeFormatStr),
+      )}`}
+      replace
+    />
+  );
+}
 
 /*
 lazy imports to enable code splitting
@@ -159,9 +186,25 @@ const authRoutesLazy = [
       </Suspense>
     ),
   },
-  /* History */
+  // {
   {
-    path: "/history/*",
+    path: "/history",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <CustomRedirect />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/history/jobs",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <History />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/history/investigations",
     element: (
       <Suspense fallback={<FallBackLoading />}>
         <History />
@@ -179,7 +222,51 @@ const authRoutesLazy = [
   },
   /* Plugins */
   {
-    path: "/plugins/*",
+    path: "/plugins",
+    element: <Navigate to="/plugins/analyzers" replace />,
+  },
+  {
+    path: "/plugins/analyzers",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <PluginsContainer />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/plugins/connectors",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <PluginsContainer />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/plugins/pivots",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <PluginsContainer />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/plugins/visualizers",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <PluginsContainer />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/plugins/ingestors",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <PluginsContainer />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/plugins/playbooks",
     element: (
       <Suspense fallback={<FallBackLoading />}>
         <PluginsContainer />

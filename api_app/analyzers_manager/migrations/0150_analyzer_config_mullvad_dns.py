@@ -11,11 +11,11 @@ plugin = {
     "python_module": {
         "health_check_schedule": None,
         "update_schedule": None,
-        "module": "mullvad_dns.MullvadDNSAnalyzer",
+        "module": "dns.dns_malicious_detectors.mullvad_dns.MullvadDNSAnalyzer",
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },
     "name": "Mullvad_DNS",
-    "description": 'This analyzer queries Mullvad\'s DNS-over-HTTPS service (using the "base" endpoint) to check a domain\'s DNS records. It supports two modes:\r\n- "query": returns raw DNS answer data.\r\n- "malicious": interprets an NXDOMAIN (rcode==3) as the domain being blocked (i.e., malicious).',
+    "description": "Mullvad_DNS (https://github.com/mullvad/dns-blocklists) is an analyzer that queries Mullvad's DNS-over-HTTPS service (using the 'base' endpoint) to check a domain's DNS records. \r\nIt supports two modes:\r\n- 'query': returns raw DNS answer data.\r\n- 'malicious': interprets an NXDOMAIN (rcode==3) as the domain being blocked (i.e., malicious).",
     "disabled": False,
     "soft_time_limit": 60,
     "routing_key": "default",
@@ -35,7 +35,7 @@ plugin = {
 params = [
     {
         "python_module": {
-            "module": "mullvad_dns.MullvadDNSAnalyzer",
+            "module": "dns.dns_malicious_detectors.mullvad_dns.MullvadDNSAnalyzer",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
         "name": "mode",
@@ -50,7 +50,7 @@ values = [
     {
         "parameter": {
             "python_module": {
-                "module": "mullvad_dns.MullvadDNSAnalyzer",
+                "module": "dns.dns_malicious_detectors.mullvad_dns.MullvadDNSAnalyzer",
                 "base_path": "api_app.analyzers_manager.observable_analyzers",
             },
             "name": "mode",

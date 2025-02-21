@@ -154,7 +154,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0065_job_mpnodesearch"),
-        ("analyzers_manager", "0149_alter_die_analyzer"),
+        ("analyzers_manager", "0151_analyzer_config_ipquery"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

@@ -14,6 +14,7 @@ from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
     malicious_detector_response,
 )
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -62,8 +63,9 @@ class MullvadDNSAnalyzer(ObservableAnalyzer):
 
         observable = self.observable_name
 
-        if self.observable_classification == self.ObservableTypes.URL.value:
-            observable = urlparse(observable).hostname
+        if self.observable_classification == Classification.URL:
+            logger.info(f"Extracting domain from URL {observable}")
+            observable = urlparse(self.observable_name).hostname
 
         encoded_query = self.encode_query(observable)
         complete_url = f"{self.url}?dns={encoded_query}"

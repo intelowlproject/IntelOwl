@@ -15,7 +15,7 @@ plugin = {
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },
     "name": "Mullvad_DNS",
-    "description": "Mullvad_DNS (https://github.com/mullvad/dns-blocklists) is an analyzer that queries Mullvad's DNS-over-HTTPS service (using the 'base' endpoint) to check a domain's DNS records. \r\nIt supports two modes:\r\n- 'query': returns raw DNS answer data.\r\n- 'malicious': interprets an NXDOMAIN (rcode==3) as the domain being blocked (i.e., malicious).",
+    "description": "[Mullvad_DNS](https://github.com/mullvad/dns-blocklists) is an analyzer that queries Mullvad's DNS-over-HTTPS service (using the 'base' endpoint) to check a domain's DNS records. \r\nIt supports two modes:\r\n- 'query': returns raw DNS answer data.\r\n- 'malicious': interprets an NXDOMAIN (rcode==3) as the domain being blocked (i.e., malicious).",
     "disabled": False,
     "soft_time_limit": 60,
     "routing_key": "default",
@@ -153,7 +153,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("api_app", "0065_job_mpnodesearch"),
+        ("api_app", "0071_delete_last_elastic_report"),
         ("analyzers_manager", "0151_analyzer_config_ipquery"),
     ]
 

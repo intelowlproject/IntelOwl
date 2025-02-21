@@ -209,8 +209,8 @@ class RestJobSerializerTestCase(CustomTestCase):
         job.delete()
         an.delete()
 
-    def test_get_analyzers_data_model(self):
-        an1 = Analyzable.objects.create(
+    def test_get_analyzers_data_model_generic(self):
+        an = Analyzable.objects.create(
             name="test@intelowl.com",
             classification=Classification.GENERIC,
         )
@@ -218,12 +218,14 @@ class RestJobSerializerTestCase(CustomTestCase):
         job = Job.objects.create(
             user=self.user,
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS.value,
-            analyzable=an1,
+            analyzable=an,
             received_request_time=now(),
         )
 
         js = RestJobSerializer(job).data
         self.assertEqual(js["analyzers_data_model"], [])
+        job.delete()
+        an.delete()
 
 
 class AbstractJobCreateSerializerTestCase(CustomTestCase):

@@ -492,7 +492,7 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
             try:
                 bulk(settings.ELASTICSEARCH_DSL_CLIENT, all_report_document_list)
             except Exception as error:  # pylint: disable=broad-exception-caught
-                logger.error(error)
+                logger.exception(error)
             else:
                 logger.info("documents correctly inserted!")
         else:

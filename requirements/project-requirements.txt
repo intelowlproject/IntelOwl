@@ -67,7 +67,7 @@ pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
 py-tlsh==4.7.2
-quark-engine==25.1.1
+quark-engine==25.2.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8
 yara-python==4.5.0
@@ -86,7 +86,7 @@ knock-subdomains==7.0.1
 dotnetfile==0.2.4
 docxpy==0.8.5
 pylnk3==0.4.2
-androguard==3.4.0a1 # version >=4.x of androguard raises a dependency conflict with quark-engine==25.1.1
+androguard==3.4.0a1 # version >=4.x of androguard raises a dependency conflict with quark-engine==25.2.1
 wad==0.4.6
 
 # this is required because XLMMacroDeobfuscator does not pin the following packages

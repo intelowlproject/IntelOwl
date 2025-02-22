@@ -24,7 +24,7 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
     def location(cls, data_type: str) -> str:
         if data_type == "ipv4":
             db_name = "drop_v4.json"
-        elif data_type == "asn":
+        elif data_type == "ipv6":
             db_name = "drop_v6.json"
         else:
             db_name = "asndrop.json"
@@ -96,7 +96,7 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
         response = requests.get(url=db_url)
         response.raise_for_status()
         data = cls.convert_to_json(response.text)
-        database_location = cls.location(type)
+        database_location = cls.location(data_type)
         with open(database_location, "w", encoding="utf-8") as f:
             json.dump(data, f)
         logger.info(f"Database updated at {database_location}")
@@ -122,8 +122,10 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
     @classmethod
     def _monkeypatch(cls):
         mock_data = (
-            '{"cidr": "1.10.16.0/20", "sblid": "SBL256894", "rir": "apnic"}\n'
-            '{"cidr": "2.56.192.0/22", "sblid": "SBL459831", "rir": "ripencc"}'
+            '{"cidr": "1.10.16.0", "sblid": "SBL256894", "rir": "apnic"}\n'
+            '{"cidr": "2.56.192.0", "sblid": "SBL459831", "rir": "ripencc"}\n'
+            '{"asn":6517,"rir":"arin","domain":"zeromist.net","cc":"US","asname":"ZEROMIST-AS-1"}\n'
+            '{"cidr":"2001:678:738::","sblid":"SBL635837","rir":"ripencc"}\n'
         )
         patches = [
             if_mock_connections(

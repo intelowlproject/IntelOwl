@@ -60,13 +60,14 @@ class MullvadDNSAnalyzer(ObservableAnalyzer):
           - Parses the DNS response.
           - Depending on the configured mode ("query" or "malicious"), returns either raw data or a flagged result.
         """
+        observable = self.observable_name
 
         if self.observable_classification == Classification.URL:
-            logger.info(f"Extracting hostname from URL {self.observable_name}")
-            hostname = urlparse(self.observable_name).hostname
-            self.observable_name = hostname
+            logger.info(f"Extracting hostname from URL {observable}")
+            hostname = urlparse(observable).hostname
+            observable = hostname
 
-        encoded_query = self.encode_query(self.observable_name)
+        encoded_query = self.encode_query(observable)
         complete_url = f"{self.url}?dns={encoded_query}"
         logger.info(f"Requesting Mullvad DNS at: {complete_url}")
 
@@ -86,13 +87,13 @@ class MullvadDNSAnalyzer(ObservableAnalyzer):
         if self.mode == "malicious":
             if dns_response.rcode() == 3:
                 return malicious_detector_response(
-                    observable=self.observable_name,
+                    observable=observable,
                     malicious=True,
                     note="Domain is blocked by Mullvad DNS content filtering.",
                 )
             else:
                 return malicious_detector_response(
-                    observable=self.observable_name,
+                    observable=observable,
                     malicious=False,
                     note="Domain is not blocked by Mullvad DNS content filtering.",
                 )
@@ -103,7 +104,7 @@ class MullvadDNSAnalyzer(ObservableAnalyzer):
             return {
                 "status": "success",
                 "data": data,
-                "message": f"DNS query for {self.observable_name} completed successfully.",
+                "message": f"DNS query for {observable} completed successfully.",
             }
 
     @classmethod

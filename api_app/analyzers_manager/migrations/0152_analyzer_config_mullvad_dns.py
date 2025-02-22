@@ -23,7 +23,7 @@ plugin = {
     "type": "observable",
     "docker_based": False,
     "maximum_tlp": "RED",
-    "observable_supported": ["url", "domain", "generic"],
+    "observable_supported": ["url", "domain"],
     "supported_filetypes": [],
     "run_hash": False,
     "run_hash_type": "",

@@ -114,7 +114,11 @@ class MullvadDNSAnalyzer(ObservableAnalyzer):
                 patch(
                     "httpx.Client.get",
                     return_value=MockUpResponse(
-                        {},
+                        {
+                            "status": "success",
+                            "data": "example.com. 236 IN A 23.215.0.138",
+                            "message": "DNS query for example.com completed successfully.",
+                        },
                         200,
                         content=b"pn\x01\x03\x00\x01\x00\x00\x00\x00\x00\x00\x07example\x03com\x00\x00\x01\x00\x01",
                     ),

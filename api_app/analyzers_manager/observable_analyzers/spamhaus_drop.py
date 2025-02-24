@@ -16,9 +16,10 @@ logger = logging.getLogger(__name__)
 
 class SpamhausDropV4(classes.ObservableAnalyzer):
 
-    url = "https://www.spamhaus.org/drop/drop_v4.json"
-    ipv6_url = "https://www.spamhaus.org/drop/drop_v6.json"
-    asn_url = "https://www.spamhaus.org/drop/asndrop.json"
+    url = "https://www.spamhaus.org/drop"
+    ipv4_url = url + "/drop_v4.json"
+    ipv6_url = url + "/drop_v6.json"
+    asn_url = url + "/asndrop.json"
 
     @classmethod
     def location(cls, data_type: str) -> str:
@@ -81,8 +82,8 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
     @classmethod
     def update(cls, data_type: str):
         if data_type == "ipv4":
-            logger.info(f"Updating database from {cls.url}")
-            db_url = cls.url
+            logger.info(f"Updating database from {cls.ipv4_url}")
+            db_url = cls.ipv4_url
         elif data_type == "ipv6":
             logger.info(f"Updating database from {cls.ipv6_url}")
             db_url = cls.ipv6_url
@@ -125,7 +126,7 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
             '{"cidr": "1.10.16.0", "sblid": "SBL256894", "rir": "apnic"}\n'
             '{"cidr": "2.56.192.0", "sblid": "SBL459831", "rir": "ripencc"}\n'
             '{"asn":6517,"rir":"arin","domain":"zeromist.net","cc":"US","asname":"ZEROMIST-AS-1"}\n'
-            '{"cidr":"2001:678:738::","sblid":"SBL635837","rir":"ripencc"}\n'
+            '{"cidr":"2001:678:738::","sblid":"SBL635837","rir":"ripencc"}'
         )
         patches = [
             if_mock_connections(

@@ -1,22 +1,26 @@
 /* eslint-disable react/prop-types */
 import React from "react";
-import { Container, Row, Col, UncontrolledTooltip } from "reactstrap";
+import { Container, Row, Col, UncontrolledTooltip, Spinner } from "reactstrap";
 import { MdInfoOutline } from "react-icons/md";
 
 import {
+  DataTable,
   Loader,
-  SyncButton,
   TableHintIcon,
-  useDataTable,
+  useDebounceInput,
 } from "@certego/certego-ui";
 
 import useTitle from "react-use/lib/useTitle";
+import { useSearchParams } from "react-router-dom";
+import { format, toDate } from "date-fns";
+import axios from "axios";
 import { jobTableColumns } from "./jobTableColumns";
 import { TimePicker } from "../../common/TimePicker";
 
 import { JOB_BASE_URI } from "../../../constants/apiURLs";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { useTimePickerStore } from "../../../stores/useTimePickerStore";
+import { datetimeFormatStr } from "../../../constants/miscConst";
 
 // constants
 const toPassTableProps = {
@@ -31,46 +35,83 @@ const toPassTableProps = {
 
 // component
 export default function JobsTable() {
-  const [playbooksLoading, playbooksError] = usePluginConfigurationStore(
-    (state) => [state.playbooksLoading, state.playbooksError],
-  );
-
   console.debug("JobsTable rendered!");
 
   // page title
   useTitle("IntelOwl | Jobs History", { restoreOnUnmount: true });
 
-  const [toDateValue, fromDateValue] = useTimePickerStore((state) => [
-    state.toDateValue,
-    state.fromDateValue,
-  ]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const startTimeParam = searchParams.get("start-time");
+  const endTimeParam = searchParams.get("end-time");
 
-  // state
-  const [initialLoading, setInitialLoading] = React.useState(true);
-
-  // API/ Table
-  const [data, tableNode, refetch, _, loadingTable] = useDataTable(
-    {
-      url: JOB_BASE_URI,
-      params: {
-        received_request_time__gte: fromDateValue,
-        received_request_time__lte: toDateValue,
-      },
-      initialParams: {
-        ordering: "-received_request_time",
-      },
-    },
-    toPassTableProps,
+  const [playbooksLoading, playbooksError] = usePluginConfigurationStore(
+    (state) => [state.playbooksLoading, state.playbooksError],
   );
 
-  React.useEffect(() => {
-    if (!loadingTable) setInitialLoading(false);
-  }, [loadingTable]);
+  const [toDateValue, fromDateValue, updateToDate, updateFromDate] =
+    useTimePickerStore((state) => [
+      state.toDateValue,
+      state.fromDateValue,
+      state.updateToDate,
+      state.updateFromDate,
+    ]);
+  const [searchFromDateValue, setSearchFromDateValue] =
+    React.useState(fromDateValue);
+  const [searchToDateValue, setSearchToDateValue] = React.useState(toDateValue);
+
+  // state
+  const [paramInitialization, setParamInitialization] = React.useState(false); // used to prevent a request with wrong params
+  const [loading, setLoading] = React.useState(true);
+  const [data, setData] = React.useState({ results: [], count: 0 });
+
+  // this update the value after some times, this give user time to pick the datetime
+  useDebounceInput(fromDateValue, 1000, setSearchFromDateValue);
+  useDebounceInput(toDateValue, 1000, setSearchToDateValue);
 
   React.useEffect(() => {
-    if (!initialLoading) refetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialLoading]);
+    if (startTimeParam) {
+      setSearchFromDateValue(toDate(startTimeParam));
+      updateFromDate(toDate(startTimeParam));
+    }
+    if (endTimeParam) {
+      setSearchToDateValue(toDate(endTimeParam));
+      updateToDate(toDate(endTimeParam));
+    }
+    setParamInitialization(true);
+  }, [startTimeParam, endTimeParam, updateFromDate, updateToDate]);
+
+  React.useEffect(() => {
+    // this check is to avoid to send request and compare state and url params before we initialized the state
+    if (paramInitialization) {
+      if (
+        startTimeParam !== format(searchFromDateValue, datetimeFormatStr) ||
+        endTimeParam !== format(searchToDateValue, datetimeFormatStr)
+      ) {
+        setSearchParams({
+          "start-time": format(searchFromDateValue, datetimeFormatStr),
+          "end-time": format(searchToDateValue, datetimeFormatStr),
+        });
+      }
+      axios
+        .get(JOB_BASE_URI, {
+          params: {
+            received_request_time__gte: searchFromDateValue,
+            received_request_time__lte: searchToDateValue,
+          },
+        })
+        .then((response) => {
+          setData(response.data);
+          setLoading(false);
+        });
+    }
+  }, [
+    setSearchParams,
+    paramInitialization,
+    searchFromDateValue,
+    searchToDateValue,
+    startTimeParam,
+    endTimeParam,
+  ]);
 
   return (
     // this loader is required to correctly get the name of the playbook executed
@@ -107,12 +148,15 @@ export default function JobsTable() {
           {/* Actions */}
           <div className="px-3 bg-dark d-flex justify-content-end align-items-center">
             <TableHintIcon />
-            <SyncButton onClick={refetch} className="ms-auto m-0 py-1" />
           </div>
-          <div style={{ height: "80vh", overflowY: "scroll" }}>
-            {/* Table */}
-            {tableNode}
-          </div>
+          {/* Table */}
+          {loading ? (
+            <Spinner />
+          ) : (
+            <div style={{ height: "80vh", overflowY: "scroll" }}>
+              <DataTable data={data.results} {...toPassTableProps} />
+            </div>
+          )}
         </Container>
       )}
     />

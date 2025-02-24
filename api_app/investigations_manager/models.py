@@ -71,10 +71,12 @@ class Investigation(OwnershipAbstractModel, ListCachable):
             for job in self.jobs.all():
                 job: Job
                 jobs = job.get_tree(job)
-                running_jobs = jobs.exclude(status__in=Job.STATUSES.final_statuses())
-                if running_jobs.count() > 0:
+                running_jobs_list = jobs.exclude(
+                    status__in=Job.STATUSES.final_statuses()
+                ).values_list("pk", flat=True)
+                if len(running_jobs_list) > 0:
                     logger.info(
-                        f"Jobs {running_jobs.values_list('pk', flat=True)}  are still running for investigation {self.pk}"
+                        f"Jobs {running_jobs_list} are still running for investigation {self.pk}"
                     )
                     self.status = self.STATUSES.RUNNING.value
                     self.end_time = None

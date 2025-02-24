@@ -31,6 +31,7 @@ class MullvadDNSAnalyzer(ObservableAnalyzer):
     """
 
     url = "https://base.dns.mullvad.net/dns-query"
+    mode: str = "query"
 
     def update(self):
         pass
@@ -92,7 +93,7 @@ class MullvadDNSAnalyzer(ObservableAnalyzer):
                 note=f"Domain is {'' if malicious else "not "}blocked by Mullvad DNS content filtering.",
             )
 
-        else:
+        elif self.mode == "query":
             answers = dns_response.answer
             data = [str(rrset) for rrset in answers] if answers else []
             return {
@@ -100,6 +101,10 @@ class MullvadDNSAnalyzer(ObservableAnalyzer):
                 "data": data,
                 "message": f"DNS query for {observable} completed successfully.",
             }
+        else:
+            raise AnalyzerConfigurationException(
+                f"Invalid mode: {self.mode}. Must be 'query' or 'malicious'."
+            )
 
     @classmethod
     def _monkeypatch(cls):

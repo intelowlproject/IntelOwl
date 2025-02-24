@@ -9,6 +9,7 @@ from django.conf import settings
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -23,6 +24,7 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
 
     @classmethod
     def location(cls, data_type: str) -> str:
+        print("location", data_type)
         if data_type == "ipv4":
             db_name = "drop_v4.json"
         elif data_type == "ipv6":
@@ -32,17 +34,19 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
         return f"{settings.MEDIA_ROOT}/{db_name}"
 
     def run(self):
-        if self.observable_name.isdigit():  # If it's numeric, treat it as an ASN
+        if self.observable_classification == Classification.IP:
+            ip = ipaddress.ip_address(self.observable_name)
+            data_type = "ipv4" if ip.version == 4 else "ipv6"
+            logger.info(f"The given observable is an {data_type} address.")
+        elif (
+            self.observable_classification == Classification.GENERIC
+            and self.observable_name.isdigit()
+        ):
             data_type = "asn"
             asn = int(self.observable_name)  # Convert to integer
             logger.info(f"The given observable is an ASN: {asn}")
         else:
-            try:
-                ip = ipaddress.ip_address(self.observable_name)
-                data_type = "ipv4" if ip.version == 4 else "ipv6"
-                logger.info(f"The given observable is an {data_type} address.")
-            except ValueError:
-                raise ValueError(f"Invalid observable: {self.observable_name}")
+            raise ValueError(f"Invalid observable: {self.observable_name}")
 
         database_location = self.location(data_type)
 

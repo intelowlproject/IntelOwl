@@ -17,6 +17,9 @@ from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
 from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
+# httpx required for HTTP/2 support (Mullvad DNS rejects HTTP/1.1 with protocol errors)
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -90,7 +93,7 @@ class MullvadDNSAnalyzer(ObservableAnalyzer):
             return malicious_detector_response(
                 observable=observable,
                 malicious=malicious,
-                note=f"Domain is {'' if malicious else "not "}blocked by Mullvad DNS content filtering.",
+                note=f"Domain is {'' if malicious else 'not '}blocked by Mullvad DNS content filtering.",
             )
 
         elif self.mode == "query":

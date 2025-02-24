@@ -18,7 +18,6 @@ from celery.worker.request import Request
 from django.conf import settings
 from django.utils.timezone import now
 from django_celery_beat.models import PeriodicTask
-from elasticsearch import ApiError
 from elasticsearch.helpers import bulk
 
 from api_app.choices import ReportStatus, Status
@@ -481,12 +480,23 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
             )
         )
         logger.info(f"documents to add to elastic: {len(all_report_document_list)}")
-        try:
-            bulk(settings.ELASTICSEARCH_DSL_CLIENT, all_report_document_list)
-        except ApiError as error:
-            logger.critical(error)
+        if all_report_document_list:
+            logger.info(
+                ", ".join(
+                    [
+                        f"{document['_source']['job']['id']}-{document['_source']['config']['name']}"
+                        for document in all_report_document_list
+                    ]
+                )
+            )
+            try:
+                bulk(settings.ELASTICSEARCH_DSL_CLIENT, all_report_document_list)
+            except Exception as error:  # pylint: disable=broad-exception-caught
+                logger.exception(error)
+            else:
+                logger.info("documents correctly inserted!")
         else:
-            logger.info("documents correctly inserted!")
+            logger.info("no documents to add")
 
 
 @shared_task(

@@ -21,6 +21,9 @@ class Qiling(FileAnalyzer, DockerBasedAnalyzer):
     shellcode: bool
     profile: str
 
+    def update(self):
+        pass
+
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
         self.args = [self.os, self.arch]
@@ -41,4 +44,6 @@ class Qiling(FileAnalyzer, DockerBasedAnalyzer):
             raise AnalyzerRunException(report["setup_error"])
         if report.get("execution_error"):
             raise AnalyzerRunException(report["execution_error"])
+        if report.get("qiling_not_available_error"):
+            raise AnalyzerRunException(report["qiling_not_available_error"])
         return report

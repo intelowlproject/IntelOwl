@@ -2,6 +2,9 @@
 
 [**Upgrade Guide**](https://intelowlproject.github.io/docs/IntelOwl/installation/#update-to-the-most-recent-version)
 
+## [v6.3.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.3.1)
+This release provides fixes to the recent added ARM support. (ARM build for v6.3.0 was broken due to some dependencies)
+
 ## [v6.3.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.3.0)
 
 This release brings official support for ARM architecture. From now on, our Docker builds are multi-platform. You can now run IntelOwl in your favourite ARM machine smoothly, e.g. Apple Silicon Mac and Raspberry PI.

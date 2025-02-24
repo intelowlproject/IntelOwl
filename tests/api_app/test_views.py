@@ -114,13 +114,22 @@ class JobViewSetTests(CustomViewSetTestCase):
                 name="1.2.3.4", classification=Classification.IP
             )
             with open("test_files/file.exe", "rb") as f:
-                self.an2 = Analyzable.objects.create(
+                self.analyzable2 = Analyzable.objects.create(
                     name="test.file",
                     classification=Classification.FILE,
                     mimetype="application/vnd.microsoft.portable-executable",
                     file=File(f),
                 )
-
+            self.analyzable3 = Analyzable.objects.create(
+                name="test.com", classification=Classification.DOMAIN
+            )
+            with open("test_files/cve.xls", "rb") as f:
+                self.analyzable4 = Analyzable.objects.create(
+                    name="cve.xls",
+                    classification=Classification.FILE,
+                    mimetype="application/vnd.ms-excel",
+                    file=File(f),
+                )
             self.job = Job.objects.create(
                 **{
                     "user": self.superuser,
@@ -132,12 +141,32 @@ class JobViewSetTests(CustomViewSetTestCase):
             self.job2 = Job.objects.create(
                 **{
                     "user": self.superuser,
-                    "analyzable": self.an2,
+                    "analyzable": self.analyzable2,
+                    "playbook_to_execute": PlaybookConfig.objects.get(
+                        name="FREE_TO_USE_ANALYZERS"
+                    ),
+                    "tlp": Job.TLP.GREEN.value,
+                }
+            )
+            self.job3 = Job.objects.create(
+                **{
+                    "user": self.superuser,
+                    "analyzable": self.analyzable3,
                     "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
                     "tlp": Job.TLP.GREEN.value,
                 }
             )
-            self.job3, _ = Job.objects.get_or_create(
+            self.job4 = Job.objects.create(
+                **{
+                    "user": self.superuser,
+                    "analyzable": self.analyzable4,
+                    "playbook_to_execute": PlaybookConfig.objects.get(
+                        name="FREE_TO_USE_ANALYZERS"
+                    ),
+                    "tlp": Job.TLP.GREEN.value,
+                }
+            )
+            self.job5, _ = Job.objects.get_or_create(
                 **{
                     "user": self.superuser,
                     "analyzable": self.analyzable,
@@ -152,13 +181,16 @@ class JobViewSetTests(CustomViewSetTestCase):
             self.investigation2, _ = Investigation.objects.get_or_create(
                 name="test_investigation2", owner=self.superuser
             )
-            self.investigation2.jobs.add(self.job3)
+            self.investigation2.jobs.add(self.job5)
 
     def tearDown(self):
+        self.job5.delete()
+        self.job4.delete()
+        self.job3.delete()
         self.job2.delete()
         self.job.delete()
         self.analyzable.delete()
-        self.an2.delete()
+        self.analyzable2.delete()
 
     def test_recent_scan(self):
         j1 = Job.objects.create(
@@ -232,6 +264,48 @@ class JobViewSetTests(CustomViewSetTestCase):
         self.assertIn("total_pages", content, msg=msg)
         self.assertIn("results", content, msg=msg)
 
+    def test_list_filter_observable(self):
+        response = self.client.get(self.jobs_list_uri, {"is_sample": False})
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertEqual(response_data["count"], 2)
+        print(response_data)
+        self.assertCountEqual(
+            list(set([job["file_name"] for job in response_data["results"]])),
+            ["1.2.3.4", "test.com"],
+        )
+
+    def test_list_filter_sample(self):
+        response = self.client.get(self.jobs_list_uri, {"is_sample": True})
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertEqual(response_data["count"], 2)
+        self.assertCountEqual(
+            list(set([job["observable_name"] for job in response_data["results"]])),
+            ["cve.xls", "test.file"],
+        )
+
+    def test_list_filter_test_observable_type(self):
+        response = self.client.get(self.jobs_list_uri, {"type": "domain"})
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertCountEqual(
+            list(set([job["observable_name"] for job in response_data["results"]])),
+            ["test.com"],
+        )
+
+    def test_list_filter_test_mimetype(self):
+        response = self.client.get(
+            self.jobs_list_uri,
+            {"type": "application/vnd.microsoft.portable-executable"},
+        )
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertCountEqual(
+            list(set([job["observable_name"] for job in response_data["results"]])),
+            ["test.file"],
+        )
+
     def test_retrieve_200(self):
         response = self.client.get(f"{self.jobs_list_uri}/{self.job.id}")
         content = response.json()
@@ -245,13 +319,13 @@ class JobViewSetTests(CustomViewSetTestCase):
         self.assertEqual(content["related_investigation_number"], 2)
 
     def test_delete(self):
-        self.assertEqual(Job.objects.count(), 3)
+        self.assertEqual(Job.objects.count(), 5)
         response = self.client.delete(f"{self.jobs_list_uri}/{self.job.id}")
         self.assertEqual(response.status_code, 403)
         self.client.force_authenticate(user=self.job.user)
         response = self.client.delete(f"{self.jobs_list_uri}/{self.job.id}")
         self.assertEqual(response.status_code, 204)
-        self.assertEqual(Job.objects.count(), 2)
+        self.assertEqual(Job.objects.count(), 4)
 
     # @action endpoints
 
@@ -302,7 +376,7 @@ class JobViewSetTests(CustomViewSetTestCase):
             [
                 {
                     "date": "2024-11-28T00:00:00Z",
-                    "pending": 3,
+                    "pending": 5,
                     "failed": 0,
                     "reported_with_fails": 0,
                     "reported_without_fails": 0,
@@ -356,8 +430,14 @@ class JobViewSetTests(CustomViewSetTestCase):
         self.assertEqual(
             resp.json(),
             {
-                "values": ["Dns"],
-                "aggregation": [{"date": "2024-11-28T00:00:00Z", "Dns": 3}],
+                "values": ["Dns", "FREE_TO_USE_ANALYZERS"],
+                "aggregation": [
+                    {
+                        "date": "2024-11-28T00:00:00Z",
+                        "Dns": 3,
+                        "FREE_TO_USE_ANALYZERS": 2,
+                    }
+                ],
             },
         )
 
@@ -389,7 +469,7 @@ class JobViewSetTests(CustomViewSetTestCase):
                 "aggregation": [
                     {
                         "date": "2024-11-28T00:00:00Z",
-                        "superuser@intelowl.org": 3,
+                        "superuser@intelowl.org": 5,
                         "testspace@intelowl.org": 1,
                     },
                 ],
@@ -406,7 +486,7 @@ class JobViewSetTests(CustomViewSetTestCase):
             {
                 "values": ["AMBER", "CLEAR", "GREEN"],
                 "aggregation": [
-                    {"date": "2024-11-28T00:00:00Z", "CLEAR": 1, "GREEN": 1, "AMBER": 1}
+                    {"date": "2024-11-28T00:00:00Z", "CLEAR": 1, "GREEN": 3, "AMBER": 1}
                 ],
             },
         )

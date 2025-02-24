@@ -112,6 +112,8 @@ In 2021 IntelOwl joined the official [Docker Open Source Program](https://www.do
 
 #### DigitalOcean
 
+[![DigitalOcean Referral Badge](https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%201.svg)](https://www.digitalocean.com/?refcode=128f2c68f93b&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge)
+
 In 2022 IntelOwl joined the official [DigitalOcean Open Source Program](https://www.digitalocean.com/open-source?utm_medium=opensource&utm_source=IntelOwl).
 
 

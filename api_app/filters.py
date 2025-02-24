@@ -1,6 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import logging
+
 import rest_framework_filters as filters
 
 from .choices import Classification
@@ -9,6 +11,8 @@ from .models import Job
 __all__ = [
     "JobFilter",
 ]
+
+logger = logging.getLogger(__name__)
 
 
 class JobFilter(filters.FilterSet):
@@ -30,7 +34,7 @@ class JobFilter(filters.FilterSet):
         name (CharFilter): Custom filter method to filter by name (observable or file name).
     """
 
-    is_sample = filters.BooleanFilter()
+    is_sample = filters.BooleanFilter(method="filter_is_sample")
     md5 = filters.CharFilter(field_name="analyzable__md5", lookup_expr="icontains")
     observable_name = filters.CharFilter(
         field_name="analyzable__name", lookup_expr="icontains"
@@ -51,6 +55,13 @@ class JobFilter(filters.FilterSet):
     id = filters.CharFilter(method="filter_for_id")
     type = filters.CharFilter(method="filter_for_type")
     name = filters.CharFilter(field_name="analyzable__name")
+
+    @staticmethod
+    def filter_is_sample(queryset, value, is_sample, *args, **kwargs):
+        logger.debug(f"{value=} {is_sample=}")
+        if is_sample:
+            return queryset.filter(analyzable__classification=Classification.FILE)
+        return queryset.exclude(analyzable__classification=Classification.FILE)
 
     @staticmethod
     def filter_for_user(queryset, value, user, *args, **kwargs):
@@ -102,7 +113,7 @@ class JobFilter(filters.FilterSet):
             QuerySet: The filtered queryset.
         """
         if _type in Classification.values:
-            return queryset.filter(analyzavle__classification=_type)
+            return queryset.filter(analyzable__classification=_type)
         return queryset.filter(analyzable__mimetype__icontains=_type)
 
     class Meta:

@@ -85,18 +85,12 @@ class MullvadDNSAnalyzer(ObservableAnalyzer):
         dns_response = dns.message.from_wire(response.content)
 
         if self.mode == "malicious":
-            if dns_response.rcode() == 3:
-                return malicious_detector_response(
-                    observable=observable,
-                    malicious=True,
-                    note="Domain is blocked by Mullvad DNS content filtering.",
-                )
-            else:
-                return malicious_detector_response(
-                    observable=observable,
-                    malicious=False,
-                    note="Domain is not blocked by Mullvad DNS content filtering.",
-                )
+            malicious = dns_response.rcode() == 3
+            return malicious_detector_response(
+                observable=observable,
+                malicious=malicious,
+                note=f"Domain is {'' if malicious else "not "}blocked by Mullvad DNS content filtering.",
+            )
 
         else:
             answers = dns_response.answer

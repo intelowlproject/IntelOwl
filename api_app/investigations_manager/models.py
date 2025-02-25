@@ -74,7 +74,11 @@ class Investigation(OwnershipAbstractModel, ListCachable):
                 running_jobs_list = jobs.exclude(
                     status__in=Job.STATUSES.final_statuses()
                 ).values_list("pk", flat=True)
-                if len(running_jobs_list) > 0:
+                running_jobs_count = len(running_jobs_list)
+                logger.info(
+                    f"{running_jobs_count} out of {self.jobs.count()} jobs are still running for investigation {self.pk}"
+                )
+                if running_jobs_count > 0:
                     logger.info(
                         f"Jobs {running_jobs_list} are still running for investigation {self.pk}"
                     )
@@ -83,6 +87,7 @@ class Investigation(OwnershipAbstractModel, ListCachable):
                     break
             # and they are all completed
             else:
+                logger.info(f"Setting investigation {self.pk} to concluded")
                 self.status = self.STATUSES.CONCLUDED.value
                 self.end_time = (
                     self.jobs.order_by("-finished_analysis_time")
@@ -90,6 +95,7 @@ class Investigation(OwnershipAbstractModel, ListCachable):
                     .finished_analysis_time
                 )
         else:
+            logger.info(f"Setting investigation {self.pk} to created")
             self.status = self.STATUSES.CREATED.value
             self.end_time = None
         if save:

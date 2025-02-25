@@ -56,7 +56,7 @@ pdfid==1.1.0
 pefile==2024.8.26
 Pillow==11.0.0
 pydeep==0.4
-pyelftools==0.31
+pyelftools==0.32
 PyExifTool==0.5.0
 pyhashlookup==1.2.0
 pyimpfuzzy==0.5

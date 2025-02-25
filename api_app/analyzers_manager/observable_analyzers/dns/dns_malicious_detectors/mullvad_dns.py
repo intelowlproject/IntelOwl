@@ -48,7 +48,7 @@ class MullvadDNSAnalyzer(ObservableAnalyzer):
         encoded_query = (
             base64.urlsafe_b64encode(wire_query).rstrip(b"=").decode("ascii")
         )
-        logger.info(f"Encoded query: {encoded_query}")
+        logger.info(f"Mullvad_DNS encoded query for {observable}: {encoded_query}")
         return encoded_query
 
     def run(self):
@@ -64,13 +64,13 @@ class MullvadDNSAnalyzer(ObservableAnalyzer):
         observable = self.observable_name
 
         if self.observable_classification == Classification.URL:
-            logger.info(f"Extracting hostname from URL {observable}")
+            logger.debug(f"Mullvad_DNS extracting hostname from URL {observable}")
             hostname = urlparse(observable).hostname
             observable = hostname
 
         encoded_query = self.encode_query(observable)
         complete_url = f"{self.url}?dns={encoded_query}"
-        logger.info(f"Requesting Mullvad DNS at: {complete_url}")
+        logger.info(f"Requesting Mullvad DNS for {observable} at: {complete_url}")
 
         try:
             response = httpx.Client(http2=True).get(

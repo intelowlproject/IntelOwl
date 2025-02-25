@@ -19,7 +19,8 @@ import { format } from "date-fns";
 import { PluginsTypes, PluginFinalStatuses } from "../../constants/pluginConst";
 import { searchTableColumns } from "./searchTableColumns";
 import { pluginReportQueries } from "./searchApi";
-import { JsonEditor } from "../common/JsonEditor";
+import { useJsonEditorStore } from "../../stores/useJsonEditorStore";
+import { SearchJSONReport } from "./utils";
 
 // table config
 const tableConfig = { enableExpanded: true, enableFlexLayout: true };
@@ -29,24 +30,16 @@ const tableInitialState = {
 };
 
 const tableProps = {
-  SubComponent: ({ row }) => (
-    <div
-      id={`jobreport-jsoninput-${row.id}`}
-      style={{ maxHeight: "50vh", overflow: "scroll" }}
-    >
-      <JsonEditor
-        id="plugin_report_json"
-        initialJsonData={row.original?.report}
-        width="100%"
-        readOnly
-      />
-    </div>
-  ),
+  SubComponent: ({ row }) => <SearchJSONReport row={row} />,
 };
 
 export default function Search() {
   const [elasticData, setElasticData] = React.useState([]);
   const [loadingData, setLoadingData] = React.useState(false);
+
+  const [setTextToHighlight] = useJsonEditorStore((state) => [
+    state.setTextToHighlight,
+  ]);
 
   const isoFormatString = "yyyy-MM-dd'T'HH:mm";
   const defaultStartDate = new Date();
@@ -393,7 +386,10 @@ export default function Search() {
                 type="text"
                 name="report"
                 value={formik.values.report}
-                onChange={formik.handleChange}
+                onChange={(event) => {
+                  formik.setFieldValue("report", event.target.value, false);
+                  setTextToHighlight(event.target.value);
+                }}
                 onBlur={formik.handleBlur}
                 className="bg-darker border-dark"
                 invalid={formik.touched.report && formik.errors.report}

@@ -63,7 +63,11 @@ export default function InvestigationsTable() {
   // state
   const [paramInitialization, setParamInitialization] = React.useState(false); // used to prevent a request with wrong params
   const [loading, setLoading] = React.useState(true);
-  const [data, setData] = React.useState({ results: [], count: 0 });
+  const [data, setData] = React.useState({
+    results: [],
+    count: 0,
+    total_pages: 0,
+  });
   /* searchNameType is used to show the user typed text (this state changes for each char typed), 
   searchNameRequest is used in the request to the backend and it's update periodically.
   In this way we avoid a request for each char. */
@@ -108,16 +112,43 @@ export default function InvestigationsTable() {
           "analyzed-object-name": searchNameRequest,
         });
       }
+      let investigationList = [];
+      let pageNumber = 0;
+      const params = {
+        start_time__gte: searchFromDateValue,
+        start_time__lte: searchToDateValue,
+        analyzed_object_name: searchNameRequest,
+      };
       axios
-        .get(INVESTIGATION_BASE_URI, {
-          params: {
-            start_time__gte: searchFromDateValue,
-            start_time__lte: searchToDateValue,
-            analyzed_object_name: searchNameRequest,
-          },
-        })
+        .get(INVESTIGATION_BASE_URI, { params })
         .then((response) => {
-          setData(response.data);
+          investigationList = investigationList.concat(response.data.results);
+          pageNumber = Math.min(response.data.total_pages, 10);
+          const additionalRequests = [];
+          // eslint-disable-next-line no-plusplus
+          for (let page = 2; page <= pageNumber; page++) {
+            params.page = page;
+            additionalRequests.push(
+              axios.get(INVESTIGATION_BASE_URI, { params }),
+            );
+          }
+          // Promise.all works only if ALL the requests are done successfully
+          return Promise.allSettled(additionalRequests);
+        })
+        .then((responseList) => {
+          // We need to handle promise manually to exclude failed requests
+          responseList
+            .filter((response) => response.status === "fulfilled")
+            .forEach((successfulResponse) => {
+              investigationList = investigationList.concat(
+                successfulResponse.value.data.results,
+              );
+            });
+          setData({
+            results: investigationList,
+            count: investigationList.length,
+            total_pages: pageNumber,
+          });
           setLoading(false);
         });
     }
@@ -195,7 +226,11 @@ export default function InvestigationsTable() {
         <Spinner />
       ) : (
         <div style={{ height: "80vh", overflowY: "scroll" }}>
-          <DataTable data={data.results} {...toPassTableProps} />
+          <DataTable
+            data={data.results}
+            pageCount={data.total_pages}
+            {...toPassTableProps}
+          />
         </div>
       )}
     </Container>

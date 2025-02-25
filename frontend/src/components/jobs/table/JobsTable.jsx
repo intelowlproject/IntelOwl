@@ -62,7 +62,11 @@ export default function JobsTable() {
   // state
   const [paramInitialization, setParamInitialization] = React.useState(false); // used to prevent a request with wrong params
   const [loading, setLoading] = React.useState(true);
-  const [data, setData] = React.useState({ results: [], count: 0 });
+  const [data, setData] = React.useState({
+    results: [],
+    count: 0,
+    total_pages: 0,
+  });
 
   // this update the value after some times, this give user time to pick the datetime
   useDebounceInput(fromDateValue, 1000, setSearchFromDateValue);
@@ -92,15 +96,38 @@ export default function JobsTable() {
           "end-time": format(searchToDateValue, datetimeFormatStr),
         });
       }
+      let jobList = [];
+      let pageNumber = 0;
+      const params = {
+        received_request_time__gte: searchFromDateValue,
+        received_request_time__lte: searchToDateValue,
+      };
       axios
-        .get(JOB_BASE_URI, {
-          params: {
-            received_request_time__gte: searchFromDateValue,
-            received_request_time__lte: searchToDateValue,
-          },
-        })
+        .get(JOB_BASE_URI, { params })
         .then((response) => {
-          setData(response.data);
+          jobList = jobList.concat(response.data.results);
+          pageNumber = Math.min(response.data.total_pages, 10);
+          const additionalRequests = [];
+          // eslint-disable-next-line no-plusplus
+          for (let page = 2; page <= pageNumber; page++) {
+            params.page = page;
+            additionalRequests.push(axios.get(JOB_BASE_URI, { params }));
+          }
+          // Promise.all works only if ALL the requests are done successfully
+          return Promise.allSettled(additionalRequests);
+        })
+        .then((responseList) => {
+          // We need to handle promise manually to exclude failed requests
+          responseList
+            .filter((response) => response.status === "fulfilled")
+            .forEach((successfulResponse) => {
+              jobList = jobList.concat(successfulResponse.value.data.results);
+            });
+          setData({
+            results: jobList,
+            count: jobList.length,
+            total_pages: pageNumber,
+          });
           setLoading(false);
         });
     }
@@ -154,7 +181,11 @@ export default function JobsTable() {
             <Spinner />
           ) : (
             <div style={{ height: "80vh", overflowY: "scroll" }}>
-              <DataTable data={data.results} {...toPassTableProps} />
+              <DataTable
+                data={data.results}
+                pageCount={data.total_pages}
+                {...toPassTableProps}
+              />
             </div>
           )}
         </Container>

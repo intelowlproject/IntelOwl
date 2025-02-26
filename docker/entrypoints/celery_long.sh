@@ -17,5 +17,5 @@ then
     echo "Running celery with autoreload"
     python3 manage.py celery_reload -c "$ARGUMENTS"
 else
-  /usr/local/bin/celery $ARGUMENTS
+  /usr/local/bin/celery "$ARGUMENTS"
 fi

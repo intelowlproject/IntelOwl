@@ -353,7 +353,7 @@ if [[ $env_argument == "prod" && $version != "${current_version}" ]]; then
   git checkout "v${version}"
 fi
 
-if [ $debug_build ]; then
+if [ "$debug_build" ]; then
   export BUILDKIT_PROGRESS="plain"
 fi
 export DOCKER_BUILDKIT=1
@@ -365,7 +365,7 @@ for value in "${compose_files[@]}" ; do
 done
 
 if grep "docker" <<< "$(groups)" > /dev/null 2>&1; then
-  docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
+  docker compose --project-directory docker "${to_run[@]}" -p "$project_name" "$cmd_argument" "$@"
 else
-  sudo docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
+  sudo docker compose --project-directory docker "${to_run[@]}" -p "$project_name" "$cmd_argument" "$@"
 fi

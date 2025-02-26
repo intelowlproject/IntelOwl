@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/bash  
 
 echo "WATCHMAN value is "
-echo $WATCHMAN
+echo "$WATCHMAN"
 
 # This script can be disabled during development using WATCHMAN=false env variable
 if [ "$WATCHMAN" = "false" ]; then echo "Skipping WATCHMAN installation because we are not in test mode"; exit 0;  fi
@@ -10,10 +10,10 @@ pip3 install --compile -r requirements/django-server-requirements.txt
 
 # install Watchman to enhance performance on the Django development Server
 # https://docs.djangoproject.com/en/3.2/ref/django-admin/#runserver
-cd /tmp
+cd /tmp || exit  
 wget https://github.com/facebook/watchman/releases/download/v2024.05.13.00/watchman-v2024.05.13.00-linux.zip
 unzip watchman-*-linux.zip
-cd watchman-*-linux/
+cd watchman-*-linux/ || exit 
 mkdir -p /usr/local/{bin,lib} /usr/local/var/run/watchman
 cp bin/* /usr/local/bin
 cp lib/* /usr/local/lib

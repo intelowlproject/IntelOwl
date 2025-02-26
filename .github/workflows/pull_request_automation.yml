@@ -57,8 +57,8 @@ jobs:
         run: |
           isort . --profile black --filter-files --check-only --diff --skip configuration/ldap_config.py
       
-      - name: Run ShellCheck
-        uses: Azbagheri/shell-linter@latest
+      - name: Perform ShellCheck Analysis
+        run: bash <(curl -s https://raw.githubusercontent.com/CICDToolbox/shellcheck/master/pipeline.sh)
 
   backend-tests:
     runs-on: ubuntu-latest

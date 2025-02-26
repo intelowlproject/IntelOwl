@@ -48,9 +48,9 @@ export function AfterRegistrationModalAlert(props) {
       zIndex="1050"
       size="lg"
       isOpen={isOpen}
-      keyboard={false}
       backdrop="static"
       labelledBy="Registration successful modal"
+      toggle={toggle}
     >
       <ModalHeader toggle={toggle}>Registration successful! 🥳</ModalHeader>
       <ModalBody className="px-5">

@@ -83,15 +83,14 @@ export default function History() {
         </NavItem>
         {createButton}
       </Nav>
+      {/* This is way to generate only the table the user wants this allow to save:
+       * requests to the backend
+       * loading time
+       * avoid error when request job page 3 and jobs has for ex 6 pages and investigations 2 */}
       <TabContent activeTab={isJobsTablePage ? "jobs" : "investigations"}>
-        <TabPane tabId="jobs">
+        <TabPane tabId={isJobsTablePage ? "jobs" : "investigations"}>
           <Suspense fallback={<FallBackLoading />}>
-            <JobsTable />
-          </Suspense>
-        </TabPane>
-        <TabPane tabId="investigations">
-          <Suspense fallback={<FallBackLoading />}>
-            <InvestigationsTable />
+            {isJobsTablePage ? <JobsTable /> : <InvestigationsTable />}
           </Suspense>
         </TabPane>
       </TabContent>

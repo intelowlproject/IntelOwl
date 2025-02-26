@@ -105,6 +105,7 @@ export function PluginConfigModal({
       labelledBy="Plugin config modal"
       isOpen={isOpen}
       style={{ minWidth: "70%" }}
+      toggle={() => toggle(false)}
     >
       <ModalHeader className="mx-2" toggle={() => toggle(false)}>
         <small className="text-info">

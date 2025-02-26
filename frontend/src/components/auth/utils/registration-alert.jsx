@@ -50,6 +50,7 @@ export function AfterRegistrationModalAlert(props) {
       isOpen={isOpen}
       backdrop="static"
       labelledBy="Registration successful modal"
+      toggle={toggle}
     >
       <ModalHeader toggle={toggle}>Registration successful! 🥳</ModalHeader>
       <ModalBody className="px-5">

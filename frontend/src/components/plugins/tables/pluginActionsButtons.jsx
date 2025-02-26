@@ -221,8 +221,9 @@ export function PluginDeletionButton({ pluginName, pluginType_ }) {
         backdrop="static"
         labelledBy="Plugin deletion modal"
         isOpen={showModal}
+        toggle={() => setShowModal(!showModal)}
       >
-        <ModalHeader className="mx-2" toggle={() => setShowModal(false)}>
+        <ModalHeader className="mx-2" toggle={() => setShowModal(!showModal)}>
           <small className="text-info">Delete plugin</small>
         </ModalHeader>
         <ModalBody className="d-flex justify-content-between my-2 mx-2">
@@ -237,7 +238,7 @@ export function PluginDeletionButton({ pluginName, pluginType_ }) {
             <Button
               className="mx-2"
               size="sm"
-              onClick={() => setShowModal(false)}
+              onClick={() => setShowModal(!showModal)}
             >
               Cancel
             </Button>
@@ -443,13 +444,13 @@ export function PlaybookFlowsButton({ playbook }) {
           centered
           zIndex="1050"
           size="lg"
-          keyboard={false}
           backdrop="static"
           labelledBy="Playbook flows modal"
           isOpen={showModal}
           style={{ minWidth: "90%" }}
+          toggle={() => setShowModal(!showModal)}
         >
-          <ModalHeader className="mx-2" toggle={() => setShowModal(false)}>
+          <ModalHeader className="mx-2" toggle={() => setShowModal(!showModal)}>
             <small className="text-info">Possible playbook flows</small>
           </ModalHeader>
           <ModalBody className="mx-2">
@@ -500,13 +501,13 @@ export function MappingDataModel({ data, type, pythonModule }) {
           centered
           zIndex="1050"
           size="lg"
-          keyboard={false}
           backdrop="static"
           labelledBy="Data model modal"
           isOpen={showModal}
           style={{ minWidth: "50%" }}
+          toggle={() => setShowModal(!showModal)}
         >
-          <ModalHeader className="mx-2" toggle={() => setShowModal(false)}>
+          <ModalHeader className="mx-2" toggle={() => setShowModal(!showModal)}>
             <small className="text-info">
               Data model mapping
               <MdInfoOutline

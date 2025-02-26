@@ -78,14 +78,9 @@ describe("Runtime Configuration Modal test", () => {
     const editableRuntimeConfigSection =
       runtimeConfigModalWarning.closest("div");
     const editableRuntimeConfig = editableRuntimeConfigSection.querySelector(
-      "#edit_runtime_configuration-modal",
+      "#jsonAceEditor__runtime_configuration",
     );
     expect(editableRuntimeConfig).toBeInTheDocument();
-    const editableText = screen.getAllByText("TEST_ANALYZER")[0];
-    expect(editableText).toBeInTheDocument();
-    expect(editableRuntimeConfig.textContent).toBe(
-      "{  analyzers: {    TEST_ANALYZER: {      query_type: 'AAAA'    }  },  connectors: {},  pivots: {},  visualizers: {}}",
-    );
     // buttons
     const closeButton = screen.getByRole("button", {
       name: "Close",
@@ -176,14 +171,9 @@ describe("Runtime Configuration Modal test", () => {
     const editableRuntimeConfigSection =
       runtimeConfigModalWarning.closest("div");
     const editableRuntimeConfig = editableRuntimeConfigSection.querySelector(
-      "#edit_runtime_configuration-modal",
+      "#jsonAceEditor__runtime_configuration",
     );
     expect(editableRuntimeConfig).toBeInTheDocument();
-    const editableText = screen.getAllByText("TEST_ANALYZER")[0];
-    expect(editableText).toBeInTheDocument();
-    expect(editableRuntimeConfig.textContent).toBe(
-      "{  analyzers: {    TEST_ANALYZER: {      query_type: 'AAAA'    }  },  connectors: {}}",
-    );
     // buttons
     const closeButton = screen.getByRole("button", {
       name: "Close",

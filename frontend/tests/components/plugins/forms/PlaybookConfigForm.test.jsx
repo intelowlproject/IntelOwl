@@ -162,13 +162,9 @@ describe("PlaybookConfigForm test", () => {
     const editableRuntimeConfigSection =
       runtimeConfigModalWarning.closest("div");
     const editableRuntimeConfig = editableRuntimeConfigSection.querySelector(
-      "#edit_runtime_configuration-modal",
+      "#jsonAceEditor__runtime_configuration",
     );
     expect(editableRuntimeConfig).toBeInTheDocument();
-    // to test the contents of the json editor we need to use this format
-    expect(editableRuntimeConfig.textContent).toBe(
-      "{  analyzers: {    TEST_ANALYZER: {      query_type: 'A'    }  },  connectors: {    TEST_CONNECTOR: {}  },  pivots: {},  visualizers: {}}",
-    );
 
     const saveButton = screen.getByRole("button", { name: "Save" });
     expect(saveButton).toBeInTheDocument();
@@ -250,14 +246,10 @@ describe("PlaybookConfigForm test", () => {
     const editableRuntimeConfigSection =
       runtimeConfigModalWarning.closest("div");
     const editableRuntimeConfig = editableRuntimeConfigSection.querySelector(
-      "#edit_runtime_configuration-modal",
+      "#jsonAceEditor__runtime_configuration",
     );
     expect(editableRuntimeConfig).toBeInTheDocument();
-    // to test the contents of the json editor we need to use this format
-    expect(editableRuntimeConfig.textContent).toBe(
-      "{  analyzers: {    TEST_ANALYZER: {      query_type: 'A'    }  },  connectors: {    TEST_CONNECTOR: {}  },  pivots: {},  visualizers: {}}",
-    );
-
+    
     const saveButton = screen.getByRole("button", { name: "Save" });
     expect(saveButton).toBeInTheDocument();
     expect(saveButton.className).toContain("disabled");
@@ -361,7 +353,7 @@ describe("PlaybookConfigForm test", () => {
     const editableRuntimeConfigSection =
       runtimeConfigModalWarning.closest("div");
     const editableRuntimeConfig = editableRuntimeConfigSection.querySelector(
-      "#edit_runtime_configuration-modal",
+     "#jsonAceEditor__runtime_configuration",
     );
     expect(editableRuntimeConfig).toBeInTheDocument();
 

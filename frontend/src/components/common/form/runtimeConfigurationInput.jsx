@@ -155,7 +155,7 @@ export function saveRuntimeConfiguration(
   editableConfig,
 ) {
   // we only want to save configuration against plugins whose params dict is not empty or was modified
-  if (jsonInput !== undefined) {
+  if (Object.keys(jsonInput).length > 0 && jsonInput !== undefined) {
     let jsonInputToSave = {};
     if (jsonInput?.jsObject) jsonInputToSave = jsonInput?.jsObject;
     else jsonInputToSave = jsonInput;

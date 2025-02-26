@@ -29,8 +29,17 @@ export function JsonEditor({
   levelToOpen,
   textToHighlight,
 }) {
+  console.debug("JsonEditor rendered");
+
   const [currentJsonData, setCurrentJasonData] =
     React.useState(initialJsonData);
+
+  // const [currentJsonData, setCurrentJasonData] = React.useState({});
+  // necessary to correctly update the state since useState is asynchronous
+  // React.useEffect(() => {
+  //   console.debug("USE EFFECT");
+  //   setCurrentJasonData(initialJsonData);
+  // }, [initialJsonData]);
 
   const getMarkers = (editor, indexes) => {
     const markers = [];

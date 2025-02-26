@@ -15,6 +15,7 @@ MEDIA_ROOT = BASE_DIR / "files_required"
 CONFIG_ROOT = PROJECT_LOCATION / "configuration"
 BLINT_REPORTS_PATH = MEDIA_ROOT / "blint"
 YARA_RULES_PATH = MEDIA_ROOT / "yara"  # path for manual yara rules
+BBOT_FILES_PATH = MEDIA_ROOT / "bbot"  # path for manual bbot files
 
 LOG_DIR = Path("/") / "var" / "log" / "intel_owl"
 # test / ci

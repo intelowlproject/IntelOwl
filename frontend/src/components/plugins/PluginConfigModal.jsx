@@ -101,7 +101,6 @@ export function PluginConfigModal({
       centered
       zIndex="1050"
       size="lg"
-      keyboard={false}
       backdrop="static"
       labelledBy="Plugin config modal"
       isOpen={isOpen}

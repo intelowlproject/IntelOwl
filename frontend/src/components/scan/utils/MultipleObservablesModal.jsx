@@ -53,7 +53,6 @@ export function MultipleObservablesModal(props) {
       size="xl"
       isOpen={isOpen}
       toggle={toggle}
-      keyboard={false}
       scrollable
       backdrop="static"
       labelledBy="Load Multiple Observables"

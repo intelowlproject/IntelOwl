@@ -48,7 +48,6 @@ export function AfterRegistrationModalAlert(props) {
       zIndex="1050"
       size="lg"
       isOpen={isOpen}
-      keyboard={false}
       backdrop="static"
       labelledBy="Registration successful modal"
     >

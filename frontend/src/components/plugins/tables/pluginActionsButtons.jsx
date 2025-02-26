@@ -218,7 +218,6 @@ export function PluginDeletionButton({ pluginName, pluginType_ }) {
         centered
         zIndex="1050"
         size="lg"
-        keyboard={false}
         backdrop="static"
         labelledBy="Plugin deletion modal"
         isOpen={showModal}

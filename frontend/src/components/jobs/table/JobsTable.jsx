@@ -4,16 +4,16 @@ import { Container, Row, Col, UncontrolledTooltip, Spinner } from "reactstrap";
 import { MdInfoOutline } from "react-icons/md";
 
 import {
-  DataTable,
   Loader,
+  SyncButton,
   TableHintIcon,
+  useDataTable,
   useDebounceInput,
 } from "@certego/certego-ui";
 
 import useTitle from "react-use/lib/useTitle";
 import { useSearchParams } from "react-router-dom";
 import { format, toDate } from "date-fns";
-import axios from "axios";
 import { jobTableColumns } from "./jobTableColumns";
 import { TimePicker } from "../../common/TimePicker";
 
@@ -21,17 +21,6 @@ import { JOB_BASE_URI } from "../../../constants/apiURLs";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { useTimePickerStore } from "../../../stores/useTimePickerStore";
 import { datetimeFormatStr } from "../../../constants/miscConst";
-
-// constants
-const toPassTableProps = {
-  columns: jobTableColumns,
-  tableEmptyNode: (
-    <>
-      <h4>No Data</h4>
-      <small className="text-muted">Note: Try changing time filter.</small>
-    </>
-  ),
-};
 
 // component
 export default function JobsTable() {
@@ -43,10 +32,6 @@ export default function JobsTable() {
   const [searchParams, setSearchParams] = useSearchParams();
   const startTimeParam = searchParams.get("start-time");
   const endTimeParam = searchParams.get("end-time");
-
-  const [playbooksLoading, playbooksError] = usePluginConfigurationStore(
-    (state) => [state.playbooksLoading, state.playbooksError],
-  );
 
   const [toDateValue, fromDateValue, updateToDate, updateFromDate] =
     useTimePickerStore((state) => [
@@ -60,19 +45,14 @@ export default function JobsTable() {
   const [searchToDateValue, setSearchToDateValue] = React.useState(toDateValue);
 
   // state
-  const [paramInitialization, setParamInitialization] = React.useState(false); // used to prevent a request with wrong params
-  const [loading, setLoading] = React.useState(true);
-  const [data, setData] = React.useState({
-    results: [],
-    count: 0,
-    total_pages: 0,
-  });
+  const [areParamsInitialized, setAreParamsInitialized] = React.useState(false); // used to prevent a request with wrong params
 
   // this update the value after some times, this give user time to pick the datetime
   useDebounceInput(fromDateValue, 1000, setSearchFromDateValue);
   useDebounceInput(toDateValue, 1000, setSearchToDateValue);
 
   React.useEffect(() => {
+    // update timepicker store with url params
     if (startTimeParam) {
       setSearchFromDateValue(toDate(startTimeParam));
       updateFromDate(toDate(startTimeParam));
@@ -81,12 +61,13 @@ export default function JobsTable() {
       setSearchToDateValue(toDate(endTimeParam));
       updateToDate(toDate(endTimeParam));
     }
-    setParamInitialization(true);
+    setAreParamsInitialized(true);
   }, [startTimeParam, endTimeParam, updateFromDate, updateToDate]);
 
   React.useEffect(() => {
-    // this check is to avoid to send request and compare state and url params before we initialized the state
-    if (paramInitialization) {
+    // After the initialization each time the time picker change, update the url
+    // Note: this check is required to avoid infinite loop (url update time picker and time picker update url)
+    if (areParamsInitialized) {
       if (
         startTimeParam !== format(searchFromDateValue, datetimeFormatStr) ||
         endTimeParam !== format(searchToDateValue, datetimeFormatStr)
@@ -96,54 +77,60 @@ export default function JobsTable() {
           "end-time": format(searchToDateValue, datetimeFormatStr),
         });
       }
-      let jobList = [];
-      let pageNumber = 0;
-      const params = {
-        received_request_time__gte: searchFromDateValue,
-        received_request_time__lte: searchToDateValue,
-      };
-      axios
-        .get(JOB_BASE_URI, { params })
-        .then((response) => {
-          jobList = jobList.concat(response.data.results);
-          pageNumber = Math.min(response.data.total_pages, 10);
-          const additionalRequests = [];
-          // eslint-disable-next-line no-plusplus
-          for (let page = 2; page <= pageNumber; page++) {
-            params.page = page;
-            additionalRequests.push(axios.get(JOB_BASE_URI, { params }));
-          }
-          // Promise.all works only if ALL the requests are done successfully
-          return Promise.allSettled(additionalRequests);
-        })
-        .then((responseList) => {
-          // We need to handle promise manually to exclude failed requests
-          responseList
-            .filter((response) => response.status === "fulfilled")
-            .forEach((successfulResponse) => {
-              jobList = jobList.concat(successfulResponse.value.data.results);
-            });
-          setData({
-            results: jobList,
-            count: jobList.length,
-            total_pages: pageNumber,
-          });
-          setLoading(false);
-        });
     }
   }, [
     setSearchParams,
-    paramInitialization,
+    areParamsInitialized,
     searchFromDateValue,
     searchToDateValue,
     startTimeParam,
     endTimeParam,
   ]);
 
+  return areParamsInitialized ? ( // this "if" saves one request
+    <JobsTableComponent
+      searchFromDateValue={searchFromDateValue}
+      searchToDateValue={searchToDateValue}
+    />
+  ) : (
+    <Spinner />
+  );
+}
+
+// constants
+const toPassTableProps = {
+  columns: jobTableColumns,
+  tableEmptyNode: (
+    <>
+      <h4>No Data</h4>
+      <small className="text-muted">Note: Try changing time filter.</small>
+    </>
+  ),
+};
+
+function JobsTableComponent({ searchFromDateValue, searchToDateValue }) {
+  const [playbooksLoading, playbooksError] = usePluginConfigurationStore(
+    (state) => [state.playbooksLoading, state.playbooksError],
+  );
+
+  const [data, tableNode, refetch, _, loadingTable] = useDataTable(
+    {
+      url: JOB_BASE_URI,
+      params: {
+        received_request_time__gte: searchFromDateValue,
+        received_request_time__lte: searchToDateValue,
+      },
+      initialParams: {
+        ordering: "-start_time",
+      },
+    },
+    toPassTableProps,
+  );
+
   return (
     // this loader is required to correctly get the name of the playbook executed
     <Loader
-      loading={playbooksLoading}
+      loading={playbooksLoading || loadingTable}
       error={playbooksError}
       render={() => (
         <Container fluid>
@@ -175,19 +162,12 @@ export default function JobsTable() {
           {/* Actions */}
           <div className="px-3 bg-dark d-flex justify-content-end align-items-center">
             <TableHintIcon />
+            <SyncButton onClick={refetch} className="ms-auto m-0 py-1" />
           </div>
-          {/* Table */}
-          {loading ? (
-            <Spinner />
-          ) : (
-            <div style={{ height: "80vh", overflowY: "scroll" }}>
-              <DataTable
-                data={data.results}
-                pageCount={data.total_pages}
-                {...toPassTableProps}
-              />
-            </div>
-          )}
+          <div style={{ height: "80vh", overflowY: "scroll" }}>
+            {/* Table */}
+            {tableNode}
+          </div>
         </Container>
       )}
     />

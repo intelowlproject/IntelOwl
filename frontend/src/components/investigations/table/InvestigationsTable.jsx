@@ -10,9 +10,14 @@ import {
   Spinner,
 } from "reactstrap";
 import { MdInfoOutline } from "react-icons/md";
-import axios from "axios";
 
-import { useDebounceInput, DataTable } from "@certego/certego-ui";
+import {
+  useDebounceInput,
+  SyncButton,
+  TableHintIcon,
+  useDataTable,
+  Loader,
+} from "@certego/certego-ui";
 
 import useTitle from "react-use/lib/useTitle";
 
@@ -61,13 +66,8 @@ export default function InvestigationsTable() {
   const [searchToDateValue, setSearchToDateValue] = React.useState(toDateValue);
 
   // state
-  const [paramInitialization, setParamInitialization] = React.useState(false); // used to prevent a request with wrong params
-  const [loading, setLoading] = React.useState(true);
-  const [data, setData] = React.useState({
-    results: [],
-    count: 0,
-    total_pages: 0,
-  });
+  const [areParamsInitialized, setAreParamsInitialized] = React.useState(false); // used to prevent a request with wrong params
+
   /* searchNameType is used to show the user typed text (this state changes for each char typed), 
   searchNameRequest is used in the request to the backend and it's update periodically.
   In this way we avoid a request for each char. */
@@ -79,6 +79,7 @@ export default function InvestigationsTable() {
   useDebounceInput(searchNameType, 1000, setSearchNameRequest);
 
   React.useEffect(() => {
+    // update timepicker store, and filter with url params
     if (startTimeParam) {
       setSearchFromDateValue(toDate(startTimeParam));
       updateFromDate(toDate(startTimeParam));
@@ -89,7 +90,7 @@ export default function InvestigationsTable() {
     }
     if (analyzedObjectNameParam) setSearchNameType(analyzedObjectNameParam);
     if (analyzedObjectNameParam) setSearchNameRequest(analyzedObjectNameParam);
-    setParamInitialization(true);
+    setAreParamsInitialized(true);
   }, [
     analyzedObjectNameParam,
     startTimeParam,
@@ -99,8 +100,9 @@ export default function InvestigationsTable() {
   ]);
 
   React.useEffect(() => {
-    // this check is to avoid to send request and compare state and url params before we initialized the state
-    if (paramInitialization) {
+    // After the initialization each time the time picker change or the filter, update the url
+    // Note: this check is required to avoid infinite loop (url update time picker and time picker update url)
+    if (areParamsInitialized) {
       if (
         startTimeParam !== format(searchFromDateValue, datetimeFormatStr) ||
         endTimeParam !== format(searchToDateValue, datetimeFormatStr) ||
@@ -112,49 +114,10 @@ export default function InvestigationsTable() {
           "analyzed-object-name": searchNameRequest,
         });
       }
-      let investigationList = [];
-      let pageNumber = 0;
-      const params = {
-        start_time__gte: searchFromDateValue,
-        start_time__lte: searchToDateValue,
-        analyzed_object_name: searchNameRequest,
-      };
-      axios
-        .get(INVESTIGATION_BASE_URI, { params })
-        .then((response) => {
-          investigationList = investigationList.concat(response.data.results);
-          pageNumber = Math.min(response.data.total_pages, 10);
-          const additionalRequests = [];
-          // eslint-disable-next-line no-plusplus
-          for (let page = 2; page <= pageNumber; page++) {
-            params.page = page;
-            additionalRequests.push(
-              axios.get(INVESTIGATION_BASE_URI, { params }),
-            );
-          }
-          // Promise.all works only if ALL the requests are done successfully
-          return Promise.allSettled(additionalRequests);
-        })
-        .then((responseList) => {
-          // We need to handle promise manually to exclude failed requests
-          responseList
-            .filter((response) => response.status === "fulfilled")
-            .forEach((successfulResponse) => {
-              investigationList = investigationList.concat(
-                successfulResponse.value.data.results,
-              );
-            });
-          setData({
-            results: investigationList,
-            count: investigationList.length,
-            total_pages: pageNumber,
-          });
-          setLoading(false);
-        });
     }
   }, [
     setSearchParams,
-    paramInitialization,
+    areParamsInitialized,
     searchFromDateValue,
     searchToDateValue,
     searchNameRequest,
@@ -163,76 +126,116 @@ export default function InvestigationsTable() {
     analyzedObjectNameParam,
   ]);
 
+  return areParamsInitialized ? (
+    <InvestigationTableComponent
+      searchFromDateValue={searchFromDateValue}
+      searchToDateValue={searchToDateValue}
+      searchNameType={searchNameType}
+      setSearchNameType={setSearchNameType}
+      searchNameRequest={searchNameRequest}
+    />
+  ) : (
+    <Spinner />
+  );
+}
+
+function InvestigationTableComponent({
+  searchFromDateValue,
+  searchToDateValue,
+  searchNameType,
+  setSearchNameType,
+  searchNameRequest,
+}) {
+  const [data, tableNode, refetch, _, loadingTable] = useDataTable(
+    {
+      url: INVESTIGATION_BASE_URI,
+      params: {
+        start_time__gte: searchFromDateValue,
+        start_time__lte: searchToDateValue,
+        analyzed_object_name: searchNameRequest,
+      },
+      initialParams: {
+        ordering: "-start_time",
+      },
+    },
+    toPassTableProps,
+  );
+
   return (
-    <Container fluid>
-      {/* Basic */}
-      <Row className="mb-2">
-        <Col className="d-flex align-items-center" sm={5}>
-          <h1 id="investigationHistory">
-            Investigations History&nbsp;
-            <small className="text-gray">{data.count} total</small>
-          </h1>
-          <div className="ms-2">
-            <MdInfoOutline id="investigationstable-infoicon" fontSize="20" />
-            <UncontrolledTooltip
-              trigger="hover"
-              target="investigationstable-infoicon"
-              placement="right"
-              fade={false}
-              innerClassName="p-2 text-start text-nowrap md-fit-content"
-            >
-              Investigations are a framework to connect jobs with each other,
-              correlate the findings and collaborate with teammates to reach
-              common goals.
-            </UncontrolledTooltip>
-          </div>
-        </Col>
-        <Col className="align-self-center">
-          <TimePicker />
-          <div className="d-flex float-end me-1">
-            <div className="d-flex align-items-center">
-              <Label check>Name</Label>
-              <div className="ms-1 d-flex">
+    <Loader
+      loading={loadingTable}
+      render={() => (
+        <Container fluid>
+          {/* Basic */}
+          <Row className="mb-2">
+            <Col className="d-flex align-items-center" sm={5}>
+              <h1 id="investigationHistory">
+                Investigations History&nbsp;
+                <small className="text-gray">{data.count} total</small>
+              </h1>
+              <div className="ms-2">
                 <MdInfoOutline
-                  id="investigationstable-name-info"
-                  fontSize="15"
+                  id="investigationstable-infoicon"
+                  fontSize="20"
                 />
                 <UncontrolledTooltip
                   trigger="hover"
-                  target="investigationstable-name-info"
+                  target="investigationstable-infoicon"
                   placement="right"
                   fade={false}
                   innerClassName="p-2 text-start text-nowrap md-fit-content"
                 >
-                  Filter investigations showing only the ones that contain at
-                  least one job related to an analyzable with this name.
+                  Investigations are a framework to connect jobs with each
+                  other, correlate the findings and collaborate with teammates
+                  to reach common goals.
                 </UncontrolledTooltip>
               </div>
-              <Label check className="me-1">
-                :
-              </Label>
-              <Input
-                id="nameSearch"
-                type="text"
-                onChange={(event) => setSearchNameType(event.target.value)}
-                value={searchNameType}
-              />
-            </div>
+            </Col>
+            <Col className="align-self-center">
+              <TimePicker />
+              <div className="d-flex float-end me-1">
+                <div className="d-flex align-items-center">
+                  <Label check>Name</Label>
+                  <div className="ms-1 d-flex">
+                    <MdInfoOutline
+                      id="investigationstable-name-info"
+                      fontSize="15"
+                    />
+                    <UncontrolledTooltip
+                      trigger="hover"
+                      target="investigationstable-name-info"
+                      placement="right"
+                      fade={false}
+                      innerClassName="p-2 text-start text-nowrap md-fit-content"
+                    >
+                      Filter investigations showing only the ones that contain
+                      at least one job related to an analyzable with this name.
+                    </UncontrolledTooltip>
+                  </div>
+                  <Label check className="me-1">
+                    :
+                  </Label>
+                  <Input
+                    id="nameSearch"
+                    type="text"
+                    onChange={(event) => setSearchNameType(event.target.value)}
+                    value={searchNameType}
+                  />
+                </div>
+              </div>
+            </Col>
+          </Row>
+          {/* Actions */}
+          <div className="px-3 bg-dark d-flex justify-content-end align-items-center">
+            <TableHintIcon />
+            <SyncButton onClick={refetch} className="ms-auto m-0 py-1" />
           </div>
-        </Col>
-      </Row>
-      {/* Table */}
-      {loading ? (
-        <Spinner />
-      ) : (
-        <div style={{ height: "80vh", overflowY: "scroll" }}>
-          <DataTable
-            data={data.results}
-            pageCount={data.total_pages}
-            {...toPassTableProps}
-          />
-        </div>
+          <div style={{ height: "80vh", overflowY: "scroll" }}>
+            {/* Table */}
+            {loadingTable ? <Spinner /> : tableNode}
+          </div>
+        </Container>
       )}
-    </Container>
+    />
   );
 }

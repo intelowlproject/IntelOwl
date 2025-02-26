@@ -32,7 +32,7 @@ RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \
     ${LOG_PATH}/uwsgi \
     ${LOG_PATH}/asgi \
-    /opt/deploy/files_required /opt/deploy/configuration /opt/deploy/files_required/blint /opt/deploy/files_required/yara
+    /opt/deploy/files_required /opt/deploy/configuration /opt/deploy/files_required/blint /opt/deploy/files_required/yara /opt/deploy/files_required/bbot
 
 # install required packages. some notes about:o
 # python3-psycopg2 is required to use PostgresSQL with Django

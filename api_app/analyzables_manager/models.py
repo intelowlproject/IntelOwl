@@ -2,6 +2,7 @@ from typing import Type, Union
 
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Q
 from django.utils.timezone import now
 
 from api_app.analyzables_manager.queryset import AnalyzableQuerySet
@@ -12,6 +13,7 @@ from api_app.data_model_manager.models import (
     FileDataModel,
     IPDataModel,
 )
+from api_app.data_model_manager.queryset import BaseDataModelQuerySet
 from api_app.defaults import file_directory_path
 from api_app.helpers import calculate_md5, calculate_sha1, calculate_sha256
 
@@ -27,7 +29,7 @@ class Analyzable(models.Model):
     file = models.FileField(
         upload_to=file_directory_path, null=True, blank=True, default=None
     )
-
+    CLASSIFICATIONS = Classification
     objects = AnalyzableQuerySet.as_manager()
 
     class Meta:
@@ -46,6 +48,16 @@ class Analyzable(models.Model):
     @property
     def is_sample(self) -> bool:
         return self.classification == Classification.FILE.value
+
+    def get_all_user_events_data_model(self) -> BaseDataModelQuerySet:
+        query = Q(user_events__analyzable=self)
+        if self.classification in [Classification.URL.value, Classification.DOMAIN.value]:
+            query |=Q(user_domain_wildcard_events__analyzables=self)
+        elif self.classification == Classification.IP.value:
+            query |= Q(user_ip_wildcard_events__analyzables=self)
+        return self.get_data_model_class().objects.filter(
+             query
+        )
 
     def get_data_model_class(self) -> Type[BaseDataModel]:
         if self.classification == Classification.IP.value:

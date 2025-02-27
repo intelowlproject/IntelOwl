@@ -31,7 +31,7 @@ class SignatureSerializer(FlexFieldsModelSerializer):
 
 
 class DomainDataModelSerializer(FlexFieldsModelSerializer):
-    ietf_report = IETFReportSerializer(many=True)
+    ietf_report = IETFReportSerializer(many=True, read_only=True)
     analyzers_report = SlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
@@ -40,7 +40,7 @@ class DomainDataModelSerializer(FlexFieldsModelSerializer):
 
 
 class IPDataModelSerializer(FlexFieldsModelSerializer):
-    ietf_report = IETFReportSerializer(many=True)
+    ietf_report = IETFReportSerializer(many=True, read_only=True)
     analyzers_report = SlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:

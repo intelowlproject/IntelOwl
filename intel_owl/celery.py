@@ -95,7 +95,7 @@ app.conf.update(
     accept_content=["application/json"],
     task_serializer="json",
     result_serializer="json",
-    imports=("intel_owl.tasks", "api_app.engines_manager.tasks"),
+    imports=("intel_owl.tasks", "api_app.engines_manager.tasks", "api_app.user_events_manager.tasks"),
     worker_redirect_stdouts=False,
     worker_hijack_root_logger=False,
     # this is to avoid RAM issues caused by long usage of this tool
@@ -129,7 +129,7 @@ app.conf.update(
 app.conf.beat_schedule = {
     "send_elastic_bi": {
         "task": "send_bi_to_elastic",
-        "schedule": crontab(minute=12),
+        "schedule": crontab(minute="12"),
         "options": {
             "queue": get_queue_name(settings.DEFAULT_QUEUE),
             "MessageGroupId": str(uuid.uuid4()),
@@ -145,7 +145,7 @@ app.conf.beat_schedule = {
     },
     "remove_old_jobs": {
         "task": "intel_owl.tasks.remove_old_jobs",
-        "schedule": crontab(minute=10, hour=2),
+        "schedule": crontab(minute="10", hour="2"),
         "options": {
             "queue": get_queue_name(settings.DEFAULT_QUEUE),
             "MessageGroupId": str(uuid.uuid4()),
@@ -162,12 +162,20 @@ app.conf.beat_schedule = {
     },
     "update_notifications_with_releases": {
         "task": "intel_owl.tasks.update_notifications_with_releases",
-        "schedule": crontab(minute=0, hour=22),
+        "schedule": crontab(minute="0", hour="22"),
         "options": {
             "queue": get_queue_name(settings.DEFAULT_QUEUE),
             "MessageGroupId": str(uuid.uuid4()),
         },
     },
+    "user_events_decay": {
+        "task": "api_app.user_events_manager.tasks.user_events_decay",
+        "schedule": crontab(hour="3,22", minute="12"),
+        "options": {
+            "queue": get_queue_name(settings.DEFAULT_QUEUE),
+            "MessageGroupId": str(uuid.uuid4()),
+        },
+    }
 }
 app.autodiscover_tasks()
 

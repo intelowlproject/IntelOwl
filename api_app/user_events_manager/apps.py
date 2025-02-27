@@ -4,9 +4,9 @@
 from django.apps import AppConfig
 
 
-class AnalyzablesManagerConfig(AppConfig):
-    name = "api_app.analyzables_manager"
+class UserEventsManagerConfig(AppConfig):
+    name = "api_app.user_events_manager"
 
     @staticmethod
-    def ready() -> None:
+    def ready(**kwargs) -> None:
         from . import signals  # noqa

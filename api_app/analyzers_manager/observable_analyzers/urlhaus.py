@@ -6,6 +6,7 @@ import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from api_app.mixins import AbuseCHMixin
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
@@ -25,12 +26,12 @@ class URLHaus(AbuseCHMixin, ObservableAnalyzer):
 
         headers = {"Accept": "application/json"}
         if self.observable_classification in [
-            self.ObservableTypes.DOMAIN,
-            self.ObservableTypes.IP,
+            Classification.DOMAIN,
+            Classification.IP,
         ]:
             uri = "host/"
             post_data = {"host": self.observable_name}
-        elif self.observable_classification == self.ObservableTypes.URL:
+        elif self.observable_classification == Classification.URL:
             uri = "url/"
             post_data = {"url": self.observable_name}
         else:

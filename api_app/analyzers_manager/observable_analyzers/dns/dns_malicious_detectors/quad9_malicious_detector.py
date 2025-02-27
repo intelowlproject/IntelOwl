@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 import requests
 
 from api_app.analyzers_manager import classes
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..dns_responses import malicious_detector_response
@@ -33,7 +34,7 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
     def run(self):
         observable = self.observable_name
         # for URLs we are checking the relative domain
-        if self.observable_classification == self.ObservableTypes.URL:
+        if self.observable_classification == Classification.URL:
             observable = urlparse(self.observable_name).hostname
 
         quad9_answer = self._quad9_dns_query(observable)

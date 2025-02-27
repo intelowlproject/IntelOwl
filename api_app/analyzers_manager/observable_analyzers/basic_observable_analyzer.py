@@ -1,3 +1,5 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
 import base64
 import logging
 from tempfile import NamedTemporaryFile

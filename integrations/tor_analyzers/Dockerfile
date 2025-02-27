@@ -1,8 +1,8 @@
-FROM python:3.8-slim
+FROM python:3.12-slim
 
-ENV PROJECT_PATH /opt/deploy
-ENV LOG_PATH /var/log/intel_owl/tor_analyzers
-ENV USER tor-user
+ENV PROJECT_PATH=/opt/deploy
+ENV LOG_PATH=/var/log/intel_owl/tor_analyzers
+ENV USER=tor-user
 
 # Add a new low-privileged user
 RUN useradd -r -s /sbin/nologin ${USER}

@@ -83,7 +83,7 @@ def extract_threatminer_reports(
                 report.get("first_seen").split(" ")[0],
                 "A",
                 report.get("ip", None) or report.get("domain", None),
-                job.observable_name,
+                job.analyzable.name,
                 threatminer_analyzer.config.name.replace("_", " "),
                 threatminer_analyzer.config.description,
             )

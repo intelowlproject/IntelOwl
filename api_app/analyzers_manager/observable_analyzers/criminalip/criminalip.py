@@ -4,6 +4,7 @@ from typing import Dict
 import requests
 
 from api_app.analyzers_manager import classes
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from .criminalip_base import CriminalIpBase
@@ -29,7 +30,7 @@ class CriminalIp(classes.ObservableAnalyzer, CriminalIpBase):
 
     def run(self):
         URLs = {
-            self.ObservableTypes.IP.value: {
+            Classification.IP.value: {
                 "endpoints": {
                     "malicious_info": "/v1/feature/ip/malicious-info",
                     "privacy_threat": "/v1/feature/ip/privacy-threat",
@@ -38,13 +39,13 @@ class CriminalIp(classes.ObservableAnalyzer, CriminalIpBase):
                 },
                 "params": {"ip": self.observable_name},
             },
-            self.ObservableTypes.DOMAIN.value: {
+            Classification.DOMAIN.value: {
                 "endpoints": {
                     "hash_view": "/v1/domain/quick/hash/view",
                 },
                 "params": {"domain": self.observable_name},
             },
-            self.ObservableTypes.GENERIC.value: {
+            Classification.GENERIC.value: {
                 "endpoints": {
                     "banner_search": "/v1/banner/search",
                     "banner_stats": "/v1/banner/stats",

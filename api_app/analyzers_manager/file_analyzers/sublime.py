@@ -87,7 +87,7 @@ class Sublime(FileAnalyzer):
                 file.seek(0)
                 proc = subprocess.run(command, check=True, stdout=subprocess.PIPE)
                 return base64.b64encode(proc.stdout.strip()).decode("utf-8")
-        return self._job.b64
+        return str(base64.b64encode(self._job.analyzable.read()), "utf-8")
 
     def _analysis(self, session: requests.Session, content: str):
         result = session.post(

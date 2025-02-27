@@ -7,6 +7,7 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -45,7 +46,7 @@ class DocGuard_Hash(classes.ObservableAnalyzer):
             self.report.errors.append(warning)
 
         uri = f"{self.observable_name}"
-        if self.observable_classification == self.ObservableTypes.HASH:
+        if self.observable_classification == Classification.HASH:
             try:
                 response = requests.get(self.url + uri, headers=headers)
                 response.raise_for_status()

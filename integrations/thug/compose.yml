@@ -1,0 +1,14 @@
+services:
+  thug:
+    image: intelowlproject/intelowl_thug:${REACT_APP_INTELOWL_VERSION}
+    container_name: intelowl_thug
+    restart: unless-stopped
+    expose:
+      - "4002"
+    env_file:
+      - env_file_integrations
+    volumes:
+      - generic_logs:/var/log/intel_owl
+    depends_on:
+      - uwsgi
+

@@ -1,9 +1,9 @@
 # https://github.com/jasonish/docker-suricata/tree/master/7.0
 FROM jasonish/suricata:7.0
 
-ENV PROJECT_PATH /opt/deploy
-ENV LOG_PATH /var/log/intel_owl/pcap_analyzers
-ENV USER pcap_analyzers-user
+ENV PROJECT_PATH=/opt/deploy
+ENV LOG_PATH=/var/log/intel_owl/pcap_analyzers
+ENV USER=pcap_analyzers-user
 RUN dnf -y install python3-pip && dnf clean all && useradd -ms /bin/bash ${USER}
 
 # Build Flask REST API

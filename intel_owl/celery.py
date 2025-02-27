@@ -95,7 +95,7 @@ app.conf.update(
     accept_content=["application/json"],
     task_serializer="json",
     result_serializer="json",
-    imports=("intel_owl.tasks",),
+    imports=("intel_owl.tasks", "api_app.engines_manager.tasks"),
     worker_redirect_stdouts=False,
     worker_hijack_root_logger=False,
     # this is to avoid RAM issues caused by long usage of this tool
@@ -137,7 +137,7 @@ app.conf.beat_schedule = {
     },
     "send_plugin_report_to_elastic": {
         "task": "send_plugin_report_to_elastic",
-        "schedule": crontab(minute="*/5"),
+        "schedule": crontab(minute="*"),
         "options": {
             "queue": get_queue_name(settings.DEFAULT_QUEUE),
             "MessageGroupId": str(uuid.uuid4()),

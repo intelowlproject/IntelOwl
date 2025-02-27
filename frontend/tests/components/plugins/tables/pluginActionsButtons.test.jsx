@@ -14,6 +14,7 @@ import {
   PlaybooksEditButton,
   PluginConfigButton,
   PlaybookFlowsButton,
+  MappingDataModel,
 } from "../../../../src/components/plugins/tables/pluginActionsButtons";
 import {
   mockedUseOrganizationStoreOwner,
@@ -483,5 +484,61 @@ describe("PlaybookFlowsButton test", () => {
     await waitFor(() => {
       expect(screen.getByText("Possible playbook flows")).toBeInTheDocument();
     });
+  });
+});
+
+describe("DataModel mapping test", () => {
+  test("DataModel mapping button", async () => {
+    const userAction = userEvent.setup();
+    const data = {
+      mapping_data_model: {
+        permalink: "external_references",
+        "data.hostnames": "resolutions",
+      },
+      type: "observable",
+      python_module: "pythonmodule.pythonclass",
+    };
+    const { container } = render(
+      <BrowserRouter>
+        <MappingDataModel
+          data={data.mapping_data_model}
+          type={data.type}
+          pythonModule={data.python_module}
+        />
+      </BrowserRouter>,
+    );
+
+    const dataModelMappingIcon = container.querySelector(
+      "#mapping-data-model__pythonmodule",
+    );
+    expect(dataModelMappingIcon).toBeInTheDocument();
+
+    userAction.click(dataModelMappingIcon);
+    await waitFor(() => {
+      expect(screen.getByText("Data model mapping")).toBeInTheDocument();
+    });
+  });
+
+  test("DataModel mapping button - disabled", async () => {
+    const data = {
+      mapping_data_model: {},
+      type: "observable",
+      python_module: "pythonmodule.pythonclass",
+    };
+    const { container } = render(
+      <BrowserRouter>
+        <MappingDataModel
+          data={data.mapping_data_model}
+          type={data.type}
+          pythonModule={data.python_module}
+        />
+      </BrowserRouter>,
+    );
+
+    const dataModelMappingIcon = container.querySelector(
+      "#mapping-data-model__pythonmodule",
+    );
+    expect(dataModelMappingIcon).toBeInTheDocument();
+    expect(dataModelMappingIcon.className).toContain("disabled");
   });
 });

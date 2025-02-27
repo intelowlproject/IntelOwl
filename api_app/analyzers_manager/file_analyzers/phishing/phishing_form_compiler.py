@@ -1,7 +1,7 @@
 import logging
 from datetime import date, timedelta
 from typing import Dict
-from urllib.parse import urlparse
+from urllib.parse import urljoin
 
 import requests
 from faker import Faker  # skipcq: BAN-B410
@@ -53,7 +53,7 @@ class PhishingFormCompiler(FileAnalyzer):
         super().config(runtime_configuration)
         if hasattr(self._job, "pivot_parent"):
             # extract target site from parent job
-            self.target_site = self._job.pivot_parent.starting_job.observable_name
+            self.target_site = self._job.pivot_parent.starting_job.analyzable.name
         else:
             logger.warning(
                 f"Job #{self.job_id}: Analyzer {self.analyzer_name} should be ran from PhishingAnalysis playbook."
@@ -137,26 +137,25 @@ class PhishingFormCompiler(FileAnalyzer):
             if input_name in names:
                 return fake_value
 
-    def extract_action_attribute(self, form) -> str:
-        if not (form_action := form.get("action", None)):
+    @staticmethod
+    def extract_action_attribute(base_site: str, form) -> str:
+        # we always return an URL to prevent MissingSchema error in request
+        form_action: str = form.get("action", None)
+        if not form_action:
             logger.info(
-                f"'action' attribute not found in form. Defaulting to {self.target_site=}"
+                f"'action' attribute not found in form. Defaulting to {base_site=}"
             )
-            form_action = self.target_site
+            return base_site
+        if "://" not in base_site:
+            # if target site is a domain add a temporary default
+            # schema so we can use urljoin as if it was an url
+            base_site = "https://" + base_site
 
-        # if relative url extracted, clean it from '/' and concatenate everything
-        # if action was not extracted in previous step the if should not pass as it is a url
-        if not urlparse(form_action).netloc:
-            logger.info(f"Found relative url in {form_action=}")
-            base_site = self.target_site
-            if base_site.endswith("/"):
-                base_site = base_site[:-1]
-            if form_action.startswith("/"):
-                form_action = form_action.replace("/", "", 1)
-
-            form_action = base_site + "/" + form_action
-
+        form_action = urljoin(base_site, form_action)
+        if "://" not in form_action:
+            form_action = "https://" + form_action
         logger.info(f"Extracted action to post data to: {form_action}")
+
         return form_action
 
     def compile_form_field(self, form) -> dict:
@@ -195,7 +194,7 @@ class PhishingFormCompiler(FileAnalyzer):
 
     def perform_request_to_form(self, form) -> Response:
         params = self.compile_form_field(form)
-        dest_url = self.extract_action_attribute(form)
+        dest_url = self.extract_action_attribute(self.target_site, form)
         logger.info(f"Job #{self.job_id}: Sending {params=} to submit url {dest_url}")
         headers = {
             "User-Agent": self.user_agent,

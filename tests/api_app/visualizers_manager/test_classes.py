@@ -4,8 +4,9 @@
 
 from kombu import uuid
 
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerReport
-from api_app.choices import PythonModuleBasePaths
+from api_app.choices import Classification, PythonModuleBasePaths
 from api_app.models import Job, PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.classes import (
@@ -473,9 +474,12 @@ class VisualizerTestCase(CustomTestCase):
                 return {}
 
         pc = PlaybookConfig.objects.first()
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
         job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             status="reported_without_fails",
         )
         vc = VisualizerConfig.objects.create(
@@ -493,10 +497,11 @@ class VisualizerTestCase(CustomTestCase):
         )
         v = MockUpVisualizer(vc)
         v.job_id = job.pk
-        self.assertEqual(list(v.analyzer_reports()), [ar])
+        self.assertEqual(list(v.get_analyzer_reports()), [ar])
         ar.delete()
         job.delete()
         vc.delete()
+        an.delete()
 
     def test_subclasses(self):
         def handler(signum, frame):
@@ -506,9 +511,12 @@ class VisualizerTestCase(CustomTestCase):
 
         signal.signal(signal.SIGALRM, handler)
 
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
         job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             status="reported_without_fails",
             user=self.superuser,
         )
@@ -547,6 +555,7 @@ class VisualizerTestCase(CustomTestCase):
                     signal.alarm(0)
 
         job.delete()
+        an.delete()
 
 
 class ErrorHandlerTestCase(CustomTestCase):

@@ -3,8 +3,8 @@
 import pathlib
 from pathlib import PosixPath
 
-from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.choices import Classification
 from api_app.mixins import VirusTotalv3AnalyzerMixin, VirusTotalv3BaseMixin
 from tests import CustomTestCase
 from tests.mock_utils import MockUpResponse
@@ -116,7 +116,7 @@ class VirusTotalMixinTestCase(CustomTestCase):
             "historical_ssl_certificates",
         ]
         params, uri, relationships_requested = self.base._get_requests_params_and_uri(
-            ObservableTypes.DOMAIN, "google.com", True
+            Classification.DOMAIN, "google.com", True
         )
         self.assertIn("relationships", params)
         self.assertListEqual(relationships_requested, expected_relationships)
@@ -132,7 +132,7 @@ class VirusTotalMixinTestCase(CustomTestCase):
             "historical_ssl_certificates",
         ]
         params, uri, relationships_requested = self.base._get_requests_params_and_uri(
-            ObservableTypes.IP, "8.8.8.8", True
+            Classification.IP, "8.8.8.8", True
         )
         self.assertIn("relationships", params)
         self.assertListEqual(relationships_requested, expected_relationships)
@@ -145,7 +145,7 @@ class VirusTotalMixinTestCase(CustomTestCase):
             "network_location",
         ]
         params, uri, relationships_requested = self.base._get_requests_params_and_uri(
-            ObservableTypes.URL, "https://google.com/robots.txt", True
+            Classification.URL, "https://google.com/robots.txt", True
         )
         self.assertIn("relationships", params)
         self.assertListEqual(relationships_requested, expected_relationships)
@@ -158,7 +158,7 @@ class VirusTotalMixinTestCase(CustomTestCase):
             "contacted_urls",
         ]
         params, uri, relationships_requested = self.base._get_requests_params_and_uri(
-            ObservableTypes.HASH, "5f423b7772a80f77438407c8b78ff305", True
+            Classification.HASH, "5f423b7772a80f77438407c8b78ff305", True
         )
         self.assertIn("relationships", params)
         self.assertListEqual(relationships_requested, expected_relationships)
@@ -181,7 +181,7 @@ class VirusTotalMixinTestCase(CustomTestCase):
             "collections",
         ]
         params, uri, relationships_requested = self.base._get_requests_params_and_uri(
-            ObservableTypes.HASH, "5f423b7772a80f77438407c8b78ff305", False
+            Classification.HASH, "5f423b7772a80f77438407c8b78ff305", False
         )
         self.assertIn("relationships", params)
         self.assertListEqual(relationships_requested, expected_relationships)

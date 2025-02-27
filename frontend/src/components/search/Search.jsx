@@ -22,6 +22,9 @@ import { pluginReportQueries } from "./searchApi";
 import { useJsonEditorStore } from "../../stores/useJsonEditorStore";
 import { SearchJSONReport } from "./utils";
 
+import { datetimeFormatStr } from "../../constants/miscConst";
+import { INTELOWL_DOCS_URL } from "../../constants/environment";
+
 // table config
 const tableConfig = { enableExpanded: true, enableFlexLayout: true };
 const tableInitialState = {
@@ -36,15 +39,13 @@ const tableProps = {
 export default function Search() {
   const [elasticData, setElasticData] = React.useState([]);
   const [loadingData, setLoadingData] = React.useState(false);
-
   const [setTextToHighlight] = useJsonEditorStore((state) => [
     state.setTextToHighlight,
   ]);
 
-  const isoFormatString = "yyyy-MM-dd'T'HH:mm";
   const defaultStartDate = new Date();
   defaultStartDate.setDate(defaultStartDate.getDate() - 30); // default: 30 days time range
-  const defaultStartDateStr = format(defaultStartDate, isoFormatString);
+  const defaultStartDateStr = format(defaultStartDate, datetimeFormatStr);
 
   const formik = useFormik({
     initialValues: {
@@ -52,9 +53,9 @@ export default function Search() {
       name: "",
       status: "",
       fromStartTime: defaultStartDateStr,
-      toStartTime: format(new Date(), isoFormatString),
+      toStartTime: format(new Date(), datetimeFormatStr),
       fromEndTime: defaultStartDateStr,
-      toEndTime: format(new Date(), isoFormatString),
+      toEndTime: format(new Date(), datetimeFormatStr),
       errors: "",
       report: "",
     },
@@ -143,7 +144,7 @@ export default function Search() {
                   This section only works if Elasticsearch has been configured
                   correctly. For more info check the{" "}
                   <Link
-                    to="https://intelowlproject.github.io/docs/IntelOwl/advanced_configuration/#elasticsearch"
+                    to={`${INTELOWL_DOCS_URL}IntelOwl/advanced_configuration/#elasticsearch`}
                     target="_blank"
                   >
                     official doc.
@@ -406,9 +407,7 @@ export default function Search() {
                 size="sm"
                 color="primary"
                 type="submit"
-                disabled={
-                  !formik.isValid || formik.isSubmitting || !formik.dirty
-                }
+                disabled={!formik.isValid || formik.isSubmitting}
               >
                 {formik.isSubmitting && <Spinner size="sm" />}Search
               </Button>

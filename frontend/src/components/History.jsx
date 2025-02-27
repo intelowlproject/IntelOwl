@@ -2,10 +2,14 @@ import React, { Suspense } from "react";
 import { RiFileListFill } from "react-icons/ri";
 import { DiGitMerge } from "react-icons/di";
 import { BsFillPlusCircleFill } from "react-icons/bs";
-import { Button, Col } from "reactstrap";
-import { RouterTabs, FallBackLoading } from "@certego/certego-ui";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Button, Col, Nav, NavItem, TabContent, TabPane } from "reactstrap";
+import {
+  useNavigate,
+  useLocation,
+  NavLink as RRNavLink,
+} from "react-router-dom";
 
+import { FallBackLoading } from "@certego/certego-ui";
 import { useGuideContext } from "../contexts/GuideContext";
 import { createInvestigation } from "./investigations/result/investigationApi";
 
@@ -13,42 +17,6 @@ const JobsTable = React.lazy(() => import("./jobs/table/JobsTable"));
 const InvestigationsTable = React.lazy(
   () => import("./investigations/table/InvestigationsTable"),
 );
-/*
-lazy imports to enable code splitting
-*/
-
-const historyRoutes = [
-  {
-    key: "history-jobs",
-    location: "jobs",
-    Title: () => (
-      <span id="Jobs">
-        <RiFileListFill />
-        &nbsp;Jobs
-      </span>
-    ),
-    Component: () => (
-      <Suspense fallback={<FallBackLoading />}>
-        <JobsTable />
-      </Suspense>
-    ),
-  },
-  {
-    key: "history-investigations",
-    location: "investigations",
-    Title: () => (
-      <span id="Investigations">
-        <DiGitMerge />
-        &nbsp;Investigations
-      </span>
-    ),
-    Component: () => (
-      <Suspense fallback={<FallBackLoading />}>
-        <InvestigationsTable />
-      </Suspense>
-    ),
-  },
-];
 
 export default function History() {
   const navigate = useNavigate();
@@ -93,5 +61,39 @@ export default function History() {
       </Button>
     </Col>
   );
-  return <RouterTabs routes={historyRoutes} extraNavComponent={createButton} />;
+
+  return (
+    <>
+      <Nav className="nav-tabs">
+        <NavItem>
+          <RRNavLink className="nav-link" to="/history/jobs">
+            <span id="Jobs">
+              <RiFileListFill />
+              &nbsp;Jobs
+            </span>
+          </RRNavLink>
+        </NavItem>
+        <NavItem>
+          <RRNavLink className="nav-link" to="/history/investigations">
+            <span id="investigations">
+              <DiGitMerge />
+              &nbsp;Investigations
+            </span>
+          </RRNavLink>
+        </NavItem>
+        {createButton}
+      </Nav>
+      {/* This is way to generate only the table the user wants this allow to save:
+       * requests to the backend
+       * loading time
+       * avoid error when request job page 3 and jobs has for ex 6 pages and investigations 2 */}
+      <TabContent activeTab={isJobsTablePage ? "jobs" : "investigations"}>
+        <TabPane tabId={isJobsTablePage ? "jobs" : "investigations"}>
+          <Suspense fallback={<FallBackLoading />}>
+            {isJobsTablePage ? <JobsTable /> : <InvestigationsTable />}
+          </Suspense>
+        </TabPane>
+      </TabContent>
+    </>
+  );
 }

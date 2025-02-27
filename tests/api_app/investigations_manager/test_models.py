@@ -1,10 +1,26 @@
+from api_app.analyzables_manager.models import Analyzable
+from api_app.choices import Classification
 from api_app.helpers import gen_random_colorhex
 from api_app.investigations_manager.models import Investigation
 from api_app.models import Job, Tag
 from tests import CustomTestCase
 
 
-class InvetigationTestCase(CustomTestCase):
+class InvestigationTestCase(CustomTestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        cls.an.delete()
+
     def test_set_correct_status_created(self):
         an: Investigation = Investigation.objects.create(name="Test", owner=self.user)
         self.assertEqual(an.status, "created")
@@ -14,8 +30,7 @@ class InvetigationTestCase(CustomTestCase):
 
     def test_set_correct_status_running(self):
         job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=self.an,
             user=self.user,
             status=Job.STATUSES.REPORTED_WITH_FAILS,
         )
@@ -25,8 +40,7 @@ class InvetigationTestCase(CustomTestCase):
         an.set_correct_status()
         self.assertEqual(an.status, "concluded")
         job.add_child(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=self.an,
             user=self.user,
             status=Job.STATUSES.PENDING,
         )
@@ -38,13 +52,11 @@ class InvetigationTestCase(CustomTestCase):
 
     def test_set_correct_status_running2(self):
         job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=self.an,
             user=self.user,
         )
         job2 = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=self.an,
             user=self.user,
             status="killed",
         )
@@ -59,8 +71,7 @@ class InvetigationTestCase(CustomTestCase):
 
     def test_set_correct_status_concluded(self):
         job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=self.an,
             user=self.user,
             status="killed",
         )
@@ -74,14 +85,12 @@ class InvetigationTestCase(CustomTestCase):
 
     def test_jobs_count(self):
         job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=self.an,
             user=self.user,
             status="killed",
         )
         j2 = job.add_child(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=self.an,
             user=self.user,
             status="killed",
         )
@@ -97,14 +106,12 @@ class InvetigationTestCase(CustomTestCase):
 
     def test_tlp(self):
         job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=self.an,
             user=self.user,
             tlp="CLEAR",
         )
         job2 = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=self.an,
             user=self.user,
             tlp="RED",
         )
@@ -122,13 +129,11 @@ class InvetigationTestCase(CustomTestCase):
 
     def test_tags(self):
         job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=self.an,
             user=self.user,
         )
         job2 = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=self.an,
             user=self.user,
         )
 

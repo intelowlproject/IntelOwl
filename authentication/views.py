@@ -11,7 +11,6 @@ from django.conf import settings
 from django.contrib.auth import get_user_model, login, logout
 from django.contrib.auth.hashers import check_password
 from django.shortcuts import redirect
-from drf_spectacular.utils import extend_schema as add_docs
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
@@ -223,9 +222,6 @@ class LogoutView(APIView):
         return Response()
 
 
-@add_docs(
-    description="""This endpoint redirects to Google OAuth login.""",
-)
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def google_login(request: Request):

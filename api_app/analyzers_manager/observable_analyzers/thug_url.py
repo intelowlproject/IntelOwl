@@ -8,7 +8,7 @@ from api_app.analyzers_manager.classes import DockerBasedAnalyzer, ObservableAna
 
 class ThugUrl(ObservableAnalyzer, DockerBasedAnalyzer):
     name: str = "Thug"
-    url: str = "http://malware_tools_analyzers:4002/thug"
+    url: str = "http://thug:4002/thug"
     # http request polling max number of tries
     max_tries: int = 15
     # interval between http request polling (in seconds)
@@ -30,7 +30,9 @@ class ThugUrl(ObservableAnalyzer, DockerBasedAnalyzer):
         enable_img_proc = self.enable_image_processing_analysis
         # make request arguments
         # analysis timeout is set to 5 minutes
-        args = ["-T", "300", "-u", str(user_agent)]
+        args = ["-T", "300"]
+        if user_agent:
+            args.extend(["-u", str(user_agent)])
         if dom_events:
             args.extend(["-e", str(dom_events)])
         if use_proxy and proxy:

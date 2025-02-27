@@ -15,14 +15,18 @@ RUN npm install npm@latest --location=global \
 # Stage 2: Backend
 FROM python:3.11.7 AS backend-build
 
-ENV PYTHONUNBUFFERED 1
-ENV DJANGO_SETTINGS_MODULE intel_owl.settings
-ENV PYTHONPATH /opt/deploy/intel_owl
-ENV LOG_PATH /var/log/intel_owl
+ENV PYTHONUNBUFFERED=1
+ENV DJANGO_SETTINGS_MODULE=intel_owl.settings
+ENV PYTHONPATH=/opt/deploy/intel_owl
+ENV LOG_PATH=/var/log/intel_owl
 ARG REPO_DOWNLOADER_ENABLED=true
 ARG WATCHMAN=false
-ENV watch_logs_cmd "watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
-ARG PYCTI_VERSION=6.1.0
+ARG TARGETARCH
+ENV watch_logs_cmd="watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
+# This is required to allow compatibility with different OpenCTI instances
+ARG PYCTI_VERSION=6.5.1
+# this is required for if/else statements
+SHELL ["/bin/bash", "-c"]
 
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \
@@ -34,19 +38,17 @@ RUN mkdir -p ${LOG_PATH} \
 # python3-psycopg2 is required to use PostgresSQL with Django
 # apache2-utils is required to execute htpasswd
 # tshark is required for Hfinger file analyzer
+# libemail-outlook-message-perl and libemail-address-perl are required for msgconvert
 RUN apt-get update \
     && apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev netcat-traditional \
-    vim libldap2-dev libfuzzy-dev net-tools python3-psycopg2 git apache2-utils tshark \
-    && apt-get clean \
+    vim libldap2-dev libfuzzy-dev net-tools python3-psycopg2 git apache2-utils tshark  \
+    libemail-outlook-message-perl libemail-address-perl \
+    && apt-get clean && apt-get autoclean && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/* \
     && pip3 install --no-cache-dir --upgrade pip
 
-# perl not interactive
-ENV PERL_MM_USE_DEFAULT 1
-# msgconvert
-RUN cpan -T Email::Outlook::Message
-
 COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
+COPY requirements/amd-only-requirements.txt $PYTHONPATH/amd-only-requirements.txt
 COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
 WORKDIR $PYTHONPATH
 
@@ -68,14 +70,18 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     # download github stuff
     && ${PYTHONPATH}/api_app/analyzers_manager/repo_downloader.sh
 
+# last step cause there is an if that could invalidate the cache
+RUN if [[ "$TARGETARCH" == "amd64" ]]; \
+    then pip3 install --no-cache-dir --compile -r amd-only-requirements.txt;  \
+    else echo "skipping installation of AMD only requirements"; fi
+
 FROM backend-build
 
 COPY --from=frontend-build /build /var/www/reactapp
-
 
 # quarkengine calls
 # HOME_DIR = f"{Path.home()}/.quark-engine/"
 # Path(HOME_DIR).mkdir(parents=True, exist_ok=True)
 # so we have to set the home env variable to allow to create its directory
-ENV HOME ${PYTHONPATH}
+ENV HOME="${PYTHONPATH}"
 

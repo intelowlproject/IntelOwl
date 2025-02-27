@@ -1,6 +1,6 @@
 {
   "name": "intelowl",
-  "version": "6.2.1",
+  "version": "6.3.1",
   "private": true,
   "proxy": "http://localhost:80/",
   "dependencies": {
@@ -12,6 +12,7 @@
     "bootstrap": "^5.3.3",
     "classnames": "^2.5.1",
     "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
     "flag-icons": "^7.2.3",
     "formik": "^2.4.6",
     "js-cookie": "^3.0.5",

@@ -9,7 +9,6 @@ from api_app.engines_manager.classes import EngineModule
 evaluations_order = {
     DataModelEvaluations.TRUSTED.value: 3,
     DataModelEvaluations.MALICIOUS.value: 2,
-    DataModelEvaluations.SUSPICIOUS.value: 1,
     DataModelEvaluations.CLEAN.value: 0,
 }
 

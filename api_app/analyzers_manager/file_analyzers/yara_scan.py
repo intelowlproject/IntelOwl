@@ -3,6 +3,7 @@
 import dataclasses
 import io
 import logging
+import math
 import os
 import zipfile
 from pathlib import PosixPath
@@ -464,7 +465,7 @@ class YaraScan(FileAnalyzer):
         signatures = data_model.signatures.count()
 
         if signatures:
-            self.MALICIOUS_EVALUATION = 20
-            self.SUSPICIOUS_EVALUATION = 10
-
-            data_model.evaluation = self.threat_to_evaluation(signatures)
+            data_model.evaluation = self.EVALUATIONS.MALICIOUS.value
+            data_model.reliability = min(math.floor(signatures.count()/2), 10)
+        else:
+            data_model.evaluation = self.EVALUATIONS.CLEAN.value

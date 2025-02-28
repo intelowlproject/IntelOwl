@@ -316,12 +316,12 @@ class DataModel(Visualizer):
             reliability = data_model.reliability
 
             if evaluation == DataModelEvaluations.TRUSTED.value:
-                if reliability > 8:
+                if reliability >= 8:
                     trusted_data_models.append(data_model)
                 else:
                     clean_data_models.append(data_model)
             elif evaluation == DataModelEvaluations.MALICIOUS.value:
-                if reliability > 7:
+                if reliability >= 6:
                     malicious_data_models.append(data_model)
                 else:
                     suspicious_data_models.append(data_model)

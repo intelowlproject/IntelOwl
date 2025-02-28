@@ -140,16 +140,16 @@ class PhishingFormCompiler(FileAnalyzer):
     @staticmethod
     def extract_action_attribute(base_site: str, form) -> str:
         # we always return an URL to prevent MissingSchema error in request
+        if "://" not in base_site:
+            # if target site is a domain add a temporary default
+            # schema so we can use urljoin as if it was an url
+            base_site = "https://" + base_site
         form_action: str = form.get("action", None)
         if not form_action:
             logger.info(
                 f"'action' attribute not found in form. Defaulting to {base_site=}"
             )
             return base_site
-        if "://" not in base_site:
-            # if target site is a domain add a temporary default
-            # schema so we can use urljoin as if it was an url
-            base_site = "https://" + base_site
 
         form_action = urljoin(base_site, form_action)
         if "://" not in form_action:

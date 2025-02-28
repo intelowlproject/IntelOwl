@@ -159,7 +159,7 @@ class PhishingFormCompilerTestCase(TestCase):
         # for this test we'll treat "form" parameter as a dict
         self.assertEqual(
             PhishingFormCompiler.extract_action_attribute("test.com", {"action": ""}),
-            "test.com",
+            "https://test.com",
         )
 
         self.assertEqual(

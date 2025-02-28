@@ -88,17 +88,13 @@ set_defaults_values () {
   export PYCTI_VERSION=$pycti_default_version
 }
 
-load_env () {
-  export "$(grep -v '^#' "$1")"
-}
-
 if ! docker compose version > /dev/null 2>&1; then
   echo "Run ./initialize.sh to install Docker Compose 2"
 fi
 
 check_parameters "$@" && shift 2
 
-load_env "docker/.env"
+. docker/.env
 current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
 
 docker_analyzers=("pcap_analyzers" "tor_analyzers" "malware_tools_analyzers" "thug" "cyberchef" "phoneinfoga" "phishing_analyzers" "nuclei_analyzer")
@@ -116,7 +112,7 @@ if [[ ${test_mode["${env_argument}"]} ]]; then
   is_test=true
   test_appendix=".test"
   # load relevant .env file
-  load_env "docker/.env.start.test"
+  . docker/.env.start.test
 else
   is_test=false
   test_appendix=""
@@ -363,7 +359,8 @@ for value in "${compose_files[@]}" ; do
     to_run+=" -f $value"
   fi
 done
-
+echo $REACT_APP_INTELOWL_VERSION
+echo $REPO_DOWNLOADER_ENABLED
 if grep "docker" <<< "$(groups)" > /dev/null 2>&1; then
   docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
 else

@@ -466,6 +466,7 @@ class YaraScan(FileAnalyzer):
 
         if signatures:
             data_model.evaluation = self.EVALUATIONS.MALICIOUS.value
-            data_model.reliability = min(math.floor(signatures.count()/2), 10)
+            data_model.reliability = min(math.floor(signatures.count() / 2), 10)
         else:
-            data_model.evaluation = self.EVALUATIONS.CLEAN.value
+            data_model.evaluation = self.EVALUATIONS.TRUSTED.value
+            data_model.reliability = 3

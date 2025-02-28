@@ -85,28 +85,20 @@ class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
         if classification:
             classification = classification.lower()
             self.report: AnalyzerReport
-            if (
-                classification
-                == self.report.data_model_class.EVALUATIONS.MALICIOUS.value
-            ):
+            if classification == self.EVALUATIONS.MALICIOUS.value:
                 if not noise:
                     logger.error("malicious IP is not a noise!?! How is this possible")
-                data_model.evaluation = (
-                    self.report.data_model_class.EVALUATIONS.MALICIOUS.value
-                )
+                data_model.evaluation = self.EVALUATIONS.MALICIOUS.value
+                data_model.reliability = 7
             elif classification == "unknown":
                 if riot:
-                    data_model.evaluation = (
-                        self.report.data_model_class.EVALUATIONS.CLEAN.value
-                    )
+                    data_model.evaluation = self.EVALUATIONS.TRUSTED.value
+                    data_model.reliability = 1
                 elif noise:
-                    data_model.evaluation = (
-                        self.report.data_model_class.EVALUATIONS.MALICIOUS.value
-                    )
+                    data_model.evaluation = self.EVALUATIONS.MALICIOUS.value
             elif classification == "benign":
-                data_model.evaluation = (
-                    self.report.data_model_class.EVALUATIONS.TRUSTED.value
-                )
+                data_model.evaluation = self.EVALUATIONS.TRUSTED.value
+                data_model.reliability = 7
             else:
                 logger.error(
                     f"there should not be other types of classification. Classification found: {classification}"

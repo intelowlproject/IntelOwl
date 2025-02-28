@@ -20,4 +20,3 @@ class DataModelTags(Choices):
 class DataModelEvaluations(Choices):
     TRUSTED = "trusted"
     MALICIOUS = "malicious"
-    CLEAN = "clean"

@@ -36,7 +36,6 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     TypeChoices = TypeChoices
     EVALUATIONS = DataModelEvaluations
 
-
     def _do_create_data_model(self) -> bool:
         if self.report.job.analyzable.classification == Classification.GENERIC.value:
             return False

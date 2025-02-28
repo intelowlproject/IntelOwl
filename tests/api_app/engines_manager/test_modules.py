@@ -73,12 +73,14 @@ class EngineModuleTestCase(CustomTestCase):
 
         ip1 = IPDataModel.objects.create(
             evaluation=IPDataModel.EVALUATIONS.MALICIOUS.value,
+            reliability=8,
             resolutions=["1.2.3.4"],
             malware_family="test2",
         )
         ip3 = IPDataModel.objects.create(
             resolutions=["1.2.3.5"],
-            evaluation=IPDataModel.EVALUATIONS.CLEAN.value,
+            evaluation=IPDataModel.EVALUATIONS.TRUSTED.value,
+            reliability=2,
             malware_family="test2",
         )
 
@@ -95,10 +97,12 @@ class EngineModuleTestCase(CustomTestCase):
         ip1 = IPDataModel.objects.create(
             evaluation=IPDataModel.EVALUATIONS.MALICIOUS.value,
             resolutions=["1.2.3.4"],
+            reliability=8,
         )
         ip2 = IPDataModel.objects.create(
             resolutions=["1.2.3.5"],
-            evaluation=IPDataModel.EVALUATIONS.CLEAN.value,
+            evaluation=IPDataModel.EVALUATIONS.FALSE_POSITIVE.value,
+            reliability=2,
         )
 
         result = self.execute(config, ip1, ip2)

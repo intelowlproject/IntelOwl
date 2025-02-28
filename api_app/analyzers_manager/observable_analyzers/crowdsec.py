@@ -52,31 +52,23 @@ class Crowdsec(ObservableAnalyzer):
         for classification in classifications:
             label = classification.get("label", "")
             if label in ["Legit scanner", "Known Security Company", "Known CERT"]:
-                data_model.evaluation = (
-                    self.EVALUATIONS.TRUSTED.value
-                )
+                data_model.evaluation = self.EVALUATIONS.TRUSTED.value
                 data_model.reliability = 9
             elif label in ["Likely Botnet", "CrowdSec Community Blocklist"]:
                 data_model.additional_info = {"classifications": classifications}
-                data_model.evaluation = (
-                    self.EVALUATIONS.MALICIOUS.value
-                )
+                data_model.evaluation = self.EVALUATIONS.MALICIOUS.value
                 data_model.reliability = 3
             elif "Proxy" in label or "VPN" in label:
                 data_model.tags = [DataModelTags.ANONYMIZER.value]
-                data_model.evaluation = (
-                    self.EVALUATIONS.CLEAN.value
-                )
-                data_model.reliability = 6
+                data_model.evaluation = self.EVALUATIONS.TRUSTED.value
+                data_model.reliability = 3
             elif label in ["TOR exit node"]:
                 data_model.tags = [
                     DataModelTags.ANONYMIZER.value,
                     DataModelTags.TOR_EXIT_NODE.value,
                 ]
-                data_model.evaluation = (
-                    self.EVALUATIONS.CLEAN.value
-                )
-                data_model.reliability = 4
+                data_model.evaluation = self.EVALUATIONS.TRUSTED.value
+                data_model.reliability = 2
 
         highest_total_score = max(
             (
@@ -85,10 +77,7 @@ class Crowdsec(ObservableAnalyzer):
             ),
             default=0,
         )
-        if (
-            data_model.evaluation
-            != self.EVALUATIONS.TRUSTED.value
-        ):
+        if data_model.evaluation != self.EVALUATIONS.TRUSTED.value:
             if highest_total_score <= 1:
                 data_model.reliability = 8
             else:

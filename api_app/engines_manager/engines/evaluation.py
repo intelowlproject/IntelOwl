@@ -9,7 +9,6 @@ from api_app.engines_manager.classes import EngineModule
 evaluations_order = {
     DataModelEvaluations.TRUSTED.value: 3,
     DataModelEvaluations.MALICIOUS.value: 2,
-    DataModelEvaluations.CLEAN.value: 0,
 }
 
 
@@ -28,8 +27,8 @@ class EvaluationEngineModule(EngineModule):
         user_evaluations = self.job.analyzable.get_all_user_events_data_model()
         if not analyzer_evaluations.exists() and not user_evaluations.exists():
             return {
-                "evaluation": DataModelEvaluations.CLEAN.value,
-                "reliability": 3,
+                "evaluation": DataModelEvaluations.TRUSTED.value,
+                "reliability": 1,
             }
         # if we have a user evaluation, the one with most reliability wins.
         # if more then 1 has same reliability, we follow the evaluations_order
@@ -43,18 +42,10 @@ class EvaluationEngineModule(EngineModule):
             }
 
         else:
-            # if someone says trusted, we trust
-            trusted_evals = analyzer_evaluations.filter(
-                evaluation=DataModelEvaluations.TRUSTED.value
+            result = (
+                analyzer_evaluations.values("evaluation")
+                .annotate(reliability=Avg("reliability"))
+                .order_by("-reliability")
+                .first()
             )
-            if trusted_evals.exists():
-                result = trusted_evals.values("evaluation", "reliability").first()
-            # otherwise we get the evaluation with the greater average reliability
-            else:
-                result = (
-                    analyzer_evaluations.values("evaluation")
-                    .annotate(reliability=Avg("reliability"))
-                    .order_by("-reliability")
-                    .first()
-                )
             return result

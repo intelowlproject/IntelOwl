@@ -4,14 +4,10 @@ from django.db import transaction
 from rest_framework import serializers
 
 from api_app.analyzables_manager.models import Analyzable
-from api_app.data_model_manager.models import (
-    DomainDataModel,
-    FileDataModel,
-    IPDataModel,
-)
+from api_app.data_model_manager.models import DomainDataModel, IPDataModel
 from api_app.data_model_manager.serializers import (
+    DataModelRelatedField,
     DomainDataModelSerializer,
-    FileDataModelSerializer,
     IPDataModelSerializer,
 )
 from api_app.user_events_manager.models import (
@@ -21,20 +17,6 @@ from api_app.user_events_manager.models import (
 )
 from api_app.user_events_manager.validators import validate_ipv4_network
 from authentication.serializers import UserProfileSerializer
-
-
-class DataModelRelatedField(serializers.RelatedField):
-
-    def to_representation(self, value):
-        if isinstance(value, DomainDataModel):
-            internal_serializer = DomainDataModelSerializer(value)
-        elif isinstance(value, IPDataModel):
-            internal_serializer = IPDataModelSerializer(value)
-        elif isinstance(value, FileDataModel):
-            internal_serializer = FileDataModelSerializer(value)
-        else:
-            raise RuntimeError("Unexpected type of of data_model")
-        return internal_serializer.data
 
 
 class UserEventSerializer(serializers.ModelSerializer):

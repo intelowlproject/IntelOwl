@@ -312,18 +312,19 @@ class DataModel(Visualizer):
             )
             logger.debug(f"{printable_analyzer_name}, {data_model}")
 
-            evaluation = ""
-            if data_model.evaluation:
-                evaluation = data_model.evaluation
+            evaluation = data_model.evaluation or ""
+            reliability = data_model.reliability
 
             if evaluation == DataModelEvaluations.TRUSTED.value:
-                trusted_data_models.append(data_model)
-            elif evaluation == DataModelEvaluations.CLEAN.value:
-                clean_data_models.append(data_model)
-            elif evaluation == DataModelEvaluations.SUSPICIOUS.value:
-                suspicious_data_models.append(data_model)
+                if reliability > 8:
+                    trusted_data_models.append(data_model)
+                else:
+                    clean_data_models.append(data_model)
             elif evaluation == DataModelEvaluations.MALICIOUS.value:
-                malicious_data_models.append(data_model)
+                if reliability > 7:
+                    malicious_data_models.append(data_model)
+                else:
+                    suspicious_data_models.append(data_model)
             else:
                 noeval_data_models.append(data_model)
 
@@ -336,7 +337,7 @@ class DataModel(Visualizer):
                 noeval_data_models,
             ),
             (
-                DataModelEvaluations.CLEAN.value,
+                "clean",
                 Visualizer.Color.SUCCESS,
                 Visualizer.Icon.LIKE,
                 clean_data_models,
@@ -348,7 +349,7 @@ class DataModel(Visualizer):
                 trusted_data_models,
             ),
             (
-                DataModelEvaluations.SUSPICIOUS.value,
+                "suspicious",
                 Visualizer.Color.WARNING,
                 Visualizer.Icon.WARNING,
                 suspicious_data_models,

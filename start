@@ -359,8 +359,7 @@ for value in "${compose_files[@]}" ; do
     to_run+=" -f $value"
   fi
 done
-echo $REACT_APP_INTELOWL_VERSION
-echo $REPO_DOWNLOADER_ENABLED
+
 if grep "docker" <<< "$(groups)" > /dev/null 2>&1; then
   docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
 else

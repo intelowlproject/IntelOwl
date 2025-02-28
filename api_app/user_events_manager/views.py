@@ -1,11 +1,15 @@
 import ipaddress
 from http import HTTPStatus
 
-from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission, IsObjectOwnerPermission
 from django.db import IntegrityError
 from requests import Request
 from rest_framework.decorators import action
-from rest_framework.mixins import CreateModelMixin, ListModelMixin, DestroyModelMixin, RetrieveModelMixin
+from rest_framework.mixins import (
+    CreateModelMixin,
+    DestroyModelMixin,
+    ListModelMixin,
+    RetrieveModelMixin,
+)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -14,17 +18,30 @@ from api_app.analyzables_manager.models import Analyzable
 from api_app.choices import Classification
 from api_app.mixins import PaginationMixin
 from api_app.user_events_manager.filters import UserEventFilterSet
-from api_app.user_events_manager.models import UserEvent, UserAnalyzableEvent, UserDomainWildCardEvent, \
-    UserIPWildCardEvent
-from api_app.user_events_manager.serializers import UserAnalyzableEventSerializer, UserDomainWildCardEventSerializer, \
-    UserIPWildCardEventSerializer
+from api_app.user_events_manager.models import (
+    UserAnalyzableEvent,
+    UserDomainWildCardEvent,
+    UserIPWildCardEvent,
+)
+from api_app.user_events_manager.serializers import (
+    UserAnalyzableEventSerializer,
+    UserDomainWildCardEventSerializer,
+    UserIPWildCardEventSerializer,
+)
+from certego_saas.apps.organization.permissions import (
+    IsObjectOwnerOrSameOrgPermission,
+    IsObjectOwnerPermission,
+)
 
 
-class UserEventViewSet(PaginationMixin, CreateModelMixin,
-                   RetrieveModelMixin,
-                   DestroyModelMixin,
-                   ListModelMixin,
-                   GenericViewSet):
+class UserEventViewSet(
+    PaginationMixin,
+    CreateModelMixin,
+    RetrieveModelMixin,
+    DestroyModelMixin,
+    ListModelMixin,
+    GenericViewSet,
+):
     permission_classes = [IsAuthenticated, IsObjectOwnerOrSameOrgPermission]
     filterset_class = UserEventFilterSet
 
@@ -43,6 +60,7 @@ class UserEventViewSet(PaginationMixin, CreateModelMixin,
         except IntegrityError:
             return Response(status=HTTPStatus.CONFLICT.value)
 
+
 class UserAnalyzableEventViewSet(UserEventViewSet):
     queryset = UserAnalyzableEvent.objects.all()
     serializer_class = UserAnalyzableEventSerializer
@@ -56,10 +74,18 @@ class UserDomainWildCardEventViewSet(UserEventViewSet):
     def validate(self, request):
         query = request.PATCH.get("query")
 
-        return Response(status=HTTPStatus.OK.value, data=[
-            Analyzable.objects.filter(name__iregex=query, classification__in=[Classification.URL.value,
-                                                                                   Classification.DOMAIN.value]).values_list("name",flat=True)
-        ])
+        return Response(
+            status=HTTPStatus.OK.value,
+            data=[
+                Analyzable.objects.filter(
+                    name__iregex=query,
+                    classification__in=[
+                        Classification.URL.value,
+                        Classification.DOMAIN.value,
+                    ],
+                ).values_list("name", flat=True)
+            ],
+        )
 
 
 class UserIPWildCardEventViewSet(UserEventViewSet):
@@ -71,7 +97,13 @@ class UserIPWildCardEventViewSet(UserEventViewSet):
         network = request.PATCH.get("network")
         network = ipaddress.IPv4Network(network)
 
-        return Response(status=HTTPStatus.OK.value, data=[
-            Analyzable.objects.filter(name__gte=network[0], name__lte=network[-1], classification=Classification.IP.value).values_list(
-                "name", flat=True)
-        ])
+        return Response(
+            status=HTTPStatus.OK.value,
+            data=[
+                Analyzable.objects.filter(
+                    name__gte=network[0],
+                    name__lte=network[-1],
+                    classification=Classification.IP.value,
+                ).values_list("name", flat=True)
+            ],
+        )

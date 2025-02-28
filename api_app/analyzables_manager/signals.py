@@ -19,12 +19,17 @@ def pre_delete_analyzable(sender, instance: Analyzable, **kwargs):
         instance.file.delete()
 
 
-
 @receiver(models.signals.post_save, sender=Analyzable)
-def post_save_analyzable(sender, instance:Analyzable, created, **kwargs):
+def post_save_analyzable(sender, instance: Analyzable, created, **kwargs):
     if created:
-        from api_app.user_events_manager.models import UserDomainWildCardEvent, UserIPWildCardEvent
-        instance.user_domain_wildcard_events.add(*UserDomainWildCardEvent.objects.matches(instance))
-        instance.user_ip_wildcard_events.add(*UserIPWildCardEvent.objects.matches(instance))
+        from api_app.user_events_manager.models import (
+            UserDomainWildCardEvent,
+            UserIPWildCardEvent,
+        )
 
-
+        instance.user_domain_wildcard_events.add(
+            *UserDomainWildCardEvent.objects.matches(instance)
+        )
+        instance.user_ip_wildcard_events.add(
+            *UserIPWildCardEvent.objects.matches(instance)
+        )

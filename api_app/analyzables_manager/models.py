@@ -51,13 +51,14 @@ class Analyzable(models.Model):
 
     def get_all_user_events_data_model(self) -> BaseDataModelQuerySet:
         query = Q(user_events__analyzable=self)
-        if self.classification in [Classification.URL.value, Classification.DOMAIN.value]:
-            query |=Q(user_domain_wildcard_events__analyzables=self)
+        if self.classification in [
+            Classification.URL.value,
+            Classification.DOMAIN.value,
+        ]:
+            query |= Q(user_domain_wildcard_events__analyzables=self)
         elif self.classification == Classification.IP.value:
             query |= Q(user_ip_wildcard_events__analyzables=self)
-        return self.get_data_model_class().objects.filter(
-             query
-        )
+        return self.get_data_model_class().objects.filter(query)
 
     def get_data_model_class(self) -> Type[BaseDataModel]:
         if self.classification == Classification.IP.value:

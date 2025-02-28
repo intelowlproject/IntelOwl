@@ -68,7 +68,9 @@ class BaseDataModel(models.Model):
         default=None,
         choices=DataModelEvaluations.choices,
     )
-    reliability = PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(10)], default=5)
+    reliability = PositiveIntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(10)], default=5
+    )
 
     external_references = SetField(
         models.URLField(),
@@ -105,8 +107,6 @@ class BaseDataModel(models.Model):
         content_type_field="data_model_content_type",
     )
 
-
-
     TAGS = DataModelTags
 
     EVALUATIONS = DataModelEvaluations
@@ -120,8 +120,6 @@ class BaseDataModel(models.Model):
             return self.analyzers_report.first().user
         elif self.jobs.exists():
             return self.jobs.first().user
-
-
 
     def merge(
         self, other: Union["BaseDataModel", Dict], append: bool = True

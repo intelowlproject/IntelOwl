@@ -95,7 +95,11 @@ app.conf.update(
     accept_content=["application/json"],
     task_serializer="json",
     result_serializer="json",
-    imports=("intel_owl.tasks", "api_app.engines_manager.tasks", "api_app.user_events_manager.tasks"),
+    imports=(
+        "intel_owl.tasks",
+        "api_app.engines_manager.tasks",
+        "api_app.user_events_manager.tasks",
+    ),
     worker_redirect_stdouts=False,
     worker_hijack_root_logger=False,
     # this is to avoid RAM issues caused by long usage of this tool
@@ -175,7 +179,7 @@ app.conf.beat_schedule = {
             "queue": get_queue_name(settings.DEFAULT_QUEUE),
             "MessageGroupId": str(uuid.uuid4()),
         },
-    }
+    },
 }
 app.autodiscover_tasks()
 

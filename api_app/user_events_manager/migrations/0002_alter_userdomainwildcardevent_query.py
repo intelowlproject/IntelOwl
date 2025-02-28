@@ -6,13 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('user_events_manager', '0001_initial'),
+        ("user_events_manager", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='userdomainwildcardevent',
-            name='query',
-            field=models.CharField(editable=False, help_text='This use classic regex syntax', max_length=100),
+            model_name="userdomainwildcardevent",
+            name="query",
+            field=models.CharField(
+                editable=False,
+                help_text="This use classic regex syntax",
+                max_length=100,
+            ),
         ),
     ]

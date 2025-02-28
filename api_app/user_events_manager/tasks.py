@@ -1,7 +1,10 @@
 from celery import shared_task
 
-from api_app.user_events_manager.choices import DecayProgressionEnum
-from api_app.user_events_manager.models import UserAnalyzableEvent, UserDomainWildCardEvent, UserIPWildCardEvent
+from api_app.user_events_manager.models import (
+    UserAnalyzableEvent,
+    UserDomainWildCardEvent,
+    UserIPWildCardEvent,
+)
 from intel_owl.tasks import FailureLoggedTask
 
 

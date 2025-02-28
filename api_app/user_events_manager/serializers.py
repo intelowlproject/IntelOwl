@@ -1,17 +1,28 @@
 import ipaddress
 
-from django.core.validators import validate_ipv4_address
 from django.db import transaction
 from rest_framework import serializers
 
 from api_app.analyzables_manager.models import Analyzable
-from api_app.data_model_manager.models import DomainDataModel, IPDataModel, FileDataModel
-from api_app.data_model_manager.serializers import DomainDataModelSerializer, IPDataModelSerializer, \
-    FileDataModelSerializer
-from api_app.user_events_manager.models import UserAnalyzableEvent, UserEvent, UserDomainWildCardEvent, \
-    UserIPWildCardEvent
+from api_app.data_model_manager.models import (
+    DomainDataModel,
+    FileDataModel,
+    IPDataModel,
+)
+from api_app.data_model_manager.serializers import (
+    DomainDataModelSerializer,
+    FileDataModelSerializer,
+    IPDataModelSerializer,
+)
+from api_app.user_events_manager.models import (
+    UserAnalyzableEvent,
+    UserDomainWildCardEvent,
+    UserIPWildCardEvent,
+)
 from api_app.user_events_manager.validators import validate_ipv4_network
 from authentication.serializers import UserProfileSerializer
+
+
 class DataModelRelatedField(serializers.RelatedField):
 
     def to_representation(self, value):
@@ -25,6 +36,7 @@ class DataModelRelatedField(serializers.RelatedField):
             raise RuntimeError("Unexpected type of of data_model")
         return internal_serializer.data
 
+
 class UserEventSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer(read_only=True)
 
@@ -36,7 +48,6 @@ class UserEventSerializer(serializers.ModelSerializer):
     class Meta:
         fields = serializers.ALL_FIELDS
 
-
     def validate(self, data):
         data["user"] = self.context["request"].user
         return data
@@ -47,7 +58,6 @@ class UserAnalyzableEventSerializer(UserEventSerializer):
     analyzable = serializers.PrimaryKeyRelatedField(queryset=Analyzable.objects.all())
     data_model_content = serializers.JSONField(write_only=True, source="data_model")
     data_model = DataModelRelatedField(read_only=True)
-
 
     class Meta:
         model = UserAnalyzableEvent
@@ -81,8 +91,11 @@ class UserDomainWildCardEventSerializer(UserEventSerializer):
 
     def save(self, **kwargs):
         with transaction.atomic():
-            data_model = DomainDataModel.objects.create(**self.validated_data.pop("data_model"))
+            data_model = DomainDataModel.objects.create(
+                **self.validated_data.pop("data_model")
+            )
             return super().save(**kwargs, data_model=data_model)
+
 
 class UserIPWildCardEventSerializer(UserEventSerializer):
     analyzables = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
@@ -105,5 +118,7 @@ class UserIPWildCardEventSerializer(UserEventSerializer):
 
     def save(self, **kwargs):
         with transaction.atomic():
-            data_model = IPDataModel.objects.create(**self.validated_data.pop("data_model"))
+            data_model = IPDataModel.objects.create(
+                **self.validated_data.pop("data_model")
+            )
             return super().save(**kwargs, data_model=data_model)

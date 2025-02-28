@@ -12,24 +12,26 @@ class TestUserDomainWildCardEvent(CustomTestCase):
             name="test.com",
             classification=Classification.DOMAIN,
         )
-        u = UserDomainWildCardEventSerializer(data={
-            "query":".*\.com" ,
-            "decay_progression": 0,
-            "decay_timedelta_days": 3,
-            "data_model_content": {
-                "evaluation": "malicious",
-                "reliability": 8
-            }
-        }, context={"request": MockUpRequest(user=self.user)},)
+        u = UserDomainWildCardEventSerializer(
+            data={
+                "query": ".*\.com",
+                "decay_progression": 0,
+                "decay_timedelta_days": 3,
+                "data_model_content": {"evaluation": "malicious", "reliability": 8},
+            },
+            context={"request": MockUpRequest(user=self.user)},
+        )
         self.assertTrue(u.is_valid(), u.errors)
         res: UserDomainWildCardEvent = u.save()
-        self.assertCountEqual(res.analyzables.values_list("pk",flat=True), [an.pk])
+        self.assertCountEqual(res.analyzables.values_list("pk", flat=True), [an.pk])
         an2 = Analyzable.objects.create(
             name="test2.com",
             classification=Classification.DOMAIN,
         )
         res.refresh_from_db()
-        self.assertCountEqual(res.analyzables.values_list("pk", flat=True), [an.pk, an2.pk])
+        self.assertCountEqual(
+            res.analyzables.values_list("pk", flat=True), [an.pk, an2.pk]
+        )
 
         res.delete()
         an.delete()

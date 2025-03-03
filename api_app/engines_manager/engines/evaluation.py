@@ -27,8 +27,8 @@ class EvaluationEngineModule(EngineModule):
         user_evaluations = self.job.analyzable.get_all_user_events_data_model()
         if not analyzer_evaluations.exists() and not user_evaluations.exists():
             return {
-                "evaluation": DataModelEvaluations.TRUSTED.value,
-                "reliability": 1,
+                "evaluation": None,
+                "reliability": 0,
             }
         # if we have a user evaluation, the one with most reliability wins.
         # if more then 1 has same reliability, we follow the evaluations_order

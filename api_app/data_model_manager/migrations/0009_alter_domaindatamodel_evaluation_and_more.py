@@ -8,23 +8,53 @@ import api_app.data_model_manager.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('data_model_manager', '0008_domaindatamodel_reliability_and_more'),
+        ("data_model_manager", "0008_domaindatamodel_reliability_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='domaindatamodel',
-            name='evaluation',
-            field=api_app.data_model_manager.fields.LowercaseCharField(blank=True, choices=[('trusted', 'Trusted'), ('malicious', 'Malicious'), ('clean', 'Clean')], default=None, max_length=100, null=True),
+            model_name="domaindatamodel",
+            name="evaluation",
+            field=api_app.data_model_manager.fields.LowercaseCharField(
+                blank=True,
+                choices=[
+                    ("trusted", "Trusted"),
+                    ("malicious", "Malicious"),
+                    ("clean", "Clean"),
+                ],
+                default=None,
+                max_length=100,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='filedatamodel',
-            name='evaluation',
-            field=api_app.data_model_manager.fields.LowercaseCharField(blank=True, choices=[('trusted', 'Trusted'), ('malicious', 'Malicious'), ('clean', 'Clean')], default=None, max_length=100, null=True),
+            model_name="filedatamodel",
+            name="evaluation",
+            field=api_app.data_model_manager.fields.LowercaseCharField(
+                blank=True,
+                choices=[
+                    ("trusted", "Trusted"),
+                    ("malicious", "Malicious"),
+                    ("clean", "Clean"),
+                ],
+                default=None,
+                max_length=100,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='ipdatamodel',
-            name='evaluation',
-            field=api_app.data_model_manager.fields.LowercaseCharField(blank=True, choices=[('trusted', 'Trusted'), ('malicious', 'Malicious'), ('clean', 'Clean')], default=None, max_length=100, null=True),
+            model_name="ipdatamodel",
+            name="evaluation",
+            field=api_app.data_model_manager.fields.LowercaseCharField(
+                blank=True,
+                choices=[
+                    ("trusted", "Trusted"),
+                    ("malicious", "Malicious"),
+                    ("clean", "Clean"),
+                ],
+                default=None,
+                max_length=100,
+                null=True,
+            ),
         ),
     ]

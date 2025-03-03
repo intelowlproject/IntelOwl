@@ -78,7 +78,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         editable=False,
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name="domain_wildcard_events",
+                        related_name="ip_wildcard_events",
                         to="data_model_manager.ipdatamodel",
                     ),
                 ),

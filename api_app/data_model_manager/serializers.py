@@ -43,6 +43,7 @@ class DomainDataModelSerializer(BaseDataModelSerializer):
 
     class Meta:
         model = DomainDataModel
+        fields = "__all__"
 
 
 class IPDataModelSerializer(BaseDataModelSerializer):
@@ -51,6 +52,7 @@ class IPDataModelSerializer(BaseDataModelSerializer):
 
     class Meta:
         model = IPDataModel
+        fields = "__all__"
 
 
 class FileDataModelSerializer(BaseDataModelSerializer):
@@ -59,6 +61,7 @@ class FileDataModelSerializer(BaseDataModelSerializer):
 
     class Meta:
         model = FileDataModel
+        fields = "__all__"
 
 
 class DataModelRelatedField(serializers.RelatedField):

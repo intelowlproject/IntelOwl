@@ -101,7 +101,7 @@ class EngineModuleTestCase(CustomTestCase):
         )
         ip2 = IPDataModel.objects.create(
             resolutions=["1.2.3.5"],
-            evaluation=IPDataModel.EVALUATIONS.FALSE_POSITIVE.value,
+            evaluation=IPDataModel.EVALUATIONS.TRUSTED.value,
             reliability=2,
         )
 

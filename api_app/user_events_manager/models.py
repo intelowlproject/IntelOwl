@@ -146,7 +146,7 @@ class UserIPWildCardEvent(UserEvent):
     data_model = models.ForeignKey(
         IPDataModel,
         on_delete=models.CASCADE,
-        related_name="domain_wildcard_events",
+        related_name="ip_wildcard_events",
         editable=False,
     )
 

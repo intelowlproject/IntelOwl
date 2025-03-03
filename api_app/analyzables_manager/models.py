@@ -55,9 +55,9 @@ class Analyzable(models.Model):
             Classification.URL.value,
             Classification.DOMAIN.value,
         ]:
-            query |= Q(user_domain_wildcard_events__analyzables=self)
+            query |= Q(domain_wildcard_events__analyzables=self)
         elif self.classification == Classification.IP.value:
-            query |= Q(user_ip_wildcard_events__analyzables=self)
+            query |= Q(ip_wildcard_events__analyzables=self)
         return self.get_data_model_class().objects.filter(query)
 
     def get_data_model_class(self) -> Type[BaseDataModel]:

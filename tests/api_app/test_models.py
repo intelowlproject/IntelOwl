@@ -8,11 +8,13 @@ from celery.canvas import Signature
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django_celery_beat.models import PeriodicTask
+from kombu import uuid
 
 from api_app.analyzables_manager.models import Analyzable
-from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.choices import Classification, PythonModuleBasePaths
 from api_app.connectors_manager.models import ConnectorConfig
+from api_app.data_model_manager.models import DomainDataModel
 from api_app.models import (
     AbstractConfig,
     Job,
@@ -467,6 +469,36 @@ class PluginConfigTestCase(CustomTestCase):
 
 
 class JobTestCase(CustomTestCase):
+
+    def test_get_analyzers_data_models(self):
+        an1 = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
+        job = Job.objects.create(
+            analyzable=an1,
+            status=Job.STATUSES.ANALYZERS_RUNNING.value,
+        )
+        config = AnalyzerConfig.objects.first()
+        domain_data_model = DomainDataModel.objects.create()
+        ar: AnalyzerReport = AnalyzerReport.objects.create(
+            report={
+                "evaluation": "MALICIOUS",
+                "urls": [{"url": "www.intelowl.com"}, {"url": "www.intelowl.com"}],
+            },
+            job=job,
+            config=config,
+            status=AnalyzerReport.STATUSES.SUCCESS.value,
+            task_id=str(uuid()),
+            parameters={},
+            data_model=domain_data_model,
+        )
+        dms = job.get_analyzers_data_models()
+        self.assertIn(ar.pk, dms.values_list("pk", flat=True))
+        an1.delete()
+        job.delete()
+
     def test_pivots_to_execute(self):
         ac = AnalyzerConfig.objects.first()
         ac2 = AnalyzerConfig.objects.exclude(pk__in=[ac.pk]).first()

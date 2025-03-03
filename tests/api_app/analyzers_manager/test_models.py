@@ -15,34 +15,6 @@ from tests import CustomTestCase
 
 class AnalyzerReportTestCase(CustomTestCase):
 
-    def test_get_data_models(self):
-        an1 = Analyzable.objects.create(
-            name="test.com",
-            classification=Classification.DOMAIN,
-        )
-
-        job = Job.objects.create(
-            analyzable=an1,
-            status=Job.STATUSES.ANALYZERS_RUNNING.value,
-        )
-        config = AnalyzerConfig.objects.first()
-        domain_data_model = DomainDataModel.objects.create()
-        ar: AnalyzerReport = AnalyzerReport.objects.create(
-            report={
-                "evaluation": "MALICIOUS",
-                "urls": [{"url": "www.intelowl.com"}, {"url": "www.intelowl.com"}],
-            },
-            job=job,
-            config=config,
-            status=AnalyzerReport.STATUSES.SUCCESS.value,
-            task_id=str(uuid()),
-            parameters={},
-            data_model=domain_data_model,
-        )
-        dm = AnalyzerReport.objects.filter(pk=ar.pk).get_data_models(job)
-        self.assertEqual(dm.model, DomainDataModel)
-        an1.delete()
-
     def test_clean(self):
         an1 = Analyzable.objects.create(
             name="test.com",

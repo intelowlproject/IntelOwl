@@ -1,6 +1,7 @@
 import ipaddress
 
 from django.db import transaction
+from pydantic import ValidationError
 from rest_framework import serializers
 
 from api_app.analyzables_manager.models import Analyzable
@@ -31,6 +32,8 @@ class UserEventSerializer(serializers.ModelSerializer):
         fields = serializers.ALL_FIELDS
 
     def validate(self, data):
+        if "request" not in self.context:
+            raise ValidationError("A request context is required")
         data["user"] = self.context["request"].user
         return data
 

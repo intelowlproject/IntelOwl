@@ -24,7 +24,7 @@ class EvaluationEngineModule(EngineModule):
         analyzer_evaluations = self.job.get_analyzers_data_models().order_by(
             "-reliability"
         )
-        user_evaluations = self.job.analyzable.get_all_user_events_data_model()
+        user_evaluations = self.job.get_user_events_data_model()
         if not analyzer_evaluations.exists() and not user_evaluations.exists():
             return {
                 "evaluation": None,

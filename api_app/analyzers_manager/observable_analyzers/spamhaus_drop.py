@@ -24,20 +24,23 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
 
     @classmethod
     def location(cls, data_type: str) -> str:
-        print("location", data_type)
         if data_type == "ipv4":
             db_name = "drop_v4.json"
         elif data_type == "ipv6":
             db_name = "drop_v6.json"
-        else:
+        elif data_type == "asn":
             db_name = "asndrop.json"
+        else:
+            raise ValueError(f"Invalid data_type: {data_type}")
         return f"{settings.MEDIA_ROOT}/{db_name}"
 
     def run(self):
         if self.observable_classification == Classification.IP:
             ip = ipaddress.ip_address(self.observable_name)
             data_type = "ipv4" if ip.version == 4 else "ipv6"
-            logger.info(f"The given observable is an {data_type} address.")
+            logger.info(
+                f"The given observable ({self.observable_name}) is an {data_type} address."
+            )
         elif (
             self.observable_classification == Classification.GENERIC
             and self.observable_name.isdigit()
@@ -72,11 +75,13 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
                     matches.append(db[i])
                 elif network.network_address > ip:
                     break
-        else:
+        elif data_type == "asn":
             # ASN Matching
             for entry in db[:-1]:
                 if int(entry["asn"]) == asn:
                     matches.append(entry)
+        else:
+            raise ValueError(f"Invalid data_type: {data_type}")
 
         if matches:
             return {"found": True, "details": matches}

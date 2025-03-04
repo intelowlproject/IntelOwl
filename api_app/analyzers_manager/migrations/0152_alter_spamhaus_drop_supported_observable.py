@@ -25,6 +25,7 @@ def reverse_migrate(apps, schema_editor):
         if "generic" in observable_supported:
             observable_supported.remove("generic")
             obj.observable_supported = observable_supported
+            obj.full_clean()
             obj.save()
     except Model.DoesNotExist:
         pass

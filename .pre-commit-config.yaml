@@ -50,8 +50,8 @@ repos:
           - stylelint-config-standard-scss@4.0.0
         args: ["--fix"]
         files: frontend/src/styles/.*(css|scss)$
-  -   repo: https://github.com/koalaman/shellcheck-precommit
-      rev: v0.7.2
-      hooks:
-      -   id: shellcheck
-          args: ["--severity=warning"] 
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.7.2
+    hooks:
+      - id: shellcheck
+        args: ["--severity=warning"] 

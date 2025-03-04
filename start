@@ -94,7 +94,7 @@ fi
 
 check_parameters "$@" && shift 2
 
-# shellcheck source=docker/.env
+# shellcheck source=docker/.env disable=SC1091
 . docker/.env
 
 current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
@@ -114,7 +114,7 @@ if [[ ${test_mode["${env_argument}"]} ]]; then
   is_test=true
   test_appendix=".test"
 
-  # shellcheck source=docker/.env.start.test
+# shellcheck source=docker/.env.start.test disable=SC1091
   . docker/.env.start.test
 
 else

@@ -97,7 +97,7 @@ if ! docker compose version > /dev/null 2>&1; then
 fi
 
 check_parameters "$@" && shift 2
-
+# shellcheck source=docker/.env
 load_env "docker/.env"
 current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
 
@@ -115,7 +115,7 @@ done
 if [[ ${test_mode["${env_argument}"]} ]]; then
   is_test=true
   test_appendix=".test"
-  # load relevant .env file
+  # shellcheck source=docker/.env.start.test
   load_env "docker/.env.start.test"
 else
   is_test=false

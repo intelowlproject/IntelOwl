@@ -129,9 +129,10 @@ fi
 
 # construct environment files from templates
 echo "Adding environment files"
-cp -n docker/env_file_app_template docker/env_file_app
-cp -n docker/env_file_postgres_template docker/env_file_postgres
-cp -n docker/env_file_integrations_template docker/env_file_integrations
+cp --update=none docker/env_file_app_template docker/env_file_app
+cp --update=none docker/env_file_postgres_template docker/env_file_postgres
+cp --update=none docker/env_file_integrations_template docker/env_file_integrations
+cp --update=none docker/.env.start.test.template docker/.env.start.test
 echo "Added environment files"
 
 check_django_secret

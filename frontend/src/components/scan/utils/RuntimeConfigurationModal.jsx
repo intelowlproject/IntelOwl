@@ -52,7 +52,6 @@ export function RuntimeConfigurationModal(props) {
       size="xl"
       isOpen={isOpen}
       toggle={toggle}
-      keyboard={false}
       scrollable
       backdrop="static"
       labelledBy="Edit Runtime Configuration"

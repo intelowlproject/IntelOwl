@@ -88,17 +88,15 @@ set_defaults_values () {
   export PYCTI_VERSION=$pycti_default_version
 }
 
-load_env () {
-  export "$(grep -v '^#' "$1")"
-}
-
 if ! docker compose version > /dev/null 2>&1; then
   echo "Run ./initialize.sh to install Docker Compose 2"
 fi
 
 check_parameters "$@" && shift 2
+
 # shellcheck source=docker/.env
-load_env "docker/.env"
+. docker/.env
+
 current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
 
 docker_analyzers=("pcap_analyzers" "tor_analyzers" "malware_tools_analyzers" "thug" "cyberchef" "phoneinfoga" "phishing_analyzers" "nuclei_analyzer")
@@ -115,8 +113,10 @@ done
 if [[ ${test_mode["${env_argument}"]} ]]; then
   is_test=true
   test_appendix=".test"
+
   # shellcheck source=docker/.env.start.test
-  load_env "docker/.env.start.test"
+  . docker/.env.start.test
+
 else
   is_test=false
   test_appendix=""

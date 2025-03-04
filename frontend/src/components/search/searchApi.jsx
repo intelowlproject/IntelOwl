@@ -26,10 +26,14 @@ export async function pluginReportQueries(body, pageSize, pageLimit) {
         params.page_size = pageSize;
         additionalRequests.push(axios.get(PLUGIN_REPORT_QUERIES, { params }));
       }
-      const multipleResponses = await Promise.all(additionalRequests);
-      multipleResponses.forEach((response) => {
-        resultList = resultList.concat(response.data.results);
-      });
+      // Promise.all works only if ALL the requests are done successfully
+      const multipleResponses = await Promise.allSettled(additionalRequests);
+      // We need to handle promise manually to exclude failed requests
+      multipleResponses
+        .filter((response) => response.status === "fulfilled")
+        .forEach((successfulResponse) => {
+          resultList = resultList.concat(successfulResponse.value.data.results);
+        });
     }
     return resultList;
   } catch (error) {

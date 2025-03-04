@@ -31,7 +31,7 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
         elif data_type == "asn":
             db_name = "asndrop.json"
         else:
-            raise ValueError(f"Invalid data_type: {data_type}")
+            raise AnalyzerRunException(f"Invalid data_type: {data_type}")
         return f"{settings.MEDIA_ROOT}/{db_name}"
 
     def run(self):
@@ -47,9 +47,11 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
         ):
             data_type = "asn"
             asn = int(self.observable_name)  # Convert to integer
-            logger.info(f"The given observable is an ASN: {asn}")
+            logger.info(
+                f"The given observable ({self.observable_name}) is an ASN: {asn}"
+            )
         else:
-            raise ValueError(f"Invalid observable: {self.observable_name}")
+            raise AnalyzerRunException(f"Invalid observable: {self.observable_name}")
 
         database_location = self.location(data_type)
 
@@ -81,7 +83,7 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
                 if int(entry["asn"]) == asn:
                     matches.append(entry)
         else:
-            raise ValueError(f"Invalid data_type: {data_type}")
+            raise AnalyzerRunException(f"Invalid data_type: {data_type}")
 
         if matches:
             return {"found": True, "details": matches}
@@ -101,7 +103,7 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
             db_url = cls.asn_url
         else:
             raise AnalyzerRunException(
-                "Invalid type provided for updating the database"
+                f"Invalid data_type provided to update: {data_type}"
             )
         response = requests.get(url=db_url)
         response.raise_for_status()

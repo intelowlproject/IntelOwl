@@ -3,6 +3,7 @@ name: Build & Tests
 
 on:
   pull_request:
+    branches: [master, develop]
     paths-ignore:
       - "**.md"
       - "docs/**"

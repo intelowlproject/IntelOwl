@@ -26,8 +26,6 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isEditing }) {
 
   // states
   const [responseError, setResponseError] = React.useState(null);
-  const [headersJsonInput, setHeadersJsonInput] = React.useState({});
-  const [paramsJsonInput, setParamsJsonInput] = React.useState({});
 
   // store
   const [retrieveAnalyzersConfiguration] = usePluginConfigurationStore(
@@ -42,12 +40,16 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isEditing }) {
       tlp: analyzerConfig?.maximum_tlp || "RED",
       url: analyzerConfig?.params?.url?.value || "",
       http_method: analyzerConfig?.params?.http_method?.value || "get",
-      headers: analyzerConfig?.params?.headers?.value || {
-        Accept: "application/json",
-      },
-      params: analyzerConfig?.params?.params?.value || {
-        param_name: "<observable>",
-      },
+      headers: isEditing
+        ? analyzerConfig?.params?.headers?.value || {}
+        : {
+            Accept: "application/json",
+          },
+      params: isEditing
+        ? analyzerConfig?.params?.params?.value || {}
+        : {
+            param_name: "<observable>",
+          },
       api_key_name: analyzerConfig?.secrets?.api_key_name?.value || "",
       certificate: analyzerConfig?.secrets?.certificate?.value || "",
     },
@@ -123,39 +125,33 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isEditing }) {
         );
       }
 
-      // plugin config
-      const pluginConfig = [
-        {
-          attribute: "http_method",
-          value: formik.values.http_method,
-          parameter: response.data.parameters.http_method.id,
-        },
-        {
-          attribute: "url",
-          value: formik.values.url,
-          parameter: response.data.parameters.url.id,
-        },
-        {
-          attribute: "headers",
-          value: headersJsonInput || JSON.stringify(formik.values.headers),
-          parameter: response.data.parameters.headers.id,
-        },
-        {
-          attribute: "api_key_name",
-          value: JSON.stringify(formik.values.api_key_name),
-          parameter: response.data.parameters.api_key_name.id,
-        },
-        {
-          attribute: "certificate",
-          value: JSON.stringify(formik.values.certificate),
-          parameter: response.data.parameters.certificate.id,
-        },
-        {
-          attribute: "params",
-          value: paramsJsonInput || JSON.stringify({}),
-          parameter: response.data.parameters.params.id,
-        },
-      ];
+      const pluginConfig = [];
+      [
+        "http_method",
+        "url",
+        "headers",
+        "api_key_name",
+        "certificate",
+        "params",
+      ].forEach((config) => {
+        const formValue = JSON.stringify(formik.values[config]);
+        const initialValues = JSON.stringify(formik.initialValues[config]);
+        const obj = {
+          attribute: config,
+          value: ["http_method", "url"].includes(config)
+            ? formik.values[config]
+            : formValue,
+          parameter: response.data.parameters[config].id,
+        };
+        if (isEditing && formValue !== initialValues) {
+          pluginConfig.push(obj);
+        } else if (!isEditing) {
+          obj.analyzer_config = formik.values.name;
+          obj.for_organization = false;
+          pluginConfig.push(obj);
+        }
+      });
+
       if (response?.success) {
         if (isEditing) {
           responsePluginConfig = await editPluginConfig(
@@ -164,12 +160,6 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isEditing }) {
             pluginConfig,
           );
         } else {
-          pluginConfig.forEach((config) =>
-            Object.assign(config, {
-              analyzer_config: response.data.name,
-              for_organization: false,
-            }),
-          );
           responsePluginConfig = await createPluginConfig(
             PluginsTypes.ANALYZER,
             formik.values.name,
@@ -414,7 +404,7 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isEditing }) {
                 <JsonEditor
                   id="analyzer_json_param"
                   initialJsonData={formik.values.params}
-                  onChange={setParamsJsonInput}
+                  onChange={(value) => formik.setFieldValue("params", value)}
                   height="150px"
                 />
               </div>
@@ -442,7 +432,7 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isEditing }) {
                 <JsonEditor
                   id="analyzer_header"
                   initialJsonData={formik.values.headers}
-                  onChange={setHeadersJsonInput}
+                  onChange={(value) => formik.setFieldValue("headers", value)}
                   height="150px"
                 />
               </div>
@@ -545,12 +535,7 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isEditing }) {
             size="lg"
             outline
             className="mx-2 mt-2"
-            disabled={
-              !formik.isValid ||
-              formik.isSubmitting ||
-              headersJsonInput?.error ||
-              paramsJsonInput?.error
-            }
+            disabled={!formik.isValid || formik.isSubmitting}
           >
             Save
           </Button>

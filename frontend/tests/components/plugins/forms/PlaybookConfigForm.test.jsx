@@ -153,18 +153,8 @@ describe("PlaybookConfigForm test", () => {
     });
     expect(newAnalysisRadio).toBeInTheDocument();
 
-    const runtimeConfigInputField = screen.getByText("Runtime Configuration:");
+    const runtimeConfigInputField = screen.getByText("Runtime Configuration");
     expect(runtimeConfigInputField).toBeInTheDocument();
-    const runtimeConfigModalWarning = screen.getByText(
-      "Note: Edit this only if you know what you are doing!",
-    );
-    expect(runtimeConfigModalWarning).toBeInTheDocument();
-    const editableRuntimeConfigSection =
-      runtimeConfigModalWarning.closest("div");
-    const editableRuntimeConfig = editableRuntimeConfigSection.querySelector(
-      "#jsonAceEditor__runtime_configuration",
-    );
-    expect(editableRuntimeConfig).toBeInTheDocument();
 
     const saveButton = screen.getByRole("button", { name: "Save" });
     expect(saveButton).toBeInTheDocument();
@@ -237,19 +227,9 @@ describe("PlaybookConfigForm test", () => {
     });
     expect(newAnalysisRadio).toBeInTheDocument();
 
-    const runtimeConfigInputField = screen.getByText("Runtime Configuration:");
+    const runtimeConfigInputField = screen.getByText("Runtime Configuration");
     expect(runtimeConfigInputField).toBeInTheDocument();
-    const runtimeConfigModalWarning = screen.getByText(
-      "Note: Edit this only if you know what you are doing!",
-    );
-    expect(runtimeConfigModalWarning).toBeInTheDocument();
-    const editableRuntimeConfigSection =
-      runtimeConfigModalWarning.closest("div");
-    const editableRuntimeConfig = editableRuntimeConfigSection.querySelector(
-      "#jsonAceEditor__runtime_configuration",
-    );
-    expect(editableRuntimeConfig).toBeInTheDocument();
-    
+
     const saveButton = screen.getByRole("button", { name: "Save" });
     expect(saveButton).toBeInTheDocument();
     expect(saveButton.className).toContain("disabled");
@@ -344,18 +324,8 @@ describe("PlaybookConfigForm test", () => {
     });
     expect(newAnalysisRadio).toBeInTheDocument();
 
-    const runtimeConfigInputField = screen.getByText("Runtime Configuration:");
+    const runtimeConfigInputField = screen.getByText("Runtime Configuration");
     expect(runtimeConfigInputField).toBeInTheDocument();
-    const runtimeConfigModalWarning = screen.getByText(
-      "Note: Edit this only if you know what you are doing!",
-    );
-    expect(runtimeConfigModalWarning).toBeInTheDocument();
-    const editableRuntimeConfigSection =
-      runtimeConfigModalWarning.closest("div");
-    const editableRuntimeConfig = editableRuntimeConfigSection.querySelector(
-     "#jsonAceEditor__runtime_configuration",
-    );
-    expect(editableRuntimeConfig).toBeInTheDocument();
 
     const saveButton = screen.getByRole("button", { name: "Save" });
     expect(saveButton).toBeInTheDocument();

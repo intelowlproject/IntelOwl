@@ -238,7 +238,9 @@ describe("test plugins report table", () => {
     await waitFor(() => {
       const expandedRow = container.querySelector(`#jobreport-jsoninput-1`);
       expect(expandedRow).toBeInTheDocument();
-      const jsonReport = container.querySelector(`#jsonAceEditor__plugin_report_json`);
+      const jsonReport = container.querySelector(
+        `#jsonAceEditor__plugin_report_json`,
+      );
       expect(jsonReport).toBeInTheDocument();
     });
 
@@ -249,7 +251,9 @@ describe("test plugins report table", () => {
     await waitFor(() => {
       const expandedRow = container.querySelector(`#jobreport-jsoninput-0`);
       expect(expandedRow).toBeInTheDocument();
-      const jsonReport = container.querySelector(`#jsonAceEditor__plugin_report_json`);
+      const jsonReport = container.querySelector(
+        `#jsonAceEditor__plugin_report_json`,
+      );
       expect(jsonReport).toBeInTheDocument();
     });
   });

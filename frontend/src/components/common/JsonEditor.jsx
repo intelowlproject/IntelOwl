@@ -2,9 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import AceEditor from "react-ace";
 import { Range } from "ace-builds";
-
-import "ace-builds/src-noconflict/mode-json";
-import "ace-builds/src-noconflict/theme-solarized_dark";
 import "ace-builds/src-noconflict/ext-language_tools";
 
 const ace = require("ace-builds/src-noconflict/ace");
@@ -17,6 +14,14 @@ ace.config.set(
 ace.config.setModuleUrl(
   "ace/mode/json_worker",
   "https://cdn.jsdelivr.net/npm/ace-builds@1.4.3/src-noconflict/worker-json.js",
+);
+ace.config.setModuleLoader(
+  "ace/mode/json",
+  () => import("ace-builds/src-noconflict/mode-json"),
+);
+ace.config.setModuleLoader(
+  "ace/theme/solarized_dark",
+  () => import("ace-builds/src-noconflict/theme-solarized_dark"),
 );
 
 export function JsonEditor({
@@ -31,15 +36,7 @@ export function JsonEditor({
 }) {
   console.debug("JsonEditor rendered");
 
-  const [currentJsonData, setCurrentJasonData] =
-    React.useState(initialJsonData);
-
-  // const [currentJsonData, setCurrentJasonData] = React.useState({});
-  // necessary to correctly update the state since useState is asynchronous
-  // React.useEffect(() => {
-  //   console.debug("USE EFFECT");
-  //   setCurrentJasonData(initialJsonData);
-  // }, [initialJsonData]);
+  const [currentJsonData, setCurrentJsonData] = React.useState(initialJsonData);
 
   const getMarkers = (editor, indexes) => {
     const markers = [];
@@ -69,7 +66,7 @@ export function JsonEditor({
       onChange={(newJsonData) => {
         if (!readOnly) {
           try {
-            setCurrentJasonData(JSON.parse(newJsonData));
+            setCurrentJsonData(JSON.parse(newJsonData));
             onChange(JSON.parse(newJsonData));
           } catch (error) {
             // errors are shown automatically in annotations

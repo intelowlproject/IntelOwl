@@ -34,6 +34,6 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("analyzers_manager", "0151_analyzer_config_ipquery"),
+        ("analyzers_manager", "0152_analyzer_config_mullvad_dns"),
     ]
     operations = [migrations.RunPython(migrate, reverse_migrate)]

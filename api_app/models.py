@@ -706,7 +706,7 @@ class Job(MP_Node):
         runner()
 
     def get_user_events_data_model(self) -> BaseDataModelQuerySet:
-        return self.analyzable.get_all_user_events_data_model(self)
+        return self.analyzable.get_all_user_events_data_model(self.user)
 
     def get_analyzers_data_models(self) -> BaseDataModelQuerySet:
         DataModel = self.analyzable.get_data_model_class()  # noqa

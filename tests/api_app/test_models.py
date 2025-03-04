@@ -482,7 +482,7 @@ class JobTestCase(CustomTestCase):
         )
         config = AnalyzerConfig.objects.first()
         domain_data_model = DomainDataModel.objects.create()
-        ar: AnalyzerReport = AnalyzerReport.objects.create(
+        AnalyzerReport.objects.create(
             report={
                 "evaluation": "MALICIOUS",
                 "urls": [{"url": "www.intelowl.com"}, {"url": "www.intelowl.com"}],
@@ -495,7 +495,7 @@ class JobTestCase(CustomTestCase):
             data_model=domain_data_model,
         )
         dms = job.get_analyzers_data_models()
-        self.assertIn(ar.pk, dms.values_list("pk", flat=True))
+        self.assertIn(domain_data_model.pk, dms.values_list("pk", flat=True))
         an1.delete()
         job.delete()
 

@@ -43,7 +43,6 @@ export function JsonEditor({
     if (indexes.length) {
       indexes.forEach((index) => {
         const start = editor.session.doc.indexToPosition(index);
-        console.debug(start);
         markers.push({
           startRow: start.row,
           startCol: start.col,

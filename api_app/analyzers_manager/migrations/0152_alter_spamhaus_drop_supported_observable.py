@@ -10,6 +10,7 @@ def migrate(apps, schema_editor):
         if "generic" not in observable_supported:
             observable_supported.append("generic")
             obj.observable_supported = observable_supported
+            obj.full_clean()
             obj.save()
     except Model.DoesNotExist:
         pass

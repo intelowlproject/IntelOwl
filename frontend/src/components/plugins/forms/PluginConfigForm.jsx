@@ -123,7 +123,7 @@ function CustomInput({ formik, config, configType, disabledInputField }) {
             type="radio"
             name={config.attribute}
             value={value}
-            checked={formik.values[config.attribute].toString() === value}
+            checked={formik.values[config.attribute]?.toString() === value}
             onBlur={formik.handleBlur}
             onChange={formik.handleChange}
             disabled={disabledInputField}

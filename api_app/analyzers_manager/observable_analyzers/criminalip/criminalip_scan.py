@@ -2,6 +2,7 @@ import logging
 import time
 
 import requests
+from requests import HTTPError
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
@@ -31,11 +32,14 @@ class CriminalIpScan(classes.ObservableAnalyzer, CriminalIpBase):
             data={"query": self.observable_name},
         )
         resp.raise_for_status()
+        resp = resp.json()
+        if resp.get("status", None) not in  [None, 200]:
+            raise HTTPError(resp.get("message", ""))
         logger.info(
             f"response from CriminalIp_scan for {self.observable_name} -> {resp.text}"
         )
 
-        id = resp.json()["data"]["scan_id"]
+        id = resp["scan_id"]
         while True:
             resp = requests.get(
                 url=f"{self.url}{self.status_endpoint}{id}", headers=HEADER

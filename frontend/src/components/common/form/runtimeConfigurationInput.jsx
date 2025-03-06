@@ -189,7 +189,7 @@ export function EditRuntimeConfiguration(props) {
       <ContentSection
         className="bg-darker"
         id="edit_runtime_configuration-section"
-        style={{ width: "45%", height: "590px", overflowY: "auto" }}
+        style={{ width: "45%", height: "590px" }}
       >
         <small className="text-muted">
           Note: Edit this only if you know what you are doing!
@@ -198,8 +198,8 @@ export function EditRuntimeConfiguration(props) {
           id="runtime_configuration"
           initialJsonData={editableConfig}
           onChange={setJsonInput}
-          height="540px"
-          width="430px"
+          height="95%"
+          width="100%"
         />
       </ContentSection>
       {/* lateral menu with the type and description of each param */}

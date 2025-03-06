@@ -10,6 +10,17 @@ function addJobNode(
   refetchInvestigation,
   isFirstLevel,
 ) {
+  // engine fields
+  const engineFields = {
+    evaluation: job.evaluation,
+    reliability: job.reliability,
+    tags: job.tags,
+  };
+  // optional fields
+  if (job.country) engineFields.country = job.country;
+  if (job.isp) engineFields.isp = job.isp;
+  if (job.mimetype) engineFields.mimetype = job.mimetype;
+
   nodes.push({
     id: `job-${job.pk}`,
     data: {
@@ -25,6 +36,7 @@ function addJobNode(
       refetchInvestigation,
       isFirstLevel: isFirstLevel || false,
       created: job.received_request_time,
+      engineFields,
     },
     type: "jobNode",
   });

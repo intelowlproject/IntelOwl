@@ -15,7 +15,7 @@ import {
   CommentIcon,
   retryJobIcon,
   downloadReportIcon,
-} from "../../../common/icon/icons";
+} from "../../../common/icon/actionIcons";
 import { fileDownload } from "../../../../utils/files";
 
 export function JobActionsBar({ job }) {

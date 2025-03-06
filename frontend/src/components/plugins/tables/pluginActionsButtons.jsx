@@ -25,7 +25,7 @@ import { IconButton, CustomJsonInput } from "@certego/certego-ui";
 import { useAuthStore } from "../../../stores/useAuthStore";
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
-import { SpinnerIcon } from "../../common/icon/icons";
+import { SpinnerIcon } from "../../common/icon/actionIcons";
 import { deleteConfiguration } from "../pluginsApi";
 import { PluginsTypes } from "../../../constants/pluginConst";
 import { PluginConfigModal } from "../PluginConfigModal";

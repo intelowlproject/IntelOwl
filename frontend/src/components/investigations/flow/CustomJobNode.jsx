@@ -10,13 +10,43 @@ import { MdContentCopy } from "react-icons/md";
 import { CopyToClipboardButton, DateHoverable } from "@certego/certego-ui";
 
 import { RemoveJob } from "./investigationActions";
+import {
+  EvaluationBadge,
+  ReliabilityBadge,
+  TagsBadge,
+} from "../../common/engineBadges";
 
 function CustomJobNode({ data }) {
   return (
     <>
       {/* Number of children */}
-      <NodeToolbar position="top" align="end" isVisible offset={3}>
-        <div className="pe-2 text-secondary">{data.children.length} items</div>
+      <NodeToolbar
+        className="d-flex-center"
+        position="top"
+        align="start"
+        isVisible
+        offset={3}
+      >
+        <EvaluationBadge
+          id={data.id}
+          evaluation={data.engineFields.evaluation}
+        />
+        <ReliabilityBadge
+          id={data.id}
+          className="ms-1"
+          reliability={data.engineFields.reliability}
+        />
+      </NodeToolbar>
+      <NodeToolbar
+        className="d-flex-center"
+        position="top"
+        align="end"
+        isVisible
+        offset={3}
+      >
+        {data.engineFields.tags?.map((tag) => (
+          <TagsBadge id={data.id} tag={tag} className="ms-1" />
+        ))}
       </NodeToolbar>
       {/* Actions */}
       <NodeToolbar

@@ -64,11 +64,18 @@ export function JsonEditor({
       readOnly={readOnly}
       onChange={(newJsonData) => {
         if (!readOnly) {
-          try {
-            setCurrentJsonData(JSON.parse(newJsonData));
-            onChange(JSON.parse(newJsonData));
-          } catch (error) {
-            // errors are shown automatically in annotations
+          // empty string --> empty object
+          // otherwise it ends up in the catch
+          if (newJsonData === "") {
+            setCurrentJsonData({});
+            onChange({});
+          } else {
+            try {
+              setCurrentJsonData(JSON.parse(newJsonData));
+              onChange(JSON.parse(newJsonData));
+            } catch (error) {
+              // errors are shown automatically in annotations
+            }
           }
         }
       }}

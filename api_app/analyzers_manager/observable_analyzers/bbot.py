@@ -22,7 +22,7 @@ class BBOT(ObservableAnalyzer):
     """
 
     modules: List[str] = ["httpx"]
-    presets: List[str] = ["web-basic"]
+    presets: List[str] = ["web-basic"]  # default preset
 
     def update(self):
         pass

@@ -33,6 +33,15 @@ class BBOT(ObservableAnalyzer):
         files_dir = settings.BBOT_FILES_PATH / f"bbot_analysis_{observable}"
         os.makedirs(files_dir, exist_ok=True)
         set_permissions(files_dir)
+        from bbot.core.config import files as bbot_files
+
+        bbot_files.BBOTConfigFiles.config_dir = files_dir
+        bbot_files.BBOTConfigFiles.config_filename = (files_dir / "bbot.yml").resolve()
+        bbot_files.BBOTConfigFiles.secrets_filename = (
+            files_dir / "secrets.yml"
+        ).resolve()
+        os.environ["BBOT_HOME"] = str(files_dir)
+        os.environ["HOME"] = str(files_dir)
 
         if self.observable_classification == Classification.URL:
             logger.debug(f"BBOT analyzer extracting hostname from URL: {observable}")
@@ -41,7 +50,8 @@ class BBOT(ObservableAnalyzer):
 
         logger.debug(f"BBOT analyzer running on observable: {observable}")
         preset_config = {"home": files_dir}
-
+        logger.debug(f"BBOT home directory: {files_dir}")
+        logger.debug(f"Directory permissions: {oct(os.stat(files_dir).st_mode)}")
         preset = Preset(
             observable,
             modules=self.modules,
@@ -56,8 +66,7 @@ class BBOT(ObservableAnalyzer):
         try:
             for event in scan.start():
                 logger.debug(f"BBOT analyzer event: {event}")
-                print(f"Event: {event}\n")
-                print(f"Type of Event: {type(event)}\n")
+                return {event}
 
         except Exception as e:
             raise AnalyzerRunException(f"BBOT analyzer failed: {e}")

@@ -1,75 +1,63 @@
 import logging
-import os
-from pathlib import Path
-from typing import List
+from typing import Dict, List
 from urllib.parse import urlparse
 
-from bbot.scanner import Preset, Scanner
-from django.conf import settings
-
-from api_app.analyzers_manager.classes import ObservableAnalyzer
+from api_app.analyzers_manager.classes import DockerBasedAnalyzer, ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
-from intel_owl.settings._util import set_permissions
+from api_app.models import PythonConfig
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
 
-class BBOT(ObservableAnalyzer):
+class BBOT(ObservableAnalyzer, DockerBasedAnalyzer):
     """
-    BBOT analyzer
+    BBOT Docker-based analyzer for IntelOwl.
     """
 
-    modules: List[str] = ["httpx"]
-    presets: List[str] = ["web-basic"]  # default preset
+    name: str = "BBOT_Analyzer"
+    url: str = "http://bbot_analyzer:5000/run"
+    max_tries: int = 20
+    poll_distance: int = 3
 
-    def update(self):
-        pass
+    def __init__(self, config: PythonConfig, **kwargs):
+        super().__init__(config, **kwargs)
+        self.args: List[str] = []
 
-    def run(self):
-
-        observable = self.observable_name
-        files_dir = settings.BBOT_FILES_PATH / f"bbot_analysis_{observable}"
-        os.makedirs(files_dir, exist_ok=True)
-        set_permissions(files_dir)
-        from bbot.core.config import files as bbot_files
-
-        bbot_files.BBOTConfigFiles.config_dir = files_dir
-        bbot_files.BBOTConfigFiles.config_filename = (files_dir / "bbot.yml").resolve()
-        bbot_files.BBOTConfigFiles.secrets_filename = (
-            files_dir / "secrets.yml"
-        ).resolve()
-        os.environ["BBOT_HOME"] = str(files_dir)
-        os.environ["HOME"] = str(files_dir)
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
+        target = self.observable_name
 
         if self.observable_classification == Classification.URL:
-            logger.debug(f"BBOT analyzer extracting hostname from URL: {observable}")
-            hostname = urlparse(observable).hostname
-            observable = hostname
+            logger.debug(f"Extracting hostname from URL: {target}")
+            hostname = urlparse(target).hostname
+            target = hostname
 
-        logger.debug(f"BBOT analyzer running on observable: {observable}")
-        preset_config = {"home": files_dir}
-        logger.debug(f"BBOT home directory: {files_dir}")
-        logger.debug(f"Directory permissions: {oct(os.stat(files_dir).st_mode)}")
-        preset = Preset(
-            observable,
-            modules=self.modules,
-            presets=self.presets,
-            output_modules=["json"],
-            config=preset_config,
-        )
+        # Prepare arguments for BBOT API request
+        self.args.append(f"-t {target}")
+        self.args.extend([f"-p {preset}" for preset in self.presets])
+        self.args.extend([f"-m {module}" for module in self.modules])
 
-        scan = Scanner(preset=preset)
-        scan.home = Path(files_dir)
+    def run(self):
+        """
+        Executes BBOT inside the Docker container via HTTP API.
+        """
+        req_data = {
+            "target": self.observable_name,
+            "presets": self.presets,
+            "modules": self.modules,
+        }
+
+        logger.info(f"Sending BBOT scan request: {req_data} to {self.url}")
 
         try:
-            for event in scan.start():
-                logger.debug(f"BBOT analyzer event: {event}")
-                return {event}
-
+            return self._docker_run(req_data)
         except Exception as e:
             raise AnalyzerRunException(f"BBOT analyzer failed: {e}")
+
+    def update(self) -> bool:
+        pass
 
     @classmethod
     def _monkeypatch(cls):
@@ -79,14 +67,14 @@ class BBOT(ObservableAnalyzer):
                     "bbot.scanner.Scanner.start",
                     return_value=MockUpResponse(
                         json=lambda: {
-                            "module": "module",
-                            "category": "category",
-                            "name": "name",
-                            "description": "description",
-                            "severity": "severity",
-                            "confidence": "confidence",
-                            "tags": ["tag1", "tag2"],
-                            "details": {"key1": "value1", "key2": "value2"},
+                            "module": "mock_module",
+                            "category": "mock_category",
+                            "name": "mock_name",
+                            "description": "mock_description",
+                            "severity": "mock_severity",
+                            "confidence": "mock_confidence",
+                            "tags": ["mock_tag1", "mock_tag2"],
+                            "details": {"key1": "mock_value1", "key2": "mock_value2"},
                         }
                     ),
                 )

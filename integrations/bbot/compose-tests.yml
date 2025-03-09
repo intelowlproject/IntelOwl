@@ -1,0 +1,8 @@
+# All additional integrations should be added following this format only.
+
+services:
+  bbot_analyzer:
+    build:
+      context: ../integrations/bbot_analyzer
+      dockerfile: Dockerfile
+    image: intelowlproject/intelowl_bbot_analyzer:test

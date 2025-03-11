@@ -19,7 +19,7 @@ import {
   BsShieldFillCheck,
   BsTwitter,
 } from "react-icons/bs";
-import { FaBiohazard, FaLock, FaLockOpen, FaTag } from "react-icons/fa";
+import { FaBiohazard, FaLock, FaLockOpen } from "react-icons/fa";
 import { HiMagnifyingGlassCircle } from "react-icons/hi2";
 import { ImExit } from "react-icons/im";
 import { SiVirustotal, SiVirtualbox, SiVmware } from "react-icons/si";
@@ -32,7 +32,20 @@ import {
   MdEmail,
   MdSignalWifiStatusbarConnectedNoInternet2,
 } from "react-icons/md";
-import { TbFishHook, TbNetwork } from "react-icons/tb";
+import {
+  TbFishHook,
+  TbNetwork,
+  TbPercentage10,
+  TbPercentage20,
+  TbPercentage30,
+  TbPercentage40,
+  TbPercentage50,
+  TbPercentage60,
+  TbPercentage70,
+  TbPercentage80,
+  TbPercentage90,
+  TbPercentage100,
+} from "react-icons/tb";
 import { FaBook } from "react-icons/fa6";
 import { PUBLIC_URL } from "../../../constants/environment";
 
@@ -65,7 +78,6 @@ const generalIcons = Object.freeze({
   virtualHost: <SiVirtualbox />,
   networkNode: <TbNetwork />,
   vmware: <SiVmware style={{ width: "40px", height: "24px" }} />,
-  tag: <FaTag />,
   // external services
   virusTotal: (
     // eslint-disable-next-line react/jsx-no-constructed-context-values
@@ -141,6 +153,17 @@ const generalIcons = Object.freeze({
       height="24px"
     />
   ),
+  // percentage
+  percentage10: <TbPercentage10 />,
+  percentage20: <TbPercentage20 />,
+  percentage30: <TbPercentage30 />,
+  percentage40: <TbPercentage40 />,
+  percentage50: <TbPercentage50 />,
+  percentage60: <TbPercentage60 />,
+  percentage70: <TbPercentage70 />,
+  percentage80: <TbPercentage80 />,
+  percentage90: <TbPercentage90 />,
+  percentage100: <TbPercentage100 />,
 });
 
 export function getIcon(iconCode) {

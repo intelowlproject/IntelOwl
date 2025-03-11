@@ -20,7 +20,7 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-error-boundary": "^5.0.0",
-    "react-icons": "^4.12.0",
+    "react-icons": "^5.5.0",
     "react-joyride": "^2.9.2",
     "react-json-tree": "^0.19.0",
     "react-markdown": "^8.0.7",

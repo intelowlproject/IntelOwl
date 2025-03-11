@@ -13,13 +13,17 @@ import { RemoveJob } from "./investigationActions";
 import {
   EvaluationBadge,
   ReliabilityBadge,
+  // ReliabilityBar,
   TagsBadge,
+  CountryBadge,
+  MimetypeBadge,
+  IspBadge,
 } from "../../common/engineBadges";
 
 function CustomJobNode({ data }) {
   return (
     <>
-      {/* Number of children */}
+      {/* Engine badges */}
       <NodeToolbar
         className="d-flex-center"
         position="top"
@@ -36,6 +40,19 @@ function CustomJobNode({ data }) {
           className="ms-1"
           reliability={data.engineFields.reliability}
         />
+        {data.engineFields?.mimetype && (
+          <MimetypeBadge
+            id={data.id}
+            mimetype={data.engineFields.mimetype}
+            className="ms-1"
+          />
+        )}
+        {data.engineFields?.isp && (
+          <IspBadge id={data.id} isp={data.engineFields.isp} className="ms-1" />
+        )}
+        {data.engineFields?.country && (
+          <CountryBadge id={data.id} country={data.engineFields.country} />
+        )}
       </NodeToolbar>
       <NodeToolbar
         className="d-flex-center"
@@ -47,6 +64,19 @@ function CustomJobNode({ data }) {
         {data.engineFields.tags?.map((tag) => (
           <TagsBadge id={data.id} tag={tag} className="ms-1" />
         ))}
+      </NodeToolbar>
+      <NodeToolbar
+        className="d-flex-center"
+        position="bottom"
+        align="start"
+        isVisible
+        offset={3}
+      >
+        {/* <ReliabilityBar
+          id={data.id}
+          reliability={data.engineFields.reliability}
+          evaluation={data.engineFields.evaluation}
+        /> */}
       </NodeToolbar>
       {/* Actions */}
       <NodeToolbar

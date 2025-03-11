@@ -8,6 +8,7 @@ from api_app.choices import Classification
 from api_app.models import PythonConfig
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
@@ -18,7 +19,7 @@ class BBOT(ObservableAnalyzer, DockerBasedAnalyzer):
 
     name: str = "BBOT_Analyzer"
     url: str = "http://bbot_analyzer:5000/run"
-    max_tries: int = 20
+    max_tries: int = 100
     poll_distance: int = 3
 
     def __init__(self, config: PythonConfig, **kwargs):
@@ -66,7 +67,8 @@ class BBOT(ObservableAnalyzer, DockerBasedAnalyzer):
                 patch(
                     "bbot.scanner.Scanner.start",
                     return_value=MockUpResponse(
-                        json=lambda: {
+                        status_code=200,
+                        json_data={
                             "module": "mock_module",
                             "category": "mock_category",
                             "name": "mock_name",
@@ -75,7 +77,7 @@ class BBOT(ObservableAnalyzer, DockerBasedAnalyzer):
                             "confidence": "mock_confidence",
                             "tags": ["mock_tag1", "mock_tag2"],
                             "details": {"key1": "mock_value1", "key2": "mock_value2"},
-                        }
+                        },
                     ),
                 )
             )

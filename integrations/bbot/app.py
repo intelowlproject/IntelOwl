@@ -1,44 +1,64 @@
-import logging
+import asyncio
+import multiprocessing
+import threading
 
 from bbot.scanner import Preset, Scanner
-from flask import Flask, jsonify, request
+from hypercorn.asyncio import serve
+from hypercorn.config import Config
+from quart import Quart, jsonify, request
 
-app = Flask(__name__)
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+orig_process_init = multiprocessing.Process.__init__
+
+
+def non_daemon_process_init(self, *args, **kwargs):
+    orig_process_init(self, *args, **kwargs)
+    self.daemon = False
+
+
+multiprocessing.Process.__init__ = non_daemon_process_init
+
+orig_thread_init = threading.Thread.__init__
+
+
+def non_daemon_thread_init(self, *args, **kwargs):
+    kwargs["daemon"] = False
+    orig_thread_init(self, *args, **kwargs)
+
+
+threading.Thread.__init__ = non_daemon_thread_init
+
+
+app = Quart(__name__)
 
 
 @app.route("/run", methods=["POST"])
 async def run_scan():
+    data = await request.get_json()
+    target = data.get("target")
+    presets = data.get("presets", ["web-basic"])
+    modules = data.get("modules", ["httpx"])
+
+    if not target:
+        return jsonify({"error": "No target provided"}), 400
+
+    scan_preset = Preset(
+        target, modules=modules, presets=presets, output_modules=["json"], max_workers=1
+    )
+
+    scanner = Scanner(preset=scan_preset)
+
     try:
-        data = request.get_json()
-        target = data.get("target")
-        presets = data.get("presets", ["web-basic"])
-        modules = data.get("modules", ["httpx"])
-
-        if not target:
-            return jsonify({"error": "No target provided"}), 400
-
-        logger.info(f"Received scan request for target: {target}")
-        logger.info(f"Using presets: {presets}")
-        logger.info(f"Using modules: {modules}")
-
-        # Initialize the BBOT preset and scanner
-        scan_preset = Preset(
-            target, modules=modules, presets=presets, output_modules=["json"]
-        )
-        scan = Scanner(preset=scan_preset)
-
         results = []
-        # Iterate asynchronously over the events
-        async for event in scan.async_start():
+        async for event in scanner.async_start():
             results.append(event)
-
-        return jsonify({"results": results})
+        return {"results": results}
     except Exception as e:
-        logger.error(f"BBOT scan failed: {str(e)}")
-        return jsonify({"error": f"Scan failed: {str(e)}"}), 500
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    multiprocessing.set_start_method("spawn", force=True)
+
+    config = Config()
+    config.bind = ["0.0.0.0:5000"]
+    asyncio.run(serve(app, config))

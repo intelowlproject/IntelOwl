@@ -39,10 +39,11 @@ class CriminalIpScan(classes.ObservableAnalyzer, CriminalIpBase):
             f"response from CriminalIp_scan for {self.observable_name} -> {resp}"
         )
 
-        id = resp["scan_id"]
+        logger.debug(f"{resp=}")
+        scan_id = resp["data"]["scan_id"]
         while True:
             resp = requests.get(
-                url=f"{self.url}{self.status_endpoint}{id}", headers=HEADER
+                url=f"{self.url}{self.status_endpoint}{scan_id}", headers=HEADER
             )
             resp.raise_for_status()
 
@@ -55,7 +56,9 @@ class CriminalIpScan(classes.ObservableAnalyzer, CriminalIpBase):
                 raise AnalyzerRunException(
                     f"Timeout with scan percentage: {scan_percent}"
                 )
-        resp = requests.get(url=f"{self.url}{self.report_endpoint}{id}", headers=HEADER)
+        resp = requests.get(
+            url=f"{self.url}{self.report_endpoint}{scan_id}", headers=HEADER
+        )
         resp.raise_for_status()
         resp = resp.json()
         logger.info(

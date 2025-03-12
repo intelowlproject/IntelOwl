@@ -4,6 +4,17 @@ import django.core.validators
 from django.db import migrations, models
 
 
+def migrate(apps, schema_editor):
+    DomainDataModel = apps.get_model("data_model_manager", "DomainDataModel")
+    IpDataModel = apps.get_model("data_model_manager", "IpDataModel")
+    FileDataModel = apps.get_model("data_model_manager", "FileDataModel")
+    for class_ in [DomainDataModel, IpDataModel, FileDataModel]:
+        class_.objects.filter(evaluation="clean").update(reliability=4)
+        class_.objects.filter(evaluation="suspicious").update(reliability=4)
+        class_.objects.filter(evaluation="malicious").update(reliability=8)
+        class_.objects.filter(evaluation="trusted").update(reliability=8)
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -44,4 +55,5 @@ class Migration(migrations.Migration):
                 ],
             ),
         ),
+        migrations.RunPython(migrate, migrations.RunPython.noop),
     ]

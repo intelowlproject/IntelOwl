@@ -104,6 +104,9 @@ class YaraRepo:
             response.raise_for_status()
         except Exception as e:
             logger.exception(e)
+            os.makedirs(
+                self.directory, exist_ok=True
+            )  # still create the folder or raise errors
         else:
             zipfile_ = zipfile.ZipFile(io.BytesIO(response.content))
             zipfile_.extractall(self.directory)

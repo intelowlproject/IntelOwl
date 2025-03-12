@@ -40,7 +40,7 @@ class CriminalIpScan(classes.ObservableAnalyzer, CriminalIpBase):
         )
 
         logger.debug(f"{resp=}")
-        scan_id = resp.get["data"]["scan_id"]
+        scan_id = resp["data"]["scan_id"]
         while True:
             resp = requests.get(
                 url=f"{self.url}{self.status_endpoint}{scan_id}", headers=HEADER

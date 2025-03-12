@@ -36,7 +36,7 @@ class CriminalIpScan(classes.ObservableAnalyzer, CriminalIpBase):
         if resp.get("status", None) not in [None, 200]:
             raise HTTPError(resp.get("message", ""))
         logger.info(
-            f"response from CriminalIp_scan for {self.observable_name} -> {resp.text}"
+            f"response from CriminalIp_scan for {self.observable_name} -> {resp}"
         )
 
         id = resp["scan_id"]

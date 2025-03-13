@@ -57,6 +57,7 @@ urlpatterns = [
     path("", include("api_app.playbooks_manager.urls")),
     path("", include("api_app.investigations_manager.urls")),
     path("data_model/", include("api_app.data_model_manager.urls")),
+    path("user_event/", include("api_app.user_events_manager.urls")),
     # auth
     path("auth/", include("authentication.urls")),
     # certego_saas:

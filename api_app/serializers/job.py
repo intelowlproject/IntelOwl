@@ -584,6 +584,14 @@ class JobSerializer(_AbstractJobViewSerializer):
     comments = CommentSerializer(
         many=True, read_only=True, source="analyzable.comments"
     )
+    file_name = rfs.CharField(source="analyzable.name", read_only=True)
+    file_mimetype = rfs.CharField(source="analyzable.mimetype", read_only=True)
+    observable_name = rfs.CharField(source="analyzable.name", read_only=True)
+    observable_classification = rfs.CharField(
+        source="analyzable.classification", read_only=True
+    )
+    md5 = rfs.CharField(source="analyzable.md5", read_only=True)
+
     pivots_to_execute = rfs.SlugRelatedField(
         many=True, read_only=True, slug_field="name"
     )
@@ -612,14 +620,7 @@ class JobSerializer(_AbstractJobViewSerializer):
     permissions = rfs.SerializerMethodField()
     data_model = rfs.SerializerMethodField()
     analyzers_data_model = rfs.SerializerMethodField(read_only=True)
-    file_name = rfs.CharField(source="analyzable.name", read_only=True)
-    file_mimetype = rfs.CharField(source="analyzable.mimetype", read_only=True)
     is_sample = rfs.BooleanField(read_only=True)
-    observable_name = rfs.CharField(source="analyzable.name", read_only=True)
-    observable_classification = rfs.CharField(
-        source="analyzable.classification", read_only=True
-    )
-    md5 = rfs.CharField(source="analyzable.md5", read_only=True)
 
     def get_pivots_to_execute(self, obj: Job):  # skipcq: PYL-R0201
         # this cast is required or serializer doesn't work with websocket

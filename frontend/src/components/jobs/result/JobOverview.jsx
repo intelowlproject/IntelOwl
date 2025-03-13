@@ -16,7 +16,6 @@ import {
 } from "reactstrap";
 
 import { Loader } from "@certego/certego-ui";
-import { JSONTree } from "react-json-tree";
 
 import { useNavigate, useLocation } from "react-router-dom";
 import { PluginsReportTable } from "./pluginReportTables";
@@ -35,6 +34,7 @@ import { JobInfoCard } from "./JobInfoCard";
 import { JobIsRunningAlert } from "./JobIsRunningAlert";
 import { JobActionsBar } from "./bar/JobActionBar";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
+import { JsonEditor } from "../../common/JsonEditor";
 
 /* THESE IDS CANNOT BE EMPTY!
 We perform a redirect in case the user landed in the visualzier page without a visualizer,
@@ -195,12 +195,14 @@ export function JobOverview({
         report: (
           <div
             id={`jobfullreport-jsoninput-${job.id}`}
-            style={{ height: "60vh", overflow: "scroll" }}
+            style={{ height: "65vh", overflow: "scroll" }}
           >
-            <JSONTree
-              data={job}
-              keyPath={["job"]}
-              shouldExpandNodeInitially={() => true}
+            <JsonEditor
+              id="job_full_report_json"
+              initialJsonData={job}
+              height="65vh"
+              width="100%"
+              readOnly
             />
           </div>
         ),

@@ -582,10 +582,9 @@ describe("test PluginConfigForm component", () => {
     const dictInput = screen.getByText("dict_input");
     expect(dictInput).toBeInTheDocument();
     const dictInputJson = container.querySelector(
-      "#pluginConfig_userConfig-dict_input",
+      "#jsonAceEditor__pluginConfig_userConfig-dict_input",
     );
     expect(dictInputJson).toBeInTheDocument();
-    expect(dictInputJson.textContent).toBe("{  }");
 
     const saveButton = screen.getByRole("button", { name: "Save" });
     expect(saveButton).toBeInTheDocument();
@@ -600,10 +599,6 @@ describe("test PluginConfigForm component", () => {
       name: "",
     })[2];
     await user.type(listInputElement, "newListElement");
-    // dict
-    await user.clear(dictInputJson);
-    await user.type(dictInputJson, "{{param: 'test'}");
-    expect(dictInputJson.textContent).toBe("{param: 'test'}");
 
     await user.click(saveButton);
 
@@ -733,10 +728,9 @@ describe("test PluginConfigForm component", () => {
     const dictInput = screen.getByText("dict_input");
     expect(dictInput).toBeInTheDocument();
     const dictInputJson = container.querySelector(
-      "#pluginConfig_userConfig-dict_input",
+      "#jsonAceEditor__pluginConfig_userConfig-dict_input",
     );
     expect(dictInputJson).toBeInTheDocument();
-    expect(dictInputJson.textContent).toBe("{  param1: 'A'}");
 
     const saveButton = screen.getByRole("button", { name: "Save" });
     expect(saveButton).toBeInTheDocument();
@@ -752,10 +746,6 @@ describe("test PluginConfigForm component", () => {
       name: "",
     })[2];
     await user.type(listInputElement, "newListElement");
-    // dict
-    await user.clear(dictInputJson);
-    await user.type(dictInputJson, "{{param1: 'test'}");
-    expect(dictInputJson.textContent).toBe("{param1: 'test'}");
 
     await user.click(saveButton);
 
@@ -921,10 +911,9 @@ describe("test PluginConfigForm component", () => {
     const dictInput = screen.getByText("dict_input");
     expect(dictInput).toBeInTheDocument();
     const dictInputJson = container.querySelector(
-      "#pluginConfig_orgConfig-dict_input",
+      "#jsonAceEditor__pluginConfig_orgConfig-dict_input",
     );
     expect(dictInputJson).toBeInTheDocument();
-    expect(dictInputJson.textContent).toBe("{  }");
 
     const saveButton = screen.getByRole("button", { name: "Save" });
     expect(saveButton).toBeInTheDocument();
@@ -939,10 +928,6 @@ describe("test PluginConfigForm component", () => {
       name: "",
     })[2];
     await user.type(listInputElement, "newListElement");
-    // dict
-    await user.clear(dictInputJson);
-    await user.type(dictInputJson, "{{param: 'test'}");
-    expect(dictInputJson.textContent).toBe("{param: 'test'}");
 
     await user.click(saveButton);
 

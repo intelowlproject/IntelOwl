@@ -4,7 +4,7 @@
   "private": true,
   "proxy": "http://localhost:80/",
   "dependencies": {
-    "@certego/certego-ui": "^0.1.14",
+    "@certego/certego-ui": "^0.1.16",
     "@dagrejs/dagre": "^1.1.4",
     "ace-builds": "^1.38.0",
     "axios": "^1.8.3",

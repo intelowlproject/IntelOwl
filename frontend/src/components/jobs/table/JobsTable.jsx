@@ -33,6 +33,8 @@ export default function JobsTable() {
   const startTimeParam = searchParams.get("start-time");
   const endTimeParam = searchParams.get("end-time");
 
+  console.debug("searchParams: ");
+
   const [toDateValue, fromDateValue, updateToDate, updateFromDate] =
     useTimePickerStore((state) => [
       state.toDateValue,
@@ -72,7 +74,14 @@ export default function JobsTable() {
         startTimeParam !== format(searchFromDateValue, datetimeFormatStr) ||
         endTimeParam !== format(searchToDateValue, datetimeFormatStr)
       ) {
+        const currentParams = {};
+        // @ts-ignore
+        searchParams.entries().forEach((element) => {
+          const [paramName, paramValue] = element;
+          currentParams[paramName] = paramValue;
+        });
         setSearchParams({
+          ...currentParams,
           "start-time": format(searchFromDateValue, datetimeFormatStr),
           "end-time": format(searchToDateValue, datetimeFormatStr),
         });
@@ -85,9 +94,10 @@ export default function JobsTable() {
     searchToDateValue,
     startTimeParam,
     endTimeParam,
+    searchParams,
   ]);
 
-  return areParamsInitialized ? ( // this "if" saves one request
+  return areParamsInitialized ? ( // this "if" avoid one request
     <JobsTableComponent
       searchFromDateValue={searchFromDateValue}
       searchToDateValue={searchToDateValue}

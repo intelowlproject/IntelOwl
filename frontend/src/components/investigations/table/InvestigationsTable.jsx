@@ -108,7 +108,16 @@ export default function InvestigationsTable() {
         endTimeParam !== format(searchToDateValue, datetimeFormatStr) ||
         analyzedObjectNameParam !== searchNameRequest
       ) {
+        const currentParams = {};
+        // @ts-ignore
+        searchParams.entries().forEach((element) => {
+          const [paramName, paramValue] = element;
+          currentParams[paramName] = paramValue;
+        });
+        console.debug("currentParams");
+        console.debug(currentParams);
         setSearchParams({
+          ...currentParams,
           "start-time": format(searchFromDateValue, datetimeFormatStr),
           "end-time": format(searchToDateValue, datetimeFormatStr),
           "analyzed-object-name": searchNameRequest,
@@ -126,7 +135,7 @@ export default function InvestigationsTable() {
     analyzedObjectNameParam,
   ]);
 
-  return areParamsInitialized ? (
+  return areParamsInitialized ? ( // this "if" avoid one request
     <InvestigationTableComponent
       searchFromDateValue={searchFromDateValue}
       searchToDateValue={searchToDateValue}

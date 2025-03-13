@@ -16,7 +16,7 @@ from rest_framework.serializers import ModelSerializer
 from api_app.data_model_manager.enums import (
     DataModelEvaluations,
     DataModelTags,
-    SignatureProviderChoices,
+    SignatureProviderChoices, DataModelKillChainPhases,
 )
 from api_app.data_model_manager.fields import LowercaseCharField, SetField
 from api_app.data_model_manager.queryset import BaseDataModelQuerySet
@@ -71,7 +71,7 @@ class BaseDataModel(models.Model):
     reliability = PositiveIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(10)], default=5
     )
-
+    kill_chain_phase =LowercaseCharField(default=None, null=True, blank=True, choices=DataModelKillChainPhases.choices, max_length=100)
     external_references = SetField(
         models.URLField(),
         blank=True,

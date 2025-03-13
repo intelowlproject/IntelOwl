@@ -20,3 +20,12 @@ class DataModelTags(Choices):
 class DataModelEvaluations(Choices):
     TRUSTED = "trusted"
     MALICIOUS = "malicious"
+
+class DataModelKillChainPhases(Choices):
+    RECONNAISSANCE = "reconnaissance"
+    WEAPONIZATION = "weaponization"
+    DELIVERY = "delivery"
+    EXPLOITATION = "exploitation"
+    INSTALLATION = "installation"
+    C2 = "c2"
+    ACTION = "action"

@@ -10,5 +10,6 @@ then
     echo "Running celery with autoreload"
     python3 manage.py celery_reload -c "$ARGUMENTS"
 else
+  # shellcheck disable=SC2086
   /usr/local/bin/celery $ARGUMENTS
 fi

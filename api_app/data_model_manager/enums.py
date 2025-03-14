@@ -15,8 +15,6 @@ class DataModelTags(Choices):
     ANONYMIZER = "anonymizer"
     TOR_EXIT_NODE = "tor_exit_node"
     ABUSED = "abused"
-    IP_ONLY = "ip_only"
-    EXPORTABLE = "exportable"
 
 
 class DataModelEvaluations(Choices):

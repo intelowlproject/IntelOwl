@@ -94,7 +94,9 @@ fi
 
 check_parameters "$@" && shift 2
 
+# shellcheck source=docker/.env disable=SC1091
 . docker/.env
+
 current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
 
 docker_analyzers=("pcap_analyzers" "tor_analyzers" "malware_tools_analyzers" "thug" "cyberchef" "phoneinfoga" "phishing_analyzers" "nuclei_analyzer")
@@ -111,8 +113,10 @@ done
 if [[ ${test_mode["${env_argument}"]} ]]; then
   is_test=true
   test_appendix=".test"
-  # load relevant .env file
+
+# shellcheck source=docker/.env.start.test disable=SC1091
   . docker/.env.start.test
+
 else
   is_test=false
   test_appendix=""
@@ -349,19 +353,19 @@ if [[ $env_argument == "prod" && $version != "${current_version}" ]]; then
   git checkout "v${version}"
 fi
 
-if [ $debug_build ]; then
+if [ "$debug_build" ]; then
   export BUILDKIT_PROGRESS="plain"
 fi
 export DOCKER_BUILDKIT=1
 
 for value in "${compose_files[@]}" ; do
   if [ -n "${value}" ]; then
-    to_run+=" -f $value"
+    to_run+=("-f" "$value")
   fi
 done
 
 if grep "docker" <<< "$(groups)" > /dev/null 2>&1; then
-  docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
+  docker compose --project-directory docker "${to_run[@]}" -p "$project_name" "$cmd_argument" "$@"
 else
-  sudo docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
+  sudo docker compose --project-directory docker "${to_run[@]}" -p "$project_name" "$cmd_argument" "$@"
 fi

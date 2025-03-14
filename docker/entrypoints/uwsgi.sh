@@ -24,8 +24,8 @@ fi
 # Collect static files
 python manage.py collectstatic --noinput
 echo "------------------------------"
-echo "DEBUG: " $DEBUG
-echo "DJANGO_TEST_SERVER: " $DJANGO_TEST_SERVER
+echo "DEBUG: " "$DEBUG"
+echo "DJANGO_TEST_SERVER: " "$DJANGO_TEST_SERVER"
 echo "------------------------------"
 CHANGELOG_NOTIFICATION_COMMAND='python manage.py changelog_notification .github/CHANGELOG.md INTELOWL --number-of-releases 3'
 ELASTIC_TEMPLATE_COMMAND='python manage.py elastic_templates'

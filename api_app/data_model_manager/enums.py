@@ -21,6 +21,7 @@ class DataModelEvaluations(Choices):
     TRUSTED = "trusted"
     MALICIOUS = "malicious"
 
+
 class DataModelKillChainPhases(Choices):
     RECONNAISSANCE = "reconnaissance"
     WEAPONIZATION = "weaponization"

@@ -12,7 +12,7 @@ pip3 install --compile -r requirements/django-server-requirements.txt
 # https://docs.djangoproject.com/en/3.2/ref/django-admin/#runserver
 cd /tmp || exit  
 wget https://github.com/facebook/watchman/archive/refs/tags/v2024.05.13.00.zip
-unzip v2024.05.13.00.zip*
+unzip v2024.05.13.00.zip
 cd watchman-2024.05.13.00 || exit
 mkdir -p /usr/local/{bin,lib} /usr/local/var/run/watchman
 cp bin/* /usr/local/bin

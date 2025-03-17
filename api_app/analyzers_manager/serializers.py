@@ -15,9 +15,7 @@ from .models import AnalyzerConfig, AnalyzerReport
 
 class AnalyzerReportSerializer(AbstractReportSerializer):
 
-    data_model = DataModelRelatedField(
-        read_only=True, context={"omit": ["analyzers_report"]}
-    )
+    data_model = DataModelRelatedField(read_only=True)
 
     class Meta:
         model = AnalyzerReport

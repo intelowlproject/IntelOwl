@@ -42,9 +42,7 @@ class UserAnalyzableEventSerializer(UserEventSerializer):
 
     analyzable = serializers.PrimaryKeyRelatedField(queryset=Analyzable.objects.all())
     data_model_content = serializers.JSONField(write_only=True, source="data_model")
-    data_model = DataModelRelatedField(
-        read_only=True, context={"omit": ["analyzers_report"]}
-    )
+    data_model = DataModelRelatedField(read_only=True)
 
     class Meta:
         model = UserAnalyzableEvent

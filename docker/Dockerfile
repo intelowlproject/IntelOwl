@@ -48,7 +48,6 @@ RUN apt-get update \
     && pip3 install --no-cache-dir --upgrade pip
 
 COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
-COPY requirements/amd-only-requirements.txt $PYTHONPATH/amd-only-requirements.txt
 COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
 WORKDIR $PYTHONPATH
 
@@ -69,11 +68,6 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && ${PYTHONPATH}/docker/scripts/watchman_install.sh \
     # download github stuff
     && ${PYTHONPATH}/api_app/analyzers_manager/repo_downloader.sh
-
-# last step cause there is an if that could invalidate the cache
-RUN if [[ "$TARGETARCH" == "amd64" ]]; \
-    then pip3 install --no-cache-dir --compile -r amd-only-requirements.txt;  \
-    else echo "skipping installation of AMD only requirements"; fi
 
 FROM backend-build
 

@@ -1,8 +1,6 @@
 import json
 import logging
 
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
-
 try:
     import die
 except ImportError:
@@ -22,20 +20,12 @@ class DetectItEasy(FileAnalyzer):
     def run(self):
         logger.info(f"Running DIE on {self.filepath} for {self.md5}")
 
-        if die:
-            json_report = die.scan_file(
-                self.filepath,
-                die.ScanFlags.RESULT_AS_JSON,
-                str(die.database_path / "db"),
-            )
-            result = json.loads(json_report)
-        else:
-            message = "DIE package not imported because incompatible in ARM"
-            self.report.errors.append(message)
-            result = {"errors": message}
-            raise AnalyzerRunException(message)
-
-        return result
+        json_report = die.scan_file(
+            self.filepath,
+            die.ScanFlags.RESULT_AS_JSON,
+            str(die.database_path / "db"),
+        )
+        return json.loads(json_report)
 
     @staticmethod
     def mocked_docker_analyzer_get(*args, **kwargs):

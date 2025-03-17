@@ -132,6 +132,26 @@ updates:
       day: "tuesday"
     target-branch: "develop"
     ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+
+  - package-ecosystem: "docker"
+    directory: "/integrations/cyberchef"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "develop"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+
+  - package-ecosystem: "docker"
+    directory: "/integrations/nuclei_analyzer"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "develop"
+    ignore:
       # ignore all patch updates since we are using ~=
       # this does not work for security updates
       - dependency-name: "*"

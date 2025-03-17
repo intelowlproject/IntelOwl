@@ -24,6 +24,8 @@ export function RuntimeConfigurationModal(props) {
 
   const [jsonInput, setJsonInput] = React.useState({});
 
+  console.debug(jsonInput);
+
   const [analyzers, connectors, visualizers, pivots] =
     usePluginConfigurationStore(stateSelector);
 
@@ -52,7 +54,6 @@ export function RuntimeConfigurationModal(props) {
       size="xl"
       isOpen={isOpen}
       toggle={toggle}
-      keyboard={false}
       scrollable
       backdrop="static"
       labelledBy="Edit Runtime Configuration"

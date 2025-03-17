@@ -52,27 +52,23 @@ class Crowdsec(ObservableAnalyzer):
         for classification in classifications:
             label = classification.get("label", "")
             if label in ["Legit scanner", "Known Security Company", "Known CERT"]:
-                data_model.evaluation = (
-                    self.report.data_model_class.EVALUATIONS.TRUSTED.value
-                )
+                data_model.evaluation = self.EVALUATIONS.TRUSTED.value
+                data_model.reliability = 9
             elif label in ["Likely Botnet", "CrowdSec Community Blocklist"]:
                 data_model.additional_info = {"classifications": classifications}
-                data_model.evaluation = (
-                    self.report.data_model_class.EVALUATIONS.CLEAN.value
-                )
+                data_model.evaluation = self.EVALUATIONS.MALICIOUS.value
+                data_model.reliability = 3
             elif "Proxy" in label or "VPN" in label:
-                data_model.tags = [DataModelTags.ANONYMIZER]
-                data_model.evaluation = (
-                    self.report.data_model_class.EVALUATIONS.CLEAN.value
-                )
+                data_model.tags = [DataModelTags.ANONYMIZER.value]
+                data_model.evaluation = self.EVALUATIONS.TRUSTED.value
+                data_model.reliability = 3
             elif label in ["TOR exit node"]:
                 data_model.tags = [
-                    DataModelTags.ANONYMIZER,
-                    DataModelTags.TOR_EXIT_NODE,
+                    DataModelTags.ANONYMIZER.value,
+                    DataModelTags.TOR_EXIT_NODE.value,
                 ]
-                data_model.evaluation = (
-                    self.report.data_model_class.EVALUATIONS.CLEAN.value
-                )
+                data_model.evaluation = self.EVALUATIONS.TRUSTED.value
+                data_model.reliability = 2
 
         highest_total_score = max(
             (
@@ -81,33 +77,15 @@ class Crowdsec(ObservableAnalyzer):
             ),
             default=0,
         )
-        if (
-            data_model.evaluation
-            != self.report.data_model_class.EVALUATIONS.TRUSTED.value
-        ):
+        if data_model.evaluation != self.EVALUATIONS.TRUSTED.value:
             if highest_total_score <= 1:
-                data_model.evaluation = (
-                    self.report.data_model_class.EVALUATIONS.CLEAN.value
-                )
-            elif 1 < highest_total_score <= 3:
+                data_model.reliability = 8
+            else:
                 highest_trust_score = max(
                     values["trust"]
                     for key, values in self.report.report.get("scores", {}).items()
                 )
-                if highest_trust_score >= 4:
-                    data_model.evaluation = (
-                        self.report.data_model_class.EVALUATIONS.MALICIOUS.value
-                    )
-                else:
-                    data_model.evaluation = (
-                        self.report.data_model_class.EVALUATIONS.SUSPICIOUS.value
-                    )
-            elif 3 < highest_total_score <= 5:
-                data_model.evaluation = (
-                    self.report.data_model_class.EVALUATIONS.MALICIOUS.value
-                )
-            else:
-                logger.error(f"unexpected score: {highest_total_score}")
+                data_model.reliability = min(highest_trust_score, 10)
 
     @classmethod
     def _monkeypatch(cls):

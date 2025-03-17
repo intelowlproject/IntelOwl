@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 import dns.resolver
 
 from api_app.analyzers_manager import classes
+from api_app.choices import Classification
 
 from ..dns_responses import dns_resolver_response
 
@@ -27,7 +28,7 @@ class UltraDNSDNSResolver(classes.ObservableAnalyzer):
 
         resolutions = []
         observable = self.observable_name
-        if self.observable_classification == self.ObservableTypes.URL:
+        if self.observable_classification == Classification.URL:
             observable = urlparse(self.observable_name).hostname
         resolver = dns.resolver.Resolver()
 

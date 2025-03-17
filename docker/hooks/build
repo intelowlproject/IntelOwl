@@ -1,15 +1,15 @@
 #!/bin/bash
 
 echo "display path"
-echo "$(pwd)"
+pwd  
 echo "display dockerfile path"
-echo $DOCKERFILE_PATH
+echo "$DOCKERFILE_PATH" 
 cd ..
 echo "current branch"
 echo "$SOURCE_BRANCH"
 
 version_regex='^v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'
-if [[ "$SOURCE_BRANCH" == "master" || "$SOURCE_BRANCH" =~ $version_regex ]]; then
+if [[ "$SOURCE_BRANCH" == "master" || "$SOURCE_BRANCH" == "test_arm" || "$SOURCE_BRANCH" == "develop_old" || "$SOURCE_BRANCH" =~ $version_regex ]]; then
   echo "The branch is master, proceeding with multi-arch build"
   docker buildx create --name multiarch --use
   docker buildx build -f "$DOCKERFILE_PATH" -t "$IMAGE_NAME" --platform linux/arm64,linux/amd64 --push .

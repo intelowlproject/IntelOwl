@@ -6,15 +6,17 @@ from unittest.mock import MagicMock, patch
 from zoneinfo import ZoneInfo
 
 from django.contrib.auth import get_user_model
+from django.core.files import File
 from django.test import override_settings
 from django.utils.timezone import now
 from elasticsearch_dsl.query import Bool, Exists, Range, Term
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from api_app.analyzers_manager.constants import ObservableTypes
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.choices import ReportStatus
+from api_app.choices import Classification, ReportStatus
+from api_app.investigations_manager.models import Investigation
 from api_app.models import Comment, Job, Parameter, PluginConfig, Tag
 from api_app.playbooks_manager.models import PlaybookConfig
 from certego_saas.apps.organization.membership import Membership
@@ -30,52 +32,51 @@ class CommentViewSetTestCase(CustomViewSetTestCase):
 
     def setUp(self):
         super().setUp()
-        self.job = Job.objects.create(
-            user=self.superuser,
-            is_sample=False,
-            observable_name="8.8.8.8",
-            observable_classification=ObservableTypes.IP,
+        self.an1 = Analyzable.objects.create(
+            name="8.8.8.8",
+            classification=Classification.IP,
         )
-        self.job2 = Job.objects.create(
-            user=self.superuser,
-            is_sample=False,
-            observable_name="8.8.8.8",
-            observable_classification=ObservableTypes.IP,
-        )
+
+        self.job = Job.objects.create(user=self.superuser, analyzable=self.an1)
+        self.job2 = Job.objects.create(user=self.user, analyzable=self.an1)
         self.comment = Comment.objects.create(
-            job=self.job, user=self.superuser, content="test"
+            analyzable=self.an1, user=self.user, content="test"
         )
-        self.comment.save()
 
     def tearDown(self) -> None:
         super().tearDown()
+        self.comment.delete()
         self.job.delete()
         self.job2.delete()
-        self.comment.delete()
+        self.an1.delete()
 
     def test_list_200(self):
+        self.client.force_authenticate(self.user)
         response = self.client.get(self.comment_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json().get("count"), 1)
 
     def test_create_201(self):
-        data = {"job_id": self.job.id, "content": "test2"}
+        self.client.force_authenticate(self.user)
+        data = {"job_id": self.job2.id, "content": "test2"}
         response = self.client.post(self.comment_url, data)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json().get("content"), "test2")
 
     def test_delete(self):
-        response = self.client.delete(f"{self.comment_url}/{self.comment.pk}")
-        self.assertEqual(response.status_code, 403)
         self.client.force_authenticate(self.superuser)
+        response = self.client.delete(f"{self.comment_url}/{self.comment.pk}")
+        self.assertEqual(response.status_code, 404)
+        self.client.force_authenticate(self.user)
         response = self.client.delete(f"{self.comment_url}/{self.comment.pk}")
         self.assertEqual(response.status_code, 204)
         self.assertEqual(0, Comment.objects.all().count())
 
     def test_get(self):
-        response = self.client.get(f"{self.comment_url}/{self.comment.pk}")
-        self.assertEqual(response.status_code, 403)
         self.client.force_authenticate(self.superuser)
+        response = self.client.get(f"{self.comment_url}/{self.comment.pk}")
+        self.assertEqual(response.status_code, 404)
+        self.client.force_authenticate(self.user)
         response = self.client.get(f"{self.comment_url}/{self.comment.pk}")
         self.assertEqual(response.status_code, 200)
 
@@ -109,48 +110,106 @@ class JobViewSetTests(CustomViewSetTestCase):
             "django.utils.timezone.now",
             return_value=datetime.datetime(2024, 11, 28, tzinfo=datetime.timezone.utc),
         ):
-            self.job, _ = Job.objects.get_or_create(
+            self.analyzable = Analyzable.objects.create(
+                name="1.2.3.4", classification=Classification.IP
+            )
+            with open("test_files/file.exe", "rb") as f:
+                self.analyzable2 = Analyzable.objects.create(
+                    name="test.file",
+                    classification=Classification.FILE,
+                    mimetype="application/vnd.microsoft.portable-executable",
+                    file=File(f),
+                )
+            self.analyzable3 = Analyzable.objects.create(
+                name="test.com", classification=Classification.DOMAIN
+            )
+            with open("test_files/cve.xls", "rb") as f:
+                self.analyzable4 = Analyzable.objects.create(
+                    name="cve.xls",
+                    classification=Classification.FILE,
+                    mimetype="application/vnd.ms-excel",
+                    file=File(f),
+                )
+            self.job = Job.objects.create(
                 **{
                     "user": self.superuser,
-                    "is_sample": False,
-                    "observable_name": "1.2.3.4",
-                    "observable_classification": "ip",
+                    "analyzable": self.analyzable,
                     "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
                     "tlp": Job.TLP.CLEAR.value,
                 }
             )
-            self.job2, _ = Job.objects.get_or_create(
+            self.job2 = Job.objects.create(
                 **{
                     "user": self.superuser,
-                    "is_sample": True,
-                    "md5": "test.file",
-                    "file_name": "test.file",
-                    "file_mimetype": "application/vnd.microsoft.portable-executable",
+                    "analyzable": self.analyzable2,
+                    "playbook_to_execute": PlaybookConfig.objects.get(
+                        name="FREE_TO_USE_ANALYZERS"
+                    ),
+                    "tlp": Job.TLP.GREEN.value,
+                }
+            )
+            self.job3 = Job.objects.create(
+                **{
+                    "user": self.superuser,
+                    "analyzable": self.analyzable3,
                     "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
                     "tlp": Job.TLP.GREEN.value,
                 }
             )
+            self.job4 = Job.objects.create(
+                **{
+                    "user": self.superuser,
+                    "analyzable": self.analyzable4,
+                    "playbook_to_execute": PlaybookConfig.objects.get(
+                        name="FREE_TO_USE_ANALYZERS"
+                    ),
+                    "tlp": Job.TLP.GREEN.value,
+                }
+            )
+            self.job5, _ = Job.objects.get_or_create(
+                **{
+                    "user": self.superuser,
+                    "analyzable": self.analyzable,
+                    "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
+                    "tlp": Job.TLP.AMBER.value,
+                }
+            )
+            self.investigation1, _ = Investigation.objects.get_or_create(
+                name="test_investigation1", owner=self.superuser
+            )
+            self.investigation1.jobs.add(self.job)
+            self.investigation2, _ = Investigation.objects.get_or_create(
+                name="test_investigation2", owner=self.superuser
+            )
+            self.investigation2.jobs.add(self.job5)
+
+    def tearDown(self):
+        self.job5.delete()
+        self.job4.delete()
+        self.job3.delete()
+        self.job2.delete()
+        self.job.delete()
+        self.analyzable.delete()
+        self.analyzable2.delete()
 
     def test_recent_scan(self):
         j1 = Job.objects.create(
             **{
                 "user": self.user,
-                "is_sample": False,
-                "observable_name": "gigatest.com",
-                "observable_classification": "domain",
+                "analyzable": self.analyzable,
                 "finished_analysis_time": now() - datetime.timedelta(days=2),
             }
         )
         j2 = Job.objects.create(
             **{
                 "user": self.user,
-                "is_sample": False,
-                "observable_name": "gigatest.com",
-                "observable_classification": "domain",
+                "analyzable": self.analyzable,
                 "finished_analysis_time": now() - datetime.timedelta(hours=2),
             }
         )
-        response = self.client.post(self.jobs_recent_scans_uri, data={"md5": j1.md5})
+        response = self.client.post(
+            self.jobs_recent_scans_uri, data={"md5": j1.analyzable.md5}
+        )
         content = response.json()
         msg = (response, content)
         self.assertEqual(200, response.status_code, msg=msg)
@@ -166,9 +225,7 @@ class JobViewSetTests(CustomViewSetTestCase):
         j1 = Job.objects.create(
             **{
                 "user": self.user,
-                "is_sample": False,
-                "observable_name": "gigatest.com",
-                "observable_classification": "domain",
+                "analyzable": self.analyzable,
                 "finished_analysis_time": datetime.datetime(
                     2024, 11, 28, tzinfo=datetime.timezone.utc
                 ),
@@ -177,9 +234,7 @@ class JobViewSetTests(CustomViewSetTestCase):
         j2 = Job.objects.create(
             **{
                 "user": self.superuser,
-                "is_sample": False,
-                "observable_name": "gigatest.com",
-                "observable_classification": "domain",
+                "analyzable": self.analyzable,
                 "finished_analysis_time": datetime.datetime(
                     2024, 11, 28, tzinfo=datetime.timezone.utc
                 ),
@@ -209,6 +264,48 @@ class JobViewSetTests(CustomViewSetTestCase):
         self.assertIn("total_pages", content, msg=msg)
         self.assertIn("results", content, msg=msg)
 
+    def test_list_filter_observable(self):
+        response = self.client.get(self.jobs_list_uri, {"is_sample": False})
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertEqual(response_data["count"], 2)
+        print(response_data)
+        self.assertCountEqual(
+            list(set([job["file_name"] for job in response_data["results"]])),
+            ["1.2.3.4", "test.com"],
+        )
+
+    def test_list_filter_sample(self):
+        response = self.client.get(self.jobs_list_uri, {"is_sample": True})
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertEqual(response_data["count"], 2)
+        self.assertCountEqual(
+            list(set([job["observable_name"] for job in response_data["results"]])),
+            ["cve.xls", "test.file"],
+        )
+
+    def test_list_filter_test_observable_type(self):
+        response = self.client.get(self.jobs_list_uri, {"type": "domain"})
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertCountEqual(
+            list(set([job["observable_name"] for job in response_data["results"]])),
+            ["test.com"],
+        )
+
+    def test_list_filter_test_mimetype(self):
+        response = self.client.get(
+            self.jobs_list_uri,
+            {"type": "application/vnd.microsoft.portable-executable"},
+        )
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertCountEqual(
+            list(set([job["observable_name"] for job in response_data["results"]])),
+            ["test.file"],
+        )
+
     def test_retrieve_200(self):
         response = self.client.get(f"{self.jobs_list_uri}/{self.job.id}")
         content = response.json()
@@ -217,15 +314,18 @@ class JobViewSetTests(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(content["id"], self.job.id, msg=msg)
         self.assertEqual(content["status"], self.job.status, msg=msg)
+        self.assertEqual(content["investigation_id"], self.investigation1.pk)
+        self.assertEqual(content["investigation_name"], self.investigation1.name)
+        self.assertEqual(content["related_investigation_number"], 2)
 
     def test_delete(self):
-        self.assertEqual(Job.objects.count(), 2)
+        self.assertEqual(Job.objects.count(), 5)
         response = self.client.delete(f"{self.jobs_list_uri}/{self.job.id}")
         self.assertEqual(response.status_code, 403)
         self.client.force_authenticate(user=self.job.user)
         response = self.client.delete(f"{self.jobs_list_uri}/{self.job.id}")
         self.assertEqual(response.status_code, 204)
-        self.assertEqual(Job.objects.count(), 1)
+        self.assertEqual(Job.objects.count(), 4)
 
     # @action endpoints
 
@@ -233,7 +333,7 @@ class JobViewSetTests(CustomViewSetTestCase):
         job = Job.objects.create(
             status=Job.STATUSES.RUNNING,
             user=self.superuser,
-            observable_classification="ip",
+            analyzable=self.analyzable,
         )
         self.assertEqual(job.status, Job.STATUSES.RUNNING)
         uri = reverse("jobs-kill", args=[job.pk])
@@ -252,7 +352,7 @@ class JobViewSetTests(CustomViewSetTestCase):
         job = Job.objects.create(
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
             user=self.superuser,
-            observable_classification="ip",
+            analyzable=self.analyzable,
         )
         uri = reverse("jobs-kill", args=[job.pk])
         self.client.force_authenticate(user=self.job.user)
@@ -276,7 +376,7 @@ class JobViewSetTests(CustomViewSetTestCase):
             [
                 {
                     "date": "2024-11-28T00:00:00Z",
-                    "pending": 2,
+                    "pending": 5,
                     "failed": 0,
                     "reported_with_fails": 0,
                     "reported_without_fails": 0,
@@ -304,7 +404,7 @@ class JobViewSetTests(CustomViewSetTestCase):
         msg = (resp, content)
 
         self.assertEqual(resp.status_code, 200, msg)
-        for field in ["date", *ObservableTypes.values]:
+        for field in ["date", *Classification.values[:-1]]:
             self.assertIn(
                 field,
                 content[0],
@@ -330,8 +430,14 @@ class JobViewSetTests(CustomViewSetTestCase):
         self.assertEqual(
             resp.json(),
             {
-                "values": ["Dns"],
-                "aggregation": [{"date": "2024-11-28T00:00:00Z", "Dns": 2}],
+                "values": ["Dns", "FREE_TO_USE_ANALYZERS"],
+                "aggregation": [
+                    {
+                        "date": "2024-11-28T00:00:00Z",
+                        "Dns": 3,
+                        "FREE_TO_USE_ANALYZERS": 2,
+                    }
+                ],
             },
         )
 
@@ -349,9 +455,7 @@ class JobViewSetTests(CustomViewSetTestCase):
             job, _ = Job.objects.get_or_create(
                 **{
                     "user": u,
-                    "is_sample": False,
-                    "observable_name": "1.2.3.4",
-                    "observable_classification": "ip",
+                    "analyzable": self.analyzable,
                     "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
                     "tlp": Job.TLP.CLEAR.value,
                 }
@@ -365,7 +469,7 @@ class JobViewSetTests(CustomViewSetTestCase):
                 "aggregation": [
                     {
                         "date": "2024-11-28T00:00:00Z",
-                        "superuser@intelowl.org": 2,
+                        "superuser@intelowl.org": 5,
                         "testspace@intelowl.org": 1,
                     },
                 ],
@@ -380,9 +484,9 @@ class JobViewSetTests(CustomViewSetTestCase):
         self.assertEqual(
             resp.json(),
             {
-                "values": ["CLEAR", "GREEN"],
+                "values": ["AMBER", "CLEAR", "GREEN"],
                 "aggregation": [
-                    {"date": "2024-11-28T00:00:00Z", "CLEAR": 1, "GREEN": 1}
+                    {"date": "2024-11-28T00:00:00Z", "CLEAR": 1, "GREEN": 3, "AMBER": 1}
                 ],
             },
         )
@@ -1364,6 +1468,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
 
 
 @override_settings(ELASTICSEARCH_DSL_ENABLED=True)
+@override_settings(ELASTICSEARCH_DSL_CLIENT=None)
 class ElasticTestCase(CustomViewSetTestCase):
     uri = reverse("plugin-report-queries")
 
@@ -1617,7 +1722,7 @@ class ElasticTestCase(CustomViewSetTestCase):
                     Bool(
                         should=[
                             Term(user__username="elastic_test_user"),
-                            Term(membership__organization__name="elastic_test_user"),
+                            Term(membership__organization__name="test_elastic_org"),
                         ]
                     ),
                     Term(config__plugin_name="analyzer"),

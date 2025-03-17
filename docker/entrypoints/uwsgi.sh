@@ -4,8 +4,8 @@ until cd /opt/deploy/intel_owl
 do
     echo "Waiting for server volume..."
 done
-mkdir -p /var/log/intel_owl/django /var/log/intel_owl/uwsgi /var/log/intel_owl/asgi /opt/deploy/intel_owl/files_required/blint /opt/deploy/intel_owl/files_required/yara
-chown -R www-data:www-data /var/log/intel_owl/django /var/log/intel_owl/uwsgi /var/log/intel_owl/asgi /opt/deploy/intel_owl/files_required/blint /opt/deploy/intel_owl/files_required/yara
+mkdir -p /var/log/intel_owl/django /var/log/intel_owl/uwsgi /var/log/intel_owl/asgi /opt/deploy/files_required/blint /opt/deploy/files_required/yara
+chown -R www-data:www-data /var/log/intel_owl/django /var/log/intel_owl/uwsgi /var/log/intel_owl/asgi /opt/deploy/files_required/blint /opt/deploy/files_required/yara
 
 # Apply database migrations
 echo "Waiting for db to be ready..."
@@ -24,8 +24,8 @@ fi
 # Collect static files
 python manage.py collectstatic --noinput
 echo "------------------------------"
-echo "DEBUG: " $DEBUG
-echo "DJANGO_TEST_SERVER: " $DJANGO_TEST_SERVER
+echo "DEBUG: " "$DEBUG"
+echo "DJANGO_TEST_SERVER: " "$DJANGO_TEST_SERVER"
 echo "------------------------------"
 CHANGELOG_NOTIFICATION_COMMAND='python manage.py changelog_notification .github/CHANGELOG.md INTELOWL --number-of-releases 3'
 ELASTIC_TEMPLATE_COMMAND='python manage.py elastic_templates'

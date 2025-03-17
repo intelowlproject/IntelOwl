@@ -2,8 +2,9 @@ import datetime
 
 from kombu import uuid
 
-from api_app.analyzers_manager.constants import ObservableTypes
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
+from api_app.choices import Classification
 from api_app.models import Job
 from api_app.visualizers_manager.visualizers.passive_dns.analyzer_extractor import (
     PDNSReport,
@@ -22,11 +23,15 @@ class TestOTXQuery(CustomTestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
+        cls.an = Analyzable.objects.create(
+            name="195.22.26.248",
+            classification=Classification.IP,
+        )
+
         cls.job = Job.objects.create(
             user=cls.user,
             status=Job.STATUSES.RUNNING.value,
-            observable_name="195.22.26.248",
-            observable_classification=ObservableTypes.IP,
+            analyzable=cls.an,
             received_request_time=datetime.datetime.now(),
         )
         cls.otx_report = None
@@ -37,6 +42,7 @@ class TestOTXQuery(CustomTestCase):
         cls.job.delete()
         if cls.otx_report:
             cls.otx_report.delete()
+        cls.an.delete()
 
     def test_no_report(self):
         report = extract_otxquery_reports(
@@ -106,11 +112,15 @@ class TestThreatminer(CustomTestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
+        cls.an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         cls.job = Job.objects.create(
             user=cls.user,
             status=Job.STATUSES.RUNNING.value,
-            observable_name="test.com",
-            observable_classification=ObservableTypes.DOMAIN,
+            analyzable=cls.an,
             received_request_time=datetime.datetime.now(),
         )
         cls.threatminer_report = None
@@ -121,6 +131,7 @@ class TestThreatminer(CustomTestCase):
         cls.job.delete()
         if cls.threatminer_report:
             cls.threatminer_report.delete()
+        cls.an.delete()
 
     def test_no_report(self):
         report = extract_threatminer_reports(
@@ -196,11 +207,15 @@ class TestValidin(CustomTestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
+        cls.an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         cls.job = Job.objects.create(
             user=cls.user,
             status=Job.STATUSES.RUNNING.value,
-            observable_name="test.com",
-            observable_classification=ObservableTypes.DOMAIN,
+            analyzable=cls.an,
             received_request_time=datetime.datetime.now(),
         )
         cls.validin_report = None
@@ -211,6 +226,7 @@ class TestValidin(CustomTestCase):
         cls.job.delete()
         if cls.validin_report:
             cls.validin_report.delete()
+        cls.an.delete()
 
     def test_no_report(self):
         report = extract_validin_reports(
@@ -304,11 +320,15 @@ class TestDNSdb(CustomTestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
+        cls.an = Analyzable.objects.create(
+            name="www.farsightsecurity.com",
+            classification=Classification.DOMAIN,
+        )
+
         cls.job = Job.objects.create(
             user=cls.user,
             status=Job.STATUSES.RUNNING.value,
-            observable_name="www.farsightsecurity.com",
-            observable_classification=ObservableTypes.DOMAIN,
+            analyzable=cls.an,
             received_request_time=datetime.datetime.now(),
         )
         cls.dnsdb_report = None
@@ -319,6 +339,7 @@ class TestDNSdb(CustomTestCase):
         cls.job.delete()
         if cls.dnsdb_report:
             cls.dnsdb_report.delete()
+        cls.an.delete()
 
     def test_no_report(self):
         report = extract_dnsdb_reports(
@@ -382,11 +403,15 @@ class TestRobtex(CustomTestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
+        cls.an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         cls.job = Job.objects.create(
             user=cls.user,
             status=Job.STATUSES.RUNNING.value,
-            observable_name="test.com",
-            observable_classification=ObservableTypes.DOMAIN,
+            analyzable=cls.an,
             received_request_time=datetime.datetime.now(),
         )
         cls.robtex_report = None
@@ -397,6 +422,7 @@ class TestRobtex(CustomTestCase):
         cls.job.delete()
         if cls.robtex_report:
             cls.robtex_report.delete()
+        cls.an.delete()
 
     def test_no_report(self):
         report = extract_robtex_reports(
@@ -457,11 +483,15 @@ class TestMnemonicPDNS(CustomTestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
+        cls.an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         cls.job = Job.objects.create(
             user=cls.user,
             status=Job.STATUSES.RUNNING.value,
-            observable_name="test.com",
-            observable_classification=ObservableTypes.DOMAIN,
+            analyzable=cls.an,
             received_request_time=datetime.datetime.now(),
         )
         cls.mnemonicpdns_report = None
@@ -472,6 +502,7 @@ class TestMnemonicPDNS(CustomTestCase):
         cls.job.delete()
         if cls.mnemonicpdns_report:
             cls.mnemonicpdns_report.delete()
+        cls.an.delete()
 
     def test_no_report(self):
         report = extract_mnemonicpdns_reports(
@@ -532,11 +563,15 @@ class TestCIRCLPassiveDNS(CustomTestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
+        cls.an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         cls.job = Job.objects.create(
             user=cls.user,
             status=Job.STATUSES.RUNNING.value,
-            observable_name="test.com",
-            observable_classification=ObservableTypes.DOMAIN,
+            analyzable=cls.an,
             received_request_time=datetime.datetime.now(),
         )
         cls.circlpdns_report = None
@@ -547,6 +582,7 @@ class TestCIRCLPassiveDNS(CustomTestCase):
         cls.job.delete()
         if cls.circlpdns_report:
             cls.circlpdns_report.delete()
+        cls.an.delete()
 
     def test_no_report(self):
         report = extract_circlpdns_reports(

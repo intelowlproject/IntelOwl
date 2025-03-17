@@ -22,7 +22,7 @@ class DomainReputationServices(Visualizer):
     @visualizable_error_handler_with_params("VirusTotal")
     def _vt3(self):
         try:
-            analyzer_report = self.analyzer_reports().get(
+            analyzer_report = self.get_analyzer_reports().get(
                 config__name="VirusTotal_v3_Get_Observable"
             )
         except AnalyzerReport.DoesNotExist:
@@ -58,7 +58,7 @@ class DomainReputationServices(Visualizer):
     @visualizable_error_handler_with_params("URLhaus")
     def _urlhaus(self):
         try:
-            analyzer_report = self.analyzer_reports().get(config__name="URLhaus")
+            analyzer_report = self.get_analyzer_reports().get(config__name="URLhaus")
         except AnalyzerReport.DoesNotExist:
             logger.warning("URLhaus report does not exist")
         else:
@@ -86,7 +86,7 @@ class DomainReputationServices(Visualizer):
     @visualizable_error_handler_with_params("ThreatFox")
     def _threatfox(self):
         try:
-            analyzer_report = self.analyzer_reports().get(config__name="ThreatFox")
+            analyzer_report = self.get_analyzer_reports().get(config__name="ThreatFox")
         except AnalyzerReport.DoesNotExist:
             logger.warning("Threatfox report does not exist")
         else:
@@ -112,7 +112,7 @@ class DomainReputationServices(Visualizer):
     @visualizable_error_handler_with_params("Tranco")
     def _tranco(self):
         try:
-            analyzer_report = self.analyzer_reports().get(config__name="Tranco")
+            analyzer_report = self.get_analyzer_reports().get(config__name="Tranco")
         except AnalyzerReport.DoesNotExist:
             logger.warning("Tranco report does not exist")
         else:
@@ -134,7 +134,7 @@ class DomainReputationServices(Visualizer):
     @visualizable_error_handler_with_params("Phishtank")
     def _phishtank(self):
         try:
-            analyzer_report = self.analyzer_reports().get(config__name="Phishtank")
+            analyzer_report = self.get_analyzer_reports().get(config__name="Phishtank")
         except AnalyzerReport.DoesNotExist:
             logger.warning("Phishtank report does not exist")
         else:
@@ -155,7 +155,9 @@ class DomainReputationServices(Visualizer):
     @visualizable_error_handler_with_params("PhishingArmy")
     def _phishing_army(self):
         try:
-            analyzer_report = self.analyzer_reports().get(config__name="PhishingArmy")
+            analyzer_report = self.get_analyzer_reports().get(
+                config__name="PhishingArmy"
+            )
         except AnalyzerReport.DoesNotExist:
             logger.warning("PhishingArmy report does not exist")
         else:
@@ -175,7 +177,9 @@ class DomainReputationServices(Visualizer):
     @visualizable_error_handler_with_params("InQuest")
     def _inquest_repdb(self):
         try:
-            analyzer_report = self.analyzer_reports().get(config__name="InQuest_REPdb")
+            analyzer_report = self.get_analyzer_reports().get(
+                config__name="InQuest_REPdb"
+            )
         except AnalyzerReport.DoesNotExist:
             logger.warning("InQuest_REPdb report does not exist")
         else:
@@ -200,7 +204,7 @@ class DomainReputationServices(Visualizer):
     @visualizable_error_handler_with_params("OTX Alienvault")
     def _otxquery(self):
         try:
-            analyzer_report = self.analyzer_reports().get(config__name="OTXQuery")
+            analyzer_report = self.get_analyzer_reports().get(config__name="OTXQuery")
         except AnalyzerReport.DoesNotExist:
             logger.warning("OTXQuery report does not exist")
         else:
@@ -230,7 +234,7 @@ class DomainReputationServices(Visualizer):
         second_level_elements = []
         third_level_elements = []
 
-        for analyzer_report in self.analyzer_reports().filter(
+        for analyzer_report in self.get_analyzer_reports().filter(
             Q(config__name__endswith="Malicious_Detector")
             | Q(config__name="GoogleSafebrowsing")
         ):
@@ -238,7 +242,7 @@ class DomainReputationServices(Visualizer):
             third_level_elements.append(
                 self.Bool(
                     value=printable_analyzer_name,
-                    disable=not analyzer_report.report["malicious"],
+                    disable=not analyzer_report.report.get("malicious"),
                 )
             )
 

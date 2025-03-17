@@ -29,15 +29,15 @@ def gen_random_colorhex() -> str:
     return "#%02X%02X%02X" % (r(), r(), r())
 
 
-def calculate_md5(value) -> str:
+def calculate_md5(value: bytes) -> str:
     return hashlib.md5(value).hexdigest()  # skipcq BAN-B324
 
 
-def calculate_sha1(value) -> str:
+def calculate_sha1(value: bytes) -> str:
     return hashlib.sha1(value).hexdigest()  # skipcq BAN-B324
 
 
-def calculate_sha256(value) -> str:
+def calculate_sha256(value: bytes) -> str:
     return hashlib.sha256(value).hexdigest()  # skipcq BAN-B324
 
 

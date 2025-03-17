@@ -5,6 +5,7 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
@@ -30,7 +31,7 @@ class EmailRep(classes.ObservableAnalyzer):
             "Accept": "application/json",
         }
 
-        if self.observable_classification not in [self.ObservableTypes.GENERIC]:
+        if self.observable_classification not in [Classification.GENERIC]:
             raise AnalyzerRunException(
                 f"not supported observable type {self.observable_classification}."
                 f" Supported: generic"

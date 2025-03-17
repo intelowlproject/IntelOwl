@@ -6,13 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('analyzers_manager', '0138_alter_analyzerreport_data_model_content_type'),
+        ("analyzers_manager", "0138_alter_analyzerreport_data_model_content_type"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='analyzerconfig',
-            name='mapping_data_model',
-            field=models.JSONField(blank=True, default=dict, help_text='Mapping analyzer_report_key: data_model_key. Keys preceded by the symbol $ will be considered as constants.'),
+            model_name="analyzerconfig",
+            name="mapping_data_model",
+            field=models.JSONField(
+                blank=True,
+                default=dict,
+                help_text="Mapping analyzer_report_key: data_model_key. Keys preceded by the symbol $ will be considered as constants.",
+            ),
         ),
     ]

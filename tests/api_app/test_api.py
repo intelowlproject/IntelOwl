@@ -11,7 +11,9 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from api_app import models
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.choices import Classification
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.playbooks_manager.models import PlaybookConfig
 
@@ -127,9 +129,9 @@ class ApiViewTests(CustomViewSetTestCase):
 
         job_id = int(content["job_id"])
         job = models.Job.objects.get(pk=job_id)
-        self.assertEqual(file_name, job.file_name)
-        self.assertEqual(file_mimetype, job.file_mimetype)
-        self.assertEqual(md5, job.md5)
+        self.assertEqual(file_name, job.analyzable.name)
+        self.assertEqual(file_mimetype, job.analyzable.mimetype)
+        self.assertEqual(md5, job.analyzable.md5)
 
         self.assertCountEqual(
             ["Suricata", "YARAify_File_Scan", "Hfinger", "DetectItEasy", "Polyswarm"],
@@ -145,14 +147,14 @@ class ApiViewTests(CustomViewSetTestCase):
         job_id = int(content["job_id"])
         job = models.Job.objects.get(pk=job_id)
         self.assertEqual(response.status_code, 200, msg=msg)
-        self.assertEqual(data["file_name"], job.file_name, msg=msg)
-        self.assertEqual(data["file_mimetype"], job.file_mimetype, msg=msg)
+        self.assertEqual(data["file_name"], job.analyzable.name, msg=msg)
+        self.assertEqual(data["file_mimetype"], job.analyzable.mimetype, msg=msg)
         self.assertCountEqual(
             data["analyzers_requested"],
             list(job.analyzers_requested.all().values_list("name", flat=True)),
             msg=msg,
         )
-        self.assertEqual(self.file_md5, job.md5, msg=msg)
+        self.assertEqual(self.file_md5, job.analyzable.md5, msg=msg)
 
     def test_analyze_file__guess_optional(self):
         data = self.analyze_file_data.copy()
@@ -165,14 +167,14 @@ class ApiViewTests(CustomViewSetTestCase):
 
         job_id = int(content["job_id"])
         job = models.Job.objects.get(pk=job_id)
-        self.assertEqual(data["file_name"], job.file_name, msg=msg)
+        self.assertEqual(data["file_name"], job.analyzable.name, msg=msg)
         self.assertCountEqual(
             data["analyzers_requested"],
             list(job.analyzers_requested.all().values_list("name", flat=True)),
             msg=msg,
         )
-        self.assertEqual(file_mimetype, job.file_mimetype, msg=msg)
-        self.assertEqual(self.file_md5, job.md5, msg=msg)
+        self.assertEqual(file_mimetype, job.analyzable.mimetype, msg=msg)
+        self.assertEqual(self.file_md5, job.analyzable.md5, msg=msg)
 
     def test_analyze_observable__domain(self):
         analyzers_requested = [
@@ -196,9 +198,9 @@ class ApiViewTests(CustomViewSetTestCase):
 
         job_id = int(content["job_id"])
         job = models.Job.objects.get(pk=job_id)
-        self.assertEqual(observable_name, job.observable_name)
-        self.assertEqual(observable_classification, job.observable_classification)
-        self.assertEqual(md5, job.md5)
+        self.assertEqual(observable_name, job.analyzable.name)
+        self.assertEqual(observable_classification, job.analyzable.classification)
+        self.assertEqual(md5, job.analyzable.md5)
         self.assertCountEqual(
             analyzers_requested,
             list(job.analyzers_requested.all().values_list("name", flat=True)),
@@ -217,16 +219,16 @@ class ApiViewTests(CustomViewSetTestCase):
 
         job_id = int(content["job_id"])
         job = models.Job.objects.get(pk=job_id)
-        self.assertEqual(data["observable_name"], job.observable_name, msg=msg)
+        self.assertEqual(data["observable_name"], job.analyzable.name, msg=msg)
         self.assertCountEqual(
             data["analyzers_requested"],
             list(job.analyzers_requested.all().values_list("name", flat=True)),
             msg=msg,
         )
         self.assertEqual(
-            data["observable_classification"], job.observable_classification, msg=msg
+            data["observable_classification"], job.analyzable.classification, msg=msg
         )
-        self.assertEqual(self.observable_md5, job.md5, msg=msg)
+        self.assertEqual(self.observable_md5, job.analyzable.md5, msg=msg)
 
     def test_analyze_observable__guess_optional(self):
         data = self.analyze_observable_ip_data.copy()
@@ -241,16 +243,16 @@ class ApiViewTests(CustomViewSetTestCase):
 
         job_id = int(content["job_id"])
         job = models.Job.objects.get(pk=job_id)
-        self.assertEqual(data["observable_name"], job.observable_name, msg=msg)
+        self.assertEqual(data["observable_name"], job.analyzable.name, msg=msg)
         self.assertCountEqual(
             data["analyzers_requested"],
             list(job.analyzers_requested.all().values_list("name", flat=True)),
             msg=msg,
         )
         self.assertEqual(
-            observable_classification, job.observable_classification, msg=msg
+            observable_classification, job.analyzable.classification, msg=msg
         )
-        self.assertEqual(self.observable_md5, job.md5, msg=msg)
+        self.assertEqual(self.observable_md5, job.analyzable.md5, msg=msg)
 
     def test_analyze_multiple_observables(self):
         data = self.mixed_observable_data.copy()
@@ -266,7 +268,7 @@ class ApiViewTests(CustomViewSetTestCase):
 
         job_id = int(content["job_id"])
         job = models.Job.objects.get(pk=job_id)
-        self.assertEqual(data["observables"][0][1], job.observable_name, msg=msg)
+        self.assertEqual(data["observables"][0][1], job.analyzable.name, msg=msg)
         self.assertCountEqual(
             data["analyzers_requested"],
             list(job.analyzers_requested.all().values_list("name", flat=True)),
@@ -282,12 +284,13 @@ class ApiViewTests(CustomViewSetTestCase):
 
         job_id = int(content["job_id"])
         job = models.Job.objects.get(pk=job_id)
-        self.assertEqual(data["observables"][1][1], job.observable_name, msg=msg)
+        self.assertEqual(data["observables"][1][1], job.analyzable.name, msg=msg)
         self.assertCountEqual(
             [data["analyzers_requested"][0]],
             list(job.analyzers_to_execute.all().values_list("name", flat=True)),
             msg=msg,
         )
+        job.delete()
 
     def test_observable_no_analyzers_only_connector(self):
         models.PluginConfig.objects.create(
@@ -329,7 +332,7 @@ class ApiViewTests(CustomViewSetTestCase):
 
         job_id = int(content["job_id"])
         job = models.Job.objects.get(pk=job_id)
-        self.assertEqual(data["observables"][0][1], job.observable_name, msg=msg)
+        self.assertEqual(data["observables"][0][1], job.analyzable.name, msg=msg)
         self.assertEqual(job.analyzers_requested.count(), 0)
         self.assertEqual(job.pivots_to_execute.count(), 0)
 
@@ -337,22 +340,25 @@ class ApiViewTests(CustomViewSetTestCase):
         self.assertEqual(models.Job.objects.count(), 0)
         filename = "file.exe"
         uploaded_file, md5 = self.__get_test_file(filename)
+        analyzable = models.Analyzable.objects.create(
+            name=filename,
+            file=uploaded_file,
+            classification="file",
+            md5=md5,
+            mimetype="application/vnd.microsoft.portable-executable",
+        )
         job = models.Job.objects.create(
-            **{
-                "md5": md5,
-                "is_sample": True,
-                "file_name": filename,
-                "file_mimetype": "application/vnd.microsoft.portable-executable",
-                "file": uploaded_file,
-            }
+            analyzable=analyzable,
         )
         self.assertEqual(models.Job.objects.count(), 1)
         response = self.client.get(f"/api/jobs/{job.id}/download_sample")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.get("Content-Disposition"),
-            f'attachment; filename="{job.file_name}"',
+            f'attachment; filename="{job.analyzable.name}"',
         )
+        job.delete()
+        analyzable.delete()
 
     def test_download_sample_404(self):
         # requesting for an ID that we know does not exist in DB
@@ -361,7 +367,10 @@ class ApiViewTests(CustomViewSetTestCase):
 
     def test_download_sample_400(self):
         # requesting for job where is_sample=False
-        job = models.Job.objects.create(is_sample=False)
+        analyzable = Analyzable.objects.create(
+            name="test.com", classification=Classification.DOMAIN
+        )
+        job = models.Job.objects.create(analyzable=analyzable)
         response = self.client.get(f"/api/jobs/{job.id}/download_sample")
         content = response.json()
         msg = (response, content)
@@ -371,6 +380,8 @@ class ApiViewTests(CustomViewSetTestCase):
             content["errors"],
             msg=msg,
         )
+        job.delete()
+        analyzable.delete()
 
     def test_no_analyzers(self):
         data = self.mixed_observable_data.copy()
@@ -419,15 +430,19 @@ class ApiViewTests(CustomViewSetTestCase):
             job = models.Job.objects.get(pk=job_id)
             self.assertEqual(response.status_code, 200, msg=msg)
             self.assertEqual(
-                self.analyze_multiple_files_filenames[index], job.file_name, msg=msg
+                self.analyze_multiple_files_filenames[index],
+                job.analyzable.name,
+                msg=msg,
             )
             self.assertCountEqual(
                 data["analyzers_requested"],
                 list(job.analyzers_requested.all().values_list("name", flat=True)),
                 msg=msg,
             )
-            self.assertEqual(self.file_md5, job.md5, msg=msg)
-            self.assertEqual(data["file_mimetypes"][index], job.file_mimetype, msg=msg)
+            self.assertEqual(self.file_md5, job.analyzable.md5, msg=msg)
+            self.assertEqual(
+                data["file_mimetypes"][index], job.analyzable.mimetype, msg=msg
+            )
 
     def test_analyze_multiple_files__guess_optional(self):
         data = self.analyze_multiple_files_data.copy()
@@ -444,15 +459,17 @@ class ApiViewTests(CustomViewSetTestCase):
             job = models.Job.objects.get(pk=job_id)
             self.assertEqual(response.status_code, 200, msg=msg)
             self.assertEqual(
-                self.analyze_multiple_files_filenames[index], job.file_name, msg=msg
+                self.analyze_multiple_files_filenames[index],
+                job.analyzable.name,
+                msg=msg,
             )
             self.assertCountEqual(
                 data["analyzers_requested"],
                 list(job.analyzers_requested.all().values_list("name", flat=True)),
                 msg=msg,
             )
-            self.assertEqual(self.file_md5, job.md5, msg=msg)
-            self.assertEqual(file_mimetypes[index], job.file_mimetype, msg=msg)
+            self.assertEqual(self.file_md5, job.analyzable.md5, msg=msg)
+            self.assertEqual(file_mimetypes[index], job.analyzable.mimetype, msg=msg)
 
     def test_tlp_clear_and_white(self):
         data = self.analyze_observable_ip_data.copy()  # tlp = "CLEAR" by default
@@ -474,11 +491,15 @@ class ApiViewTests(CustomViewSetTestCase):
         self.assertEqual(job.tlp, "CLEAR", msg=msg)
 
     def test_job_rescan__observable_analyzers(self):
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         job = models.Job.objects.create(
             tlp="CLEAR",
             user=self.user,
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             status="reported_without_fails",
             finished_analysis_time=datetime.datetime(
                 2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc
@@ -496,7 +517,7 @@ class ApiViewTests(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 202, contents)
         new_job_id = int(contents["id"])
         new_job = models.Job.objects.get(pk=new_job_id)
-        self.assertEqual(new_job.observable_name, "test.com")
+        self.assertEqual(new_job.analyzable.name, "test.com")
         self.assertEqual(new_job.tlp, "CLEAR")
         self.assertEqual(
             list(new_job.analyzers_requested.all()),
@@ -510,13 +531,18 @@ class ApiViewTests(CustomViewSetTestCase):
                 "visualizers": {},
             },
         )
+        an.delete()
 
     def test_job_rescan__observable_playbook(self):
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         job = models.Job.objects.create(
             tlp="CLEAR",
             user=self.user,
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             status="reported_without_fails",
             finished_analysis_time=datetime.datetime(
                 2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc
@@ -534,7 +560,7 @@ class ApiViewTests(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 202, contents)
         new_job_id = int(contents["id"])
         new_job = models.Job.objects.get(pk=new_job_id)
-        self.assertEqual(new_job.observable_name, "test.com")
+        self.assertEqual(new_job.analyzable.name, "test.com")
         self.assertEqual(new_job.tlp, "CLEAR")
         self.assertEqual(
             new_job.playbook_requested, PlaybookConfig.objects.get(name="Dns")
@@ -547,15 +573,16 @@ class ApiViewTests(CustomViewSetTestCase):
                 "visualizers": {},
             },
         )
+        an.delete()
 
     def test_job_rescan__sample_analyzers(self):
+        an = Analyzable.objects.create(
+            file=self.uploaded_file, name="file.exe", classification="file"
+        )
         job = models.Job.objects.create(
             tlp="CLEAR",
-            md5=self.file_md5,
             user=self.user,
-            is_sample=True,
-            file_name="file.exe",
-            file=self.uploaded_file,
+            analyzable=an,
             status="reported_without_fails",
             finished_analysis_time=datetime.datetime(
                 2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc
@@ -579,8 +606,8 @@ class ApiViewTests(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 202, contents)
         new_job_id = int(contents["id"])
         new_job = models.Job.objects.get(pk=new_job_id)
-        self.assertEqual(new_job.file_name, "file.exe")
-        self.assertEqual(new_job.file, job.file)
+        self.assertEqual(new_job.analyzable.name, "file.exe")
+        self.assertEqual(new_job.analyzable.file, job.analyzable.file)
         self.assertEqual(new_job.tlp, "CLEAR")
         self.assertEqual(
             list(new_job.analyzers_requested.all()),
@@ -599,16 +626,17 @@ class ApiViewTests(CustomViewSetTestCase):
                 "visualizers": {},
             },
         )
+        job.delete()
+        an.delete()
 
     def test_job_rescan__sample_playbook(self):
-
+        an = Analyzable.objects.create(
+            file=self.uploaded_file, name="file.exe", classification="file"
+        )
         job = models.Job.objects.create(
             tlp="CLEAR",
-            md5=self.file_md5,
             user=self.user,
-            is_sample=True,
-            file_name="file.exe",
-            file=self.uploaded_file,
+            analyzable=an,
             status="reported_without_fails",
             playbook_requested=PlaybookConfig.objects.get(name="FREE_TO_USE_ANALYZERS"),
             finished_analysis_time=datetime.datetime(
@@ -632,8 +660,8 @@ class ApiViewTests(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 202, contents)
         new_job_id = int(contents["id"])
         new_job = models.Job.objects.get(pk=new_job_id)
-        self.assertEqual(new_job.file_name, "file.exe")
-        self.assertEqual(new_job.file, job.file)
+        self.assertEqual(new_job.analyzable.name, "file.exe")
+        self.assertEqual(new_job.analyzable.file, job.analyzable.file)
         self.assertEqual(new_job.tlp, "CLEAR")
         self.assertEqual(
             new_job.playbook_requested,
@@ -652,13 +680,19 @@ class ApiViewTests(CustomViewSetTestCase):
                 "visualizers": {},
             },
         )
+        job.delete()
+        an.delete()
 
     def test_job_rescan__permission(self):
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         job = models.Job.objects.create(
             tlp="CLEAR",
             user=self.user,
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             status="reported_without_fails",
             finished_analysis_time=datetime.datetime(
                 2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc
@@ -681,3 +715,4 @@ class ApiViewTests(CustomViewSetTestCase):
         response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
         contents = response.json()
         self.assertEqual(response.status_code, 403, contents)
+        an.delete()

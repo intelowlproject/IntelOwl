@@ -32,7 +32,7 @@ then
 fi
 
 CMD="/usr/local/bin/celery -A intel_owl.celery --broker ${BROKER_URL} flower --broker_api=${BROKER_URL_API} --max_tasks=1000 --max_workers=500"
-htpasswd -cb /opt/deploy/shared_htpasswd/.htpasswd ${FLOWER_USER} ${FLOWER_PWD}
+htpasswd -cb /opt/deploy/shared_htpasswd/.htpasswd "${FLOWER_USR}" "${FLOWER_PWD}"
 
 if [[ ${DEBUG} == "True" ]] && [[ ${DJANGO_TEST_SERVER} == "True" ]];
 then

@@ -39,7 +39,7 @@ params = [
         "type": "str",
         "description": "api key for criminal ip",
         "is_secret": True,
-        "required": False,
+        "required": True,
     },
     {
         "python_module": {

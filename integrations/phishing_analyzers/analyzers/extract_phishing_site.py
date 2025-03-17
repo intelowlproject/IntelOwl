@@ -65,6 +65,8 @@ def analyze_target(
 
         result: str = json.dumps(extract_driver_result(driver_wrapper), default=str)
         logger.debug(f"JSON dump of driver {result=}")
+
+        # this print returns the result of the analysis, do not remove
         print(result)
     except Exception as e:
         logger.exception(

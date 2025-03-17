@@ -238,19 +238,16 @@ class Maxmind(classes.ObservableAnalyzer):
             org = org.lower()
             self.report: AnalyzerReport
             if org in ["fastly", "cloudflare", "akamai"]:
-                data_model.evaluation = (
-                    self.report.data_model_class.EVALUATIONS.CLEAN.value
-                )
+                data_model.evaluation = self.EVALUATIONS.TRUSTED.value
+                data_model.reliability = 4
             elif org in [
                 "zscaler",
                 "palo alto networks",
                 "microdata service srl",
                 "forcepoint",
             ]:
-                data_model.evaluation = (
-                    self.report.data_model_class.EVALUATIONS.TRUSTED.value
-                )
+                data_model.evaluation = self.EVALUATIONS.TRUSTED.value
+                data_model.reliability = 8
             elif org in ["stark industries"]:
-                data_model.evaluation = (
-                    self.report.data_model_class.EVALUATIONS.SUSPICIOUS.value
-                )
+                data_model.evaluation = self.EVALUATIONS.MALICIOUS.value
+                data_model.reliability = 4

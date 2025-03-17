@@ -16,7 +16,7 @@ import { FaUserSecret } from "react-icons/fa";
 import PropTypes from "prop-types";
 import { useFormik, FormikProvider, FieldArray } from "formik";
 
-import { CustomJsonInput, IconButton } from "@certego/certego-ui";
+import { IconButton } from "@certego/certego-ui";
 
 import {
   createPluginConfig,
@@ -30,6 +30,7 @@ import {
 } from "../../../constants/pluginConst";
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
+import { JsonEditor } from "../../common/JsonEditor";
 
 function CustomInput({ formik, config, configType, disabledInputField }) {
   switch (config.type) {
@@ -99,21 +100,14 @@ function CustomInput({ formik, config, configType, disabledInputField }) {
     case ParameterTypes.DICT:
       return (
         <div style={{ maxHeight: "150px" }}>
-          <CustomJsonInput
+          <JsonEditor
             id={`pluginConfig_${configType}-${config.attribute}`}
-            placeholder={formik.values[config.attribute]}
+            initialJsonData={formik.values[config.attribute]}
             onChange={(value) => {
-              formik.setFieldValue(config.attribute, value.jsObject, false);
+              formik.setFieldValue(config.attribute, value, false);
             }}
-            /* waitAfterKeyPress=1000 is the default value and we cannot change it:
-                with this value (or higher) in case the user press "save & close" too fast it doesn't take changes.
-                If we decrease it (min allowed 100) we don't have this problems, but it's not possible to edit:
-                The library auto refresh and move the cursor too fast to make it editable.
-            */
-            waitAfterKeyPress={1000}
             height="150px"
-            viewOnly={disabledInputField}
-            confirmGood={!disabledInputField}
+            readOnly={disabledInputField}
           />
         </div>
       );
@@ -129,7 +123,7 @@ function CustomInput({ formik, config, configType, disabledInputField }) {
             type="radio"
             name={config.attribute}
             value={value}
-            checked={formik.values[config.attribute].toString() === value}
+            checked={formik.values[config.attribute]?.toString() === value}
             onBlur={formik.handleBlur}
             onChange={formik.handleChange}
             disabled={disabledInputField}

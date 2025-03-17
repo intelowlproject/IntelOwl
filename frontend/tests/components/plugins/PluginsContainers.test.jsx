@@ -1,7 +1,7 @@
 import React from "react";
 import "@testing-library/jest-dom";
 import { render, screen, waitFor } from "@testing-library/react";
-import { BrowserRouter } from "react-router-dom";
+import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import PluginsContainer from "../../../src/components/plugins/PluginsContainer";
 
@@ -27,9 +27,9 @@ describe("test PluginsContainer component", () => {
   test("plugins page", async () => {
     const user = userEvent.setup();
     render(
-      <BrowserRouter>
+      <MemoryRouter initialEntries={["/plugins/analyzers"]}>
         <PluginsContainer />
-      </BrowserRouter>,
+      </MemoryRouter>,
     );
 
     // router tabs

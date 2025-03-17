@@ -35,7 +35,9 @@ class ThugUrl(ObservableAnalyzer, DockerBasedAnalyzer):
         enable_img_proc = self.enable_image_processing_analysis
         # make request arguments
         # analysis timeout is set to 5 minutes
-        args = ["-T", "300", "-u", str(user_agent)]
+        args = ["-T", "300"]
+        if user_agent:
+            args.extend(["-u", str(user_agent)])
         if dom_events:
             args.extend(["-e", str(dom_events)])
         if use_proxy and proxy:

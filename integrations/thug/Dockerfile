@@ -1,7 +1,6 @@
 # This base image is the one currently (02/2025) updated by the maintainer
 # but it does not support ARM
-# Plus, v6.11 is bugged, see https://github.com/buffer/thug/issues/397
-FROM thughoneyclient/thug:v6.11
+FROM thughoneyclient/thug:v6.13
 
 USER root
 ENV PROJECT_PATH=/opt/deploy

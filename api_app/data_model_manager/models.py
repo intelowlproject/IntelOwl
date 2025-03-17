@@ -1,21 +1,29 @@
 import json
-from typing import Dict, Type
+import logging
+from typing import Dict, Type, Union
 
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres import fields as pg_fields
+from django.contrib.postgres.fields import ArrayField
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.db.models import ForeignKey, ManyToManyField, PositiveIntegerField
+from django.forms import JSONField
 from django.utils.timezone import now
 from rest_framework.serializers import ModelSerializer
 
 from api_app.data_model_manager.enums import (
     DataModelEvaluations,
+    DataModelKillChainPhases,
     DataModelTags,
     SignatureProviderChoices,
 )
 from api_app.data_model_manager.fields import LowercaseCharField, SetField
 from api_app.data_model_manager.queryset import BaseDataModelQuerySet
 from certego_saas.apps.user.models import User
+
+logger = logging.getLogger(__name__)
 
 
 class IETFReport(models.Model):
@@ -60,46 +68,48 @@ class BaseDataModel(models.Model):
         blank=True,
         default=None,
         choices=DataModelEvaluations.choices,
-    )  # classification/verdict/found/score/malscore
-    # HybridAnalysisObservable (verdict), BasicMaliciousDetector (malicious),
-    # GoogleSafeBrowsing (malicious), Crowdsec (classifications),
-    # GreyNoise (classification), Cymru (found), Cuckoo (malscore),
-    # Intezer (verdict/sub_verdict), Triage (analysis.score),
-    # HybridAnalysisFileAnalyzer (classification_tags)
+    )
+    reliability = PositiveIntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(10)], default=5
+    )
+    kill_chain_phase = LowercaseCharField(
+        default=None,
+        null=True,
+        blank=True,
+        choices=DataModelKillChainPhases.choices,
+        max_length=100,
+    )
     external_references = SetField(
         models.URLField(),
         blank=True,
         default=list,
-    )  # link/external_references/permalink/domains
-    # Crowdsec (link), UrlHaus (external_references), BoxJs,
-    # Cuckoo (result_url/permalink), Intezer (link/analysis_url),
-    # MalwareBazaarFileAnalyzer (permalink/file_information.value), MwDB (permalink),
-    # StringsInfo (data), Triage (permalink), UnpacMe (permalink), XlmMacroDeobfuscator,
-    # Yara (report.list_el.url/rule_url), Yaraify (link),
-    # HybridAnalysisFileAnalyzer (domains),
-    # VirusTotalV3FileAnalyzer (data.relationships.contacted_urls/contacted_domains)
+    )
     related_threats = SetField(
         LowercaseCharField(max_length=100), default=list, blank=True
     )  # threats/related_threats, used as a pointer to other IOCs
     tags = SetField(
         LowercaseCharField(max_length=100), null=True, blank=True, default=None
-    )  # used for generic tags like phishing, malware, social_engineering
-    # HybridAnalysisFileAnalyzer, MalwareBazaarFileAnalyzer, MwDB,
-    # VirusTotalV3FileAnalyzer (report.data.attributes.tags)
-    # GoogleSafeBrowsing, QuarkEngineAPK (crimes.crime)
+    )
     malware_family = LowercaseCharField(
         max_length=100, null=True, blank=True, default=None
-    )  # family/family_name/malware_family
-    # HybridAnalysisObservable, Intezer (family_name), Cuckoo, MwDB,
-    # Triage (analysis.family), UnpacMe (results.malware_id.malware_family),
-    # VirusTotalV3FileAnalyzer
-    # (attributes.last_analysis_results.list_el.results/attributes.names)
+    )
     additional_info = models.JSONField(
         default=dict
     )  # field for additional information related to a specific analyzer
     date = models.DateTimeField(default=now)
     analyzers_report = GenericRelation(
         to="analyzers_manager.AnalyzerReport",
+        object_id_field="data_model_object_id",
+        content_type_field="data_model_content_type",
+    )
+    jobs = GenericRelation(
+        to="api_app.Job",
+        object_id_field="data_model_object_id",
+        content_type_field="data_model_content_type",
+    )
+
+    user_events = GenericRelation(
+        to="user_events_manager.UserAnalyzableEvent",
         object_id_field="data_model_object_id",
         content_type_field="data_model_content_type",
     )
@@ -111,6 +121,84 @@ class BaseDataModel(models.Model):
     class Meta:
         abstract = True
 
+    @property
+    def owner(self) -> User:
+        if self.analyzers_report.exists():
+            return self.analyzers_report.first().user
+        elif self.jobs.exists():
+            return self.jobs.first().user
+
+    def merge(
+        self, other: Union["BaseDataModel", Dict], append: bool = True
+    ) -> "BaseDataModel":
+        if not self.pk:
+            raise ValueError("Unable to merge a model that was not saved.")
+        if not isinstance(other, (self.__class__, dict)):
+            raise TypeError(f"Different class between {self} and {type(other)}")
+        for field_name, field in self.get_fields().items():
+            if field_name == "id":
+                continue
+            result_attr = getattr(self, field_name)
+            if isinstance(other, dict):
+                try:
+                    other_attr = other[field_name]
+                except KeyError:
+                    continue
+            else:
+                other_attr = getattr(other, field_name, None)
+            if not other_attr:
+                continue
+            if append:
+                if isinstance(field, ArrayField):
+                    if not result_attr:
+                        result_attr = []
+                    result_attr.extend(other_attr)
+                elif isinstance(field, (JSONField, SetField)):
+                    if not result_attr:
+                        result_attr = {}
+                    result_attr |= other_attr
+                elif isinstance(field, ManyToManyField):
+                    result_attr.add(*other_attr.values_list("pk", flat=True))
+                    continue
+                elif isinstance(field, ForeignKey):
+                    if isinstance(other_attr, dict):
+                        other_attr = field.related_model.objects.get_or_create(
+                            **other_attr
+                        )
+                    elif isinstance(other_attr, models.Model):
+                        pass
+                    else:
+                        logger.error(
+                            f"Field {field_name} has wrong type with value {other_attr}"
+                        )
+                        continue
+                    result_attr = other_attr
+                else:
+                    result_attr = other_attr
+            else:
+                result_attr = other_attr
+            setattr(self, field_name, result_attr)
+        self.save()
+        return self
+
+    def __sub__(self, other: "BaseDataModel") -> "BaseDataModel":
+        from deepdiff import DeepDiff
+
+        if not isinstance(other, BaseDataModel):
+            raise TypeError(f"Different class between {self} and {type(other)}")
+        dict1 = self.serialize()
+        dict2 = other.serialize()
+        result = DeepDiff(
+            dict1,
+            dict2,
+            ignore_order=True,
+            verbose_level=1,
+            exclude_paths=["id", "analyzers_report", "jobs", "date"],
+        )
+
+        new = self.__class__.objects.create()
+        return new.merge(result)
+
     @classmethod
     def get_content_type(cls) -> ContentType:
         return ContentType.objects.get_for_model(model=cls)
@@ -121,13 +209,12 @@ class BaseDataModel(models.Model):
             field.name: field for field in cls._meta.fields + cls._meta.many_to_many
         }
 
-    @property
-    def owner(self) -> User:
-        return self.analyzers_report.first().user
-
     @classmethod
     def get_serializer(cls) -> Type[ModelSerializer]:
         raise NotImplementedError()
+
+    def serialize(self) -> Dict:
+        return self.get_serializer()(self, read_only=True).data
 
 
 class DomainDataModel(BaseDataModel):

@@ -49,10 +49,8 @@ class JobAdminView(CustomAdminView):
         "id",
         "status",
         "user",
-        "observable_name",
-        "observable_classification",
-        "file_name",
-        "file_mimetype",
+        "get_analyzable_name",
+        "get_analyzable_classification",
         "received_request_time",
         "analyzers_executed",
         "connectors_executed",
@@ -64,12 +62,15 @@ class JobAdminView(CustomAdminView):
         "user",
         "status",
     )
-    search_fields = (
-        "md5",
-        "observable_name",
-        "file_name",
-    )
     list_filter = ("status", "user", "tags")
+
+    @admin.display(description="Name")
+    def get_analyzable_name(self, instance):
+        return instance.analyzable.name
+
+    @admin.display(description="Classification")
+    def get_analyzable_classification(self, instance):
+        return instance.analyzable.classification
 
     @staticmethod
     def has_add_permission(request: HttpRequest) -> bool:

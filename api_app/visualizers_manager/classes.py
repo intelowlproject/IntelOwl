@@ -534,24 +534,23 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
         report.save()
         return report
 
-    def analyzer_reports(self) -> QuerySet:
+    def get_analyzer_reports(self) -> QuerySet:
         from api_app.analyzers_manager.models import AnalyzerReport
 
         return AnalyzerReport.objects.filter(job=self._job)
 
-    def connector_reports(self) -> QuerySet:
+    def get_connector_reports(self) -> QuerySet:
         from api_app.connectors_manager.models import ConnectorReport
 
         return ConnectorReport.objects.filter(job=self._job)
 
-    def pivots_reports(self) -> QuerySet:
+    def get_pivots_reports(self) -> QuerySet:
         from api_app.pivots_manager.models import PivotReport
 
         return PivotReport.objects.filter(job=self._job)
 
-    def data_models(self) -> QuerySet:
-        from api_app.analyzers_manager.models import AnalyzerReport
+    def get_data_models(self) -> QuerySet:
 
-        data_model_class = AnalyzerReport.get_data_model_class(self._job)
-        analyzer_reports_pk = [report.pk for report in self.analyzer_reports()]
+        data_model_class = self._job.analyzable.get_data_model_class()
+        analyzer_reports_pk = [report.pk for report in self.get_analyzer_reports()]
         return data_model_class.objects.filter(analyzers_report__in=analyzer_reports_pk)

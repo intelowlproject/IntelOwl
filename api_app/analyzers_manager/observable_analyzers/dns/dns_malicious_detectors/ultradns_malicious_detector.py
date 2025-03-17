@@ -5,6 +5,7 @@ import dns.resolver
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 
 from ..dns_responses import malicious_detector_response
 
@@ -22,7 +23,7 @@ class UltraDNSMaliciousDetector(classes.ObservableAnalyzer):
         observable = self.observable_name
 
         # for URLs we are checking the relative domain
-        if self.observable_classification == self.ObservableTypes.URL:
+        if self.observable_classification == Classification.URL:
             observable = urlparse(self.observable_name).hostname
 
         # Configure resolver with both nameservers

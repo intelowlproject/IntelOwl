@@ -9,6 +9,9 @@ def migrate(apps, schema_editor):
 
     PivotMap = apps.get_model("pivots_manager", "PivotMap")
     Investigation = apps.get_model("investigations_manager", "Investigation")
+    Job = apps.get_model("api_app", "Job")
+    if not Job.objects.count():
+        return
     # I have to use the import here because i really need the class methods
     from api_app.models import Job as JobNonStoric
 

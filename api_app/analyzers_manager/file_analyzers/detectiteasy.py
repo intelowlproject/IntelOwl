@@ -18,9 +18,10 @@ class DetectItEasy(FileAnalyzer):
         logger.info(f"Running DIE on {self.filepath} for {self.md5}")
 
         json_report = die.scan_file(
-            self.filepath, die.ScanFlags.RESULT_AS_JSON, str(die.database_path / "db")
+            self.filepath,
+            die.ScanFlags.RESULT_AS_JSON,
+            str(die.database_path / "db"),
         )
-
         return json.loads(json_report)
 
     @staticmethod

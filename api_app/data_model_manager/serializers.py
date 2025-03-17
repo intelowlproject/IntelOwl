@@ -68,11 +68,17 @@ class DataModelRelatedField(serializers.RelatedField):
 
     def to_representation(self, value):
         if isinstance(value, DomainDataModel):
-            internal_serializer = DomainDataModelSerializer(value)
+            internal_serializer = DomainDataModelSerializer(
+                value, omit=self.context.get("omit", [])
+            )
         elif isinstance(value, IPDataModel):
-            internal_serializer = IPDataModelSerializer(value)
+            internal_serializer = IPDataModelSerializer(
+                value, omit=self.context.get("omit", [])
+            )
         elif isinstance(value, FileDataModel):
-            internal_serializer = FileDataModelSerializer(value)
+            internal_serializer = FileDataModelSerializer(
+                value, omit=self.context.get("omit", [])
+            )
         else:
             raise RuntimeError("Unexpected type of of data_model")
         return internal_serializer.data

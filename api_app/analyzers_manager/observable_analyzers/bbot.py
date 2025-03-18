@@ -53,11 +53,13 @@ class BBOT(ObservableAnalyzer, DockerBasedAnalyzer):
         logger.info(f"Sending BBOT scan request: {req_data} to {self.url}")
 
         try:
-            return self._docker_run(req_data)
+            response = self._docker_run(req_data)
+            logger.debug(f"BBOT response: {response}")
+            return response
         except Exception as e:
             raise AnalyzerRunException(f"BBOT analyzer failed: {e}")
 
-    def update(self) -> bool:
+    def update(self):
         pass
 
     @classmethod
@@ -67,17 +69,13 @@ class BBOT(ObservableAnalyzer, DockerBasedAnalyzer):
                 patch(
                     "bbot.scanner.Scanner.start",
                     return_value=MockUpResponse(
-                        status_code=200,
-                        json_data={
-                            "module": "mock_module",
-                            "category": "mock_category",
-                            "name": "mock_name",
-                            "description": "mock_description",
-                            "severity": "mock_severity",
-                            "confidence": "mock_confidence",
-                            "tags": ["mock_tag1", "mock_tag2"],
-                            "details": {"key1": "mock_value1", "key2": "mock_value2"},
+                        {
+                            "status": "success",
+                            "data": "example.com. 236 IN A 23.215.0.138",
+                            "message": "DNS query for example.com completed successfully.",
                         },
+                        200,
+                        content=b"pn\x01\x03\x00\x01\x00\x00\x00\x00\x00\x00\x07example\x03com\x00\x00\x01\x00\x01",
                     ),
                 )
             )

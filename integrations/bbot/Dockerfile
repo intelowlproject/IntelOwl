@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bullseye
+FROM python:3.12-slim
 
 # Environment variables
 ENV PROJECT_PATH=/opt/deploy/bbot
@@ -19,10 +19,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Upgrade pip and install Python packages
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir quart hypercorn bbot baddns numpy badsecrets pyOpenSSL
+    pip install --no-cache-dir fastapi uvicorn[standard] bbot
 
 # Pre-install BBOT dependencies
-RUN bbot --install-all-deps -y
+RUN bbot --install-all-deps -y --force
+
+ENV BBOT_DISABLE_DEPSINSTALL=1  
+ENV BBOT_SKIP_FIRST_RUN=1 
 
 
 # Set up project directory

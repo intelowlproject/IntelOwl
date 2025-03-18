@@ -1,64 +1,52 @@
-import asyncio
-import multiprocessing
-import threading
+import logging
 
-from bbot.scanner import Preset, Scanner
-from hypercorn.asyncio import serve
-from hypercorn.config import Config
-from quart import Quart, jsonify, request
+from bbot.scanner import Scanner
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
-orig_process_init = multiprocessing.Process.__init__
+app = FastAPI()
 
-
-def non_daemon_process_init(self, *args, **kwargs):
-    orig_process_init(self, *args, **kwargs)
-    self.daemon = False
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
-multiprocessing.Process.__init__ = non_daemon_process_init
-
-orig_thread_init = threading.Thread.__init__
-
-
-def non_daemon_thread_init(self, *args, **kwargs):
-    kwargs["daemon"] = False
-    orig_thread_init(self, *args, **kwargs)
+class scan_request(BaseModel):
+    target: str
+    presets: list[str] = ["web-basic"]
+    modules: list[str] = []
 
 
-threading.Thread.__init__ = non_daemon_thread_init
+@app.post("/run")
+async def run_scan(request: scan_request):
+    if not request.target:
+        logger.error("No target provided")
+        raise HTTPException(status_code=400, detail="No target provided")
 
-
-app = Quart(__name__)
-
-
-@app.route("/run", methods=["POST"])
-async def run_scan():
-    data = await request.get_json()
-    target = data.get("target")
-    presets = data.get("presets", ["web-basic"])
-    modules = data.get("modules", ["httpx"])
-
-    if not target:
-        return jsonify({"error": "No target provided"}), 400
-
-    scan_preset = Preset(
-        target, modules=modules, presets=presets, output_modules=["json"], max_workers=1
-    )
-
-    scanner = Scanner(preset=scan_preset)
+    logger.info(f"Received scan request for target: {request.target}")
 
     try:
+
+        scanner = Scanner(
+            request.target,
+            modules=request.modules,
+            presets=request.presets,
+            output_modules=["json"],
+        )
+
         results = []
+
         async for event in scanner.async_start():
-            results.append(event)
-        return {"results": results}
+            results.append(event.data)
+
+        logger.info(f"Scan results: {results}")
+        return {"success": True, "report": {"events": results}}
+
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logger.error(f"Error while scanning target: {e}")
+        raise HTTPException(status_code=500, detail="Error while scanning")
 
 
 if __name__ == "__main__":
-    multiprocessing.set_start_method("spawn", force=True)
+    import uvicorn
 
-    config = Config()
-    config.bind = ["0.0.0.0:5000"]
-    asyncio.run(serve(app, config))
+    uvicorn.run(app, host="0.0.0.0", port=5000)

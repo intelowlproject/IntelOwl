@@ -24,21 +24,18 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Pre-install BBOT dependencies
 RUN bbot --install-all-deps -y --force
 
-ENV BBOT_DISABLE_DEPSINSTALL=1  
-ENV BBOT_SKIP_FIRST_RUN=1 
-
-
 # Set up project directory
 WORKDIR ${PROJECT_PATH}
 
 # Copy application files
-COPY --chown=${USER}:${USER} app.py entrypoint.sh ./
+COPY --chown=${USER}:${USER} app.py ./
 
 # Make scripts executable
-RUN chmod u+x entrypoint.sh app.py
+RUN chmod u+x app.py
 
 # Expose port
 EXPOSE 5000
 
 # Entrypoint
-ENTRYPOINT ["./entrypoint.sh"]
+# ENTRYPOINT ["./entrypoint.sh"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "5000", "--log-level", "debug"]

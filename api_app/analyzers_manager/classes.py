@@ -435,12 +435,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         # step #2: raise AnalyzerRunException in case of error
         # Modified to support synchronous analyzer BBOT that return results directly in the initial response, avoiding unnecessary polling.
         if analyzer_name == "BBOT_Analyzer":
-            if not self.__raise_in_case_bad_request(
-                analyzer_name, resp1, params_to_check=["report"]
-            ):
-                raise AssertionError
             report = resp1.json().get("report", None)
-
         else:
             if not self.__raise_in_case_bad_request(self.name, resp1):
                 raise AssertionError

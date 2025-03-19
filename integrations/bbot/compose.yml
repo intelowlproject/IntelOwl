@@ -5,11 +5,10 @@ services:
     image: intelowlproject/intelowl_bbot_analyzer:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_bbot_analyzer
     restart: unless-stopped
-    networks:
-      - intel_owl_default
     expose:
       - "5000"
     volumes:
       - generic_logs:/var/log/intel_owl
+      - ../:/opt/deploy/intel_owl
     depends_on:
       - uwsgi

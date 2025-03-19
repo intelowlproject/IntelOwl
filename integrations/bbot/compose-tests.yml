@@ -3,6 +3,6 @@
 services:
   bbot_analyzer:
     build:
-      context: ../integrations/bbot_analyzer
+      context: ../integrations/bbot
       dockerfile: Dockerfile
-    image: intelowlproject/intelowl_bbot_analyzer:test
+    image: intelowlproject/intelowl_bbot_analyzer:${REACT_APP_INTELOWL_VERSION}

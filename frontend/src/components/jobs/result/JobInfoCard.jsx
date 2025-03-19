@@ -51,13 +51,13 @@ export function JobInfoCard({ job }) {
           <Col sm={12} md={3} className="d-flex justify-content-start">
             <Button
               className="bg-darker border-1 lh-sm mx-1"
-              href={`/history/investigations?start-time=${format(
+              href={`/history/investigations?start_time__gte=${format(
                 startDateRelatedInvestigation,
                 datetimeFormatStr,
-              )}&end-time=${format(
+              )}&start_time__lte=${format(
                 endDateRelatedInvestigation,
                 datetimeFormatStr,
-              )}&analyzed-object-name=${
+              )}&analyzed_object_name=${
                 job.is_sample ? job.file_name : job.observable_name
               }`}
               target="_blank"

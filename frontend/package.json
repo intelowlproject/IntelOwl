@@ -4,7 +4,7 @@
   "private": true,
   "proxy": "http://localhost:80/",
   "dependencies": {
-    "@certego/certego-ui": "^0.1.14",
+    "@certego/certego-ui": "git://github.com/certego/certego-ui.git#78a9aae9cfaaf40f41e6e814afdcd556d439feb9",
     "@dagrejs/dagre": "^1.1.4",
     "axios": "^1.7.7",
     "axios-hooks": "^3.1.5",

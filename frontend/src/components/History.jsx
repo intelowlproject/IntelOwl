@@ -6,12 +6,15 @@ import { Button, Col, Nav, NavItem, TabContent, TabPane } from "reactstrap";
 import {
   useNavigate,
   useLocation,
+  useSearchParams,
   NavLink as RRNavLink,
 } from "react-router-dom";
+import { format } from "date-fns-tz";
 
 import { FallBackLoading } from "@certego/certego-ui";
 import { useGuideContext } from "../contexts/GuideContext";
 import { createInvestigation } from "./investigations/result/investigationApi";
+import { datetimeFormatStr } from "../constants/miscConst";
 
 const JobsTable = React.lazy(() => import("./jobs/table/JobsTable"));
 const InvestigationsTable = React.lazy(
@@ -22,6 +25,19 @@ export default function History() {
   const navigate = useNavigate();
   const location = useLocation();
   const isJobsTablePage = location?.pathname.includes("jobs");
+
+  const [searchParams, _] = useSearchParams();
+
+  let startTimeParam;
+  let endTimeParam;
+
+  if (isJobsTablePage) {
+    startTimeParam = searchParams.get("received_request_time__gte");
+    endTimeParam = searchParams.get("received_request_time__lte");
+  } else {
+    startTimeParam = searchParams.get("start_time__gte");
+    endTimeParam = searchParams.get("start_time__lte");
+  }
 
   const { guideState, setGuideState } = useGuideContext();
 
@@ -66,7 +82,14 @@ export default function History() {
     <>
       <Nav className="nav-tabs">
         <NavItem>
-          <RRNavLink className="nav-link" to="/history/jobs">
+          <RRNavLink
+            className="nav-link"
+            to={`/history/jobs?received_request_time__gte=${encodeURIComponent(
+              format(startTimeParam, datetimeFormatStr),
+            )}&received_request_time__lte=${encodeURIComponent(
+              format(endTimeParam, datetimeFormatStr),
+            )}`}
+          >
             <span id="Jobs">
               <RiFileListFill />
               &nbsp;Jobs
@@ -74,7 +97,14 @@ export default function History() {
           </RRNavLink>
         </NavItem>
         <NavItem>
-          <RRNavLink className="nav-link" to="/history/investigations">
+          <RRNavLink
+            className="nav-link"
+            to={`/history/investigations?start_time__gte=${encodeURIComponent(
+              format(startTimeParam, datetimeFormatStr),
+            )}&start_time__lte=${encodeURIComponent(
+              format(endTimeParam, datetimeFormatStr),
+            )}`}
+          >
             <span id="investigations">
               <DiGitMerge />
               &nbsp;Investigations

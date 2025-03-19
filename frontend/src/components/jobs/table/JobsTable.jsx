@@ -1,6 +1,14 @@
 /* eslint-disable react/prop-types */
 import React from "react";
-import { Container, Row, Col, UncontrolledTooltip, Spinner } from "reactstrap";
+import {
+  Container,
+  Row,
+  Col,
+  UncontrolledTooltip,
+  Spinner,
+  Label,
+  Input,
+} from "reactstrap";
 import { MdInfoOutline } from "react-icons/md";
 
 import {
@@ -15,11 +23,9 @@ import useTitle from "react-use/lib/useTitle";
 import { useSearchParams } from "react-router-dom";
 import { format, toDate } from "date-fns";
 import { jobTableColumns } from "./jobTableColumns";
-import { TimePicker } from "../../common/TimePicker";
 
 import { JOB_BASE_URI } from "../../../constants/apiURLs";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
-import { useTimePickerStore } from "../../../stores/useTimePickerStore";
 import { datetimeFormatStr } from "../../../constants/miscConst";
 
 // component
@@ -30,71 +36,61 @@ export default function JobsTable() {
   useTitle("IntelOwl | Jobs History", { restoreOnUnmount: true });
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const startTimeParam = searchParams.get("start-time");
-  const endTimeParam = searchParams.get("end-time");
+  const startTimeParam = searchParams.get("received_request_time__gte");
+  const endTimeParam = searchParams.get("received_request_time__lte");
 
-  console.debug("searchParams: ");
-
-  const [toDateValue, fromDateValue, updateToDate, updateFromDate] =
-    useTimePickerStore((state) => [
-      state.toDateValue,
-      state.fromDateValue,
-      state.updateToDate,
-      state.updateFromDate,
-    ]);
+  // default: 24h
+  const defaultFromDate = new Date();
+  defaultFromDate.setDate(defaultFromDate.getDate() - 1);
   const [searchFromDateValue, setSearchFromDateValue] =
-    React.useState(fromDateValue);
-  const [searchToDateValue, setSearchToDateValue] = React.useState(toDateValue);
+    React.useState(defaultFromDate);
+  const [searchToDateValue, setSearchToDateValue] = React.useState(new Date());
 
   // state
   const [areParamsInitialized, setAreParamsInitialized] = React.useState(false); // used to prevent a request with wrong params
 
-  // this update the value after some times, this give user time to pick the datetime
-  useDebounceInput(fromDateValue, 1000, setSearchFromDateValue);
-  useDebounceInput(toDateValue, 1000, setSearchToDateValue);
-
   React.useEffect(() => {
-    // update timepicker store with url params
     if (startTimeParam) {
       setSearchFromDateValue(toDate(startTimeParam));
-      updateFromDate(toDate(startTimeParam));
     }
     if (endTimeParam) {
       setSearchToDateValue(toDate(endTimeParam));
-      updateToDate(toDate(endTimeParam));
     }
     setAreParamsInitialized(true);
-  }, [startTimeParam, endTimeParam, updateFromDate, updateToDate]);
+  }, [startTimeParam, endTimeParam]);
 
   React.useEffect(() => {
     // After the initialization each time the time picker change, update the url
     // Note: this check is required to avoid infinite loop (url update time picker and time picker update url)
-    if (areParamsInitialized) {
-      if (
-        startTimeParam !== format(searchFromDateValue, datetimeFormatStr) ||
-        endTimeParam !== format(searchToDateValue, datetimeFormatStr)
-      ) {
-        const currentParams = {};
-        // @ts-ignore
-        searchParams.entries().forEach((element) => {
-          const [paramName, paramValue] = element;
-          currentParams[paramName] = paramValue;
-        });
-        setSearchParams({
-          ...currentParams,
-          "start-time": format(searchFromDateValue, datetimeFormatStr),
-          "end-time": format(searchToDateValue, datetimeFormatStr),
-        });
-      }
+    if (
+      areParamsInitialized &&
+      (startTimeParam !== format(searchFromDateValue, datetimeFormatStr) ||
+        endTimeParam !== format(searchToDateValue, datetimeFormatStr))
+    ) {
+      const currentParams = {};
+      // @ts-ignore
+      searchParams.entries().forEach((element) => {
+        const [paramName, paramValue] = element;
+        currentParams[paramName] = paramValue;
+      });
+      setSearchParams({
+        ...currentParams,
+        received_request_time__gte: format(
+          searchFromDateValue,
+          datetimeFormatStr,
+        ),
+        received_request_time__lte: format(
+          searchToDateValue,
+          datetimeFormatStr,
+        ),
+      });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     setSearchParams,
     areParamsInitialized,
     searchFromDateValue,
     searchToDateValue,
-    startTimeParam,
-    endTimeParam,
-    searchParams,
   ]);
 
   return areParamsInitialized ? ( // this "if" avoid one request
@@ -123,18 +119,57 @@ function JobsTableComponent({ searchFromDateValue, searchToDateValue }) {
     (state) => [state.playbooksLoading, state.playbooksError],
   );
 
-  const [data, tableNode, refetch, _, loadingTable] = useDataTable(
+  const [
+    data,
+    tableNode,
+    refetch,
+    tableStateReducer,
+    loadingTable,
+    tableState,
+  ] = useDataTable(
     {
       url: JOB_BASE_URI,
       params: {
-        received_request_time__gte: searchFromDateValue,
-        received_request_time__lte: searchToDateValue,
-      },
-      initialParams: {
-        ordering: "-start_time",
+        ordering: "-received_request_time",
       },
     },
     toPassTableProps,
+  );
+
+  // state
+  const [fromDateType, setFromDateType] = React.useState(searchFromDateValue);
+  const [toDateType, setToDateType] = React.useState(searchToDateValue);
+
+  const onChangeFilter = ({ name, value }) => {
+    const { filters } = tableState;
+    // check if there is already a filter for the selected item
+    const filterIndex = filters.findIndex((filter) => filter.id === name);
+
+    // Note: this check is required to avoid infinite loop
+    if (
+      filterIndex !== -1 &&
+      filters[filterIndex].value === format(value, datetimeFormatStr)
+    )
+      return null;
+
+    // If the filter is already present I update the value
+    if (filterIndex !== -1) filters[filterIndex].value = value;
+    // otherwise I add a new element to the filter list
+    else filters.push({ id: name, value });
+    // set new filters
+    return tableStateReducer({ filters }, { type: "setFilter" });
+  };
+
+  // this update the value after some times, this give user time to pick the datetime
+  useDebounceInput(
+    { name: "received_request_time__gte", value: fromDateType },
+    1000,
+    onChangeFilter,
+  );
+  useDebounceInput(
+    { name: "received_request_time__lte", value: toDateType },
+    1000,
+    onChangeFilter,
   );
 
   return (
@@ -166,7 +201,54 @@ function JobsTableComponent({ searchFromDateValue, searchToDateValue }) {
               </div>
             </Col>
             <Col className="align-self-center">
-              <TimePicker />
+              <div className="d-flex float-end">
+                <div className="d-flex align-items-center">
+                  <Label className="me-1 mb-0" for="DatePicker__gte">
+                    From:
+                  </Label>
+                  <Input
+                    id="DatePicker__gte"
+                    type="datetime-local"
+                    name="received_request_time__gte"
+                    autoComplete="off"
+                    value={format(fromDateType, datetimeFormatStr)}
+                    onChange={(event) => {
+                      setFromDateType(
+                        event.target.value === ""
+                          ? format(new Date(), datetimeFormatStr)
+                          : format(
+                              new Date(event.target.value),
+                              datetimeFormatStr,
+                            ),
+                      );
+                    }}
+                    min="1970-01-01T00:00:00"
+                  />
+                </div>
+                <div className="d-flex align-items-center ms-1">
+                  <Label className="me-1 mb-0" for="DatePicker__lte">
+                    To:
+                  </Label>
+                  <Input
+                    id="DatePicker__lte"
+                    type="datetime-local"
+                    name="received_request_time__lte"
+                    autoComplete="off"
+                    value={format(toDateType, datetimeFormatStr)}
+                    onChange={(event) => {
+                      setToDateType(
+                        event.target.value === ""
+                          ? format(new Date(), datetimeFormatStr)
+                          : format(
+                              new Date(event.target.value),
+                              datetimeFormatStr,
+                            ),
+                      );
+                    }}
+                    min="1970-01-01T00:00:00"
+                  />
+                </div>
+              </div>
             </Col>
           </Row>
           {/* Actions */}

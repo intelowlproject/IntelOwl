@@ -45,9 +45,9 @@ function CustomRedirect() {
 
   return (
     <Navigate
-      to={`/history/jobs?start-time=${encodeURIComponent(
+      to={`/history/jobs?received_request_time__gte=${encodeURIComponent(
         format(startDatetime, datetimeFormatStr),
-      )}&end-time=${encodeURIComponent(
+      )}&received_request_time__lte=${encodeURIComponent(
         format(endDatetime, datetimeFormatStr),
       )}`}
       replace
@@ -186,7 +186,6 @@ const authRoutesLazy = [
       </Suspense>
     ),
   },
-  // {
   {
     path: "/history",
     element: (

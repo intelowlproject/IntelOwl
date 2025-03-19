@@ -436,6 +436,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         # Modified to support synchronous analyzer BBOT that return results directly in the initial response, avoiding unnecessary polling.
         if analyzer_name == "BBOT_Analyzer":
             report = resp1.json().get("report", None)
+            err = resp1.json().get("error", None)
         else:
             if not self.__raise_in_case_bad_request(self.name, resp1):
                 raise AssertionError

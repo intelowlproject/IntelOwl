@@ -8,6 +8,7 @@ from typing import Dict, Generator, List, Union
 
 import django.core
 from django.conf import settings
+from django.core.cache import cache
 from django.db.models import Q, QuerySet
 from django.http import QueryDict
 from django.utils.timezone import now
@@ -637,12 +638,24 @@ class JobSerializer(_AbstractJobViewSerializer):
         return instance.investigation
 
     def get_related_investigation_number(self, instance: Job) -> int:
-        return Investigation.investigation_for_analyzable(
+        # this query is cpu intensive, and it's done for very often:
+        # during an analysis each time an analyzer it's completed this query is done from the websocket
+        cache_key = f"{instance.id}_related_investigation_number"
+        cached_investigation_number = cache.get(cache_key)
+        logger.debug(f"{cache_key=}: {cached_investigation_number=}")
+        if cached_investigation_number is not None:
+            logger.debug(f"used cache: {cache_key=}")
+            return cached_investigation_number
+
+        related_investigation_number = Investigation.investigation_for_analyzable(
             Investigation.objects.filter(
                 start_time__gte=now() - datetime.timedelta(days=30),
             ),
             instance.analyzable.name,
         ).count()
+        cache.set(cache_key, related_investigation_number, 60)
+        logger.debug(f"set cache: {cache_key=} for {related_investigation_number=}")
+        return related_investigation_number
 
     def get_fields(self):
         # this method override is required for a cyclic import

@@ -63,8 +63,7 @@ class BBOT(ObservableAnalyzer, DockerBasedAnalyzer):
     def update(self):
         pass
 
-    @classmethod
-    def _monkeypatch(cls):
+    def _monkeypatch(self):
         """Mock BBOT's HTTP API response for testing."""
         mock_response = {
             "report": {
@@ -105,4 +104,4 @@ class BBOT(ObservableAnalyzer, DockerBasedAnalyzer):
                 patch("requests.post", return_value=MockUpResponse(mock_response, 200))
             )
         ]
-        return super()._monkeypatch(cls, patches=patches)
+        return super()._monkeypatch(patches=patches)

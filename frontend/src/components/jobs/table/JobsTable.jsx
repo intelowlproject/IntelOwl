@@ -1,14 +1,6 @@
 /* eslint-disable react/prop-types */
 import React from "react";
-import {
-  Container,
-  Row,
-  Col,
-  UncontrolledTooltip,
-  Spinner,
-  Label,
-  Input,
-} from "reactstrap";
+import { Container, Row, Col, UncontrolledTooltip, Spinner } from "reactstrap";
 import { MdInfoOutline } from "react-icons/md";
 
 import {
@@ -27,6 +19,7 @@ import { jobTableColumns } from "./jobTableColumns";
 import { JOB_BASE_URI } from "../../../constants/apiURLs";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { datetimeFormatStr } from "../../../constants/miscConst";
+import { TimePicker } from "../../common/TimePicker";
 
 // component
 export default function JobsTable() {
@@ -145,15 +138,13 @@ function JobsTableComponent({ searchFromDateValue, searchToDateValue }) {
     // check if there is already a filter for the selected item
     const filterIndex = filters.findIndex((filter) => filter.id === name);
 
-    // Note: this check is required to avoid infinite loop
-    if (
-      filterIndex !== -1 &&
-      filters[filterIndex].value === format(value, datetimeFormatStr)
-    )
-      return null;
-
-    // If the filter is already present I update the value
-    if (filterIndex !== -1) filters[filterIndex].value = value;
+    // If the filter is already present (index>=0) I update the value
+    if (filterIndex !== -1) {
+      // Note: this check is required to avoid infinite loop
+      if (filters[filterIndex].value === format(value, datetimeFormatStr))
+        return null;
+      filters[filterIndex].value = value;
+    }
     // otherwise I add a new element to the filter list
     else filters.push({ id: name, value });
     // set new filters
@@ -201,54 +192,15 @@ function JobsTableComponent({ searchFromDateValue, searchToDateValue }) {
               </div>
             </Col>
             <Col className="align-self-center">
-              <div className="d-flex float-end">
-                <div className="d-flex align-items-center">
-                  <Label className="me-1 mb-0" for="DatePicker__gte">
-                    From:
-                  </Label>
-                  <Input
-                    id="DatePicker__gte"
-                    type="datetime-local"
-                    name="received_request_time__gte"
-                    autoComplete="off"
-                    value={format(fromDateType, datetimeFormatStr)}
-                    onChange={(event) => {
-                      setFromDateType(
-                        event.target.value === ""
-                          ? format(new Date(), datetimeFormatStr)
-                          : format(
-                              new Date(event.target.value),
-                              datetimeFormatStr,
-                            ),
-                      );
-                    }}
-                    min="1970-01-01T00:00:00"
-                  />
-                </div>
-                <div className="d-flex align-items-center ms-1">
-                  <Label className="me-1 mb-0" for="DatePicker__lte">
-                    To:
-                  </Label>
-                  <Input
-                    id="DatePicker__lte"
-                    type="datetime-local"
-                    name="received_request_time__lte"
-                    autoComplete="off"
-                    value={format(toDateType, datetimeFormatStr)}
-                    onChange={(event) => {
-                      setToDateType(
-                        event.target.value === ""
-                          ? format(new Date(), datetimeFormatStr)
-                          : format(
-                              new Date(event.target.value),
-                              datetimeFormatStr,
-                            ),
-                      );
-                    }}
-                    min="1970-01-01T00:00:00"
-                  />
-                </div>
-              </div>
+              <TimePicker
+                id="jobs-table__time-picker"
+                fromName="received_request_time__gte"
+                toName="received_request_time__lte"
+                fromValue={fromDateType}
+                toValue={toDateType}
+                fromOnChange={setFromDateType}
+                toOnChange={setToDateType}
+              />
             </Col>
           </Row>
           {/* Actions */}

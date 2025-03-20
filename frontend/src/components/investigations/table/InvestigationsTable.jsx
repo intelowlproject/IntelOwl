@@ -26,6 +26,7 @@ import { format, toDate } from "date-fns-tz";
 import { INVESTIGATION_BASE_URI } from "../../../constants/apiURLs";
 import { investigationTableColumns } from "./investigationTableColumns";
 import { datetimeFormatStr } from "../../../constants/miscConst";
+import { TimePicker } from "../../common/TimePicker";
 
 // constants
 const toPassTableProps = {
@@ -154,12 +155,12 @@ function InvestigationTableComponent({
     if (["start_time__gte", "start_time__lte"].includes(name))
       valueToChange = format(value, datetimeFormatStr);
 
-    // Note: this check is required to avoid infinite loop
-    if (filterIndex !== -1 && filters[filterIndex].value === valueToChange)
-      return null;
-
-    // If the filter is already present I update the value
-    if (filterIndex !== -1) filters[filterIndex].value = value;
+    // If the filter is already present (index>=0) I update the value
+    if (filterIndex !== -1) {
+      // Note: this check is required to avoid infinite loop
+      if (filters[filterIndex].value === valueToChange) return null;
+      filters[filterIndex].value = value;
+    }
     // otherwise I add a new element to the filter list
     else filters.push({ id: name, value });
     // set new filters
@@ -209,54 +210,15 @@ function InvestigationTableComponent({
               </div>
             </Col>
             <Col className="align-self-center">
-              <div className="d-flex float-end">
-                <div className="d-flex align-items-center">
-                  <Label className="me-1 mb-0" for="DatePicker__gte">
-                    From:
-                  </Label>
-                  <Input
-                    id="DatePicker__gte"
-                    type="datetime-local"
-                    name="start_time__gte"
-                    autoComplete="off"
-                    value={format(fromDateType, datetimeFormatStr)}
-                    onChange={(event) => {
-                      setFromDateType(
-                        event.target.value === ""
-                          ? format(new Date(), datetimeFormatStr)
-                          : format(
-                              new Date(event.target.value),
-                              datetimeFormatStr,
-                            ),
-                      );
-                    }}
-                    min="1970-01-01T00:00:00"
-                  />
-                </div>
-                <div className="d-flex align-items-center ms-1">
-                  <Label className="me-1 mb-0" for="DatePicker__lte">
-                    To:
-                  </Label>
-                  <Input
-                    id="DatePicker__lte"
-                    type="datetime-local"
-                    name="start_time__lte"
-                    autoComplete="off"
-                    value={format(toDateType, datetimeFormatStr)}
-                    onChange={(event) => {
-                      setToDateType(
-                        event.target.value === ""
-                          ? format(new Date(), datetimeFormatStr)
-                          : format(
-                              new Date(event.target.value),
-                              datetimeFormatStr,
-                            ),
-                      );
-                    }}
-                    min="1970-01-01T00:00:00"
-                  />
-                </div>
-              </div>
+              <TimePicker
+                id="investigations-table__time-picker"
+                fromName="start_time__gte"
+                toName="start_time__lte"
+                fromValue={fromDateType}
+                toValue={toDateType}
+                fromOnChange={setFromDateType}
+                toOnChange={setToDateType}
+              />
               <div className="d-flex float-end me-1">
                 <div className="d-flex align-items-center">
                   <Label check>Name</Label>

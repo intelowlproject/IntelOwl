@@ -136,7 +136,6 @@ function InvestigationTableComponent({
       url: INVESTIGATION_BASE_URI,
       params: {
         analyzed_object_name: searchNameRequest,
-        ordering: "-start_time",
       },
     },
     toPassTableProps,

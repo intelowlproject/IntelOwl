@@ -122,9 +122,6 @@ function JobsTableComponent({ searchFromDateValue, searchToDateValue }) {
   ] = useDataTable(
     {
       url: JOB_BASE_URI,
-      params: {
-        ordering: "-received_request_time",
-      },
     },
     toPassTableProps,
   );

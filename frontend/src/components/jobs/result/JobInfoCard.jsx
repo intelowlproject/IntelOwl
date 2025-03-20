@@ -59,7 +59,7 @@ export function JobInfoCard({ job }) {
                 datetimeFormatStr,
               )}&analyzed_object_name=${
                 job.is_sample ? job.file_name : job.observable_name
-              }`}
+              }&ordering=-start_time`}
               target="_blank"
               rel="noreferrer"
               id="investigationSearchBtn"

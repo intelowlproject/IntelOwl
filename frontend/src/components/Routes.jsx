@@ -49,7 +49,7 @@ function CustomRedirect() {
         format(startDatetime, datetimeFormatStr),
       )}&received_request_time__lte=${encodeURIComponent(
         format(endDatetime, datetimeFormatStr),
-      )}`}
+      )}&ordering=-received_request_time`}
       replace
     />
   );

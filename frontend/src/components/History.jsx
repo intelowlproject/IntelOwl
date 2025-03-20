@@ -88,7 +88,7 @@ export default function History() {
               format(startTimeParam, datetimeFormatStr),
             )}&received_request_time__lte=${encodeURIComponent(
               format(endTimeParam, datetimeFormatStr),
-            )}`}
+            )}&ordering=-received_request_time`}
           >
             <span id="Jobs">
               <RiFileListFill />
@@ -103,7 +103,7 @@ export default function History() {
               format(startTimeParam, datetimeFormatStr),
             )}&start_time__lte=${encodeURIComponent(
               format(endTimeParam, datetimeFormatStr),
-            )}`}
+            )}&ordering=-start_time`}
           >
             <span id="investigations">
               <DiGitMerge />

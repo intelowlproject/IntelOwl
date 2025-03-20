@@ -563,7 +563,6 @@ class JobSerializer(_AbstractJobViewSerializer):
             "investigation_name",
             "permissions",
             "data_model",
-            "analyzers_data_model",
             "file_name",
             "file_mimetype",
             "is_sample",
@@ -620,7 +619,6 @@ class JobSerializer(_AbstractJobViewSerializer):
     )
     permissions = rfs.SerializerMethodField()
     data_model = rfs.SerializerMethodField()
-    analyzers_data_model = rfs.SerializerMethodField(read_only=True)
     is_sample = rfs.BooleanField(read_only=True)
 
     def get_pivots_to_execute(self, obj: Job):  # skipcq: PYL-R0201
@@ -674,11 +672,6 @@ class JobSerializer(_AbstractJobViewSerializer):
                 many=True, read_only=True, source=f"{field}reports"
             )
         return super().get_fields()
-
-    def get_analyzers_data_model(self, instance: Job):
-        if instance.analyzable.classification == Classification.GENERIC:
-            return []
-        return instance.get_analyzers_data_models().serialize()
 
     def get_data_model(self, instance: Job):
         if instance.data_model:

@@ -73,26 +73,22 @@ class EngineModuleTestCase(CustomTestCase):
 
         ip1 = IPDataModel.objects.create(
             evaluation=IPDataModel.EVALUATIONS.MALICIOUS.value,
+            reliability=8,
             resolutions=["1.2.3.4"],
             malware_family="test2",
         )
-        ip2 = IPDataModel.objects.create(
-            resolutions=["1.2.3.5"],
-            evaluation=IPDataModel.EVALUATIONS.SUSPICIOUS.value,
-            malware_family="test",
-        )
         ip3 = IPDataModel.objects.create(
             resolutions=["1.2.3.5"],
-            evaluation=IPDataModel.EVALUATIONS.CLEAN.value,
+            evaluation=IPDataModel.EVALUATIONS.TRUSTED.value,
+            reliability=2,
             malware_family="test2",
         )
 
-        result = self.execute(config, ip1, ip2, ip3)
+        result = self.execute(config, ip1, ip3)
         self.assertEqual(result["evaluation"], IPDataModel.EVALUATIONS.MALICIOUS.value)
         self.assertEqual(result["malware_family"], "test2")
 
         ip1.delete()
-        ip2.delete()
         ip3.delete()
 
     def test_evaluation(self):
@@ -101,10 +97,12 @@ class EngineModuleTestCase(CustomTestCase):
         ip1 = IPDataModel.objects.create(
             evaluation=IPDataModel.EVALUATIONS.MALICIOUS.value,
             resolutions=["1.2.3.4"],
+            reliability=8,
         )
         ip2 = IPDataModel.objects.create(
             resolutions=["1.2.3.5"],
-            evaluation=IPDataModel.EVALUATIONS.SUSPICIOUS.value,
+            evaluation=IPDataModel.EVALUATIONS.TRUSTED.value,
+            reliability=2,
         )
 
         result = self.execute(config, ip1, ip2)

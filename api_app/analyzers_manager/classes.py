@@ -16,6 +16,7 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..choices import Classification, PythonModuleBasePaths
 from ..classes import Plugin
+from ..data_model_manager.enums import DataModelEvaluations
 from ..models import PythonConfig
 from .constants import HashChoices, TypeChoices
 from .exceptions import AnalyzerConfigurationException, AnalyzerRunException
@@ -33,24 +34,7 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
 
     HashChoices = HashChoices
     TypeChoices = TypeChoices
-
-    MALICIOUS_EVALUATION = 75
-    SUSPICIOUS_EVALUATION = 35
-    FALSE_POSITIVE = -50
-
-    def threat_to_evaluation(self, threat_level):
-        # MAGIC NUMBERS HERE!!!
-        # I know, it should be 25-50-75-100. We raised it a bit because too many false positives were generated
-        self.report: AnalyzerReport
-        if threat_level >= self.MALICIOUS_EVALUATION:
-            evaluation = self.report.data_model_class.EVALUATIONS.MALICIOUS.value
-        elif threat_level >= self.SUSPICIOUS_EVALUATION:
-            evaluation = self.report.data_model_class.EVALUATIONS.SUSPICIOUS.value
-        elif threat_level <= self.FALSE_POSITIVE:
-            evaluation = self.report.data_model_class.EVALUATIONS.TRUSTED.value
-        else:
-            evaluation = self.report.data_model_class.EVALUATIONS.CLEAN.value
-        return evaluation
+    EVALUATIONS = DataModelEvaluations
 
     def _do_create_data_model(self) -> bool:
         if self.report.job.analyzable.classification == Classification.GENERIC.value:

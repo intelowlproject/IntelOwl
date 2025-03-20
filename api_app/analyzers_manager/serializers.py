@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 from rest_framework import serializers as rfs
 
+from ..data_model_manager.serializers import DataModelRelatedField
 from ..models import PythonModule
 from ..serializers.plugin import (
     ParameterSerializer,
@@ -13,9 +14,12 @@ from .models import AnalyzerConfig, AnalyzerReport
 
 
 class AnalyzerReportSerializer(AbstractReportSerializer):
+
+    data_model = DataModelRelatedField(read_only=True)
+
     class Meta:
         model = AnalyzerReport
-        fields = AbstractReportSerializer.Meta.fields
+        fields = AbstractReportSerializer.Meta.fields + ["data_model"]
         list_serializer_class = AbstractReportSerializer.Meta.list_serializer_class
 
 

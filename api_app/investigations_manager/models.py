@@ -106,12 +106,12 @@ class Investigation(OwnershipAbstractModel, ListCachable):
         cls, queryset: models.QuerySet, analyzed_object_name: str
     ) -> models.QuerySet:
         related_job_id_list = [
-            job.id
-            for job in Job.objects.filter(
+            job_data[0]
+            for job_data in Job.objects.filter(
                 analyzable__name__icontains=analyzed_object_name
-            )
+            ).values_list("id")
         ]
-        return queryset.filter(jobs__in=related_job_id_list).distinct()
+        return queryset.filter(jobs__id__in=related_job_id_list).distinct()
 
     @property
     def tags(self) -> List[str]:

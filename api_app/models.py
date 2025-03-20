@@ -705,8 +705,14 @@ class Job(MP_Node):
         )
         runner()
 
+    def get_user_events_data_model(self) -> BaseDataModelQuerySet:
+        return self.analyzable.get_all_user_events_data_model(self.user)
+
     def get_analyzers_data_models(self) -> BaseDataModelQuerySet:
-        return self.analyzerreports.get_data_models(self)
+        DataModel = self.analyzable.get_data_model_class()  # noqa
+        return DataModel.objects.filter(
+            pk__in=self.analyzerreports.values_list("data_model_object_id", flat=True)
+        )
 
     def get_config_runtime_configuration(self, config: "AbstractConfig") -> typing.Dict:
         try:

@@ -181,3 +181,8 @@ thead {
 input[type="file"]::file-selector-button {
   background-color: $primary;
 }
+
+.custom-ace-marker {
+  position: absolute;
+  background: rgb(33, 63, 75);
+}

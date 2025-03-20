@@ -238,11 +238,10 @@ describe("test plugins report table", () => {
     await waitFor(() => {
       const expandedRow = container.querySelector(`#jobreport-jsoninput-1`);
       expect(expandedRow).toBeInTheDocument();
-      expect(expandedRow.textContent).toContain("root:{} 4 keys");
-      expect(expandedRow.textContent).toContain("report:{} 2 keys");
-      expect(expandedRow.textContent).toContain("data_model:{} 0 keys");
-      expect(expandedRow.textContent).toContain("errors:[] 0 items");
-      expect(expandedRow.textContent).toContain("parameters:undefined");
+      const jsonReport = container.querySelector(
+        `#jsonAceEditor__plugin_report_json`,
+      );
+      expect(jsonReport).toBeInTheDocument();
     });
 
     // raw data - analyzers with data model
@@ -252,11 +251,10 @@ describe("test plugins report table", () => {
     await waitFor(() => {
       const expandedRow = container.querySelector(`#jobreport-jsoninput-0`);
       expect(expandedRow).toBeInTheDocument();
-      expect(expandedRow.textContent).toContain("root:{} 4 keys");
-      expect(expandedRow.textContent).toContain("report:{} 2 keys");
-      expect(expandedRow.textContent).toContain("data_model:{} 12 keys");
-      expect(expandedRow.textContent).toContain("errors:[] 0 items");
-      expect(expandedRow.textContent).toContain("parameters:undefined");
+      const jsonReport = container.querySelector(
+        `#jsonAceEditor__plugin_report_json`,
+      );
+      expect(jsonReport).toBeInTheDocument();
     });
   });
 });

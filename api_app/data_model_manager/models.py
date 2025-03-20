@@ -6,14 +6,16 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres import fields as pg_fields
 from django.contrib.postgres.fields import ArrayField
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models import ForeignKey, ManyToManyField
+from django.db.models import ForeignKey, ManyToManyField, PositiveIntegerField
 from django.forms import JSONField
 from django.utils.timezone import now
 from rest_framework.serializers import ModelSerializer
 
 from api_app.data_model_manager.enums import (
     DataModelEvaluations,
+    DataModelKillChainPhases,
     DataModelTags,
     SignatureProviderChoices,
 )
@@ -66,40 +68,31 @@ class BaseDataModel(models.Model):
         blank=True,
         default=None,
         choices=DataModelEvaluations.choices,
-    )  # classification/verdict/found/score/malscore
-    # HybridAnalysisObservable (verdict), BasicMaliciousDetector (malicious),
-    # GoogleSafeBrowsing (malicious), Crowdsec (classifications),
-    # GreyNoise (classification), Cymru (found), Cuckoo (malscore),
-    # Intezer (verdict/sub_verdict), Triage (analysis.score),
-    # HybridAnalysisFileAnalyzer (classification_tags)
+    )
+    reliability = PositiveIntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(10)], default=5
+    )
+    kill_chain_phase = LowercaseCharField(
+        default=None,
+        null=True,
+        blank=True,
+        choices=DataModelKillChainPhases.choices,
+        max_length=100,
+    )
     external_references = SetField(
         models.URLField(),
         blank=True,
         default=list,
-    )  # link/external_references/permalink/domains
-    # Crowdsec (link), UrlHaus (external_references), BoxJs,
-    # Cuckoo (result_url/permalink), Intezer (link/analysis_url),
-    # MalwareBazaarFileAnalyzer (permalink/file_information.value), MwDB (permalink),
-    # StringsInfo (data), Triage (permalink), UnpacMe (permalink), XlmMacroDeobfuscator,
-    # Yara (report.list_el.url/rule_url), Yaraify (link),
-    # HybridAnalysisFileAnalyzer (domains),
-    # VirusTotalV3FileAnalyzer (data.relationships.contacted_urls/contacted_domains)
+    )
     related_threats = SetField(
         LowercaseCharField(max_length=100), default=list, blank=True
     )  # threats/related_threats, used as a pointer to other IOCs
     tags = SetField(
         LowercaseCharField(max_length=100), null=True, blank=True, default=None
-    )  # used for generic tags like phishing, malware, social_engineering
-    # HybridAnalysisFileAnalyzer, MalwareBazaarFileAnalyzer, MwDB,
-    # VirusTotalV3FileAnalyzer (report.data.attributes.tags)
-    # GoogleSafeBrowsing, QuarkEngineAPK (crimes.crime)
+    )
     malware_family = LowercaseCharField(
         max_length=100, null=True, blank=True, default=None
-    )  # family/family_name/malware_family
-    # HybridAnalysisObservable, Intezer (family_name), Cuckoo, MwDB,
-    # Triage (analysis.family), UnpacMe (results.malware_id.malware_family),
-    # VirusTotalV3FileAnalyzer
-    # (attributes.last_analysis_results.list_el.results/attributes.names)
+    )
     additional_info = models.JSONField(
         default=dict
     )  # field for additional information related to a specific analyzer
@@ -115,6 +108,12 @@ class BaseDataModel(models.Model):
         content_type_field="data_model_content_type",
     )
 
+    user_events = GenericRelation(
+        to="user_events_manager.UserAnalyzableEvent",
+        object_id_field="data_model_object_id",
+        content_type_field="data_model_content_type",
+    )
+
     TAGS = DataModelTags
 
     EVALUATIONS = DataModelEvaluations
@@ -124,7 +123,10 @@ class BaseDataModel(models.Model):
 
     @property
     def owner(self) -> User:
-        return self.analyzers_report.first().user
+        if self.analyzers_report.exists():
+            return self.analyzers_report.first().user
+        elif self.jobs.exists():
+            return self.jobs.first().user
 
     def merge(
         self, other: Union["BaseDataModel", Dict], append: bool = True

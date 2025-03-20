@@ -17,14 +17,14 @@ describe("test TimePicker component", () => {
 
     const { container } = render(
       <BrowserRouter>
-        <TimePicker 
-            id="test-time-picker"
-            fromName="time__gte"
-            toName="time__lte"
-            fromValue={fromDate}
-            toValue={toDate}
-            fromOnChange={setFromDateValue}
-            toOnChange={setToDateValue}
+        <TimePicker
+          id="test-time-picker"
+          fromName="time__gte"
+          toName="time__lte"
+          fromValue={fromDate}
+          toValue={toDate}
+          fromOnChange={setFromDateValue}
+          toOnChange={setToDateValue}
         />
       </BrowserRouter>,
     );
@@ -41,8 +41,12 @@ describe("test TimePicker component", () => {
     const secondDateInput = container.querySelector("#DatePicker__lte");
     expect(secondDateInput).toBeInTheDocument();
     // datetime saves also milliseconds
-    expect(firstDateInput).toHaveValue(`${format(fromDate, datetimeFormatStr)}.000`);
-    expect(secondDateInput).toHaveValue(`${format(toDate, datetimeFormatStr)}.000`);
+    expect(firstDateInput).toHaveValue(
+      `${format(fromDate, datetimeFormatStr)}.000`,
+    );
+    expect(secondDateInput).toHaveValue(
+      `${format(toDate, datetimeFormatStr)}.000`,
+    );
 
     /* datetime-local input is editable only with fireEvent, user.type doesn't work:
     https://github.com/testing-library/user-event/issues/399#issuecomment-656084165 */
@@ -54,8 +58,8 @@ describe("test TimePicker component", () => {
     });
 
     await waitFor(() => {
-        expect(setFromDateValue).toHaveBeenCalledWith("2024-02-05T12:06:01");
-        expect(setToDateValue).toHaveBeenCalledWith("2024-05-13T12:06:01");
+      expect(setFromDateValue).toHaveBeenCalledWith("2024-02-05T12:06:01");
+      expect(setToDateValue).toHaveBeenCalledWith("2024-05-13T12:06:01");
     });
   });
 });

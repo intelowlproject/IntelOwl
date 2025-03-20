@@ -23,35 +23,35 @@ class Malshare(Ingestor):
     def update(cls) -> bool:
         pass
 
-    def run(self) -> Iterable[Any]:
-        print("malshare run")
+    def download_sample(self, h):
         try:
 
-            print(self.url)
-            print(self.limit)
-
-            print(self._api_key_name)
-
+            logger.info(f"Downloading sample {h}")
+            download_url = f"{self.url}/api.php?api_key={self._api_key_name}&action=getfile&hash={h}"
+            response = requests.get(download_url)
+            response.raise_for_status()
+            if not isinstance(response.content, bytes):
+                raise ValueError("VT downloaded file is not instance of bytes")
         except Exception as e:
-            print(e)
-        # self._api_key_name="16fd330a437706c7d5e52b5d5688125fdb6ab04df10547e58c8918c902db815c"
+            error_message = f"Cannot download the file {h}. Raised Error: {e}."
+            print(error_message)
+            raise IngestorRunException(error_message)
+        return response.content
+
+    def run(self) -> Iterable[Any]:
         req_url = f"{self.url}/api.php?api_key={self._api_key_name}&action=getlist"
         result = requests.get(req_url)
         result.raise_for_status()
         content = result.json()
-        print(content)
         if not isinstance(content, list):
             raise IngestorRunException(f"Content {content} not expected")
 
         # limit = min(len(content), self.limit)
-        for elem in content[0:10]:
-            value = elem.get("sha256")
-            yield value
-        # try:
-        #     # ipaddress.ip_address(value)
-        #     yield value
-        # except ValueError:
-        #     pass
+        for elem in content[75:78]:
+            hash = elem.get("sha256")
+            logger.info(f"Downloading sample {hash}")
+            sample = self.download_sample(hash)
+            yield sample
 
     @classmethod
     def _monkeypatch(cls):

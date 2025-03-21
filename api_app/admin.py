@@ -123,8 +123,6 @@ class PluginConfigAdminView(ModelWithOwnershipAdminView, CustomAdminView):
         "pk",
         "get_config",
         "parameter",
-        "for_organization",
-        "get_owner",
         "get_type",
         "value",
     ) + ModelWithOwnershipAdminView.list_display

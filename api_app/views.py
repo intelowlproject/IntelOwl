@@ -1494,10 +1494,14 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
                         param_obj["exist"] = True
                     org_config.append(copy.deepcopy(param_obj))
                 # override default config with user config (if any)
+                print(pc.data)
                 for config in [
                     config
                     for config in pc.data
-                    if config["owner"] == request.user.username
+                    if (
+                        config["owner"] == request.user.username
+                        or (request.user.is_superuser and config["ingestor_config"])
+                    )
                     and config["organization"] is None
                     and config["attribute"] == attribute
                 ]:

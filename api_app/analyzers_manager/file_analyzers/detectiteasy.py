@@ -1,10 +1,7 @@
 import json
 import logging
 
-try:
-    import die
-except ImportError:
-    die = None
+import die
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from tests.mock_utils import MockUpResponse

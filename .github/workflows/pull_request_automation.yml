@@ -94,8 +94,10 @@ jobs:
         if: always()
         run: |
           docker ps -a
+          docker logs intelowl_bbot_analyzer
           docker logs intelowl_uwsgi
           docker logs intelowl_daphne
+          
 
       - name: Setup coverage
         run: |
@@ -104,10 +106,6 @@ jobs:
       - name: Run test
         run: |
           docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests
-
-      - name: Check BBOT analyzer logs
-        run: |
-          docker logs bbot_analyzer
 
   frontend-tests:
     runs-on: ubuntu-latest

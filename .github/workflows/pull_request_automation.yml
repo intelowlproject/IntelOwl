@@ -90,6 +90,10 @@ jobs:
           STAGE: "ci"
           REPO_DOWNLOADER_ENABLED: false
 
+      - name: Check BBOT analyzer logs
+        run: |
+          docker logs bbot_analyzer
+
       - name: Docker debug
         if: always()
         run: |

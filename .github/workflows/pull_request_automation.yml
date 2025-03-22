@@ -90,10 +90,6 @@ jobs:
           STAGE: "ci"
           REPO_DOWNLOADER_ENABLED: false
 
-      - name: Check BBOT analyzer logs
-        run: |
-          docker logs bbot_analyzer
-
       - name: Docker debug
         if: always()
         run: |
@@ -108,6 +104,10 @@ jobs:
       - name: Run test
         run: |
           docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests
+
+      - name: Check BBOT analyzer logs
+        run: |
+          docker logs bbot_analyzer
 
   frontend-tests:
     runs-on: ubuntu-latest

@@ -21,7 +21,7 @@ plugin = {
         "base_path": "api_app.ingestors_manager.ingestors",
     },
     "schedule": {
-        "minute": "*",
+        "minute": "0",
         "hour": "*",
         "day_of_week": "*",
         "day_of_month": "*",
@@ -29,7 +29,7 @@ plugin = {
     },
     "periodic_task": {
         "crontab": {
-            "minute": "*",
+            "minute": "0",
             "hour": "*",
             "day_of_week": "*",
             "day_of_month": "*",
@@ -62,7 +62,7 @@ plugin = {
     },
     "playbooks_choice": ["FREE_TO_USE_ANALYZERS"],
     "name": "Malshare",
-    "description": "my des",
+    "description": "[MalShare](https://malshare.com/) is a public malware repository that allows registered users to access and share a collection of malware samples for research and analysis purposes",
     "disabled": True,
     "soft_time_limit": 60,
     "routing_key": "ingestor",
@@ -104,7 +104,7 @@ params = [
         "type": "str",
         "description": "",
         "is_secret": True,
-        "required": False,
+        "required": True,
     },
 ]
 
@@ -128,7 +128,7 @@ values = [
         "pivot_config": None,
         "for_organization": False,
         "value": "https://malshare.com/",
-        "updated_at": "2025-03-08T13:45:26.000974Z",
+        "updated_at": "2025-03-20T13:27:06.934775Z",
         "owner": None,
     },
     {
@@ -150,7 +150,7 @@ values = [
         "pivot_config": None,
         "for_organization": False,
         "value": 10,
-        "updated_at": "2025-03-20T08:24:39.640682Z",
+        "updated_at": "2025-03-20T13:18:41.183632Z",
         "owner": None,
     },
 ]

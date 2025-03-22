@@ -34,7 +34,6 @@ class Malshare(Ingestor):
                 raise ValueError("VT downloaded file is not instance of bytes")
         except Exception as e:
             error_message = f"Cannot download the file {h}. Raised Error: {e}."
-            print(error_message)
             raise IngestorRunException(error_message)
         return response.content
 
@@ -46,8 +45,8 @@ class Malshare(Ingestor):
         if not isinstance(content, list):
             raise IngestorRunException(f"Content {content} not expected")
 
-        # limit = min(len(content), self.limit)
-        for elem in content[75:78]:
+        limit = min(len(content), self.limit)
+        for elem in content[:limit]:
             hash = elem.get("sha256")
             logger.info(f"Downloading sample {hash}")
             sample = self.download_sample(hash)

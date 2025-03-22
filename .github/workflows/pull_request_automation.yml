@@ -81,7 +81,7 @@ jobs:
           cp docker/env_file_postgres_template docker/env_file_postgres
 
       - name: Startup script launch (Slow)
-        if: contains(github.base_ref, 'master')
+        if: !contains(github.base_ref, 'master')
         run: |
           cp docker/env_file_integrations_template docker/env_file_integrations
           ./start ci up --all_analyzers -- --build -d
@@ -92,7 +92,7 @@ jobs:
           REPO_DOWNLOADER_ENABLED: false
 
       - name: Startup script launch (Fast)
-        if: "!contains(github.base_ref, 'master')"
+        if: "contains(github.base_ref, 'master')"
         run: |
           ./start ci up -- --build -d
         env:

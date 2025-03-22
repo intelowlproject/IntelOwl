@@ -34,8 +34,8 @@ COPY --chown=${USER}:${USER} app.py ./
 RUN chmod u+x app.py
 
 # Expose port
-EXPOSE 5000
+EXPOSE 5001
 
 # Entrypoint
 # ENTRYPOINT ["./entrypoint.sh"]
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "5000", "--log-level", "debug"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "5001", "--log-level", "debug"]

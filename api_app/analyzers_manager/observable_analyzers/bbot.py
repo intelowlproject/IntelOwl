@@ -20,7 +20,7 @@ class BBOT(ObservableAnalyzer, DockerBasedAnalyzer):
     """
 
     name: str = "BBOT_Analyzer"
-    url: str = "http://bbot_analyzer:5000/run"
+    url: str = "http://bbot_analyzer:5001/run"
     max_tries: int = 100
     poll_distance: int = 3
 

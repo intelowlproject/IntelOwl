@@ -5,9 +5,7 @@ from unittest.mock import patch
 import requests
 
 from api_app.ingestors_manager.classes import Ingestor
-from api_app.ingestors_manager.exceptions import (  # IngestorConfigurationException,
-    IngestorRunException,
-)
+from api_app.ingestors_manager.exceptions import IngestorRunException
 from tests.mock_utils import MockUpResponse, if_mock_connections
 
 logger = logging.getLogger(__name__)

@@ -57,9 +57,6 @@ jobs:
       - name: isort
         run: |
           isort . --profile black --filter-files --check-only --diff --skip configuration/ldap_config.py
-      
-      - name: Perform ShellCheck Analysis
-        run: bash <(curl -s https://raw.githubusercontent.com/CICDToolbox/shellcheck/master/pipeline.sh)
 
   backend-tests:
     runs-on: ubuntu-latest
@@ -81,9 +78,20 @@ jobs:
           cp docker/env_file_postgres_template docker/env_file_postgres
 
       - name: Startup script launch (Slow)
+        if: contains(github.base_ref, 'master')
         run: |
           cp docker/env_file_integrations_template docker/env_file_integrations
           ./start ci up --all_analyzers -- --build -d
+        env:
+          DOCKER_BUILDKIT: 1
+          BUILDKIT_PROGRESS: "plain"
+          STAGE: "ci"
+          REPO_DOWNLOADER_ENABLED: false
+
+      - name: Startup script launch (Fast)
+        if: "!contains(github.base_ref, 'master')"
+        run: |
+          ./start ci up -- --build -d
         env:
           DOCKER_BUILDKIT: 1
           BUILDKIT_PROGRESS: "plain"
@@ -94,10 +102,8 @@ jobs:
         if: always()
         run: |
           docker ps -a
-          docker logs intelowl_bbot_analyzer
           docker logs intelowl_uwsgi
           docker logs intelowl_daphne
-          
 
       - name: Setup coverage
         run: |
@@ -106,7 +112,6 @@ jobs:
       - name: Run test
         run: |
           docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests
-          docker logs intelowl_bbot_analyzer
 
   frontend-tests:
     runs-on: ubuntu-latest

@@ -55,25 +55,35 @@ class Malshare(Ingestor):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockUpResponse(
-                        [
-                            {
-                                "md5": "56cb253271d0bc47e2869d351ebd2551",
-                                "sha1": "8620e2d371740651fb2a111cbaf3ba1632b61b61",
-                                "sha256": "6cf10ac2e7b6bd7ff09e237322a89b1259da78bd54c20fe11339092fa921cf45",
-                            },
-                            {
-                                "md5": "56cb33e74796abcaa39783e8e873e351",
-                                "sha1": "0d72b496d104eb71ecb9d2107b99425e3eccf566",
-                                "sha256": "f85f9bd1a1cb68514876c2b13b8643715d551e055c7cb26f764a42abaac41067",
-                            },
-                            {
-                                "md5": "56cb78ab63ac800ef1e900a2ca855e90",
-                                "sha1": "cbbbf4c8608a0722a8490b352364a030211dfdbd",
-                                "sha256": "c26841fc297fadba690e4ae3be2f9f1fbef0766b46a828d7f12814dddcbd5478",
-                            },
-                        ],
-                        200,
+                    side_effect=lambda url, *args, **kwargs: (
+                        MockUpResponse(
+                            [
+                                {
+                                    "md5": "56cb253271d0bc47e2869d351ebd2551",
+                                    "sha1": "8620e2d371740651fb2a111cbaf3ba1632b61b61",
+                                    "sha256": "6cf10ac2e7b6bd7ff09e237322a89b1259da78bd54c20fe11339092fa921cf45",
+                                },
+                                {
+                                    "md5": "56cb33e74796abcaa39783e8e873e351",
+                                    "sha1": "0d72b496d104eb71ecb9d2107b99425e3eccf566",
+                                    "sha256": "f85f9bd1a1cb68514876c2b13b8643715d551e055c7cb26f764a42abaac41067",
+                                },
+                                {
+                                    "md5": "56cb78ab63ac800ef1e900a2ca855e90",
+                                    "sha1": "cbbbf4c8608a0722a8490b352364a030211dfdbd",
+                                    "sha256": "c26841fc297fadba690e4ae3be2f9f1fbef0766b46a828d7f12814dddcbd5478",
+                                },
+                            ],
+                            200,
+                        )
+                        if "action=getlist" in url
+                        else (
+                            MockUpResponse(
+                                {},
+                                content=b"mock file content",
+                                status_code=200,
+                            )
+                        )
                     ),
                 ),
             )

@@ -183,11 +183,44 @@ class OpenCTI(classes.Connector):
             "report": pycti.Report(self.opencti_instance).read(id=report["id"]),
         }
 
+    def health_check(self):
+        """
+        Verifies connectivity to OpenCTI instance
+        """
+        try:
+            # Create client with short timeout
+            opencti_client = pycti.OpenCTIApiClient(
+                url=self._url_key_name,
+                token=self._api_key_name,
+                ssl_verify=self.ssl_verify,
+                proxies=self.proxies,
+            )
+
+            # Simple API call to verify connection and auth
+            health_status = opencti_client.health_check()
+
+            # Validate response format
+            if not health_status:
+                return False, "Unable to connect to OpenCTI"
+
+            if health_status.get("status") == "OK":
+                version = health_status.get("version", "unknown")
+                return True, f"Connected to OpenCTI v{version}"
+
+            return False, f"Unexpected OpenCTI response: {health_status}"
+
+        except Exception as e:
+            return False, f"OpenCTI connection failed: {str(e)}"
+
     @classmethod
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
                 patch("pycti.OpenCTIApiClient", return_value=None),
+                patch(
+                    "pycti.OpenCTIApiClient.health_check",
+                    return_value={"status": "OK", "version": "5.6.0"},
+                ),
                 patch("pycti.Identity.create", return_value={"id": 1}),
                 patch("pycti.MarkingDefinition.create", return_value={"id": 1}),
                 patch("pycti.StixCyberObservable.create", return_value={"id": 1}),

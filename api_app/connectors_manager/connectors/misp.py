@@ -130,6 +130,43 @@ class MISP(Connector):
 
         return misp_instance.get_event(misp_event.id)
 
+    def health_check(self):
+        """
+        Verifies connectivity to MISP instance
+        """
+        try:
+            # Configure SSL if needed
+            ssl_param = None
+            if self.ssl_check:
+                if self.self_signed_certificate:
+                    ssl_param = (
+                        f"{settings.PROJECT_LOCATION}/configuration/misp_ssl.crt"
+                    )
+                else:
+                    ssl_param = self.ssl_check
+
+            # Create client with short timeout
+            misp = pymisp.PyMISP(
+                url=self._url_key_name,
+                key=self._api_key_name,
+                ssl=ssl_param,
+                debug=False,  # Force debug off for health check
+                timeout=10,
+            )
+
+            # Get version info to check connectivity
+            result = misp.version()
+
+            if isinstance(result, dict) and "version" in result:
+                return True, f"Connected to MISP v{result['version']}"
+
+            return False, "Invalid response from MISP server"
+
+        except ConnectionError:
+            return False, "Connection error - check URL and network"
+        except Exception as e:
+            return False, f"MISP connection failed: {str(e)}"
+
     @classmethod
     def _monkeypatch(cls):
         patches = [
@@ -172,3 +209,7 @@ class MockPyMISP:
     @staticmethod
     def get_event(event_id) -> dict:
         return {"Event": {"id": event_id}}
+
+    @staticmethod
+    def version() -> dict:
+        return {"version": "2.4.146"}

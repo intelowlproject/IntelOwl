@@ -4,11 +4,13 @@ from base64 import b64encode
 from typing import Dict
 
 import debloat.processor
+import pefile
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
@@ -17,6 +19,10 @@ class Debloat(FileAnalyzer):
     Analyzer for debloating PE files using the Debloat tool.
     Reduces file size for easier malware analysis.
     """
+
+    def _log_wrapper(self, message, *args, **kwargs):
+        """Custom logging wrapper to handle unexpected kwargs like 'end'."""
+        logger.info(message)
 
     def run(self) -> Dict[str, int | str]:
         logger.info(f"Running Debloat analyzer on file {self.md5}")
@@ -32,6 +38,7 @@ class Debloat(FileAnalyzer):
         """
         try:
             binary = self.read_file_bytes()
+            pe = pefile.PE(data=binary)  # Parse the binary into a PE object
             logger.info(f"Read {len(binary)} bytes from file {self.md5}")
             original_size = len(binary)
             logger.info(f"Read {original_size} bytes from file {self.md5}")
@@ -43,10 +50,10 @@ class Debloat(FileAnalyzer):
             logger.info(f"Output file: {output_file}")
 
             debloat.processor.process_pe(
-                binary,
-                out_path=str(output_file),
+                pe,
+                out_path=output_file,
                 last_ditch_processing=True,
-                log_message=logger.info,
+                log_message=self._log_wrapper,
                 cert_preservation=True,
                 beginning_file_size=original_size,
             )

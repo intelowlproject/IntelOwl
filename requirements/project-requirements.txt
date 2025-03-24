@@ -29,7 +29,7 @@ dataclasses==0.6
 # https://github.com/advisories/GHSA-q4qm-xhf9-4p8f
 # unpatched CVE: noproblem, we just use this for debugging purposes
 flower==2.0.0
-uWSGI==2.0.22
+uWSGI==2.0.28
 uwsgitop==0.12
 whitenoise==6.9.0
 daphne==4.1.0

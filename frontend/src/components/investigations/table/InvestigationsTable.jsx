@@ -25,9 +25,8 @@ import { useSearchParams } from "react-router-dom";
 import { format, toDate } from "date-fns-tz";
 import { INVESTIGATION_BASE_URI } from "../../../constants/apiURLs";
 import { investigationTableColumns } from "./investigationTableColumns";
-import { TimePicker } from "../../common/TimePicker";
-import { useTimePickerStore } from "../../../stores/useTimePickerStore";
 import { datetimeFormatStr } from "../../../constants/miscConst";
+import { TimePicker } from "../../common/TimePicker";
 
 // constants
 const toPassTableProps = {
@@ -49,98 +48,70 @@ export default function InvestigationsTable() {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const analyzedObjectNameParam =
-    searchParams.get("analyzed-object-name") || "";
-  const startTimeParam = searchParams.get("start-time");
-  const endTimeParam = searchParams.get("end-time");
+    searchParams.get("analyzed_object_name") || "";
+  const startTimeParam = searchParams.get("start_time__gte");
+  const endTimeParam = searchParams.get("start_time__lte");
 
-  // store
-  const [toDateValue, fromDateValue, updateToDate, updateFromDate] =
-    useTimePickerStore((state) => [
-      state.toDateValue,
-      state.fromDateValue,
-      state.updateToDate,
-      state.updateFromDate,
-    ]);
+  // default: 24h
+  const defaultFromDate = new Date();
+  defaultFromDate.setDate(defaultFromDate.getDate() - 1);
   const [searchFromDateValue, setSearchFromDateValue] =
-    React.useState(fromDateValue);
-  const [searchToDateValue, setSearchToDateValue] = React.useState(toDateValue);
+    React.useState(defaultFromDate);
+  const [searchToDateValue, setSearchToDateValue] = React.useState(new Date());
 
   // state
   const [areParamsInitialized, setAreParamsInitialized] = React.useState(false); // used to prevent a request with wrong params
-
-  /* searchNameType is used to show the user typed text (this state changes for each char typed), 
-  searchNameRequest is used in the request to the backend and it's update periodically.
-  In this way we avoid a request for each char. */
-  const [searchNameType, setSearchNameType] = React.useState("");
   const [searchNameRequest, setSearchNameRequest] = React.useState("");
 
-  useDebounceInput(fromDateValue, 1000, setSearchFromDateValue);
-  useDebounceInput(toDateValue, 1000, setSearchToDateValue);
-  useDebounceInput(searchNameType, 1000, setSearchNameRequest);
-
   React.useEffect(() => {
-    // update timepicker store, and filter with url params
+    // update filter with url params
     if (startTimeParam) {
       setSearchFromDateValue(toDate(startTimeParam));
-      updateFromDate(toDate(startTimeParam));
     }
     if (endTimeParam) {
       setSearchToDateValue(toDate(endTimeParam));
-      updateToDate(toDate(endTimeParam));
     }
-    if (analyzedObjectNameParam) setSearchNameType(analyzedObjectNameParam);
-    if (analyzedObjectNameParam) setSearchNameRequest(analyzedObjectNameParam);
+    if (analyzedObjectNameParam) {
+      setSearchNameRequest(analyzedObjectNameParam);
+    }
     setAreParamsInitialized(true);
-  }, [
-    analyzedObjectNameParam,
-    startTimeParam,
-    endTimeParam,
-    updateFromDate,
-    updateToDate,
-  ]);
+  }, [analyzedObjectNameParam, startTimeParam, endTimeParam]);
 
   React.useEffect(() => {
     // After the initialization each time the time picker change or the filter, update the url
     // Note: this check is required to avoid infinite loop (url update time picker and time picker update url)
-    if (areParamsInitialized) {
-      if (
-        startTimeParam !== format(searchFromDateValue, datetimeFormatStr) ||
+    if (
+      areParamsInitialized &&
+      (startTimeParam !== format(searchFromDateValue, datetimeFormatStr) ||
         endTimeParam !== format(searchToDateValue, datetimeFormatStr) ||
-        analyzedObjectNameParam !== searchNameRequest
-      ) {
-        const currentParams = {};
-        // @ts-ignore
-        searchParams.entries().forEach((element) => {
-          const [paramName, paramValue] = element;
-          currentParams[paramName] = paramValue;
-        });
-        console.debug("currentParams");
-        console.debug(currentParams);
-        setSearchParams({
-          ...currentParams,
-          "start-time": format(searchFromDateValue, datetimeFormatStr),
-          "end-time": format(searchToDateValue, datetimeFormatStr),
-          "analyzed-object-name": searchNameRequest,
-        });
-      }
+        analyzedObjectNameParam !== searchNameRequest)
+    ) {
+      const currentParams = {};
+      // @ts-ignore
+      searchParams.entries().forEach((element) => {
+        const [paramName, paramValue] = element;
+        currentParams[paramName] = paramValue;
+      });
+      setSearchParams({
+        ...currentParams,
+        start_time__gte: format(searchFromDateValue, datetimeFormatStr),
+        start_time__lte: format(searchToDateValue, datetimeFormatStr),
+        analyzed_object_name: searchNameRequest,
+      });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     setSearchParams,
     areParamsInitialized,
     searchFromDateValue,
     searchToDateValue,
     searchNameRequest,
-    startTimeParam,
-    endTimeParam,
-    analyzedObjectNameParam,
   ]);
 
   return areParamsInitialized ? ( // this "if" avoid one request
     <InvestigationTableComponent
       searchFromDateValue={searchFromDateValue}
       searchToDateValue={searchToDateValue}
-      searchNameType={searchNameType}
-      setSearchNameType={setSearchNameType}
       searchNameRequest={searchNameRequest}
     />
   ) : (
@@ -151,23 +122,60 @@ export default function InvestigationsTable() {
 function InvestigationTableComponent({
   searchFromDateValue,
   searchToDateValue,
-  searchNameType,
-  setSearchNameType,
   searchNameRequest,
 }) {
-  const [data, tableNode, refetch, _, loadingTable] = useDataTable(
+  const [
+    data,
+    tableNode,
+    refetch,
+    tableStateReducer,
+    loadingTable,
+    tableState,
+  ] = useDataTable(
     {
       url: INVESTIGATION_BASE_URI,
       params: {
-        start_time__gte: searchFromDateValue,
-        start_time__lte: searchToDateValue,
         analyzed_object_name: searchNameRequest,
-      },
-      initialParams: {
-        ordering: "-start_time",
       },
     },
     toPassTableProps,
+  );
+
+  // state
+  const [searchNameType, setSearchNameType] = React.useState(searchNameRequest);
+  const [fromDateType, setFromDateType] = React.useState(searchFromDateValue);
+  const [toDateType, setToDateType] = React.useState(searchToDateValue);
+
+  const onChangeFilter = ({ name, value }) => {
+    const { filters } = tableState;
+    // check if there is already a filter for the selected item
+    const filterIndex = filters.findIndex((filter) => filter.id === name);
+    let valueToChange = value;
+    if (["start_time__gte", "start_time__lte"].includes(name))
+      valueToChange = format(value, datetimeFormatStr);
+
+    // If the filter is already present (index>=0) I update the value
+    if (filterIndex !== -1) {
+      // Note: this check is required to avoid infinite loop
+      if (filters[filterIndex].value === valueToChange) return null;
+      filters[filterIndex].value = value;
+    }
+    // otherwise I add a new element to the filter list
+    else filters.push({ id: name, value });
+    // set new filters
+    return tableStateReducer({ filters }, { type: "setFilter" });
+  };
+
+  // this update the value after some times, this give user time to pick the datetime
+  useDebounceInput(
+    { name: "start_time__gte", value: fromDateType },
+    1000,
+    onChangeFilter,
+  );
+  useDebounceInput(
+    { name: "start_time__lte", value: toDateType },
+    1000,
+    onChangeFilter,
   );
 
   return (
@@ -201,7 +209,15 @@ function InvestigationTableComponent({
               </div>
             </Col>
             <Col className="align-self-center">
-              <TimePicker />
+              <TimePicker
+                id="investigations-table__time-picker"
+                fromName="start_time__gte"
+                toName="start_time__lte"
+                fromValue={fromDateType}
+                toValue={toDateType}
+                fromOnChange={setFromDateType}
+                toOnChange={setToDateType}
+              />
               <div className="d-flex float-end me-1">
                 <div className="d-flex align-items-center">
                   <Label check>Name</Label>
@@ -227,7 +243,47 @@ function InvestigationTableComponent({
                   <Input
                     id="nameSearch"
                     type="text"
-                    onChange={(event) => setSearchNameType(event.target.value)}
+                    onChange={(event) => {
+                      setSearchNameType(event.target.value);
+                      // if the user clears the filter
+                      if (event.target.value.length === 0) {
+                        // Set empty string to remove the filter
+                        onChangeFilter({
+                          name: "analyzed_object_name",
+                          value: "",
+                        });
+                      }
+                    }}
+                    onKeyDown={(event) => {
+                      // the request is sent if the user presses 'enter'
+                      if (event.key === "Enter") {
+                        onChangeFilter({
+                          name: "analyzed_object_name",
+                          value: event.target.value || "",
+                        });
+                      }
+                    }}
+                    onKeyUp={(event) => {
+                      // if the user presses 'backspace'
+                      // the request is sent if input value is empty
+                      if (
+                        event.key === "Backspace" &&
+                        event.target.value.length === 0
+                      ) {
+                        // Set empy string to remove the filter
+                        onChangeFilter({
+                          name: "analyzed_object_name",
+                          value: "",
+                        });
+                      }
+                    }}
+                    onPaste={(event) => {
+                      // if copy-paste is done, the request is sent automatically
+                      onChangeFilter({
+                        name: "analyzed_object_name",
+                        value: event.clipboardData.getData("text/plain") || "",
+                      });
+                    }}
                     value={searchNameType}
                   />
                 </div>

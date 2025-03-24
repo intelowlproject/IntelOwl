@@ -14,14 +14,14 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-class scan_request(BaseModel):
+class ScanRequest(BaseModel):
     target: str
     presets: list[str] = ["web-basic"]
     modules: list[str] = []
 
 
 def get_output_json(scan_name):
-    """Read and parse output.json into a structured list of events."""
+    """Read and parse output.json which is a NDJSON file into a structured list of events."""
     json_path = Path(f"/opt/deploy/bbot/.bbot/scans/{scan_name}/output.json")
     if not json_path.exists():
         logger.warning(f"output.json not found at {json_path}")
@@ -47,7 +47,7 @@ def get_output_json(scan_name):
 
 
 @app.post("/run")
-async def run_scan(request: scan_request):
+async def run_scan(request: ScanRequest):
     if not request.target:
         logger.error("No target provided")
         raise HTTPException(status_code=400, detail="No target provided")

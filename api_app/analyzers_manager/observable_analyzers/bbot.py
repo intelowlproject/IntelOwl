@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import logging
-from typing import Dict, List
 from urllib.parse import urlparse
 
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, ObservableAnalyzer
@@ -26,16 +25,15 @@ class BBOT(ObservableAnalyzer, DockerBasedAnalyzer):
 
     def __init__(self, config: PythonConfig, **kwargs):
         super().__init__(config, **kwargs)
-        self.args: List[str] = []
+        self.args: list[str] = []
 
-    def config(self, runtime_configuration: Dict):
+    def config(self, runtime_configuration: dict):
         super().config(runtime_configuration)
         target = self.observable_name
 
         if self.observable_classification == Classification.URL:
             logger.debug(f"Extracting hostname from URL: {target}")
-            hostname = urlparse(target).hostname
-            target = hostname
+            target = urlparse(target).hostname
 
         self.args.append(f"-t {target}")
         self.args.extend([f"-p {preset}" for preset in self.presets])
@@ -83,10 +81,10 @@ class BBOT(ObservableAnalyzer, DockerBasedAnalyzer):
                         "status": "FINISHED",
                         "target": {
                             "hash": "a2d3b5795582da7a4edc56ef63ae6d6866a70d9c",
-                            "seeds": ["anshsinghal.tech"],
+                            "seeds": ["test.com"],
                             "blacklist": [],
                             "seed_hash": "1f26e4e291bfa260f77d2411c88906aee99786c5",
-                            "whitelist": ["anshsinghal.tech"],
+                            "whitelist": ["test.com"],
                             "scope_hash": "86df039469ae73720ac0d8cdd7cf92c3953659b4",
                             "strict_scope": False,
                             "blacklist_hash": "da39a3ee5e6b4b0d3255bfef95601890afd80709",

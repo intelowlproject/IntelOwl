@@ -85,7 +85,7 @@ class Malshare(Ingestor):
                             ],
                             200,
                         )
-                        if "action=getlist" in url
+                        if "getlist" in kwargs.get("params", {}).get("action", "")
                         else (
                             MockUpResponse(
                                 {},

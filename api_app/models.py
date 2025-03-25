@@ -1422,8 +1422,20 @@ class AbstractReport(models.Model):
                 index = int(search_keyword)
             except ValueError:
                 result = []
-                for obj in search_from:
-                    result.append(self.get_value(obj, [search_keyword] + fields))
+                errors = []
+                for i, obj in enumerate(search_from):
+                    # if we are iterating a list, we get all the objects that matches
+                    try:
+                        result.append(self.get_value(obj, [search_keyword] + fields))
+                    except ValueError:
+                        errors.append(
+                            f"Field {search_keyword} not available at position {i}"
+                        )
+                if result:
+                    self.errors.extend(errors)
+                else:
+                    raise Exception("No object matches")
+
                 return result
             else:
                 # a.b.0

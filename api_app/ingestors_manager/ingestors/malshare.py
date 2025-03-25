@@ -16,36 +16,37 @@ class Malshare(Ingestor):
     url: str
     _api_key_name: str
     limit: int
+    base_url: str = "https://malshare.com/api.php"
 
     @classmethod
     def update(cls) -> bool:
         pass
 
-    def download_sample(self, h):
+    def download_sample(self, sample_hash: str) -> bytes:
         try:
-            logger.info(f"Downloading sample {h}")
-            download_url = f"{self.url}/api.php"
+            logger.info(f"Downloading sample {sample_hash}")
             params = {
                 "api_key": self._api_key_name,
                 "action": "getfile",
-                "hash": h,
+                "hash": sample_hash,
             }
-            response = requests.get(download_url, params=params)
+            response = requests.get(self.base_url, params=params)
             response.raise_for_status()
             if not isinstance(response.content, bytes):
                 raise ValueError("The downloaded file is not instance of bytes")
         except Exception as e:
-            error_message = f"Cannot download the file {h}. Raised Error: {e}."
+            error_message = (
+                f"Cannot download the file {sample_hash}. Raised Error: {e}."
+            )
             raise IngestorRunException(error_message)
         return response.content
 
     def run(self) -> Iterable[Any]:
-        req_url = f"{self.url}/api.php"
         params = {
             "api_key": self._api_key_name,
             "action": "getlist",
         }
-        result = requests.get(req_url, params=params)
+        result = requests.get(self.base_url, params=params)
         result.raise_for_status()
         content = result.json()
         if not isinstance(content, list):

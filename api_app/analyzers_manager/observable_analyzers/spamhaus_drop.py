@@ -59,7 +59,7 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
             logger.info(
                 f"Database does not exist in {database_location}, initialising..."
             )
-            self.update(data_type)
+            self.update()
         with open(database_location, "r") as f:
             db = json.load(f)
 

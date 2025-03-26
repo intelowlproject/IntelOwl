@@ -60,10 +60,8 @@ class BBOT(ObservableAnalyzer, DockerBasedAnalyzer):
         except requests.RequestException as e:
             logger.error(f"BBOT HTTP request failed: {e}")
             raise AnalyzerRunException(f"Network error contacting BBOT container: {e}")
-        except AnalyzerRunException as e:
-            logger.error(f"BBOT scan failed: {e}")
-            raise
 
+    @classmethod
     def update(self):
         pass
 

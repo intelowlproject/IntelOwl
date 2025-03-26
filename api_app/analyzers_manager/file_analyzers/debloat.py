@@ -8,7 +8,7 @@ from base64 import b64encode
 from tempfile import TemporaryDirectory
 
 import pefile
-from debloat.processor import RESULT_CODES, process_pe
+from debloat.processor import process_pe
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
@@ -50,7 +50,7 @@ class Debloat(FileAnalyzer):
             original_size = os.path.getsize(self.filepath)
 
             try:
-                debloat_code = process_pe(
+                process_pe(
                     binary,
                     out_path=output_path,
                     last_ditch_processing=True,
@@ -74,8 +74,8 @@ class Debloat(FileAnalyzer):
             )
 
             with open(output_path, "rb") as f:
-                debloated_hash = hashlib.md5(f.read()).hexdigest()
                 output = f.read()
+                debloated_hash = hashlib.md5(output).hexdigest()
 
             encoded_output = b64encode(output).decode("utf-8")
 
@@ -88,12 +88,15 @@ class Debloat(FileAnalyzer):
                 "debloated_size": debloated_size,
                 "size_reduction_percentage": size_reduction,
                 "debloated_hash": debloated_hash,
-                "debloat_result": RESULT_CODES.get(debloat_code, "Unknown"),
                 "debloated_file": encoded_output,
             }
 
     @classmethod
-    def _monkeypatch(cls, patches: list = None) -> None:
+    def update(cls) -> bool:
+        pass
+
+    @classmethod
+    def _monkeypatch(cls, patches: list = None):
         patches = [
             if_mock_connections(
                 patch(
@@ -102,7 +105,6 @@ class Debloat(FileAnalyzer):
                         {
                             "success": True,
                             "original_size": 3840392,
-                            "debloat_result": "No Solution found.",
                             "debloated_file": "",
                             "debloated_hash": "f7f92eadfb444e7fce27efa2007a955a",
                             "debloated_size": 813976,

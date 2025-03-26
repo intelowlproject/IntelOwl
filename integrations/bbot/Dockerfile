@@ -11,15 +11,15 @@ RUN useradd -ms /bin/bash ${USER}
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    debianutils build-essential libssl-dev libffi-dev cargo openssl \
-    libpq-dev curl unzip git make bash tar p7zip-full p7zip && \
+    build-essential libssl-dev libffi-dev && \
+    echo "${USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${USER} && \
     apt-get clean && apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/* /tmp/* /usr/share/doc/* /usr/share/man/*
 
 
 # Upgrade pip and install Python packages
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir fastapi uvicorn[standard] bbot
+    pip install --no-cache-dir -r requirements.txt
 
 # Pre-install BBOT dependencies
 RUN bbot --install-all-deps -y --force
@@ -28,14 +28,16 @@ RUN bbot --install-all-deps -y --force
 WORKDIR ${PROJECT_PATH}
 
 # Copy application files
-COPY --chown=${USER}:${USER} app.py ./
+COPY --chown=${USER}:${USER} requirements.txt app.py ./
 
 # Make scripts executable
 RUN chmod u+x app.py
+
+# Switch to non-root user
+USER ${USER}
 
 # Expose port
 EXPOSE 5001
 
 # Entrypoint
-# ENTRYPOINT ["./entrypoint.sh"]
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "5001", "--log-level", "debug"]

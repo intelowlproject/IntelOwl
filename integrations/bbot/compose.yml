@@ -7,6 +7,5 @@ services:
       - "5001"
     volumes:
       - generic_logs:/var/log/intel_owl
-      - ../:/opt/deploy/intel_owl
     depends_on:
       - uwsgi

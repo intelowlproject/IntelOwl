@@ -4,6 +4,7 @@ import json
 import logging
 from pathlib import Path
 
+from bbot.errors import BBOTError
 from bbot.scanner import Scanner
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -39,11 +40,18 @@ def get_output_json(scan_name):
                         logger.error(
                             f"Failed to parse JSON line: {line[:100]}... - Error: {e}"
                         )
-        logger.debug(f"Parsed {len(events)} events from output.json")
-        return events
-    except Exception as e:
+    except OSError as e:
         logger.error(f"Failed to read output.json: {e}")
         return []
+    except UnicodeDecodeError as e:
+        logger.error(f"Encoding error in output.json: {e}")
+        return []
+    except Exception as e:
+        logger.error(f"Unexpected error reading output.json: {e}")
+        return []
+
+    logger.debug(f"Parsed {len(events)} events from output.json")
+    return events
 
 
 @app.post("/run")
@@ -55,23 +63,15 @@ async def run_scan(request: ScanRequest):
     logger.info(f"Received scan request for target: {request.target}")
 
     try:
-
         scanner = Scanner(
             request.target,
             modules=request.modules,
             presets=request.presets,
             output_modules=["json"],
-            config={
-                "modules": {
-                    "iis_shortnames": {
-                        "_enabled": False
-                    }  # currently this module has recursion bugs
-                }
-            },
+            config={"modules": {"iis_shortnames": {"_enabled": False}}},
         )
 
         results = []
-
         async for event in scanner.async_start():
             results.append(event.data)
 
@@ -84,9 +84,15 @@ async def run_scan(request: ScanRequest):
             "report": {"events": results, "json_output": json_output},
         }
 
+    except BBOTError as e:
+        logger.error(f"BBOT error: {e}")
+        raise HTTPException(status_code=500, detail=f"BBOT error: {e}")
+    except ValueError as e:
+        logger.error(f"Invalid input: {e}")
+        raise HTTPException(status_code=400, detail=f"Invalid input: {e}")
     except Exception as e:
-        logger.error(f"Error while scanning target: {e}")
-        raise HTTPException(status_code=500, detail="Error while scanning")
+        logger.error(f"Unexpected error: {e}")
+        raise HTTPException(status_code=500, detail="Unexpected error")
 
 
 if __name__ == "__main__":

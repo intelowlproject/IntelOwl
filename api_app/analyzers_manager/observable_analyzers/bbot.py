@@ -3,6 +3,8 @@
 import logging
 from urllib.parse import urlparse
 
+import requests
+
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
@@ -55,8 +57,12 @@ class BBOT(ObservableAnalyzer, DockerBasedAnalyzer):
             report = self._docker_run(req_data, analyzer_name=self.name)
             logger.info(f"BBOT scan completed successfully with report: {report}")
             return report
-        except Exception as e:
-            raise AnalyzerRunException(f"BBOT analyzer failed: {str(e)}")
+        except requests.RequestException as e:
+            logger.error(f"BBOT HTTP request failed: {e}")
+            raise AnalyzerRunException(f"Network error contacting BBOT container: {e}")
+        except AnalyzerRunException as e:
+            logger.error(f"BBOT scan failed: {e}")
+            raise
 
     def update(self):
         pass

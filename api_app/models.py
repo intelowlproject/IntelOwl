@@ -681,6 +681,7 @@ class Job(MP_Node):
         ).distinct()
         if pivots_analyzers.exists():
             runner |= self._get_signatures(pivots_analyzers)
+        runner |= self._get_engine_signature()
         if connectors.exists():
             runner |= self._get_signatures(connectors)
             pivots_connectors = pivots.filter(
@@ -690,7 +691,6 @@ class Job(MP_Node):
                 runner |= self._get_signatures(pivots_connectors)
         if visualizers.exists():
             runner |= self._get_signatures(visualizers)
-        runner |= self._get_engine_signature()
         runner |= self._final_status_signature
         return runner
 

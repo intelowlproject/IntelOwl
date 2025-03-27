@@ -16,7 +16,11 @@ class Malshare(Ingestor):
     url: str
     _api_key_name: str
     limit: int
-    base_url: str = "https://malshare.com/api.php"
+    endpoint: str = "api.php"
+
+    @property
+    def base_url(self) -> str:
+        return f"{self.url}/{self.endpoint}"
 
     @classmethod
     def update(cls) -> bool:
@@ -24,7 +28,7 @@ class Malshare(Ingestor):
 
     def download_sample(self, sample_hash: str) -> bytes:
         try:
-            logger.info(f"Downloading sample {sample_hash}")
+            logger.info(f"Starting download for sample: {sample_hash}")
             params = {
                 "api_key": self._api_key_name,
                 "action": "getfile",
@@ -34,11 +38,19 @@ class Malshare(Ingestor):
             response.raise_for_status()
             if not isinstance(response.content, bytes):
                 raise ValueError("The downloaded file is not instance of bytes")
-        except Exception as e:
-            error_message = (
-                f"Cannot download the file {sample_hash}. Raised Error: {e}."
+
+        except ValueError as val_err:
+            logger.error(f"Invalid file format for {sample_hash}: {val_err}")
+            raise IngestorRunException(
+                f"Invalid file format for {sample_hash}: {val_err}"
             )
-            raise IngestorRunException(error_message)
+
+        except Exception as e:
+            logger.error(f"Unexpected error while downloading {sample_hash}: {e}")
+            raise IngestorRunException(
+                f"Unexpected error while downloading {sample_hash}: {e}"
+            )
+
         return response.content
 
     def run(self) -> Iterable[Any]:

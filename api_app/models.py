@@ -608,7 +608,7 @@ class Job(MP_Node):
             # kill celery tasks using task ids
             celery_app.control.revoke(ids, terminate=True)
 
-            reports.update(status=self.STATUSES.KILLED)
+            reports.update(status=self.STATUSES.KILLED, end_time=now())
 
         self.status = self.STATUSES.KILLED
         self.save(update_fields=["status"])

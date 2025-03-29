@@ -19,8 +19,8 @@ jobs:
         stale-pr-label: "stale"
         exempt-pr-labels: "keep-open"
         # Issues
-        stale-issue-message: "This issue has been marked as stale because it has had no activity for 10 days. If you are still working on this, please provide some updates."
-        days-before-issue-stale: 10
+        stale-issue-message: "This issue has been marked as stale because it has had no activity for 30 days. If you are still working on this, please provide some updates."
+        days-before-issue-stale: 30
         days-before-issue-close: -1  # do not close Issues
         stale-issue-label: "stale"
         exempt-issue-labels: "keep-open"

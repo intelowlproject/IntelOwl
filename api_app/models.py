@@ -1426,7 +1426,11 @@ class AbstractReport(models.Model):
                 for i, obj in enumerate(search_from):
                     # if we are iterating a list, we get all the objects that matches
                     try:
-                        result.append(self.get_value(obj, [search_keyword] + fields))
+                        res = self.get_value(obj, [search_keyword] + fields)
+                        if isinstance(res, list):
+                            result.extend(res)
+                        else:
+                            result.append(res)
                     except KeyError:
                         errors.append(
                             f"Field {search_keyword} not available at position {i}"

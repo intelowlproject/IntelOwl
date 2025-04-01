@@ -17,7 +17,7 @@ django_extensions==3.2.3
 jsonschema==4.23.0
 # django rest framework libs
 Authlib==1.4.0
-djangorestframework==3.15.2
+djangorestframework==3.16.0
 djangorestframework-filters==1.0.0.dev2
 drf-spectacular==0.28.0
 django-rest-email-auth==4.0.0

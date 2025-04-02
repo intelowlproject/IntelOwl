@@ -32,7 +32,7 @@ def get_output_json(scan_name):
     try:
         with open(json_path, "r", encoding="utf-8") as file:
             for line in file:
-                if line.strip():
+                if line := line.strip():
                     try:
                         event = json.loads(line)
                         events.append(event)

@@ -68,9 +68,9 @@ class ModelWithOwnershipSerializer(rfs.ModelSerializer):
             # 1 - we are owner  OR
             # 2 - we are admin of the same org
             if org.owner == attrs["owner"] or (
-                attrs["owner"].user.has_membership()
-                and attrs["owner"].user.membership.organization.pk == org.pk
-                and attrs["owner"].user.membership.is_admin
+                attrs["owner"].has_membership()
+                and attrs["owner"].membership.organization.pk == org.pk
+                and attrs["owner"].membership.is_admin
             ):
                 attrs["for_organization"] = True
             else:

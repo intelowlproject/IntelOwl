@@ -111,7 +111,7 @@ class Debloat(FileAnalyzer):
                         {
                             "success": True,
                             "original_size": 3840392,
-                            "debloated_file": "",
+                            "debloated_file": "TVqQAAMAAAAEAAAA//",
                             "debloated_hash": "f7f92eadfb444e7fce27efa2007a955a",
                             "debloated_size": 813976,
                             "size_reduction_percentage": 78.80487200264973,

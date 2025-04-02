@@ -17,7 +17,7 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
@@ -1494,10 +1494,14 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
                         param_obj["exist"] = True
                     org_config.append(copy.deepcopy(param_obj))
                 # override default config with user config (if any)
+                print(pc.data)
                 for config in [
                     config
                     for config in pc.data
-                    if config["owner"] == request.user.username
+                    if (
+                        config["owner"] == request.user.username
+                        or (request.user.is_superuser and config["ingestor_config"])
+                    )
                     and config["organization"] is None
                     and config["attribute"] == attribute
                 ]:
@@ -1522,6 +1526,18 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
         return Response(status=status.HTTP_200_OK)
+
+    def check_object_permissions(self, request, obj):
+        if obj.ingestor_config:
+            permission = IsAdminUser()
+            if not permission.has_object_permission(request, self, obj):
+                self.permission_denied(
+                    request,
+                    message=getattr(permission, "message", None),
+                    code=getattr(permission, "code", None),
+                )
+        else:
+            super().check_object_permissions(request, obj)
 
     @plugin_config.mapping.post
     def create(self, request, name=None):

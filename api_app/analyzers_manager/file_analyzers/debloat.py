@@ -61,7 +61,7 @@ class Debloat(FileAnalyzer):
             except Exception as e:
                 raise AnalyzerRunException(f"Debloat processing failed: {e}")
 
-            if debloat_code == 0:
+            if debloat_code == 0 and not os.path.exists(output_path):
                 return {
                     "success": False,
                     "error": "No solution found",
@@ -95,7 +95,6 @@ class Debloat(FileAnalyzer):
                 "debloated_file": encoded_output,
                 "size_reduction_percentage": size_reduction,
                 "debloated_hash": debloated_hash,
-                "debloated_file": encoded_output,
             }
 
     @classmethod

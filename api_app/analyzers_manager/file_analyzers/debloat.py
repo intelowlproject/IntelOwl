@@ -14,8 +14,8 @@ from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class Debloat(FileAnalyzer):
@@ -50,7 +50,7 @@ class Debloat(FileAnalyzer):
             original_size = os.path.getsize(self.filepath)
 
             try:
-                process_pe(
+                debloat_code = process_pe(
                     binary,
                     out_path=output_path,
                     last_ditch_processing=True,
@@ -60,6 +60,12 @@ class Debloat(FileAnalyzer):
                 )
             except Exception as e:
                 raise AnalyzerRunException(f"Debloat processing failed: {e}")
+
+            if debloat_code == 0:
+                return {
+                    "success": False,
+                    "error": "No solution found",
+                }
 
             if not os.path.exists(output_path) or not os.path.isfile(output_path):
                 raise AnalyzerRunException(
@@ -86,6 +92,7 @@ class Debloat(FileAnalyzer):
                 "success": True,
                 "original_size": original_size,
                 "debloated_size": debloated_size,
+                "debloated_file": encoded_output,
                 "size_reduction_percentage": size_reduction,
                 "debloated_hash": debloated_hash,
                 "debloated_file": encoded_output,

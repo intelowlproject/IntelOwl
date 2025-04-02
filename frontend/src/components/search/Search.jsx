@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import React, { useEffect } from "react";
-import { useFormik, Form, FormikProvider } from "formik";
+import { useFormik, Form, FormikProvider, ErrorMessage } from "formik"; // Added ErrorMessage here
+
 import {
   Container,
   Row,
@@ -21,6 +22,9 @@ import { PluginsTypes, PluginFinalStatuses } from "../../constants/pluginConst";
 import { searchTableColumns } from "./searchTableColumns";
 import { pluginReportQueries } from "./searchApi";
 import { INTELOWL_DOCS_URL } from "../../constants/environment";
+import {
+  AnalyzersMultiSelectDropdownInput,
+} from "../common/form/pluginsMultiSelectDropdownInput";
 
 // table config
 const tableConfig = { enableExpanded: true, enableFlexLayout: true };
@@ -39,6 +43,16 @@ const tableProps = {
     </div>
   ),
 };
+
+// DangerErrorMessage function added from scanform file
+function DangerErrorMessage(fieldName) {
+  return (
+    <ErrorMessage
+      name={fieldName}
+      render={(msg) => <span className="text-danger">{msg}</span>}
+    />
+  );
+}
 
 export default function Search() {
   const [elasticData, setElasticData] = React.useState([]);
@@ -60,6 +74,7 @@ export default function Search() {
       toEndTime: format(new Date(), isoFormatString),
       errors: "",
       report: "",
+      analyzers: []  // ensure analyzers is defined in initialValues
     },
     validate: (values) => {
       console.debug("validate - values");
@@ -160,7 +175,7 @@ export default function Search() {
           </Row>
           <Row id="search-input-fields-first-row d-flex flex-wrap">
             <Col xxl={4} sm={12} className="d-flex align-items-center mt-4">
-              <Label className="col-3 fw-bold mb-0" for="search__type">
+              <Label className="col-3 fw-bold mb-0" htmlFor="search__type">
                 Type:
               </Label>
               <Input
@@ -189,25 +204,21 @@ export default function Search() {
                   ))}
               </Input>
             </Col>
-            <Col xxl={4} sm={12} className="d-flex align-items-center mt-4">
-              <Label className="col-3 fw-bold mb-0" for="search__name">
+            <Col xxl={3} sm={12} className="d-flex align-items-center mt-4">
+              <Label className=" w-[100%] col-3 fw-bold mb-0" htmlFor="search__name">
                 Name:
               </Label>
-              <Input
-                id="search__name"
-                type="text"
-                name="name"
-                placeholder="Enter a plugin name"
-                value={formik.values.name}
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                className="col bg-darker border-dark"
-              />
+              {/* Replaced the regular MultiSelectDropdownInput with AnalyzersMultiSelectDropdownInput */}
+              <Col sm={9}>
+              <AnalyzersMultiSelectDropdownInput formik={formik} fieldName="analyzers" />
+{DangerErrorMessage("analyzers")}
+
+                                </Col>
             </Col>
             <Col xxl={3} sm={12} className=" d-flex align-items-center mt-4">
               <Label
                 className="col-xxl-4 col-sm-3 fw-bold mb-0"
-                for="search__status"
+                htmlFor="search__status"
               >
                 Status:
               </Label>
@@ -242,7 +253,7 @@ export default function Search() {
               <div className="d-flex flex-column align-item-start">
                 <div className="d-flex flex-column flex-wrap">
                   <div className="d-flex align-items-center mb-1">
-                    <Label className="col-3 mb-0" for="search__fromStartTime">
+                    <Label className="col-3 mb-0" htmlFor="search__fromStartTime">
                       from
                     </Label>
                     <Input
@@ -258,7 +269,7 @@ export default function Search() {
                     />
                   </div>
                   <div className="d-flex align-items-center">
-                    <Label className="col-3 mb-0" for="search__toStartTime">
+                    <Label className="col-3 mb-0" htmlFor="search__toStartTime">
                       to
                     </Label>
                     <Input
@@ -290,7 +301,7 @@ export default function Search() {
               <div className="d-flex flex-column align-item-start">
                 <div className="d-flex flex-column flex-wrap">
                   <div className="d-flex align-items-center mb-1">
-                    <Label className="col-3 mb-0" for="search__fromEndTime">
+                    <Label className="col-3 mb-0" htmlFor="search__fromEndTime">
                       from
                     </Label>
                     <Input
@@ -306,7 +317,7 @@ export default function Search() {
                     />
                   </div>
                   <div className="d-flex align-items-center">
-                    <Label className="col-3 mb-0" for="search__toEndTime">
+                    <Label className="col-3 mb-0" htmlFor="search__toEndTime">
                       to
                     </Label>
                     <Input
@@ -330,7 +341,7 @@ export default function Search() {
             <Col xxl={3} sm={12} className="d-flex align-items-center mt-3">
               <Label
                 className="col-xxl-4 col-sm-3 fw-bold mb-0"
-                for="search__errors"
+                htmlFor="search__errors"
               >
                 Errors:
               </Label>
@@ -364,7 +375,7 @@ export default function Search() {
             <Col xxl={11} sm={12} className="d-flex align-items-center mt-3">
               <Label
                 className="col-xxl-1 col-sm-3 fw-bold mb-0"
-                for="search__report"
+                htmlFor="search__report"
               >
                 Text search:
                 <MdInfoOutline

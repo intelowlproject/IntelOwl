@@ -62,7 +62,7 @@ class BBOT(ObservableAnalyzer, DockerBasedAnalyzer):
             raise AnalyzerRunException(f"Network error contacting BBOT container: {e}")
 
     @classmethod
-    def update(self):
+    def update(cls):
         pass
 
     @staticmethod

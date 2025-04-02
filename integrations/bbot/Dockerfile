@@ -21,11 +21,9 @@ COPY requirements.txt app.py ./
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Pre-install BBOT dependencies
-RUN bbot --install-all-deps -y --force
-
-# Make script executable
-RUN chmod u+x app.py
+# Pre-install BBOT dependencies & Make script executable
+RUN bbot --install-all-deps -y --force && \
+    chmod u+x app.py
 
 # Expose port
 EXPOSE 5001

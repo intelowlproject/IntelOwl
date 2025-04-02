@@ -433,14 +433,19 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             self._raise_container_not_running()
 
         # step #2: raise AnalyzerRunException in case of error
-        if not self.__raise_in_case_bad_request(self.name, resp1):
-            raise AssertionError
+        # Modified to support synchronous analyzer BBOT that return results directly in the initial response, avoiding unnecessary polling.
+        if analyzer_name == "BBOT_Analyzer":
+            report = resp1.json().get("report", None)
+            err = resp1.json().get("error", None)
+        else:
+            if not self.__raise_in_case_bad_request(self.name, resp1):
+                raise AssertionError
 
-        # step #3: if no error, continue and try to fetch result
-        key = resp1.json().get("key")
-        final_resp = self.__poll_for_result(key)
-        err = final_resp.get("error", None)
-        report = final_resp.get("report", None)
+            # step #3: if no error, continue and try to fetch result
+            key = resp1.json().get("key")
+            final_resp = self.__poll_for_result(key)
+            err = final_resp.get("error", None)
+            report = final_resp.get("report", None)
 
         # APKiD provides empty result in case it does not support the binary type
         if not report and (analyzer_name != "APKiD"):

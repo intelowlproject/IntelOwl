@@ -119,7 +119,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0071_delete_last_elastic_report"),
-        ("analyzers_manager", "0153_alter_spamhaus_drop_supported_observable"),
+        ("analyzers_manager", "0154_analyzer_config_bbot.py"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

@@ -12,8 +12,7 @@ import { CopyToClipboardButton, DateHoverable } from "@certego/certego-ui";
 import { RemoveJob } from "./investigationActions";
 import {
   EvaluationBadge,
-  ReliabilityBadge,
-  // ReliabilityBar,
+  ReliabilityBar,
   TagsBadge,
   CountryBadge,
   MimetypeBadge,
@@ -34,11 +33,6 @@ function CustomJobNode({ data }) {
         <EvaluationBadge
           id={data.id}
           evaluation={data.engineFields.evaluation}
-        />
-        <ReliabilityBadge
-          id={data.id}
-          className="ms-1"
-          reliability={data.engineFields.reliability}
         />
         {data.engineFields?.mimetype && (
           <MimetypeBadge
@@ -72,11 +66,11 @@ function CustomJobNode({ data }) {
         isVisible
         offset={3}
       >
-        {/* <ReliabilityBar
+        <ReliabilityBar
           id={data.id}
           reliability={data.engineFields.reliability}
           evaluation={data.engineFields.evaluation}
-        /> */}
+        />
       </NodeToolbar>
       {/* Actions */}
       <NodeToolbar

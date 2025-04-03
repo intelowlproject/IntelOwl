@@ -6,11 +6,7 @@ import { VscFile } from "react-icons/vsc";
 import { TbWorld } from "react-icons/tb";
 import classnames from "classnames";
 import { EvaluationColors, TagsColors } from "../../constants/colorConst";
-import {
-  EvaluationIcons,
-  TagsIcons,
-  // ReliabilityIcons
-} from "../../constants/engineConst";
+import { EvaluationIcons, TagsIcons } from "../../constants/engineConst";
 import { getIcon } from "./icon/icons";
 
 export function EvaluationBadge(props) {
@@ -22,12 +18,12 @@ export function EvaluationBadge(props) {
 
   return (
     <Badge
-      id={`evaluation__${id}_${evaluation}`}
+      id={`evaluation__job${id}_${evaluation}`}
       className={`d-flex-center ${divClass}`}
     >
       {getIcon(icon)}
       <UncontrolledTooltip
-        target={`evaluation__${id}_${evaluation}`}
+        target={`evaluation__job${id}_${evaluation}`}
         placement="top"
         fade={false}
       >
@@ -47,45 +43,13 @@ EvaluationBadge.defaultProps = {
   className: null,
 };
 
-export function ReliabilityBadge(props) {
-  const { id, reliability, className } = props;
-  // const icon = ReliabilityIcons?.[reliability];
-
-  return (
-    <Badge
-      id={`reliability__${id}`}
-      className={`d-flex-center bg-secondary ${className}`}
-    >
-      {/* {getIcon(icon)} */}
-      {reliability}
-      <UncontrolledTooltip
-        target={`reliability__${id}`}
-        placement="top"
-        fade={false}
-      >
-        Reliability: {reliability}
-      </UncontrolledTooltip>
-    </Badge>
-  );
-}
-
-ReliabilityBadge.propTypes = {
-  id: PropTypes.string.isRequired,
-  reliability: PropTypes.string.isRequired,
-  className: PropTypes.string,
-};
-
-ReliabilityBadge.defaultProps = {
-  className: null,
-};
-
 export function ReliabilityBar(props) {
   const { id, reliability, evaluation, className } = props;
   const color = EvaluationColors?.[evaluation];
 
   return (
     <div
-      id={`reliability-bar__${id}`}
+      id={`reliability-bar__job${id}_rel${reliability}`}
       className={`d-flex-center ${className}`}
       style={{ width: "300px" }}
     >
@@ -102,7 +66,7 @@ export function ReliabilityBar(props) {
         />
       ))}
       <UncontrolledTooltip
-        target={`reliability-bar__${id}`}
+        target={`reliability-bar__job${id}_rel${reliability}`}
         placement="top"
         fade={false}
       >
@@ -115,7 +79,7 @@ export function ReliabilityBar(props) {
 ReliabilityBar.propTypes = {
   id: PropTypes.string.isRequired,
   reliability: PropTypes.string.isRequired,
-  evaluation: PropTypes.string.isRequired,
+  evaluation: PropTypes.number.isRequired,
   className: PropTypes.string,
 };
 
@@ -195,12 +159,12 @@ export function MimetypeBadge(props) {
 
   return (
     <Badge
-      id={`mimetype__${id}`}
+      id={`mimetype__job${id}`}
       className={`d-flex-center bg-secondary ${className}`}
     >
       <VscFile />
       <UncontrolledTooltip
-        target={`mimetype__${id}`}
+        target={`mimetype__job${id}`}
         placement="top"
         fade={false}
       >

@@ -12,9 +12,9 @@ function addJobNode(
 ) {
   // engine fields
   const engineFields = {
-    evaluation: job.evaluation,
-    reliability: job.reliability,
-    tags: job.tags,
+    evaluation: job?.evaluation || "",
+    reliability: job?.reliability,
+    tags: job?.tags || [],
   };
   // optional fields
   if (job.country) engineFields.country = job.country;
@@ -114,7 +114,7 @@ export function getNodesAndEdges(
       300,
       60,
       150,
-      70,
+      80,
     );
     return [
       initialNode.concat(layoutedNodes),

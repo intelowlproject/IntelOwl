@@ -1,6 +1,4 @@
-const {
-  getIcon,
-} = require("../../../../../src/components/common/icon/icons");
+const { getIcon } = require("../../../../../src/components/common/icon/icons");
 
 describe("visualizer icon module", () => {
   test("check defined icons", () => {

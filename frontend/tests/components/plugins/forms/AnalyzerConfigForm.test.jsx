@@ -256,7 +256,7 @@ describe("AnalyzerConfigForm test", () => {
           },
           {
             attribute: "params",
-            value: "{}",
+            value: '{"param_name":"<observable>"}',
             parameter: 455,
             for_organization: false,
             analyzer_config: "myNewAnalyzer",
@@ -324,7 +324,7 @@ describe("AnalyzerConfigForm test", () => {
 
     expect(screen.getByText("Plugin Config")).toBeInTheDocument();
 
-    const urlInputField = screen.getByText("Url:");
+    const urlInputField = screen.getByLabelText("Url:");
     expect(urlInputField).toBeInTheDocument();
 
     const httpMethodInputField = screen.getByText("HTTP method:");
@@ -358,6 +358,9 @@ describe("AnalyzerConfigForm test", () => {
     await userAction.clear(descriptionInputField);
     await userAction.type(descriptionInputField, "myNewAnalyzer - description");
 
+    await userAction.clear(urlInputField);
+    await userAction.type(urlInputField, "https://mynewurl.com");
+
     expect(saveButton.className).not.toContain("disabled");
     await userAction.click(saveButton);
 
@@ -375,33 +378,8 @@ describe("AnalyzerConfigForm test", () => {
         `${API_BASE_URI}/analyzer/myNewAnalyzer/plugin_config`,
         [
           {
-            attribute: "http_method",
-            value: "get",
-            parameter: 455,
-          },
-          {
             attribute: "url",
-            value: "https://www.service.com/",
-            parameter: 455,
-          },
-          {
-            attribute: "headers",
-            value: '{"Accept":"application/json"}',
-            parameter: 455,
-          },
-          {
-            attribute: "api_key_name",
-            value: '""',
-            parameter: 455,
-          },
-          {
-            attribute: "certificate",
-            value: '""',
-            parameter: 455,
-          },
-          {
-            attribute: "params",
-            value: "{}",
+            value: "https://mynewurl.com",
             parameter: 455,
           },
         ],

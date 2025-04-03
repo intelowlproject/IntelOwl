@@ -6,7 +6,6 @@ import {
   MdPauseCircleOutline,
   MdInfoOutline,
 } from "react-icons/md";
-import { JSONTree } from "react-json-tree";
 import { UncontrolledPopover } from "reactstrap";
 
 import {
@@ -21,6 +20,7 @@ import { StatusTag } from "../../common/StatusTag";
 import { killPlugin, retryPlugin } from "./jobApi";
 import { PluginStatuses, PluginsTypes } from "../../../constants/pluginConst";
 import { markdownToHtml } from "../../common/markdownToHtml";
+import { JsonEditor } from "../../common/JsonEditor";
 
 const tableProps = {
   columns: [
@@ -143,15 +143,20 @@ const tableProps = {
   SubComponent: ({ row }) => (
     <div
       id={`jobreport-jsoninput-${row.id}`}
-      style={{ maxHeight: "50vh", overflow: "scroll" }}
+      style={{ maxHeight: "40vh", width: "100%", overflow: "scroll" }}
+      className="row"
     >
-      <JSONTree
-        data={{
+      <JsonEditor
+        id="plugin_report_json"
+        initialJsonData={{
           report: row.original?.report,
           data_model: row.original?.data_model,
           errors: row.original?.errors,
           parameters: row.original?.parameters,
         }}
+        width="100%"
+        readOnly
+        levelToOpen={1}
       />
     </div>
   ),
@@ -166,7 +171,6 @@ export function PluginsReportTable({
 }) {
   console.debug("PluginsReportTable rendered");
   const reports = pluginReports;
-  const analyzersDataModel = job?.analyzers_data_model || [];
 
   reports.forEach((report, index) => {
     // description
@@ -180,17 +184,6 @@ export function PluginsReportTable({
         reports[index].description = plugin.description;
       }
     });
-    // data model
-    reports[index].data_model = {};
-    if (report.type === PluginsTypes.ANALYZER) {
-      analyzersDataModel.forEach((dataModel) => {
-        dataModel?.analyzers_report?.forEach((analyzerReportId) => {
-          if (report.id === analyzerReportId) {
-            reports[index].data_model = dataModel;
-          }
-        });
-      });
-    }
   });
 
   return (

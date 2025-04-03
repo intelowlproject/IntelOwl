@@ -14,10 +14,19 @@ class DataModelTags(Choices):
     SOCIAL_ENGINEERING = "social_engineering"
     ANONYMIZER = "anonymizer"
     TOR_EXIT_NODE = "tor_exit_node"
+    ABUSED = "abused"
 
 
 class DataModelEvaluations(Choices):
     TRUSTED = "trusted"
-    CLEAN = "clean"
-    SUSPICIOUS = "suspicious"
     MALICIOUS = "malicious"
+
+
+class DataModelKillChainPhases(Choices):
+    RECONNAISSANCE = "reconnaissance"
+    WEAPONIZATION = "weaponization"
+    DELIVERY = "delivery"
+    EXPLOITATION = "exploitation"
+    INSTALLATION = "installation"
+    C2 = "c2"
+    ACTION = "action"

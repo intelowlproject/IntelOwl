@@ -1,0 +1,11 @@
+services:
+  bbot_analyzer:
+    image: intelowlproject/intelowl_bbot_analyzer:${REACT_APP_INTELOWL_VERSION}
+    container_name: intelowl_bbot_analyzer
+    restart: unless-stopped
+    expose:
+      - "5001"
+    volumes:
+      - generic_logs:/var/log/intel_owl
+    depends_on:
+      - uwsgi

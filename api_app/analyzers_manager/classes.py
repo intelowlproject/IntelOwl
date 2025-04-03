@@ -16,6 +16,7 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..choices import Classification, PythonModuleBasePaths
 from ..classes import Plugin
+from ..data_model_manager.enums import DataModelEvaluations
 from ..models import PythonConfig
 from .constants import HashChoices, TypeChoices
 from .exceptions import AnalyzerConfigurationException, AnalyzerRunException
@@ -33,24 +34,7 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
 
     HashChoices = HashChoices
     TypeChoices = TypeChoices
-
-    MALICIOUS_EVALUATION = 75
-    SUSPICIOUS_EVALUATION = 35
-    FALSE_POSITIVE = -50
-
-    def threat_to_evaluation(self, threat_level):
-        # MAGIC NUMBERS HERE!!!
-        # I know, it should be 25-50-75-100. We raised it a bit because too many false positives were generated
-        self.report: AnalyzerReport
-        if threat_level >= self.MALICIOUS_EVALUATION:
-            evaluation = self.report.data_model_class.EVALUATIONS.MALICIOUS.value
-        elif threat_level >= self.SUSPICIOUS_EVALUATION:
-            evaluation = self.report.data_model_class.EVALUATIONS.SUSPICIOUS.value
-        elif threat_level <= self.FALSE_POSITIVE:
-            evaluation = self.report.data_model_class.EVALUATIONS.TRUSTED.value
-        else:
-            evaluation = self.report.data_model_class.EVALUATIONS.CLEAN.value
-        return evaluation
+    EVALUATIONS = DataModelEvaluations
 
     def _do_create_data_model(self) -> bool:
         if self.report.job.analyzable.classification == Classification.GENERIC.value:
@@ -449,14 +433,19 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             self._raise_container_not_running()
 
         # step #2: raise AnalyzerRunException in case of error
-        if not self.__raise_in_case_bad_request(self.name, resp1):
-            raise AssertionError
+        # Modified to support synchronous analyzer BBOT that return results directly in the initial response, avoiding unnecessary polling.
+        if analyzer_name == "BBOT_Analyzer":
+            report = resp1.json().get("report", None)
+            err = resp1.json().get("error", None)
+        else:
+            if not self.__raise_in_case_bad_request(self.name, resp1):
+                raise AssertionError
 
-        # step #3: if no error, continue and try to fetch result
-        key = resp1.json().get("key")
-        final_resp = self.__poll_for_result(key)
-        err = final_resp.get("error", None)
-        report = final_resp.get("report", None)
+            # step #3: if no error, continue and try to fetch result
+            key = resp1.json().get("key")
+            final_resp = self.__poll_for_result(key)
+            err = final_resp.get("error", None)
+            report = final_resp.get("report", None)
 
         # APKiD provides empty result in case it does not support the binary type
         if not report and (analyzer_name != "APKiD"):

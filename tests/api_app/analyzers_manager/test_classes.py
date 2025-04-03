@@ -234,6 +234,10 @@ class ObservableAnalyzerTestCase(CustomTestCase):
             name="CVE-2024-51181",
             classification=Classification.GENERIC,
         )
+        an7 = Analyzable.objects.create(
+            name=51181,
+            classification=Classification.GENERIC,
+        )
 
         Job.objects.create(
             user=self.superuser,
@@ -265,6 +269,11 @@ class ObservableAnalyzerTestCase(CustomTestCase):
             analyzable=an6,
             status="reported_without_fails",
         )
+        Job.objects.create(
+            user=self.superuser,
+            analyzable=an7,
+            status="reported_without_fails",
+        )
 
     def test_subclasses(self):
         def handler(signum, frame):
@@ -289,14 +298,17 @@ class ObservableAnalyzerTestCase(CustomTestCase):
                         f" for {timeout_seconds} seconds"
                     )
                     if observable_supported == Classification.GENERIC.value:
+                        if config.name == "NVD_CVE":
+                            name = "CVE-2024-51181"
+                        elif config.name == "Spamhaus_DROP":
+                            name = 51181
+                        else:
+                            name = "test@intelowl.com"
+
                         # generic should handle different use cases
                         job = Job.objects.get(
                             analyzable__classification=Classification.GENERIC.value,
-                            analyzable__name=(
-                                "CVE-2024-51181"
-                                if config.name == "NVD_CVE"
-                                else "test@intelowl.com"
-                            ),
+                            analyzable__name=name,
                         )
                     else:
                         job = Job.objects.get(

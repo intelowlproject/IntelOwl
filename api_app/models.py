@@ -608,7 +608,7 @@ class Job(MP_Node):
             # kill celery tasks using task ids
             celery_app.control.revoke(ids, terminate=True)
 
-            reports.update(status=self.STATUSES.KILLED)
+            reports.update(status=self.STATUSES.KILLED, end_time=now())
 
         self.status = self.STATUSES.KILLED
         self.save(update_fields=["status"])
@@ -681,6 +681,7 @@ class Job(MP_Node):
         ).distinct()
         if pivots_analyzers.exists():
             runner |= self._get_signatures(pivots_analyzers)
+        runner |= self._get_engine_signature()
         if connectors.exists():
             runner |= self._get_signatures(connectors)
             pivots_connectors = pivots.filter(
@@ -690,7 +691,6 @@ class Job(MP_Node):
                 runner |= self._get_signatures(pivots_connectors)
         if visualizers.exists():
             runner |= self._get_signatures(visualizers)
-        runner |= self._get_engine_signature()
         runner |= self._final_status_signature
         return runner
 
@@ -705,8 +705,14 @@ class Job(MP_Node):
         )
         runner()
 
+    def get_user_events_data_model(self) -> BaseDataModelQuerySet:
+        return self.analyzable.get_all_user_events_data_model(self.user)
+
     def get_analyzers_data_models(self) -> BaseDataModelQuerySet:
-        return self.analyzerreports.get_data_models(self)
+        DataModel = self.analyzable.get_data_model_class()  # noqa
+        return DataModel.objects.filter(
+            pk__in=self.analyzerreports.values_list("data_model_object_id", flat=True)
+        )
 
     def get_config_runtime_configuration(self, config: "AbstractConfig") -> typing.Dict:
         try:
@@ -1416,8 +1422,24 @@ class AbstractReport(models.Model):
                 index = int(search_keyword)
             except ValueError:
                 result = []
-                for obj in search_from:
-                    result.append(self.get_value(obj, [search_keyword] + fields))
+                errors = []
+                for i, obj in enumerate(search_from):
+                    # if we are iterating a list, we get all the objects that matches
+                    try:
+                        res = self.get_value(obj, [search_keyword] + fields)
+                        if isinstance(res, list):
+                            result.extend(res)
+                        else:
+                            result.append(res)
+                    except KeyError:
+                        errors.append(
+                            f"Field {search_keyword} not available at position {i}"
+                        )
+                if result:
+                    self.errors.extend(errors)
+                else:
+                    raise Exception("No object matches")
+
                 return result
             else:
                 # a.b.0

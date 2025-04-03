@@ -212,7 +212,6 @@ module.exports = {
       "comma-separated-tokens",
       "pretty-bytes",
       "ccount",
-      "react-json-tree",
       "react-base16-styling",
     ].join("|")})/)`,
     "\\.pnp\\.[^\\/]+$",

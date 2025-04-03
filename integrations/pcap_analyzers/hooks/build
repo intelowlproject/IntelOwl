@@ -1,9 +1,9 @@
 #!/bin/bash
 
 echo "display path"
-echo "$(pwd)"
+pwd
 echo "display dockerfile path"
-echo $DOCKERFILE_PATH
+echo "$DOCKERFILE_PATH"
 echo "current branch"
 echo "$SOURCE_BRANCH"
 

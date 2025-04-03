@@ -2,6 +2,10 @@ import React from "react";
 import { FormGroup, Label, Button, Spinner, Input } from "reactstrap";
 import { Form, useFormik, FormikProvider } from "formik";
 import PropTypes from "prop-types";
+import {
+  IoIosArrowDropdownCircle,
+  IoIosArrowDropupCircle,
+} from "react-icons/io";
 
 import {
   AnalyzersMultiSelectDropdownInput,
@@ -55,6 +59,9 @@ export function PlaybookConfigForm({ playbookConfig, toggle, isEditing }) {
   const [editableConfig, setEditableConfig] = React.useState({});
   const [jsonInput, setJsonInput] = React.useState({});
   const [responseError, setResponseError] = React.useState(null);
+
+  // This state is necessary because the runtime config JSON editor does not work correctly due to useEffects in this component
+  const [isRuntimeConfigOpen, setIsRuntimeConfigOpen] = React.useState(false);
 
   // store
   const [
@@ -211,6 +218,8 @@ export function PlaybookConfigForm({ playbookConfig, toggle, isEditing }) {
 
   React.useEffect(() => {
     if (!pluginsLoading) {
+      // close the config dropdown before updating the plugins otherwise the new config is not loaded correctly
+      setIsRuntimeConfigOpen(false);
       const [params, config] = runtimeConfigurationParam(
         formik,
         analyzers,
@@ -372,17 +381,31 @@ export function PlaybookConfigForm({ playbookConfig, toggle, isEditing }) {
           </Label>
           <ScanConfigSelectInput formik={formik} />
         </FormGroup>
-        <FormGroup row className="d-flex align-items-center">
-          <Label className="me-2 mb-0" for="playbook-scan-config">
-            Runtime Configuration:
-          </Label>
-          <EditRuntimeConfiguration
-            setJsonInput={setJsonInput}
-            selectedPluginsParams={selectedPluginsParams}
-            editableConfig={editableConfig}
-          />
-        </FormGroup>
-
+        {/* The runtime config has been included in a dropdown to ensure that 
+          it correctly renders the config once it is modified by the component's useEffect
+        */}
+        <Button
+          size="sm"
+          onClick={() => setIsRuntimeConfigOpen(!isRuntimeConfigOpen)}
+          color="primary"
+          className="my-2"
+        >
+          <span className="me-1">Runtime Configuration</span>
+          {isRuntimeConfigOpen ? (
+            <IoIosArrowDropupCircle />
+          ) : (
+            <IoIosArrowDropdownCircle />
+          )}
+        </Button>
+        {isRuntimeConfigOpen && (
+          <FormGroup row className="d-flex align-items-center">
+            <EditRuntimeConfiguration
+              setJsonInput={setJsonInput}
+              selectedPluginsParams={selectedPluginsParams}
+              editableConfig={editableConfig}
+            />
+          </FormGroup>
+        )}
         <FormGroup className="d-flex justify-content-end align-items-center mt-3">
           {responseError && formik.submitCount && (
             <small className="text-danger">{responseError}</small>

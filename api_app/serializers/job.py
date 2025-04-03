@@ -8,6 +8,7 @@ from typing import Dict, Generator, List, Union
 
 import django.core
 from django.conf import settings
+from django.core.cache import cache
 from django.db.models import Q, QuerySet
 from django.http import QueryDict
 from django.utils.timezone import now
@@ -562,7 +563,6 @@ class JobSerializer(_AbstractJobViewSerializer):
             "investigation_name",
             "permissions",
             "data_model",
-            "analyzers_data_model",
             "file_name",
             "file_mimetype",
             "is_sample",
@@ -584,6 +584,14 @@ class JobSerializer(_AbstractJobViewSerializer):
     comments = CommentSerializer(
         many=True, read_only=True, source="analyzable.comments"
     )
+    file_name = rfs.CharField(source="analyzable.name", read_only=True)
+    file_mimetype = rfs.CharField(source="analyzable.mimetype", read_only=True)
+    observable_name = rfs.CharField(source="analyzable.name", read_only=True)
+    observable_classification = rfs.CharField(
+        source="analyzable.classification", read_only=True
+    )
+    md5 = rfs.CharField(source="analyzable.md5", read_only=True)
+
     pivots_to_execute = rfs.SlugRelatedField(
         many=True, read_only=True, slug_field="name"
     )
@@ -611,15 +619,7 @@ class JobSerializer(_AbstractJobViewSerializer):
     )
     permissions = rfs.SerializerMethodField()
     data_model = rfs.SerializerMethodField()
-    analyzers_data_model = rfs.SerializerMethodField(read_only=True)
-    file_name = rfs.CharField(source="analyzable.name", read_only=True)
-    file_mimetype = rfs.CharField(source="analyzable.mimetype", read_only=True)
     is_sample = rfs.BooleanField(read_only=True)
-    observable_name = rfs.CharField(source="analyzable.name", read_only=True)
-    observable_classification = rfs.CharField(
-        source="analyzable.classification", read_only=True
-    )
-    md5 = rfs.CharField(source="analyzable.md5", read_only=True)
 
     def get_pivots_to_execute(self, obj: Job):  # skipcq: PYL-R0201
         # this cast is required or serializer doesn't work with websocket
@@ -636,12 +636,24 @@ class JobSerializer(_AbstractJobViewSerializer):
         return instance.investigation
 
     def get_related_investigation_number(self, instance: Job) -> int:
-        return Investigation.investigation_for_analyzable(
+        # this query is cpu intensive, and it's done for very often:
+        # during an analysis each time an analyzer it's completed this query is done from the websocket
+        cache_key = f"{instance.id}_related_investigation_number"
+        cached_investigation_number = cache.get(cache_key)
+        logger.debug(f"{cache_key=}: {cached_investigation_number=}")
+        if cached_investigation_number is not None:
+            logger.debug(f"used cache: {cache_key=}")
+            return cached_investigation_number
+
+        related_investigation_number = Investigation.investigation_for_analyzable(
             Investigation.objects.filter(
                 start_time__gte=now() - datetime.timedelta(days=30),
             ),
             instance.analyzable.name,
         ).count()
+        cache.set(cache_key, related_investigation_number, 60)
+        logger.debug(f"set cache: {cache_key=} for {related_investigation_number=}")
+        return related_investigation_number
 
     def get_fields(self):
         # this method override is required for a cyclic import
@@ -660,11 +672,6 @@ class JobSerializer(_AbstractJobViewSerializer):
                 many=True, read_only=True, source=f"{field}reports"
             )
         return super().get_fields()
-
-    def get_analyzers_data_model(self, instance: Job):
-        if instance.analyzable.classification == Classification.GENERIC:
-            return []
-        return instance.get_analyzers_data_models().serialize()
 
     def get_data_model(self, instance: Job):
         if instance.data_model:

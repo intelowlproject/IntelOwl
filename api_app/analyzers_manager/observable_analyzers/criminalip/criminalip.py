@@ -2,6 +2,7 @@ import logging
 from typing import Dict
 
 import requests
+from requests import HTTPError
 
 from api_app.analyzers_manager import classes
 from api_app.choices import Classification
@@ -25,6 +26,8 @@ class CriminalIp(classes.ObservableAnalyzer, CriminalIpBase):
         resp = requests.get(url, headers=self.getHeaders(), params=params)
         resp.raise_for_status()
         resp = resp.json()
+        if resp.get("status", None) not in [None, 200]:
+            raise HTTPError(resp.get("message", ""))
         logger.info(f"response from CriminalIp for {self.observable_name} -> {resp}")
         return resp
 

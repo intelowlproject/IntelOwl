@@ -210,9 +210,17 @@ export default function Search() {
               </Label>
               {/* Replaced the regular MultiSelectDropdownInput with AnalyzersMultiSelectDropdownInput */}
               <Col sm={9}>
-              <AnalyzersMultiSelectDropdownInput formik={formik} fieldName="analyzers" />
-                 {DangerErrorMessage("analyzers")}
-
+              <AnalyzersMultiSelectDropdownInput
+  formik={{
+    ...formik,
+    values: {
+      ...formik.values,
+      type: "", // override type to a falsey value
+    },
+  }}
+  fieldName="analyzers"
+/>
+{DangerErrorMessage("analyzers")}
               </Col>
             </Col>
             <Col xxl={3} sm={12} className=" d-flex align-items-center mt-4">

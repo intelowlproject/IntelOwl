@@ -58,8 +58,18 @@ class Debloat(FileAnalyzer):
                     log_message=log_message,
                     beginning_file_size=original_size,
                 )
-            except Exception as e:
-                raise AnalyzerRunException(f"Debloat processing failed: {e}")
+            except OSError as e:
+                raise AnalyzerRunException(
+                    f"File operation failed during Debloat processing: {e}"
+                )
+            except ValueError as e:
+                raise AnalyzerRunException(
+                    f"Invalid parameter in Debloat processing: {e}"
+                )
+            except AttributeError as e:
+                raise AnalyzerRunException(
+                    f"Debloat library error, possibly malformed PE object: {e}"
+                )
 
             if debloat_code == 0 and not os.path.exists(output_path):
                 return {
@@ -82,6 +92,7 @@ class Debloat(FileAnalyzer):
             with open(output_path, "rb") as f:
                 output = f.read()
                 debloated_hash = hashlib.md5(output).hexdigest()
+                debloated_sha256 = hashlib.sha256(output).hexdigest()
 
             encoded_output = b64encode(output).decode("utf-8")
 
@@ -95,6 +106,7 @@ class Debloat(FileAnalyzer):
                 "debloated_file": encoded_output,
                 "size_reduction_percentage": size_reduction,
                 "debloated_hash": debloated_hash,
+                "debloated_sha256": debloated_sha256,
             }
 
     @classmethod
@@ -115,6 +127,7 @@ class Debloat(FileAnalyzer):
                             "debloated_hash": "f7f92eadfb444e7fce27efa2007a955a",
                             "debloated_size": 813976,
                             "size_reduction_percentage": 78.80487200264973,
+                            "debloated_sha256": "f7f92eadfb444e7fce27efa2007a955a",
                         },
                         200,
                     ),

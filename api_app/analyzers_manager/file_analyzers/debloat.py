@@ -4,6 +4,7 @@
 import hashlib
 import logging
 import os
+import sys
 from base64 import b64encode
 from tempfile import TemporaryDirectory
 
@@ -18,6 +19,36 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
+# Custom logger to handle the debloat library's logging
+def log_message(*args, end="\n", flush=False, **kwargs):
+    message = " ".join(map(str, args))
+    if end:
+        message += end
+    valid_kwargs = {}
+    for key, value in kwargs.items():
+        if key in [
+            "level",
+            "exc_info",
+            "stack_info",
+            "extra",
+            "msg",
+            "args",
+            "kwargs",
+        ]:
+            valid_kwargs[key] = value
+    logger.info(message, **valid_kwargs)
+    # Emulate flush if requested
+    if flush:
+        for handler in logger.handlers:
+            try:
+                handler.flush()
+            except AttributeError:
+                pass
+        # Fallback to stdout flush if no flushable handlers
+        if not any(hasattr(h, "flush") for h in logger.handlers):
+            sys.stdout.flush()
+
+
 class Debloat(FileAnalyzer):
 
     def run(self):
@@ -25,25 +56,6 @@ class Debloat(FileAnalyzer):
             binary = pefile.PE(self.filepath, fast_load=True)
         except pefile.PEFormatError as e:
             raise AnalyzerRunException(f"Invalid PE file: {e}")
-
-        # BBOT logger is passing invalid kwargs to logger.info like "end" and "flush"
-        def log_message(*args, end="\n", **kwargs):
-            message = " ".join(map(str, args))
-            if end:
-                message += end
-            valid_kwargs = {}
-            for key, value in kwargs.items():
-                if key in [
-                    "level",
-                    "exc_info",
-                    "stack_info",
-                    "extra",
-                    "msg",
-                    "args",
-                    "kwargs",
-                ]:
-                    valid_kwargs[key] = value
-            logger.info(message, **valid_kwargs)
 
         with TemporaryDirectory() as temp_dir:
             output_path = os.path.join(temp_dir, "debloated.exe")
@@ -70,6 +82,8 @@ class Debloat(FileAnalyzer):
                 raise AnalyzerRunException(
                     f"Debloat library error, possibly malformed PE object: {e}"
                 )
+
+            logger.debug(f"Debloat returned code: {debloat_code}")
 
             if debloat_code == 0 and not os.path.exists(output_path):
                 return {

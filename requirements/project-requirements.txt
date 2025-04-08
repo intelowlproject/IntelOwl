@@ -24,7 +24,7 @@ django-rest-email-auth==4.0.0
 
 # infra
 boto3==1.26.143
-celery[sqs,redis]==5.4.0
+celery[sqs,redis]==5.5.1
 dataclasses==0.6
 # https://github.com/advisories/GHSA-q4qm-xhf9-4p8f
 # unpatched CVE: noproblem, we just use this for debugging purposes

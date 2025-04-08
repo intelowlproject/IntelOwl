@@ -29,7 +29,7 @@
     "react-scripts": "^5.0.1",
     "react-select": "^5.8.1",
     "react-table": "^7.8.0",
-    "react-use": "^17.5.1",
+    "react-use": "^17.6.0",
     "reactflow": "^11.11.4",
     "reactstrap": "^9.2.3",
     "recharts": "^2.13.0",

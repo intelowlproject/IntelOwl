@@ -89,8 +89,11 @@ class VisualizableBase(VisualizableObject):
         self.icon = icon
         self.bold = bold
         self.italic = italic
-        self.copy_text = copy_text or value
         self.description = description
+        if link:
+            self.copy_text = link
+        else:
+            self.copy_text = copy_text or value
 
     @property
     def attributes(self) -> List[str]:

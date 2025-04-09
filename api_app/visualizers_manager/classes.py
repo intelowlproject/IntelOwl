@@ -91,7 +91,7 @@ class VisualizableBase(VisualizableObject):
         self.italic = italic
         self.description = description
         if link:
-            self.copy_text = link
+            self.copy_text = copy_text or link
         else:
             self.copy_text = copy_text or value
 

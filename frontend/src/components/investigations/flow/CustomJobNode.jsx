@@ -55,8 +55,8 @@ function CustomJobNode({ data }) {
         isVisible
         offset={3}
       >
-        {data.engineFields.tags?.map((tag) => (
-          <TagsBadge id={data.id} tag={tag} className="ms-1" />
+        {data.engineFields.tags?.map((tag, index) => (
+          <TagsBadge id={`${data.id}_${index}`} tag={tag} className="ms-1" />
         ))}
       </NodeToolbar>
       <NodeToolbar

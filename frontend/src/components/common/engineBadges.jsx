@@ -102,13 +102,9 @@ export function TagsBadge(props) {
   const divClass = classnames(`bg-${color}`, className);
 
   return (
-    <Badge id={`tag__${id}_${tag}`} className={`d-flex-center ${divClass}`}>
+    <Badge id={`tag__${id}`} className={`d-flex-center ${divClass}`}>
       {icon}
-      <UncontrolledTooltip
-        target={`tag__${id}_${tag}`}
-        placement="top"
-        fade={false}
-      >
+      <UncontrolledTooltip target={`tag__${id}`} placement="top" fade={false}>
         {tag}
       </UncontrolledTooltip>
     </Badge>

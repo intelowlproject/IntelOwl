@@ -56,3 +56,18 @@ export const StatusColors = Object.freeze({
   ...ReportStatusColors,
   ...InvestigationStatusColors,
 });
+
+export const EvaluationColors = Object.freeze({
+  trusted: "success",
+  malicious: "danger",
+});
+
+export const TagsColors = Object.freeze({
+  phishing: "danger",
+  anonymizer: "warning",
+  malware: "danger",
+  social_engineering: "secondary",
+  tor_exit_node: "warning",
+  scanner: "danger",
+  ip_only: "secondary",
+});

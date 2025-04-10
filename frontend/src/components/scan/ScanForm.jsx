@@ -56,7 +56,7 @@ import {
   sanitizeObservable,
   getObservableClassification,
 } from "../../utils/observables";
-import { SpinnerIcon } from "../common/icon/icons";
+import { SpinnerIcon } from "../common/icon/actionIcons";
 import {
   AnalyzersMultiSelectDropdownInput,
   ConnectorsMultiSelectDropdownInput,

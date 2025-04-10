@@ -38,14 +38,12 @@ def log_message(*args, end="\n", flush=False, **kwargs):
             valid_kwargs[key] = value
     logger.info(message, **valid_kwargs)
     # Emulate flush if requested
-    if flush:
-        for handler in logger.handlers:
-            try:
-                handler.flush()
-            except AttributeError:
-                pass
-        # Fallback to stdout flush if no flushable handlers
-        if not any(hasattr(h, "flush") for h in logger.handlers):
+    for handler in logger.handlers:
+        if hasattr(handler, "flush"):
+            handler.flush()
+            break
+        else:
+            # Fallback to stdout flush if no flushable handlers
             sys.stdout.flush()
 
 
@@ -83,7 +81,7 @@ class Debloat(FileAnalyzer):
                     f"Debloat library error, possibly malformed PE object: {e}"
                 )
 
-            logger.debug(f"Debloat returned code: {debloat_code}")
+            logger.info(f"Debloat processed {self.filepath} with code {debloat_code}")
 
             if debloat_code == 0 and not os.path.exists(output_path):
                 return {
@@ -111,7 +109,7 @@ class Debloat(FileAnalyzer):
             encoded_output = b64encode(output).decode("utf-8")
 
             os.remove(output_path)
-            logger.info("Cleaned up temporary file.")
+            logger.debug("Cleaned up temporary file.")
 
             return {
                 "success": True,

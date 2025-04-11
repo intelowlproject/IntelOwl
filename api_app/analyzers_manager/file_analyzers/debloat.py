@@ -42,9 +42,9 @@ def log_message(*args, end="\n", flush=False, **kwargs):
         if hasattr(handler, "flush"):
             handler.flush()
             break
-        else:
-            # Fallback to stdout flush if no flushable handlers
-            sys.stdout.flush()
+    else:
+        # Fallback to stdout flush if no flushable handlers
+        sys.stdout.flush()
 
 
 class Debloat(FileAnalyzer):

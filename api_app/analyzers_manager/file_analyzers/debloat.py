@@ -38,13 +38,14 @@ def log_message(*args, end="\n", flush=False, **kwargs):
             valid_kwargs[key] = value
     logger.info(message, **valid_kwargs)
     # Emulate flush if requested
-    for handler in logger.handlers:
-        if hasattr(handler, "flush"):
-            handler.flush()
-            break
-    else:
-        # Fallback to stdout flush if no flushable handlers
-        sys.stdout.flush()
+    if flush:
+        for handler in logger.handlers:
+            if hasattr(handler, "flush"):
+                handler.flush()
+                break
+        else:
+            # Fallback to stdout flush if no flushable handlers
+            sys.stdout.flush()
 
 
 class Debloat(FileAnalyzer):

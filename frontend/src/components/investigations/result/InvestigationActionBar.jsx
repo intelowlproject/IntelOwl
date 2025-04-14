@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { ContentSection, IconButton, addToast } from "@certego/certego-ui";
 
 import { deleteInvestigation } from "./investigationApi";
-import { DeleteIcon } from "../../common/icon/icons";
+import { DeleteIcon } from "../../common/icon/actionIcons";
 import { areYouSureConfirmDialog } from "../../common/areYouSureConfirmDialog";
 
 export function InvestigationActionsBar({ investigation }) {

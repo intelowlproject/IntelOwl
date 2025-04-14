@@ -95,6 +95,8 @@ class AnalyzerReport(AbstractReport):
             # this is a constant
             if report_key.startswith("$"):
                 value = report_key[1:]
+            elif isinstance(report_key, int):
+                value = report_key
             # this is a field of the report
             else:
                 try:

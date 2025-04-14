@@ -11,12 +11,21 @@ describe("test TimePicker component", () => {
     const toDate = new Date();
     const fromDate = structuredClone(toDate);
     fromDate.setDate(fromDate.getDate() - 1);
-    const toDateValue = format(toDate, datetimeFormatStr);
-    const fromDateValue = format(fromDate, datetimeFormatStr);
+
+    const setFromDateValue = jest.fn();
+    const setToDateValue = jest.fn();
 
     const { container } = render(
       <BrowserRouter>
-        <TimePicker />
+        <TimePicker
+          id="test-time-picker"
+          fromName="time__gte"
+          toName="time__lte"
+          fromValue={fromDate}
+          toValue={toDate}
+          fromOnChange={setFromDateValue}
+          toOnChange={setToDateValue}
+        />
       </BrowserRouter>,
     );
 
@@ -32,21 +41,25 @@ describe("test TimePicker component", () => {
     const secondDateInput = container.querySelector("#DatePicker__lte");
     expect(secondDateInput).toBeInTheDocument();
     // datetime saves also milliseconds
-    expect(firstDateInput).toHaveValue(`${fromDateValue}.000`);
-    expect(secondDateInput).toHaveValue(`${toDateValue}.000`);
+    expect(firstDateInput).toHaveValue(
+      `${format(fromDate, datetimeFormatStr)}.000`,
+    );
+    expect(secondDateInput).toHaveValue(
+      `${format(toDate, datetimeFormatStr)}.000`,
+    );
 
     /* datetime-local input is editable only with fireEvent, user.type doesn't work:
     https://github.com/testing-library/user-event/issues/399#issuecomment-656084165 */
-    await fireEvent.change(firstDateInput, {
+    fireEvent.change(firstDateInput, {
       target: { value: "2024-02-05T12:06:01" },
     });
-    await fireEvent.change(secondDateInput, {
+    fireEvent.change(secondDateInput, {
       target: { value: "2024-05-13T12:06:01" },
     });
 
     await waitFor(() => {
-      expect(firstDateInput).toHaveValue("2024-02-05T12:06:01.000");
-      expect(secondDateInput).toHaveValue("2024-05-13T12:06:01.000");
+      expect(setFromDateValue).toHaveBeenCalledWith("2024-02-05T12:06:01");
+      expect(setToDateValue).toHaveBeenCalledWith("2024-05-13T12:06:01");
     });
   });
 });

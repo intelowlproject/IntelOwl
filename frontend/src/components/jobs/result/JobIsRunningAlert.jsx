@@ -9,7 +9,7 @@ import { JobFinalStatuses } from "../../../constants/jobConst";
 import { areYouSureConfirmDialog } from "../../common/areYouSureConfirmDialog";
 
 import { killJob } from "./jobApi";
-import { killJobIcon } from "../../common/icon/icons";
+import { killJobIcon } from "../../common/icon/actionIcons";
 import { JobIsRunningFlow } from "./flow/JobIsRunningFlow";
 
 export function JobIsRunningAlert({ job }) {

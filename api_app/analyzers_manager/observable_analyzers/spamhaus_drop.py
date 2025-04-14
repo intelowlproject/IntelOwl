@@ -59,7 +59,7 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
             logger.info(
                 f"Database does not exist in {database_location}, initialising..."
             )
-            self.update(data_type)
+            self.update()
         with open(database_location, "r") as f:
             db = json.load(f)
 
@@ -91,27 +91,29 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
         return {"found": False}
 
     @classmethod
-    def update(cls, data_type: str):
-        if data_type == "ipv4":
-            logger.info(f"Updating database from {cls.ipv4_url}")
-            db_url = cls.ipv4_url
-        elif data_type == "ipv6":
-            logger.info(f"Updating database from {cls.ipv6_url}")
-            db_url = cls.ipv6_url
-        elif data_type == "asn":
-            logger.info(f"Updating database from {cls.asn_url}")
-            db_url = cls.asn_url
-        else:
-            raise AnalyzerRunException(
-                f"Invalid data_type provided to update: {data_type}"
-            )
-        response = requests.get(url=db_url)
-        response.raise_for_status()
-        data = cls.convert_to_json(response.text)
-        database_location = cls.location(data_type)
-        with open(database_location, "w", encoding="utf-8") as f:
-            json.dump(data, f)
-        logger.info(f"Database updated at {database_location}")
+    def update(cls):
+        data_types = ["ipv4", "ipv6", "asn"]
+        for data_type in data_types:
+            if data_type == "ipv4":
+                logger.info(f"Updating database from {cls.ipv4_url}")
+                db_url = cls.ipv4_url
+            elif data_type == "ipv6":
+                logger.info(f"Updating database from {cls.ipv6_url}")
+                db_url = cls.ipv6_url
+            elif data_type == "asn":
+                logger.info(f"Updating database from {cls.asn_url}")
+                db_url = cls.asn_url
+            else:
+                raise AnalyzerRunException(
+                    f"Invalid data_type provided to update: {data_type}"
+                )
+            response = requests.get(url=db_url)
+            response.raise_for_status()
+            data = cls.convert_to_json(response.text)
+            database_location = cls.location(data_type)
+            with open(database_location, "w", encoding="utf-8") as f:
+                json.dump(data, f)
+            logger.info(f"Database updated at {database_location}")
 
     @staticmethod
     def convert_to_json(input_string) -> dict:

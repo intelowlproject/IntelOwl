@@ -20,16 +20,17 @@ import { FaDiagramProject } from "react-icons/fa6";
 import { VscJson } from "react-icons/vsc";
 import { Link } from "react-router-dom";
 
-import { IconButton, CustomJsonInput } from "@certego/certego-ui";
+import { IconButton } from "@certego/certego-ui";
 
 import { useAuthStore } from "../../../stores/useAuthStore";
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
-import { SpinnerIcon } from "../../common/icon/icons";
+import { SpinnerIcon } from "../../common/icon/actionIcons";
 import { deleteConfiguration } from "../pluginsApi";
 import { PluginsTypes } from "../../../constants/pluginConst";
 import { PluginConfigModal } from "../PluginConfigModal";
 import { PlaybookFlows } from "../flows/PlaybookFlows";
+import { JsonEditor } from "../../common/JsonEditor";
 import {
   INTELOWL_DOCS_URL,
   INTELOWL_REPO_URL,
@@ -553,12 +554,16 @@ export function MappingDataModel({ data, type, pythonModule }) {
                 analyzer&apos;s source code.
               </Link>
             </small>
-            <div className="my-2 d-flex justify-content-center">
-              <CustomJsonInput
+            <div
+              className="my-2 d-flex justify-content-center"
+              style={{ maxHeight: "40vh", width: "100%", overflow: "scroll" }}
+            >
+              <JsonEditor
                 id="data_model_mapping_json"
-                placeholder={data}
-                viewOnly
-                confirmGood={false}
+                initialJsonData={data}
+                width="100%"
+                height="20vh"
+                readOnly
               />
             </div>
           </ModalBody>

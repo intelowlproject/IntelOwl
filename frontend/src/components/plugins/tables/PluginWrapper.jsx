@@ -92,6 +92,7 @@ export default function PluginWrapper({
               config={tableConfig}
               initialState={tableInitialState}
               columns={columns}
+              autoResetPage
             />
           )}
         />

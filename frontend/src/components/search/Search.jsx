@@ -1,7 +1,6 @@
 /* eslint-disable react/prop-types */
 import React, { useEffect } from "react";
-import { useFormik, Form, FormikProvider, ErrorMessage } from "formik"; // Added ErrorMessage here
-
+import { useFormik, Form, FormikProvider } from "formik";
 import {
   Container,
   Row,
@@ -23,9 +22,11 @@ import { searchTableColumns } from "./searchTableColumns";
 import { pluginReportQueries } from "./searchApi";
 import { INTELOWL_DOCS_URL } from "../../constants/environment";
 import {
-  AnalyzersMultiSelectDropdownInput,
-} from "../common/form/pluginsMultiSelectDropdownInput";
-
+    AnalyzersMultiSelectDropdownInput,
+    ConnectorsMultiSelectDropdownInput,
+    PivotsMultiSelectDropdownInput
+  } from "../common/form/pluginsMultiSelectDropdownInput";
+  import { JobTypes, ObservableClassifications } from "../../constants/jobConst";
 // table config
 const tableConfig = { enableExpanded: true, enableFlexLayout: true };
 const tableInitialState = {
@@ -44,19 +45,9 @@ const tableProps = {
   ),
 };
 
-// DangerErrorMessage function added from scanform file
-function DangerErrorMessage(fieldName) {
-  return (
-    <ErrorMessage
-      name={fieldName}
-      render={(msg) => <span className="text-danger">{msg}</span>}
-    />
-  );
-}
-
 export default function Search() {
   const [elasticData, setElasticData] = React.useState([]);
-  const [loadingData, setLoadingData] = React.useState(false);
+  const [loadingData, setLoadingData] = React.useState(true);
 
   const isoFormatString = "yyyy-MM-dd'T'HH:mm";
   const defaultStartDate = new Date();
@@ -65,16 +56,20 @@ export default function Search() {
 
   const formik = useFormik({
     initialValues: {
-      type: "",
-      name: "",
-      status: "",
-      fromStartTime: defaultStartDateStr,
-      toStartTime: format(new Date(), isoFormatString),
-      fromEndTime: defaultStartDateStr,
-      toEndTime: format(new Date(), isoFormatString),
-      errors: "",
-      report: "",
-      analyzers: []  // ensure analyzers is defined in initialValues
+            observableType: JobTypes.OBSERVABLE,
+            classification: ObservableClassifications.GENERIC,
+            type: [],
+            name: "",
+            status: "",
+            fromStartTime: defaultStartDateStr,
+            toStartTime: format(new Date(), isoFormatString),
+            fromEndTime: defaultStartDateStr,
+            toEndTime: format(new Date(), isoFormatString),
+            errors: "",
+            report: "",
+            analyzers: [] ,
+            connectors: [],
+            pivots:[] 
     },
     validate: (values) => {
       console.debug("validate - values");
@@ -92,27 +87,44 @@ export default function Search() {
       return errors;
     },
     onSubmit: async () => {
+      const collectSelectedValues = (values) => {
+        const selected = [];
+      
+        ['analyzers', 'connectors', 'pivots'].forEach((category) => {
+          if (Array.isArray(values[category])) {
+            values[category].forEach(item => {
+              if (item?.value) {
+                selected.push(item.value);
+              }
+            });
+          }
+        });
+      
+        return selected;
+      };
       const queryParams = {
         start_start_time: new Date(formik.values.fromStartTime),
         end_start_time: new Date(formik.values.toStartTime),
         start_end_time: new Date(formik.values.fromEndTime),
         end_end_time: new Date(formik.values.toEndTime),
+
       };
+
+      const excludedKeys = ["analyzers", "connectors", "pivots"];
+      
       Object.entries(formik.values).forEach(([key, value]) => {
-        if (formik.initialValues[key] !== value)
-          if (key === "type") queryParams.plugin_name = value;
-          else if (key === "fromStartTime")
-            queryParams.start_start_time = new Date(value);
-          else if (key === "toStartTime")
-            queryParams.end_start_time = new Date(value);
-          else if (key === "fromEndTime")
-            queryParams.start_end_time = new Date(value);
-          else if (key === "toEndTime")
-            queryParams.end_end_time = new Date(value);
-          else queryParams[key] = value;
+        if (excludedKeys.includes(key)) return;
+      
+        if (key === "type") queryParams.plugin_name = collectSelectedValues(formik.values);
+        else if (key === "fromStartTime") queryParams.start_start_time = new Date(value);
+        else if (key === "toStartTime") queryParams.end_start_time = new Date(value);
+        else if (key === "fromEndTime") queryParams.start_end_time = new Date(value);
+        else if (key === "toEndTime") queryParams.end_end_time = new Date(value);
+        else queryParams[key] = value;
       });
 
       let response = [];
+
       try {
         setLoadingData(true);
         response = await pluginReportQueries(
@@ -120,6 +132,7 @@ export default function Search() {
           tableInitialState.pageSize,
           20,
         );
+        
       } catch (err) {
         // error will be handled by pluginReportQueries
       } finally {
@@ -129,6 +142,18 @@ export default function Search() {
       }
     },
   });
+   const renderMultiSelectDropdown = () => {
+      switch (formik.values.type) {
+        case PluginsTypes.CONNECTOR:
+          return <ConnectorsMultiSelectDropdownInput formik={formik} />;
+        case PluginsTypes.PIVOT:
+          return <PivotsMultiSelectDropdownInput formik={formik} />;
+        case PluginsTypes.ANALYZER:
+          return <AnalyzersMultiSelectDropdownInput formik={formik}   />;
+        default:
+          return null;
+      }
+    };
 
   useEffect(() => {
     // this hook is required to run a request when the page is visited the first time
@@ -175,7 +200,7 @@ export default function Search() {
           </Row>
           <Row id="search-input-fields-first-row d-flex flex-wrap">
             <Col xxl={4} sm={12} className="d-flex align-items-center mt-4">
-              <Label className="col-3 fw-bold mb-0" htmlFor="search__type">
+              <Label className="col-3 fw-bold mb-0" for="search__type">
                 Type:
               </Label>
               <Input
@@ -204,29 +229,18 @@ export default function Search() {
                   ))}
               </Input>
             </Col>
-            <Col xxl={3} sm={12} className="d-flex align-items-center mt-4">
-              <Label className=" w-[100%] col-3 fw-bold mb-0" htmlFor="search__name">
+            <Col xxl={4} sm={12} className="d-flex align-items-center mt-4">
+              <Label className="col-3 fw-bold mb-0" for="search__name">
                 Name:
               </Label>
-              {/* Replaced the regular MultiSelectDropdownInput with AnalyzersMultiSelectDropdownInput */}
               <Col sm={9}>
-              <AnalyzersMultiSelectDropdownInput
-  formik={{
-    ...formik,
-    values: {
-      ...formik.values,
-      type: "", // override type to a falsey value
-    },
-  }}
-  fieldName="analyzers"
-/>
-{DangerErrorMessage("analyzers")}
+              {renderMultiSelectDropdown()}
               </Col>
             </Col>
             <Col xxl={3} sm={12} className=" d-flex align-items-center mt-4">
               <Label
                 className="col-xxl-4 col-sm-3 fw-bold mb-0"
-                htmlFor="search__status"
+                for="search__status"
               >
                 Status:
               </Label>
@@ -261,7 +275,7 @@ export default function Search() {
               <div className="d-flex flex-column align-item-start">
                 <div className="d-flex flex-column flex-wrap">
                   <div className="d-flex align-items-center mb-1">
-                    <Label className="col-3 mb-0" htmlFor="search__fromStartTime">
+                    <Label className="col-3 mb-0" for="search__fromStartTime">
                       from
                     </Label>
                     <Input
@@ -277,7 +291,7 @@ export default function Search() {
                     />
                   </div>
                   <div className="d-flex align-items-center">
-                    <Label className="col-3 mb-0" htmlFor="search__toStartTime">
+                    <Label className="col-3 mb-0" for="search__toStartTime">
                       to
                     </Label>
                     <Input
@@ -309,7 +323,7 @@ export default function Search() {
               <div className="d-flex flex-column align-item-start">
                 <div className="d-flex flex-column flex-wrap">
                   <div className="d-flex align-items-center mb-1">
-                    <Label className="col-3 mb-0" htmlFor="search__fromEndTime">
+                    <Label className="col-3 mb-0" for="search__fromEndTime">
                       from
                     </Label>
                     <Input
@@ -325,7 +339,7 @@ export default function Search() {
                     />
                   </div>
                   <div className="d-flex align-items-center">
-                    <Label className="col-3 mb-0" htmlFor="search__toEndTime">
+                    <Label className="col-3 mb-0" for="search__toEndTime">
                       to
                     </Label>
                     <Input
@@ -349,7 +363,7 @@ export default function Search() {
             <Col xxl={3} sm={12} className="d-flex align-items-center mt-3">
               <Label
                 className="col-xxl-4 col-sm-3 fw-bold mb-0"
-                htmlFor="search__errors"
+                for="search__errors"
               >
                 Errors:
               </Label>
@@ -383,7 +397,7 @@ export default function Search() {
             <Col xxl={11} sm={12} className="d-flex align-items-center mt-3">
               <Label
                 className="col-xxl-1 col-sm-3 fw-bold mb-0"
-                htmlFor="search__report"
+                for="search__report"
               >
                 Text search:
                 <MdInfoOutline

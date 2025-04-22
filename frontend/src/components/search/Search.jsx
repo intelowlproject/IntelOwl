@@ -424,6 +424,7 @@ export default function Search() {
               config={tableConfig}
               initialState={tableInitialState}
               columns={searchTableColumns}
+              autoResetPage
               {...tableProps}
             />
           )}

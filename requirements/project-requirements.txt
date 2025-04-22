@@ -16,7 +16,7 @@ django-solo==2.4.0
 django_extensions==3.2.3
 jsonschema==4.23.0
 # django rest framework libs
-Authlib==1.4.0
+Authlib==1.5.2
 djangorestframework==3.15.2
 djangorestframework-filters==1.0.0.dev2
 drf-spectacular==0.28.0

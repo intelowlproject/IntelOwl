@@ -20,46 +20,40 @@ def strip_ansi_codes(text):
 # Extract structured data from Phunter CLI output
 def parse_phunter_output(output):
     result = {}
+    key_mapping = {
+        "phone number:": "phone_number",
+        "possible:": "possible",
+        "valid:": "valid",
+        "operator:": "operator",
+        "possible location:": "location",
+        "location:": "location",
+        "carrier:": "carrier",
+        "line type:": "line_type",
+        "international:": "international_format",
+        "national:": "national_format",
+        "local time:": "local_time",
+        "views count:": "views",
+    }
+
     lines = output.splitlines()
 
     for line in lines:
-        line = line.strip()
+        line = line.strip().lower()
 
-        if "Phone number:" in line:
-            result["phone_number"] = line.partition(":")[2].strip()
-
-        elif "Possible:" in line:
-            result["possible"] = "yes" if "✔" in line else "no"
-
-        elif "Valid:" in line:
-            result["valid"] = "yes" if "✔" in line else "no"
-
-        elif "Operator:" in line:
-            result["operator"] = line.partition(":")[2].strip()
-
-        elif "Possible location:" in line:
-            result["location"] = line.partition(":")[2].strip()
-
-        elif "Carrier:" in line:
-            result["carrier"] = line.partition(":")[2].strip()
-
-        elif "Line Type:" in line:
-            result["line_type"] = line.partition(":")[2].strip()
-
-        elif "International:" in line:
-            result["international_format"] = line.partition(":")[2].strip()
-
-        elif "National:" in line:
-            result["national_format"] = line.partition(":")[2].strip()
-
-        elif "Local Time:" in line:
-            result["local_time"] = line.partition(":")[2].strip()
-
-        elif "Views count:" in line:
-            result["views"] = line.partition(":")[2].strip()
-
-        elif "Not spammer" in line:
+        # Special case: spam status
+        if "not spammer" in line:
             result["spam_status"] = "Not spammer"
+            continue
+
+        for keyword, key_name in key_mapping.items():
+            if keyword in line:
+                value = line.partition(":")[2].strip()
+                # Special handling for booleans
+                if key_name in ("possible", "valid"):
+                    result[key_name] = "yes" if "✔" in value else "no"
+                else:
+                    result[key_name] = value
+                break  # No need to check other keywords once matched
 
     return result
 
@@ -86,8 +80,9 @@ def analyze():
 
     try:
         logger.info(f"Executing Phunter on: {phone_number}")
+        command = ["python3", "phunter.py", "-t", phone_number]
         result = subprocess.run(
-            ["python3", "phunter.py", "-t", phone_number],
+            command,
             capture_output=True,
             text=True,
             check=True,

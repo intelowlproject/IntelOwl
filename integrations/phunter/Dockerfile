@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 
 # Install dependencies
-RUN apt-get update && apt-get install -y git
+RUN apt-get update && apt-get install -y --no-install-recommends git
 
 # Clone Phunter
 RUN git clone https://github.com/N0rz3/Phunter.git /app/Phunter

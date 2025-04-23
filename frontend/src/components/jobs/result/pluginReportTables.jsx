@@ -140,6 +140,7 @@ const tableProps = {
       { id: "name", desc: true },
     ],
   },
+  autoResetPage: true,
   SubComponent: ({ row }) => (
     <div
       id={`jobreport-jsoninput-${row.id}`}

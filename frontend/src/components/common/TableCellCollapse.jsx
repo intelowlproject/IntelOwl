@@ -20,9 +20,10 @@ export function TableCellCollapse({ values, label }) {
       </Button>
       <Collapse isOpen={isOpen} id="table-cell-collapse">
         <ul className="d-flex flex-column align-items-start p-3">
-          {values?.sort().map((value) => (
+          {values?.sort().map((value, index) => (
             <li className="pb-2" key={value}>
               <CopyToClipboardButton
+                id={`table-cell-collapse__${index}`}
                 showOnHover
                 text={value}
                 className="d-block text-break"

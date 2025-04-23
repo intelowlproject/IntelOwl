@@ -503,6 +503,20 @@ class JobTreeSerializer(ModelSerializer):
     evaluation = rfs.CharField(
         source="data_model.evaluation", allow_null=True, read_only=True
     )
+    reliability = rfs.IntegerField(
+        source="data_model.reliability", allow_null=True, read_only=True
+    )
+    tags = rfs.ListField(
+        source="data_model.tags",
+        allow_null=True,
+        child=rfs.CharField(read_only=True),
+        read_only=True,
+        default=[],
+    )
+    isp = rfs.CharField(source="data_model.isp", allow_null=True, read_only=True)
+    country = rfs.CharField(
+        source="data_model.country_code", allow_null=True, read_only=True
+    )
     is_sample = rfs.BooleanField(read_only=True)
 
     playbook = rfs.SlugRelatedField(
@@ -513,6 +527,9 @@ class JobTreeSerializer(ModelSerializer):
         required=False,
     )
     analyzed_object_name = rfs.CharField(source="analyzable.name", read_only=True)
+    mimetype = rfs.CharField(
+        source="analyzable.mimetype", allow_null=True, read_only=True
+    )
 
     class Meta:
         model = Job
@@ -525,6 +542,11 @@ class JobTreeSerializer(ModelSerializer):
             "received_request_time",
             "is_sample",
             "evaluation",
+            "reliability",
+            "tags",
+            "mimetype",
+            "isp",
+            "country",
         ]
 
     def to_representation(self, instance):

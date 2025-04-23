@@ -10,7 +10,7 @@ import { VerticalListVisualizer } from "./elements/verticalList";
 import { TitleVisualizer } from "./elements/title";
 
 import { VisualizerComponentType } from "./elements/const";
-import { getIcon } from "./icons";
+import { getIcon } from "../../../common/icon/icons";
 
 import { HorizontalListVisualizer } from "./elements/horizontalList";
 import { TableVisualizer } from "./elements/table";

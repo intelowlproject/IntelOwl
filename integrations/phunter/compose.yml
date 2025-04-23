@@ -1,0 +1,11 @@
+services:
+  phunter:
+    image: intelowlproject/phunter:${REACT_APP_INTELOWL_VERSION}
+    container_name: phunter
+    restart: unless-stopped
+    expose:
+      - "5000"
+    volumes:
+      - generic_logs:/var/log/intel_owl
+    depends_on:
+      - uwsgi

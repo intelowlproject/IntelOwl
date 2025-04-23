@@ -1,0 +1,2 @@
+flask==3.1.0
+phonenumbers==9.0.3

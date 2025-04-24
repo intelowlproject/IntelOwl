@@ -433,8 +433,8 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             self._raise_container_not_running()
 
         # step #2: raise AnalyzerRunException in case of error
-        # Modified to support synchronous analyzer BBOT that return results directly in the initial response, avoiding unnecessary polling.
-        if analyzer_name == "BBOT_Analyzer":
+        # Modified to support synchronous analyzers that return results directly in the initial response, avoiding unnecessary polling.
+        if analyzer_name in ["BBOT_Analyzer", "Phunter"]:
             report = resp1.json().get("report", None)
             err = resp1.json().get("error", None)
         else:

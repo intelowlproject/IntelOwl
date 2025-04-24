@@ -1,7 +1,6 @@
 import logging
 
 import phonenumbers
-import requests
 
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
@@ -12,10 +11,6 @@ logger = logging.getLogger(__name__)
 
 
 class PhunterAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
-    """
-    PhunterAnalyzer is a class that analyzes phone numbers using the Phunter API.
-    """
-
     name: str = "Phunter"
     url: str = "http://phunter:5000/analyze"
     max_tries: int = 1
@@ -26,7 +21,7 @@ class PhunterAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
             parsed_number = phonenumbers.parse(self.observable_name)
             if not phonenumbers.is_valid_number(parsed_number):
                 logger.error(f"Invalid phone number: {self.observable_name}")
-                raise AnalyzerRunException("Invalid phone number.")
+                return {"success": False, "error": "Invalid phone number"}
         except phonenumbers.phonenumberutil.NumberParseException:
             logger.error(f"Phone number parsing failed for: {self.observable_name}")
             raise AnalyzerRunException("Invalid phone number format")
@@ -34,23 +29,14 @@ class PhunterAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
         req_data = {"phone_number": self.observable_name}
         logger.info(f"Sending {self.name} scan request: {req_data} to {self.url}")
         try:
-            response = requests.post(self.url, json=req_data)
-            logger.debug(
-                f"[{self.name}] Raw response: {response.status_code} - {response.text}"
-            )
-            response.raise_for_status()
-            try:
-                result = response.json()
-                logger.info(f"[{self.name}] Scan successful. Result: {result}")
-                return result
-            except ValueError:
-                logger.error(
-                    f"[{self.name}] JSON parsing failed. Response content: {response.text}"
-                )
-                raise AnalyzerRunException("Invalid JSON returned by Phunter API")
-        except requests.RequestException as e:
-            logger.error(f"[{self.name}] HTTP request failed: {e}", exc_info=True)
-            raise AnalyzerRunException("Failed to connect to Phunter API")
+            response = self._docker_run(req_data, analyzer_name=self.name)
+            logger.info(f"[{self.name}] Scan successful by Phunter. Result: {response}")
+            print(response)
+            return response
+
+        except Exception as e:
+            logger.error(f"[{self.name}] Request failed: {str(e)}", exc_info=True)
+            raise AnalyzerRunException(f"Failed to connect to Phunter API: {str(e)}")
 
     @classmethod
     def update(self):

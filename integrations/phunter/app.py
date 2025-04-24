@@ -95,7 +95,21 @@ def analyze():
         parsed_output = parse_phunter_output(clean_output)
 
         logger.info("Phunter analysis completed successfully.")
-        return jsonify(parsed_output)
+        logger.info(
+            {
+                "success": True,
+                "report": parsed_output,
+            }
+        )
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "report": parsed_output,
+                }
+            ),
+            200,
+        )
 
     except subprocess.CalledProcessError as e:
         logger.error(f"Phunter execution failed: {e.stderr}")

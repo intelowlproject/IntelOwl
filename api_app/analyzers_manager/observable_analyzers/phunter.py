@@ -1,6 +1,7 @@
 import logging
 
 import phonenumbers
+import requests
 
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
@@ -28,15 +29,21 @@ class PhunterAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
 
         req_data = {"phone_number": self.observable_name}
         logger.info(f"Sending {self.name} scan request: {req_data} to {self.url}")
+
         try:
             response = self._docker_run(req_data, analyzer_name=self.name)
             logger.info(f"[{self.name}] Scan successful by Phunter. Result: {response}")
-            print(response)
             return response
 
-        except Exception as e:
-            logger.error(f"[{self.name}] Request failed: {str(e)}", exc_info=True)
-            raise AnalyzerRunException(f"Failed to connect to Phunter API: {str(e)}")
+        except requests.exceptions.RequestException as e:
+            logger.error(
+                f"[{self.name}] Request failed due to network issue: {e}", exc_info=True
+            )
+            raise AnalyzerRunException(f"Request error to Phunter API: {e}")
+
+        except ValueError as e:
+            logger.error(f"[{self.name}] Invalid response format: {e}", exc_info=True)
+            raise AnalyzerRunException(f"Invalid response format from Phunter API: {e}")
 
     @classmethod
     def update(self):

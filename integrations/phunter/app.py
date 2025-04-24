@@ -12,13 +12,13 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 
 
-# Remove ANSI codes from script output
 def strip_ansi_codes(text):
+    """Remove ANSI escape codes from terminal output"""
     return re.sub(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])", "", text)
 
 
-# Extract structured data from Phunter CLI output
 def parse_phunter_output(output):
+    """Parse output from Phunter CLI and convert to structured JSON"""
     result = {}
     key_mapping = {
         "phone number:": "phone_number",
@@ -40,20 +40,18 @@ def parse_phunter_output(output):
     for line in lines:
         line = line.strip().lower()
 
-        # Special case: spam status
         if "not spammer" in line:
             result["spam_status"] = "Not spammer"
             continue
 
-        for keyword, key_name in key_mapping.items():
+        for keyword, key in key_mapping.items():
             if keyword in line:
                 value = line.partition(":")[2].strip()
-                # Special handling for booleans
-                if key_name in ("possible", "valid"):
-                    result[key_name] = "yes" if "✔" in value else "no"
+                if key in ("possible", "valid"):
+                    result[key] = "yes" if "✔" in value else "no"
                 else:
-                    result[key_name] = value
-                break  # No need to check other keywords once matched
+                    result[key] = value
+                break
 
     return result
 
@@ -63,44 +61,43 @@ def analyze():
     data = request.get_json()
     phone_number = data.get("phone_number")
 
-    logger.info(f"Received request to analyze phone number: {phone_number}")
+    logger.info("Received analysis request")
 
     if not phone_number:
-        logger.warning("Phone number missing from request")
+        logger.warning("No phone number provided in request")
         return jsonify({"error": "No phone number provided"}), 400
 
     try:
         parsed_number = phonenumbers.parse(phone_number)
         if not phonenumbers.is_valid_number(parsed_number):
-            logger.warning(f"Phone number is not valid: {phone_number}")
+            logger.warning("Invalid phone number")
             return jsonify({"error": "Invalid phone number"}), 400
-    except phonenumbers.phonenumberutil.NumberParseException as e:
-        logger.warning(f"Number parsing failed: {e}")
+
+        formatted_number = phonenumbers.format_number(
+            parsed_number, phonenumbers.PhoneNumberFormat.E164
+        )
+
+    except phonenumbers.phonenumberutil.NumberParseException:
+        logger.warning("Phone number parsing failed")
         return jsonify({"error": "Invalid phone number format"}), 400
 
     try:
-        logger.info(f"Executing Phunter on: {phone_number}")
-        command = ["python3", "phunter.py", "-t", phone_number]
+        logger.info("Executing Phunter CLI tool")
+        command = ["python3", "phunter.py", "-t", formatted_number]
         result = subprocess.run(
             command,
             capture_output=True,
             text=True,
             check=True,
-            cwd="/app/Phunter",  # Update if path is different
+            cwd="/app/Phunter",
         )
-        raw_output = result.stdout
-        logger.debug(f"Raw Phunter output:\n{raw_output}")
 
+        raw_output = result.stdout
         clean_output = strip_ansi_codes(raw_output)
         parsed_output = parse_phunter_output(clean_output)
 
-        logger.info("Phunter analysis completed successfully.")
-        logger.info(
-            {
-                "success": True,
-                "report": parsed_output,
-            }
-        )
+        logger.info("Phunter analysis completed")
+
         return (
             jsonify(
                 {
@@ -112,11 +109,8 @@ def analyze():
         )
 
     except subprocess.CalledProcessError as e:
-        logger.error(f"Phunter execution failed: {e.stderr}")
-        return jsonify({"error": "Phunter execution failed", "details": e.stderr}), 500
-    except Exception as e:
-        logger.exception("Unexpected error during Phunter analysis")
-        return jsonify({"error": "Internal server error", "details": str(e)}), 500
+        logger.error(f"Phunter CLI failed: {e.stderr}")
+        return jsonify({"error": "Phunter execution failed"}), 500
 
 
 if __name__ == "__main__":

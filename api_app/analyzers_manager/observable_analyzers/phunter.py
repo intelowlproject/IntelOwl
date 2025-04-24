@@ -19,13 +19,10 @@ class PhunterAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
 
     def run(self):
         try:
-            parsed_number = phonenumbers.parse(self.observable_name)
-            if not phonenumbers.is_valid_number(parsed_number):
-                logger.error(f"Invalid phone number: {self.observable_name}")
-                return {"success": False, "error": "Invalid phone number"}
+            phonenumbers.parse(self.observable_name)
         except phonenumbers.phonenumberutil.NumberParseException:
             logger.error(f"Phone number parsing failed for: {self.observable_name}")
-            raise AnalyzerRunException("Invalid phone number format")
+            return {"success": False, "error": "Invalid phone number"}
 
         req_data = {"phone_number": self.observable_name}
         logger.info(f"Sending {self.name} scan request: {req_data} to {self.url}")

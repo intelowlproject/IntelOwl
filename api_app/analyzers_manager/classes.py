@@ -399,7 +399,11 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         )
 
     def _docker_run(
-        self, req_data: dict, req_files: dict = None, analyzer_name: str = None
+        self,
+        req_data: dict,
+        req_files: dict = None,
+        analyzer_name: str = None,
+        avoid_polling: bool = False,
     ) -> dict:
         """
         Helper function that takes of care of requesting new analysis,
@@ -434,7 +438,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
 
         # step #2: raise AnalyzerRunException in case of error
         # Modified to support synchronous analyzers that return results directly in the initial response, avoiding unnecessary polling.
-        if analyzer_name in ["BBOT_Analyzer", "Phunter"]:
+        if avoid_polling:
             report = resp1.json().get("report", None)
             err = resp1.json().get("error", None)
         else:

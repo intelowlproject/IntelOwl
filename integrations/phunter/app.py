@@ -109,10 +109,9 @@ def analyze():
         )
 
     except subprocess.CalledProcessError as e:
-        logger.error(f"Phunter CLI failed: {e.stderr}")
-        return jsonify({"error": "Phunter execution failed"}), 500
+        return jsonify({"error": f"Phunter execution failed with error {e}"}), 500
 
 
 if __name__ == "__main__":
     logger.info("Starting Phunter Flask API...")
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5612)

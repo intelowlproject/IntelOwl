@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class PhunterAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
     name: str = "Phunter"
-    url: str = "http://phunter:5000/analyze"
+    url: str = "http://phunter:5612/analyze"
     max_tries: int = 1
     poll_distance: int = 0
 
@@ -28,19 +28,19 @@ class PhunterAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
         logger.info(f"Sending {self.name} scan request: {req_data} to {self.url}")
 
         try:
-            response = self._docker_run(req_data, analyzer_name=self.name)
+            response = self._docker_run(
+                req_data, analyzer_name=self.name, avoid_polling=True
+            )
             logger.info(f"[{self.name}] Scan successful by Phunter. Result: {response}")
             return response
 
         except requests.exceptions.RequestException as e:
-            logger.error(
-                f"[{self.name}] Request failed due to network issue: {e}", exc_info=True
+            raise AnalyzerRunException(
+                f"[{self.name}] Request failed due to network issue: {e}"
             )
-            raise AnalyzerRunException(f"Request error to Phunter API: {e}")
 
         except ValueError as e:
-            logger.error(f"[{self.name}] Invalid response format: {e}", exc_info=True)
-            raise AnalyzerRunException(f"Invalid response format from Phunter API: {e}")
+            raise AnalyzerRunException(f"[{self.name}] Invalid response format: {e}")
 
     @classmethod
     def update(self):
@@ -60,9 +60,9 @@ class PhunterAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
                 "line_type": "FIXED LINE OR MOBILE",
                 "local_time": "21:34:45",
                 "spam_status": "Not spammer",
-                "phone_number": "+918929554991",
-                "national_format": "089295 54991",
-                "international_format": "+91 89295 54991",
+                "phone_number": "+911234567890",
+                "national_format": "01234567890",
+                "international_format": "+91 1234567890",
             },
         }
         return MockUpResponse(mock_response, 200)

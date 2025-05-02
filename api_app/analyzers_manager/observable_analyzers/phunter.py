@@ -47,9 +47,7 @@ class PhunterAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
             raise AnalyzerRunException(f"[{self.name}] Invalid response format: {e}")
 
         except Exception as e:
-            raise AnalyzerRunException(
-                f"[{self.name}] An unexpected error occurred: {e}"
-            )
+            raise AnalyzerRunException(f"{self.name} An unexpected error occurred: {e}")
 
     @classmethod
     def update(self):

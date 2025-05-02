@@ -1,8 +1,8 @@
 import logging
 import re
+import shlex
 import subprocess
 
-import phonenumbers
 from flask import Flask, jsonify, request
 
 # Logging Configuration
@@ -68,22 +68,9 @@ def analyze():
         return jsonify({"error": "No phone number provided"}), 400
 
     try:
-        parsed_number = phonenumbers.parse(phone_number)
-        if not phonenumbers.is_valid_number(parsed_number):
-            logger.warning("Invalid phone number")
-            return jsonify({"error": "Invalid phone number"}), 400
-
-        formatted_number = phonenumbers.format_number(
-            parsed_number, phonenumbers.PhoneNumberFormat.E164
-        )
-
-    except phonenumbers.phonenumberutil.NumberParseException:
-        logger.warning("Phone number parsing failed")
-        return jsonify({"error": "Invalid phone number format"}), 400
-
-    try:
         logger.info("Executing Phunter CLI tool")
-        command = ["python3", "phunter.py", "-t", formatted_number]
+        command_str = f"python3 phunter.py -t {phone_number}"
+        command = shlex.split(command_str)
         result = subprocess.run(
             command,
             capture_output=True,

@@ -19,12 +19,16 @@ class PhunterAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
 
     def run(self):
         try:
-            phonenumbers.parse(self.observable_name)
+            parsed_number = phonenumbers.parse(self.observable_name)
+
+            formatted_number = phonenumbers.format_number(
+                parsed_number, phonenumbers.PhoneNumberFormat.E164
+            )
         except phonenumbers.phonenumberutil.NumberParseException:
             logger.error(f"Phone number parsing failed for: {self.observable_name}")
             return {"success": False, "error": "Invalid phone number"}
 
-        req_data = {"phone_number": self.observable_name}
+        req_data = {"phone_number": formatted_number}
         logger.info(f"Sending {self.name} scan request: {req_data} to {self.url}")
 
         try:
@@ -41,6 +45,11 @@ class PhunterAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
 
         except ValueError as e:
             raise AnalyzerRunException(f"[{self.name}] Invalid response format: {e}")
+
+        except Exception as e:
+            raise AnalyzerRunException(
+                f"[{self.name}] An unexpected error occurred: {e}"
+            )
 
     @classmethod
     def update(self):

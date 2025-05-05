@@ -1,5 +1,6 @@
 import { getLayoutedElements } from "../../common/flows/getLayoutedElements";
 import { JobFinalStatuses } from "../../../constants/jobConst";
+import { TagsIcons } from "../../../constants/engineConst";
 
 /* eslint-disable id-length */
 function addJobNode(
@@ -16,6 +17,20 @@ function addJobNode(
     reliability: job?.reliability,
     tags: job?.tags || [],
   };
+  if (engineFields.tags) {
+    const customTags = [];
+    const tags = [];
+    engineFields.tags.forEach((tag) => {
+      if (Object.keys(TagsIcons).includes(tag)) {
+        tags.push(tag);
+      } else {
+        customTags.push(tag);
+      }
+    });
+    tags.push(customTags.toString());
+    engineFields.tags = tags;
+  }
+
   // optional fields
   if (job.country) engineFields.country = job.country;
   if (job.isp) engineFields.isp = job.isp;

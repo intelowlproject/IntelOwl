@@ -17,7 +17,7 @@ function addJobNode(
     reliability: job?.reliability,
     tags: job?.tags || [],
   };
-  if (engineFields.tags) {
+  if (engineFields.tags.length > 0) {
     const customTags = [];
     const tags = [];
     engineFields.tags.forEach((tag) => {
@@ -27,7 +27,7 @@ function addJobNode(
         customTags.push(tag);
       }
     });
-    tags.push(customTags.toString());
+    if (customTags.length > 0) tags.push(customTags.toString());
     engineFields.tags = tags;
   }
 

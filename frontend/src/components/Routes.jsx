@@ -210,6 +210,14 @@ const authRoutesLazy = [
       </Suspense>
     ),
   },
+  {
+    path: "/history/user-reports",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <History />
+      </Suspense>
+    ),
+  },
   /* Investigation */
   {
     path: `/investigation/:id`,

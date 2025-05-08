@@ -12,7 +12,7 @@ import {
 } from "reactstrap";
 import { NavLink as RRNavLink, useLocation } from "react-router-dom";
 import { AiOutlineDashboard } from "react-icons/ai";
-import { MdHome, MdShare } from "react-icons/md";
+import { MdShare } from "react-icons/md";
 import {
   RiPlugFill,
   RiBookReadFill,
@@ -21,7 +21,7 @@ import {
 } from "react-icons/ri";
 import { FaGithub, FaGoogle, FaLinkedin } from "react-icons/fa";
 import { IoSearch } from "react-icons/io5";
-import { TbReport, TbReportSearch } from "react-icons/tb";
+import { TbReport, TbReportSearch, TbDatabaseSearch } from "react-icons/tb";
 
 // lib
 import { AxiosLoadingBar } from "@certego/certego-ui";
@@ -71,6 +71,12 @@ function AuthLinks() {
   return (
     <>
       <NavItem>
+        <RRNavLink className="d-flex-start-center nav-link" to="/analyzables">
+          <TbDatabaseSearch />
+          <span className="ms-1">Analyzables</span>
+        </RRNavLink>
+      </NavItem>
+      <NavItem>
         <RRNavLink className="d-flex-start-center nav-link" to="/dashboard">
           <AiOutlineDashboard />
           <span className="ms-1" id="dashboard-title">
@@ -87,7 +93,7 @@ function AuthLinks() {
       <NavItem>
         <RRNavLink className="d-flex-start-center nav-link" to="/search">
           <TbReportSearch />
-          <span className="ms-1">Search</span>
+          <span className="ms-1">Reports</span>
         </RRNavLink>
       </NavItem>
       <NavItem>
@@ -259,12 +265,6 @@ function AppHeader() {
         <Collapse navbar isOpen={isOpen}>
           {/* Navbar Left Side */}
           <Nav navbar id="navbar-left-side">
-            <NavItem>
-              <RRNavLink className="d-flex-start-center nav-link" end to="/">
-                <MdHome />
-                <span className="ms-1">Home</span>
-              </RRNavLink>
-            </NavItem>
             {isAuthenticated && (
               <AuthLinks isInOrganization={isInOrganization} />
             )}

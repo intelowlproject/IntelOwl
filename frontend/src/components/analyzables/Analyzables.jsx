@@ -55,15 +55,15 @@ export default function Analyzables() {
       let response = null;
       try {
         setLoadingData(true);
-        response = await axios.get(
-          ANALYZABLES_URI,
-          // {params: {"name": "test1.com"}}
+        response = await axios.post(
+          `${ANALYZABLES_URI}/get_analyzables`,
+          formik.values.analyzables,
         );
       } catch (error) {
         addToast("Search failed!", prettifyErrors(error), "danger", true);
       } finally {
         setLoadingData(false);
-        setData(response.data.results);
+        setData(response.data);
         formik.setSubmitting(false);
       }
     },
@@ -88,7 +88,7 @@ export default function Analyzables() {
                   fade={false}
                   innerClassName="p-2 text-start text-nowrap md-fit-content"
                 >
-                  Analyzables are unique artifacts that can be analyzed multiple
+                  Analyzables are unique objects that can be analyzed multiple
                   times to have a different evaluation over time.
                 </UncontrolledTooltip>
               </div>
@@ -187,6 +187,10 @@ export default function Analyzables() {
               color="info"
               outline
               className="mx-auto rounded-0 col-sm-1 order-sm-5"
+              disabled={
+                formik.values.analyzables.length === 1 &&
+                formik.values.analyzables[0] === ""
+              }
             >
               Search
             </Button>

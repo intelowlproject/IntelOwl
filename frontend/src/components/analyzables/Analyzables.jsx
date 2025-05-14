@@ -57,7 +57,7 @@ export default function Analyzables() {
         setLoadingData(true);
         response = await axios.post(
           `${ANALYZABLES_URI}/get_analyzables`,
-          formik.values.analyzables,
+          formik.values.analyzables.filter((value) => value !== ""),
         );
       } catch (error) {
         addToast("Search failed!", prettifyErrors(error), "danger", true);
@@ -68,8 +68,6 @@ export default function Analyzables() {
       }
     },
   });
-
-  console.debug(formik.values);
 
   return (
     <Container fluid>
@@ -144,6 +142,7 @@ export default function Analyzables() {
                                 <Button
                                   color="primary"
                                   size="sm"
+                                  id={`analyzable-${index}-addbtn`}
                                   className="mx-auto rounded-1 d-flex align-items-center px-3"
                                   onClick={() => arrayHelpers.push("")}
                                 >

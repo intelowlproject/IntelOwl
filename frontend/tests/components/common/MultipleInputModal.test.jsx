@@ -44,7 +44,7 @@ describe("Multiple Observable Modal test", () => {
       </BrowserRouter>,
     );
 
-    const modalTitle = screen.getByText("Load Multiple Observables");
+    const modalTitle = screen.getByText("Load Multiple Values");
     expect(modalTitle).toBeInTheDocument();
     expect(modalTitle.closest("div").className).toContain("modal-header");
     const modalInfo = screen.getByText(

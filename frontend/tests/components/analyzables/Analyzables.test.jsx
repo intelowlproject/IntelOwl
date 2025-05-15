@@ -215,7 +215,7 @@ describe("test Analyzable component", () => {
           },
           {
             name: "8.8.8.8",
-            tags: ["not found"],
+            tags: ["not_found"],
           },
         ],
       }),

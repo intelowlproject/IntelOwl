@@ -5,7 +5,7 @@ import { DataTable, DefaultColumnFilter } from "@certego/certego-ui";
 
 import { VerticalListVisualizer } from "./verticalList";
 import { HorizontalListVisualizer } from "./horizontalList";
-import { markdownToHtml } from "../../../../common/markdownToHtml";
+import { markdownToHtml } from "../../markdownToHtml";
 
 function getAccessor(element) {
   if ([VerticalListVisualizer, HorizontalListVisualizer].includes(element.type))

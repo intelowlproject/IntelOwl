@@ -1,11 +1,11 @@
 import React from "react";
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
-import { HorizontalListVisualizer } from "../../../../../../src/components/jobs/result/visualizer/elements/horizontalList";
-import { BaseVisualizer } from "../../../../../../src/components/jobs/result/visualizer/elements/base";
-import { BooleanVisualizer } from "../../../../../../src/components/jobs/result/visualizer/elements/bool";
-import { TitleVisualizer } from "../../../../../../src/components/jobs/result/visualizer/elements/title";
-import { VerticalListVisualizer } from "../../../../../../src/components/jobs/result/visualizer/elements/verticalList";
+import { HorizontalListVisualizer } from "../../../../../../src/components/common/visualizer/elements/horizontalList";
+import { BaseVisualizer } from "../../../../../../src/components/common/visualizer/elements/base";
+import { BooleanVisualizer } from "../../../../../../src/components/common/visualizer/elements/bool";
+import { TitleVisualizer } from "../../../../../../src/components/common/visualizer/elements/title";
+import { VerticalListVisualizer } from "../../../../../../src/components/common/visualizer/elements/verticalList";
 
 // mock useLocation
 jest.mock("react-router-dom", () => ({

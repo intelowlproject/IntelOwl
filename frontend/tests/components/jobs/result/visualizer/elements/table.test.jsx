@@ -2,8 +2,8 @@ import React from "react";
 import "@testing-library/jest-dom";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { TableVisualizer } from "../../../../../../src/components/jobs/result/visualizer/elements/table";
-import { BaseVisualizer } from "../../../../../../src/components/jobs/result/visualizer/elements/base";
+import { TableVisualizer } from "../../../../../../src/components/common/visualizer/elements/table";
+import { BaseVisualizer } from "../../../../../../src/components/common/visualizer/elements/base";
 
 // mock useLocation
 jest.mock("react-router-dom", () => ({

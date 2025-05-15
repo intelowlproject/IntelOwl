@@ -1,8 +1,8 @@
 import React from "react";
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
-import { TitleVisualizer } from "../../../../../../src/components/jobs/result/visualizer/elements/title";
-import { BaseVisualizer } from "../../../../../../src/components/jobs/result/visualizer/elements/base";
+import { TitleVisualizer } from "../../../../../../src/components/common/visualizer/elements/title";
+import { BaseVisualizer } from "../../../../../../src/components/common/visualizer/elements/base";
 
 // mock useLocation
 jest.mock("react-router-dom", () => ({

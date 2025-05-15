@@ -18,6 +18,7 @@ export const INGESTORS_CONFIG_URI = `${API_BASE_URI}/ingestor`;
 export const PLAYBOOKS_CONFIG_URI = `${API_BASE_URI}/playbook`;
 export const PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI = `${PLAYBOOKS_CONFIG_URI}/analyze_multiple_files`;
 export const PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI = `${PLAYBOOKS_CONFIG_URI}/analyze_multiple_observables`;
+export const ANALYZABLES_URI = `${API_BASE_URI}/analyzable`;
 
 const AGGREGATE_PATH = "/aggregate";
 export const JOB_AGG_STATUS_URI = `${JOB_BASE_URI}${AGGREGATE_PATH}/status`;

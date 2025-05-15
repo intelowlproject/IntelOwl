@@ -22,7 +22,11 @@ export const analyzablesTableColumns = [
     accessor: "id",
     Cell: ({ value: id }) => (
       <div className="d-flex flex-column justify-content-center p-2">
-        {id ? <div id={`analyzable-${id}`}>#{id}</div> : <div>NF</div>}
+        {id ? (
+          <div id={`analyzable-${id}`}>#{id}</div>
+        ) : (
+          <div className="fst-italic">NF</div>
+        )}
       </div>
     ),
     disableSortBy: true,
@@ -50,7 +54,9 @@ export const analyzablesTableColumns = [
     accessor: "discovery_date",
     Cell: ({ value }) =>
       value ? (
-        <DateHoverable ago value={value} format="hh:mm:ss a MMM do, yyyy" />
+        <div className="py-2">
+          <DateHoverable ago value={value} format="hh:mm:ss a MMM do, yyyy" />
+        </div>
       ) : (
         <div />
       ),
@@ -98,7 +104,9 @@ export const analyzablesTableColumns = [
     accessor: "last_analysis",
     Cell: ({ value }) =>
       value ? (
-        <DateHoverable ago value={value} format="hh:mm:ss a MMM do, yyyy" />
+        <div className="py-2">
+          <DateHoverable ago value={value} format="hh:mm:ss a MMM do, yyyy" />
+        </div>
       ) : (
         <div />
       ),

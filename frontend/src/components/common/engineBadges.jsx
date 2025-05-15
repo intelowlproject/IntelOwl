@@ -98,7 +98,7 @@ export function TagsBadge(props) {
   if (Object.keys(TagsIcons).includes(tag)) {
     color = TagsColors?.[tag];
     icon = getIcon(TagsIcons?.[tag]);
-  } else if (tag === "not found") {
+  } else if (tag === "not_found") {
     color = "accent";
     icon = "Not Found";
   } else {

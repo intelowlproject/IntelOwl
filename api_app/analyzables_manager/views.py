@@ -34,7 +34,7 @@ class AnalyzableViewSet(viewsets.ReadOnlyModelViewSet):
             except Analyzable.DoesNotExist:
                 analyzable_nf = {
                     "name": name,
-                    "tags": ["not found"],
+                    "tags": ["not_found"],
                 }
                 analyzables.append(analyzable_nf)
         return Response(analyzables, status=status.HTTP_200_OK)

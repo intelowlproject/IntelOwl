@@ -30,10 +30,12 @@ function CustomJobNode({ data }) {
         isVisible
         offset={3}
       >
-        <EvaluationBadge
-          id={data.id}
-          evaluation={data.engineFields.evaluation}
-        />
+        {data.engineFields.evaluation && (
+          <EvaluationBadge
+            id={data.id}
+            evaluation={data.engineFields.evaluation}
+          />
+        )}
         {data.engineFields?.mimetype && (
           <MimetypeBadge
             id={data.id}
@@ -66,11 +68,13 @@ function CustomJobNode({ data }) {
         isVisible
         offset={3}
       >
-        <ReliabilityBar
-          id={data.id}
-          reliability={data.engineFields.reliability}
-          evaluation={data.engineFields.evaluation}
-        />
+        {data.engineFields.evaluation && (
+          <ReliabilityBar
+            id={data.id}
+            reliability={data.engineFields.reliability}
+            evaluation={data.engineFields.evaluation}
+          />
+        )}
       </NodeToolbar>
       {/* Actions */}
       <NodeToolbar

@@ -108,6 +108,20 @@ class ApiViewTests(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_analyze_file__pcap(self):
+        # set a fake API key or YARAify_File_Scan will be skipped as not configured
+        models.PluginConfig.objects.create(
+            owner=self.user,
+            analyzer_config=AnalyzerConfig.objects.get(name="YARAify_File_Scan"),
+            parameter=models.Parameter.objects.get(
+                python_module=models.PythonModule.objects.get(
+                    base_path="api_app.analyzers_manager.file_analyzers",
+                    module="yaraify_file_scan.YARAifyFileScan",
+                ),
+                name="service_api_key",
+            ),
+            value="faketoken",
+        )
+
         # with noone, only the PCAP analyzers should be executed
         analyzers_requested = AnalyzerConfig.objects.all().values_list(
             "name", flat=True

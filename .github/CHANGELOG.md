@@ -2,6 +2,13 @@
 
 [**Upgrade Guide**](https://intelowlproject.github.io/docs/IntelOwl/installation/#update-to-the-most-recent-version)
 
+## [v6.4.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.4.0)
+The new features are in the backend part and will be supported in the UI in the next releases.
+* Analyzable: Representation of an observable or sample: every job is linked to the analyzable scanned.
+* Data models: A new system to normalize the output of analyzers (already available in the job raw section).
+* User Event: Users can create reports for analyzables.
+* Engine: Evaluate user reports and data get from the analyzers to assign a score to the job.
+
 ## [v6.3.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.3.1)
 This release provides fixes to the recent added ARM support. (ARM build for v6.3.0 was broken due to some dependencies)
 

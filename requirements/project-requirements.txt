@@ -29,7 +29,7 @@ dataclasses==0.6
 # https://github.com/advisories/GHSA-q4qm-xhf9-4p8f
 # unpatched CVE: noproblem, we just use this for debugging purposes
 flower==2.0.0
-uWSGI==2.0.22
+uWSGI==2.0.28
 uwsgitop==0.12
 whitenoise==6.9.0
 daphne==4.1.0
@@ -89,6 +89,7 @@ pylnk3==0.4.2
 androguard==3.4.0a1 # version >=4.x of androguard raises a dependency conflict with quark-engine==25.1.1
 wad==0.4.6
 debloat==1.6.4
+die-python==0.4.0
 
 # httpx required for HTTP/2 support (Mullvad DNS rejects HTTP/1.1 with protocol errors)
 httpx[http2]==0.28.1

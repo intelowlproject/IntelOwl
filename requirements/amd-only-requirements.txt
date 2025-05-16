@@ -1,3 +1,0 @@
-# the build is broken with ARM
-# related issue: https://github.com/elastic/die-python/issues/27
-die-python==0.2.0

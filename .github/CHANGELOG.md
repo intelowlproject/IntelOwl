@@ -2,6 +2,22 @@
 
 [**Upgrade Guide**](https://intelowlproject.github.io/docs/IntelOwl/installation/#update-to-the-most-recent-version)
 
+## [v6.4.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.4.0)
+This release mostly provides important changes in the backend part that will be supported in the UI in the next releases.
+* Analyzable: Representation of an observable or a sample: every job is linked to the scanned analyzable.
+* Data models: A new system to normalize the output of analyzers (already available in the job raw section). It allows analyzers to specify the evaluation, reliability and many others information about the analyzable. 
+* User Event: Users can create reports for analyzables: indicating additional information or a custom evaluation.
+* Engine: Evaluate user reports and analyzers's data to assign a score to the job.
+
+As usual, we add new plugins. This release brings the following new ones:
+* [Nuclei](https://github.com/projectdiscovery/nuclei): A modern, high-performance vulnerability scanner that leverages simple YAML-based templates.
+* [ipquery](https://ipquery.io/): a flexible api for vpn detection, geolocation, and threat intelligence.
+* [mullvad](https://mullvad.net/en): VPN provider.
+* [spamhaus](https://www.spamhaus.org/): Updated existing analyzer to support IPv6.
+* [bbot](https://github.com/blacklanternsecurity/bbot): multipurpose scanner.
+* [debloat](https://github.com/Squiblydoo/debloat): remove excess garbage from bloated executables.
+
+
 ## [v6.3.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.3.1)
 This release provides fixes to the recent added ARM support. (ARM build for v6.3.0 was broken due to some dependencies)
 

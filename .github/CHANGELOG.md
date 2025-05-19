@@ -5,9 +5,9 @@
 ## [v6.4.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.4.0)
 This release mostly provides important changes in the backend part that will be supported in the UI in the next releases.
 * Analyzable: Representation of an observable or a sample: every job is linked to the scanned analyzable.
-* Data models: A new system to normalize the output of analyzers (already available in the job raw section). It allows analyzers to specify the evaluation, reliability and many others information about the aanlyzable. 
+* Data models: A new system to normalize the output of analyzers (already available in the job raw section). It allows analyzers to specify the evaluation, reliability and many others information about the analyzable. 
 * User Event: Users can create reports for analyzables: indicating additional information or a custom evaluation.
-* Engine: Evaluate user reports and data got from the analyzers to assign a score to the job.
+* Engine: Evaluate user reports and analyzers's data to assign a score to the job.
 
 As usual, we add new plugins. This release brings the following new ones:
 * [Nuclei](https://github.com/projectdiscovery/nuclei): A modern, high-performance vulnerability scanner that leverages simple YAML-based templates.

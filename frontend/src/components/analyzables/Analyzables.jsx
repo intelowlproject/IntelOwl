@@ -53,17 +53,20 @@ export default function Analyzables() {
     },
     onSubmit: async () => {
       let response = null;
+      const searchParams = new URLSearchParams();
+      formik.values.analyzables
+        .filter((value) => value !== "")
+        .forEach((name) => searchParams.append("name", name));
       try {
         setLoadingData(true);
-        response = await axios.post(
-          `${ANALYZABLES_URI}/get_analyzables`,
-          formik.values.analyzables.filter((value) => value !== ""),
+        response = await axios.get(
+          `${ANALYZABLES_URI}?${searchParams.toString()}`,
         );
       } catch (error) {
         addToast("Search failed!", prettifyErrors(error), "danger", true);
       } finally {
         setLoadingData(false);
-        setData(response.data);
+        setData(response.data.results);
         formik.setSubmitting(false);
       }
     },

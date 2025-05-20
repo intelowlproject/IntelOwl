@@ -71,17 +71,17 @@ function AuthLinks() {
   return (
     <>
       <NavItem>
-        <RRNavLink className="d-flex-start-center nav-link" to="/analyzables">
-          <TbDatabaseSearch />
-          <span className="ms-1">Analyzables</span>
-        </RRNavLink>
-      </NavItem>
-      <NavItem>
         <RRNavLink className="d-flex-start-center nav-link" to="/dashboard">
           <AiOutlineDashboard />
           <span className="ms-1" id="dashboard-title">
             Dashboard
           </span>
+        </RRNavLink>
+      </NavItem>
+      <NavItem>
+        <RRNavLink className="d-flex-start-center nav-link" to="/analyzables">
+          <TbDatabaseSearch />
+          <span className="ms-1">Analyzables</span>
         </RRNavLink>
       </NavItem>
       <NavItem>

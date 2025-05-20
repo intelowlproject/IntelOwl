@@ -1,6 +1,6 @@
 from api_app.analyzables_manager.models import Analyzable
 from api_app.choices import Classification
-from api_app.data_model_manager.models import DomainDataModel
+from api_app.data_model_manager.models import DomainDataModel, FileDataModel
 from api_app.models import Job
 from api_app.playbooks_manager.models import PlaybookConfig
 from tests import CustomViewSetTestCase
@@ -24,6 +24,19 @@ class TestAnalyzablesViewSet(CustomViewSetTestCase):
             user=self.user,
         )
 
+        self.an2 = Analyzable.objects.create(
+            name="f9bc35a57b22f82c94dbcc420f71b903",
+            classification=Classification.HASH,
+        )
+        self.domain_data_model2 = FileDataModel.objects.create()
+        self.job2 = Job.objects.create(
+            analyzable=self.an2,
+            status=Job.STATUSES.REPORTED_WITHOUT_FAILS.value,
+            data_model=self.domain_data_model2,
+            playbook_to_execute=PlaybookConfig.objects.first(),
+            user=self.user,
+        )
+
     def tearDown(self):
         super().tearDown()
         self.an.delete()
@@ -36,25 +49,40 @@ class TestAnalyzablesViewSet(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 200, response.content)
         result = response.json()
         self.assertIn("count", result)
+        self.assertEqual(result["count"], 2)
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(f"{self.URL}?name=test.com")
+        self.assertEqual(response.status_code, 200, response.content)
+        result = response.json()
+        self.assertIn("count", result)
         self.assertEqual(result["count"], 1)
+        self.assertEqual(result["results"][0]["name"], "test.com")
 
-    def test_get_analyzables(self):
         self.client.force_authenticate(user=self.user)
-        response = self.client.post(
-            f"{self.URL}/get_analyzables",
-            data=["test.com"],
-            format="json",
+        response = self.client.get(f"{self.URL}?name=google.com")
+        self.assertEqual(response.status_code, 200, response.content)
+        result = response.json()
+        self.assertIn("count", result)
+        self.assertEqual(result["count"], 0)
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(f"{self.URL}?name=test.com&name=google.com")
+        self.assertEqual(response.status_code, 200, response.content)
+        result = response.json()
+        self.assertIn("count", result)
+        self.assertEqual(result["count"], 1)
+        self.assertEqual(result["results"][0]["name"], "test.com")
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(
+            f"{self.URL}?name=test.com&name=f9bc35a57b22f82c94dbcc420f71b903"
         )
         self.assertEqual(response.status_code, 200, response.content)
         result = response.json()
-        self.assertEqual(result[0]["id"], self.an.pk)
-
-        self.client.force_authenticate(user=self.user)
-        response = self.client.post(
-            f"{self.URL}/get_analyzables",
-            data=["noanalyzable.com"],
-            format="json",
+        self.assertIn("count", result)
+        self.assertEqual(result["count"], 2)
+        self.assertEqual(
+            result["results"][0]["name"], "f9bc35a57b22f82c94dbcc420f71b903"
         )
-        self.assertEqual(response.status_code, 200, response.content)
-        result = response.json()
-        self.assertEqual(result[0]["tags"], ["not_found"])
+        self.assertEqual(result["results"][1]["name"], "test.com")

@@ -4,7 +4,7 @@ import { UncontrolledTooltip } from "reactstrap";
 import { VscGlobe, VscFile } from "react-icons/vsc";
 
 import { extractCountry } from "./utils/extractCountry";
-import { getIcon } from "./visualizer/icons";
+import { getIcon } from "../../common/icon/icons";
 import { ObservableClassifications } from "../../../constants/jobConst";
 
 export function JobInfoIcon({ job }) {

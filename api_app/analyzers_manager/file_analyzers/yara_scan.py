@@ -3,6 +3,7 @@
 import dataclasses
 import io
 import logging
+import math
 import os
 import zipfile
 from pathlib import PosixPath
@@ -104,6 +105,9 @@ class YaraRepo:
             response.raise_for_status()
         except Exception as e:
             logger.exception(e)
+            os.makedirs(
+                self.directory, exist_ok=True
+            )  # still create the folder or raise errors
         else:
             zipfile_ = zipfile.ZipFile(io.BytesIO(response.content))
             zipfile_.extractall(self.directory)
@@ -464,7 +468,8 @@ class YaraScan(FileAnalyzer):
         signatures = data_model.signatures.count()
 
         if signatures:
-            self.MALICIOUS_EVALUATION = 20
-            self.SUSPICIOUS_EVALUATION = 10
-
-            data_model.evaluation = self.threat_to_evaluation(signatures)
+            data_model.evaluation = self.EVALUATIONS.MALICIOUS.value
+            data_model.reliability = min(math.floor(signatures / 2), 10)
+        else:
+            data_model.evaluation = self.EVALUATIONS.TRUSTED.value
+            data_model.reliability = 3

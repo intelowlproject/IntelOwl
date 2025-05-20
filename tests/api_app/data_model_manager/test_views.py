@@ -3,7 +3,9 @@ from typing import Type
 from django.db.models import Model
 from kombu import uuid
 
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
+from api_app.choices import Classification
 from api_app.data_model_manager.models import (
     DomainDataModel,
     FileDataModel,
@@ -14,9 +16,13 @@ from tests import CustomViewSetTestCase, ViewSetTestCaseMixin
 
 
 def create_report(user):
+    an1, _ = Analyzable.objects.get_or_create(
+        name="test.com",
+        classification=Classification.DOMAIN,
+    )
+
     job = Job.objects.create(
-        observable_name="test.com",
-        observable_classification="domain",
+        analyzable=an1,
         status=Job.STATUSES.CONNECTORS_RUNNING.value,
         user=user,
     )
@@ -42,11 +48,16 @@ class DomainDataModelViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase
             self.fail(e)
 
     @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
+    def setUpClass(cls):
+        super().setUpClass()
         report = create_report(cls.user)
         report.data_model = cls.model_class.objects.create()
         report.save()
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        Analyzable.objects.all().delete()
 
     @classmethod
     @property
@@ -76,11 +87,16 @@ class IPDataModelViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
         return self.model_class.objects.order_by("?").first().pk
 
     @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
+    def setUpClass(cls):
+        super().setUpClass()
         report = create_report(cls.user)
         report.data_model = cls.model_class.objects.create()
         report.save()
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        Analyzable.objects.all().delete()
 
     def test_get_superuser(self):
         plugin = self.get_object()
@@ -101,11 +117,16 @@ class FileDataModelViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
         return self.model_class.objects.order_by("?").first().pk
 
     @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
+    def setUpClass(cls):
+        super().setUpClass()
         report = create_report(cls.user)
         report.data_model = cls.model_class.objects.create()
         report.save()
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        Analyzable.objects.all().delete()
 
     def test_get_superuser(self):
         plugin = self.get_object()

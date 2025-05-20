@@ -8,9 +8,10 @@ from channels.testing import WebsocketCommunicator
 from django.contrib.auth import get_user_model
 from django.test import TransactionTestCase
 
-from api_app.analyzers_manager.constants import ObservableTypes, TypeChoices
+from api_app.analyzables_manager.models import Analyzable
+from api_app.analyzers_manager.constants import TypeChoices
 from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.choices import ParamTypes
+from api_app.choices import Classification, ParamTypes
 from api_app.models import Job, Parameter, PluginConfig, PythonModule
 from intel_owl.asgi import application
 from intel_owl.tasks import job_set_final_status, run_plugin
@@ -52,14 +53,23 @@ class WebsocketTestCase(TransactionTestCase, metaclass=abc.ABCMeta):
 
 class JobConsumerTestCase(WebsocketTestCase):
     def setUp(self) -> None:
+        self.an = Analyzable.objects.create(
+            name="8.8.8.8",
+            classification=Classification.IP,
+        )
+
         self.user = User.objects.create(username="websocket_test")
         self.job = Job.objects.create(
             id=1027,
             user=self.user,
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS.value,
-            observable_name="8.8.8.8",
-            observable_classification=ObservableTypes.IP,
+            analyzable=self.an,
         )
+
+    def tearDown(self) -> None:
+        self.user.delete()
+        Job.objects.all().delete()
+        Analyzable.objects.all().delete()
 
     async def test_job_unauthorized(self, *args, **kwargs):
         self.assertEqual(await sync_to_async(Job.objects.filter(id=1027).count)(), 1)
@@ -98,14 +108,16 @@ class JobConsumerTestCase(WebsocketTestCase):
         # The test will be blocked waiting a response from ws that already happened.
         # we need a sleep to wait.
         # in this test happens for the functions: run_plugin set_final_status.
-
+        analyzable = await sync_to_async(Analyzable.objects.create)(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
         # setup db
         job = await sync_to_async(Job.objects.create)(
             id=1029,
             user=self.user,
             status=Job.STATUSES.PENDING.value,
-            observable_name="test.com",
-            observable_classification=ObservableTypes.DOMAIN,
+            analyzable=analyzable,
         )
         class_dns_python_module, _ = await sync_to_async(
             PythonModule.objects.get_or_create
@@ -120,9 +132,9 @@ class JobConsumerTestCase(WebsocketTestCase):
             python_module=class_dns_python_module,
             type=TypeChoices.OBSERVABLE.value,
             observable_supported=[
-                ObservableTypes.IP.value,
-                ObservableTypes.DOMAIN.value,
-                ObservableTypes.URL.value,
+                Classification.IP.value,
+                Classification.DOMAIN.value,
+                Classification.URL.value,
             ],
         )
         analyzer_list = [classic_dns_analyzer_config]
@@ -204,12 +216,15 @@ class JobConsumerTestCase(WebsocketTestCase):
             self.assertIsNotNone(job_report_terminated["finished_analysis_time"])
 
     async def test_job_killed(self, *args, **kwargs):
+        analyzable = await sync_to_async(Analyzable.objects.create)(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
         await sync_to_async(Job.objects.create)(
             id=1030,
             user=self.user,
             status=Job.STATUSES.RUNNING.value,
-            observable_name="test.com",
-            observable_classification=ObservableTypes.DOMAIN,
+            analyzable=analyzable,
         )
 
         await sync_to_async(self.client.force_login)(self.user)

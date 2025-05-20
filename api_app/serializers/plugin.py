@@ -82,7 +82,6 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
         required=False,
         slug_field="name",
         default=None,
-        write_only=True,
     )
     connector_config = rfs.SlugRelatedField(
         queryset=ConnectorConfig.objects.all(),
@@ -90,7 +89,6 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
         required=False,
         slug_field="name",
         default=None,
-        write_only=True,
     )
     pivot_config = rfs.SlugRelatedField(
         queryset=PivotConfig.objects.all(),
@@ -98,7 +96,6 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
         required=False,
         slug_field="name",
         default=None,
-        write_only=True,
     )
     visualizer_config = rfs.SlugRelatedField(
         queryset=VisualizerConfig.objects.all(),
@@ -106,7 +103,6 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
         required=False,
         slug_field="name",
         default=None,
-        write_only=True,
     )
     ingestor_config = rfs.SlugRelatedField(
         queryset=IngestorConfig.objects.all(),
@@ -114,7 +110,6 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
         required=False,
         slug_field="name",
         default=None,
-        write_only=True,
     )
 
     @staticmethod
@@ -133,7 +128,19 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
             return attrs
         _value = attrs["value"]
         self.validate_value_type(_value, attrs["parameter"])
-        return super().validate(attrs)
+
+        # ingestor have their own users!
+        if ingestor := attrs["ingestor_config"]:
+            user_request = attrs["owner"]
+            if not user_request.is_superuser:
+                raise ValidationError(
+                    "Ingestor configuration can be changed only by admins"
+                )
+            else:
+                attrs["owner"] = ingestor.user
+        res = super().validate(attrs)
+
+        return res
 
     def create(self, validated_data):
         value = validated_data.pop("value", None)

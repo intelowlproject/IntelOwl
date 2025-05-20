@@ -280,16 +280,17 @@ class JobQuerySet(MP_NodeQuerySet, CleanOnCreateQuerySet, SendToBiQuerySet):
         """
         if parent:
             return parent.add_child(**kwargs)
-        try:
-            return self.model.add_root(**kwargs)
-        except IntegrityError as e:
-            if "path" in str(e):
+        # try multiple times hoping to for no race conditions
+        total_attempt_number = 5
+        for attempt in range(0, total_attempt_number):
+            try:
+                return self.model.add_root(**kwargs)
+            except IntegrityError:
                 logger.warning(
                     f"Found race condition for {kwargs['name']}. Trying again to calculate path."
                 )
-                # we try again a second time, hoping for no race condition
-                return self.model.add_root(**kwargs)
-            raise
+                if attempt == total_attempt_number - 1:
+                    raise
 
     def delete(self, *args, **kwargs):
         """
@@ -969,28 +970,17 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
             )
 
 
-class IngestorQuerySet(PythonConfigQuerySet):
-    """
-    Custom queryset for Ingestor model, providing methods for annotating configurations specific to ingestors.
+class CommentQuerySet(QuerySet):
 
-    Methods:
-    - annotate_runnable: Annotates ingestors indicating if they are runnable.
-    """
+    def visible_for_user(self, user):
+        from api_app.analyzables_manager.models import Analyzable
 
-    def annotate_runnable(self, user: User = None) -> "PythonConfigQuerySet":
-        """
-        Annotates ingestors indicating if they are runnable.
-
-        Args:
-            user (User, optional): The user to check. Defaults to None.
-
-        Returns:
-            PythonConfigQuerySet: The annotated queryset.
-        """
-        # the plugin is runnable IF
-        # - it is not disabled
-        qs = self.filter(
-            pk=OuterRef("pk"),
-        ).exclude(disabled=True)
-
-        return self.annotate(runnable=Exists(qs))
+        analyzables = Analyzable.objects.visible_for_user(user)
+        qs = self.filter(analyzable__in=analyzables.values_list("pk", flat=True))
+        if user.has_membership():
+            qs = qs.filter(
+                user__membership__organization__pk=user.membership.organization.pk
+            )
+        else:
+            qs = qs.filter(user=user)
+        return qs

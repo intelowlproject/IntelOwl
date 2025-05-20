@@ -101,11 +101,11 @@ export function PluginConfigModal({
       centered
       zIndex="1050"
       size="lg"
-      keyboard={false}
       backdrop="static"
       labelledBy="Plugin config modal"
       isOpen={isOpen}
       style={{ minWidth: "70%" }}
+      toggle={() => toggle(false)}
     >
       <ModalHeader className="mx-2" toggle={() => toggle(false)}>
         <small className="text-info">

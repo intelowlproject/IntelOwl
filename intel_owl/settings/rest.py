@@ -27,7 +27,6 @@ REST_FRAMEWORK = {
         "rest_framework_filters.backends.RestFrameworkFilterBackend",
         "rest_framework.filters.OrderingFilter",
     ],
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 # Django-Rest-Durin

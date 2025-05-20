@@ -1,3 +1,5 @@
+from api_app.analyzables_manager.models import Analyzable
+from api_app.choices import Classification
 from api_app.interfaces import CreateJobsFromPlaybookInterface
 from api_app.investigations_manager.models import Investigation
 from api_app.models import Job
@@ -19,9 +21,13 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         self.c.name = "test"
 
     def test__get_file_serializer(self):
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         parent_job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             user=self.user,
         )
         serializer = self.c._get_file_serializer(
@@ -35,18 +41,23 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         jobs = serializer.save(send_task=False, parent=parent_job)
         self.assertEqual(len(jobs), 1)
         job = jobs[0]
-        self.assertEqual(job.analyzed_object_name, "test.0")
+        self.assertEqual(job.analyzable.name, "test.0")
         self.assertEqual(job.playbook_to_execute, self.c.playbooks_choice.first())
         self.assertEqual(job.tlp, "CLEAR")
-        self.assertEqual(job.file.read(), b"test")
+        self.assertEqual(job.analyzable.read(), b"test")
         self.assertIsNone(job.investigation)
         self.assertIsNotNone(parent_job.investigation)
         parent_job.delete()
+        an.delete()
 
     def test__get_observable_serializer(self):
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         parent_job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             user=self.user,
         )
         serializer = self.c._get_observable_serializer(
@@ -60,19 +71,24 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         jobs = serializer.save(send_task=False, parent=parent_job)
         self.assertEqual(len(jobs), 1)
         job = jobs[0]
-        self.assertEqual(job.analyzed_object_name, "google.com")
+        self.assertEqual(job.analyzable.name, "google.com")
         self.assertEqual(job.playbook_to_execute, self.c.playbooks_choice.first())
         self.assertEqual(job.tlp, "CLEAR")
-        self.assertEqual(job.observable_classification, "domain")
+        self.assertEqual(job.analyzable.classification, "domain")
         self.assertIsNone(job.investigation)
         self.assertIsNotNone(parent_job.investigation)
         parent_job.delete()
+        an.delete()
 
     def test__multiple_jobs_investigations(self):
         investigation_count = Investigation.objects.count()
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         parent_job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             user=self.user,
         )
         self.assertIsNone(parent_job.investigation)
@@ -98,13 +114,18 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         parent_job.delete()
         job1.delete()
         job2.delete()
+        an.delete()
 
     def test__multiple_jobs_investigation_with_parent_in_investigation(self):
         investigation = Investigation.objects.create(owner=self.user, name="test")
         investigation_count = Investigation.objects.count()
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         parent_job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             user=self.user,
         )
         investigation.jobs.set([parent_job])
@@ -139,3 +160,4 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         )
         parent_job.delete()
         investigation.delete()
+        an.delete()

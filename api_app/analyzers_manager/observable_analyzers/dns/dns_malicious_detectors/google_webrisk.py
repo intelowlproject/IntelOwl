@@ -13,6 +13,7 @@ from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
     malicious_detector_response,
 )
+from api_app.choices import Classification
 from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -43,7 +44,7 @@ class WebRisk(classes.ObservableAnalyzer):
 
     def run(self):
         if (
-            self.observable_classification == self.ObservableTypes.URL
+            self.observable_classification == Classification.URL
             and not self.observable_name.startswith("http")
         ):
             raise AnalyzerRunException(

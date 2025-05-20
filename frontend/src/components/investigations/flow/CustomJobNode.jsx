@@ -10,13 +10,71 @@ import { MdContentCopy } from "react-icons/md";
 import { CopyToClipboardButton, DateHoverable } from "@certego/certego-ui";
 
 import { RemoveJob } from "./investigationActions";
+import {
+  EvaluationBadge,
+  ReliabilityBar,
+  TagsBadge,
+  CountryBadge,
+  MimetypeBadge,
+  IspBadge,
+} from "../../common/engineBadges";
 
 function CustomJobNode({ data }) {
   return (
     <>
-      {/* Number of children */}
-      <NodeToolbar position="top" align="end" isVisible offset={3}>
-        <div className="pe-2 text-secondary">{data.children.length} items</div>
+      {/* Engine badges */}
+      <NodeToolbar
+        className="d-flex-center"
+        position="top"
+        align="start"
+        isVisible
+        offset={3}
+      >
+        {data.engineFields.evaluation && (
+          <EvaluationBadge
+            id={data.id}
+            evaluation={data.engineFields.evaluation}
+          />
+        )}
+        {data.engineFields?.mimetype && (
+          <MimetypeBadge
+            id={data.id}
+            mimetype={data.engineFields.mimetype}
+            className="ms-1"
+          />
+        )}
+        {data.engineFields?.isp && (
+          <IspBadge id={data.id} isp={data.engineFields.isp} className="ms-1" />
+        )}
+        {data.engineFields?.country && (
+          <CountryBadge id={data.id} country={data.engineFields.country} />
+        )}
+      </NodeToolbar>
+      <NodeToolbar
+        className="d-flex-center"
+        position="top"
+        align="end"
+        isVisible
+        offset={3}
+      >
+        {data.engineFields.tags?.map((tag, index) => (
+          <TagsBadge id={`${data.id}_${index}`} tag={tag} className="ms-1" />
+        ))}
+      </NodeToolbar>
+      <NodeToolbar
+        className="d-flex-center"
+        position="bottom"
+        align="start"
+        isVisible
+        offset={3}
+      >
+        {data.engineFields.evaluation && (
+          <ReliabilityBar
+            id={data.id}
+            reliability={data.engineFields.reliability}
+            evaluation={data.engineFields.evaluation}
+          />
+        )}
       </NodeToolbar>
       {/* Actions */}
       <NodeToolbar

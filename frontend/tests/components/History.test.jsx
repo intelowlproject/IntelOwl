@@ -2,7 +2,7 @@ import React from "react";
 import "@testing-library/jest-dom";
 import axios from "axios";
 import { render, screen, waitFor } from "@testing-library/react";
-import { BrowserRouter } from "react-router-dom";
+import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import History from "../../src/components/History";
 import { INVESTIGATION_BASE_URI } from "../../src/constants/apiURLs";
@@ -20,9 +20,9 @@ describe("test History component", () => {
   test("history page", async () => {
     const user = userEvent.setup();
     render(
-      <BrowserRouter>
+      <MemoryRouter initialEntries={["/history/jobs"]}>
         <History />
-      </BrowserRouter>,
+      </MemoryRouter>,
     );
 
     // router tabs
@@ -58,9 +58,9 @@ describe("test History component", () => {
     axios.post.mockImplementation(() => Promise.resolve({ data: {} }));
     const user = userEvent.setup();
     render(
-      <BrowserRouter>
+      <MemoryRouter>
         <History />
-      </BrowserRouter>,
+      </MemoryRouter>,
     );
 
     // router tabs

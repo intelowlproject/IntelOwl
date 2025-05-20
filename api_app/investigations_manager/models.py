@@ -10,7 +10,7 @@ from api_app.choices import TLP
 from api_app.interfaces import OwnershipAbstractModel
 from api_app.investigations_manager.choices import InvestigationStatusChoices
 from api_app.investigations_manager.queryset import InvestigationQuerySet
-from api_app.models import ListCachable
+from api_app.models import Job, ListCachable
 from certego_saas.apps.user.models import User
 
 logger = logging.getLogger(__name__)
@@ -63,7 +63,6 @@ class Investigation(OwnershipAbstractModel, ListCachable):
         return False
 
     def set_correct_status(self, save: bool = True):
-        from api_app.models import Job
 
         logger.info(f"Setting status for investigation {self.pk}")
         # if I have some jobs
@@ -72,16 +71,23 @@ class Investigation(OwnershipAbstractModel, ListCachable):
             for job in self.jobs.all():
                 job: Job
                 jobs = job.get_tree(job)
-                running_jobs = jobs.exclude(status__in=Job.STATUSES.final_statuses())
-                if running_jobs.count() > 0:
+                running_jobs_list = jobs.exclude(
+                    status__in=Job.STATUSES.final_statuses()
+                ).values_list("pk", flat=True)
+                running_jobs_count = len(running_jobs_list)
+                logger.info(
+                    f"{running_jobs_count} out of {self.jobs.count()} jobs are still running for investigation {self.pk}"
+                )
+                if running_jobs_count > 0:
                     logger.info(
-                        f"Jobs {running_jobs.values_list('pk', flat=True)}  are still running for investigation {self.pk}"
+                        f"Jobs {running_jobs_list} are still running for investigation {self.pk}"
                     )
                     self.status = self.STATUSES.RUNNING.value
                     self.end_time = None
                     break
             # and they are all completed
             else:
+                logger.info(f"Setting investigation {self.pk} to concluded")
                 self.status = self.STATUSES.CONCLUDED.value
                 self.end_time = (
                     self.jobs.order_by("-finished_analysis_time")
@@ -89,10 +95,23 @@ class Investigation(OwnershipAbstractModel, ListCachable):
                     .finished_analysis_time
                 )
         else:
+            logger.info(f"Setting investigation {self.pk} to created")
             self.status = self.STATUSES.CREATED.value
             self.end_time = None
         if save:
             self.save(update_fields=["status", "end_time"])
+
+    @classmethod
+    def investigation_for_analyzable(
+        cls, queryset: models.QuerySet, analyzed_object_name: str
+    ) -> models.QuerySet:
+        related_job_id_list = [
+            job_data[0]
+            for job_data in Job.objects.filter(
+                analyzable__name__icontains=analyzed_object_name
+            ).values_list("id")
+        ]
+        return queryset.filter(jobs__id__in=related_job_id_list).distinct()
 
     @property
     def tags(self) -> List[str]:

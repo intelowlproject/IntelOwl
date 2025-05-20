@@ -5,10 +5,10 @@ import { IoIosEye } from "react-icons/io";
 import { MdInput } from "react-icons/md";
 import { PiGraphFill } from "react-icons/pi";
 import { BsFillPlusCircleFill } from "react-icons/bs";
-import { useLocation } from "react-router-dom";
-import { Button, Col } from "reactstrap";
+import { NavLink as RRNavLink, useLocation } from "react-router-dom";
+import { Button, Col, Nav, NavItem } from "reactstrap";
 
-import { RouterTabs, FallBackLoading } from "@certego/certego-ui";
+import { FallBackLoading } from "@certego/certego-ui";
 import { useGuideContext } from "../../contexts/GuideContext";
 import { PluginsTypes } from "../../constants/pluginConst";
 import { PluginConfigModal } from "./PluginConfigModal";
@@ -19,99 +19,6 @@ const Pivots = React.lazy(() => import("./tables/Pivots"));
 const Visualizers = React.lazy(() => import("./tables/Visualizers"));
 const Ingestors = React.lazy(() => import("./tables/Ingestors"));
 const Playbooks = React.lazy(() => import("./tables/Playbooks"));
-
-const routes = [
-  {
-    key: "plugins-analyzers",
-    location: "analyzers",
-    Title: () => (
-      <span id="Analyzers">
-        <AiOutlineApi />
-        &nbsp;Analyzers
-      </span>
-    ),
-    Component: () => (
-      <Suspense fallback={<FallBackLoading />}>
-        <Analyzers />
-      </Suspense>
-    ),
-  },
-  {
-    key: "plugins-connectors",
-    location: "connectors",
-    Title: () => (
-      <span id="Connectors">
-        <TiFlowChildren />
-        &nbsp;Connectors
-      </span>
-    ),
-    Component: () => (
-      <Suspense fallback={<FallBackLoading />}>
-        <Connectors />
-      </Suspense>
-    ),
-  },
-  {
-    key: "plugins-pivots",
-    location: "pivots",
-    Title: () => (
-      <span id="Pivots">
-        <PiGraphFill />
-        &nbsp;Pivots
-      </span>
-    ),
-    Component: () => (
-      <Suspense fallback={<FallBackLoading />}>
-        <Pivots />
-      </Suspense>
-    ),
-  },
-  {
-    key: "plugins-visualizers",
-    location: "visualizers",
-    Title: () => (
-      <span>
-        <IoIosEye />
-        &nbsp;Visualizers
-      </span>
-    ),
-    Component: () => (
-      <Suspense fallback={<FallBackLoading />}>
-        <Visualizers />
-      </Suspense>
-    ),
-  },
-  {
-    key: "plugins-ingestors",
-    location: "ingestors",
-    Title: () => (
-      <span>
-        <MdInput />
-        &nbsp;Ingestors
-      </span>
-    ),
-    Component: () => (
-      <Suspense fallback={<FallBackLoading />}>
-        <Ingestors />
-      </Suspense>
-    ),
-  },
-  {
-    key: "plugins-playbooks",
-    location: "playbooks",
-    Title: () => (
-      <span>
-        <TiBook />
-        &nbsp;Playbooks
-      </span>
-    ),
-    Component: () => (
-      <Suspense fallback={<FallBackLoading />}>
-        <Playbooks />
-      </Suspense>
-    ),
-  },
-];
 
 export default function PluginsContainer() {
   console.debug("PluginsContainer rendered!");
@@ -159,5 +66,89 @@ export default function PluginsContainer() {
     </Col>
   );
 
-  return <RouterTabs routes={routes} extraNavComponent={createButton} />;
+  /* switch is requested or each time a section is selected everything need to be rendered again
+  slowing down the performance and the UX */
+  let selectedComponent;
+  switch (pluginsPage) {
+    case PluginsTypes.ANALYZER:
+      selectedComponent = <Analyzers />;
+      break;
+    case PluginsTypes.CONNECTOR:
+      selectedComponent = <Connectors />;
+      break;
+    case PluginsTypes.PIVOT:
+      selectedComponent = <Pivots />;
+      break;
+    case PluginsTypes.VISUALIZER:
+      selectedComponent = <Visualizers />;
+      break;
+    case PluginsTypes.INGESTOR:
+      selectedComponent = <Ingestors />;
+      break;
+    case PluginsTypes.PLAYBOOK:
+      selectedComponent = <Playbooks />;
+      break;
+    default:
+      selectedComponent = undefined;
+  }
+  selectedComponent = (
+    <Suspense fallback={<FallBackLoading />}>{selectedComponent}</Suspense>
+  );
+
+  return (
+    <>
+      <Nav className="nav-tabs">
+        <NavItem>
+          <RRNavLink className="nav-link" to="/plugins/analyzers">
+            <span id="analyzers">
+              <AiOutlineApi />
+              &nbsp;Analyzers
+            </span>
+          </RRNavLink>
+        </NavItem>
+        <NavItem>
+          <RRNavLink className="nav-link" to="/plugins/connectors">
+            <span id="connectors">
+              <TiFlowChildren />
+              &nbsp;Connectors
+            </span>
+          </RRNavLink>
+        </NavItem>
+        <NavItem>
+          <RRNavLink className="nav-link" to="/plugins/pivots">
+            <span id="pivots">
+              <PiGraphFill />
+              &nbsp;Pivots
+            </span>
+          </RRNavLink>
+        </NavItem>
+        <NavItem>
+          <RRNavLink className="nav-link" to="/plugins/visualizers">
+            <span id="visualizers">
+              <IoIosEye />
+              &nbsp;Visualizers
+            </span>
+          </RRNavLink>
+        </NavItem>
+        <NavItem>
+          <RRNavLink className="nav-link" to="/plugins/ingestors">
+            <span id="ingestors">
+              <MdInput />
+              &nbsp;Ingestors
+            </span>
+          </RRNavLink>
+        </NavItem>
+        <NavItem>
+          <RRNavLink className="nav-link" to="/plugins/playbooks">
+            <span id="playbooks">
+              <TiBook />
+              &nbsp;Playbooks
+            </span>
+          </RRNavLink>
+        </NavItem>
+        {createButton}
+      </Nav>
+      {selectedComponent}
+    </>
+  );
 }

@@ -7,19 +7,19 @@ MINIMUM_DOCKER_COMPOSE_VERSION=2.3.4
 
 # Function to compare 2 semver version
 semantic_version_comp () {
-  if [[ $1 == $2 ]]; then
+  if [[ "$1" == "$2" ]]; then 
       echo "equalTo"
       return
   fi
 
   # Remove "v" prefix if present
-  ver1=$(echo $1 | sed 's/^v//')
-  ver2=$(echo $2 | sed 's/^v//')
+  ver1="${1//v/}"  # Used parameter substitution instead of sed (SC2001)
+  ver2="${2//v/}"
 
   # Convert version numbers to arrays
   local IFS=.
-  local i ver1=($ver1) ver2=($ver2)
-
+  read -ra ver1 <<< "$1"
+  read -ra ver2 <<< "$2"
   # Fill empty fields in ver1 with zeros
   for ((i=${#ver1[@]}; i<${#ver2[@]}; i++)); do
       ver1[i]=0
@@ -129,9 +129,10 @@ fi
 
 # construct environment files from templates
 echo "Adding environment files"
-cp -n docker/env_file_app_template docker/env_file_app
-cp -n docker/env_file_postgres_template docker/env_file_postgres
-cp -n docker/env_file_integrations_template docker/env_file_integrations
+cp --update=none docker/env_file_app_template docker/env_file_app
+cp --update=none docker/env_file_postgres_template docker/env_file_postgres
+cp --update=none docker/env_file_integrations_template docker/env_file_integrations
+cp --update=none docker/.env.start.test.template docker/.env.start.test
 echo "Added environment files"
 
 check_django_secret

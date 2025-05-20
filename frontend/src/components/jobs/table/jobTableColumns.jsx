@@ -73,7 +73,14 @@ export const jobTableColumns = [
     id: "user",
     accessor: "user.username",
     Cell: ({ value, row: { original: job } }) => (
-      <TableCell job={job} isCopyToClipboard isTruncate value={value} />
+      <div>
+        <TableCell
+          id={`table-cell-user__${job.id}`}
+          isCopyToClipboard
+          isTruncate
+          value={value}
+        />
+      </div>
     ),
     disableSortBy: true,
     Filter: DefaultColumnFilter,
@@ -84,7 +91,12 @@ export const jobTableColumns = [
     id: "name",
     accessor: (job) => job.observable_name || job.file_name,
     Cell: ({ value, row: { original: job } }) => (
-      <TableCell job={job} value={value} isCopyToClipboard isTruncate />
+      <TableCell
+        id={`table-cell-name__${job.id}`}
+        value={value}
+        isCopyToClipboard
+        isTruncate
+      />
     ),
     disableSortBy: true,
     Filter: DefaultColumnFilter,
@@ -94,7 +106,12 @@ export const jobTableColumns = [
     id: "md5",
     accessor: "md5",
     Cell: ({ value, row: { original: job } }) => (
-      <TableCell job={job} isCopyToClipboard isTruncate value={value} />
+      <TableCell
+        id={`table-cell-md5__${job.id}`}
+        isCopyToClipboard
+        isTruncate
+        value={value}
+      />
     ),
     disableSortBy: true,
     Filter: DefaultColumnFilter,
@@ -103,9 +120,14 @@ export const jobTableColumns = [
     Header: "Type",
     id: "is_sample",
     accessor: (job) => job.is_sample,
-    Cell: ({ value }) => (value ? JobTypes.FILE : JobTypes.OBSERVABLE),
+    Cell: ({ value, row: { original: job } }) => (
+      <TableCell
+        id={`table-cell-type__${job.id}`}
+        value={value ? JobTypes.FILE : JobTypes.OBSERVABLE}
+      />
+    ),
     disableSortBy: true,
-    maxWidth: 100,
+    maxWidth: 110,
     Filter: ({
       column: { filterValue: isSampleStr, setFilter, id, selectOptions },
     }) => {
@@ -166,14 +188,17 @@ export const jobTableColumns = [
   {
     Header: "SubType",
     id: "type",
-    accessor: (job) => job.observable_classification || job.file_mimetype,
+    accessor: (job) =>
+      job.is_sample ? job.file_mimetype : job.observable_classification,
     disableSortBy: true,
     maxWidth: 100,
     Filter: SelectOptionsFilter,
     selectOptions: Object.values(ObservableClassifications)
       .sort()
       .concat(Object.values(FileMimeTypes).sort()),
-    Cell: ({ value }) => <TableCell value={value} />,
+    Cell: ({ value, row: { original: job } }) => (
+      <TableCell id={`table-cell-type__${job.id}`} value={value} />
+    ),
   },
   {
     Header: "TLP",

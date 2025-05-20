@@ -6,5 +6,5 @@ suricata-update enable-source etnetera/aggressive
 suricata-update enable-source tgreen/hunting
 suricata-update enable-source malsilo/win-malware
 suricata-update
-kill $(pidof suricata)
+kill "$(pidof suricata)"
 suricata --unix-socket=/tmp/suricata.socket &

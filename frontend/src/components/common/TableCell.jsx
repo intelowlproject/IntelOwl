@@ -7,47 +7,78 @@ export default function TableCell(props) {
     value = null,
     isTruncate = false,
     isCopyToClipboard = false,
-    job,
+    isList = false,
+    id,
+    ulKey = null,
   } = props;
 
-  const tableId = job ? `table-user-${job.id}` : `table-user-${value}`;
-  const tableKey = job ? `table-user-${job.id}` : `table-user-${value}`;
-
-  return (
-    <div>
-      {isCopyToClipboard ? (
-        <CopyToClipboardButton
-          showOnHover
-          id={tableId}
-          key={tableKey}
-          text={value}
-          className={`d-block p-2 ${
-            isTruncate ? `text-truncate` : `text-break`
-          }`}
-        >
-          {value}
-        </CopyToClipboardButton>
-      ) : (
-        <div className="d-flex justify-content-center">
-          <span className="d-block text-break pb-2" id={tableId} key={tableKey}>
-            {value}
-          </span>
-        </div>
-      )}
+  let cell = (
+    <div className="d-flex justify-content-center">
+      <span
+        className={`d-block p-2 ${isTruncate ? `text-truncate` : `text-break`}`}
+        id={id}
+      >
+        {value}
+      </span>
     </div>
   );
+
+  if (isCopyToClipboard) {
+    cell = (
+      <CopyToClipboardButton
+        showOnHover
+        id={id}
+        text={value}
+        className={`d-block p-2 ${isTruncate ? `text-truncate` : `text-break`}`}
+      >
+        {value}
+      </CopyToClipboardButton>
+    );
+  }
+
+  if (isList) {
+    cell = (
+      <ul className="d-flex flex-column text-left" key={ulKey}>
+        {value?.sort().map((val, index) => (
+          <li
+            className="mb-1 pb-2"
+            key={`${id}__${val}`}
+            id={`${id}__${index}`}
+          >
+            <div className="d-flex align-items-start">
+              <CopyToClipboardButton
+                id={`${id}__${index}`}
+                showOnHover
+                text={val}
+                className={`d-block ${
+                  isTruncate ? `text-truncate` : `text-break`
+                }`}
+              >
+                {val}
+              </CopyToClipboardButton>
+            </div>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  return <div>{cell}</div>;
 }
 
 TableCell.propTypes = {
-  value: PropTypes.string,
+  value: PropTypes.any,
   isTruncate: PropTypes.bool,
   isCopyToClipboard: PropTypes.bool,
-  job: PropTypes.object,
+  isList: PropTypes.bool,
+  id: PropTypes.string.isRequired,
+  ulKey: PropTypes.string,
 };
 
 TableCell.defaultProps = {
   value: null,
   isTruncate: false,
   isCopyToClipboard: false,
-  job: null,
+  isList: false,
+  ulKey: null,
 };

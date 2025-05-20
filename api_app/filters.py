@@ -1,15 +1,18 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import rest_framework_filters as filters
-from django.db.models import Q
+import logging
 
-from .analyzers_manager.constants import ObservableTypes
+import rest_framework_filters as filters
+
+from .choices import Classification
 from .models import Job
 
 __all__ = [
     "JobFilter",
 ]
+
+logger = logging.getLogger(__name__)
 
 
 class JobFilter(filters.FilterSet):
@@ -31,11 +34,17 @@ class JobFilter(filters.FilterSet):
         name (CharFilter): Custom filter method to filter by name (observable or file name).
     """
 
-    is_sample = filters.BooleanFilter()
-    md5 = filters.CharFilter(lookup_expr="icontains")
-    observable_name = filters.CharFilter(lookup_expr="icontains")
-    file_name = filters.CharFilter(lookup_expr="icontains")
-    file_mimetype = filters.CharFilter(lookup_expr="icontains")
+    is_sample = filters.BooleanFilter(method="filter_is_sample")
+    md5 = filters.CharFilter(field_name="analyzable__md5", lookup_expr="icontains")
+    observable_name = filters.CharFilter(
+        field_name="analyzable__name", lookup_expr="icontains"
+    )
+    file_name = filters.CharFilter(
+        field_name="analyzable__name", lookup_expr="icontains"
+    )
+    file_mimetype = filters.CharFilter(
+        field_name="analyzable__mimetype", lookup_expr="icontains"
+    )
     tags = filters.BaseInFilter(field_name="tags__label", lookup_expr="in")
     playbook_to_execute = filters.CharFilter(
         field_name="playbook_to_execute__name", lookup_expr="icontains"
@@ -45,7 +54,14 @@ class JobFilter(filters.FilterSet):
     user = filters.CharFilter(method="filter_for_user")
     id = filters.CharFilter(method="filter_for_id")
     type = filters.CharFilter(method="filter_for_type")
-    name = filters.CharFilter(method="filter_for_name")
+    name = filters.CharFilter(field_name="analyzable__name")
+
+    @staticmethod
+    def filter_is_sample(queryset, value, is_sample, *args, **kwargs):
+        logger.debug(f"{value=} {is_sample=}")
+        if is_sample:
+            return queryset.filter(analyzable__classification=Classification.FILE)
+        return queryset.exclude(analyzable__classification=Classification.FILE)
 
     @staticmethod
     def filter_for_user(queryset, value, user, *args, **kwargs):
@@ -96,33 +112,15 @@ class JobFilter(filters.FilterSet):
         Returns:
             QuerySet: The filtered queryset.
         """
-        if _type in ObservableTypes.values:
-            return queryset.filter(observable_classification=_type)
-        return queryset.filter(file_mimetype__icontains=_type)
-
-    @staticmethod
-    def filter_for_name(queryset, value, name, *args, **kwargs):
-        """
-        Filters the queryset by observable name or file name.
-
-        Args:
-            queryset (QuerySet): The queryset to filter.
-            value (str): The filter value.
-            name (str): The name to filter by (observable or file name).
-
-        Returns:
-            QuerySet: The filtered queryset.
-        """
-        return queryset.filter(
-            Q(observable_name__icontains=name) | Q(file_name__icontains=name)
-        )
+        if _type in Classification.values:
+            return queryset.filter(analyzable__classification=_type)
+        return queryset.filter(analyzable__mimetype__icontains=_type)
 
     class Meta:
         model = Job
         fields = {
             "received_request_time": ["lte", "gte"],
             "finished_analysis_time": ["lte", "gte"],
-            "observable_classification": ["exact"],
             "tlp": ["exact"],
             "status": ["exact"],
         }

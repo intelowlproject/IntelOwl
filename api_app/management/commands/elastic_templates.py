@@ -4,7 +4,6 @@ import logging
 from django.conf import settings
 from django.core.management import BaseCommand
 from elasticsearch import ApiError
-from elasticsearch_dsl import connections
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +21,7 @@ class Command(BaseCommand):
                 settings.CONFIG_ROOT / "elastic_search_mappings" / "plugin_report.json"
             ) as file_content:
                 try:
-                    connections.get_connection().indices.put_template(
+                    settings.ELASTICSEARCH_DSL_CLIENT.indices.put_template(
                         name="plugin-report", body=json.load(file_content)
                     )
                     success_msg = (

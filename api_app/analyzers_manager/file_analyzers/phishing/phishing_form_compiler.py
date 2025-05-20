@@ -53,7 +53,7 @@ class PhishingFormCompiler(FileAnalyzer):
         super().config(runtime_configuration)
         if hasattr(self._job, "pivot_parent"):
             # extract target site from parent job
-            self.target_site = self._job.pivot_parent.starting_job.observable_name
+            self.target_site = self._job.pivot_parent.starting_job.analyzable.name
         else:
             logger.warning(
                 f"Job #{self.job_id}: Analyzer {self.analyzer_name} should be ran from PhishingAnalysis playbook."
@@ -137,21 +137,19 @@ class PhishingFormCompiler(FileAnalyzer):
             if input_name in names:
                 return fake_value
 
-    #         guarda anche i log di errore
-
     @staticmethod
     def extract_action_attribute(base_site: str, form) -> str:
         # we always return an URL to prevent MissingSchema error in request
+        if "://" not in base_site:
+            # if target site is a domain add a temporary default
+            # schema so we can use urljoin as if it was an url
+            base_site = "https://" + base_site
         form_action: str = form.get("action", None)
         if not form_action:
             logger.info(
                 f"'action' attribute not found in form. Defaulting to {base_site=}"
             )
             return base_site
-        if "://" not in base_site:
-            # if target site is a domain add a temporary default
-            # schema so we can use urljoin as if it was an url
-            base_site = "https://" + base_site
 
         form_action = urljoin(base_site, form_action)
         if "://" not in form_action:

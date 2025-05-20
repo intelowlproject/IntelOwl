@@ -3,7 +3,7 @@ import "@testing-library/jest-dom";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { BaseVisualizer } from "../../../../../../src/components/jobs/result/visualizer/elements/base";
-import { getIcon } from "../../../../../../src/components/jobs/result/visualizer/icons";
+import { getIcon } from "../../../../../../src/components/common/icon/icons";
 
 // mock useLocation
 jest.mock("react-router-dom", () => ({

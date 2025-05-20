@@ -37,6 +37,7 @@ print_help () {
   echo "                                file."
   echo "    --pcap_analyzers            Uses the integrations/pcap_analyzers/compose.yml"
   echo "                                file."
+  echo "    --bbot                      Uses the integrations/bbot/compose.yml"
   echo "    --multi_queue               Uses the multiqueue.override.yml compose file."
   echo "    --nfs                       Uses the nfs.override.yml compose file."
   echo "    --traefik_prod              Uses the traefik.yml and traefik_prod.yml compose file."
@@ -88,20 +89,18 @@ set_defaults_values () {
   export PYCTI_VERSION=$pycti_default_version
 }
 
-load_env () {
-  export "$(grep -v '^#' "$1")"
-}
-
 if ! docker compose version > /dev/null 2>&1; then
   echo "Run ./initialize.sh to install Docker Compose 2"
 fi
 
 check_parameters "$@" && shift 2
 
-load_env "docker/.env"
+# shellcheck source=docker/.env disable=SC1091
+. docker/.env
+
 current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
 
-docker_analyzers=("pcap_analyzers" "tor_analyzers" "malware_tools_analyzers" "thug" "cyberchef" "phoneinfoga" "phishing_analyzers" "nuclei_analyzer")
+docker_analyzers=("pcap_analyzers" "tor_analyzers" "malware_tools_analyzers" "thug" "cyberchef" "phoneinfoga" "phishing_analyzers" "nuclei_analyzer" "bbot")
 
 
 for value in "${docker_analyzers[@]}"; do
@@ -115,8 +114,10 @@ done
 if [[ ${test_mode["${env_argument}"]} ]]; then
   is_test=true
   test_appendix=".test"
-  # load relevant .env file
-  load_env "docker/.env.start.test"
+
+# shellcheck source=docker/.env.start.test disable=SC1091
+  . docker/.env.start.test
+
 else
   is_test=false
   test_appendix=""
@@ -175,6 +176,10 @@ while [[ $# -gt 0 ]]; do
     ;;
   --phishing_analyzers)
     analyzers["phishing_analyzers"]=true
+    shift 1
+    ;;
+  --bbot)
+    analyzers["bbot"]=true
     shift 1
     ;;
   --multi_queue)
@@ -353,19 +358,19 @@ if [[ $env_argument == "prod" && $version != "${current_version}" ]]; then
   git checkout "v${version}"
 fi
 
-if [ $debug_build ]; then
+if [ "$debug_build" ]; then
   export BUILDKIT_PROGRESS="plain"
 fi
 export DOCKER_BUILDKIT=1
 
 for value in "${compose_files[@]}" ; do
   if [ -n "${value}" ]; then
-    to_run+=" -f $value"
+    to_run+=("-f" "$value")
   fi
 done
 
 if grep "docker" <<< "$(groups)" > /dev/null 2>&1; then
-  docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
+  docker compose --project-directory docker "${to_run[@]}" -p "$project_name" "$cmd_argument" "$@"
 else
-  sudo docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
+  sudo docker compose --project-directory docker "${to_run[@]}" -p "$project_name" "$cmd_argument" "$@"
 fi

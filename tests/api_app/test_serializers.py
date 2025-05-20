@@ -6,9 +6,10 @@ from django.contrib.auth import get_user_model
 from django.utils.timezone import now
 from rest_framework.exceptions import ValidationError
 
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
-from api_app.choices import PythonModuleBasePaths
+from api_app.choices import Classification, PythonModuleBasePaths
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.models import Job, Parameter, PluginConfig, PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
@@ -36,13 +37,12 @@ User = get_user_model()
 
 class JobRecentScanSerializerTestCase(CustomTestCase):
     def test_to_representation(self):
+        an = Analyzable.objects.create(name="gigatest.com", classification="domain")
         j1 = Job.objects.create(
             **{
                 "user": self.user,
-                "is_sample": False,
-                "observable_name": "gigatest.com",
-                "observable_classification": "domain",
                 "finished_analysis_time": now() - datetime.timedelta(hours=2),
+                "analyzable": an,
             }
         )
         data = JobRecentScanSerializer(j1).data
@@ -192,17 +192,21 @@ class PluginConfigSerializerTestCase(CustomTestCase):
 
 class RestJobSerializerTestCase(CustomTestCase):
     def test_validate(self):
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             user=self.user,
         )
         js = RestJobSerializer(job)
         self.assertIn("analyzer_reports", js.data)
         self.assertIn("connector_reports", js.data)
         self.assertIn("visualizer_reports", js.data)
-        self.assertIn("analyzers_data_model", js.data)
         job.delete()
+        an.delete()
 
 
 class AbstractJobCreateSerializerTestCase(CustomTestCase):
@@ -217,11 +221,14 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         a1 = AnalyzerConfig.objects.order_by("?").first()
         a2 = AnalyzerConfig.objects.order_by("?").exclude(pk=a1.pk).first()
         a3 = AnalyzerConfig.objects.order_by("?").exclude(pk__in=[a1.pk, a2.pk]).first()
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         j1 = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             user=self.user,
-            md5="72cf478e87b031233091d8c00a38ce00",
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
             received_request_time=now() - datetime.timedelta(hours=3),
         )
@@ -236,7 +243,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
             self.ajcs.check_previous_jobs(
                 validated_data={
                     "scan_check_time": datetime.timedelta(days=1),
-                    "md5": "72cf478e87b031233091d8c00a38ce00",
+                    "analyzable": an,
                     "analyzers_to_execute": [],
                 }
             ),
@@ -246,7 +253,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
             self.ajcs.check_previous_jobs(
                 validated_data={
                     "scan_check_time": datetime.timedelta(days=1),
-                    "md5": "72cf478e87b031233091d8c00a38ce00",
+                    "analyzable": an,
                     "analyzers_to_execute": [a1],
                 }
             ),
@@ -256,7 +263,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
             self.ajcs.check_previous_jobs(
                 validated_data={
                     "scan_check_time": datetime.timedelta(days=1),
-                    "md5": "72cf478e87b031233091d8c00a38ce00",
+                    "analyzable": an,
                     "analyzers_to_execute": [a1, a2],
                 }
             ),
@@ -265,10 +272,12 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
             self.ajcs.check_previous_jobs(
                 validated_data={
                     "scan_check_time": datetime.timedelta(days=1),
-                    "md5": "72cf478e87b031233091d8c00a38ce00",
+                    "analyzable": an,
                     "analyzers_to_execute": [a1, a2, a3],
                 }
             )
+        j1.delete()
+        an.delete()
 
     def test_set_default_value_from_playbook(self):
         data = {"playbook_requested": PlaybookConfig.objects.first()}
@@ -574,9 +583,11 @@ class ObservableJobCreateSerializerTestCase(CustomTestCase):
 class CommentSerializerTestCase(CustomTestCase):
     def setUp(self):
         super().setUp()
+        self.an = Analyzable.objects.create(
+            name="test.com", classification=Classification.DOMAIN
+        )
         self.job = Job.objects.create(
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=self.an,
             user=self.user,
         )
         self.job.save()
@@ -589,6 +600,7 @@ class CommentSerializerTestCase(CustomTestCase):
     def tearDown(self) -> None:
         super().tearDown()
         self.job.delete()
+        self.an.delete()
 
     def test_create(self):
         self.assertTrue(self.cs.is_valid())
@@ -607,8 +619,12 @@ class JobResponseSerializerTestCase(CustomTestCase):
         self.assertEqual(result, {"status": "not_available", "job_id": None})
 
     def test_job(self):
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
         job = Job.objects.create(
-            observable_name="test.com", observable_classification="domain"
+            analyzable=an,
         )
         result = JobResponseSerializer(job).data
         self.assertIn("status", result)
@@ -616,13 +632,23 @@ class JobResponseSerializerTestCase(CustomTestCase):
         self.assertIn("job_id", result)
         self.assertEqual(result["job_id"], job.id)
         job.delete()
+        an.delete()
 
     def test_many(self):
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+        an2 = Analyzable.objects.create(
+            name="test2.com",
+            classification=Classification.DOMAIN,
+        )
+
         job1 = Job.objects.create(
-            observable_name="test.com", observable_classification="domain"
+            analyzable=an,
         )
         job2 = Job.objects.create(
-            observable_name="test2.com", observable_classification="domain"
+            analyzable=an2,
         )
         result = JobResponseSerializer([job1, job2], many=True).data
         self.assertIn("count", result)
@@ -635,6 +661,8 @@ class JobResponseSerializerTestCase(CustomTestCase):
         self.assertEqual(result["results"][0]["job_id"], job1.id)
         job1.delete()
         job2.delete()
+        an.delete()
+        an2.delete()
 
 
 class AbstractListConfigSerializerTestCase(CustomTestCase):

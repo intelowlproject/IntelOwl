@@ -1,5 +1,4 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import {
   Button,
@@ -18,6 +17,7 @@ import {
   CopyToClipboardButton,
   ArrowToggleIcon,
 } from "@certego/certego-ui";
+import { format } from "date-fns";
 import { processTimeMMSS } from "../../../utils/time";
 
 import { JobTag } from "../../common/JobTag";
@@ -27,47 +27,84 @@ import { TLPTag } from "../../common/TLPTag";
 import { JobInfoIcon } from "./JobInfoIcon";
 import { JobIsRunningAlert } from "./JobIsRunningAlert";
 import { JobFinalStatuses } from "../../../constants/jobConst";
+import { datetimeFormatStr } from "../../../constants/miscConst";
 
 export function JobInfoCard({ job }) {
-  const navigate = useNavigate();
   // local state
   const [isOpenJobInfoCard, setIsOpenJobInfoCard] = React.useState(false);
   const [isOpenJobWarnings, setIsOpenJobWarnings] = React.useState(false);
   const [isOpenJobErrors, setIsOpenJobErrors] = React.useState(false);
 
+  const investigationTimeRange = 30;
+  const endDateRelatedInvestigation = new Date();
+  const startDateRelatedInvestigation = structuredClone(
+    endDateRelatedInvestigation,
+  );
+  startDateRelatedInvestigation.setDate(
+    startDateRelatedInvestigation.getDate() - investigationTimeRange,
+  );
+
   return (
     <div id="JobInfoCardSection">
       <ContentSection className="mb-0 bg-darker">
         <Row>
-          <Col sm={12} md={1} className="d-flex justify-content-start">
-            {job.investigation && (
+          <Col sm={12} md={3} className="d-flex justify-content-start">
+            <Button
+              className="bg-darker border-1 lh-sm mx-1"
+              href={`/history/investigations?start_time__gte=${format(
+                startDateRelatedInvestigation,
+                datetimeFormatStr,
+              )}&start_time__lte=${format(
+                endDateRelatedInvestigation,
+                datetimeFormatStr,
+              )}&analyzed_object_name=${
+                job.is_sample ? job.file_name : job.observable_name
+              }&ordering=-start_time`}
+              target="_blank"
+              rel="noreferrer"
+              id="investigationSearchBtn"
+              size="xs"
+              style={{ fontSize: "0.8rem" }}
+            >
+              Similar Investigations: <br /> {job.related_investigation_number}
+            </Button>
+            <UncontrolledTooltip
+              placement="top"
+              target="investigationSearchBtn"
+            >
+              Search investigations for{" "}
+              {job.is_sample ? job.file_name : job.observable_name} in the last
+              {` ${investigationTimeRange}`} days.
+            </UncontrolledTooltip>
+            {job.investigation_id && (
               <>
                 <Button
-                  className="bg-darker border-1 lh-sm"
-                  onClick={() =>
-                    navigate(`/investigation/${job.investigation}`)
-                  }
+                  className="bg-darker border-1 lh-sm mx-1"
+                  href={`/investigation/${job.investigation_id}`}
+                  target="_blank"
+                  rel="noreferrer"
                   id="investigationOverviewBtn"
                   size="xs"
                   style={{ fontSize: "0.8rem" }}
                 >
-                  Investigation Overview
+                  Investigation: <br /> {job.investigation_name}
                 </Button>
                 <UncontrolledTooltip
                   placement="top"
                   target="investigationOverviewBtn"
                 >
-                  This job is part of the investigation #{job.investigation}
+                  This job is part of the investigation #
+                  {job.invinvestigation_id}
                 </UncontrolledTooltip>
               </>
             )}
           </Col>
           <Col
-            className="d-flex-start-start justify-content-center"
+            className="d-flex-start-start justify-content-center align-items-center"
             sm={12}
-            md={10}
+            md={7}
           >
-            <h3 className="d-flex-start align-items-center text-truncate">
+            <h3 className="d-flex-start text-truncate">
               <JobInfoIcon job={job} />
               {job.is_sample ? (
                 <CopyToClipboardButton
@@ -87,13 +124,15 @@ export function JobInfoCard({ job }) {
                 </CopyToClipboardButton>
               )}
             </h3>
-            <Badge className="ms-1 float-end" color="info">
-              {job.is_sample
-                ? `file: ${job.file_mimetype}`
-                : job.observable_classification}
-            </Badge>
+            <div className="h-100 d-flex align-items-start">
+              <Badge className="ms-1 float-end" color="info">
+                {job.is_sample
+                  ? `file: ${job.file_mimetype}`
+                  : job.observable_classification}
+              </Badge>
+            </div>
           </Col>
-          <Col sm={12} md={1} className="d-flex justify-content-end">
+          <Col sm={12} md={2} className="d-flex justify-content-end">
             <Button
               className="bg-darker border-0"
               onClick={() => setIsOpenJobInfoCard(!isOpenJobInfoCard)}

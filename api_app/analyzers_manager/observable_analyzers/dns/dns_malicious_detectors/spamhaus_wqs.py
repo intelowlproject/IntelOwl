@@ -4,6 +4,7 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..dns_responses import malicious_detector_response
@@ -24,7 +25,7 @@ class SpamhausWQS(classes.ObservableAnalyzer):
             url=f"""{self.url}/
             {
                 "DBL"
-                if self.observable_classification == self.ObservableTypes.DOMAIN.value
+                if self.observable_classification == Classification.DOMAIN.value
                 else "AUTHBL"
             }
             /{self.observable_name}""",

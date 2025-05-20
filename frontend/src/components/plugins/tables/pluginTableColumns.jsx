@@ -25,7 +25,6 @@ import {
 } from "./pluginActionsButtons";
 import { JobTypes } from "../../../constants/jobConst";
 import TableCell from "../../common/TableCell";
-import TableCellList from "../../common/TableCellList";
 import { TableCellCollapse } from "../../common/TableCellCollapse";
 
 /* This function is available in the certego-ui, but it doesn't works:
@@ -90,8 +89,13 @@ const pluginTableColumns = [
     Header: "Name",
     id: "name",
     accessor: "name",
-    Cell: ({ value }) => (
-      <TableCell isCopyToClipboard isTruncate value={value} />
+    Cell: ({ value, row: { original: plugin } }) => (
+      <TableCell
+        id={`table-cell-name__${plugin.id}`}
+        isCopyToClipboard
+        isTruncate
+        value={value}
+      />
     ),
     Filter: DefaultColumnFilter,
     minWidth: 150,
@@ -145,8 +149,14 @@ export const analyzersTableColumns = [
       }
       return supported;
     },
-    Cell: ({ value }) => (
-      <TableCellList value={value} ulKey={value} size={25} />
+    Cell: ({ value, row: { original: plugin } }) => (
+      <TableCell
+        id={`table-cell-supported_types__${plugin.id}`}
+        ulKey={value}
+        value={value}
+        size={25}
+        isList
+      />
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
@@ -281,8 +291,14 @@ export const pivotTableColumns = [
     Header: "Playbook to execute",
     id: "playbook",
     accessor: "playbooks_choice",
-    Cell: ({ value }) => (
-      <TableCellList value={value} ulKey={value} size={20} />
+    Cell: ({ value, row: { original: plugin } }) => (
+      <TableCell
+        id={`table-cell-playbook__${plugin.id}`}
+        ulKey={value}
+        value={value}
+        size={20}
+        isList
+      />
     ),
     Filter: SelectColumnFilter,
     maxWidth: 145,
@@ -338,8 +354,14 @@ export const playbookTableColumns = [
     Header: "Supported types",
     id: "supported_types",
     accessor: "type",
-    Cell: ({ value }) => (
-      <TableCellList value={value} ulKey={value} size={20} />
+    Cell: ({ value, row: { original: plugin } }) => (
+      <TableCell
+        id={`table-cell-supported_types__${plugin.id}`}
+        ulKey={value}
+        value={value}
+        size={20}
+        isList
+      />
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
@@ -436,12 +458,12 @@ export const visualizerTableColumns = [
     Header: "Playbook connected to",
     id: "playbooks",
     accessor: (row) => row.playbooks,
-    Cell: ({ value }) => (
-      <TableCellList
+    Cell: ({ value, row: { original: plugin } }) => (
+      <TableCell
+        id={`table-cell-visualizers-playbook__${plugin.id}`}
         ulKey={`visualizers-playbooks__${value}`}
         value={value}
-        idPrefix="table-user-"
-        keyPrefix="table-user-"
+        isList
       />
     ),
     Filter: SelectColumnFilter,
@@ -485,8 +507,13 @@ export const ingestorTableColumns = [
     Header: "Playbook to execute",
     id: "playbook",
     accessor: "playbooks_choice",
-    Cell: ({ value }) => (
-      <TableCell isCopyToClipboard isTruncate value={value} />
+    Cell: ({ value, row: { original: plugin } }) => (
+      <TableCell
+        id={`table-cell-playbook__${plugin.id}`}
+        isCopyToClipboard
+        isTruncate
+        value={value}
+      />
     ),
     Filter: SelectColumnFilter,
     maxWidth: 200,

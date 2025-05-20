@@ -82,22 +82,6 @@ describe("test plugins report table", () => {
                 type: "analyzer",
               },
             ],
-            analyzers_data_model: [
-              {
-                id: 1,
-                ietf_report: [],
-                analyzers_report: [174],
-                evaluation: null,
-                external_references: [],
-                related_threats: [],
-                tags: null,
-                malware_family: null,
-                additional_info: {},
-                date: "2024-12-19T11:20:04.549652Z",
-                rank: null,
-                resolutions: [],
-              },
-            ],
             connector_reports: [],
             visualizer_reports: [],
             comments: [],
@@ -238,11 +222,10 @@ describe("test plugins report table", () => {
     await waitFor(() => {
       const expandedRow = container.querySelector(`#jobreport-jsoninput-1`);
       expect(expandedRow).toBeInTheDocument();
-      expect(expandedRow.textContent).toContain("root:{} 4 keys");
-      expect(expandedRow.textContent).toContain("report:{} 2 keys");
-      expect(expandedRow.textContent).toContain("data_model:{} 0 keys");
-      expect(expandedRow.textContent).toContain("errors:[] 0 items");
-      expect(expandedRow.textContent).toContain("parameters:undefined");
+      const jsonReport = container.querySelector(
+        `#jsonAceEditor__plugin_report_json`,
+      );
+      expect(jsonReport).toBeInTheDocument();
     });
 
     // raw data - analyzers with data model
@@ -252,11 +235,10 @@ describe("test plugins report table", () => {
     await waitFor(() => {
       const expandedRow = container.querySelector(`#jobreport-jsoninput-0`);
       expect(expandedRow).toBeInTheDocument();
-      expect(expandedRow.textContent).toContain("root:{} 4 keys");
-      expect(expandedRow.textContent).toContain("report:{} 2 keys");
-      expect(expandedRow.textContent).toContain("data_model:{} 12 keys");
-      expect(expandedRow.textContent).toContain("errors:[] 0 items");
-      expect(expandedRow.textContent).toContain("parameters:undefined");
+      const jsonReport = container.querySelector(
+        `#jsonAceEditor__plugin_report_json`,
+      );
+      expect(jsonReport).toBeInTheDocument();
     });
   });
 });

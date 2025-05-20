@@ -1,5 +1,6 @@
 import { getLayoutedElements } from "../../common/flows/getLayoutedElements";
 import { JobFinalStatuses } from "../../../constants/jobConst";
+import { TagsIcons } from "../../../constants/engineConst";
 
 /* eslint-disable id-length */
 function addJobNode(
@@ -10,6 +11,31 @@ function addJobNode(
   refetchInvestigation,
   isFirstLevel,
 ) {
+  // engine fields
+  const engineFields = {
+    evaluation: job?.evaluation || "",
+    reliability: job?.reliability,
+    tags: job?.tags || [],
+  };
+  if (engineFields.tags.length > 0) {
+    const customTags = [];
+    const tags = [];
+    engineFields.tags.forEach((tag) => {
+      if (Object.keys(TagsIcons).includes(tag)) {
+        tags.push(tag);
+      } else {
+        customTags.push(tag);
+      }
+    });
+    if (customTags.length > 0) tags.push(customTags.toString());
+    engineFields.tags = tags;
+  }
+
+  // optional fields
+  if (job.country) engineFields.country = job.country;
+  if (job.isp) engineFields.isp = job.isp;
+  if (job.mimetype) engineFields.mimetype = job.mimetype;
+
   nodes.push({
     id: `job-${job.pk}`,
     data: {
@@ -25,6 +51,7 @@ function addJobNode(
       refetchInvestigation,
       isFirstLevel: isFirstLevel || false,
       created: job.received_request_time,
+      engineFields,
     },
     type: "jobNode",
   });
@@ -102,7 +129,7 @@ export function getNodesAndEdges(
       300,
       60,
       150,
-      70,
+      80,
     );
     return [
       initialNode.concat(layoutedNodes),

@@ -8,7 +8,7 @@ ENV PROJECT_PATH=/app
 RUN adduser -D -h /home/${USER} ${USER}
 
 # Install required packages using apk and clean cache in the same layer
-RUN apk add --no-cache python3=3.11.11-r0 py3-pip \
+RUN apk add --no-cache python3=3.11.12-r0 py3-pip \
     && rm -rf /var/cache/apk/* \
     && pip3 install --no-cache-dir --upgrade pip
 

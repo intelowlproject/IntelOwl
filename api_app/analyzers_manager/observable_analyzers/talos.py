@@ -20,9 +20,8 @@ database_location = f"{settings.MEDIA_ROOT}/{db_name}"
 class Talos(classes.ObservableAnalyzer):
     def run(self):
         result = {"found": False}
-        if not os.path.isfile(database_location):
-            if not self.update():
-                raise AnalyzerRunException("Failed extraction of talos db")
+        if not os.path.isfile(database_location) and not self.update():
+            raise AnalyzerRunException("Failed extraction of talos db")
 
         if not os.path.exists(database_location):
             raise AnalyzerRunException(
@@ -66,13 +65,9 @@ class Talos(classes.ObservableAnalyzer):
         found = self.report.report.get("found", False)
         if found:
             data_model.external_references.append(
-                f"https://www.talosintelligence.com/reputation_center/lookup?search={self.report.job.observable_name}"
+                f"https://www.talosintelligence.com/reputation_center/lookup?search={self.report.job.analyzable.name}"
             )
-            data_model.evaluation = (
-                self.report.data_model_class.EVALUATIONS.MALICIOUS.value
-            )
-        else:
-            data_model.evaluation = self.report.data_model_class.EVALUATIONS.CLEAN.value
+            data_model.evaluation = self.EVALUATIONS.MALICIOUS.value
 
     @classmethod
     def _monkeypatch(cls):

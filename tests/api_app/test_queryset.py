@@ -4,8 +4,9 @@ from django.db.models import F
 from django.utils.timezone import now
 from django_celery_beat.models import CrontabSchedule
 
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.choices import PythonModuleBasePaths
+from api_app.choices import Classification, PythonModuleBasePaths
 from api_app.ingestors_manager.models import IngestorConfig
 from api_app.models import Job, Parameter, PluginConfig, PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
@@ -503,62 +504,77 @@ class JobQuerySetTestCase(CustomTestCase):
         Job.objects.all().delete()
 
     def test_annotate_importance_date_this_day(self):
-        Job.objects.create(
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
+        j = Job.objects.create(
             tlp="RED",
             user=self.user,
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             status="reported_without_fails",
             finished_analysis_time=now() - datetime.timedelta(hours=5),
         )
-        j = (
-            Job.objects.filter(observable_name="test.com")
-            ._annotate_importance_date()
-            .first()
-        )
+        j = Job.objects.filter(pk=j.pk)._annotate_importance_date().first()
         self.assertEqual(3, j.date_weight)
         j.delete()
+        an.delete()
 
     def test_annotate_importance_date_this_week(self):
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         Job.objects.create(
             tlp="RED",
             user=self.user,
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             status="reported_without_fails",
             finished_analysis_time=now() - datetime.timedelta(days=5),
         )
         j = (
-            Job.objects.filter(observable_name="test.com")
+            Job.objects.filter(analyzable__name="test.com")
             ._annotate_importance_date()
             .first()
         )
         self.assertEqual(2, j.date_weight)
         j.delete()
+        an.delete()
 
     def test_annotate_importance_date_old(self):
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         Job.objects.create(
             tlp="RED",
             user=self.user,
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             status="reported_without_fails",
             finished_analysis_time=now() - datetime.timedelta(days=30),
         )
         j = (
-            Job.objects.filter(observable_name="test.com")
+            Job.objects.filter(analyzable__name="test.com")
             ._annotate_importance_date()
             .first()
         )
         self.assertEqual(0, j.date_weight)
         j.delete()
+        an.delete()
 
     def test_annotate_importance_user_same_user_same_org(self):
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         Job.objects.create(
             tlp="RED",
             user=self.user,
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             status="reported_without_fails",
         )
         org = Organization.objects.create(name="test_org")
@@ -571,7 +587,7 @@ class JobQuerySetTestCase(CustomTestCase):
             organization=org,
         )
         j = (
-            Job.objects.filter(observable_name="test.com")
+            Job.objects.filter(analyzable__name="test.com")
             ._annotate_importance_user(self.user)
             .first()
         )
@@ -580,13 +596,18 @@ class JobQuerySetTestCase(CustomTestCase):
         m1.delete()
         m2.delete()
         org.delete()
+        an.delete()
 
     def test_annotate_importance_user_same_org(self):
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         Job.objects.create(
             tlp="RED",
             user=self.superuser,
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             status="reported_without_fails",
         )
         org = Organization.objects.create(name="test_org")
@@ -599,7 +620,7 @@ class JobQuerySetTestCase(CustomTestCase):
             organization=org,
         )
         j = (
-            Job.objects.filter(observable_name="test.com")
+            Job.objects.filter(analyzable__name="test.com")
             ._annotate_importance_user(self.user)
             .first()
         )
@@ -608,33 +629,43 @@ class JobQuerySetTestCase(CustomTestCase):
         m1.delete()
         m2.delete()
         org.delete()
+        an.delete()
 
     def test_annotate_importance_user_valid(self):
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         Job.objects.create(
             tlp="RED",
             user=self.user,
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             status="reported_without_fails",
         )
         j = (
-            Job.objects.filter(observable_name="test.com")
+            Job.objects.filter(analyzable__name="test.com")
             ._annotate_importance_user(self.user)
             .first()
         )
         self.assertEqual(3, j.user_weight)
         j.delete()
+        an.delete()
 
     def test_annotate_importance_user_wrong(self):
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         Job.objects.create(
             tlp="RED",
             user=self.superuser,
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             status="reported_without_fails",
         )
         j = (
-            Job.objects.filter(observable_name="test.com")
+            Job.objects.filter(analyzable__name="test.com")
             ._annotate_importance_user(self.user)
             .first()
         )
@@ -642,11 +673,15 @@ class JobQuerySetTestCase(CustomTestCase):
         j.delete()
 
     def test_visible_for_user_tlp(self):
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         j = Job.objects.create(
             tlp="RED",
             user=self.superuser,
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             status="reported_without_fails",
         )
         self.assertEqual(1, Job.objects.visible_for_user(self.superuser).count())
@@ -655,20 +690,24 @@ class JobQuerySetTestCase(CustomTestCase):
         j = Job.objects.create(
             tlp="GREEN",
             user=self.superuser,
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             status="reported_without_fails",
         )
         self.assertEqual(1, Job.objects.visible_for_user(self.superuser).count())
         self.assertEqual(1, Job.objects.visible_for_user(self.user).count())
         j.delete()
+        an.delete()
 
     def test_visible_for_user_membership(self):
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
         j = Job.objects.create(
             tlp="RED",
             user=self.superuser,
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             status="reported_without_fails",
         )
         self.assertEqual(1, Job.objects.visible_for_user(self.superuser).count())
@@ -687,8 +726,13 @@ class JobQuerySetTestCase(CustomTestCase):
         m2.delete()
         org.delete()
         j.delete()
+        an.delete()
 
     def test_visible_for_user_ingestor(self):
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
         schedule = CrontabSchedule.objects.create()
         ingestor = IngestorConfig.objects.create(
             name="test",
@@ -704,8 +748,7 @@ class JobQuerySetTestCase(CustomTestCase):
         j = Job.objects.create(
             tlp="RED",
             user=ingestor.user,
-            observable_name="test.com",
-            observable_classification="domain",
+            analyzable=an,
             status="reported_without_fails",
         )
         self.assertEqual(1, Job.objects.visible_for_user(self.superuser).count())
@@ -713,3 +756,4 @@ class JobQuerySetTestCase(CustomTestCase):
         ingestor.delete()
         schedule.delete()
         j.delete()
+        an.delete()

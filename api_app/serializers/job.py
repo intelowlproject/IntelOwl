@@ -8,6 +8,7 @@ from typing import Dict, Generator, List, Union
 
 import django.core
 from django.conf import settings
+from django.core.cache import cache
 from django.db.models import Q, QuerySet
 from django.http import QueryDict
 from django.utils.timezone import now
@@ -16,9 +17,10 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
 from rest_framework.serializers import ModelSerializer
 
-from api_app.analyzers_manager.constants import ObservableTypes, TypeChoices
+from api_app.analyzables_manager.models import Analyzable
+from api_app.analyzers_manager.constants import TypeChoices
 from api_app.analyzers_manager.models import AnalyzerConfig, MimeTypes
-from api_app.choices import TLP, ScanMode
+from api_app.choices import TLP, Classification, ScanMode
 from api_app.connectors_manager.exceptions import NotRunnableConnector
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.defaults import default_runtime
@@ -34,6 +36,14 @@ from certego_saas.apps.user.models import User
 from intel_owl.celery import get_queue_name
 
 logger = logging.getLogger(__name__)
+
+
+class JobRelatedField(rfs.PrimaryKeyRelatedField):
+    def get_queryset(self):
+        if "request" in self.context:
+            request = self.context.get("request")
+            return super().get_queryset().filter(owner=request.user)
+        return super().get_queryset()
 
 
 class UserSerializer(rfs.ModelSerializer):
@@ -54,6 +64,10 @@ class JobRecentScanSerializer(rfs.ModelSerializer):
     )
     user = rfs.CharField(source="user.username", allow_null=False, read_only=True)
     importance = rfs.IntegerField(allow_null=True, read_only=True)
+    observable_name = rfs.CharField(
+        source="analyzable.name", read_only=True, allow_null=True
+    )
+    file_name = rfs.CharField(source="analyzable.name", read_only=True, allow_null=True)
 
     class Meta:
         model = Job
@@ -88,7 +102,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             "id",
             "user",
             "delay",
-            "is_sample",
             "tlp",
             "runtime_configuration",
             "analyzers_requested",
@@ -102,7 +115,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         )
 
     md5 = rfs.HiddenField(default=None)
-    is_sample = rfs.HiddenField(write_only=True, default=False)
     user = rfs.HiddenField(default=rfs.CurrentUserDefault())
     delay = rfs.IntegerField(default=0)
     scan_mode = rfs.ChoiceField(
@@ -330,7 +342,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             .filter(
                 received_request_time__gte=now() - validated_data["scan_check_time"]
             )
-            .filter(Q(md5=validated_data["md5"]))
+            .filter(Q(analyzable__pk=validated_data["analyzable"].pk))
         )
         for analyzer in validated_data.get("analyzers_to_execute", []):
             qs = qs.filter(analyzers_requested__in=[analyzer])
@@ -423,6 +435,8 @@ class CommentSerializer(rfs.ModelSerializer):
 
     def create(self, validated_data: dict) -> Comment:
         validated_data["user"] = self.context["request"].user
+        job = validated_data.pop("job")
+        validated_data["analyzable"] = job.analyzable
         return super().create(validated_data)
 
 
@@ -433,19 +447,28 @@ class JobListSerializer(_AbstractJobViewSerializer):
 
     class Meta:
         model = Job
-        exclude = (
-            "file",
-            "errors",
-            "scan_mode",
-            "scan_check_time",
-            "runtime_configuration",
-            "sent_to_bi",
-            "warnings",
-            "analyzers_requested",
-            "connectors_requested",
-            "path",
-            "numchild",
-            "depth",
+        fields = (
+            "id",
+            "user",
+            "tags",
+            "status",
+            "file_name",
+            "file_mimetype",
+            "is_sample",
+            "observable_name",
+            "observable_classification",
+            "md5",
+            "pivots_to_execute",
+            "analyzers_to_execute",
+            "connectors_to_execute",
+            "playbook_to_execute",
+            "playbook_requested",
+            "visualizers_to_execute",
+            "received_request_time",
+            "finished_analysis_time",
+            "process_time",
+            "tlp",
+            "investigation",
         )
 
     pivots_to_execute = rfs.SerializerMethodField(read_only=True)
@@ -459,6 +482,14 @@ class JobListSerializer(_AbstractJobViewSerializer):
         read_only=True, slug_field="name", many=True
     )
     playbook_to_execute = rfs.SlugRelatedField(read_only=True, slug_field="name")
+    file_name = rfs.CharField(source="analyzable.name", read_only=True)
+    file_mimetype = rfs.CharField(source="analyzable.mimetype", read_only=True)
+    is_sample = rfs.BooleanField(read_only=True)
+    observable_name = rfs.CharField(source="analyzable.name", read_only=True)
+    observable_classification = rfs.CharField(
+        source="analyzable.classification", read_only=True
+    )
+    md5 = rfs.CharField(source="analyzable.md5", read_only=True)
 
     def get_pivots_to_execute(self, obj: Job):  # skipcq: PYL-R0201
         return obj.pivots_to_execute.all().values_list("name", flat=True)
@@ -467,6 +498,37 @@ class JobListSerializer(_AbstractJobViewSerializer):
 class JobTreeSerializer(ModelSerializer):
     pivot_config = rfs.CharField(
         source="pivot_parent.pivot_config.name", allow_null=True, read_only=True
+    )
+
+    evaluation = rfs.CharField(
+        source="data_model.evaluation", allow_null=True, read_only=True
+    )
+    reliability = rfs.IntegerField(
+        source="data_model.reliability", allow_null=True, read_only=True
+    )
+    tags = rfs.ListField(
+        source="data_model.tags",
+        allow_null=True,
+        child=rfs.CharField(read_only=True),
+        read_only=True,
+        default=[],
+    )
+    isp = rfs.CharField(source="data_model.isp", allow_null=True, read_only=True)
+    country = rfs.CharField(
+        source="data_model.country_code", allow_null=True, read_only=True
+    )
+    is_sample = rfs.BooleanField(read_only=True)
+
+    playbook = rfs.SlugRelatedField(
+        source="playbook_to_execute",
+        slug_field="name",
+        queryset=PlaybookConfig.objects.all(),
+        many=False,
+        required=False,
+    )
+    analyzed_object_name = rfs.CharField(source="analyzable.name", read_only=True)
+    mimetype = rfs.CharField(
+        source="analyzable.mimetype", allow_null=True, read_only=True
     )
 
     class Meta:
@@ -479,15 +541,13 @@ class JobTreeSerializer(ModelSerializer):
             "status",
             "received_request_time",
             "is_sample",
+            "evaluation",
+            "reliability",
+            "tags",
+            "mimetype",
+            "isp",
+            "country",
         ]
-
-    playbook = rfs.SlugRelatedField(
-        source="playbook_to_execute",
-        slug_field="name",
-        queryset=PlaybookConfig.objects.all(),
-        many=False,
-        required=False,
-    )
 
     def to_representation(self, instance):
         instance: Job
@@ -507,15 +567,53 @@ class JobSerializer(_AbstractJobViewSerializer):
 
     class Meta:
         model = Job
-        exclude = (
-            "file",
-            "depth",
-            "path",
-            "numchild",
-            "sent_to_bi",
+        fields = (
+            "id",
+            "user",
+            "tags",
+            "comments",
+            "status",
+            "pivots_to_execute",
+            "analyzers_to_execute",
+            "analyzers_requested",
+            "connectors_to_execute",
+            "connectors_requested",
+            "visualizers_to_execute",
+            "playbook_requested",
+            "playbook_to_execute",
+            "investigation_id",
+            "investigation_name",
+            "permissions",
+            "data_model",
+            "file_name",
+            "file_mimetype",
+            "is_sample",
+            "observable_name",
+            "observable_classification",
+            "md5",
+            "analyzer_reports",
+            "connector_reports",
+            "pivot_reports",
+            "visualizer_reports",
+            "received_request_time",
+            "related_investigation_number",
+            "finished_analysis_time",
+            "process_time",
+            "warnings",
+            "errors",
         )
 
-    comments = CommentSerializer(many=True, read_only=True)
+    comments = CommentSerializer(
+        many=True, read_only=True, source="analyzable.comments"
+    )
+    file_name = rfs.CharField(source="analyzable.name", read_only=True)
+    file_mimetype = rfs.CharField(source="analyzable.mimetype", read_only=True)
+    observable_name = rfs.CharField(source="analyzable.name", read_only=True)
+    observable_classification = rfs.CharField(
+        source="analyzable.classification", read_only=True
+    )
+    md5 = rfs.CharField(source="analyzable.md5", read_only=True)
+
     pivots_to_execute = rfs.SlugRelatedField(
         many=True, read_only=True, slug_field="name"
     )
@@ -536,19 +634,48 @@ class JobSerializer(_AbstractJobViewSerializer):
     )
     playbook_requested = rfs.SlugRelatedField(read_only=True, slug_field="name")
     playbook_to_execute = rfs.SlugRelatedField(read_only=True, slug_field="name")
-    investigation = rfs.SerializerMethodField(read_only=True, default=None)
+    investigation_id = rfs.SerializerMethodField(read_only=True, default=None)
+    investigation_name = rfs.SerializerMethodField(read_only=True, default=None)
+    related_investigation_number = rfs.SerializerMethodField(
+        read_only=True, default=None
+    )
     permissions = rfs.SerializerMethodField()
-
-    analyzers_data_model = rfs.SerializerMethodField(read_only=True)
+    data_model = rfs.SerializerMethodField()
+    is_sample = rfs.BooleanField(read_only=True)
 
     def get_pivots_to_execute(self, obj: Job):  # skipcq: PYL-R0201
         # this cast is required or serializer doesn't work with websocket
         return list(obj.pivots_to_execute.all().values_list("name", flat=True))
 
-    def get_investigation(self, instance: Job):  # skipcq: PYL-R0201
+    def get_investigation_id(self, instance: Job):  # skipcq: PYL-R0201
         if root_investigation := instance.get_root().investigation:
             return root_investigation.pk
         return instance.investigation
+
+    def get_investigation_name(self, instance: Job):  # skipcq: PYL-R0201
+        if root_investigation := instance.get_root().investigation:
+            return root_investigation.name
+        return instance.investigation
+
+    def get_related_investigation_number(self, instance: Job) -> int:
+        # this query is cpu intensive, and it's done for very often:
+        # during an analysis each time an analyzer it's completed this query is done from the websocket
+        cache_key = f"{instance.id}_related_investigation_number"
+        cached_investigation_number = cache.get(cache_key)
+        logger.debug(f"{cache_key=}: {cached_investigation_number=}")
+        if cached_investigation_number is not None:
+            logger.debug(f"used cache: {cache_key=}")
+            return cached_investigation_number
+
+        related_investigation_number = Investigation.investigation_for_analyzable(
+            Investigation.objects.filter(
+                start_time__gte=now() - datetime.timedelta(days=30),
+            ),
+            instance.analyzable.name,
+        ).count()
+        cache.set(cache_key, related_investigation_number, 60)
+        logger.debug(f"set cache: {cache_key=} for {related_investigation_number=}")
+        return related_investigation_number
 
     def get_fields(self):
         # this method override is required for a cyclic import
@@ -568,10 +695,10 @@ class JobSerializer(_AbstractJobViewSerializer):
             )
         return super().get_fields()
 
-    def get_analyzers_data_model(self, instance: Job):
-        if instance.observable_classification == ObservableTypes.GENERIC:
-            return []
-        return instance.analyzerreports.get_data_models(instance).serialize()
+    def get_data_model(self, instance: Job):
+        if instance.data_model:
+            return instance.data_model.serialize()
+        return {}
 
 
 class RestJobSerializer(JobSerializer):
@@ -619,11 +746,11 @@ class MultipleJobSerializer(rfs.ListSerializer):
                 if parent.playbook_to_execute:
                     investigation_name = (
                         f"{parent.playbook_to_execute.name}:"
-                        f" {parent.analyzed_object_name}"
+                        f" {parent.analyzable.name}"
                     )
                 else:
                     investigation_name = (
-                        f"Pivot investigation: {parent.analyzed_object_name}"
+                        f"Pivot investigation: {parent.analyzable.name}"
                     )
 
                 investigation = Investigation.objects.create(
@@ -740,7 +867,6 @@ class FileJobSerializer(_AbstractJobCreateSerializer):
     file = rfs.FileField(required=True)
     file_name = rfs.CharField(required=False)
     file_mimetype = rfs.CharField(required=False)
-    is_sample = rfs.HiddenField(write_only=True, default=True)
 
     class Meta:
         model = Job
@@ -765,6 +891,24 @@ class FileJobSerializer(_AbstractJobCreateSerializer):
         attrs = super().validate(attrs)
         logger.debug(f"after attrs: {attrs}")
         return attrs
+
+    def create(self, validated_data):
+        md5 = validated_data.pop("md5")
+        sample, created = Analyzable.objects.get_or_create(
+            md5=md5,
+            defaults={
+                "name": validated_data.pop("file_name"),
+                "file": validated_data.pop("file"),
+                "mimetype": validated_data.pop("file_mimetype"),
+                "md5": md5,
+                "classification": Classification.FILE.value,
+            },
+        )
+        if created:
+            sample.full_clean()
+            sample.save()
+        validated_data["analyzable"] = sample
+        return super().create(validated_data)
 
     def set_analyzers_to_execute(
         self,
@@ -860,7 +1004,6 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
 
     observable_name = rfs.CharField(required=True)
     observable_classification = rfs.CharField(required=False)
-    is_sample = rfs.HiddenField(write_only=True, default=False)
 
     class Meta:
         model = Job
@@ -870,6 +1013,25 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
         )
         list_serializer_class = MultipleObservableJobSerializer
 
+    def create(self, validated_data):
+        observable_classification = validated_data.pop("observable_classification")
+        md5 = validated_data.pop("md5")
+        obs, created = Analyzable.objects.get_or_create(
+            defaults={
+                "name": validated_data.pop("observable_name"),
+                "md5": md5,
+                "classification": observable_classification,
+            },
+            md5=md5,
+        )
+        if created:
+            obs.full_clean()
+            obs.save()
+
+        validated_data["analyzable"] = obs
+
+        return super().create(validated_data)
+
     def validate(self, attrs: dict) -> dict:
         logger.debug(f"before attrs: {attrs}")
         attrs["observable_name"] = self.defanged_values_removal(
@@ -877,18 +1039,18 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
         )
         # calculate ``observable_classification``
         if not attrs.get("observable_classification", None):
-            attrs["observable_classification"] = ObservableTypes.calculate(
+            attrs["observable_classification"] = Classification.calculate_observable(
                 attrs["observable_name"]
             )
         if attrs["observable_classification"] in [
-            ObservableTypes.HASH,
-            ObservableTypes.DOMAIN,
+            Classification.HASH,
+            Classification.DOMAIN,
         ]:
             # force lowercase in ``observable_name``.
             # Ref: https://github.com/intelowlproject/IntelOwl/issues/658
             attrs["observable_name"] = attrs["observable_name"].lower()
 
-        if attrs["observable_classification"] == ObservableTypes.IP.value:
+        if attrs["observable_classification"] == Classification.IP.value:
             ip = ipaddress.ip_address(attrs["observable_name"])
             if ip.is_loopback:
                 raise ValidationError({"detail": "Loopback address"})
@@ -1075,7 +1237,9 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
         # check availability of the case where all
         # analyzers were run but no playbooks were
         # triggered.
-        query = Q(md5=validated_data["md5"]) & Q(status__in=statuses_to_check)
+        query = Q(analyzable__md5=validated_data["md5"]) & Q(
+            status__in=statuses_to_check
+        )
         if validated_data.get("playbooks", []):
             query &= Q(playbook_requested__name__in=validated_data["playbooks"])
         else:
@@ -1104,6 +1268,7 @@ class JobBISerializer(AbstractBIInterface, ModelSerializer):
     end_time = rfs.DateTimeField(source="finished_analysis_time")
     playbook = rfs.SerializerMethodField(source="get_playbook")
     job_id = rfs.CharField(source="pk")
+    is_sample = rfs.BooleanField(read_only=True)
 
     class Meta:
         model = Job

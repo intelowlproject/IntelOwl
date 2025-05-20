@@ -1,6 +1,5 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-import base64
 import datetime
 import json
 import logging
@@ -14,6 +13,8 @@ from django.utils.timezone import now
 from django_celery_beat.models import ClockedSchedule, CrontabSchedule, PeriodicTask
 from treebeard.mp_tree import MP_Node
 
+from api_app.analyzables_manager.models import Analyzable
+from api_app.data_model_manager.queryset import BaseDataModelQuerySet
 from api_app.interfaces import OwnershipAbstractModel
 
 if TYPE_CHECKING:
@@ -35,7 +36,6 @@ from django.utils.module_loading import import_string
 
 from api_app.choices import (
     TLP,
-    ObservableClassification,
     ParamTypes,
     PythonModuleBasePaths,
     ReportStatus,
@@ -46,11 +46,12 @@ from api_app.choices import (
 if typing.TYPE_CHECKING:
     from api_app.classes import Plugin
 
-from api_app.defaults import default_runtime, file_directory_path
-from api_app.helpers import calculate_sha1, calculate_sha256, deprecated, get_now
+from api_app.defaults import default_runtime
+from api_app.helpers import deprecated, get_now
 from api_app.queryset import (
     AbstractConfigQuerySet,
     AbstractReportQuerySet,
+    CommentQuerySet,
     JobQuerySet,
     OrganizationPluginConfigurationQuerySet,
     ParameterQuerySet,
@@ -285,17 +286,19 @@ class Comment(models.Model):
         related_name="comment",
     )
 
-    class Meta:
-        ordering = ["created_at"]
-
-    job = models.ForeignKey(
-        "Job",
+    analyzable = models.ForeignKey(
+        "analyzables_manager.Analyzable",
         on_delete=models.CASCADE,
         related_name="comments",
     )
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = CommentQuerySet.as_manager()
+
+    class Meta:
+        ordering = ["created_at"]
 
 
 class Job(MP_Node):
@@ -325,9 +328,9 @@ class Job(MP_Node):
 
     class Meta:
         indexes = [
+            models.Index(fields=["data_model_content_type", "data_model_object_id"]),
             models.Index(
                 fields=[
-                    "md5",
                     "status",
                 ]
             ),
@@ -359,14 +362,11 @@ class Job(MP_Node):
         on_delete=models.CASCADE,
         null=True,  # for backwards compatibility
     )
-    is_sample = models.BooleanField(blank=False, default=False)
-    md5 = models.CharField(max_length=32, blank=False)
-    observable_name = models.CharField(max_length=512, blank=True)
-    observable_classification = models.CharField(
-        max_length=12, blank=True, choices=ObservableClassification.choices
+
+    analyzable = models.ForeignKey(
+        Analyzable, related_name="jobs", on_delete=models.CASCADE
     )
-    file_name = models.CharField(max_length=512, blank=True)
-    file_mimetype = models.CharField(max_length=80, blank=True)
+
     status = models.CharField(
         max_length=32, blank=False, choices=STATUSES.choices, default="pending"
     )
@@ -423,7 +423,6 @@ class Job(MP_Node):
     warnings = pg_fields.ArrayField(
         models.TextField(), blank=True, default=list, null=True
     )
-    file = models.FileField(blank=True, upload_to=file_directory_path)
     tags = models.ManyToManyField(Tag, related_name="jobs", blank=True)
 
     scan_mode = models.IntegerField(
@@ -436,9 +435,21 @@ class Job(MP_Node):
         null=True, blank=True, default=datetime.timedelta(hours=24)
     )
     sent_to_bi = models.BooleanField(editable=False, default=False)
+    data_model_content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        limit_choices_to={
+            "app_label": "data_model_manager",
+        },
+        null=True,
+        editable=False,
+        blank=True,
+    )
+    data_model_object_id = models.IntegerField(null=True, editable=False, blank=True)
+    data_model = GenericForeignKey("data_model_content_type", "data_model_object_id")
 
     def __str__(self):
-        return f'{self.__class__.__name__}(#{self.pk}, "{self.analyzed_object_name}")'
+        return f'{self.__class__.__name__}(#{self.pk}, "{self.analyzable.name}")'
 
     def get_root(self):
         if self.is_root():
@@ -450,22 +461,9 @@ class Job(MP_Node):
             # this is not a really valid solution, but it will work for now
             return self.objects.filter(path=self.path[0 : self.steplen]).first()  # noqa
 
-    @property
-    def analyzed_object_name(self):
-        return self.file_name if self.is_sample else self.observable_name
-
-    @property
-    def analyzed_object(self):
-        return self.file if self.is_sample else self.observable_name
-
     @cached_property
-    def sha256(self) -> str:
-        """
-        Calculate and return the SHA-256 hash of the file or observable name.
-        """
-        return calculate_sha256(
-            self.file.read() if self.is_sample else self.observable_name.encode("utf-8")
-        )
+    def is_sample(self) -> bool:
+        return self.analyzable.is_sample
 
     @cached_property
     def parent_job(self) -> Optional["Job"]:
@@ -473,24 +471,6 @@ class Job(MP_Node):
         Return the parent job if it exists, otherwise return None.
         """
         return self.get_parent()
-
-    @cached_property
-    def sha1(self) -> str:
-        """
-        Calculate and return the SHA-1 hash of the file or observable name.
-        """
-        return calculate_sha1(
-            self.file.read() if self.is_sample else self.observable_name.encode("utf-8")
-        )
-
-    @cached_property
-    def b64(self) -> str:
-        """
-        Return the Base64 encoded string of the file or observable name.
-        """
-        return base64.b64encode(
-            self.file.read() if self.is_sample else self.observable_name.encode("utf-8")
-        ).decode("utf-8")
 
     def get_absolute_url(self):
         """
@@ -628,7 +608,7 @@ class Job(MP_Node):
             # kill celery tasks using task ids
             celery_app.control.revoke(ids, terminate=True)
 
-            reports.update(status=self.STATUSES.KILLED)
+            reports.update(status=self.STATUSES.KILLED, end_time=now())
 
         self.status = self.STATUSES.KILLED
         self.save(update_fields=["status"])
@@ -676,6 +656,18 @@ class Job(MP_Node):
     def priority(self):
         return self.user.profile.task_priority
 
+    def _get_engine_signature(self) -> Signature:
+        from api_app.engines_manager.tasks import execute_engine
+
+        return execute_engine.signature(
+            args=[self.pk],
+            kwargs={},
+            queue=get_queue_name(settings.CONFIG_QUEUE),
+            immutable=True,
+            MessageGroupId=str(uuid.uuid4()),
+            priority=self.priority,
+        )
+
     def _get_pipeline(
         self,
         analyzers: PythonConfigQuerySet,
@@ -689,6 +681,7 @@ class Job(MP_Node):
         ).distinct()
         if pivots_analyzers.exists():
             runner |= self._get_signatures(pivots_analyzers)
+        runner |= self._get_engine_signature()
         if connectors.exists():
             runner |= self._get_signatures(connectors)
             pivots_connectors = pivots.filter(
@@ -711,6 +704,15 @@ class Job(MP_Node):
             self.visualizers_to_execute.all(),
         )
         runner()
+
+    def get_user_events_data_model(self) -> BaseDataModelQuerySet:
+        return self.analyzable.get_all_user_events_data_model(self.user)
+
+    def get_analyzers_data_models(self) -> BaseDataModelQuerySet:
+        DataModel = self.analyzable.get_data_model_class()  # noqa
+        return DataModel.objects.filter(
+            pk__in=self.analyzerreports.values_list("data_model_object_id", flat=True)
+        )
 
     def get_config_runtime_configuration(self, config: "AbstractConfig") -> typing.Dict:
         try:
@@ -1420,8 +1422,24 @@ class AbstractReport(models.Model):
                 index = int(search_keyword)
             except ValueError:
                 result = []
-                for obj in search_from:
-                    result.append(self.get_value(obj, [search_keyword] + fields))
+                errors = []
+                for i, obj in enumerate(search_from):
+                    # if we are iterating a list, we get all the objects that matches
+                    try:
+                        res = self.get_value(obj, [search_keyword] + fields)
+                        if isinstance(res, list):
+                            result.extend(res)
+                        else:
+                            result.append(res)
+                    except KeyError:
+                        errors.append(
+                            f"Field {search_keyword} not available at position {i}"
+                        )
+                if result:
+                    self.errors.extend(errors)
+                else:
+                    raise Exception("No object matches")
+
                 return result
             else:
                 # a.b.0
@@ -1796,29 +1814,3 @@ class PythonConfig(AbstractConfig):
             )[0]
             self.health_check_task = periodic_task
             self.save()
-
-
-class SingletonModel(models.Model):
-    """Singleton base class.
-    Singleton is a desing pattern that allow only one istance of a class.
-    """
-
-    class Meta:
-        abstract = True
-        constraints = [
-            models.CheckConstraint(
-                check=Q(pk=1),
-                name="singleton",
-                violation_error_message="This class is a singleton: only one object is allowed",
-            ),
-        ]
-
-    def save(self, *args, **kwargs):
-        # check required to delete the singleton instance and create a new one
-        if type(self).objects.count() == 0:
-            self.pk = 1
-        super().save(*args, **kwargs)
-
-
-class LastElasticReportUpdate(SingletonModel):
-    last_update_datetime = models.DateTimeField()

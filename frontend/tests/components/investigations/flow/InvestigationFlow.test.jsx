@@ -261,6 +261,8 @@ describe("test InvestigationFlow", () => {
                 status: "reported_without_fails",
                 received_request_time: "2024-04-03T13:08:45.417245Z",
                 is_sample: false,
+                evaluation: "trusted",
+                reliability: 7,
                 children: [
                   {
                     pk: 11,
@@ -270,6 +272,8 @@ describe("test InvestigationFlow", () => {
                     children: [],
                     received_request_time: "2024-04-03T13:09:45.417245Z",
                     is_sample: false,
+                    evaluation: "malicious",
+                    reliability: 4,
                   },
                 ],
               },
@@ -280,6 +284,9 @@ describe("test InvestigationFlow", () => {
                 status: "reported_without_fails",
                 received_request_time: "2024-08-23T10:03:27.489939Z",
                 is_sample: true,
+                evaluation: "malicious",
+                reliability: 7,
+                mimetype: "testmimetype",
               },
             ],
           }}
@@ -299,6 +306,15 @@ describe("test InvestigationFlow", () => {
     const firstJobNode = container.querySelector("#job-10");
     expect(firstJobNode).toBeInTheDocument();
     expect(firstJobNode.textContent).toBe("test1.com");
+    const firstJobNodeEvaluationBadge = container.querySelector(
+      "#evaluation__job10_trusted",
+    );
+    expect(firstJobNodeEvaluationBadge).toBeInTheDocument();
+    const firstJobNodeReliabilityBar = container.querySelector(
+      "#reliability-bar__job10_rel7",
+    );
+    expect(firstJobNodeReliabilityBar).toBeInTheDocument();
+
     fireEvent.click(firstJobNode);
     // first job tollbar
     const jobTollbar = container.querySelector("#toolbar-job-10");
@@ -331,6 +347,15 @@ describe("test InvestigationFlow", () => {
     const secondJobNode = container.querySelector("#job-11");
     expect(secondJobNode).toBeInTheDocument();
     expect(secondJobNode.textContent).toBe("test11.com");
+    const secondJobNodeEvaluationBadge = container.querySelector(
+      "#evaluation__job11_malicious",
+    );
+    expect(secondJobNodeEvaluationBadge).toBeInTheDocument();
+    const secondJobNodeReliabilityBar = container.querySelector(
+      "#reliability-bar__job11_rel4",
+    );
+    expect(secondJobNodeReliabilityBar).toBeInTheDocument();
+
     fireEvent.click(secondJobNode);
     // pivot tollbar
     const secondJobTollbar = container.querySelector("#toolbar-job-11");
@@ -362,6 +387,18 @@ describe("test InvestigationFlow", () => {
     const fileJobNode = container.querySelector("#job-12");
     expect(fileJobNode).toBeInTheDocument();
     expect(fileJobNode.textContent).toBe("test.sh");
+    const fileJobNodeEvaluationBadge = container.querySelector(
+      "#evaluation__job12_malicious",
+    );
+    expect(fileJobNodeEvaluationBadge).toBeInTheDocument();
+    const fileJobNodeReliabilityBar = container.querySelector(
+      "#reliability-bar__job12_rel7",
+    );
+    expect(fileJobNodeReliabilityBar).toBeInTheDocument();
+    const fileJobNodemimetypeBadge =
+      container.querySelector("#mimetype__job12");
+    expect(fileJobNodemimetypeBadge).toBeInTheDocument();
+
     fireEvent.click(fileJobNode);
     // file job tollbar
     const fileJobTollbar = container.querySelector("#toolbar-job-12");

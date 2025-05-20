@@ -27,7 +27,7 @@
     "react-markdown": "^8.0.7",
     "react-router-dom": "^6.27.0",
     "react-scripts": "^5.0.1",
-    "react-select": "^5.8.1",
+    "react-select": "^5.10.1",
     "react-table": "^7.8.0",
     "react-use": "^17.5.1",
     "reactflow": "^11.11.4",

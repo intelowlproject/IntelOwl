@@ -66,7 +66,27 @@ export default function Analyzables() {
         addToast("Search failed!", prettifyErrors(error), "danger", true);
       } finally {
         setLoadingData(false);
-        setData(response.data.results);
+        const resultData = [];
+        if (response.data.count !== formik.values.analyzables.length) {
+          formik.values.analyzables.forEach((analyzableName) => {
+            if (
+              response.data.results
+                .map((result) => result.name)
+                .includes(analyzableName)
+            ) {
+              resultData.push(
+                response.data.results.filter(
+                  (result) => result.name === analyzableName,
+                )[0],
+              );
+            } else {
+              resultData.push({ name: analyzableName, tags: ["not_found"] });
+            }
+          });
+          setData(resultData);
+        } else {
+          setData(response.data.results);
+        }
         formik.setSubmitting(false);
       }
     },

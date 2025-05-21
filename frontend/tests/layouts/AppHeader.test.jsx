@@ -38,10 +38,6 @@ describe("test AppHeader component", () => {
     expect(navbarLeftSide).toBeInTheDocument();
     expect(navbarLeftSide.className).toContain("navbar-nav");
 
-    const homeButton = screen.getByText("Home");
-    expect(homeButton).toBeInTheDocument();
-    expect(homeButton.closest("a").href).toContain("/");
-
     // header nav - right side
     const navbarRightSide = container.querySelector(`#navbar-right-side`);
     expect(navbarRightSide).toBeInTheDocument();
@@ -91,9 +87,9 @@ describe("test AppHeader component", () => {
     expect(navbarLeftSide).toBeInTheDocument();
     expect(navbarLeftSide.className).toContain("navbar-nav");
 
-    const homeButton = screen.getByText("Home");
-    expect(homeButton).toBeInTheDocument();
-    expect(homeButton.closest("a").href).toContain("/");
+    const analyzablesButton = screen.getByText("Analyzables");
+    expect(analyzablesButton).toBeInTheDocument();
+    expect(analyzablesButton.closest("a").href).toContain("/analyzables");
 
     const dashboardButton = screen.getByText("Dashboard");
     expect(dashboardButton).toBeInTheDocument();
@@ -102,6 +98,10 @@ describe("test AppHeader component", () => {
     const historyButton = screen.getByText("History");
     expect(historyButton).toBeInTheDocument();
     expect(historyButton.closest("a").href).toContain("/history");
+
+    const reportsButton = screen.getByText("Reports");
+    expect(reportsButton).toBeInTheDocument();
+    expect(reportsButton.closest("a").href).toContain("/search");
 
     const pluginsButton = screen.getByText("Plugins");
     expect(pluginsButton).toBeInTheDocument();
@@ -145,9 +145,9 @@ describe("test AppHeader component", () => {
     expect(navbarLeftSide).toBeInTheDocument();
     expect(navbarLeftSide.className).toContain("navbar-nav");
 
-    const homeButton = screen.getByText("Home");
-    expect(homeButton).toBeInTheDocument();
-    expect(homeButton.closest("a").href).toContain("/");
+    const analyzablesButton = screen.getByText("Analyzables");
+    expect(analyzablesButton).toBeInTheDocument();
+    expect(analyzablesButton.closest("a").href).toContain("/analyzables");
 
     const dashboardButton = screen.getByText("Dashboard");
     expect(dashboardButton).toBeInTheDocument();
@@ -156,6 +156,10 @@ describe("test AppHeader component", () => {
     const historyButton = screen.getByText("History");
     expect(historyButton).toBeInTheDocument();
     expect(historyButton.closest("a").href).toContain("/history");
+
+    const reportsButton = screen.getByText("Reports");
+    expect(reportsButton).toBeInTheDocument();
+    expect(reportsButton.closest("a").href).toContain("/search");
 
     const pluginsButton = screen.getByText("Plugins");
     expect(pluginsButton).toBeInTheDocument();

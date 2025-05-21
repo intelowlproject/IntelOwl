@@ -36,7 +36,7 @@ const tableProps = {
   SubComponent: ({ row }) => <SearchJSONReport row={row} />,
 };
 
-export default function Search() {
+export default function ReportsSearch() {
   const [elasticData, setElasticData] = React.useState([]);
   const [loadingData, setLoadingData] = React.useState(false);
   const [setTextToHighlight] = useJsonEditorStore((state) => [
@@ -126,7 +126,7 @@ export default function Search() {
           <Row className="mb-2">
             <Col className="d-flex align-items-center">
               <h1 id="reportSearch">
-                Search&nbsp;
+                Reports Search&nbsp;
                 <small className="text-gray" style={{ marginBottom: "0.5rem" }}>
                   {elasticData?.length} total
                 </small>

@@ -5,9 +5,8 @@ import { Modal, ModalHeader, ModalBody, Button, Input } from "reactstrap";
 import { ContentSection } from "@certego/certego-ui";
 import { observableValidators } from "../../../utils/observables";
 
-// components
-export function MultipleObservablesModal(props) {
-  const { isOpen, toggle, formik, ...rest } = props;
+export function MultipleInputModal(props) {
+  const { isOpen, toggle, formik, formikSetField, ...rest } = props;
   const [extractedObservables, setExtractedObservables] = React.useState({});
 
   const extractObservables = (inputText) => {
@@ -35,14 +34,14 @@ export function MultipleObservablesModal(props) {
       observables[key] = [...new Set(observables[key])];
     });
 
-    console.debug("MultipleObservablesModal - observables:");
+    console.debug("MultipleInputModal - observables:");
     console.debug(observables);
     setExtractedObservables(observables);
   };
 
   const saveAndCloseModal = () => {
     const observableNames = Object.values(extractedObservables).flat();
-    formik.setFieldValue("observable_names", observableNames, false);
+    formik.setFieldValue(formikSetField, observableNames, false);
     toggle();
   };
 
@@ -55,12 +54,12 @@ export function MultipleObservablesModal(props) {
       toggle={toggle}
       scrollable
       backdrop="static"
-      labelledBy="Load Multiple Observables"
+      labelledBy="Load Multiple Values"
       style={{ minWidth: "70%" }}
       {...rest}
     >
       <ModalHeader className="bg-tertiary" toggle={toggle}>
-        Load Multiple Observables
+        Load Multiple Values
       </ModalHeader>
       <ModalBody
         className="d-flex-column bg-body"
@@ -125,8 +124,9 @@ export function MultipleObservablesModal(props) {
   );
 }
 
-MultipleObservablesModal.propTypes = {
+MultipleInputModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   toggle: PropTypes.func.isRequired,
   formik: PropTypes.object.isRequired,
+  formikSetField: PropTypes.string.isRequired,
 };

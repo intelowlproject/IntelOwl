@@ -27,7 +27,8 @@ const InvestigationResult = React.lazy(
   () => import("./investigations/result/InvestigationResult"),
 );
 const History = React.lazy(() => import("./History"));
-const Search = React.lazy(() => import("./search/Search"));
+const ReportsSearch = React.lazy(() => import("./search/ReportsSearch"));
+const Analyzables = React.lazy(() => import("./analyzables/Analyzables"));
 const AnalyzableResult = React.lazy(
   () => import("./analyzables/AnalyzableResult"),
 );
@@ -298,7 +299,16 @@ const authRoutesLazy = [
     path: "/search",
     element: (
       <Suspense fallback={<FallBackLoading />}>
-        <Search />
+        <ReportsSearch />
+      </Suspense>
+    ),
+  },
+  /* Analyzables */
+  {
+    path: "/analyzables",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <Analyzables />
       </Suspense>
     ),
   },

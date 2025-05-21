@@ -54,3 +54,9 @@ export const APIACCESS_BASE_URI = `${AUTH_BASE_URI}/apiaccess`;
 // WEBSOCKETS
 const WEBSOCKET_BASE_URI = "ws";
 export const WEBSOCKET_JOBS_URI = `${WEBSOCKET_BASE_URI}/jobs`;
+
+// user event
+export const USER_EVENT_BASE_URI = `${API_BASE_URI}/user_event`;
+export const USER_EVENT_ANALYZABLE = `${USER_EVENT_BASE_URI}/analyzable`;
+export const USER_EVENT_IP_WILDCARD = `${USER_EVENT_BASE_URI}/ip_wildcard`;
+export const USER_EVENT_DOMAIN_WILDCARD = `${USER_EVENT_BASE_URI}/domain_wildcard`;

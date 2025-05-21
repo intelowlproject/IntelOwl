@@ -7,7 +7,7 @@ export const TagsIcons = Object.freeze({
   phishing: "hook",
   anonymizer: "incognito",
   malware: "malware",
-  social_engineering: "",
+  social_engineering: "creditCard",
   tor_exit_node: "tor",
   scanner: "magnifyingGlass",
   ip_only: "networkNode",

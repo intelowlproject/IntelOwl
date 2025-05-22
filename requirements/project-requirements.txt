@@ -5,7 +5,7 @@ django-auth-ldap==5.1.0
 django-radius==1.5.0
 django-filter==25.1
 django-storages==1.14
-django-celery-beat==2.7.0
+django-celery-beat==2.8.1
 django-celery-results==2.5.0
 django-ses == 4.4.0
 django-iam-dbauth==0.2.1

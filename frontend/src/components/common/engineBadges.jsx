@@ -43,6 +43,21 @@ EvaluationBadge.defaultProps = {
   className: null,
 };
 
+function relBar(reliability, color) {
+  return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((index) => (
+    <hr
+      style={{
+        width: "10%",
+        borderTop: "3px solid white",
+        opacity: 1,
+      }}
+      className={`mt-1 me-1 ${
+        index <= reliability ? `border-${color}` : "border-tertiary"
+      }`}
+    />
+  ));
+}
+
 export function ReliabilityBar(props) {
   const { id, reliability, evaluation, className } = props;
   const color = EvaluationColors?.[evaluation];
@@ -53,18 +68,7 @@ export function ReliabilityBar(props) {
       className={`d-flex-center ${className}`}
       style={{ width: "300px" }}
     >
-      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((index) => (
-        <hr
-          style={{
-            width: "10%",
-            borderTop: "3px solid white",
-            opacity: 1,
-          }}
-          className={`mt-1 me-1 ${
-            index <= reliability ? `border-${color}` : "border-tertiary"
-          }`}
-        />
-      ))}
+      {relBar(reliability, color)}
       <UncontrolledTooltip
         target={`reliability-bar__job${id}_rel${reliability}`}
         placement="top"
@@ -94,6 +98,9 @@ export function TagsBadge(props) {
   if (Object.keys(TagsIcons).includes(tag)) {
     color = TagsColors?.[tag];
     icon = getIcon(TagsIcons?.[tag]);
+  } else if (tag === "not_found") {
+    color = "accent";
+    icon = "Not Found";
   } else {
     color = "secondary";
     icon = <FaTag />;
@@ -203,5 +210,44 @@ IspBadge.propTypes = {
 };
 
 IspBadge.defaultProps = {
+  className: null,
+};
+
+export function LastEvaluationComponent(props) {
+  const { id, reliability, evaluation, className } = props;
+  const color = EvaluationColors?.[evaluation];
+
+  return (
+    <div
+      id={`lastevaluationcomponent__id${id}_rel${reliability}`}
+      className="d-flex flex-column"
+      style={{ width: "100%" }}
+    >
+      <small>{evaluation.toUpperCase()}</small>
+      <div
+        className={`ms-1 d-flex-center ${className}`}
+        style={{ width: "100%" }}
+      >
+        {relBar(reliability, color)}
+        <UncontrolledTooltip
+          target={`lastevaluationcomponent__id${id}_rel${reliability}`}
+          placement="top"
+          fade={false}
+        >
+          Evaluation: {evaluation} - Reliability: {reliability}
+        </UncontrolledTooltip>
+      </div>
+    </div>
+  );
+}
+
+LastEvaluationComponent.propTypes = {
+  id: PropTypes.string.isRequired,
+  reliability: PropTypes.string.isRequired,
+  evaluation: PropTypes.number.isRequired,
+  className: PropTypes.string,
+};
+
+LastEvaluationComponent.defaultProps = {
   className: null,
 };

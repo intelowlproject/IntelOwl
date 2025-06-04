@@ -27,7 +27,8 @@ const InvestigationResult = React.lazy(
   () => import("./investigations/result/InvestigationResult"),
 );
 const History = React.lazy(() => import("./History"));
-const Search = React.lazy(() => import("./search/Search"));
+const ReportsSearch = React.lazy(() => import("./search/ReportsSearch"));
+const Analyzables = React.lazy(() => import("./analyzables/Analyzables"));
 
 function CustomRedirect() {
   /* this is a way to auto-redirect to the job page with the current date:
@@ -303,7 +304,16 @@ const authRoutesLazy = [
     path: "/search",
     element: (
       <Suspense fallback={<FallBackLoading />}>
-        <Search />
+        <ReportsSearch />
+      </Suspense>
+    ),
+  },
+  /* Analyzables */
+  {
+    path: "/analyzables",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <Analyzables />
       </Suspense>
     ),
   },

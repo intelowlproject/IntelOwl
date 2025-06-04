@@ -3,7 +3,8 @@ import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import { MultipleObservablesModal } from "../../../../src/components/scan/utils/MultipleObservablesModal";
+// import { MultipleObservablesModal } from "../../../../src/components/scan/utils/MultipleObservablesModal";
+import { MultipleInputModal } from "../../../src/components/common/form/MultipleInputModal";
 
 describe("Multiple Observable Modal test", () => {
   test("Multiple Observable Modal", async () => {
@@ -34,15 +35,16 @@ describe("Multiple Observable Modal test", () => {
 
     render(
       <BrowserRouter>
-        <MultipleObservablesModal
+        <MultipleInputModal
           isOpen
           toggle={() => jest.fn()}
           formik={formik}
+          formikSetField=""
         />
       </BrowserRouter>,
     );
 
-    const modalTitle = screen.getByText("Load Multiple Observables");
+    const modalTitle = screen.getByText("Load Multiple Values");
     expect(modalTitle).toBeInTheDocument();
     expect(modalTitle.closest("div").className).toContain("modal-header");
     const modalInfo = screen.getByText(

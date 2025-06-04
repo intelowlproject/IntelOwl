@@ -45,7 +45,7 @@ import {
 } from "../../constants/advancedSettingsConst";
 import { JobResultSections } from "../../constants/miscConst";
 import { RuntimeConfigurationModal } from "./utils/RuntimeConfigurationModal";
-import { MultipleObservablesModal } from "./utils/MultipleObservablesModal";
+import { MultipleInputModal } from "../common/form/MultipleInputModal";
 import RecentScans from "./utils/RecentScans";
 import { TagSelectInput } from "../common/form/TagSelectInput";
 import { createJob } from "./scanApi";
@@ -532,10 +532,11 @@ export default function ScanForm() {
                   />
                 )}
                 {isMultipleObservablesModalOpen && (
-                  <MultipleObservablesModal
+                  <MultipleInputModal
                     isOpen={isMultipleObservablesModalOpen}
                     toggle={toggleMultipleObservablesModal}
                     formik={formik}
+                    formikSetField="observable_names"
                   />
                 )}
               </Col>

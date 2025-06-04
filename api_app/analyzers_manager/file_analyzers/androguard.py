@@ -15,7 +15,7 @@ class AndroguardAnalyzer(FileAnalyzer):
         session = get_default_session()
 
         if self._job.analyzable.mimetype == MimeTypes.DEX:
-            _, _, dx = session.addDEX(self._job.analyzable.name, self.read_file_bytes())
+            session.addDEX(self._job.analyzable.name, self.read_file_bytes())
             results = {}
         else:
             _, apk = session.addAPK(self._job.analyzable.name, self.read_file_bytes())

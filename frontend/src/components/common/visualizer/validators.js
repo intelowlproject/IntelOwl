@@ -1,4 +1,4 @@
-import { FileMimeTypes } from "../../../../constants/jobConst";
+import { FileMimeTypes } from "../../../constants/jobConst";
 import { VisualizerComponentType } from "./elements/const";
 
 function parseLevelSize(value) {

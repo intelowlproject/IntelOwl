@@ -54,6 +54,12 @@ class TestUserAnalyzableEventViewSet(CustomViewSetTestCase):
         self.assertIn("count", result)
         self.assertEqual(result["count"], 0)
 
+        response = self.client.get(self.URL + f"?analyzable_name={self.an.name}")
+        self.assertEqual(response.status_code, 200, response.content)
+        result = response.json()
+        self.assertIn("count", result)
+        self.assertEqual(result["count"], 1)
+
         self.client.force_authenticate(user=self.superuser)
         response = self.client.get(self.URL)
         self.assertEqual(response.status_code, 200, response.content)

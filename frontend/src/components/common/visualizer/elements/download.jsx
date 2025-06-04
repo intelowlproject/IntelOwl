@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "reactstrap";
 import PropTypes from "prop-types";
 import { FaFileDownload } from "react-icons/fa";
-import { fileDownload, humanReadbleSize } from "../../../../../utils/files";
+import { fileDownload, humanReadbleSize } from "../../../../utils/files";
 import { VisualizerTooltip } from "../VisualizerTooltip";
 
 export function DownloadVisualizer({

@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import React from "react";
+import useTitle from "react-use/lib/useTitle";
 import { useFormik, Form, FormikProvider, FieldArray } from "formik";
 import axios from "axios";
 import {
@@ -31,6 +32,9 @@ const tableInitialState = {
 };
 
 export default function Analyzables() {
+  // page title
+  useTitle(`IntelOwl | Analyzables`, { restoreOnUnmount: true });
+
   const [data, setData] = React.useState([]);
   const [loadingData, setLoadingData] = React.useState(false);
 
@@ -80,7 +84,11 @@ export default function Analyzables() {
                 )[0],
               );
             } else {
-              resultData.push({ name: analyzableName, tags: ["not_found"] });
+              resultData.push({
+                name: analyzableName,
+                jobs: [],
+                user_events: [],
+              });
             }
           });
           setData(resultData);

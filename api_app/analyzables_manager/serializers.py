@@ -1,12 +1,15 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers as rfs
 
 from api_app.analyzables_manager.models import Analyzable
 from api_app.models import Job
-from api_app.serializers.job import JobRelatedField
+from api_app.serializers.job import JobAnalyzableHistorySerializer, JobRelatedField
+from api_app.user_events_manager.models import UserAnalyzableEvent
+from api_app.user_events_manager.serializers import UserAnalyzableEventSerializer
 
 
-class AnalyzableSerializer(ModelSerializer):
+class AnalyzableSerializer(rfs.ModelSerializer):
     jobs = JobRelatedField(many=True, read_only=True)
+    user_events = rfs.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = Analyzable
@@ -14,14 +17,16 @@ class AnalyzableSerializer(ModelSerializer):
 
     def to_representation(self, instance):
         analyzable = super().to_representation(instance)
-        last_job = (
-            Job.objects.filter(id__in=analyzable["jobs"])
-            .order_by("-finished_analysis_time")
-            .first()
+        jobs_queryset = Job.objects.filter(id__in=analyzable["jobs"]).order_by(
+            "-finished_analysis_time"
         )
-        analyzable["last_reliability"] = last_job.data_model.reliability
-        analyzable["last_evaluation"] = last_job.data_model.evaluation
-        analyzable["last_analysis"] = last_job.data_model.date
-        analyzable["tags"] = last_job.data_model.tags
-        analyzable["playbook_to_execute"] = last_job.playbook_to_execute.name
+        user_events_queryset = UserAnalyzableEvent.objects.filter(
+            id__in=analyzable["user_events"]
+        ).order_by("-date")
+        analyzable["jobs"] = JobAnalyzableHistorySerializer(
+            jobs_queryset, many=True
+        ).data
+        analyzable["user_events"] = UserAnalyzableEventSerializer(
+            user_events_queryset, many=True
+        ).data
         return analyzable

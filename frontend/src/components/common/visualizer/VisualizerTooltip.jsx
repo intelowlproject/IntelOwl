@@ -7,9 +7,9 @@ import { AiOutlineLink } from "react-icons/ai";
 import { LuGitBranchPlus } from "react-icons/lu";
 import { useLocation } from "react-router-dom";
 
-import { ObservableClassifications } from "../../../../constants/jobConst";
-import { getObservableClassification } from "../../../../utils/observables";
-import { markdownToHtml } from "../../../common/markdownToHtml";
+import { ObservableClassifications } from "../../../constants/jobConst";
+import { getObservableClassification } from "../../../utils/observables";
+import { markdownToHtml } from "../markdownToHtml";
 
 export function VisualizerTooltip({
   idElement,

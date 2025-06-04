@@ -18,14 +18,12 @@ import {
   TLPSelectInput,
   TLPSelectInputLabel,
 } from "../../common/form/TLPSelectInput";
-import {
-  AllPluginSupportedTypes,
-  PluginsTypes,
-} from "../../../constants/pluginConst";
+import { PluginsTypes } from "../../../constants/pluginConst";
 import { ScanConfigSelectInput } from "../../common/form/ScanConfigSelectInput";
 import { parseScanCheckTime } from "../../../utils/time";
 import { TagSelectInput } from "../../common/form/TagSelectInput";
 import { JobTag } from "../../common/JobTag";
+import { Classifications } from "../../../constants/miscConst";
 import {
   TlpChoices,
   TLPs,
@@ -320,7 +318,7 @@ export function PlaybookConfigForm({ playbookConfig, toggle, isEditing }) {
           <Label className="me-4 mb-0" for="supportedType">
             Supported types:
           </Label>
-          {Object.values(AllPluginSupportedTypes).map((type) => (
+          {Object.values(Classifications).map((type) => (
             <FormGroup check inline key={`supportedType__${type}`}>
               <Input
                 id={`supportedType__${type}`}

@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import React from "react";
-// import { UncontrolledTooltip } from "reactstrap";
+import { UncontrolledTooltip } from "reactstrap";
 import { MdOutlineRefresh } from "react-icons/md";
 import { IoSearch } from "react-icons/io5";
 
@@ -23,7 +23,23 @@ export const analyzablesTableColumns = [
     Cell: ({ value: id }) => (
       <div className="d-flex flex-column justify-content-center p-2">
         {id ? (
-          <div id={`analyzable-${id}`}>#{id}</div>
+          <div>
+            <a
+              id={`analyzableTable-${id}`}
+              href={`/analyzables/${id}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              #{id}
+            </a>
+            <UncontrolledTooltip
+              target={`analyzableTable-${id}`}
+              placement="top"
+              fade={false}
+            >
+              Analyzable overview
+            </UncontrolledTooltip>
+          </div>
         ) : (
           <div className="fst-italic">NF</div>
         )}
@@ -99,31 +115,19 @@ export const analyzablesTableColumns = [
     ),
   },
   {
-    Header: "Last Analysis",
-    id: "last_analysis",
-    accessor: "last_analysis",
-    Cell: ({ value }) =>
-      value ? (
-        <div className="py-2">
-          <DateHoverable ago value={value} format="hh:mm:ss a MMM do, yyyy" />
-        </div>
-      ) : (
-        <div />
-      ),
-    disableSortBy: true,
-    maxWidth: 110,
-  },
-  {
-    Header: "Last Evaluation",
+    Header: "Last evaluation",
     id: "evaluation",
-    accessor: (analyzable) => analyzable,
-    Cell: ({ value: analyzable, row }) =>
-      analyzable.last_evaluation ? (
+    accessor: (analyzable) =>
+      analyzable?.jobs
+        .concat(analyzable?.user_events)
+        .sort((elA, elB) => new Date(elB.date) - new Date(elA.date))[0],
+    Cell: ({ value, row }) =>
+      value?.data_model?.evaluation ? (
         <div className="d-flex justify-content-center py-2">
           <LastEvaluationComponent
             id={row.id}
-            reliability={analyzable.last_reliability}
-            evaluation={analyzable.last_evaluation}
+            reliability={value.data_model.reliability}
+            evaluation={value.data_model.evaluation}
           />
         </div>
       ) : (
@@ -133,13 +137,41 @@ export const analyzablesTableColumns = [
     maxWidth: 120,
   },
   {
+    Header: "Last evaluation date",
+    id: "evaluation_date",
+    accessor: (analyzable) =>
+      analyzable?.jobs
+        .concat(analyzable?.user_events)
+        .sort((elA, elB) => new Date(elB.date) - new Date(elA.date))[0],
+    Cell: ({ value }) =>
+      value?.data_model?.date && value.data_model.evaluation ? (
+        <div className="py-2">
+          <DateHoverable
+            ago
+            value={value.data_model.date}
+            format="hh:mm:ss a MMM do, yyyy"
+          />
+        </div>
+      ) : (
+        <div />
+      ),
+    disableSortBy: true,
+    maxWidth: 110,
+  },
+  {
     Header: "Tags",
     id: "tags",
-    accessor: "tags",
+    accessor: (analyzable) => {
+      if (analyzable.id === undefined)
+        return { data_model: { tags: ["not_found"] } };
+      return analyzable?.jobs
+        .concat(analyzable?.user_events)
+        .sort((elA, elB) => new Date(elB.date) - new Date(elA.date))[0];
+    },
     Cell: ({ value, row }) =>
-      value ? (
+      value?.data_model?.tags ? (
         <div className="d-flex justify-content-center py-2">
-          {value.map((tag, index) => (
+          {value.data_model.tags.map((tag, index) => (
             <TagsBadge
               id={`tag-row${row.id}_${index}`}
               tag={tag}
@@ -154,27 +186,6 @@ export const analyzablesTableColumns = [
     maxWidth: 100,
     Filter: DefaultColumnFilter,
     filterValueAccessorFn: (tags) => tags.map((tag) => tag.label),
-  },
-  {
-    Header: "Playbook",
-    id: "playbook_to_execute",
-    accessor: (analyzable) => analyzable,
-    Cell: ({ value: analyzable, row }) => {
-      const playbookName = analyzable.playbook_to_execute || "Custom analysis";
-      return analyzable.id ? (
-        <TableCell
-          id={`table-cell-playbook__${row.id}`}
-          isCopyToClipboard
-          isTruncate
-          value={playbookName}
-        />
-      ) : (
-        <div />
-      );
-    },
-    disableSortBy: true,
-    Filter: DefaultColumnFilter,
-    maxWidth: 100,
   },
   {
     Header: "Actions",

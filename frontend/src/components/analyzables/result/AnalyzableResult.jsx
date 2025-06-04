@@ -4,7 +4,7 @@ import useTitle from "react-use/lib/useTitle";
 import { useParams } from "react-router-dom";
 
 import { Loader } from "@certego/certego-ui";
-import { ANALYZABLES_URI } from "../../constants/apiURLs";
+import { ANALYZABLES_URI } from "../../../constants/apiURLs";
 import { AnalyzableOverview } from "./AnalyzableOverview";
 
 export default function AnalyzableResult() {

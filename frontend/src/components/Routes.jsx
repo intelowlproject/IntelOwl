@@ -30,7 +30,7 @@ const History = React.lazy(() => import("./History"));
 const ReportsSearch = React.lazy(() => import("./search/ReportsSearch"));
 const Analyzables = React.lazy(() => import("./analyzables/Analyzables"));
 const AnalyzableResult = React.lazy(
-  () => import("./analyzables/AnalyzableResult"),
+  () => import("./analyzables/result/AnalyzableResult"),
 );
 
 function CustomRedirect() {

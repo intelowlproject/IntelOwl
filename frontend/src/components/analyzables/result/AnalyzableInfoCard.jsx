@@ -18,7 +18,7 @@ import {
   ArrowToggleIcon,
 } from "@certego/certego-ui";
 
-import { Classifications } from "../../constants/miscConst";
+import { Classifications } from "../../../constants/miscConst";
 
 export function AnalyzableInfoCard({ analyzable }) {
   // local state
@@ -62,11 +62,14 @@ export function AnalyzableInfoCard({ analyzable }) {
               onClick={() =>
                 setIsOpenAnalyzableInfoCard(!isOpenAnalyzableInfoCard)
               }
-              id="JobInfoCardDropDown"
+              id="AnalyzableInfoCardDropDown"
             >
               <ArrowToggleIcon isExpanded={isOpenAnalyzableInfoCard} />
             </Button>
-            <UncontrolledTooltip placement="left" target="JobInfoCardDropDown">
+            <UncontrolledTooltip
+              placement="left"
+              target="AnalyzableInfoCardDropDown"
+            >
               Toggle Analyzable Metadata
             </UncontrolledTooltip>
           </Col>

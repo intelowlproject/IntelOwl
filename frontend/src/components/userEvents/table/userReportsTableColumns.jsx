@@ -7,52 +7,6 @@ import {
   CopyToClipboardButton,
 } from "@certego/certego-ui";
 
-// const mockData = [{
-//   'id': 6,
-//   'user': {
-//     'username': 'user',
-//     'profile': {
-//       'user': {
-//         'username': 'user',
-//         'email': 'user@intelowl.com',
-//         'first_name': '',
-//         'last_name': '',
-//         'password': 'test',
-//         'is_active': true
-//       },
-//       'company_name': '',
-//       'company_role': '',
-//       'twitter_handle': '',
-//       'discover_from': 'other',
-//       'task_priority': 10,
-//       'is_robot': false
-//     }},
-//     'date': '2025-05-07T14:11:25.071686Z',
-//     'next_decay': '2025-05-10T14:11:25.071686Z',
-//     'decay_times': 0,
-//     'analyzable': 4,
-//     'data_model': {
-//       'id': 6,
-//       'analyzers_report': [],
-//       'ietf_report': [],
-//       'evaluation': 'malicious',
-//       'reliability': 8,
-//       'kill_chain_phase': null,
-//       'external_references': [],
-//       'related_threats': [],
-//       'tags': null,
-//       'malware_family': null,
-//       'additional_info': {},
-//       'date': '2025-05-07T14:11:25.071235Z',
-//       'rank': null,
-//       'resolutions': []
-//     },
-//     'data_model_object_id': 6,
-//     'decay_progression': 0,
-//     'decay_timedelta_days': 3,
-//     'data_model_content_type': 44
-//   }]
-
 export const userReportsTableColumns = [
   {
     Header: () => "ID", // No header
@@ -125,14 +79,5 @@ export const userReportsTableColumns = [
       <DateHoverable ago value={value} format="hh:mm:ss a MMM do, yyyy" />
     ),
     maxWidth: 100,
-  },
-  {
-    Header: "Description",
-    id: "description",
-    accessor: (report) => report,
-    Cell: ({ value: report }) => <div>{report}</div>,
-    disableSortBy: true,
-    disableFilter: true,
-    maxWidth: 280,
   },
 ];

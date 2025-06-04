@@ -82,7 +82,7 @@ describe("test Analyzable component", () => {
         status: 200,
         data: {
           count: 1,
-          total_pages:1,
+          total_pages: 1,
           results: [
             {
               id: 1,
@@ -92,7 +92,7 @@ describe("test Analyzable component", () => {
                   pk: 13,
                   user: {
                     username: "admin",
-                      // ...
+                    // ...
                   },
                   date: "2025-05-27T14:05:34.542462Z",
                   data_model: {
@@ -109,15 +109,15 @@ describe("test Analyzable component", () => {
                     additional_info: {},
                     date: "2025-05-27T14:05:34.398314Z",
                     rank: null,
-                    resolutions: []
-                  }
-                }
+                    resolutions: [],
+                  },
+                },
               ],
               user_events: [
                 {
                   id: 6,
                   user: {
-                    "username": "admin",
+                    username: "admin",
                     // ...
                   },
                   date: "2025-05-28T10:36:04.762720Z",
@@ -138,13 +138,13 @@ describe("test Analyzable component", () => {
                     additional_info: {},
                     date: "2025-05-28T10:36:04.760905Z",
                     rank: null,
-                    resolutions: []
+                    resolutions: [],
                   },
                   data_model_object_id: 15,
                   decay_progression: 0,
                   decay_timedelta_days: 3,
-                  data_model_content_type: 44
-                }
+                  data_model_content_type: 44,
+                },
               ],
               name: "google.com",
               discovery_date: "2025-05-05T12:55:43.777042Z",
@@ -246,7 +246,7 @@ describe("test Analyzable component", () => {
         status: 200,
         data: {
           count: 1,
-          total_pages:1,
+          total_pages: 1,
           results: [
             {
               id: 1,
@@ -256,7 +256,7 @@ describe("test Analyzable component", () => {
                   pk: 13,
                   user: {
                     username: "admin",
-                      // ...
+                    // ...
                   },
                   date: "2025-05-27T14:05:34.542462Z",
                   data_model: {
@@ -273,15 +273,15 @@ describe("test Analyzable component", () => {
                     additional_info: {},
                     date: "2025-05-27T14:05:34.398314Z",
                     rank: null,
-                    resolutions: []
-                  }
-                }
+                    resolutions: [],
+                  },
+                },
               ],
               user_events: [
                 {
                   id: 6,
                   user: {
-                    "username": "admin",
+                    username: "admin",
                     // ...
                   },
                   date: "2025-05-28T10:36:04.762720Z",
@@ -302,13 +302,13 @@ describe("test Analyzable component", () => {
                     additional_info: {},
                     date: "2025-05-28T10:36:04.760905Z",
                     rank: null,
-                    resolutions: []
+                    resolutions: [],
                   },
                   data_model_object_id: 15,
                   decay_progression: 0,
                   decay_timedelta_days: 3,
-                  data_model_content_type: 44
-                }
+                  data_model_content_type: 44,
+                },
               ],
               name: "google.com",
               discovery_date: "2025-05-05T12:55:43.777042Z",

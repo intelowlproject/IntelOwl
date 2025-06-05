@@ -15,11 +15,11 @@ import useTitle from "react-use/lib/useTitle";
 
 import { useSearchParams } from "react-router-dom";
 import { format, toDate } from "date-fns-tz";
-import { USER_EVENT_ANALYZABLE } from "../../../constants/apiURLs";
+import { USER_EVENT_ANALYZABLE } from "../../constants/apiURLs";
 import { userReportsTableColumns } from "./userReportsTableColumns";
-import { datetimeFormatStr } from "../../../constants/miscConst";
-import { TimePicker } from "../../common/TimePicker";
-import { JsonEditor } from "../../common/JsonEditor";
+import { datetimeFormatStr } from "../../constants/miscConst";
+import { TimePicker } from "../common/TimePicker";
+import { JsonEditor } from "../common/JsonEditor";
 
 // constants
 const toPassTableProps = {

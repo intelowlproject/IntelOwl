@@ -21,7 +21,7 @@ const InvestigationsTable = React.lazy(
   () => import("./investigations/table/InvestigationsTable"),
 );
 const UserReportsTable = React.lazy(
-  () => import("./userEvents/table/UserReportsTable"),
+  () => import("./userReports/UserReportsTable"),
 );
 
 export default function History() {

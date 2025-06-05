@@ -3,8 +3,8 @@ import React from "react";
 
 import { DefaultColumnFilter, DateHoverable } from "@certego/certego-ui";
 
-import { LastEvaluationComponent, TagsBadge } from "../../common/engineBadges";
-import TableCell from "../../common/TableCell";
+import { LastEvaluationComponent, TagsBadge } from "../common/engineBadges";
+import TableCell from "../common/TableCell";
 
 export const userReportsTableColumns = [
   {

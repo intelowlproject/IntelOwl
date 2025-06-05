@@ -83,7 +83,8 @@ export default function History() {
         onClick={onClick}
       >
         <BsFillPlusCircleFill />
-        &nbsp;Create {pageType.substring(0, pageType.length - 1)}
+        &nbsp;Create{" "}
+        {pageType.substring(0, pageType.length - 1).replace("-", " ")}
       </Button>
     </Col>
   );

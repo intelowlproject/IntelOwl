@@ -33,13 +33,13 @@ const toPassTableProps = {
   SubComponent: ({ row }) => (
     <div
       id={`userreport-jsoninput-${row.id}`}
-      style={{ maxHeight: "40vh", width: "100%", overflow: "scroll" }}
+      style={{ maxHeight: "50vh", width: "100%", overflow: "scroll" }}
       className="row"
     >
       <JsonEditor
         id="user_report_json"
         initialJsonData={{
-          data_model: row.original?.data_model,
+          report: row.original,
         }}
         width="100%"
         readOnly

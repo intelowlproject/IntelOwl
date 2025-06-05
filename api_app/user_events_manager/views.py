@@ -16,8 +16,12 @@ from rest_framework.viewsets import GenericViewSet
 
 from api_app.analyzables_manager.models import Analyzable
 from api_app.choices import Classification
-from api_app.mixins import PaginationMixin
-from api_app.user_events_manager.filters import UserEventFilterSet
+
+# from api_app.mixins import PaginationMixin
+from api_app.user_events_manager.filters import (
+    UserAnalyzableEventFilterSet,
+    UserEventFilterSet,
+)
 from api_app.user_events_manager.models import (
     UserAnalyzableEvent,
     UserDomainWildCardEvent,
@@ -35,7 +39,7 @@ from certego_saas.apps.organization.permissions import (
 
 
 class UserEventViewSet(
-    PaginationMixin,
+    # PaginationMixin,
     CreateModelMixin,
     RetrieveModelMixin,
     DestroyModelMixin,
@@ -64,6 +68,7 @@ class UserEventViewSet(
 class UserAnalyzableEventViewSet(UserEventViewSet):
     queryset = UserAnalyzableEvent.objects.all()
     serializer_class = UserAnalyzableEventSerializer
+    filterset_class = UserAnalyzableEventFilterSet
 
 
 class UserDomainWildCardEventViewSet(UserEventViewSet):

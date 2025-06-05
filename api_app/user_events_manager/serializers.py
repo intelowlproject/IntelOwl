@@ -5,6 +5,7 @@ from pydantic import ValidationError
 from rest_framework import serializers
 
 from api_app.analyzables_manager.models import Analyzable
+from api_app.analyzables_manager.serializers import AnalyzableSerializer
 from api_app.data_model_manager.models import DomainDataModel, IPDataModel
 from api_app.data_model_manager.serializers import (
     DataModelRelatedField,
@@ -17,11 +18,12 @@ from api_app.user_events_manager.models import (
     UserIPWildCardEvent,
 )
 from api_app.user_events_manager.validators import validate_ipv4_network
-from authentication.serializers import UserProfileSerializer
 
 
 class UserEventSerializer(serializers.ModelSerializer):
-    user = UserProfileSerializer(read_only=True)
+    user = serializers.CharField(
+        source="user.username", allow_null=False, read_only=True
+    )
 
     date = serializers.DateTimeField(read_only=True)
 
@@ -62,6 +64,12 @@ class UserAnalyzableEventSerializer(UserEventSerializer):
         with transaction.atomic():
             data_model = self.validated_data.pop("data_model_content").save()
             return super().save(**kwargs, data_model=data_model)
+
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        analyzable = AnalyzableSerializer(instance.analyzable)
+        result["analyzable"] = analyzable.data["name"]
+        return result
 
 
 class UserDomainWildCardEventSerializer(UserEventSerializer):

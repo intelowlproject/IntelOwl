@@ -1,8 +1,5 @@
-# tests/analyzer_mocks.py
-
 from unittest.mock import patch
 
-# from api_app.analyzers_manager.observable_analyzers.mmdb_server import MmdbServer
 from tests.mock_utils import MockUpResponse
 
 

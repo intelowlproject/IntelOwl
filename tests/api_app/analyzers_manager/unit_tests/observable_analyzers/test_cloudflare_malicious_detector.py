@@ -5,8 +5,6 @@ from tests.api_app.analyzers_manager.unit_tests.observable_analyzers.base_test_c
     BaseAnalyzerTest,
 )
 
-# from tests.mock_utils import MockUpResponse, if_mock_connections
-
 
 class CloudFlareMalicioudDetectorTestCase(BaseAnalyzerTest):
 

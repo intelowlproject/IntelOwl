@@ -1,5 +1,3 @@
-# from unittest.mock import patch
-
 from api_app.analyzers_manager.classes import AnalyzerRunException
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.analyzers_manager.observable_analyzers.nvd_cve import NVDDetails

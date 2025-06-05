@@ -6,6 +6,15 @@ from unittest.mock import patch
 from tests.mock_utils import MockUpResponse
 
 
+def dns0_eu_malicious_detector():
+    return patch(
+        "requests.get",
+        return_value=MockUpResponse(
+            {"Answer": [{"data": "negative-caching.dns0.eu"}]}, 200
+        ),
+    )
+
+
 def nvdcve_mock_patch():
     return patch(
         "requests.get",
@@ -94,7 +103,16 @@ def nvdcve_mock_patch():
     )
 
 
+def cloudflare_malicious_detector():
+    return patch(
+        "requests.get",
+        return_value=MockUpResponse({"Answer": [{"data": "0.0.0.0"}]}, 200),
+    )
+
+
 # central registry of all patches
 ANALYZER_PATCHES = {
     "nvd_cve": nvdcve_mock_patch,
+    "dns0_eu": dns0_eu_malicious_detector,
+    "cloudflare_malicious_detector": cloudflare_malicious_detector,
 }

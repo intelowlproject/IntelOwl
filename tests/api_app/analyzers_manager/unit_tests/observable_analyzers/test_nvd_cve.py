@@ -1,16 +1,19 @@
 # from unittest.mock import patch
 
-from django.test import TestCase
-
 from api_app.analyzers_manager.classes import AnalyzerRunException
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.analyzers_manager.observable_analyzers.nvd_cve import NVDDetails
 from tests.api_app.analyzers_manager.unit_tests.analyzer_mocks import ANALYZER_PATCHES
+from tests.api_app.analyzers_manager.unit_tests.observable_analyzers.base_test_class import (
+    BaseAnalyzerTest,
+)
 
-# from tests.mock_utils import MockUpResponse, if_mock_connections
 
+class NVDCVETestCase(BaseAnalyzerTest):
 
-class NVDCVETestCase(TestCase):
+    analyzer_class = NVDDetails
+    mock_patch_key = "nvd_cve"
+
     config = AnalyzerConfig.objects.get(python_module=NVDDetails.python_module)
 
     def test_valid_cve_format(self, *args, **kwargs):

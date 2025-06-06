@@ -1,5 +1,5 @@
 # Flask-Shell2HTTP dynamically install the most recent supported version of Flask
 # So, if you want reproducible builds, you must explicitly state the flask version you want to install
 Flask-Shell2HTTP-fork==1.9.2
-flask==3.1.0
+flask==3.1.1
 gunicorn==23.0.0

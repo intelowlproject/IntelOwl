@@ -31,7 +31,7 @@ export function AnalyzableOverview({ analyzable }) {
   const jobs = analyzable?.jobs?.map((job) => ({ ...job, type: "job" }));
   const userReports = analyzable?.user_events?.map((userEvent) => ({
     ...userEvent,
-    type: "user report",
+    type: "user_report",
   }));
   const lastEvent = jobs
     .concat(userReports)

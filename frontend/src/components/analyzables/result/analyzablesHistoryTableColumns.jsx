@@ -19,44 +19,28 @@ export const analyzablesHistoryTableColumns = [
     accessor: "id",
     Cell: ({ value: id, row: { original } }) => (
       <div className="d-flex flex-column justify-content-center p-2">
-        {original.type === "job" ? (
-          <div>
-            <a
-              id={`analyzable-history__job-${id}`}
-              href={`/jobs/${id}/${JobResultSections.VISUALIZER}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              #{id}
-            </a>
-            <UncontrolledTooltip
-              target={`analyzable-history__job-${id}`}
-              placement="top"
-              fade={false}
-            >
-              Job overview
-            </UncontrolledTooltip>
-          </div>
-        ) : (
-          <div>
-            <a
-              id={`analyzable-history__report-${id}`}
-              // to be modified with the correct url when the dedicated page will be created
-              href={`/analyzables/${id}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              #{id}
-            </a>
-            <UncontrolledTooltip
-              target={`analyzable-history__report-${id}`}
-              placement="top"
-              fade={false}
-            >
-              Report overview
-            </UncontrolledTooltip>
-          </div>
-        )}
+        <div>
+          <a
+            id={`analyzable-history__${original.type}-${id}`}
+            // to be modified with the correct url when the dedicated page will be created
+            href={
+              original.type === "job"
+                ? `/jobs/${id}/${JobResultSections.VISUALIZER}`
+                : `/analyzables/${id}`
+            }
+            target="_blank"
+            rel="noreferrer"
+          >
+            #{id}
+          </a>
+          <UncontrolledTooltip
+            target={`analyzable-history__${original.type}-${id}`}
+            placement="top"
+            fade={false}
+          >
+            {original.type.replace("_", " ")} overview
+          </UncontrolledTooltip>
+        </div>
       </div>
     ),
     disableSortBy: true,
@@ -100,9 +84,12 @@ export const analyzablesHistoryTableColumns = [
     disableSortBy: true,
     maxWidth: 90,
     Filter: SelectOptionsFilter,
-    selectOptions: ["job", "user report"],
+    selectOptions: ["job", "user_report"],
     Cell: ({ value, row: { original } }) => (
-      <TableCell id={`table-cell-type__${original.id}`} value={value} />
+      <TableCell
+        id={`table-cell-type__${original.id}`}
+        value={value.replace("_", " ")}
+      />
     ),
   },
   {
@@ -149,11 +136,18 @@ export const analyzablesHistoryTableColumns = [
   },
   {
     Header: "Description",
-    id: "actions",
-    accessor: (value) =>
-      value.type === "job"
-        ? `Playbook executed: ${value.playbook}`
-        : value.data_model.related_threats.toString(),
+    id: "descriptions",
+    accessor: (value) => {
+      let text = "";
+      if (value.type === "job" && value.playbook) {
+        text = `Playbook executed: ${value.playbook}`;
+      } else if (value.type === "job") {
+        text = "Custom Analysis";
+      } else {
+        text = value.data_model.related_threats.toString();
+      }
+      return text;
+    },
     disableSortBy: true,
     Cell: ({ value, row }) =>
       value && (

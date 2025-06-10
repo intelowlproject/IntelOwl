@@ -27,7 +27,7 @@ export const analyzablesHistoryTableColumns = [
             id={`analyzable-history__${original.type}-${id}`}
             // to be modified with the correct url when the dedicated page will be created
             href={
-              original.type === "job"
+              original.type === AnalyzableHistoryTypes.JOB
                 ? `/jobs/${id}/${JobResultSections.VISUALIZER}`
                 : `/analyzables/${id}`
             }

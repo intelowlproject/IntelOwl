@@ -3,7 +3,7 @@ import "@testing-library/jest-dom";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import { VisualizerTooltip } from "../../../../../src/components/jobs/result/visualizer/VisualizerTooltip";
+import { VisualizerTooltip } from "../../../../../src/components/common/visualizer/VisualizerTooltip";
 
 describe("VisualizerTooltip component", () => {
   test("copy button - link button disabled", async () => {

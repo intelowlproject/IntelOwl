@@ -33,7 +33,7 @@ CommentIcon.propTypes = {
   commentNumber: PropTypes.number.isRequired,
 };
 
-export function retryJobIcon() {
+export function rescanIcon() {
   return (
     <span className="d-flex align-items-center">
       <MdOutlineRefresh className="me-1" />

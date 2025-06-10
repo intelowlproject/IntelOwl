@@ -29,3 +29,17 @@ export const HistoryPages = Object.freeze({
   INVESTIGAITONS: "investigations",
   USER_REPORTS: "user-reports",
 });
+
+export const Classifications = Object.freeze({
+  IP: "ip",
+  URL: "url",
+  DOMAIN: "domain",
+  HASH: "hash",
+  GENERIC: "generic",
+  FILE: "file",
+});
+
+export const AnalyzableHistoryTypes = Object.freeze({
+  JOB: "job",
+  USER_REPORT: "user_report",
+});

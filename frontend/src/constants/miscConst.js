@@ -32,3 +32,8 @@ export const Classifications = Object.freeze({
   GENERIC: "generic",
   FILE: "file",
 });
+
+export const AnalyzableHistoryTypes = Object.freeze({
+  JOB: "job",
+  USER_REPORT: "user_report",
+});

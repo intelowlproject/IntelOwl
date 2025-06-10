@@ -10,7 +10,10 @@ import {
 
 import TableCell from "../../common/TableCell";
 import { TagsBadge, LastEvaluationComponent } from "../../common/engineBadges";
-import { JobResultSections } from "../../../constants/miscConst";
+import {
+  JobResultSections,
+  AnalyzableHistoryTypes,
+} from "../../../constants/miscConst";
 
 export const analyzablesHistoryTableColumns = [
   {
@@ -84,7 +87,7 @@ export const analyzablesHistoryTableColumns = [
     disableSortBy: true,
     maxWidth: 90,
     Filter: SelectOptionsFilter,
-    selectOptions: ["job", "user_report"],
+    selectOptions: Object.values(AnalyzableHistoryTypes),
     Cell: ({ value, row: { original } }) => (
       <TableCell
         id={`table-cell-type__${original.id}`}
@@ -139,9 +142,9 @@ export const analyzablesHistoryTableColumns = [
     id: "descriptions",
     accessor: (value) => {
       let text = "";
-      if (value.type === "job" && value.playbook) {
+      if (value.type === AnalyzableHistoryTypes.JOB && value.playbook) {
         text = `Playbook executed: ${value.playbook}`;
-      } else if (value.type === "job") {
+      } else if (value.type === AnalyzableHistoryTypes.JOB) {
         text = "Custom Analysis";
       } else {
         text = value.data_model.related_threats.toString();

@@ -1,7 +1,7 @@
 import React from "react";
 import "@testing-library/jest-dom";
 import { render, screen, within } from "@testing-library/react";
-import VisualizerReport from "../../../../../src/components/jobs/result/visualizer/visualizer";
+import VisualizerReport from "../../../../../src/components/common/visualizer/visualizer";
 
 // mock useLocation
 jest.mock("react-router-dom", () => ({

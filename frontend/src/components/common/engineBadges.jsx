@@ -82,8 +82,8 @@ export function ReliabilityBar(props) {
 
 ReliabilityBar.propTypes = {
   id: PropTypes.string.isRequired,
-  reliability: PropTypes.string.isRequired,
-  evaluation: PropTypes.number.isRequired,
+  reliability: PropTypes.number.isRequired,
+  evaluation: PropTypes.string.isRequired,
   className: PropTypes.string,
 };
 
@@ -243,8 +243,8 @@ export function LastEvaluationComponent(props) {
 
 LastEvaluationComponent.propTypes = {
   id: PropTypes.string.isRequired,
-  reliability: PropTypes.string.isRequired,
-  evaluation: PropTypes.number.isRequired,
+  reliability: PropTypes.number.isRequired,
+  evaluation: PropTypes.string.isRequired,
   className: PropTypes.string,
 };
 

@@ -23,3 +23,17 @@ export const HTTPMethods = Object.freeze({
 });
 
 export const datetimeFormatStr = "yyyy-MM-dd'T'HH:mm:ss";
+
+export const Classifications = Object.freeze({
+  IP: "ip",
+  URL: "url",
+  DOMAIN: "domain",
+  HASH: "hash",
+  GENERIC: "generic",
+  FILE: "file",
+});
+
+export const AnalyzableHistoryTypes = Object.freeze({
+  JOB: "job",
+  USER_REPORT: "user_report",
+});

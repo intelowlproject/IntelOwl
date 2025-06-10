@@ -59,16 +59,13 @@ describe("test Analyzable component", () => {
       screen.getByRole("columnheader", { name: "Classification All" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("columnheader", { name: "Last Analysis" }),
+      screen.getByRole("columnheader", { name: "Last evaluation" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("columnheader", { name: "Last Evaluation" }),
+      screen.getByRole("columnheader", { name: "Last evaluation date" }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("columnheader", { name: "Tags" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("columnheader", { name: "Playbook" }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("columnheader", { name: "Actions" }),
@@ -80,29 +77,87 @@ describe("test Analyzable component", () => {
 
   test("Analyzable page - search single analyzable", async () => {
     const user = userEvent.setup();
-    axios.post.mockImplementation(() =>
+    axios.get.mockImplementation(() =>
       Promise.resolve({
         status: 200,
-        data: [
-          {
-            id: 1,
-            jobs: [1, 4, 5],
-            name: "google.com",
-            discovery_date: "2025-05-05T12:55:43.777042Z",
-            md5: "1d5920f4b44b27a802bd77c4f0536f5a",
-            sha256:
-              "d4c9d9027326271a89ce51fcaf328ed673f17be33469ff979e8ab8dd501e664f",
-            sha1: "baea954b95731c68ae6e45bd1e252eb4560cdc45",
-            classification: "domain",
-            mimetype: null,
-            file: null,
-            last_reliability: 8,
-            last_evaluation: "trusted",
-            last_analysis: "2025-05-14T10:55:16.706478Z",
-            tags: null,
-            playbook_to_execute: "Dns",
-          },
-        ],
+        data: {
+          count: 1,
+          total_pages: 1,
+          results: [
+            {
+              id: 1,
+              jobs: [
+                {
+                  playbook: "Dns",
+                  pk: 13,
+                  user: {
+                    username: "admin",
+                    // ...
+                  },
+                  date: "2025-05-27T14:05:34.542462Z",
+                  data_model: {
+                    id: 14,
+                    analyzers_report: [],
+                    ietf_report: [],
+                    evaluation: null,
+                    reliability: 5,
+                    kill_chain_phase: null,
+                    external_references: [],
+                    related_threats: [],
+                    tags: null,
+                    malware_family: null,
+                    additional_info: {},
+                    date: "2025-05-27T14:05:34.398314Z",
+                    rank: null,
+                    resolutions: [],
+                  },
+                },
+              ],
+              user_events: [
+                {
+                  id: 6,
+                  user: {
+                    username: "admin",
+                    // ...
+                  },
+                  date: "2025-05-28T10:36:04.762720Z",
+                  next_decay: "2025-06-03T10:36:04.762720Z",
+                  decay_times: 1,
+                  analyzable: 2,
+                  data_model: {
+                    id: 15,
+                    analyzers_report: [],
+                    ietf_report: [],
+                    evaluation: "trusted",
+                    reliability: 6,
+                    kill_chain_phase: null,
+                    external_references: [],
+                    related_threats: [],
+                    tags: null,
+                    malware_family: null,
+                    additional_info: {},
+                    date: "2025-05-28T10:36:04.760905Z",
+                    rank: null,
+                    resolutions: [],
+                  },
+                  data_model_object_id: 15,
+                  decay_progression: 0,
+                  decay_timedelta_days: 3,
+                  data_model_content_type: 44,
+                },
+              ],
+              name: "google.com",
+              discovery_date: "2025-05-05T12:55:43.777042Z",
+              md5: "1d5920f4b44b27a802bd77c4f0536f5a",
+              sha256:
+                "d4c9d9027326271a89ce51fcaf328ed673f17be33469ff979e8ab8dd501e664f",
+              sha1: "baea954b95731c68ae6e45bd1e252eb4560cdc45",
+              classification: "domain",
+              mimetype: null,
+              file: null,
+            },
+          ],
+        },
       }),
     );
 
@@ -154,16 +209,13 @@ describe("test Analyzable component", () => {
       screen.getByRole("columnheader", { name: "Classification All" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("columnheader", { name: "Last Analysis" }),
+      screen.getByRole("columnheader", { name: "Last evaluation" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("columnheader", { name: "Last Evaluation" }),
+      screen.getByRole("columnheader", { name: "Last evaluation date" }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("columnheader", { name: "Tags" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("columnheader", { name: "Playbook" }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("columnheader", { name: "Actions" }),
@@ -177,13 +229,11 @@ describe("test Analyzable component", () => {
     await user.click(searchButton);
 
     await waitFor(() => {
-      expect(axios.post).toHaveBeenCalledWith(
-        `${ANALYZABLES_URI}/get_analyzables`,
-        ["google.com"],
+      expect(axios.get).toHaveBeenCalledWith(
+        `${ANALYZABLES_URI}?name=google.com`,
       );
       expect(screen.getByText("#1")).toBeInTheDocument();
       expect(screen.getByText("google.com")).toBeInTheDocument();
-      expect(screen.getByText("Dns")).toBeInTheDocument();
       expect(screen.getAllByText("domain")[1]).toBeInTheDocument();
       expect(screen.getByText("TRUSTED")).toBeInTheDocument();
     });
@@ -191,33 +241,87 @@ describe("test Analyzable component", () => {
 
   test("Analyzable page - search multiple analyzable", async () => {
     const user = userEvent.setup();
-    axios.post.mockImplementation(() =>
+    axios.get.mockImplementation(() =>
       Promise.resolve({
         status: 200,
-        data: [
-          {
-            id: 1,
-            jobs: [1, 4, 5],
-            name: "google.com",
-            discovery_date: "2025-05-05T12:55:43.777042Z",
-            md5: "1d5920f4b44b27a802bd77c4f0536f5a",
-            sha256:
-              "d4c9d9027326271a89ce51fcaf328ed673f17be33469ff979e8ab8dd501e664f",
-            sha1: "baea954b95731c68ae6e45bd1e252eb4560cdc45",
-            classification: "domain",
-            mimetype: null,
-            file: null,
-            last_reliability: 8,
-            last_evaluation: "trusted",
-            last_analysis: "2025-05-14T10:55:16.706478Z",
-            tags: null,
-            playbook_to_execute: "Dns",
-          },
-          {
-            name: "8.8.8.8",
-            tags: ["not_found"],
-          },
-        ],
+        data: {
+          count: 1,
+          total_pages: 1,
+          results: [
+            {
+              id: 1,
+              jobs: [
+                {
+                  playbook: "Dns",
+                  pk: 13,
+                  user: {
+                    username: "admin",
+                    // ...
+                  },
+                  date: "2025-05-27T14:05:34.542462Z",
+                  data_model: {
+                    id: 14,
+                    analyzers_report: [],
+                    ietf_report: [],
+                    evaluation: null,
+                    reliability: 5,
+                    kill_chain_phase: null,
+                    external_references: [],
+                    related_threats: [],
+                    tags: null,
+                    malware_family: null,
+                    additional_info: {},
+                    date: "2025-05-27T14:05:34.398314Z",
+                    rank: null,
+                    resolutions: [],
+                  },
+                },
+              ],
+              user_events: [
+                {
+                  id: 6,
+                  user: {
+                    username: "admin",
+                    // ...
+                  },
+                  date: "2025-05-28T10:36:04.762720Z",
+                  next_decay: "2025-06-03T10:36:04.762720Z",
+                  decay_times: 1,
+                  analyzable: 2,
+                  data_model: {
+                    id: 15,
+                    analyzers_report: [],
+                    ietf_report: [],
+                    evaluation: "trusted",
+                    reliability: 6,
+                    kill_chain_phase: null,
+                    external_references: [],
+                    related_threats: [],
+                    tags: null,
+                    malware_family: null,
+                    additional_info: {},
+                    date: "2025-05-28T10:36:04.760905Z",
+                    rank: null,
+                    resolutions: [],
+                  },
+                  data_model_object_id: 15,
+                  decay_progression: 0,
+                  decay_timedelta_days: 3,
+                  data_model_content_type: 44,
+                },
+              ],
+              name: "google.com",
+              discovery_date: "2025-05-05T12:55:43.777042Z",
+              md5: "1d5920f4b44b27a802bd77c4f0536f5a",
+              sha256:
+                "d4c9d9027326271a89ce51fcaf328ed673f17be33469ff979e8ab8dd501e664f",
+              sha1: "baea954b95731c68ae6e45bd1e252eb4560cdc45",
+              classification: "domain",
+              mimetype: null,
+              file: null,
+            },
+          ],
+        },
       }),
     );
 
@@ -269,16 +373,13 @@ describe("test Analyzable component", () => {
       screen.getByRole("columnheader", { name: "Classification All" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("columnheader", { name: "Last Analysis" }),
+      screen.getByRole("columnheader", { name: "Last evaluation" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("columnheader", { name: "Last Evaluation" }),
+      screen.getByRole("columnheader", { name: "Last evaluation date" }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("columnheader", { name: "Tags" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("columnheader", { name: "Playbook" }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("columnheader", { name: "Actions" }),
@@ -310,14 +411,12 @@ describe("test Analyzable component", () => {
     await user.click(searchButton);
 
     await waitFor(() => {
-      expect(axios.post).toHaveBeenCalledWith(
-        `${ANALYZABLES_URI}/get_analyzables`,
-        ["google.com", "8.8.8.8"],
+      expect(axios.get).toHaveBeenCalledWith(
+        `${ANALYZABLES_URI}?name=google.com&name=8.8.8.8`,
       );
       // first row
       expect(screen.getByText("#1")).toBeInTheDocument();
       expect(screen.getByText("google.com")).toBeInTheDocument();
-      expect(screen.getByText("Dns")).toBeInTheDocument();
       expect(screen.getAllByText("domain")[1]).toBeInTheDocument();
       expect(screen.getByText("TRUSTED")).toBeInTheDocument();
       // second row

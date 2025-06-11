@@ -18,7 +18,8 @@ class BaseAnalyzerTest(TestCase):
         }
         return mapping.get(observable_type, "test")
 
-    def get_mocked_response(self):
+    @staticmethod
+    def get_mocked_response():
         """
         Subclasses should override this method to return a context manager that patches
         any external calls (e.g., requests.get) with their own mocked response.

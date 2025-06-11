@@ -2,35 +2,38 @@ from unittest import TestCase
 
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.models import AnalyzerConfig
-from tests.api_app.analyzers_manager.unit_tests.analyzer_mocks import ANALYZER_PATCHES
 
 
 class BaseAnalyzerTest(TestCase):
     analyzer_class = None
-    mock_patch_key = None
 
     @classmethod
-    def get_sample_observable(self, observable_type):
+    def get_sample_observable(cls, observable_type):
         mapping = {
             "domain": "example.com",
             "ip": "8.8.8.8",
             "url": "https://example.com",
             "hash": "deadbeefdeadbeefdeadbeefdeadbeef",
+            "generic": "test@intelowl.com",
         }
         return mapping.get(observable_type, "test")
 
+    def get_mocked_response(self):
+        """
+        Subclasses should override this method to return a context manager that patches
+        any external calls (e.g., requests.get) with their own mocked response.
+        """
+        raise NotImplementedError("Subclasses must implement get_mocked_response()")
+
     def test_analyzer_process(self):
-        if self.analyzer_class is None or self.mock_patch_key is None:
-            self.skipTest("analyzer_class or mock_patch_key is not set")
+        if self.analyzer_class is None:
+            self.skipTest("analyzer_class is not set")
 
         config = AnalyzerConfig.objects.get(
             python_module=self.analyzer_class.python_module
         )
 
-        patch_context = ANALYZER_PATCHES.get(self.mock_patch_key)
-        assert patch_context is not None, f"Patch for {self.mock_patch_key} not found"
-
-        with patch_context():
+        with self.get_mocked_response():
             for observable_type in config.observable_supported:
                 if observable_type == "generic":
                     continue
@@ -43,9 +46,10 @@ class BaseAnalyzerTest(TestCase):
                     try:
                         response = analyzer.run()
                     except AnalyzerRunException:
-                        self.fail("AnalyzerRunException raised with valid format")
+                        self.fail(
+                            f"AnalyzerRunException raised for {observable_type} with valid format"
+                        )
 
-                    # 💡 Add assertion for non-empty JSON response
                     self.assertIsInstance(
                         response,
                         dict,

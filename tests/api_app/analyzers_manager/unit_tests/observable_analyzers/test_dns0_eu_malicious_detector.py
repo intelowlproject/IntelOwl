@@ -13,7 +13,8 @@ class DNS0EUMaliciousDetectorTestCase(BaseAnalyzerTest):
 
     analyzer_class = DNS0EUMaliciousDetector
 
-    def get_mocked_response(self):
+    @staticmethod
+    def get_mocked_response():
         return patch(
             "requests.get",
             return_value=MockUpResponse(

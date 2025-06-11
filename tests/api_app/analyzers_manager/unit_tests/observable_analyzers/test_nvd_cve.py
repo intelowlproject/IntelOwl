@@ -13,7 +13,8 @@ class NVDCVETestCase(BaseAnalyzerTest):
     analyzer_class = NVDDetails
     config = AnalyzerConfig.objects.get(python_module=analyzer_class.python_module)
 
-    def get_mocked_response(self):
+    @staticmethod
+    def get_mocked_response():
         return patch(
             "requests.get",
             return_value=MockUpResponse(

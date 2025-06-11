@@ -13,7 +13,8 @@ class CloudFlareMalicioudDetectorTestCase(BaseAnalyzerTest):
 
     analyzer_class = CloudFlareMaliciousDetector
 
-    def get_mocked_response(self):
+    @staticmethod
+    def get_mocked_response():
         return patch(
             "requests.get",
             return_value=MockUpResponse({"Answer": [{"data": "0.0.0.0"}]}, 200),

@@ -64,7 +64,9 @@ describe("test History component", () => {
     await user.click(userReportsButton);
     await waitFor(() => {
       expect(jobsButton.closest("a").className).not.toContain("active"); // not selected
-      expect(investigationButton.closest("a").className).not.toContain("active"); // not selected
+      expect(investigationButton.closest("a").className).not.toContain(
+        "active",
+      ); // not selected
       expect(userReportsButton.closest("a").className).toContain("active"); // selected
       const createUserReportButton = screen.getByRole("button", {
         name: /Create user report/i,

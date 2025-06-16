@@ -103,11 +103,19 @@ describe("test AnalyzableOverview", () => {
     expect(toggleIcon).toBeInTheDocument();
     await user.click(toggleIcon);
     expect(screen.getByText("SHA256")).toBeInTheDocument();
-    expect(screen.getByText("d4c9d9027326271a89ce51fcaf328ed673f17be33469ff979e8ab8dd501e664f")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "d4c9d9027326271a89ce51fcaf328ed673f17be33469ff979e8ab8dd501e664f",
+      ),
+    ).toBeInTheDocument();
     expect(screen.getByText("SHA1")).toBeInTheDocument();
-    expect(screen.getByText("baea954b95731c68ae6e45bd1e252eb4560cdc45")).toBeInTheDocument();
+    expect(
+      screen.getByText("baea954b95731c68ae6e45bd1e252eb4560cdc45"),
+    ).toBeInTheDocument();
     expect(screen.getByText("MD5")).toBeInTheDocument();
-    expect(screen.getByText("1d5920f4b44b27a802bd77c4f0536f5a")).toBeInTheDocument();
+    expect(
+      screen.getByText("1d5920f4b44b27a802bd77c4f0536f5a"),
+    ).toBeInTheDocument();
     // visualizers - first row
     expect(screen.getByText("First Analysis")).toBeInTheDocument();
     expect(screen.getAllByText("1 day ago")[0]).toBeInTheDocument();

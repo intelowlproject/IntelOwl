@@ -271,7 +271,7 @@ class JobViewSetTests(CustomViewSetTestCase):
         self.assertEqual(response_data["count"], 2)
         print(response_data)
         self.assertCountEqual(
-            list(set([job["file_name"] for job in response_data["results"]])),
+            list({job["file_name"] for job in response_data["results"]}),
             ["1.2.3.4", "test.com"],
         )
 
@@ -281,7 +281,7 @@ class JobViewSetTests(CustomViewSetTestCase):
         response_data = response.json()
         self.assertEqual(response_data["count"], 2)
         self.assertCountEqual(
-            list(set([job["observable_name"] for job in response_data["results"]])),
+            list({job["observable_name"] for job in response_data["results"]}),
             ["cve.xls", "test.file"],
         )
 
@@ -290,7 +290,7 @@ class JobViewSetTests(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 200)
         response_data = response.json()
         self.assertCountEqual(
-            list(set([job["observable_name"] for job in response_data["results"]])),
+            list({job["observable_name"] for job in response_data["results"]}),
             ["test.com"],
         )
 
@@ -302,7 +302,7 @@ class JobViewSetTests(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 200)
         response_data = response.json()
         self.assertCountEqual(
-            list(set([job["observable_name"] for job in response_data["results"]])),
+            list({job["observable_name"] for job in response_data["results"]}),
             ["test.file"],
         )
 

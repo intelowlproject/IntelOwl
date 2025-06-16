@@ -24,7 +24,7 @@ class GreedyBear(Ingestor):
 
     VALID_FEED_TYPES = {"log4j", "cowrie", "all"}
     VALID_ATTACK_TYPES = {"scanner", "payload_request", "all"}
-    VALID_AGE = {"recent", "persistent"}
+    VALID_AGE = {"recent", "persistent", "likely_to_recur", "most_expected_hits"}
 
     @classmethod
     def update(cls) -> bool:

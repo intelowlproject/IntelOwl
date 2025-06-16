@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import React from "react";
+import { Badge } from "reactstrap";
 
 import { DefaultColumnFilter, DateHoverable } from "@certego/certego-ui";
 
@@ -95,7 +96,7 @@ export const userReportsTableColumns = [
           <DateHoverable ago value={value} format="hh:mm:ss a MMM do, yyyy" />
         </div>
       ) : (
-        <span className="text-secondary fst-italic">Decayed</span>
+        <Badge color="accent">Decayed</Badge>
       ),
     maxWidth: 100,
   },

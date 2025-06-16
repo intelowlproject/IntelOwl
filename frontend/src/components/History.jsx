@@ -81,6 +81,7 @@ export default function History() {
         size="sm"
         color="darker"
         onClick={onClick}
+        disabled={pageType === HistoryPages.USER_REPORTS} // !! da eliminare dopo aver creato il modale
       >
         <BsFillPlusCircleFill />
         &nbsp;Create{" "}

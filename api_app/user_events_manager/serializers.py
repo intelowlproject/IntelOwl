@@ -5,7 +5,6 @@ from pydantic import ValidationError
 from rest_framework import serializers
 
 from api_app.analyzables_manager.models import Analyzable
-from api_app.analyzables_manager.serializers import AnalyzableSerializer
 from api_app.data_model_manager.models import DomainDataModel, IPDataModel
 from api_app.data_model_manager.serializers import (
     DataModelRelatedField,
@@ -42,7 +41,9 @@ class UserEventSerializer(serializers.ModelSerializer):
 
 class UserAnalyzableEventSerializer(UserEventSerializer):
 
-    analyzable = serializers.PrimaryKeyRelatedField(queryset=Analyzable.objects.all())
+    analyzable = serializers.SlugRelatedField(
+        queryset=Analyzable.objects.all(), slug_field="name"
+    )
     data_model_content = serializers.JSONField(write_only=True, source="data_model")
     data_model = DataModelRelatedField(read_only=True)
 
@@ -64,12 +65,6 @@ class UserAnalyzableEventSerializer(UserEventSerializer):
         with transaction.atomic():
             data_model = self.validated_data.pop("data_model_content").save()
             return super().save(**kwargs, data_model=data_model)
-
-    def to_representation(self, instance):
-        result = super().to_representation(instance)
-        analyzable = AnalyzableSerializer(instance.analyzable)
-        result["analyzable"] = analyzable.data["name"]
-        return result
 
 
 class UserDomainWildCardEventSerializer(UserEventSerializer):

@@ -7,12 +7,14 @@ import {
   DefaultColumnFilter,
   SelectOptionsFilter,
 } from "@certego/certego-ui";
+import { format } from "date-fns-tz";
 
 import TableCell from "../../common/TableCell";
 import { TagsBadge, LastEvaluationComponent } from "../../common/engineBadges";
 import {
   JobResultSections,
   AnalyzableHistoryTypes,
+  datetimeFormatStr,
 } from "../../../constants/miscConst";
 
 export const analyzablesHistoryTableColumns = [
@@ -20,32 +22,39 @@ export const analyzablesHistoryTableColumns = [
     Header: "ID",
     id: "pk",
     accessor: "id",
-    Cell: ({ value: id, row: { original } }) => (
-      <div className="d-flex flex-column justify-content-center p-2">
-        <div>
-          <a
-            id={`analyzable-history__${original.type}-${id}`}
-            // to be modified with the correct url when the dedicated page will be created
-            href={
-              original.type === AnalyzableHistoryTypes.JOB
-                ? `/jobs/${id}/${JobResultSections.VISUALIZER}`
-                : `/analyzables/${id}`
-            }
-            target="_blank"
-            rel="noreferrer"
-          >
-            #{id}
-          </a>
-          <UncontrolledTooltip
-            target={`analyzable-history__${original.type}-${id}`}
-            placement="top"
-            fade={false}
-          >
-            {original.type.replace("_", " ")} overview
-          </UncontrolledTooltip>
+    Cell: ({ value: id, row: { original } }) => {
+      const fromDate = new Date(original.date);
+      fromDate.setDate(fromDate.getDate() - 1);
+      return (
+        <div className="d-flex flex-column justify-content-center p-2">
+          <div>
+            <a
+              id={`analyzable-history__${original.type}-${id}`}
+              href={
+                original.type === AnalyzableHistoryTypes.JOB
+                  ? `/jobs/${id}/${JobResultSections.VISUALIZER}`
+                  : `/history/user-reports?date__gte=${encodeURIComponent(
+                      format(fromDate, datetimeFormatStr),
+                    )}&date__lte=${encodeURIComponent(
+                      format(new Date(), datetimeFormatStr),
+                    )}&ordering=-date&id=${id}`
+              }
+              target="_blank"
+              rel="noreferrer"
+            >
+              #{id}
+            </a>
+            <UncontrolledTooltip
+              target={`analyzable-history__${original.type}-${id}`}
+              placement="top"
+              fade={false}
+            >
+              {original.type.replace("_", " ")} overview
+            </UncontrolledTooltip>
+          </div>
         </div>
-      </div>
-    ),
+      );
+    },
     disableSortBy: true,
     maxWidth: 60,
     Filter: DefaultColumnFilter,
@@ -53,7 +62,7 @@ export const analyzablesHistoryTableColumns = [
   {
     Header: "User",
     id: "user",
-    accessor: "user.username",
+    accessor: "user",
     Cell: ({ value, row: { original } }) => (
       <TableCell
         id={`table-cell-user__${original.id}`}

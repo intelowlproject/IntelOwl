@@ -180,7 +180,7 @@ function UserReportsTableComponent({ searchFromDateValue, searchToDateValue }) {
             <Col className="d-flex align-items-center" sm={5}>
               <h1 id="UserReportsHistory">
                 User Reports History&nbsp;
-                <small className="text-gray">{data.count} total</small>
+                <small className="text-gray">{data?.count} total</small>
               </h1>
               <div className="ms-2">
                 <MdInfoOutline id="userreportstable-infoicon" fontSize="20" />

@@ -17,10 +17,7 @@ describe("test AnalyzableOverview", () => {
       {
         playbook: "Dns",
         id: 13,
-        user: {
-          username: "admin",
-          // ...
-        },
+        user: "admin",
         date: jobDate,
         data_model: {
           id: 14,
@@ -43,10 +40,7 @@ describe("test AnalyzableOverview", () => {
     user_events: [
       {
         id: 6,
-        user: {
-          username: "admin",
-          // ...
-        },
+        user: "admin",
         date: userReportDate,
         next_decay: "2025-06-03T10:36:04.762720Z",
         decay_times: 1,
@@ -173,7 +167,7 @@ describe("test AnalyzableOverview", () => {
     ).toBeInTheDocument();
     // cell - user report
     expect(screen.getByRole("cell", { name: "#6" })).toBeInTheDocument();
-    expect(screen.getByText("#6").href).toContain("/analyzables/6");
+    expect(screen.getByText("#6").href).toContain("id=6");
     expect(
       screen.getAllByRole("cell", { name: "admin" })[1],
     ).toBeInTheDocument();

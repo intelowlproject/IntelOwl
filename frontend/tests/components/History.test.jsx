@@ -8,11 +8,14 @@ import History from "../../src/components/History";
 import { INVESTIGATION_BASE_URI } from "../../src/constants/apiURLs";
 
 jest.mock("axios");
-// mock JobsTable and InvestigationsTable components
+// mock JobsTable, InvestigationsTable and UserReportsTable components
 jest.mock("../../src/components/jobs/table/JobsTable", () =>
   jest.fn((props) => <div {...props} />),
 );
 jest.mock("../../src/components/investigations/table/InvestigationsTable", () =>
+  jest.fn((props) => <div {...props} />),
+);
+jest.mock("../../src/components/userReports/UserReportsTable", () =>
   jest.fn((props) => <div {...props} />),
 );
 
@@ -42,6 +45,10 @@ describe("test History component", () => {
     expect(investigationButton).toBeInTheDocument();
     expect(investigationButton.closest("a").className).not.toContain("active"); // not selected
 
+    const userReportsButton = screen.getByText("User Reports");
+    expect(userReportsButton).toBeInTheDocument();
+    expect(userReportsButton.closest("a").className).not.toContain("active"); // not selected
+
     // investigation tab selected
     await user.click(investigationButton);
     await waitFor(() => {
@@ -51,6 +58,20 @@ describe("test History component", () => {
         name: /Create investigation/i,
       });
       expect(createInvestigationButton).toBeInTheDocument();
+    });
+
+    // user reports tab selected
+    await user.click(userReportsButton);
+    await waitFor(() => {
+      expect(jobsButton.closest("a").className).not.toContain("active"); // not selected
+      expect(investigationButton.closest("a").className).not.toContain(
+        "active",
+      ); // not selected
+      expect(userReportsButton.closest("a").className).toContain("active"); // selected
+      const createUserReportButton = screen.getByRole("button", {
+        name: /Create user report/i,
+      });
+      expect(createUserReportButton).toBeInTheDocument();
     });
   });
 

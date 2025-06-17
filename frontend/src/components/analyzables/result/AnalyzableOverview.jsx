@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Col, Row, Container, Badge } from "reactstrap";
+import { Col, Row, Container } from "reactstrap";
 import { FaTag } from "react-icons/fa";
 
 import { DateHoverable, DataTable } from "@certego/certego-ui";
@@ -20,6 +20,7 @@ import { TagsIcons } from "../../../constants/engineConst";
 import { TagsColors } from "../../../constants/colorConst";
 import { getIcon } from "../../common/icon/icons";
 import { AnalyzableHistoryTypes } from "../../../constants/miscConst";
+import { UserReportDecay } from "../../userReports/UserReportDecay";
 
 const tableInitialState = {
   pageSize: 10,
@@ -40,23 +41,6 @@ export function AnalyzableOverview({ analyzable }) {
   const lastEvent = jobs
     .concat(userReports)
     .sort((elA, elB) => new Date(elB.date) - new Date(elA.date))[0];
-
-  let decayedElement = null;
-  if (lastEvent.next_decay === null && lastEvent.data_model.reliability === 0) {
-    decayedElement = <Badge color="accent">Decayed</Badge>;
-  } else if (
-    lastEvent.next_decay !== null &&
-    lastEvent.next_decay !== undefined
-  ) {
-    decayedElement = (
-      <DateHoverable
-        ago
-        noHover
-        value={lastEvent.next_decay}
-        format="hh:mm:ss a MMM do, yyyy"
-      />
-    );
-  }
 
   return (
     <Container fluid>
@@ -122,7 +106,15 @@ export function AnalyzableOverview({ analyzable }) {
                   format="hh:mm:ss a MMM do, yyyy"
                 />,
               ],
-              ["Decay", decayedElement],
+              [
+                "Decay",
+                lastEvent.type === AnalyzableHistoryTypes.USER_REPORT ? (
+                  <UserReportDecay
+                    decay={lastEvent.next_decay}
+                    reliability={lastEvent.data_model.reliability}
+                  />
+                ) : null,
+              ],
               ["Malware Family", lastEvent.data_model.malware_family],
               ["Killchain Phase", lastEvent.data_model.kill_chain_phase],
             ].map(([title, value], index) => (

@@ -7,11 +7,11 @@ import { DateHoverable } from "@certego/certego-ui";
 export function UserReportDecay(props) {
   const { decay, reliability } = props;
 
-  let decayedElement = null;
+  let decayComponent = null;
   if (decay === null && reliability === 0) {
-    decayedElement = <Badge color="accent">Decayed</Badge>;
+    decayComponent = <Badge color="accent">Decayed</Badge>;
   } else if (decay !== null && decay !== undefined) {
-    decayedElement = (
+    decayComponent = (
       <DateHoverable
         ago
         noHover
@@ -20,7 +20,7 @@ export function UserReportDecay(props) {
       />
     );
   }
-  return decayedElement;
+  return decayComponent;
 }
 
 UserReportDecay.propTypes = {

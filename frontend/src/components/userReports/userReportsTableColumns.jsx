@@ -1,10 +1,10 @@
 /* eslint-disable react/prop-types */
 import React from "react";
-import { Badge } from "reactstrap";
 
 import { DefaultColumnFilter, DateHoverable } from "@certego/certego-ui";
 
 import { LastEvaluationComponent, TagsBadge } from "../common/engineBadges";
+import { UserReportDecay } from "./UserReportDecay";
 import TableCell from "../common/TableCell";
 
 export const userReportsTableColumns = [
@@ -89,15 +89,13 @@ export const userReportsTableColumns = [
   {
     Header: "Decay",
     id: "next_decay",
-    accessor: "next_decay",
-    Cell: ({ value }) =>
-      value ? (
-        <div className="py-2">
-          <DateHoverable ago value={value} format="hh:mm:ss a MMM do, yyyy" />
-        </div>
-      ) : (
-        <Badge color="accent">Decayed</Badge>
-      ),
+    accessor: (userEvent) => userEvent,
+    Cell: ({ value: userEvent }) => (
+      <UserReportDecay
+        decay={userEvent.next_decay}
+        reliability={userEvent.data_model.reliability}
+      />
+    ),
     maxWidth: 100,
   },
   {

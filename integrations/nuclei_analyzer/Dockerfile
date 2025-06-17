@@ -1,4 +1,4 @@
-FROM projectdiscovery/nuclei:v3.3.8
+FROM projectdiscovery/nuclei:v3.4.5
 
 ENV LOG_PATH=/var/log/intel_owl/nuclei_analyzer
 ENV USER=nuclei-user

@@ -207,6 +207,28 @@ export function JobOverview({
           </div>
         ),
       },
+      {
+        name: "data_model",
+        nav: (
+          <div className="d-flex-center">
+            <strong>Data Model</strong>
+          </div>
+        ),
+        report: (
+          <div
+            id={`jobdatamodel-jsoninput-${job.id}`}
+            style={{ height: "65vh", overflow: "scroll" }}
+          >
+            <JsonEditor
+              id="job_data_model_json"
+              initialJsonData={job.data_model}
+              height="65vh"
+              width="100%"
+              readOnly
+            />
+          </div>
+        ),
+      },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [

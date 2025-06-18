@@ -1,5 +1,6 @@
 import hashlib
 import os
+from contextlib import ExitStack
 from unittest import TestCase
 
 from api_app.analyzers_manager.models import AnalyzerConfig
@@ -51,14 +52,39 @@ class BaseFileAnalyzerTest(TestCase):
         with open(path, "rb") as f:
             return f.read()
 
-    def get_mocked_response(self) -> dict:
-        """Subclasses override this to define expected mocked output."""
+    def get_mocked_response(self):
+        """
+        Subclasses override this to define expected mocked output.
+
+        Can return:
+        1. A single patch object: patch('module.function')
+        2. A list of patch objects: [patch('module.func1'), patch('module.func2')]
+        3. A context manager: patch.multiple() or ExitStack()
+        """
         raise NotImplementedError
+
+    def _apply_patches(self, patches):
+        """Helper method to apply single or multiple patches"""
+        if patches is None:
+            return ExitStack()  # No-op context manager
+
+        # If it's already a context manager, return as-is
+        if hasattr(patches, "__enter__") and hasattr(patches, "__exit__"):
+            return patches
+
+        # If it's a list of patches, use ExitStack to manage them
+        if isinstance(patches, (list, tuple)):
+            stack = ExitStack()
+            for patch_obj in patches:
+                stack.enter_context(patch_obj)
+            return stack
+
+        # Single patch object
+        return patches
 
     def test_analyzer_on_supported_filetypes(self):
         if self.analyzer_class is None:
             self.skipTest("analyzer_class is not set")
-
         config = AnalyzerConfig.objects.get(
             python_module=self.analyzer_class.python_module
         )
@@ -79,7 +105,13 @@ class BaseFileAnalyzerTest(TestCase):
                 analyzer.md5 = md5
                 analyzer.read_file_bytes = lambda: file_bytes
 
-                with self.get_mocked_response():
-                    response = analyzer.run()  # let it raise if broken
+                # Set up filepath for analyzers that need it
+                test_file_path = self.get_sample_file_path(mimetype)
+                analyzer._FileAnalyzer__filepath = test_file_path
+
+                # Apply patches using the improved system
+                patches = self.get_mocked_response()
+                with self._apply_patches(patches):
+                    response = analyzer.run()
                     self.assertTrue(response)
                     print(f"SUCCESS {mimetype}")

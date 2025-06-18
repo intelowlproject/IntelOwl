@@ -26,7 +26,7 @@ class BaseAnalyzerTest(TestCase):
         """
         raise NotImplementedError("Subclasses must implement get_mocked_response()")
 
-    def test_analyzer_process(self):
+    def test_analyzer_on_supported_observables(self):
         if self.analyzer_class is None:
             self.skipTest("analyzer_class is not set")
 

@@ -20,15 +20,15 @@ def migrate(apps, schema_editor):
     p1 = Parameter(
         name="command_sequence_toggle",
         type="bool",
-        description="Enable fetching details from CommandSequenceAPI. Enabled by default, if sha256 hash is provided",
+        description="Enable fetching details from CommandSequenceAPI. Enabled by default",
         is_secret=False,
-        required=True,
+        required=False,
         python_module=pm,
     )
     p2 = Parameter(
         name="same_cluster_commands",
         type="bool",
-        description="Enable fetching details from CommandSequenceAPI for same cluster commands",
+        description="Enable fetching details from CommandSequenceAPI for same cluster commands. Set to False by default",
         is_secret=False,
         required=False,
         python_module=pm,

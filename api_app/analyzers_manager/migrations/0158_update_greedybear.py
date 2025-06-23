@@ -3,51 +3,46 @@
 from django.db import migrations
 
 
+def migrate(apps, schema_editor):
+    PythonModule = apps.get_model("api_app", "PythonModule")
+    Parameter = apps.get_model("api_app", "Parameter")
+    AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
+    pm = PythonModule.objects.get(
+        module="greedybear.GreedyBear",
+        base_path="api_app.analyzers_manager.observable_analyzers",
+    )
+    AnalyzerConfig.objects.filter(python_module=pm).update(
+        description="Scan an IP, domain or a command sequence hash against the [GreedyBear](https://www.honeynet.org/2021/12/27/new-project-available-greedybear/) service",
+        observable_supported=["ip", "domain", "hash"],
+        run_hash=True,
+        run_hash_type="sha256",
+    )
+    p1 = Parameter(
+        name="command_sequence_toggle",
+        type="bool",
+        description="Enable fetching details from CommandSequenceAPI. Enabled by default, if sha256 hash is provided",
+        is_secret=False,
+        required=True,
+        python_module=pm,
+    )
+    p2 = Parameter(
+        name="same_cluster_commands",
+        type="bool",
+        description="Enable fetching details from CommandSequenceAPI for same cluster commands",
+        is_secret=False,
+        required=False,
+        python_module=pm,
+    )
+
+    p1.full_clean()
+    p1.save()
+
+    p2.full_clean()
+    p2.save()
+
+
 class Migration(migrations.Migration):
-
-    def migrate(apps, schema_editor):
-        PythonModule = apps.get_model("api_app", "PythonModule")
-        Parameter = apps.get_model("api_app", "Parameter")
-        pm = PythonModule.objects.get(
-            module="greedybear.GreedyBear",
-            base_path="api_app.analyzers_manager.observable_analyzers",
-        )
-        p1 = Parameter(
-            name="command_sequence_toggle",
-            type="bool",
-            description="Enable fetching details from CommandSequenceAPI. Enabled by default, if sha256 hash is provided",
-            is_secret=False,
-            required=True,
-            python_module=pm,
-        )
-        p2 = Parameter(
-            name="same_cluster_commands",
-            type="bool",
-            description="Enable fetching details from CommandSequenceAPI for same cluster commands",
-            is_secret=False,
-            required=False,
-            python_module=pm,
-        )
-        p1.full_clean()
-        p1.save()
-
-        p2.full_clean()
-        p2.save()
-
-    def reverse_migrate(apps, schema_editor):
-        PythonModule = apps.get_model("api_app", "PythonModule")
-        Parameter = apps.get_model("api_app", "Parameter")
-        pm = PythonModule.objects.get(
-            module="greedybear.GreedyBear",
-            base_path="api_app.analyzers_manager.observable_analyzers",
-        )
-        p1 = Parameter.objects.get(name="command_sequence_toggle", python_module=pm)
-        p2 = Parameter.objects.get(name="same_cluster_commands", python_module=pm)
-        p1.delete()
-        p2.delete()
-
     dependencies = [
         ("analyzers_manager", "0157_analyzer_config_phunter"),
     ]
-
-    operations = [migrations.RunPython(migrate, reverse_migrate)]
+    operations = [migrations.RunPython(migrate, migrations.RunPython.noop)]

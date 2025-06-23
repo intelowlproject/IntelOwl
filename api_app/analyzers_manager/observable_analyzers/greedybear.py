@@ -7,7 +7,6 @@ import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from api_app.choices import Classification
 from api_app.helpers import get_hash_type
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
@@ -45,10 +44,7 @@ class GreedyBear(ObservableAnalyzer):
                 )
                 result = {"command_sequence_results": command_sequence_response.json()}
 
-            elif (
-                self.observable_classification == Classification.IP
-                or self.observable_classification == Classification.DOMAIN
-            ):
+            else:
                 if self.command_sequence_toggle:
                     if self.same_cluster_commands:
                         params_["include_similar"] = True

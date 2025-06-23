@@ -64,14 +64,7 @@ class GreedyBear(ObservableAnalyzer):
                 )
                 result["enrichment_results"] = enrichment_response.json()
 
-            else:
-                raise ValueError("Invalid observale type. Supported are: sha256, IP")
-
             return result
-
-        except ValueError as e:
-            logger.error(f"Error during GreedyBear analyzer run: {e}")
-            raise AnalyzerRunException(f"GreedyBear analyzer failed: {e}")
 
         except Exception as e:
             logger.error(f"Unexpected error during GreedyBear analyzer run: {e}")

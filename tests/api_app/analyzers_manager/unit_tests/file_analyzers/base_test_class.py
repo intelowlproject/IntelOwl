@@ -10,38 +10,37 @@ class BaseFileAnalyzerTest(TestCase):
     analyzer_class = None
     test_files_dir = "test_files"
 
+    MIMETYPE_TO_FILENAME = {
+        "application/onenote": "sample.one",
+        "application/x-sharedlib": "ping.elf",
+        "application/vnd.tcpdump.pcap": "example.pcap",
+        "application/vnd.android.package-archive": "sample.apk",
+        "application/javascript": "file.jse",
+        "text/html": "page.html",
+        "application/pdf": "document.pdf",
+        "text/rtf": "document.rtf",
+        "application/vnd.ms-excel": "document.xls",
+        "application/msword": "document.doc",
+        "application/x-ms-shortcut": "downloader.lnk",
+        "application/vnd.microsoft.portable-executable": "file.dll",
+        "application/octet-stream": "shellcode.bin",
+        "message/rfc822": "Sublime-Standard-Test-String.eml",
+        "text/plain": "textfile.txt",
+        "application/x-chrome-extension": "sample.crx",
+        "application/json": "manifest.json",
+        "application/x-executable": "main.out",
+        "text/x-java": "java_vuln.java",
+        "text/x-kotlin": "kotlin.kt",
+        "text/x-objective-c": "objectivec.m",
+        "text/x-swift": "swift.swift",
+        "text/xml": "android.xml",
+        "application/zip": "test.zip",
+        "application/x-dex": "sample.dex",
+    }
+
     @classmethod
     def get_sample_file_path(cls, mimetype: str) -> str:
-        # Match mimetype → filename from your FileAnalyzerTestCase
-        MIMETYPE_TO_FILENAME = {
-            "application/onenote": "sample.one",
-            "application/x-sharedlib": "ping.elf",
-            "application/vnd.tcpdump.pcap": "example.pcap",
-            "application/vnd.android.package-archive": "sample.apk",
-            "application/javascript": "file.jse",
-            "text/html": "page.html",
-            "application/pdf": "document.pdf",
-            "text/rtf": "document.rtf",
-            "application/vnd.ms-excel": "document.xls",
-            "application/msword": "document.doc",
-            "application/x-ms-shortcut": "downloader.lnk",
-            "application/vnd.microsoft.portable-executable": "file.dll",
-            "application/octet-stream": "shellcode.bin",
-            "message/rfc822": "Sublime-Standard-Test-String.eml",
-            "text/plain": "textfile.txt",
-            "application/x-chrome-extension": "sample.crx",
-            "application/json": "manifest.json",
-            "application/x-executable": "main.out",
-            "text/x-java": "java_vuln.java",
-            "text/x-kotlin": "kotlin.kt",
-            "text/x-objective-c": "objectivec.m",
-            "text/x-swift": "swift.swift",
-            "text/xml": "android.xml",
-            "application/zip": "test.zip",
-            "application/x-dex": "sample.dex",
-        }
-
-        filename = MIMETYPE_TO_FILENAME.get(mimetype)
+        filename = cls.MIMETYPE_TO_FILENAME.get(mimetype)
         if not filename:
             raise ValueError(f"No test file defined for mimetype {mimetype}")
         return os.path.join(cls.test_files_dir, filename)
@@ -51,6 +50,21 @@ class BaseFileAnalyzerTest(TestCase):
         path = cls.get_sample_file_path(mimetype)
         with open(path, "rb") as f:
             return f.read()
+
+    @classmethod
+    def get_all_supported_mimetypes(cls) -> set:
+        """Returns all available mimetypes from the mapping"""
+        return set(cls.MIMETYPE_TO_FILENAME.keys())
+
+    def get_extra_config(self) -> dict:
+        """
+        Subclasses can override this to provide additional runtime configuration
+        specific to their analyzer (e.g., API keys, URLs, retry counts, etc.).
+
+        Returns:
+            dict: Extra configuration parameters for the analyzer
+        """
+        return {}
 
     def get_mocked_response(self):
         """
@@ -89,29 +103,39 @@ class BaseFileAnalyzerTest(TestCase):
             python_module=self.analyzer_class.python_module
         )
 
-        for mimetype in config.supported_filetypes:
+        # If supported_filetypes is None or empty, use all available mimetypes
+        if config.supported_filetypes:
+            supported_types = config.supported_filetypes
+        else:
+            supported_types = self.get_all_supported_mimetypes()
+
+        for mimetype in supported_types:
             with self.subTest(mimetype=mimetype):
+
                 try:
                     file_bytes = self.get_sample_file_bytes(mimetype)
                 except (ValueError, FileNotFoundError, OSError):
                     print(f"SKIPPING {mimetype}")
                     continue
 
-                md5 = hashlib.md5(file_bytes).hexdigest()
-
-                analyzer = self.analyzer_class(config)
-                analyzer.file_mimetype = mimetype
-                analyzer.filename = f"test_file_{mimetype}"
-                analyzer.md5 = md5
-                analyzer.read_file_bytes = lambda: file_bytes
-
-                # Set up filepath for analyzers that need it
-                test_file_path = self.get_sample_file_path(mimetype)
-                analyzer._FileAnalyzer__filepath = test_file_path
-
                 # Apply patches using the improved system
                 patches = self.get_mocked_response()
                 with self._apply_patches(patches):
+                    md5 = hashlib.md5(file_bytes).hexdigest()
+
+                    analyzer = self.analyzer_class(config)
+                    analyzer.file_mimetype = mimetype
+                    analyzer.filename = f"test_file_{mimetype}"
+                    analyzer.md5 = md5
+                    analyzer.read_file_bytes = lambda: file_bytes
+
+                    test_file_path = self.get_sample_file_path(mimetype)
+                    analyzer._FileAnalyzer__filepath = test_file_path
+
+                    extra_config = self.get_extra_config()
+                    for key, value in extra_config.items():
+                        setattr(analyzer, key, value)
+
                     response = analyzer.run()
                     self.assertTrue(response)
                     print(f"SUCCESS {mimetype}")

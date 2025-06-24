@@ -1,9 +1,11 @@
 import hashlib
 import os
 from contextlib import ExitStack
+from types import SimpleNamespace
 from unittest import TestCase
 
 from api_app.analyzers_manager.models import AnalyzerConfig
+from tests.mock_utils import MockUpResponse
 
 
 class BaseFileAnalyzerTest(TestCase):
@@ -102,6 +104,7 @@ class BaseFileAnalyzerTest(TestCase):
         config = AnalyzerConfig.objects.get(
             python_module=self.analyzer_class.python_module
         )
+        print(config)
 
         # If supported_filetypes is None or empty, use all available mimetypes
         if config.supported_filetypes:
@@ -128,6 +131,10 @@ class BaseFileAnalyzerTest(TestCase):
                     analyzer.filename = f"test_file_{mimetype}"
                     analyzer.md5 = md5
                     analyzer.read_file_bytes = lambda: file_bytes
+                    analyzer._job = SimpleNamespace()
+                    analyzer._job.analyzable = SimpleNamespace()
+                    analyzer._job.analyzable.name = analyzer.filename
+                    analyzer._job.analyzable.mimetype = mimetype
 
                     test_file_path = self.get_sample_file_path(mimetype)
                     analyzer._FileAnalyzer__filepath = test_file_path
@@ -137,5 +144,10 @@ class BaseFileAnalyzerTest(TestCase):
                         setattr(analyzer, key, value)
 
                     response = analyzer.run()
-                    self.assertTrue(response)
+                    self.assertIsInstance(
+                        response,
+                        (dict, MockUpResponse),
+                        f"Expected dict or MockUpResponse, got {type(response)} with value: {response}",
+                    )
+
                     print(f"SUCCESS {mimetype}")

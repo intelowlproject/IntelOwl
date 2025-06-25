@@ -6,6 +6,8 @@ import logging
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from api_app.helpers import get_hash_type
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
@@ -15,7 +17,7 @@ logger = logging.getLogger(__name__)
 class GreedyBear(ObservableAnalyzer):
     _api_key_name: str
     url: str
-    command_sequence_toggle: bool = True
+    command_sequence_toggle: bool = False
     same_cluster_commands: bool = False
 
     @classmethod
@@ -34,7 +36,16 @@ class GreedyBear(ObservableAnalyzer):
         command_sequence_uri = "/api/command_sequence"
 
         result = {}
-        if get_hash_type(self.observable_name) == "sha-256":
+
+        if (
+            self.observable_classification == Classification.HASH
+            and get_hash_type(self.observable_name) != "sha-256"
+        ):
+            raise AnalyzerRunException(
+                "GreedyBear does not support hashes other than SHA-256."
+            )
+
+        elif get_hash_type(self.observable_name) == "sha-256":
             params_["include_similar"] = True
 
             command_sequence_response = requests.get(
@@ -43,6 +54,9 @@ class GreedyBear(ObservableAnalyzer):
             result = {"command_sequence_results": command_sequence_response.json()}
 
         else:
+            enrichment_response = requests.get(
+                self.url + enrichment_uri, params=params_, headers=headers
+            )
             if self.command_sequence_toggle:
                 if self.same_cluster_commands:
                     params_["include_similar"] = True
@@ -50,13 +64,10 @@ class GreedyBear(ObservableAnalyzer):
                     self.url + command_sequence_uri, params=params_, headers=headers
                 )
                 result["command_sequence_results"] = command_sequence_response.json()
+                result["enrichment_results"] = enrichment_response.json()
+                return result
 
-            enrichment_response = requests.get(
-                self.url + enrichment_uri, params=params_, headers=headers
-            )
-            result["enrichment_results"] = enrichment_response.json()
-
-        return result
+            return enrichment_response.json()
 
     @classmethod
     def _monkeypatch(cls):

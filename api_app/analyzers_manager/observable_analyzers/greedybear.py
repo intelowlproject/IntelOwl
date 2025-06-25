@@ -46,8 +46,9 @@ class GreedyBear(ObservableAnalyzer):
             )
 
         elif get_hash_type(self.observable_name) == "sha-256":
-            params_["include_similar"] = True
-
+            logger.info("Fetching command sequence for SHA-256 hash.")
+            if self.same_cluster_commands:
+                params_["include_similar"] = True
             command_sequence_response = requests.get(
                 self.url + command_sequence_uri, params=params_, headers=headers
             )
@@ -58,6 +59,9 @@ class GreedyBear(ObservableAnalyzer):
                 self.url + enrichment_uri, params=params_, headers=headers
             )
             if self.command_sequence_toggle:
+                logger.info(
+                    f"Fetching command sequence for observable: {self.observable_name}."
+                )
                 if self.same_cluster_commands:
                     params_["include_similar"] = True
                 command_sequence_response = requests.get(
@@ -67,7 +71,9 @@ class GreedyBear(ObservableAnalyzer):
                 result["enrichment_results"] = enrichment_response.json()
                 return result
 
-            return enrichment_response.json()
+            result = enrichment_response.json()
+
+        return result
 
     @classmethod
     def _monkeypatch(cls):

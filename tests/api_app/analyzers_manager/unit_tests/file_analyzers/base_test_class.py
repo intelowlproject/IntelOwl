@@ -58,6 +58,7 @@ class BaseFileAnalyzerTest(TestCase):
         """Returns all available mimetypes from the mapping"""
         return set(cls.MIMETYPE_TO_FILENAME.keys())
 
+    @classmethod
     def get_extra_config(self) -> dict:
         """
         Subclasses can override this to provide additional runtime configuration
@@ -79,6 +80,7 @@ class BaseFileAnalyzerTest(TestCase):
         """
         raise NotImplementedError
 
+    @classmethod
     def _apply_patches(self, patches):
         """Helper method to apply single or multiple patches"""
         if patches is None:
@@ -117,7 +119,7 @@ class BaseFileAnalyzerTest(TestCase):
 
                 try:
                     file_bytes = self.get_sample_file_bytes(mimetype)
-                except (ValueError, FileNotFoundError, OSError):
+                except (ValueError, OSError):
                     print(f"SKIPPING {mimetype}")
                     continue
 

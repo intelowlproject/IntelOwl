@@ -9,7 +9,8 @@ from tests.api_app.analyzers_manager.unit_tests.file_analyzers.base_test_class i
 class BlintTestCase(BaseFileAnalyzerTest):
     analyzer_class = BlintAnalyzer
 
-    def get_mocked_response(self):
+    @staticmethod
+    def get_mocked_response():
         # Create mock findings data
         mock_findings = [
             {

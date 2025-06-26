@@ -2,14 +2,24 @@
 # See the file 'LICENSE' for copying permission.
 
 
+import json
 import logging
+import os
 
 import requests
 
+# from analyzers_manager.models import AnalyzerConfig
+from django.conf import settings
+
 from api_app.analyzers_manager.classes import ObservableAnalyzer
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.models import PluginConfig
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
+
+db_name = "hunting_abuse_fplist.json"
+database_location = f"{settings.MEDIA_ROOT}/{db_name}"
 
 
 class HuntingAbuseAPI(ObservableAnalyzer):
@@ -17,20 +27,46 @@ class HuntingAbuseAPI(ObservableAnalyzer):
     _auth_key: str
 
     @classmethod
-    def update(cls):
-        pass
+    def get_auth_key(cls) -> str | None:
+        for plugin in PluginConfig.objects.filter(
+            parameter__python_module=cls.python_module,
+            parameter__is_secret=True,
+            parameter__name="auth_key",
+        ):
+            if plugin.value:
+                return plugin.value
+        return None
 
-    def run(self):
-        headers = {"Content-Type": "application/json", "Auth-Key": self._auth_key}
-
+    @classmethod
+    def update(cls) -> bool:
+        auth_key = cls.get_auth_key()
+        headers = {"Content-Type": "application/json", "Auth-Key": auth_key}
         data = {"query": "get_fplist", "format": "json"}
 
-        response = requests.post(self.url, json=data, headers=headers)
-        response.raise_for_status()
-        fp_list = response.json()
+        try:
+            response = requests.post(cls.url, json=data, headers=headers)
+            response.raise_for_status()
+
+            with open(database_location, "w", encoding="utf-8") as f:
+                f.write(response.text)
+
+            if not os.path.exists(database_location):
+                raise Exception(f"database location {database_location} does not exist")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to update Hunting Abuse database: {e}")
+            return False
+
+    def run(self):
+        if not os.path.isfile(database_location):
+            logger.info("Hunting Abuse database not found, updating...")
+            if not self.update():
+                raise AnalyzerRunException("Failed extraction of Hunting Abuse db")
+
+        with open(database_location, "r", encoding="utf-8") as f:
+            fp_list = json.load(f)
 
         for _key, value_dict in fp_list.items():
-            logger.info(f"Fetching fp_status for {self.observable_name}")
             if value_dict["entry_value"] == self.observable_name:
                 return {"fp_status": "true", "details": value_dict}
         return {"fp_status": "False"}

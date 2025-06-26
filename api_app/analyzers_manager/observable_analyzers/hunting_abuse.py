@@ -7,8 +7,6 @@ import logging
 import os
 
 import requests
-
-# from analyzers_manager.models import AnalyzerConfig
 from django.conf import settings
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
@@ -48,7 +46,7 @@ class HuntingAbuseAPI(ObservableAnalyzer):
             response.raise_for_status()
 
             with open(database_location, "w", encoding="utf-8") as f:
-                f.write(response.text)
+                json.dump(response.json(), f)
 
             if not os.path.exists(database_location):
                 raise Exception(f"database location {database_location} does not exist")

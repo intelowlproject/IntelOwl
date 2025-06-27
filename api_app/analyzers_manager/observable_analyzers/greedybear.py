@@ -6,7 +6,6 @@ import logging
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
 from api_app.helpers import get_hash_type
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
@@ -37,23 +36,22 @@ class GreedyBear(ObservableAnalyzer):
 
         result = {}
 
-        if (
-            self.observable_classification == Classification.HASH
-            and get_hash_type(self.observable_name) != "sha-256"
-        ):
-            raise AnalyzerRunException(
-                "GreedyBear does not support hashes other than SHA-256."
-            )
+        if self.observable_classification == Classification.HASH:
 
-        elif get_hash_type(self.observable_name) == "sha-256":
-            logger.info("Fetching command sequence for SHA-256 hash.")
-            if self.same_cluster_commands:
-                params_["include_similar"] = True
-            command_sequence_response = requests.get(
-                self.url + command_sequence_uri, params=params_, headers=headers
-            )
-            result = {"command_sequence_results": command_sequence_response.json()}
-
+            if get_hash_type(self.observable_name) == "sha-256":
+                if self.same_cluster_commands:
+                    params_["include_similar"] = True
+                logger.info(
+                    f"Fetching command sequence for SHA-256 hash: {self.observable_name}."
+                )
+                command_sequence_response = requests.get(
+                    self.url + command_sequence_uri, params=params_, headers=headers
+                )
+                result = {"command_sequence_results": command_sequence_response.json()}
+            else:
+                result = {
+                    "command_sequence_results": "Unsupported hash type. Only SHA-256 is supported."
+                }
         else:
             enrichment_response = requests.get(
                 self.url + enrichment_uri, params=params_, headers=headers

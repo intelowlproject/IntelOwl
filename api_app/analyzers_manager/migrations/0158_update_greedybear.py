@@ -14,13 +14,11 @@ def migrate(apps, schema_editor):
     AnalyzerConfig.objects.filter(python_module=pm).update(
         description="Scan an IP, domain or a command sequence hash against the [GreedyBear](https://www.honeynet.org/2021/12/27/new-project-available-greedybear/) service",
         observable_supported=["ip", "domain", "hash"],
-        run_hash=True,
-        run_hash_type="sha256",
     )
     p1 = Parameter(
         name="command_sequence_toggle",
         type="bool",
-        description="Enable fetching details from CommandSequenceAPI. Enabled by default",
+        description="Enable fetching details from CommandSequenceAPI. Enabled by default if sha-256 hash is provided",
         is_secret=False,
         required=False,
         python_module=pm,
@@ -28,7 +26,7 @@ def migrate(apps, schema_editor):
     p2 = Parameter(
         name="same_cluster_commands",
         type="bool",
-        description="Enable fetching details from CommandSequenceAPI for same cluster commands. Set to False by default",
+        description="Enable fetching details from CommandSequenceAPI for same cluster commands. Disabled by default",
         is_secret=False,
         required=False,
         python_module=pm,

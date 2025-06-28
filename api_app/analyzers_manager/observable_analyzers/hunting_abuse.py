@@ -11,6 +11,7 @@ from django.conf import settings
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import Classification
 from api_app.models import PluginConfig
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
@@ -23,6 +24,11 @@ database_location = f"{settings.MEDIA_ROOT}/{db_name}"
 class HuntingAbuseAPI(ObservableAnalyzer):
     url: str = "https://hunting-api.abuse.ch/api/v1/"
     _auth_key: str
+
+    def _do_create_data_model(self) -> bool:
+        return super()._do_create_data_model() and self.report.report.get(
+            "fp_status", False
+        )
 
     @classmethod
     def get_auth_key(cls) -> str | None:
@@ -65,9 +71,14 @@ class HuntingAbuseAPI(ObservableAnalyzer):
             fp_list = json.load(f)
 
         for _key, value_dict in fp_list.items():
-            if value_dict["entry_value"] == self.observable_name:
-                return {"fp_status": "true", "details": value_dict}
-        return {"fp_status": "False"}
+            is_match = self.observable_name == value_dict["entry_value"] or (
+                self.observable_classification == Classification.IP
+                and self.observable_name in value_dict["entry_value"]
+            )
+
+            if is_match:
+                return {"fp_status": True, "details": value_dict}
+        return {"fp_status": False}
 
     @classmethod
     def _monkeypatch(cls):

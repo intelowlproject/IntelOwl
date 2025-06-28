@@ -28,7 +28,11 @@ plugin = {
     "run_hash": False,
     "run_hash_type": "",
     "not_supported_filetypes": [],
-    "mapping_data_model": {},
+    "mapping_data_model": {
+        "$trusted": "evaluation",
+        "$9": "reliability",
+        "details": "additional_info",
+    },
     "model": "analyzers_manager.AnalyzerConfig",
 }
 

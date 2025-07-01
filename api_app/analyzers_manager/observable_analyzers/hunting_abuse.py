@@ -12,6 +12,7 @@ from django.conf import settings
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
+from api_app.mixins import AbuseCHMixin
 from api_app.models import PluginConfig
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
@@ -21,9 +22,8 @@ db_name = "hunting_abuse_fplist.json"
 database_location = f"{settings.MEDIA_ROOT}/{db_name}"
 
 
-class HuntingAbuseAPI(ObservableAnalyzer):
+class HuntingAbuseAPI(AbuseCHMixin, ObservableAnalyzer):
     url: str = "https://hunting-api.abuse.ch/api/v1/"
-    _auth_key: str
 
     def _do_create_data_model(self) -> bool:
         return super()._do_create_data_model() and self.report.report.get(
@@ -31,20 +31,19 @@ class HuntingAbuseAPI(ObservableAnalyzer):
         )
 
     @classmethod
-    def get_auth_key(cls) -> str | None:
+    def get_auth_key(cls) -> str:
         for plugin in PluginConfig.objects.filter(
             parameter__python_module=cls.python_module,
             parameter__is_secret=True,
-            parameter__name="auth_key",
+            parameter__name="service_api_key",
         ):
             if plugin.value:
                 return plugin.value
-        return None
+        return ""
 
     @classmethod
     def update(cls) -> bool:
-        auth_key = cls.get_auth_key()
-        headers = {"Content-Type": "application/json", "Auth-Key": auth_key}
+        headers = {"Content-Type": "application/json", "Auth-Key": cls.get_auth_key()}
         data = {"query": "get_fplist", "format": "json"}
 
         try:
@@ -55,11 +54,19 @@ class HuntingAbuseAPI(ObservableAnalyzer):
                 json.dump(response.json(), f)
 
             if not os.path.exists(database_location):
-                raise Exception(f"database location {database_location} does not exist")
+                raise FileNotFoundError(
+                    f"Failed to create the database file at {database_location}"
+                )
             return True
+
+        except requests.RequestException as e:
+            logger.error(f"Failed to fetch response from Hunting Abuse API: {e}")
+        except FileNotFoundError as e:
+            logger.error(f"File not found: {e}")
         except Exception as e:
             logger.error(f"Failed to update Hunting Abuse database: {e}")
-            return False
+
+        return False
 
     def run(self):
         if not os.path.isfile(database_location):
@@ -71,6 +78,8 @@ class HuntingAbuseAPI(ObservableAnalyzer):
             fp_list = json.load(f)
 
         for _key, value_dict in fp_list.items():
+            # Checking observable classification is IP, is necessary to handle cases where response contains
+            # results in 'ip:port' format
             is_match = self.observable_name == value_dict["entry_value"] or (
                 self.observable_classification == Classification.IP
                 and self.observable_name in value_dict["entry_value"]

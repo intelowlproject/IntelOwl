@@ -31,7 +31,6 @@ from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers import AbstractBIInterface
 from api_app.serializers.report import AbstractReportSerializerInterface
 from api_app.visualizers_manager.models import VisualizerConfig
-from authentication.serializers import UserProfileSerializer
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from certego_saas.apps.user.models import User
 from intel_owl.celery import get_queue_name
@@ -1293,7 +1292,7 @@ class JobBISerializer(AbstractBIInterface, ModelSerializer):
 
 class JobAnalyzableHistorySerializer(rfs.ModelSerializer):
     id = rfs.CharField(source="pk")
-    user = UserProfileSerializer(allow_null=False, read_only=True)
+    user = rfs.CharField(source="user.username", allow_null=False, read_only=True)
     data_model = rfs.SerializerMethodField()
     date = rfs.DateTimeField(
         source="finished_analysis_time", read_only=True, allow_null=False

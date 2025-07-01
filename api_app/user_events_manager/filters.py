@@ -1,11 +1,29 @@
 import rest_framework_filters as filters
 
+from api_app.user_events_manager.models import UserEvent
+
 
 class UserEventFilterSet(filters.FilterSet):
 
     username = filters.CharFilter(lookup_expr="iexact", field_name="user__username")
     next_decay = filters.DateRangeFilter()
-    date = filters.DateRangeFilter()
+    id = filters.CharFilter(method="filter_for_id")
+
+    class Meta:
+        model = UserEvent
+        fields = {
+            "date": ["lte", "gte"],
+        }
+
+    @staticmethod
+    def filter_for_id(queryset, value, _id, *args, **kwargs):
+        try:
+            int_id = int(_id)
+        except ValueError:
+            # this is to manage bad data as input
+            return queryset
+        else:
+            return queryset.filter(id=int_id)
 
 
 class UserAnalyzableEventFilterSet(UserEventFilterSet):

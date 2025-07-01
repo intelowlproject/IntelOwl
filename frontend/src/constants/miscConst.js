@@ -24,6 +24,12 @@ export const HTTPMethods = Object.freeze({
 
 export const datetimeFormatStr = "yyyy-MM-dd'T'HH:mm:ss";
 
+export const HistoryPages = Object.freeze({
+  JOBS: "jobs",
+  INVESTIGAITONS: "investigations",
+  USER_REPORTS: "user-reports",
+});
+
 export const Classifications = Object.freeze({
   IP: "ip",
   URL: "url",

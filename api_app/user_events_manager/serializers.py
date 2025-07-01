@@ -17,11 +17,12 @@ from api_app.user_events_manager.models import (
     UserIPWildCardEvent,
 )
 from api_app.user_events_manager.validators import validate_ipv4_network
-from authentication.serializers import UserProfileSerializer
 
 
 class UserEventSerializer(serializers.ModelSerializer):
-    user = UserProfileSerializer(read_only=True)
+    user = serializers.CharField(
+        source="user.username", allow_null=False, read_only=True
+    )
 
     date = serializers.DateTimeField(read_only=True)
 
@@ -40,7 +41,9 @@ class UserEventSerializer(serializers.ModelSerializer):
 
 class UserAnalyzableEventSerializer(UserEventSerializer):
 
-    analyzable = serializers.PrimaryKeyRelatedField(queryset=Analyzable.objects.all())
+    analyzable = serializers.SlugRelatedField(
+        queryset=Analyzable.objects.all(), slug_field="name"
+    )
     data_model_content = serializers.JSONField(write_only=True, source="data_model")
     data_model = DataModelRelatedField(read_only=True)
 

@@ -16,7 +16,7 @@ import { VerticalListVisualizer } from "../../common/visualizer/elements/vertica
 import { BooleanVisualizer } from "../../common/visualizer/elements/bool";
 
 import { LastEvaluationComponent } from "../../common/engineBadges";
-import { TagsIcons } from "../../../constants/engineConst";
+import { TagsIcons } from "../../../constants/dataModelConst";
 import { TagsColors } from "../../../constants/colorConst";
 import { getIcon } from "../../common/icon/icons";
 import { AnalyzableHistoryTypes } from "../../../constants/miscConst";

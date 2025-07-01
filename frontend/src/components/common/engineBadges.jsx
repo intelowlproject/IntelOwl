@@ -6,7 +6,7 @@ import { VscFile } from "react-icons/vsc";
 import { TbWorld } from "react-icons/tb";
 import classnames from "classnames";
 import { EvaluationColors, TagsColors } from "../../constants/colorConst";
-import { EvaluationIcons, TagsIcons } from "../../constants/engineConst";
+import { EvaluationIcons, TagsIcons } from "../../constants/dataModelConst";
 import { getIcon } from "./icon/icons";
 
 export function EvaluationBadge(props) {

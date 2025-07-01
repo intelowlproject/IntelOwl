@@ -1,30 +1,24 @@
 /* eslint-disable react/prop-types */
 import React from "react";
 import useTitle from "react-use/lib/useTitle";
-import { useFormik, Form, FormikProvider, FieldArray } from "formik";
+import { useFormik, Form, FormikProvider } from "formik";
 import axios from "axios";
-import {
-  Container,
-  Row,
-  Col,
-  Input,
-  UncontrolledTooltip,
-  Button,
-  FormGroup,
-} from "reactstrap";
+import { Container, Row, Col, UncontrolledTooltip, Button } from "reactstrap";
 import { MdInfoOutline } from "react-icons/md";
 import { RiFileAddLine } from "react-icons/ri";
-import { BsFillTrashFill, BsFillPlusCircleFill } from "react-icons/bs";
+import { BsFillPlusCircleFill } from "react-icons/bs";
 import { Loader, DataTable, addToast } from "@certego/certego-ui";
 
 import { analyzablesTableColumns } from "./analyzablesTableColumns";
 import { ANALYZABLES_URI } from "../../constants/apiURLs";
 import { prettifyErrors } from "../../utils/api";
 import { MultipleInputModal } from "../common/form/MultipleInputModal";
+import { ListInput } from "../common/form/ListInput";
+import { UserReportModal } from "../userReports/UserReportModal";
 
 // table config
 const tableConfig = {
-  // enableSelection: true
+  enableSelection: true,
 };
 const tableInitialState = {
   pageSize: 10,
@@ -45,15 +39,12 @@ export default function Analyzables() {
     [setMultipleAnalyzablesModalOpen],
   );
 
+  const [showUserReportModal, setShowUserReportModal] = React.useState(false);
+  const [selectedRows, setSelectedRows] = React.useState([]);
+
   const formik = useFormik({
     initialValues: {
       analyzables: [""],
-    },
-    validate: (values) => {
-      console.debug("validate - values");
-      console.debug(values);
-      const errors = {};
-      return errors;
     },
     onSubmit: async () => {
       let response = null;
@@ -123,92 +114,46 @@ export default function Analyzables() {
               </div>
             </Col>
           </Row>
-          <Row id="search-input-fields-first-row d-flex flex-wrap">
-            <FieldArray
-              name="analyzables"
-              render={(arrayHelpers) => (
-                <FormGroup row>
-                  <Col sm={9}>
-                    <div style={{ maxHeight: "35vh", overflowY: "scroll" }}>
-                      {formik.values.analyzables &&
-                      formik.values.analyzables.length > 0
-                        ? formik.values.analyzables.map((value, index) => (
-                            <div
-                              className="py-2 d-flex"
-                              key={`analyzables-${index + 0}`}
-                            >
-                              <Col sm={10} className="pe-3">
-                                <Input
-                                  type="text"
-                                  id={`analyzable-${index}`}
-                                  name={`analyzable-${index}`}
-                                  placeholder="google.com, 8.8.8.8, https://google.com, 1d5920f4b44b27a802bd77c4f0536f5a"
-                                  className="input-dark"
-                                  value={value}
-                                  onChange={(event) => {
-                                    const attributevalues =
-                                      formik.values.analyzables;
-                                    attributevalues[index] = event.target.value;
-                                    formik.setFieldValue(
-                                      "analyzables",
-                                      attributevalues,
-                                      false,
-                                    );
-                                  }}
-                                />
-                              </Col>
-                              <Col sm={1} className="d-flex">
-                                <Button
-                                  color="primary"
-                                  size="sm"
-                                  id={`analyzable-${index}-deletebtn`}
-                                  className="mx-auto rounded-1 d-flex align-items-center px-3"
-                                  onClick={() => arrayHelpers.remove(index)}
-                                  disabled={
-                                    formik.values.analyzables.length === 1
-                                  }
-                                >
-                                  <BsFillTrashFill />
-                                </Button>
-                                <Button
-                                  color="primary"
-                                  size="sm"
-                                  id={`analyzable-${index}-addbtn`}
-                                  className="mx-auto rounded-1 d-flex align-items-center px-3"
-                                  onClick={() => arrayHelpers.push("")}
-                                >
-                                  <BsFillPlusCircleFill />
-                                </Button>
-                              </Col>
-                            </div>
-                          ))
-                        : null}
-                    </div>
-                  </Col>
-                  <Col
-                    sm={2}
-                    className="d-flex py-2 offset-1 justify-content-end align-items-start"
-                  >
-                    <Button
-                      size="sm"
-                      className="px-3 py-2 bg-tertiary border-tertiary d-flex align-items-center"
-                      onClick={toggleMultipleAnalyzablesModal}
-                    >
-                      <RiFileAddLine className="me-1" /> Load multiple
-                      analyzables
-                    </Button>
-                    {isMultipleAnalyzablesModalOpen && (
-                      <MultipleInputModal
-                        isOpen={isMultipleAnalyzablesModalOpen}
-                        toggle={toggleMultipleAnalyzablesModal}
-                        formik={formik}
-                        formikSetField="analyzables"
-                      />
-                    )}
-                  </Col>
-                </FormGroup>
+          <Row
+            id="search-input-fields-first-row"
+            className="d-flex flex-wrap me-2"
+          >
+            <Col sm={9}>
+              <ListInput
+                id="analyzables"
+                values={formik.values.analyzables}
+                formikSetFieldValue={formik.setFieldValue}
+                placeholder="google.com, 8.8.8.8, https://google.com, 1d5920f4b44b27a802bd77c4f0536f5a"
+              />
+            </Col>
+            <Col
+              sm={3}
+              className="d-flex py-2 justify-content-end align-items-start"
+            >
+              <Button
+                size="sm"
+                className="px-3 me-2 bg-tertiary border-tertiary d-flex align-items-center"
+                onClick={toggleMultipleAnalyzablesModal}
+              >
+                <RiFileAddLine className="me-1" /> Multiple analyzables
+              </Button>
+              {isMultipleAnalyzablesModalOpen && (
+                <MultipleInputModal
+                  isOpen={isMultipleAnalyzablesModalOpen}
+                  toggle={toggleMultipleAnalyzablesModal}
+                  formik={formik}
+                  formikSetField="analyzables"
+                />
               )}
-            />
+              <Button
+                id="newUserEvaluationBtn"
+                size="sm"
+                className="px-3 bg-tertiary border-tertiary d-flex align-items-center"
+                onClick={() => setShowUserReportModal(!showUserReportModal)}
+              >
+                <BsFillPlusCircleFill className="me-1" /> New evaluation
+              </Button>
+            </Col>
           </Row>
           <Row>
             <Button
@@ -230,15 +175,26 @@ export default function Analyzables() {
       <Row className="me-2" style={{ marginTop: "6%" }}>
         <div className="d-flex justify-content-between">
           <h4 className="py-0 mb-0">Results:</h4>
-          {/* <Button
-                size="sm"
-                className="px-3 bg-tertiary border-0"
-                disabled
-            >
-                Add your report
-            </Button> */}
+          <Button
+            id="addUserEvaluationBtn"
+            size="sm"
+            className="px-3 bg-tertiary border-tertiary d-flex align-items-center"
+            disabled={data?.length === 0 || selectedRows.length === 0}
+            onClick={() => setShowUserReportModal(!showUserReportModal)}
+          >
+            <BsFillPlusCircleFill className="me-1" /> Your evaluation
+          </Button>
         </div>
       </Row>
+      {showUserReportModal && (
+        <UserReportModal
+          analyzables={
+            selectedRows.length > 0 ? selectedRows.map((row) => row) : [""]
+          }
+          toggle={setShowUserReportModal}
+          isOpen={showUserReportModal}
+        />
+      )}
       <Row className="mt-2 me-2">
         <Loader
           loading={loadingData}
@@ -249,8 +205,8 @@ export default function Analyzables() {
               initialState={tableInitialState}
               columns={analyzablesTableColumns}
               autoResetPage
-              // onSelectedRowChange={setSelectedRows}
-              // isRowSelectable={(row) => !row.original.completed}
+              onSelectedRowChange={setSelectedRows}
+              isRowSelectable={(row) => !row.original.completed}
             />
           )}
         />

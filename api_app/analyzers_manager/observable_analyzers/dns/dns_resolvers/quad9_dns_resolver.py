@@ -2,52 +2,30 @@
 # See the file 'LICENSE' for copying permission.
 
 """Quad9 DNS resolutions"""
-import base64
 import logging
-from urllib.parse import urlparse
 
 import dns.message
 import httpx
 
 from api_app.analyzers_manager import classes
-from api_app.choices import Classification
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..dns_responses import dns_resolver_response
+from ..doh_mixin import DoHMixin
 
 logger = logging.getLogger(__name__)
 
 
-class Quad9DNSResolver(classes.ObservableAnalyzer):
+class Quad9DNSResolver(DoHMixin, classes.ObservableAnalyzer):
     """Resolve a DNS query with Quad9"""
 
     url: str = "https://dns.quad9.net/dns-query"
-    headers: dict = {"Accept": "application/dns-message"}
-    query_type: str
-
-    @staticmethod
-    def encode_query(observable: str) -> str:
-        """
-        Constructs a DNS query for the given observable (domain) for an A record,
-        converts it to wire format, and encodes it in URL-safe base64.
-        """
-        logger.info(f"Encoding DNS query for {observable}")
-        query = dns.message.make_query(observable, dns.rdatatype.A)
-        wire_query = query.to_wire()
-        encoded_query = (
-            base64.urlsafe_b64encode(wire_query).rstrip(b"=").decode("ascii")
-        )
-        logger.info(f"Quad9_DNS encoded query for {observable}: {encoded_query}")
-        return encoded_query
 
     def run(self):
-        observable = self.observable_name
-        # for URLs we are checking the relative domain
-        if self.observable_classification == Classification.URL:
-            observable = urlparse(self.observable_name).hostname
-
-        encoded_query = self.encode_query(observable)
-        complete_url = f"{self.url}?dns={encoded_query}"
+        observable = self.convert_to_domain(
+            self.observable_name, self.observable_classification
+        )
+        complete_url = self.build_query_url(observable)
 
         # sometimes it can respond with 503, I suppose to avoid DoS.
         # In 1k requests just 20 fails and at least with 30 requests between 2 failures
@@ -71,7 +49,7 @@ class Quad9DNSResolver(classes.ObservableAnalyzer):
         for answer in dns_response.answer:
             resolutions.extend([resolution.address for resolution in answer])
 
-        return dns_resolver_response(self.observable_name, resolutions)
+        return dns_resolver_response(observable, resolutions)
 
     @classmethod
     def _monkeypatch(cls):

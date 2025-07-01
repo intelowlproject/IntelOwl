@@ -21,6 +21,9 @@ class Quad9DNSResolver(DoHMixin, classes.ObservableAnalyzer):
 
     url: str = "https://dns.quad9.net/dns-query"
 
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         observable = self.convert_to_domain(
             self.observable_name, self.observable_classification

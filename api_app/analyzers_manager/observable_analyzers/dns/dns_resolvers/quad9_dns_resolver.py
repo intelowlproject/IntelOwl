@@ -21,6 +21,7 @@ class Quad9DNSResolver(DoHMixin, classes.ObservableAnalyzer):
 
     url: str = "https://dns.quad9.net/dns-query"
 
+    @classmethod
     def update(cls) -> bool:
         pass
 

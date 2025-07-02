@@ -77,8 +77,7 @@ export default function Analyzables() {
             } else {
               resultData.push({
                 name: analyzableName,
-                jobs: [],
-                user_events: [],
+                last_data_model: { tags: ["not_found"] },
               });
             }
           });

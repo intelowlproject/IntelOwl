@@ -117,17 +117,14 @@ export const analyzablesTableColumns = [
   {
     Header: "Last evaluation",
     id: "evaluation",
-    accessor: (analyzable) =>
-      analyzable?.jobs
-        .concat(analyzable?.user_events)
-        .sort((elA, elB) => new Date(elB.date) - new Date(elA.date))[0],
+    accessor: (analyzable) => analyzable?.last_data_model,
     Cell: ({ value, row }) =>
-      value?.data_model?.evaluation ? (
+      value?.evaluation ? (
         <div className="d-flex justify-content-center py-2">
           <LastEvaluationComponent
             id={row.id}
-            reliability={value.data_model.reliability}
-            evaluation={value.data_model.evaluation}
+            reliability={value.reliability}
+            evaluation={value.evaluation}
           />
         </div>
       ) : (
@@ -139,16 +136,13 @@ export const analyzablesTableColumns = [
   {
     Header: "Last evaluation date",
     id: "evaluation_date",
-    accessor: (analyzable) =>
-      analyzable?.jobs
-        .concat(analyzable?.user_events)
-        .sort((elA, elB) => new Date(elB.date) - new Date(elA.date))[0],
+    accessor: (analyzable) => analyzable?.last_data_model,
     Cell: ({ value }) =>
-      value?.data_model?.date && value.data_model.evaluation ? (
+      value?.date && value?.evaluation ? (
         <div className="py-2">
           <DateHoverable
             ago
-            value={value.data_model.date}
+            value={value.date}
             format="hh:mm:ss a MMM do, yyyy"
           />
         </div>
@@ -161,17 +155,11 @@ export const analyzablesTableColumns = [
   {
     Header: "Tags",
     id: "tags",
-    accessor: (analyzable) => {
-      if (analyzable.id === undefined)
-        return { data_model: { tags: ["not_found"] } };
-      return analyzable?.jobs
-        .concat(analyzable?.user_events)
-        .sort((elA, elB) => new Date(elB.date) - new Date(elA.date))[0];
-    },
-    Cell: ({ value, row }) =>
-      value?.data_model?.tags ? (
+    accessor: (analyzable) => analyzable?.last_data_model?.tags,
+    Cell: ({ value: tags, row }) =>
+      tags ? (
         <div className="d-flex justify-content-center py-2">
-          {value.data_model.tags.map((tag, index) => (
+          {tags.map((tag, index) => (
             <TagsBadge
               id={`tag-row${row.id}_${index}`}
               tag={tag}

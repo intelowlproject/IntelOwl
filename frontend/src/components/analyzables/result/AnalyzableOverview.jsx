@@ -1,9 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
+import useAxios from "axios-hooks";
 import { Col, Row, Container } from "reactstrap";
 import { FaTag } from "react-icons/fa";
 
-import { DateHoverable, DataTable } from "@certego/certego-ui";
+import { DateHoverable, DataTable, Loader } from "@certego/certego-ui";
 
 import { AnalyzableActionsBar } from "./AnalyzableActionBar";
 import { AnalyzableInfoCard } from "./AnalyzableInfoCard";
@@ -21,6 +22,7 @@ import { TagsColors } from "../../../constants/colorConst";
 import { getIcon } from "../../common/icon/icons";
 import { AnalyzableHistoryTypes } from "../../../constants/miscConst";
 import { UserReportDecay } from "../../userReports/UserReportDecay";
+import { ANALYZABLES_URI } from "../../../constants/apiURLs";
 
 const tableInitialState = {
   pageSize: 10,
@@ -30,17 +32,19 @@ const tableInitialState = {
 export function AnalyzableOverview({ analyzable }) {
   console.debug("AnalyzableOverview rendered");
 
-  const jobs = analyzable?.jobs?.map((job) => ({
+  // API to download the analyzable history data
+  const [{ data: history, loading, error }] = useAxios({
+    url: `${ANALYZABLES_URI}/${analyzable.id}/history`,
+  });
+
+  const jobs = history?.jobs?.map((job) => ({
     ...job,
     type: AnalyzableHistoryTypes.JOB,
   }));
-  const userReports = analyzable?.user_events?.map((userEvent) => ({
+  const userReports = history?.user_events?.map((userEvent) => ({
     ...userEvent,
     type: AnalyzableHistoryTypes.USER_REPORT,
   }));
-  const lastEvent = jobs
-    .concat(userReports)
-    .sort((elA, elB) => new Date(elB.date) - new Date(elA.date))[0];
 
   return (
     <Container fluid>
@@ -84,15 +88,15 @@ export function AnalyzableOverview({ analyzable }) {
               ],
               [
                 "Last Evaluation",
-                lastEvent.data_model.evaluation && (
+                analyzable.last_data_model.evaluation && (
                   <div
                     className="d-flex justify-content-center"
                     style={{ width: "200px" }}
                   >
                     <LastEvaluationComponent
                       id={analyzable.id}
-                      reliability={lastEvent.data_model.reliability}
-                      evaluation={lastEvent.data_model.evaluation}
+                      reliability={analyzable.last_data_model.reliability}
+                      evaluation={analyzable.last_data_model.evaluation}
                     />
                   </div>
                 ),
@@ -102,21 +106,21 @@ export function AnalyzableOverview({ analyzable }) {
                 <DateHoverable
                   ago
                   noHover
-                  value={lastEvent.data_model.date}
+                  value={analyzable.last_data_model.date}
                   format="hh:mm:ss a MMM do, yyyy"
                 />,
               ],
               [
                 "Decay",
-                lastEvent.type === AnalyzableHistoryTypes.USER_REPORT ? (
+                analyzable?.next_decay !== undefined ? (
                   <UserReportDecay
-                    decay={lastEvent.next_decay}
-                    reliability={lastEvent.data_model.reliability}
+                    decay={analyzable.next_decay}
+                    reliability={analyzable.last_data_model.reliability}
                   />
                 ) : null,
               ],
-              ["Malware Family", lastEvent.data_model.malware_family],
-              ["Killchain Phase", lastEvent.data_model.kill_chain_phase],
+              ["Malware Family", analyzable.last_data_model.malware_family],
+              ["Killchain Phase", analyzable.last_data_model.kill_chain_phase],
             ].map(([title, value], index) => (
               <TitleVisualizer
                 id={`title-visualizer__element-${index}`}
@@ -153,7 +157,7 @@ export function AnalyzableOverview({ analyzable }) {
             values={[
               [
                 "Tags",
-                (lastEvent.data_model.tags || []).map((tag, index) => (
+                (analyzable.last_data_model.tags || []).map((tag, index) => (
                   <BooleanVisualizer
                     value={tag}
                     id={`tags-${index}`}
@@ -175,23 +179,27 @@ export function AnalyzableOverview({ analyzable }) {
               ],
               [
                 "External References",
-                lastEvent.data_model.external_references.map((value, index) => (
-                  <BaseVisualizer
-                    value={value}
-                    id={`external_references-${index}`}
-                    size="h6"
-                  />
-                )),
+                analyzable.last_data_model.external_references.map(
+                  (value, index) => (
+                    <BaseVisualizer
+                      value={value}
+                      id={`external_references-${index}`}
+                      size="h6"
+                    />
+                  ),
+                ),
               ],
               [
                 "Comments",
-                lastEvent.data_model.related_threats.map((value, index) => (
-                  <BaseVisualizer
-                    value={value}
-                    id={`related_threats-${index}`}
-                    size="h6"
-                  />
-                )),
+                analyzable.last_data_model.related_threats.map(
+                  (value, index) => (
+                    <BaseVisualizer
+                      value={value}
+                      id={`related_threats-${index}`}
+                      size="h6"
+                    />
+                  ),
+                ),
               ],
             ].map(([title, values], index) => (
               <VerticalListVisualizer
@@ -224,12 +232,18 @@ export function AnalyzableOverview({ analyzable }) {
         </Col>
       </Row>
       <Row className="mt-2">
-        <DataTable
-          data={jobs.concat(userReports)}
-          config={{}}
-          initialState={tableInitialState}
-          columns={analyzablesHistoryTableColumns}
-          autoResetPage
+        <Loader
+          loading={loading}
+          error={error}
+          render={() => (
+            <DataTable
+              data={jobs.concat(userReports)}
+              config={{}}
+              initialState={tableInitialState}
+              columns={analyzablesHistoryTableColumns}
+              autoResetPage
+            />
+          )}
         />
       </Row>
     </Container>

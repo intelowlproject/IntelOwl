@@ -86,3 +86,11 @@ class TestAnalyzablesViewSet(CustomViewSetTestCase):
             result["results"][1]["name"], "f9bc35a57b22f82c94dbcc420f71b903"
         )
         self.assertEqual(result["results"][0]["name"], "test.com")
+
+    def test_history(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(f"{self.URL}/{self.an.pk}/history")
+        self.assertEqual(response.status_code, 200, response.content)
+        result = response.json()
+        self.assertIn("jobs", result)
+        self.assertIn("user_events", result)

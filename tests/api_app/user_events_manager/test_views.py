@@ -18,7 +18,7 @@ class TestUserAnalyzableEventViewSet(CustomViewSetTestCase):
         )
         u = UserAnalyzableEventSerializer(
             data={
-                "analyzable": self.an.pk,
+                "analyzable": {"name": self.an.name},
                 "decay_progression": 0,
                 "decay_timedelta_days": 3,
                 "data_model_content": {"evaluation": "malicious", "reliability": 8},
@@ -84,7 +84,7 @@ class TestUserAnalyzableEventViewSet(CustomViewSetTestCase):
             self.URL,
             data=json.dumps(
                 {
-                    "analyzable": an.pk,
+                    "analyzable": {"name": an.name},
                     "decay_progression": 0,
                     "decay_timedelta_days": 3,
                     "data_model_content": {"evaluation": "malicious", "reliability": 8},
@@ -97,7 +97,7 @@ class TestUserAnalyzableEventViewSet(CustomViewSetTestCase):
             self.URL,
             data=json.dumps(
                 {
-                    "analyzable": an.pk,
+                    "analyzable": {"name": an.name},
                     "decay_progression": 0,
                     "decay_timedelta_days": 3,
                     "data_model_content": {"evaluation": "malicious", "reliability": 8},
@@ -111,7 +111,7 @@ class TestUserAnalyzableEventViewSet(CustomViewSetTestCase):
             self.URL,
             data=json.dumps(
                 {
-                    "analyzable": an.pk,
+                    "analyzable": {"name": an.name},
                     "decay_progression": 0,
                     "decay_timedelta_days": 3,
                     "data_model_content": {"evaluation": "malicious", "reliability": 8},

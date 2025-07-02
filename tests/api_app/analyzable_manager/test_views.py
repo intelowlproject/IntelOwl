@@ -83,6 +83,6 @@ class TestAnalyzablesViewSet(CustomViewSetTestCase):
         self.assertIn("count", result)
         self.assertEqual(result["count"], 2)
         self.assertEqual(
-            result["results"][0]["name"], "f9bc35a57b22f82c94dbcc420f71b903"
+            result["results"][1]["name"], "f9bc35a57b22f82c94dbcc420f71b903"
         )
-        self.assertEqual(result["results"][1]["name"], "test.com")
+        self.assertEqual(result["results"][0]["name"], "test.com")

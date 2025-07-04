@@ -1,3 +1,4 @@
+import logging
 from contextlib import ExitStack
 from types import SimpleNamespace
 from unittest import TestCase
@@ -8,6 +9,30 @@ from api_app.analyzers_manager.models import AnalyzerConfig
 
 class BaseAnalyzerTest(TestCase):
     analyzer_class = None
+    # Control logging behavior in tests
+    suppress_analyzer_logs = True
+
+    def setUp(self):
+        """Set up test environment including logging configuration"""
+        super().setUp()
+
+        if self.suppress_analyzer_logs and self.analyzer_class:
+            # Suppress logs from the specific analyzer being tested
+            analyzer_module = self.analyzer_class.__module__
+            logging.getLogger(analyzer_module).setLevel(logging.CRITICAL)
+
+            # Also suppress common analyzer manager logs
+            logging.getLogger("api_app.analyzers_manager").setLevel(logging.WARNING)
+
+    def tearDown(self):
+        """Clean up after test"""
+        super().tearDown()
+
+        # Reset logging levels if they were modified
+        if self.suppress_analyzer_logs and self.analyzer_class:
+            analyzer_module = self.analyzer_class.__module__
+            logging.getLogger(analyzer_module).setLevel(logging.NOTSET)
+            logging.getLogger("api_app.analyzers_manager").setLevel(logging.NOTSET)
 
     @classmethod
     def get_sample_observable(cls, observable_type):
@@ -39,8 +64,9 @@ class BaseAnalyzerTest(TestCase):
         1. A single patch object: patch('module.function')
         2. A list of patch objects: [patch('module.func1'), patch('module.func2')]
         3. A context manager: patch.multiple() or ExitStack()
+        4. None: No mocking needed
         """
-        raise NotImplementedError("Subclasses must implement get_mocked_response()")
+        return None
 
     @classmethod
     def _apply_patches(cls, patches):
@@ -62,7 +88,54 @@ class BaseAnalyzerTest(TestCase):
         # Single patch object
         return patches
 
+    def _create_mock_analyzer_job(self, observable_name, observable_type):
+        """Create a properly structured mock job object"""
+        mock_tlp_enum = SimpleNamespace()
+        mock_tlp_enum.CLEAR = SimpleNamespace(value="clear")
+        mock_tlp_enum.GREEN = SimpleNamespace(value="green")
+        mock_tlp_enum.AMBER = SimpleNamespace(value="amber")
+        mock_tlp_enum.RED = SimpleNamespace(value="red")
+
+        mock_job = SimpleNamespace()
+        mock_job.analyzable = SimpleNamespace()
+        mock_job.analyzable.name = observable_name
+        mock_job.tlp = "clear"
+        mock_job.TLP = mock_tlp_enum
+
+        return mock_job
+
+    def _setup_analyzer(self, config, observable_type, observable_value):
+        """Setup analyzer instance with proper configuration"""
+        analyzer = self.analyzer_class(config)
+        analyzer.observable_name = observable_value
+        analyzer.observable_classification = observable_type
+        analyzer._job = self._create_mock_analyzer_job(
+            observable_value, observable_type
+        )
+
+        # Apply extra configuration
+        extra_config = self.get_extra_config()
+        for key, value in extra_config.items():
+            setattr(analyzer, key, value)
+
+        return analyzer
+
+    def _validate_response(self, response, observable_type):
+        """Validate analyzer response format and content"""
+        self.assertIsInstance(
+            response,
+            dict,
+            f"Analyzer response for {observable_type} should be a dictionary (JSON object)",
+        )
+        self.assertTrue(
+            response, f"Analyzer response for {observable_type} should not be empty"
+        )
+
+        # Additional validation can be added here
+        # e.g., check for required fields, data types, etc.
+
     def test_analyzer_on_supported_observables(self):
+        """Test analyzer on all supported observable types"""
         if self.analyzer_class is None:
             self.skipTest("analyzer_class is not set")
 
@@ -81,38 +154,22 @@ class BaseAnalyzerTest(TestCase):
                 patches = self.get_mocked_response()
                 with self._apply_patches(patches):
                     observable_value = self.get_sample_observable(observable_type)
-                    analyzer = self.analyzer_class(config)
-                    analyzer.observable_name = observable_value
-                    analyzer.observable_classification = observable_type
-                    # Create a mock TLP enum
-                    mock_tlp_enum = SimpleNamespace()
-                    mock_tlp_enum.CLEAR = SimpleNamespace(value="clear")
-                    mock_tlp_enum.GREEN = SimpleNamespace(value="green")
-                    mock_tlp_enum.AMBER = SimpleNamespace(value="amber")
-                    mock_tlp_enum.RED = SimpleNamespace(value="red")
-
-                    analyzer._job = SimpleNamespace()
-                    analyzer._job.analyzable = SimpleNamespace()
-                    analyzer._job.analyzable.name = analyzer.observable_name
-                    analyzer._job.tlp = "clear"
-                    analyzer._job.TLP = mock_tlp_enum
-
-                    extra_config = self.get_extra_config()
-                    for key, value in extra_config.items():
-                        setattr(analyzer, key, value)
+                    analyzer = self._setup_analyzer(
+                        config, observable_type, observable_value
+                    )
 
                     try:
                         response = analyzer.run()
-                    except AnalyzerRunException:
+                        self._validate_response(response, observable_type)
+                        print(f"SUCCESS {observable_type}")
+
+                    except AnalyzerRunException as e:
                         self.fail(
-                            f"AnalyzerRunException raised for {observable_type} with valid format"
+                            f"AnalyzerRunException raised for {observable_type} "
+                            f"with valid format: {str(e)}"
                         )
-
-                    self.assertIsInstance(
-                        response,
-                        dict,
-                        "Analyzer response should be a dictionary (JSON object)",
-                    )
-                    self.assertTrue(response, "Analyzer response should not be empty")
-
-                    print(f"SUCCESS {observable_type}")
+                    except Exception as e:
+                        self.fail(
+                            f"Unexpected exception for {observable_type}: "
+                            f"{type(e).__name__}: {str(e)}"
+                        )

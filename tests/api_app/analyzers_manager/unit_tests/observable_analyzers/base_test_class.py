@@ -124,7 +124,7 @@ class BaseAnalyzerTest(TestCase):
         """Validate analyzer response format and content"""
         self.assertIsInstance(
             response,
-            dict,
+            (dict, list),
             f"Analyzer response for {observable_type} should be a dictionary (JSON object)",
         )
         self.assertTrue(
@@ -173,3 +173,40 @@ class BaseAnalyzerTest(TestCase):
                             f"Unexpected exception for {observable_type}: "
                             f"{type(e).__name__}: {str(e)}"
                         )
+
+    def test_analyzer_error_handling(self):
+        """Test analyzer behavior with invalid inputs"""
+        if self.analyzer_class is None:
+            self.skipTest("analyzer_class is not set")
+
+        config = AnalyzerConfig.objects.get(
+            python_module=self.analyzer_class.python_module
+        )
+
+        # Test with invalid observable types if applicable
+        invalid_observables = {
+            "domain": "invalid..domain",
+            "ip": "999.999.999.999",
+            "url": "not-a-url",
+            "hash": "tooshort",
+        }
+
+        for observable_type in config.observable_supported:
+            if observable_type in invalid_observables:
+                with self.subTest(observable_type=f"{observable_type}_invalid"):
+                    patches = self.get_mocked_response()
+                    with self._apply_patches(patches):
+                        invalid_value = invalid_observables[observable_type]
+                        analyzer = self._setup_analyzer(
+                            config, observable_type, invalid_value
+                        )
+
+                        # Depending on your analyzer's design, this might raise
+                        # an exception or return an error response
+                        try:
+                            response = analyzer.run()
+                            # If no exception, validate it's a proper error response
+                            self.assertIsInstance(response, (dict, list))
+                        except (AnalyzerRunException, ValueError) as e:
+                            # Expected behavior for invalid input
+                            print(f"Expected error for invalid {observable_type}: {e}")

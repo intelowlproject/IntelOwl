@@ -41,6 +41,6 @@ def migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("analyzers_manager", "0157_analyzer_config_phunter"),
+        ("analyzers_manager", "0158_analyzer_config_huntingabuseapi"),
     ]
     operations = [migrations.RunPython(migrate, migrations.RunPython.noop)]

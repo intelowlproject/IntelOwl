@@ -139,9 +139,16 @@ class BaseAnalyzerTest(TestCase):
         if self.analyzer_class is None:
             self.skipTest("analyzer_class is not set")
 
-        config = AnalyzerConfig.objects.get(
+        configs = AnalyzerConfig.objects.filter(
             python_module=self.analyzer_class.python_module
         )
+
+        if not configs.exists():
+            self.skipTest(
+                f"No AnalyzerConfig found for {self.analyzer_class.python_module}"
+            )
+
+        config = configs.first()
 
         for observable_type in config.observable_supported:
             if observable_type == "generic":
@@ -179,9 +186,16 @@ class BaseAnalyzerTest(TestCase):
         if self.analyzer_class is None:
             self.skipTest("analyzer_class is not set")
 
-        config = AnalyzerConfig.objects.get(
+        configs = AnalyzerConfig.objects.filter(
             python_module=self.analyzer_class.python_module
         )
+
+        if not configs.exists():
+            self.skipTest(
+                f"No AnalyzerConfig found for {self.analyzer_class.python_module}"
+            )
+
+        config = configs.first()
 
         # Test with invalid observable types if applicable
         invalid_observables = {

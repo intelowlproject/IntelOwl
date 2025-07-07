@@ -9,6 +9,7 @@ from rest_framework.mixins import (
     DestroyModelMixin,
     ListModelMixin,
     RetrieveModelMixin,
+    UpdateModelMixin,
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -41,6 +42,7 @@ class UserEventViewSet(
     RetrieveModelMixin,
     DestroyModelMixin,
     ListModelMixin,
+    UpdateModelMixin,
     GenericViewSet,
 ):
     permission_classes = [IsAuthenticated, IsObjectOwnerOrSameOrgPermission]
@@ -48,7 +50,7 @@ class UserEventViewSet(
 
     def get_permissions(self):
         permissions = super().get_permissions()
-        if self.action in ["destroy"]:
+        if self.action in ["destroy", "update", "partial_update"]:
             permissions.append(IsObjectOwnerPermission())
         return permissions
 

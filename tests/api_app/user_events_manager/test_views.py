@@ -121,11 +121,47 @@ class TestUserAnalyzableEventViewSet(CustomViewSetTestCase):
         )
         self.assertEqual(response.status_code, 201, response.content)
 
+        self.client.force_authenticate(user=self.user)
+        an3 = Analyzable.objects.filter(
+            name="test3.com", classification=Classification.DOMAIN
+        )
+        self.assertFalse(an3.exists())
+        response = self.client.post(
+            self.URL,
+            data=json.dumps(
+                {
+                    "analyzable": {"name": "test3.com"},
+                    "decay_progression": 0,
+                    "decay_timedelta_days": 3,
+                    "data_model_content": {"evaluation": "malicious", "reliability": 8},
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 201, response.content)
+        self.assertTrue(an3.exists())
         an.delete()
+        an3.delete()
+
+    def test_update(self):
+        payload = {
+            "analyzable": {"name": self.an.name},
+            "data_model_content": {"evaluation": "trusted", "reliability": 10},
+        }
+        self.client.force_authenticate(self.user)
+        response = self.client.patch(
+            f"{self.URL}/{self.res.pk}", payload, format="json"
+        )
+        self.assertEqual(response.status_code, 200, response.json())
+        self.client.force_authenticate(self.guest)
+        response = self.client.patch(
+            f"{self.URL}/{self.res.pk}", payload, format="json"
+        )
+        self.assertEqual(response.status_code, 404, response.json())
 
     def test_delete(self):
         self.client.force_authenticate(self.superuser)
-        # 1. owner/admin can't delete a playbook created by an user
+        # 1. owner/admin can't delete a event created by an user
         response = self.client.delete(f"{self.URL}/{self.res.pk}")
         self.assertEqual(response.status_code, 404)
         self.client.force_authenticate(self.user)

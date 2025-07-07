@@ -41,8 +41,7 @@ export function UserReportModal({ analyzables, toggle, isOpen }) {
   const formik = useFormik({
     initialValues: {
       // base fields
-      // analyzables: analyzables.map(analyzable => analyzable.name) || [""],
-      analyzables: analyzables.map((analyzable) => analyzable.id) || [""],
+      analyzables: analyzables.map((analyzable) => analyzable.name) || [""],
       evaluation: "",
       kill_chain_phase: "",
       external_references: [""],
@@ -89,7 +88,7 @@ export function UserReportModal({ analyzables, toggle, isOpen }) {
       const reports = [];
       formik.values.analyzables.forEach((analyzable) => {
         reports.push({
-          analyzable,
+          analyzable: { name: analyzable },
           decay_progression: formik.values.decay_progression,
           decay_timedelta_days: formik.values.decay_timedelta_days,
           data_model_content: {

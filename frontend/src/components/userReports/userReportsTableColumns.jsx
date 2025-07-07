@@ -54,7 +54,7 @@ export const userReportsTableColumns = [
   {
     Header: "Analyzable",
     id: "analyzable_name",
-    accessor: "analyzable",
+    accessor: (userEvent) => userEvent.analyzable.name,
     Cell: ({ value, row }) => (
       <TableCell
         id={`table-cell-analyzable__${row?.id}`}

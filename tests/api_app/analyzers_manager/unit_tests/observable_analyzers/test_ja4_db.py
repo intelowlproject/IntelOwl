@@ -1,4 +1,3 @@
-import os
 from unittest.mock import patch
 
 from api_app.analyzers_manager.observable_analyzers.ja4_db import Ja4DB
@@ -54,9 +53,3 @@ class Ja4DBTestCase(BaseAnalyzerTest):
             },
         ]
         return patch("requests.get", return_value=MockUpResponse(sample_data, 200))
-
-    def tearDown(self):
-        # Clean up local JSON file after test
-        db_file = Ja4DB.location()
-        if os.path.exists(db_file):
-            os.remove(db_file)

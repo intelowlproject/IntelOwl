@@ -15,7 +15,7 @@ plugin = {
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },
     "name": "ExpandURL",
-    "description": "ExpandURL analyzer, takes a fake URL and provides us the actual expanded URL, along with full redirection chain.",
+    "description": "ExpandURL analyzer, takes a shortened URL and provides us the actual expanded URL, along with full redirection chain.",
     "disabled": False,
     "soft_time_limit": 60,
     "routing_key": "default",

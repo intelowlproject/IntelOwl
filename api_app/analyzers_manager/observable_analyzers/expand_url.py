@@ -19,6 +19,8 @@ class ExpandURL(ObservableAnalyzer):
             soup = BeautifulSoup(html_content, features="html.parser")
             refresh_meta_tag = soup.find("meta", attrs={"http-equiv": "refresh"})
 
+            # following block checks if the response content contains any meta refresh tags
+            # if yes then, capture and return the redirection url
             if (
                 refresh_meta_tag is not None
                 and "url" in refresh_meta_tag["content"].lower()

@@ -215,7 +215,23 @@ const authRoutesLazy = [
     ),
   },
   {
-    path: "/history/user-reports",
+    path: "/history/user-events",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <History />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/history/user-domain-wildcard-events",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <History />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/history/user-ip-wildcard-events",
     element: (
       <Suspense fallback={<FallBackLoading />}>
         <History />

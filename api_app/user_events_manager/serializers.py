@@ -77,7 +77,7 @@ class UserAnalyzableEventSerializer(UserEventSerializer):
 
 
 class UserDomainWildCardEventSerializer(UserEventSerializer):
-
+    query = serializers.CharField(required=True)
     analyzables = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
     data_model_content = DomainDataModelSerializer(write_only=True, source="data_model")
     data_model = DomainDataModelSerializer(read_only=True)

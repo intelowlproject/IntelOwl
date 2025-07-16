@@ -27,7 +27,9 @@ export const datetimeFormatStr = "yyyy-MM-dd'T'HH:mm:ss";
 export const HistoryPages = Object.freeze({
   JOBS: "jobs",
   INVESTIGAITONS: "investigations",
-  USER_REPORTS: "user-reports",
+  USER_EVENTS: "user-events",
+  USER_DOMAIN_WILDCARD_EVENTS: "user-domain-wildcard-events",
+  USER_IP_WILDCARD_EVENTS: "user-ip-wildcard-events",
 });
 
 export const Classifications = Object.freeze({
@@ -41,5 +43,7 @@ export const Classifications = Object.freeze({
 
 export const AnalyzableHistoryTypes = Object.freeze({
   JOB: "job",
-  USER_REPORT: "user_report",
+  USER_EVENT: "user_event",
+  USER_DOMAIN_WILDCARD_EVENT: "user_domain_wildcard_event",
+  USER_IP_WILDCARD_EVENT: "user_ip_wildcard_event",
 });

@@ -11,14 +11,25 @@ import {
   Button,
   Input,
   FormFeedback,
+  UncontrolledTooltip,
 } from "reactstrap";
 import PropTypes from "prop-types";
-import { useFormik, FormikProvider } from "formik";
+import { useFormik, FormikProvider, FieldArray } from "formik";
 import axios from "axios";
+import { BsFillTrashFill, BsFillPlusCircleFill } from "react-icons/bs";
+import { MdInfoOutline } from "react-icons/md";
 
-import { ArrowToggleIcon, addToast } from "@certego/certego-ui";
+import {
+  ArrowToggleIcon,
+  addToast,
+  useDebounceInput,
+} from "@certego/certego-ui";
 
-import { USER_EVENT_ANALYZABLE } from "../../constants/apiURLs";
+import {
+  USER_EVENT_ANALYZABLE,
+  USER_EVENT_IP_WILDCARD,
+  USER_EVENT_DOMAIN_WILDCARD,
+} from "../../constants/apiURLs";
 
 import {
   Evaluations,
@@ -29,8 +40,15 @@ import { TagSelectInput } from "../common/form/TagSelectInput";
 import {
   DecayProgressionTypes,
   DecayProgressionDescription,
-} from "../../constants/userReportsConst";
+  UserEventTypes,
+} from "../../constants/userEventsConst";
 import { useAuthStore } from "../../stores/useAuthStore";
+import {
+  IP_REGEX,
+  DOMAIN_REGEX,
+  URL_REGEX,
+  HASH_REGEX,
+} from "../../constants/regexConst";
 
 export function UserReportModal({ analyzables, toggle, isOpen }) {
   console.debug("UserReportModal rendered!");
@@ -38,10 +56,14 @@ export function UserReportModal({ analyzables, toggle, isOpen }) {
   const [user] = useAuthStore((state) => [state.user]);
   const [isOpenAdvancedFields, setIsOpenAdvancedFields] = React.useState(false);
 
+  const [inputValue, setInputValue] = React.useState("");
+  const [wildcard, setWildcard] = React.useState("");
+  const [inputTypes, setInputTypes] = React.useState({});
+
   const formik = useFormik({
     initialValues: {
-      // base fields
-      analyzables: analyzables.map((analyzable) => analyzable.name) || [""],
+      // base data model fields
+      analyzables: analyzables.map((analyzable) => analyzable?.name || ""),
       evaluation: "",
       kill_chain_phase: "",
       external_references: [""],
@@ -58,15 +80,12 @@ export function UserReportModal({ analyzables, toggle, isOpen }) {
       console.debug(values);
       const errors = {};
 
-      // check domain wildcard
-
-      // check ip wildcard
-
       if (!Number.isInteger(values.decay_timedelta_days)) {
         errors.decay_timedelta_days = "The value must be a number.";
-      } else if (
+      }
+      if (
         values.decay_timedelta_days !== 0 &&
-        values?.decay_progression === DecayProgressionTypes.FIXED
+        values.decay_progression === DecayProgressionTypes.FIXED
       ) {
         errors.decay_timedelta_days =
           "You can't have a fixed decay progression and days different from 0";
@@ -85,88 +104,192 @@ export function UserReportModal({ analyzables, toggle, isOpen }) {
         }
       });
 
-      const reports = [];
+      const apiCalls = [];
+
       formik.values.analyzables.forEach((analyzable) => {
-        reports.push({
-          analyzable: { name: analyzable },
+        const evaluation = {
           decay_progression: formik.values.decay_progression,
           decay_timedelta_days: formik.values.decay_timedelta_days,
           data_model_content: {
             ...editedFields,
             reliability: formik.values.reliability,
           },
-        });
-      });
+        };
 
-      const requests = reports.map((report) => {
-        if (
-          analyzables.findIndex(
-            (analyzable) =>
-              analyzable.id === report.analyzable &&
-              analyzable?.user_events
-                ?.map((event) => event.user.username)
-                .includes(user.username),
-          ) !== -1
+        if (inputTypes[analyzable].type === UserEventTypes.IP_WILDCARD) {
+          evaluation.network = analyzable;
+          axios
+            .get(
+              `${USER_EVENT_IP_WILDCARD}?username=${user.username}&network=${analyzable}`,
+            )
+            .then((resp) => {
+              if (resp.data.count === 0) {
+                // create a new evaluation
+                apiCalls.push(
+                  axios.post(`${USER_EVENT_IP_WILDCARD}`, evaluation),
+                );
+              } else {
+                // edit an existing evaluation
+                apiCalls.push(
+                  axios.patch(
+                    `${USER_EVENT_IP_WILDCARD}/${resp.data.results[0].id}`,
+                    evaluation,
+                  ),
+                );
+              }
+            });
+        } else if (
+          inputTypes[analyzable].type === UserEventTypes.DOMAIN_WILDCARD
         ) {
-          // edit an existing report
-          return axios.patch(`${USER_EVENT_ANALYZABLE}`, report);
-        }
-        // create a new report
-        return axios.post(`${USER_EVENT_ANALYZABLE}`, report);
-      });
-
-      Promise.allSettled(requests).then((response) => {
-        const failed = [];
-        response.forEach((promise, index) => {
-          if (promise.status === "rejected")
-            failed.push(reports[index].analyzable);
-        });
-        console.debug(failed);
-
-        if (failed.length === 0) {
-          addToast("Report added successfully", null, "success");
-          formik.setSubmitting(false);
-          formik.resetForm();
-          toggle(false);
-        } else if (failed.length !== reports.length) {
-          addToast(
-            `Failed to add reports: ${failed.toString()}`,
-            null,
-            "warning",
-          );
-          formik.setFieldValue("analyzables", failed, false);
+          evaluation.query = analyzable;
+          axios
+            .get(
+              `${USER_EVENT_DOMAIN_WILDCARD}?username=${user.username}&query=${analyzable}`,
+            )
+            .then((resp) => {
+              if (resp.data.count === 0) {
+                // create a new evaluation
+                apiCalls.push(
+                  axios.post(`${USER_EVENT_DOMAIN_WILDCARD}`, evaluation),
+                );
+              } else {
+                // edit an existing evaluation
+                apiCalls.push(
+                  axios.patch(
+                    `${USER_EVENT_DOMAIN_WILDCARD}/${resp.data.results[0].id}`,
+                    evaluation,
+                  ),
+                );
+              }
+            });
         } else {
-          addToast(
-            `Failed to add reports: ${failed.toString()}`,
-            null,
-            "danger",
-          );
-          formik.setSubmitting(false);
-          formik.resetForm();
-          toggle(false);
+          evaluation.analyzable = { name: analyzable };
+          axios
+            .get(
+              `${USER_EVENT_ANALYZABLE}?username=${user.username}&analyzable_name=${analyzable}`,
+            )
+            .then((resp) => {
+              if (resp.data.count === 0) {
+                // create a new evaluation
+                apiCalls.push(
+                  axios.post(`${USER_EVENT_ANALYZABLE}`, evaluation),
+                );
+              } else {
+                // edit an existing evaluation
+                apiCalls.push(
+                  axios.patch(
+                    `${USER_EVENT_ANALYZABLE}/${resp.data.results[0].id}`,
+                    evaluation,
+                  ),
+                );
+              }
+            });
         }
       });
+
+      const failed = [];
+      const response = await Promise.allSettled(apiCalls);
+      response.forEach((promise, index) => {
+        if (promise.status === "rejected")
+          failed.push(formik.values.analyzables[index]);
+      });
+      if (failed.length === 0) {
+        addToast("Evaluation added successfully", null, "success");
+        formik.setSubmitting(false);
+        formik.resetForm();
+        toggle(false);
+      } else {
+        addToast(
+          `Failed to add evaluation for: ${failed.toString()}`,
+          null,
+          "danger",
+        );
+        formik.setFieldValue("analyzables", failed, false);
+      }
       return null;
     },
   });
 
-  console.debug("formik", formik.values);
+  React.useEffect(() => {
+    const obj = {};
+    formik.initialValues.analyzables.forEach((analyzable) => {
+      if (analyzable !== "") {
+        obj[analyzable] = { type: UserEventTypes.ANALYZABLE };
+      }
+    });
+    setInputTypes({ ...inputTypes, ...obj });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formik.initialValues.analyzables]);
+
+  useDebounceInput(inputValue, 1000, setWildcard);
+
+  // ip/domain wildcard matches
+  React.useEffect(() => {
+    if (wildcard !== "") {
+      // check ip wildcard
+      if (
+        IP_REGEX.test(wildcard.split(/[/]/)[0]) &&
+        wildcard.split(/[/]/).length === 2
+      ) {
+        axios
+          .put(`${USER_EVENT_IP_WILDCARD}/validate`, { network: wildcard })
+          .then((response) => {
+            setInputTypes({
+              ...inputTypes,
+              [wildcard]: {
+                type: UserEventTypes.IP_WILDCARD,
+                matchesNumber: response.data.length,
+                matches: response.data,
+              },
+            });
+          })
+          .catch((error) => console.debug(error));
+      } else if (
+        !DOMAIN_REGEX.test(wildcard) &&
+        !IP_REGEX.test(wildcard) &&
+        !URL_REGEX.test(wildcard) &&
+        !HASH_REGEX.test(wildcard)
+      ) {
+        // check domain wildcard
+        axios
+          .put(`${USER_EVENT_DOMAIN_WILDCARD}/validate`, { query: wildcard })
+          .then((response) => {
+            setInputTypes({
+              ...inputTypes,
+              [wildcard]: {
+                type: UserEventTypes.DOMAIN_WILDCARD,
+                matchesNumber: response.data.length,
+                matches: response.data,
+              },
+            });
+          })
+          .catch((error) => console.debug(error));
+      } else {
+        console.debug("analyzable type");
+        setInputTypes({
+          ...inputTypes,
+          [wildcard]: { type: UserEventTypes.ANALYZABLE },
+        });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wildcard]);
 
   return (
     <Modal
-      id="user-report-modal"
+      id="user-evaluaiton-modal"
       autoFocus
       centered
       zIndex="1050"
       size="lg"
       backdrop="static"
-      labelledBy="User report modal"
+      labelledBy="User evaluaiton modal"
       isOpen={isOpen}
       style={{ minWidth: "70%" }}
       toggle={() => toggle(false)}
     >
       <ModalHeader className="mx-2" toggle={() => toggle(false)}>
-        <small className="text-info">Add your report</small>
+        <small className="text-info">Add your evaluaiton</small>
       </ModalHeader>
       <ModalBody className="m-2">
         <FormikProvider value={formik}>
@@ -178,27 +301,134 @@ export function UserReportModal({ analyzables, toggle, isOpen }) {
                     className="me-2 mb-0 required"
                     for="userReport__analyzables"
                   >
-                    Analyzable(s):
+                    Analyzable(s) or IP/Domain wildcard:
                   </Label>
                 </Col>
                 <Col md={10}>
-                  <ListInput
-                    id="analyzables"
-                    values={formik.values.analyzables}
-                    formikSetFieldValue={formik.setFieldValue}
-                    placeholder="google.com, 8.8.8.8, https://google.com, 1d5920f4b44b27a802bd77c4f0536f5a, *\.com"
+                  <FieldArray
+                    name="analyzables"
+                    render={(arrayHelpers) => (
+                      <FormGroup row>
+                        <div style={{ maxHeight: "40vh", overflowY: "scroll" }}>
+                          {formik.values.analyzables &&
+                          formik.values.analyzables.length > 0
+                            ? formik.values.analyzables.map((value, index) => (
+                                <div>
+                                  <div
+                                    className="py-2 d-flex"
+                                    key={`"analyzables"-${index + 0}`}
+                                  >
+                                    <Col sm={10} className="pe-3">
+                                      <Input
+                                        type="text"
+                                        id={`"analyzables"-${index}`}
+                                        name={`$"analyzables"-${index}`}
+                                        placeholder="google.com, 8.8.8.8, https://google.com, 1d5920f4b44b27a802bd77c4f0536f5a, .*\.com"
+                                        className="input-dark"
+                                        value={value}
+                                        onChange={(event) => {
+                                          const attributevalues =
+                                            formik.values.analyzables;
+                                          attributevalues[index] =
+                                            event.target.value;
+                                          formik.setFieldValue(
+                                            "analyzables",
+                                            attributevalues,
+                                            false,
+                                          );
+                                          setInputValue(event.target.value);
+                                        }}
+                                      />
+                                    </Col>
+                                    <Col
+                                      sm={2}
+                                      className="d-flex justify-content-start"
+                                    >
+                                      <Button
+                                        color="primary"
+                                        size="sm"
+                                        id={`"analyzables"-${index}-deletebtn`}
+                                        className="mx-1 rounded-1 d-flex align-items-center px-3"
+                                        onClick={() =>
+                                          arrayHelpers.remove(index)
+                                        }
+                                        disabled={
+                                          formik.values.analyzables.length === 1
+                                        }
+                                      >
+                                        <BsFillTrashFill />
+                                      </Button>
+                                      <Button
+                                        color="primary"
+                                        size="sm"
+                                        id={`"analyzables"-${index}-addbtn`}
+                                        className="mx-1 rounded-1 d-flex align-items-center px-3"
+                                        onClick={() => arrayHelpers.push("")}
+                                      >
+                                        <BsFillPlusCircleFill />
+                                      </Button>
+                                    </Col>
+                                  </div>
+                                  <div className="row">
+                                    <Col sm={3}>
+                                      <small className="fst-italic">
+                                        Type:
+                                      </small>
+                                      <small className="text-info ms-2">
+                                        {inputTypes[value]?.type?.replace(
+                                          "_",
+                                          " ",
+                                        )}
+                                      </small>
+                                    </Col>
+                                    <Col
+                                      sm={5}
+                                      className="d-flex align-items-center "
+                                    >
+                                      <small className="fst-italic">
+                                        Matches:
+                                      </small>
+                                      {inputTypes[value]?.type !==
+                                        UserEventTypes.ANALYZABLE &&
+                                      value !== "" ? (
+                                        <div>
+                                          <small className="text-info ms-2">
+                                            {inputTypes[value]?.matchesNumber}{" "}
+                                          </small>
+                                          <MdInfoOutline
+                                            id="matches-infoicon"
+                                            fontSize="15"
+                                            className="text-info"
+                                          />
+                                          <UncontrolledTooltip
+                                            trigger="hover"
+                                            delay={{ show: 0, hide: 200 }}
+                                            target="matches-infoicon"
+                                            placement="right"
+                                            fade={false}
+                                            innerClassName="p-2 text-start text-nowrap md-fit-content"
+                                          >
+                                            {inputTypes[
+                                              value
+                                            ]?.matches.toString()}
+                                          </UncontrolledTooltip>
+                                        </div>
+                                      ) : (
+                                        <small className="text-gray ms-2">
+                                          supported only for wildcard
+                                        </small>
+                                      )}
+                                    </Col>
+                                  </div>
+                                </div>
+                              ))
+                            : null}
+                        </div>
+                      </FormGroup>
+                    )}
                   />
                 </Col>
               </Row>
-              {/* <Row>
-                <Col className="offset-2 col-9">
-                  <small className="fst-italic">
-                    Note: if a domain wildcard or a network is entered, the
-                    search for existing analyzables that mach will be
-                    automatically performed
-                  </small>
-                </Col>
-              </Row> */}
               <hr />
             </FormGroup>
             <FormGroup>
@@ -404,6 +634,7 @@ export function UserReportModal({ analyzables, toggle, isOpen }) {
                             <option
                               key={`userReport__decay_progression-select-option-${value}`}
                               value={value}
+                              className="d-flex flex-column"
                             >
                               {decayType.toUpperCase()}
                             </option>

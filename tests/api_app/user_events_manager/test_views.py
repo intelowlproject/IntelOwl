@@ -2,7 +2,10 @@ import json
 
 from api_app.analyzables_manager.models import Analyzable
 from api_app.choices import Classification
-from api_app.user_events_manager.serializers import UserAnalyzableEventSerializer
+from api_app.user_events_manager.serializers import (
+    UserAnalyzableEventSerializer,
+    UserIPWildCardEventSerializer,
+)
 from tests import CustomViewSetTestCase
 from tests.mock_utils import MockUpRequest
 
@@ -169,3 +172,211 @@ class TestUserAnalyzableEventViewSet(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 204)
         response = self.client.delete(f"{self.URL}/{self.res.pk}")
         self.assertEqual(response.status_code, 404)
+
+
+class TestUserIPWildCardEventViewSet(CustomViewSetTestCase):
+    URL = "/api/user_event/ip_wildcard"
+
+    def setUp(self):
+        super().setUp()
+        self.an = Analyzable.objects.create(
+            name="1.2.3.4",
+            classification=Classification.IP,
+        )
+        u = UserIPWildCardEventSerializer(
+            data={
+                "network": "1.2.3.0/24",
+                "decay_progression": 0,
+                "decay_timedelta_days": 3,
+                "data_model_content": {"evaluation": "malicious", "reliability": 8},
+            },
+            context={"request": MockUpRequest(user=self.user)},
+        )
+
+        u.is_valid(raise_exception=True)
+        self.res = u.save()
+
+    def tearDown(self):
+        super().tearDown()
+        self.res.delete()
+        self.an.delete()
+
+    def test_list(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(self.URL)
+        self.assertEqual(response.status_code, 200, response.content)
+        result = response.json()
+        self.assertIn("count", result)
+        self.assertEqual(result["count"], 1)
+
+        response = self.client.get(self.URL + f"?username={self.user.username}")
+        self.assertEqual(response.status_code, 200, response.content)
+        result = response.json()
+        self.assertIn("count", result)
+        self.assertEqual(result["count"], 1)
+
+        response = self.client.get(self.URL + f"?username={self.superuser.username}")
+        self.assertEqual(response.status_code, 200, response.content)
+        result = response.json()
+        self.assertIn("count", result)
+        self.assertEqual(result["count"], 0)
+
+        u = UserIPWildCardEventSerializer(
+            data={
+                "network": "1.2.4.0/24",
+                "decay_progression": 0,
+                "decay_timedelta_days": 3,
+                "data_model_content": {"evaluation": "malicious", "reliability": 8},
+            },
+            context={"request": MockUpRequest(user=self.user)},
+        )
+
+        u.is_valid(raise_exception=True)
+        u.save()
+
+        response = self.client.get(self.URL + "?network=1.2.3.0/24")
+        self.assertEqual(response.status_code, 200, response.content)
+        result = response.json()
+        self.assertIn("count", result)
+        self.assertEqual(result["count"], 1)
+
+    def test_create(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(
+            self.URL,
+            data=json.dumps(
+                {
+                    "network": "1.2.4.0/24",
+                    "decay_progression": 0,
+                    "decay_timedelta_days": 3,
+                    "data_model_content": {"evaluation": "malicious", "reliability": 8},
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 201, response.content)
+        response = self.client.post(
+            self.URL,
+            data=json.dumps(
+                {
+                    "network": "1.2.4.0/24",
+                    "decay_progression": 0,
+                    "decay_timedelta_days": 3,
+                    "data_model_content": {"evaluation": "malicious", "reliability": 8},
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 409, response.content)
+        self.client.force_authenticate(user=self.superuser)
+        response = self.client.post(
+            self.URL,
+            data=json.dumps(
+                {
+                    "network": "1.2.3.0/24",
+                    "decay_progression": 0,
+                    "decay_timedelta_days": 3,
+                    "data_model_content": {"evaluation": "malicious", "reliability": 8},
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 201, response.content)
+
+    def test_validate(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.put(
+            f"{self.URL}/validate", {"network": "1.2.3.0/24"}, format="json"
+        )
+        self.assertEqual(response.status_code, 200, response.json())
+        result = response.json()
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0], self.an.name)
+
+        an2 = Analyzable.objects.create(
+            name="1.2.4.4",
+            classification=Classification.IP,
+        )
+        response = self.client.put(
+            f"{self.URL}/validate", {"network": "1.2.3.0/24"}, format="json"
+        )
+        self.assertEqual(response.status_code, 200, response.json())
+        result = response.json()
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0], self.an.name)
+
+        an2.delete()
+
+
+class TestUserDomainWildCardEventViewSet(CustomViewSetTestCase):
+    URL = "/api/user_event/domain_wildcard"
+
+    def setUp(self):
+        super().setUp()
+        self.an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
+    def tearDown(self):
+        super().tearDown()
+        self.an.delete()
+
+    def test_create(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(
+            self.URL,
+            data=json.dumps(
+                {
+                    "query": ".*\.com",
+                    "decay_progression": 0,
+                    "decay_timedelta_days": 3,
+                    "data_model_content": {"evaluation": "malicious", "reliability": 8},
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 201, response.content)
+        print(response.json())
+        response = self.client.post(
+            self.URL,
+            data=json.dumps(
+                {
+                    "query": ".*\.com",
+                    "decay_progression": 0,
+                    "decay_timedelta_days": 3,
+                    "data_model_content": {"evaluation": "malicious", "reliability": 8},
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 409, response.content)
+        self.client.force_authenticate(user=self.superuser)
+        response = self.client.post(
+            self.URL,
+            data=json.dumps(
+                {
+                    "query": ".*\.com",
+                    "decay_progression": 0,
+                    "decay_timedelta_days": 3,
+                    "data_model_content": {"evaluation": "malicious", "reliability": 8},
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 201, response.content)
+
+    def test_validate(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.put(
+            f"{self.URL}/validate", {"query": "*\.test.com"}, format="json"
+        )
+        self.assertEqual(response.status_code, 400, response.json())
+
+        response = self.client.put(
+            f"{self.URL}/validate", {"query": ".*\.?test.com"}, format="json"
+        )
+        self.assertEqual(response.status_code, 200, response.json())
+        result = response.json()
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0], self.an.name)

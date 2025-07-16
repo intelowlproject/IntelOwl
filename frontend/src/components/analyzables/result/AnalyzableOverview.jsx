@@ -21,7 +21,6 @@ import { TagsIcons } from "../../../constants/dataModelConst";
 import { TagsColors } from "../../../constants/colorConst";
 import { getIcon } from "../../common/icon/icons";
 import { AnalyzableHistoryTypes } from "../../../constants/miscConst";
-import { UserReportDecay } from "../../userReports/UserReportDecay";
 import { ANALYZABLES_URI } from "../../../constants/apiURLs";
 
 const tableInitialState = {
@@ -33,18 +32,33 @@ export function AnalyzableOverview({ analyzable }) {
   console.debug("AnalyzableOverview rendered");
 
   // API to download the analyzable history data
-  const [{ data: history, loading, error }] = useAxios({
-    url: `${ANALYZABLES_URI}/${analyzable.id}/history`,
-  });
+  const [{ data: history, loading, error }] = useAxios(
+    {
+      url: `${ANALYZABLES_URI}/${analyzable.id}/history`,
+    },
+    { cache: false },
+  );
 
   const jobs = history?.jobs?.map((job) => ({
     ...job,
     type: AnalyzableHistoryTypes.JOB,
   }));
-  const userReports = history?.user_events?.map((userEvent) => ({
+  const userEvents = history?.user_events?.map((userEvent) => ({
     ...userEvent,
-    type: AnalyzableHistoryTypes.USER_REPORT,
+    type: AnalyzableHistoryTypes.USER_EVENT,
   }));
+  const userDomainWildCardEvents = history?.user_domain_wildcard_events?.map(
+    (userEvent) => ({
+      ...userEvent,
+      type: AnalyzableHistoryTypes.USER_DOMAIN_WILDCARD_EVENT,
+    }),
+  );
+  const userIpWildCardEvents = history?.user_ip_wildcard_events?.map(
+    (userEvent) => ({
+      ...userEvent,
+      type: AnalyzableHistoryTypes.USER_IP_WILDCARD_EVENT,
+    }),
+  );
 
   return (
     <Container fluid>
@@ -75,7 +89,7 @@ export function AnalyzableOverview({ analyzable }) {
         <Col>
           <HorizontalListVisualizer
             id="analyzable-overview__first-row"
-            alignment="center"
+            alignment="around"
             values={[
               [
                 "First Analysis",
@@ -109,15 +123,6 @@ export function AnalyzableOverview({ analyzable }) {
                   value={analyzable.last_data_model.date}
                   format="hh:mm:ss a MMM do, yyyy"
                 />,
-              ],
-              [
-                "Decay",
-                analyzable?.next_decay !== undefined ? (
-                  <UserReportDecay
-                    decay={analyzable.next_decay}
-                    reliability={analyzable.last_data_model.reliability}
-                  />
-                ) : null,
               ],
               ["Malware Family", analyzable.last_data_model.malware_family],
               ["Killchain Phase", analyzable.last_data_model.kill_chain_phase],
@@ -237,7 +242,11 @@ export function AnalyzableOverview({ analyzable }) {
           error={error}
           render={() => (
             <DataTable
-              data={jobs.concat(userReports)}
+              data={jobs.concat(
+                userEvents,
+                userDomainWildCardEvents,
+                userIpWildCardEvents,
+              )}
               config={{}}
               initialState={tableInitialState}
               columns={analyzablesHistoryTableColumns}

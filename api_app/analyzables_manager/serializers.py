@@ -4,12 +4,10 @@ from api_app.analyzables_manager.models import Analyzable
 from api_app.choices import Classification
 from api_app.models import Job
 from api_app.serializers.job import JobRelatedField
-from api_app.user_events_manager.models import UserAnalyzableEvent
 
 
 class AnalyzableSerializer(rfs.ModelSerializer):
     jobs = JobRelatedField(many=True, read_only=True)
-    user_events = rfs.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = Analyzable
@@ -22,7 +20,6 @@ class AnalyzableSerializer(rfs.ModelSerializer):
             "sha256",
             "sha1",
             "mimetype",
-            "user_events",
         ]
 
     def to_representation(self, instance):
@@ -32,24 +29,22 @@ class AnalyzableSerializer(rfs.ModelSerializer):
             .order_by("-finished_analysis_time")
             .first()
         )
-        user_event = (
-            UserAnalyzableEvent.objects.filter(id__in=analyzable["user_events"])
-            .order_by("-date")
-            .first()
+        user_event_data_model = (
+            instance.get_all_user_events_data_model().order_by("-date").first()
         )
 
-        if job is None and user_event is None:
+        if job is None and user_event_data_model is None:
             analyzable["last_data_model"] = None
             return analyzable
-        elif job is not None and user_event is not None:
+        elif job is not None and user_event_data_model is not None:
             last_data_model = (
                 job.data_model
-                if job.data_model.date > user_event.data_model.date
-                else user_event.data_model
+                if job.data_model.date > user_event_data_model.date
+                else user_event_data_model
             )
         else:
             last_data_model = (
-                job.data_model if job is not None else user_event.data_model
+                job.data_model if job is not None else user_event_data_model
             )
 
         serializer_class = Classification.get_data_model_class(

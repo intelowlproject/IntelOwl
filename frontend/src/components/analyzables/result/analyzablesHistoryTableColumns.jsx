@@ -78,7 +78,7 @@ export const analyzablesHistoryTableColumns = [
   {
     Header: "Date",
     id: "date",
-    accessor: "date",
+    accessor: (analyzable) => analyzable.data_model.date,
     Cell: ({ value }) =>
       value ? (
         <div className="py-2">
@@ -100,7 +100,7 @@ export const analyzablesHistoryTableColumns = [
     Cell: ({ value, row: { original } }) => (
       <TableCell
         id={`table-cell-type__${original.id}`}
-        value={value.replace("_", " ")}
+        value={value.replaceAll("_", " ")}
       />
     ),
   },

@@ -7,7 +7,7 @@ import { LastEvaluationComponent, TagsBadge } from "../common/engineBadges";
 import { UserReportDecay } from "./UserReportDecay";
 import TableCell from "../common/TableCell";
 
-export const userReportsTableColumns = [
+export const userEventsTableStartColumns = [
   {
     Header: () => "ID", // No header
     id: "id",
@@ -27,7 +27,7 @@ export const userReportsTableColumns = [
   {
     Header: "Date",
     id: "date",
-    accessor: "date",
+    accessor: "data_model.date",
     Cell: ({ value }) => (
       <div className="py-2">
         <DateHoverable ago value={value} format="hh:mm:ss a MMM do, yyyy" />
@@ -51,22 +51,9 @@ export const userReportsTableColumns = [
     Filter: DefaultColumnFilter,
     maxWidth: 100,
   },
-  {
-    Header: "Analyzable",
-    id: "analyzable_name",
-    accessor: (userEvent) => userEvent.analyzable.name,
-    Cell: ({ value, row }) => (
-      <TableCell
-        id={`table-cell-analyzable__${row?.id}`}
-        isCopyToClipboard
-        isTruncate
-        value={value}
-      />
-    ),
-    disableSortBy: true,
-    Filter: DefaultColumnFilter,
-    maxWidth: 160,
-  },
+];
+
+export const userReportsTableEndColumns = [
   {
     Header: "Evaluation",
     id: "evaluation",
@@ -135,4 +122,67 @@ export const userReportsTableColumns = [
     disableSortBy: true,
     maxWidth: 160,
   },
+];
+
+export const userAnalyzableEventsTableColumns = [
+  ...userEventsTableStartColumns,
+  {
+    Header: "Analyzable",
+    id: "analyzable_name",
+    accessor: (userEvent) => userEvent?.analyzable?.name,
+    Cell: ({ value, row }) => (
+      <TableCell
+        id={`table-cell-analyzable__${row?.id}`}
+        isCopyToClipboard
+        isTruncate
+        value={value}
+      />
+    ),
+    disableSortBy: true,
+    Filter: DefaultColumnFilter,
+    maxWidth: 160,
+  },
+  ...userReportsTableEndColumns,
+];
+
+export const userDomainWildcardEventsTableColumns = [
+  ...userEventsTableStartColumns,
+  {
+    Header: "Query",
+    id: "analyzables_name",
+    accessor: (userEvent) => userEvent?.query,
+    Cell: ({ value, row }) => (
+      <TableCell
+        id={`table-cell-query__${row?.id}`}
+        isCopyToClipboard
+        isTruncate
+        value={value}
+      />
+    ),
+    disableSortBy: true,
+    Filter: DefaultColumnFilter,
+    maxWidth: 160,
+  },
+  ...userReportsTableEndColumns,
+];
+
+export const userIpWildcardEventsTableColumns = [
+  ...userEventsTableStartColumns,
+  {
+    Header: "Network",
+    id: "ip",
+    accessor: (userEvent) => userEvent,
+    Cell: ({ value, row }) => (
+      <TableCell
+        id={`table-cell-query__${row?.id}`}
+        isCopyToClipboard
+        isTruncate
+        value={`${value.start_ip} - ${value.end_ip}`}
+      />
+    ),
+    disableSortBy: true,
+    Filter: DefaultColumnFilter,
+    maxWidth: 140,
+  },
+  ...userReportsTableEndColumns,
 ];

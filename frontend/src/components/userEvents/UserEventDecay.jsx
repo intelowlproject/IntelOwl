@@ -4,7 +4,7 @@ import { Badge } from "reactstrap";
 
 import { DateHoverable } from "@certego/certego-ui";
 
-export function UserReportDecay(props) {
+export function UserEventDecay(props) {
   const { decay, reliability } = props;
 
   let decayComponent = null;
@@ -23,7 +23,7 @@ export function UserReportDecay(props) {
   return decayComponent;
 }
 
-UserReportDecay.propTypes = {
+UserEventDecay.propTypes = {
   decay: PropTypes.any.isRequired,
   reliability: PropTypes.number.isRequired,
 };

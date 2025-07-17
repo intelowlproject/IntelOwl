@@ -4,10 +4,10 @@ import PropTypes from "prop-types";
 import { ContentSection, IconButton } from "@certego/certego-ui";
 
 import { rescanIcon, addEvaluationIcon } from "../../common/icon/actionIcons";
-import { UserReportModal } from "../../userReports/UserReportModal";
+import { UserEventModal } from "../../userEvents/UserEventModal";
 
 export function AnalyzableActionsBar({ analyzable }) {
-  const [showUserReportModal, setShowUserReportModal] = React.useState(false);
+  const [showUserEventModal, setShowUserEventModal] = React.useState(false);
 
   return (
     <ContentSection className="d-inline-flex me-2">
@@ -19,13 +19,13 @@ export function AnalyzableActionsBar({ analyzable }) {
         title="Add your evaluation"
         titlePlacement="top"
         className="me-2"
-        onClick={() => setShowUserReportModal(!showUserReportModal)}
+        onClick={() => setShowUserEventModal(!showUserEventModal)}
       />
-      {showUserReportModal && (
-        <UserReportModal
+      {showUserEventModal && (
+        <UserEventModal
           analyzables={[analyzable]}
-          toggle={setShowUserReportModal}
-          isOpen={showUserReportModal}
+          toggle={setShowUserEventModal}
+          isOpen={showUserEventModal}
         />
       )}
       <IconButton

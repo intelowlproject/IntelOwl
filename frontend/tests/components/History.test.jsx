@@ -8,14 +8,14 @@ import History from "../../src/components/History";
 import { INVESTIGATION_BASE_URI } from "../../src/constants/apiURLs";
 
 jest.mock("axios");
-// mock JobsTable, InvestigationsTable and UserReportsTable components
+// mock JobsTable, InvestigationsTable and UserEventsTable components
 jest.mock("../../src/components/jobs/table/JobsTable", () =>
   jest.fn((props) => <div {...props} />),
 );
 jest.mock("../../src/components/investigations/table/InvestigationsTable", () =>
   jest.fn((props) => <div {...props} />),
 );
-jest.mock("../../src/components/userReports/UserReportsTable", () =>
+jest.mock("../../src/components/userEvents/UserEventsTable", () =>
   jest.fn((props) => <div {...props} />),
 );
 

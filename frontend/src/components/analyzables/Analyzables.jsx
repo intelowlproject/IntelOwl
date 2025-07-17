@@ -14,7 +14,7 @@ import { ANALYZABLES_URI } from "../../constants/apiURLs";
 import { prettifyErrors } from "../../utils/api";
 import { MultipleInputModal } from "../common/form/MultipleInputModal";
 import { ListInput } from "../common/form/ListInput";
-import { UserReportModal } from "../userReports/UserReportModal";
+import { UserEventModal } from "../userEvents/UserEventModal";
 
 // table config
 const tableConfig = {
@@ -39,7 +39,7 @@ export default function Analyzables() {
     [setMultipleAnalyzablesModalOpen],
   );
 
-  const [showUserReportModal, setShowUserReportModal] = React.useState(false);
+  const [showUserEventModal, setShowUserEventModal] = React.useState(false);
   const [selectedRows, setSelectedRows] = React.useState([]);
 
   const formik = useFormik({
@@ -148,7 +148,7 @@ export default function Analyzables() {
                 id="newUserEvaluationBtn"
                 size="sm"
                 className="px-3 bg-tertiary border-tertiary d-flex align-items-center"
-                onClick={() => setShowUserReportModal(!showUserReportModal)}
+                onClick={() => setShowUserEventModal(!showUserEventModal)}
               >
                 <BsFillPlusCircleFill className="me-1" /> New evaluation
               </Button>
@@ -179,19 +179,19 @@ export default function Analyzables() {
             size="sm"
             className="px-3 bg-tertiary border-tertiary d-flex align-items-center"
             disabled={data?.length === 0 || selectedRows.length === 0}
-            onClick={() => setShowUserReportModal(!showUserReportModal)}
+            onClick={() => setShowUserEventModal(!showUserEventModal)}
           >
             <BsFillPlusCircleFill className="me-1" /> Your evaluation
           </Button>
         </div>
       </Row>
-      {showUserReportModal && (
-        <UserReportModal
+      {showUserEventModal && (
+        <UserEventModal
           analyzables={
             selectedRows.length > 0 ? selectedRows.map((row) => row) : [""]
           }
-          toggle={setShowUserReportModal}
-          isOpen={showUserReportModal}
+          toggle={setShowUserEventModal}
+          isOpen={showUserEventModal}
         />
       )}
       <Row className="mt-2 me-2">

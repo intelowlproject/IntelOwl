@@ -4,7 +4,7 @@ import React from "react";
 import { DefaultColumnFilter, DateHoverable } from "@certego/certego-ui";
 
 import { LastEvaluationComponent, TagsBadge } from "../common/engineBadges";
-import { UserReportDecay } from "./UserReportDecay";
+import { UserEventDecay } from "./UserEventDecay";
 import TableCell from "../common/TableCell";
 
 export const userEventsTableStartColumns = [
@@ -53,7 +53,7 @@ export const userEventsTableStartColumns = [
   },
 ];
 
-export const userReportsTableEndColumns = [
+export const userEventsTableEndColumns = [
   {
     Header: "Evaluation",
     id: "evaluation",
@@ -78,7 +78,7 @@ export const userReportsTableEndColumns = [
     id: "next_decay",
     accessor: (userEvent) => userEvent,
     Cell: ({ value: userEvent }) => (
-      <UserReportDecay
+      <UserEventDecay
         decay={userEvent.next_decay}
         reliability={userEvent.data_model.reliability}
       />
@@ -142,7 +142,7 @@ export const userAnalyzableEventsTableColumns = [
     Filter: DefaultColumnFilter,
     maxWidth: 160,
   },
-  ...userReportsTableEndColumns,
+  ...userEventsTableEndColumns,
 ];
 
 export const userDomainWildcardEventsTableColumns = [
@@ -163,7 +163,7 @@ export const userDomainWildcardEventsTableColumns = [
     Filter: DefaultColumnFilter,
     maxWidth: 160,
   },
-  ...userReportsTableEndColumns,
+  ...userEventsTableEndColumns,
 ];
 
 export const userIpWildcardEventsTableColumns = [
@@ -184,5 +184,5 @@ export const userIpWildcardEventsTableColumns = [
     Filter: DefaultColumnFilter,
     maxWidth: 140,
   },
-  ...userReportsTableEndColumns,
+  ...userEventsTableEndColumns,
 ];

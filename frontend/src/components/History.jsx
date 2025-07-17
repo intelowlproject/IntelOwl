@@ -24,15 +24,15 @@ import {
   userAnalyzableEventsTableColumns,
   userDomainWildcardEventsTableColumns,
   userIpWildcardEventsTableColumns,
-} from "./userReports/userReportsTableColumns";
-import { UserReportModal } from "./userReports/UserReportModal";
+} from "./userEvents/userEventsTableColumns";
+import { UserEventModal } from "./userEvents/UserEventModal";
 
 const JobsTable = React.lazy(() => import("./jobs/table/JobsTable"));
 const InvestigationsTable = React.lazy(
   () => import("./investigations/table/InvestigationsTable"),
 );
-const UserReportsTable = React.lazy(
-  () => import("./userReports/UserReportsTable"),
+const UserEventsTable = React.lazy(
+  () => import("./userEvents/UserEventsTable"),
 );
 
 export default function History() {
@@ -66,7 +66,7 @@ export default function History() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const [showUserReportModal, setShowUserReportModal] = React.useState(false);
+  const [showUserEventModal, setShowUserEventModal] = React.useState(false);
 
   const onClick = async () => {
     if (pageType === HistoryPages.JOBS) {
@@ -79,7 +79,7 @@ export default function History() {
         // handle inside createInvestigation
       }
     } else {
-      setShowUserReportModal(!showUserReportModal);
+      setShowUserEventModal(!showUserEventModal);
     }
   };
 
@@ -95,10 +95,10 @@ export default function History() {
         <BsFillPlusCircleFill />
         &nbsp;{createButtonTitle}
       </Button>
-      {showUserReportModal && (
-        <UserReportModal
-          toggle={setShowUserReportModal}
-          isOpen={showUserReportModal}
+      {showUserEventModal && (
+        <UserEventModal
+          toggle={setShowUserEventModal}
+          isOpen={showUserEventModal}
         />
       )}
     </Col>
@@ -211,21 +211,21 @@ export default function History() {
               <InvestigationsTable />
             )}
             {pageType === HistoryPages.USER_EVENTS && (
-              <UserReportsTable
+              <UserEventsTable
                 title="Analyzables evaluations"
                 url={USER_EVENT_ANALYZABLE}
                 columns={userAnalyzableEventsTableColumns}
               />
             )}
             {pageType === HistoryPages.USER_DOMAIN_WILDCARD_EVENTS && (
-              <UserReportsTable
+              <UserEventsTable
                 title="Domain wildcard evaluaitons"
                 url={USER_EVENT_DOMAIN_WILDCARD}
                 columns={userDomainWildcardEventsTableColumns}
               />
             )}
             {pageType === HistoryPages.USER_IP_WILDCARD_EVENTS && (
-              <UserReportsTable
+              <UserEventsTable
                 title="Ip wildcard evaluations"
                 url={USER_EVENT_IP_WILDCARD}
                 columns={userIpWildcardEventsTableColumns}

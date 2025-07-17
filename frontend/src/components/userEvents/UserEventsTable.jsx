@@ -29,7 +29,7 @@ const toPassTableProps = {
   ),
   SubComponent: ({ row }) => (
     <div
-      id={`userreport-jsoninput-${row.id}`}
+      id={`userEvent-jsoninput-${row.id}`}
       style={{ maxHeight: "50vh", width: "100%", overflow: "scroll" }}
       className="row"
     >
@@ -56,11 +56,11 @@ const toPassTableProps = {
 };
 
 // component
-export default function UserReportsTable({ title, url, columns }) {
-  console.debug("UserReportsTable rendered!");
+export default function UserEventsTable({ title, url, columns }) {
+  console.debug("UserEventsTable rendered!");
 
   // page title
-  useTitle("IntelOwl | User Reports History", { restoreOnUnmount: true });
+  useTitle("IntelOwl | User Evaluations History", { restoreOnUnmount: true });
 
   const [searchParams, setSearchParams] = useSearchParams();
   const startTimeParam = searchParams.get("event_date__gte");
@@ -116,7 +116,7 @@ export default function UserReportsTable({ title, url, columns }) {
   ]);
 
   return areParamsInitialized ? ( // this "if" avoid one request
-    <UserReportsTableComponent
+    <UserEventsTableComponent
       title={title}
       url={url}
       columns={columns}
@@ -128,7 +128,7 @@ export default function UserReportsTable({ title, url, columns }) {
   );
 }
 
-function UserReportsTableComponent({
+function UserEventsTableComponent({
   title,
   url,
   columns,
@@ -196,15 +196,15 @@ function UserReportsTableComponent({
           {/* Basic */}
           <Row className="mb-2">
             <Col className="d-flex align-items-center" sm={7}>
-              <h1 id="UserReportsHistory">
+              <h1 id="UserEventsHistory">
                 {title} History&nbsp;
                 <small className="text-gray">{data?.count} total</small>
               </h1>
               <div className="ms-2">
-                <MdInfoOutline id="userreportstable-infoicon" fontSize="20" />
+                <MdInfoOutline id="usereventstable-infoicon" fontSize="20" />
                 <UncontrolledTooltip
                   trigger="hover"
-                  target="userreportstable-infoicon"
+                  target="usereventstable-infoicon"
                   placement="right"
                   fade={false}
                   innerClassName="p-2 text-start text-nowrap md-fit-content"
@@ -215,7 +215,7 @@ function UserReportsTableComponent({
             </Col>
             <Col className="align-self-center">
               <TimePicker
-                id="userreportstable__time-picker"
+                id="usereventstable__time-picker"
                 fromName="event_date__gte"
                 toName="event_date__lte"
                 fromValue={fromDateType}

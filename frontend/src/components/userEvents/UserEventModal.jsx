@@ -50,8 +50,8 @@ import {
   HASH_REGEX,
 } from "../../constants/regexConst";
 
-export function UserReportModal({ analyzables, toggle, isOpen }) {
-  console.debug("UserReportModal rendered!");
+export function UserEventModal({ analyzables, toggle, isOpen }) {
+  console.debug("UserEventModal rendered!");
 
   const [user] = useAuthStore((state) => [state.user]);
   const [isOpenAdvancedFields, setIsOpenAdvancedFields] = React.useState(false);
@@ -299,7 +299,7 @@ export function UserReportModal({ analyzables, toggle, isOpen }) {
                 <Col md={2} className="d-flex align-items-top mt-2">
                   <Label
                     className="me-2 mb-0 required"
-                    for="userReport__analyzables"
+                    for="userEvent__analyzables"
                   >
                     Analyzable(s) or IP/Domain wildcard:
                   </Label>
@@ -436,14 +436,14 @@ export function UserReportModal({ analyzables, toggle, isOpen }) {
                 <Col md={2} className="d-flex align-items-center">
                   <Label
                     className="me-2 mb-0 required"
-                    for="userReport__evaluation"
+                    for="userEvent__evaluation"
                   >
                     Evaluation:
                   </Label>
                 </Col>
                 <Col md={8} className="d-flex align-items-center">
                   <Input
-                    id="userReport__evaluation"
+                    id="userEvent__evaluation"
                     type="select"
                     name="evaluation"
                     value={formik.values.evaluation}
@@ -456,7 +456,7 @@ export function UserReportModal({ analyzables, toggle, isOpen }) {
                       .sort()
                       .map((value) => (
                         <option
-                          key={`userReport__evaluation-select-option-${value}`}
+                          key={`userEvent__evaluation-select-option-${value}`}
                           value={value}
                         >
                           {value.toUpperCase()}
@@ -472,7 +472,7 @@ export function UserReportModal({ analyzables, toggle, isOpen }) {
                 <Col md={2} className="d-flex align-items-center">
                   <Label
                     className="me-2 mb-0 required"
-                    for="userReport__related_threats"
+                    for="userEvent__related_threats"
                   >
                     Comments:
                   </Label>
@@ -492,7 +492,7 @@ export function UserReportModal({ analyzables, toggle, isOpen }) {
                 <Col md={2} className="d-flex align-items-center">
                   <Label
                     className="me-2 mb-0"
-                    for="userReport__external_references"
+                    for="userEvent__external_references"
                   >
                     External references:
                   </Label>
@@ -512,14 +512,14 @@ export function UserReportModal({ analyzables, toggle, isOpen }) {
                 <Col md={2} className="d-flex align-items-center">
                   <Label
                     className="me-2 mb-0"
-                    for="userReport__kill_chain_phase"
+                    for="userEvent__kill_chain_phase"
                   >
                     Kill chain phase:
                   </Label>
                 </Col>
                 <Col md={8} className="d-flex align-items-center">
                   <Input
-                    id="userReport__kill_chain_phase"
+                    id="userEvent__kill_chain_phase"
                     type="select"
                     name="kill_chain_phase"
                     value={formik.values.kill_chain_phase}
@@ -532,7 +532,7 @@ export function UserReportModal({ analyzables, toggle, isOpen }) {
                       .sort()
                       .map((value) => (
                         <option
-                          key={`userReport__kill_chain_phase-select-option-${value}`}
+                          key={`userEvent__kill_chain_phase-select-option-${value}`}
                           value={value}
                         >
                           {value.toUpperCase()}
@@ -544,12 +544,12 @@ export function UserReportModal({ analyzables, toggle, isOpen }) {
               <hr />
             </FormGroup>
             <FormGroup row className="d-flex align-items-center">
-              <Label sm={2} for="userReport__tags">
+              <Label sm={2} for="userEvent__tags">
                 Tags:
               </Label>
               <Col sm={8}>
                 <TagSelectInput
-                  id="userReport-tagselectinput"
+                  id="userEvent-tagselectinput"
                   selectedTags={formik.values.tags}
                   setSelectedTags={(selectedTags) =>
                     formik.setFieldValue("tags", selectedTags, false)
@@ -579,16 +579,13 @@ export function UserReportModal({ analyzables, toggle, isOpen }) {
                 <FormGroup className="mt-4">
                   <Row>
                     <Col md={2} className="d-flex align-items-center">
-                      <Label
-                        className="me-2 mb-0"
-                        for="userReport__reliability"
-                      >
+                      <Label className="me-2 mb-0" for="userEvent__reliability">
                         Reliability:
                       </Label>
                     </Col>
                     <Col md={8} className="d-flex-column align-items-center">
                       <Input
-                        id="userReport__reliability"
+                        id="userEvent__reliability"
                         type="number"
                         name="reliability"
                         value={formik.values.reliability}
@@ -613,14 +610,14 @@ export function UserReportModal({ analyzables, toggle, isOpen }) {
                     <Col md={2} className="d-flex align-items-center">
                       <Label
                         className="me-2 mb-0"
-                        for="userReport__decay_progression"
+                        for="userEvent__decay_progression"
                       >
                         Decay type:
                       </Label>
                     </Col>
                     <Col md={8} className="d-flex align-items-center">
                       <Input
-                        id="userReport__decay_progression"
+                        id="userEvent__decay_progression"
                         type="select"
                         name="decay_progression"
                         value={formik.values.decay_progression}
@@ -632,7 +629,7 @@ export function UserReportModal({ analyzables, toggle, isOpen }) {
                         {Object.entries(DecayProgressionTypes).map(
                           ([decayType, value]) => (
                             <option
-                              key={`userReport__decay_progression-select-option-${value}`}
+                              key={`userEvent__decay_progression-select-option-${value}`}
                               value={value}
                               className="d-flex flex-column"
                             >
@@ -659,14 +656,14 @@ export function UserReportModal({ analyzables, toggle, isOpen }) {
                     <Col md={2} className="d-flex align-items-center">
                       <Label
                         className="me-2 mb-0"
-                        for="userReport__decay_timedelta_days"
+                        for="userEvent__decay_timedelta_days"
                       >
                         Decay days:
                       </Label>
                     </Col>
                     <Col md={8} className="d-flex-column align-items-center">
                       <Input
-                        id="userReport__decay_timedelta_days"
+                        id="userEvent__decay_timedelta_days"
                         type="number"
                         name="decay_timedelta_days"
                         value={formik.values.decay_timedelta_days}
@@ -709,12 +706,12 @@ export function UserReportModal({ analyzables, toggle, isOpen }) {
   );
 }
 
-UserReportModal.propTypes = {
+UserEventModal.propTypes = {
   analyzables: PropTypes.arrayOf(Object),
   toggle: PropTypes.func.isRequired,
   isOpen: PropTypes.bool.isRequired,
 };
 
-UserReportModal.defaultProps = {
+UserEventModal.defaultProps = {
   analyzables: [""],
 };

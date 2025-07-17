@@ -79,9 +79,9 @@ function AuthLinks() {
         </RRNavLink>
       </NavItem>
       <NavItem>
-        <RRNavLink className="d-flex-start-center nav-link" to="/analyzables">
+        <RRNavLink className="d-flex-start-center nav-link" to="/artifacts">
           <TbDatabaseSearch />
-          <span className="ms-1">Analyzables</span>
+          <span className="ms-1">Artifacts</span>
         </RRNavLink>
       </NavItem>
       <NavItem>

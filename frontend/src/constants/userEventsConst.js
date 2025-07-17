@@ -11,7 +11,7 @@ export const DecayProgressionDescription = Object.freeze({
 });
 
 export const UserEventTypes = Object.freeze({
-  ANALYZABLE: "analyzable",
+  ANALYZABLE: "artifact",
   IP_WILDCARD: "ip_wildcard",
   DOMAIN_WILDCARD: "domain_wildcard",
 });

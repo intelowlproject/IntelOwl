@@ -329,7 +329,7 @@ const authRoutesLazy = [
   },
   /* Analyzables */
   {
-    path: "/analyzables",
+    path: "/artifacts",
     element: (
       <Suspense fallback={<FallBackLoading />}>
         <Analyzables />
@@ -337,7 +337,7 @@ const authRoutesLazy = [
     ),
   },
   {
-    path: `/analyzables/:id`,
+    path: `/artifacts/:id`,
     element: (
       <Suspense fallback={<FallBackLoading />}>
         <AnalyzableResult />

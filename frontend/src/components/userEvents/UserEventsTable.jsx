@@ -56,7 +56,7 @@ const toPassTableProps = {
 };
 
 // component
-export default function UserEventsTable({ title, url, columns }) {
+export default function UserEventsTable({ title, url, columns, description }) {
   console.debug("UserEventsTable rendered!");
 
   // page title
@@ -120,6 +120,7 @@ export default function UserEventsTable({ title, url, columns }) {
       title={title}
       url={url}
       columns={columns}
+      description={description}
       searchFromDateValue={searchFromDateValue}
       searchToDateValue={searchToDateValue}
     />
@@ -132,6 +133,7 @@ function UserEventsTableComponent({
   title,
   url,
   columns,
+  description,
   searchFromDateValue,
   searchToDateValue,
 }) {
@@ -197,7 +199,7 @@ function UserEventsTableComponent({
           <Row className="mb-2">
             <Col className="d-flex align-items-center" sm={7}>
               <h1 id="UserEventsHistory">
-                {title} History&nbsp;
+                {title}&nbsp;
                 <small className="text-gray">{data?.count} total</small>
               </h1>
               <div className="ms-2">
@@ -209,7 +211,7 @@ function UserEventsTableComponent({
                   fade={false}
                   innerClassName="p-2 text-start text-nowrap md-fit-content"
                 >
-                  TO DO
+                  {description}
                 </UncontrolledTooltip>
               </div>
             </Col>

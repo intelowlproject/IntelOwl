@@ -27,7 +27,7 @@ const tableInitialState = {
 
 export default function Analyzables() {
   // page title
-  useTitle(`IntelOwl | Analyzables`, { restoreOnUnmount: true });
+  useTitle(`IntelOwl | Artifacts`, { restoreOnUnmount: true });
 
   const [data, setData] = React.useState([]);
   const [loadingData, setLoadingData] = React.useState(false);
@@ -96,7 +96,7 @@ export default function Analyzables() {
         <Form onSubmit={formik.handleSubmit}>
           <Row className="mb-2">
             <Col className="d-flex align-items-center">
-              <h1 id="reportSearch">Analyzables&nbsp;</h1>
+              <h1 id="reportSearch">Artifacts&nbsp;</h1>
               <div className="ms-2">
                 <MdInfoOutline id="search__elastic-infoicon" fontSize="20" />
                 <UncontrolledTooltip
@@ -107,7 +107,7 @@ export default function Analyzables() {
                   fade={false}
                   innerClassName="p-2 text-start text-nowrap md-fit-content"
                 >
-                  Analyzables are unique objects that can be analyzed multiple
+                  Artifacts are unique objects that can be analyzed multiple
                   times to have a different evaluation over time.
                 </UncontrolledTooltip>
               </div>

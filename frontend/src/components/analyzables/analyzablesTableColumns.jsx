@@ -37,7 +37,7 @@ export const analyzablesTableColumns = [
               placement="top"
               fade={false}
             >
-              Analyzable overview
+              Artifact overview
             </UncontrolledTooltip>
           </div>
         ) : (

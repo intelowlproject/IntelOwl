@@ -70,7 +70,7 @@ export function AnalyzableOverview({ analyzable }) {
         <Col>
           <h2 className="d-flex align-items-center">
             <span className="me-2 text-secondary">
-              Analyzable #{analyzable.id}
+              Artifact #{analyzable.id}
             </span>
           </h2>
         </Col>

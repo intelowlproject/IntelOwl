@@ -265,7 +265,6 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
           })
           .catch((error) => console.debug(error));
       } else {
-        console.debug("analyzable type");
         setInputTypes({
           ...inputTypes,
           [wildcard]: { type: UserEventTypes.ANALYZABLE },
@@ -301,7 +300,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                     className="me-2 mb-0 required"
                     for="userEvent__analyzables"
                   >
-                    Analyzable(s) or IP/Domain wildcard:
+                    Artifact(s) or IP/Domain wildcard:
                   </Label>
                 </Col>
                 <Col md={10}>

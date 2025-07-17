@@ -33,7 +33,7 @@ export function AnalyzableActionsBar({ analyzable }) {
         Icon={rescanIcon}
         size="sm"
         color="light"
-        title="Rescan analyzable"
+        title="Rescan artifact"
         titlePlacement="top"
         href={`/scan?observable=${analyzable.name}`}
         target="_blank"

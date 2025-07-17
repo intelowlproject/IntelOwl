@@ -157,7 +157,7 @@ export default function History() {
           >
             <span id="user-events" className="d-flex-center">
               <GrDocumentUser />
-              &nbsp;Analyzables evaluations
+              &nbsp;Artifacts evaluations
             </span>
           </RRNavLink>
         </NavItem>
@@ -212,9 +212,10 @@ export default function History() {
             )}
             {pageType === HistoryPages.USER_EVENTS && (
               <UserEventsTable
-                title="Analyzables evaluations"
+                title="Artifacts evaluations"
                 url={USER_EVENT_ANALYZABLE}
                 columns={userAnalyzableEventsTableColumns}
+                description="Evaluations related to artifacts given by users"
               />
             )}
             {pageType === HistoryPages.USER_DOMAIN_WILDCARD_EVENTS && (
@@ -222,6 +223,7 @@ export default function History() {
                 title="Domain wildcard evaluaitons"
                 url={USER_EVENT_DOMAIN_WILDCARD}
                 columns={userDomainWildcardEventsTableColumns}
+                description="Evaluations of domain wildcards given by users"
               />
             )}
             {pageType === HistoryPages.USER_IP_WILDCARD_EVENTS && (
@@ -229,6 +231,7 @@ export default function History() {
                 title="Ip wildcard evaluations"
                 url={USER_EVENT_IP_WILDCARD}
                 columns={userIpWildcardEventsTableColumns}
+                description="Evaluations related to networks given by users"
               />
             )}
           </Suspense>

@@ -127,7 +127,7 @@ export const userEventsTableEndColumns = [
 export const userAnalyzableEventsTableColumns = [
   ...userEventsTableStartColumns,
   {
-    Header: "Analyzable",
+    Header: "Artifact",
     id: "analyzable_name",
     accessor: (userEvent) => userEvent?.analyzable?.name,
     Cell: ({ value, row }) => (

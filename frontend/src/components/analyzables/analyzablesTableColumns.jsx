@@ -26,7 +26,7 @@ export const analyzablesTableColumns = [
           <div>
             <a
               id={`analyzableTable-${id}`}
-              href={`/analyzables/${id}`}
+              href={`/artifacts/${id}`}
               target="_blank"
               rel="noreferrer"
             >

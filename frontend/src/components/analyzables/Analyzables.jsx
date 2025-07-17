@@ -134,7 +134,7 @@ export default function Analyzables() {
                 className="px-3 me-2 bg-tertiary border-tertiary d-flex align-items-center"
                 onClick={toggleMultipleAnalyzablesModal}
               >
-                <RiFileAddLine className="me-1" /> Multiple analyzables
+                <RiFileAddLine className="me-1" /> Multiple artifacts
               </Button>
               {isMultipleAnalyzablesModalOpen && (
                 <MultipleInputModal

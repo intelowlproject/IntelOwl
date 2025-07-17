@@ -93,4 +93,7 @@ class TestAnalyzablesViewSet(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 200, response.content)
         result = response.json()
         self.assertIn("jobs", result)
+        self.assertEqual(len(result["jobs"]), 1)
         self.assertIn("user_events", result)
+        self.assertIn("user_domain_wildcard_events", result)
+        self.assertIn("user_ip_wildcard_events", result)

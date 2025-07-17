@@ -43,11 +43,11 @@ class UserAnalyzableEventFilterSet(UserEventFilterSet):
 
     @staticmethod
     def filter_for_event_date(queryset, value, _date, *args, **kwargs):
-        filters = {}
+        date_filters = {}
         if value.endswith("__gte"):
-            filters["date__gte"] = _date
+            date_filters["date__gte"] = _date
         if value.endswith("__lte"):
-            filters["date__lte"] = _date
+            date_filters["date__lte"] = _date
 
         data_model_map = {
             DomainDataModel: ContentType.objects.get_for_model(DomainDataModel),
@@ -57,7 +57,7 @@ class UserAnalyzableEventFilterSet(UserEventFilterSet):
 
         user_events_ids = []
         for model, content_type in data_model_map.items():
-            data_model_ids = model.objects.filter(**filters).values_list(
+            data_model_ids = model.objects.filter(**date_filters).values_list(
                 "id", flat=True
             )
             if data_model_ids:

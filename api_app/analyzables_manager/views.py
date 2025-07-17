@@ -42,33 +42,35 @@ class AnalyzableViewSet(viewsets.ReadOnlyModelViewSet):
         jobs_queryset = analyzable.jobs.visible_for_user(user).order_by(
             "-finished_analysis_time"
         )
-        user_events = analyzable.user_events.visible_for_user(user).order_by("-date")
-        user_domain_wildcard_events = (
+        user_events_queryset = analyzable.user_events.visible_for_user(user).order_by(
+            "-date"
+        )
+        user_domain_wildcard_events_queryset = (
             analyzable.user_domain_wildcard_events.visible_for_user(user).order_by(
                 "-date"
             )
         )
-        user_ip_wildcard_events = analyzable.user_ip_wildcard_events.visible_for_user(
-            user
-        ).order_by("-date")
-
-        response_data = {}
-        response_data["jobs"] = JobAnalyzableHistorySerializer(
-            jobs_queryset, many=True
-        ).data
-        response_data["user_events"] = UserAnalyzableEventSerializer(
-            user_events, many=True
-        ).data
-        response_data["user_domain_wildcard_events"] = (
-            UserDomainWildCardEventSerializer(
-                user_domain_wildcard_events, many=True
-            ).data
+        user_ip_wildcard_events_queryset = (
+            analyzable.user_ip_wildcard_events.visible_for_user(user).order_by("-date")
         )
-        response_data["user_ip_wildcard_events"] = UserIPWildCardEventSerializer(
-            user_ip_wildcard_events, many=True
+
+        jobs = JobAnalyzableHistorySerializer(jobs_queryset, many=True).data
+        user_events = UserAnalyzableEventSerializer(
+            user_events_queryset, many=True
+        ).data
+        user_domain_wildcard_events = UserDomainWildCardEventSerializer(
+            user_domain_wildcard_events_queryset, many=True
+        ).data
+        user_ip_wildcard_events = UserIPWildCardEventSerializer(
+            user_ip_wildcard_events_queryset, many=True
         ).data
 
         return Response(
             status=HTTPStatus.OK.value,
-            data=response_data,
+            data={
+                "jobs": jobs,
+                "user_events": user_events,
+                "user_domain_wildcard_events": user_domain_wildcard_events,
+                "user_ip_wildcard_events": user_ip_wildcard_events,
+            },
         )

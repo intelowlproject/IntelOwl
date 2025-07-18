@@ -5,8 +5,8 @@
 import logging
 
 import dns.message
-import httpx
 import requests
+from httpx import Client, ConnectError
 
 from api_app.analyzers_manager import classes
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
@@ -67,10 +67,10 @@ class Quad9MaliciousDetector(DoHMixin, classes.ObservableAnalyzer):
         quad9_response = None
         for attempt in range(0, attempt_number):
             try:
-                quad9_response = httpx.Client(http2=True).get(
+                quad9_response = Client(http2=True).get(
                     complete_url, headers=self.headers, timeout=10
                 )
-            except httpx.ConnectError as exception:
+            except ConnectError as exception:
                 # if the last attempt fails, raise an error
                 if attempt == attempt_number - 1:
                     raise exception
@@ -107,6 +107,9 @@ class Quad9MaliciousDetector(DoHMixin, classes.ObservableAnalyzer):
                 patch(
                     "requests.get",
                     return_value=MockUpResponse({"Answer": False}, 200),
+                ),
+                patch.object(
+                    Quad9MaliciousDetector, "_quad9_dns_query", return_value=False
                 ),
             )
         ]

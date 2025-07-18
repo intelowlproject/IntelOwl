@@ -1,6 +1,6 @@
 import json
 import logging
-from subprocess import CalledProcessError, CompletedProcess, run
+import subprocess
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
@@ -19,7 +19,7 @@ class GuardDogGeneric(ObservableAnalyzer):
     def run(self):
         try:
 
-            command = run(
+            process: subprocess.CompletedProcess = subprocess.run(
                 [
                     "guarddog",
                     self.scan_type,
@@ -29,26 +29,26 @@ class GuardDogGeneric(ObservableAnalyzer):
                 ],
                 capture_output=True,
             )
-            std_error = command.stderr
+            std_error = process.stderr
             if std_error:
                 std_error = std_error.decode("utf-8")
-            command.check_returncode()  # raises CalledProcessError if return code is non-zero else none
+            process.check_returncode()  # raises CalledProcessError if return code is non-zero else none
 
-            output = json.loads(command.stdout)
+            output = json.loads(process.stdout)
 
             return output
 
-        except CalledProcessError as e:
+        except subprocess.CalledProcessError as e:
             logger.error(f"Failed to execute command: {e}, {std_error}")
             raise AnalyzerRunException(f"failed to run guarddog: {std_error}")
 
     @classmethod
     def _monkeypatch(cls):
 
-        response_from_command = CompletedProcess(
+        response_from_command = subprocess.CompletedProcess(
             args=["guarddog", "pypi", "scan", "requests", "--output-format=json"],
             returncode=0,
-            stdout=b'{"package": "requests", "issues": 0, "errors": {}, "results": {}',
+            stdout=b'{"package": "requests", "issues": 0, "errors": {}, "results": {}, "path": "tmp/T/tmpuoxvqnbr/requests"}',
             stderr=b"",
         )
 

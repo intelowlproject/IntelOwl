@@ -1,10 +1,13 @@
 import json
 import logging
-from subprocess import CalledProcessError, CompletedProcess, run
+import subprocess
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import if_mock_connections, patch
+
+# from subprocess import CalledProcessError, CompletedProcess, run as process_run
+
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +24,7 @@ class GuardDogFile(FileAnalyzer):
         scan_mode = "verify" if self.is_requirements_file else "scan"
 
         try:
-            command: CompletedProcess = run(
+            process: subprocess.CompletedProcess = subprocess.run(
                 [
                     "guarddog",
                     self.scan_type,
@@ -31,23 +34,23 @@ class GuardDogFile(FileAnalyzer):
                 ],
                 capture_output=True,
             )
-            std_error = command.stderr
+            std_error = process.stderr
             if std_error:
                 std_error = std_error.decode("utf-8")
-            command.check_returncode()  # raises CalledProcessError if return code is non-zero else none
+            process.check_returncode()  # raises CalledProcessError if return code is non-zero else none
 
-            output = json.loads(command.stdout)
+            output = json.loads(process.stdout)
 
             return output
 
-        except CalledProcessError as e:
+        except subprocess.CalledProcessError as e:
             logger.error(f"Failed to execute command: {e}, {std_error}")
             raise AnalyzerRunException(f"failed to run guarddog: {std_error}")
 
     @classmethod
     def _monkeypatch(cls):
 
-        response_from_command = CompletedProcess(
+        response_from_command = subprocess.CompletedProcess(
             args=[
                 "guarddog",
                 "pypi",
@@ -56,7 +59,7 @@ class GuardDogFile(FileAnalyzer):
                 "--output-format=json",
             ],
             returncode=0,
-            stdout=b'[{"dependency": "requests", "version": "2.32.3", "result": {"issues": 0, "errors": {}, "results": {}}]',
+            stdout=b'[{"dependency": "requests", "ver": "2.32", "result": {"iss": 0, "err": {}, "res": {}, "path": "/tmp/requests"}}, {}]',
             stderr=b"INFO: Scanning using at most 8 parallel worker threads\n\n",
         )
 

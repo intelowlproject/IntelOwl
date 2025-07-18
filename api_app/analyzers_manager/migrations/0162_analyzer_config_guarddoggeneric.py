@@ -131,7 +131,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0071_delete_last_elastic_report"),
-        ("analyzers_manager", "0160_update_greedybear"),
+        ("analyzers_manager", "0161_analyzer_config_guarddogfile"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

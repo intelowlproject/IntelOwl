@@ -6,9 +6,6 @@ from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import if_mock_connections, patch
 
-# from subprocess import CalledProcessError, CompletedProcess, run as process_run
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -26,24 +23,23 @@ class GuardDogFile(FileAnalyzer):
         try:
             process: subprocess.CompletedProcess = subprocess.run(
                 [
-                    "guarddog",
+                    "/usr/local/bin/guarddog",
                     self.scan_type,
                     scan_mode,
                     self.filepath,
                     "--output-format=json",
                 ],
                 capture_output=True,
+                check=True,
+                text=True,
             )
-            std_error = process.stderr
-            if std_error:
-                std_error = std_error.decode("utf-8")
-            process.check_returncode()  # raises CalledProcessError if return code is non-zero else none
 
             output = json.loads(process.stdout)
 
             return output
 
         except subprocess.CalledProcessError as e:
+            std_error = process.stderr
             logger.error(f"Failed to execute command: {e}, {std_error}")
             raise AnalyzerRunException(f"failed to run guarddog: {std_error}")
 
@@ -59,8 +55,8 @@ class GuardDogFile(FileAnalyzer):
                 "--output-format=json",
             ],
             returncode=0,
-            stdout=b'[{"dependency": "requests", "ver": "2.32", "result": {"iss": 0, "err": {}, "res": {}, "path": "/tmp/requests"}}, {}]',
-            stderr=b"INFO: Scanning using at most 8 parallel worker threads\n\n",
+            stdout='[{"dependency": "requests", "ver": "2.32", "result": {"iss": 0, "err": {}, "res": {}, "path": "/tmp/requests"}}, {}]',
+            stderr="INFO: Scanning using at most 8 parallel worker threads\n\n",
         )
 
         patches = [

@@ -21,24 +21,22 @@ class GuardDogGeneric(ObservableAnalyzer):
 
             process: subprocess.CompletedProcess = subprocess.run(
                 [
-                    "guarddog",
+                    "/usr/local/bin/guarddog",
                     self.scan_type,
                     "scan",
                     self.observable_name,
                     "--output-format=json",
                 ],
                 capture_output=True,
+                check=True,
+                text=True,
             )
-            std_error = process.stderr
-            if std_error:
-                std_error = std_error.decode("utf-8")
-            process.check_returncode()  # raises CalledProcessError if return code is non-zero else none
-
             output = json.loads(process.stdout)
 
             return output
 
         except subprocess.CalledProcessError as e:
+            std_error = process.stderr
             logger.error(f"Failed to execute command: {e}, {std_error}")
             raise AnalyzerRunException(f"failed to run guarddog: {std_error}")
 
@@ -48,8 +46,8 @@ class GuardDogGeneric(ObservableAnalyzer):
         response_from_command = subprocess.CompletedProcess(
             args=["guarddog", "pypi", "scan", "requests", "--output-format=json"],
             returncode=0,
-            stdout=b'{"package": "requests", "issues": 0, "errors": {}, "results": {}, "path": "tmp/T/tmpuoxvqnbr/requests"}',
-            stderr=b"",
+            stdout='{"package": "requests", "issues": 0, "errors": {}, "results": {}, "path": "tmp/T/tmpuoxvqnbr/requests"}',
+            stderr="",
         )
 
         patches = [

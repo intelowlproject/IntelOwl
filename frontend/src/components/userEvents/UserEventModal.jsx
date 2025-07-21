@@ -276,19 +276,19 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
 
   return (
     <Modal
-      id="user-evaluaiton-modal"
+      id="user-evaluation-modal"
       autoFocus
       centered
       zIndex="1050"
       size="lg"
       backdrop="static"
-      labelledBy="User evaluaiton modal"
+      labelledBy="User evaluation modal"
       isOpen={isOpen}
       style={{ minWidth: "70%" }}
       toggle={() => toggle(false)}
     >
       <ModalHeader className="mx-2" toggle={() => toggle(false)}>
-        <small className="text-info">Add your evaluaiton</small>
+        <small className="text-info">Add your evaluation</small>
       </ModalHeader>
       <ModalBody className="m-2">
         <FormikProvider value={formik}>
@@ -315,13 +315,13 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                                 <div>
                                   <div
                                     className="py-2 d-flex"
-                                    key={`"analyzables"-${index + 0}`}
+                                    key={`analyzables-${index + 0}`}
                                   >
                                     <Col sm={10} className="pe-3">
                                       <Input
                                         type="text"
-                                        id={`"analyzables"-${index}`}
-                                        name={`$"analyzables"-${index}`}
+                                        id={`analyzables-${index}`}
+                                        name={`analyzables-${index}`}
                                         placeholder="google.com, 8.8.8.8, https://google.com, 1d5920f4b44b27a802bd77c4f0536f5a, .*\.com"
                                         className="input-dark"
                                         value={value}
@@ -346,7 +346,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                                       <Button
                                         color="primary"
                                         size="sm"
-                                        id={`"analyzables"-${index}-deletebtn`}
+                                        id={`analyzables-${index}-deletebtn`}
                                         className="mx-1 rounded-1 d-flex align-items-center px-3"
                                         onClick={() =>
                                           arrayHelpers.remove(index)
@@ -360,7 +360,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                                       <Button
                                         color="primary"
                                         size="sm"
-                                        id={`"analyzables"-${index}-addbtn`}
+                                        id={`analyzables-${index}-addbtn`}
                                         className="mx-1 rounded-1 d-flex align-items-center px-3"
                                         onClick={() => arrayHelpers.push("")}
                                       >
@@ -682,7 +682,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
             )}
             <FormGroup className="d-flex justify-content-end align-items-center mt-3">
               <Button
-                id="plugin-config"
+                id="user-event"
                 type="submit"
                 color="primary"
                 size="xl"

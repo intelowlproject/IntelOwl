@@ -87,9 +87,9 @@ describe("test AppHeader component", () => {
     expect(navbarLeftSide).toBeInTheDocument();
     expect(navbarLeftSide.className).toContain("navbar-nav");
 
-    const analyzablesButton = screen.getByText("Analyzables");
+    const analyzablesButton = screen.getByText("Artifacts");
     expect(analyzablesButton).toBeInTheDocument();
-    expect(analyzablesButton.closest("a").href).toContain("/analyzables");
+    expect(analyzablesButton.closest("a").href).toContain("/artifacts");
 
     const dashboardButton = screen.getByText("Dashboard");
     expect(dashboardButton).toBeInTheDocument();
@@ -145,9 +145,9 @@ describe("test AppHeader component", () => {
     expect(navbarLeftSide).toBeInTheDocument();
     expect(navbarLeftSide.className).toContain("navbar-nav");
 
-    const analyzablesButton = screen.getByText("Analyzables");
+    const analyzablesButton = screen.getByText("Artifacts");
     expect(analyzablesButton).toBeInTheDocument();
-    expect(analyzablesButton.closest("a").href).toContain("/analyzables");
+    expect(analyzablesButton.closest("a").href).toContain("/artifacts");
 
     const dashboardButton = screen.getByText("Dashboard");
     expect(dashboardButton).toBeInTheDocument();

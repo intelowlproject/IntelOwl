@@ -79,7 +79,12 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
       console.debug("validate - values");
       console.debug(values);
       const errors = {};
-
+      if (
+        values.related_threats.length === 1 &&
+        values.related_threats[0] === ""
+      ) {
+        errors.related_threats = "A comment is required";
+      }
       if (!Number.isInteger(values.decay_timedelta_days)) {
         errors.decay_timedelta_days = "The value must be a number.";
       }
@@ -90,7 +95,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
         errors.decay_timedelta_days =
           "You can't have a fixed decay progression and days different from 0";
       }
-
+      console.debug("errors", errors);
       return errors;
     },
     onSubmit: async () => {
@@ -333,7 +338,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                                           formik.setFieldValue(
                                             "analyzables",
                                             attributevalues,
-                                            false,
+                                            true,
                                           );
                                           setInputValue(event.target.value);
                                         }}

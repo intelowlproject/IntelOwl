@@ -25,7 +25,7 @@ export function ListInput({ id, values, formikSetFieldValue, placeholder }) {
                         onChange={(event) => {
                           const attributevalues = values;
                           attributevalues[index] = event.target.value;
-                          formikSetFieldValue(`${id}`, attributevalues, false);
+                          formikSetFieldValue(`${id}`, attributevalues, true);
                         }}
                       />
                     </Col>

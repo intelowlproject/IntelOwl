@@ -1,6 +1,6 @@
 const {
   validateLevel,
-} = require("../../../../../src/components/jobs/result/visualizer/validators");
+} = require("../../../../src/components/common/visualizer/validators");
 
 describe("visualizer data validation", () => {
   test("Validate only required fields (one element for each component type) and check validation is recursive", () => {

@@ -4,11 +4,11 @@ import "@testing-library/jest-dom";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import {UserEventModal} from "../../../src/components/userEvents/UserEventModal";
-import { 
-  USER_EVENT_ANALYZABLE, 
-  USER_EVENT_IP_WILDCARD, 
-  USER_EVENT_DOMAIN_WILDCARD 
+import { UserEventModal } from "../../../src/components/userEvents/UserEventModal";
+import {
+  USER_EVENT_ANALYZABLE,
+  USER_EVENT_IP_WILDCARD,
+  USER_EVENT_DOMAIN_WILDCARD,
 } from "../../../src/constants/apiURLs";
 import { mockedUseTagsStore, mockedUseAuthStore } from "../../mock";
 
@@ -21,7 +21,6 @@ jest.mock("../../../src/stores/useTagsStore", () => ({
 }));
 
 describe("test UserEventModal component", () => {
-
   const analyzableMock = {
     id: 1,
     jobs: [13],
@@ -55,7 +54,7 @@ describe("test UserEventModal component", () => {
     const user = userEvent.setup();
     render(
       <BrowserRouter>
-        <UserEventModal toggle={()=> jest.fn()} isOpen/>
+        <UserEventModal toggle={() => jest.fn()} isOpen />
       </BrowserRouter>,
     );
 
@@ -70,7 +69,9 @@ describe("test UserEventModal component", () => {
     expect(screen.getByText("Type:")).toBeInTheDocument();
     expect(screen.getByText("Matches:")).toBeInTheDocument();
     expect(screen.getByText("supported only for wildcard")).toBeInTheDocument();
-    const evaluationInput = screen.getByRole("combobox", { name: /Evaluation:/i });
+    const evaluationInput = screen.getByRole("combobox", {
+      name: /Evaluation:/i,
+    });
     expect(evaluationInput).toBeInTheDocument();
     const commentsInput = screen.getAllByRole("textbox")[1];
     expect(commentsInput).toBeInTheDocument();
@@ -78,17 +79,23 @@ describe("test UserEventModal component", () => {
     const externalReferencesInput = screen.getAllByRole("textbox")[2];
     expect(externalReferencesInput).toBeInTheDocument();
     expect(externalReferencesInput.id).toBe("external_references-0");
-    const killChainPhaseInput = screen.getByRole("combobox", { name: /Kill chain phase:/i });
+    const killChainPhaseInput = screen.getByRole("combobox", {
+      name: /Kill chain phase:/i,
+    });
     expect(killChainPhaseInput).toBeInTheDocument();
     expect(screen.getByText("Tags:")).toBeInTheDocument();
 
     // advanced fields
-    const advancedFields = screen.getByRole("button", { name: /Advanced fields/i });
+    const advancedFields = screen.getByRole("button", {
+      name: /Advanced fields/i,
+    });
     expect(advancedFields).toBeInTheDocument();
     await user.click(advancedFields);
     const reliabilityInput = screen.getByText("Reliability:");
     expect(reliabilityInput).toBeInTheDocument();
-    const decayTypeInput = screen.getByRole("combobox", { name: /Decay type:/i });
+    const decayTypeInput = screen.getByRole("combobox", {
+      name: /Decay type:/i,
+    });
     expect(decayTypeInput).toBeInTheDocument();
     const decayDaysInput = screen.getByText("Decay days:");
     expect(decayDaysInput).toBeInTheDocument();
@@ -106,15 +113,15 @@ describe("test UserEventModal component", () => {
       url: USER_EVENT_ANALYZABLE,
       getUrl: `${USER_EVENT_ANALYZABLE}?username=test&analyzable_name=google.com`,
       payload: {
-        analyzable: {name: "google.com"},
-          data_model_content: {
-            evaluation: "malicious",
-            related_threats: ["my comment"],
-            reliability: 10,
-          },
-          decay_progression: "2",
-          decay_timedelta_days: 0,
-      }
+        analyzable: { name: "google.com" },
+        data_model_content: {
+          evaluation: "malicious",
+          related_threats: ["my comment"],
+          reliability: 10,
+        },
+        decay_progression: "2",
+        decay_timedelta_days: 0,
+      },
     },
     {
       type: "ip wildcard",
@@ -123,14 +130,14 @@ describe("test UserEventModal component", () => {
       getUrl: `${USER_EVENT_IP_WILDCARD}?username=test&network=1.2.3.0/24`,
       payload: {
         network: "1.2.3.0/24",
-          data_model_content: {
-            evaluation: "malicious",
-            related_threats: ["my comment"],
-            reliability: 10,
-          },
-          decay_progression: "2",
-          decay_timedelta_days: 0,
-      }
+        data_model_content: {
+          evaluation: "malicious",
+          related_threats: ["my comment"],
+          reliability: 10,
+        },
+        decay_progression: "2",
+        decay_timedelta_days: 0,
+      },
     },
     {
       type: "domain wildcard",
@@ -139,84 +146,91 @@ describe("test UserEventModal component", () => {
       getUrl: `${USER_EVENT_DOMAIN_WILDCARD}?username=test&query=.*\\.test.com`,
       payload: {
         query: ".*\\.test.com",
-          data_model_content: {
-            evaluation: "malicious",
-            related_threats: ["my comment"],
-            reliability: 10,
-          },
-          decay_progression: "2",
-          decay_timedelta_days: 0,
-      }
-    }
-  ])("UserEventModal - $type (new evaluation) - create event", async ({ type, input, url, getUrl, payload}) => {
-    const user = userEvent.setup();
-    axios.put.mockImplementation(() =>
-      Promise.resolve({ status: 200, data: [""] }),
-    );
-    axios.get.mockImplementation(() =>
-      Promise.resolve({ status: 200, data: { count: 0 } }),
-    );
-    render(
-      <BrowserRouter>
-        <UserEventModal toggle={()=> jest.fn()} isOpen/>
-      </BrowserRouter>,
-    );
-
-    const modalTitle = screen.getByRole("heading", {
-      name: /Add your evaluation/i,
-    });
-    expect(modalTitle).toBeInTheDocument();
-
-    const analyzablesInput = screen.getAllByRole("textbox")[0];
-    expect(analyzablesInput).toBeInTheDocument();
-    expect(analyzablesInput.id).toBe("analyzables-0");
-    expect(analyzablesInput.value).toBe("");
-    expect(screen.getByText("Type:")).toBeInTheDocument();
-    expect(screen.getByText("Matches:")).toBeInTheDocument();
-    expect(screen.getByText("supported only for wildcard")).toBeInTheDocument();
-    const evaluationInput = screen.getByRole("combobox", { name: /Evaluation:/i });
-    expect(evaluationInput).toBeInTheDocument();
-    const commentsInput = screen.getAllByRole("textbox")[1];
-    expect(commentsInput).toBeInTheDocument();
-    expect(commentsInput.id).toBe("related_threats-0");
-    expect(commentsInput.value).toBe("");
-    const externalReferencesInput = screen.getAllByRole("textbox")[2];
-    expect(externalReferencesInput).toBeInTheDocument();
-    expect(externalReferencesInput.id).toBe("external_references-0");
-    const killChainPhaseInput = screen.getByRole("combobox", { name: /Kill chain phase:/i });
-    expect(killChainPhaseInput).toBeInTheDocument();
-    expect(screen.getByText("Tags:")).toBeInTheDocument();
-    const advancedFields = screen.getByRole("button", { name: /Advanced fields/i });
-    expect(advancedFields).toBeInTheDocument();
-    const saveButton = screen.getByRole("button", { name: /Save/i });
-    expect(saveButton).toBeInTheDocument();
-    expect(saveButton.className).toContain("disabled");
-
-    // add analyzable
-    fireEvent.change(analyzablesInput, {target: {value: input}});
-    expect(analyzablesInput.value).toBe(input);
-    // add evaluation
-    fireEvent.change(evaluationInput, {target: {value: "malicious"}});
-    expect(screen.getByText("MALICIOUS")).toBeInTheDocument();
-    // add comment
-    fireEvent.change(commentsInput, {target: {value: "my comment"}});
-    expect(commentsInput.value).toBe("my comment");
-
-    // IMPORTANT - wait for the state change
-    await screen.findByText(type);
-
-    expect(saveButton.className).not.toContain("disabled");
-
-    await user.click(saveButton);
-    await waitFor(()=>{
-      expect(axios.get).toHaveBeenCalledWith(
-        `${getUrl}`
+        data_model_content: {
+          evaluation: "malicious",
+          related_threats: ["my comment"],
+          reliability: 10,
+        },
+        decay_progression: "2",
+        decay_timedelta_days: 0,
+      },
+    },
+  ])(
+    "UserEventModal - $type (new evaluation) - create event",
+    async ({ type, input, url, getUrl, payload }) => {
+      const user = userEvent.setup();
+      axios.put.mockImplementation(() =>
+        Promise.resolve({ status: 200, data: [""] }),
       );
-      expect(axios.post).toHaveBeenCalledWith(
-        `${url}`, payload
+      axios.get.mockImplementation(() =>
+        Promise.resolve({ status: 200, data: { count: 0 } }),
       );
-    } );
-  });
+      render(
+        <BrowserRouter>
+          <UserEventModal toggle={() => jest.fn()} isOpen />
+        </BrowserRouter>,
+      );
+
+      const modalTitle = screen.getByRole("heading", {
+        name: /Add your evaluation/i,
+      });
+      expect(modalTitle).toBeInTheDocument();
+
+      const analyzablesInput = screen.getAllByRole("textbox")[0];
+      expect(analyzablesInput).toBeInTheDocument();
+      expect(analyzablesInput.id).toBe("analyzables-0");
+      expect(analyzablesInput.value).toBe("");
+      expect(screen.getByText("Type:")).toBeInTheDocument();
+      expect(screen.getByText("Matches:")).toBeInTheDocument();
+      expect(
+        screen.getByText("supported only for wildcard"),
+      ).toBeInTheDocument();
+      const evaluationInput = screen.getByRole("combobox", {
+        name: /Evaluation:/i,
+      });
+      expect(evaluationInput).toBeInTheDocument();
+      const commentsInput = screen.getAllByRole("textbox")[1];
+      expect(commentsInput).toBeInTheDocument();
+      expect(commentsInput.id).toBe("related_threats-0");
+      expect(commentsInput.value).toBe("");
+      const externalReferencesInput = screen.getAllByRole("textbox")[2];
+      expect(externalReferencesInput).toBeInTheDocument();
+      expect(externalReferencesInput.id).toBe("external_references-0");
+      const killChainPhaseInput = screen.getByRole("combobox", {
+        name: /Kill chain phase:/i,
+      });
+      expect(killChainPhaseInput).toBeInTheDocument();
+      expect(screen.getByText("Tags:")).toBeInTheDocument();
+      const advancedFields = screen.getByRole("button", {
+        name: /Advanced fields/i,
+      });
+      expect(advancedFields).toBeInTheDocument();
+      const saveButton = screen.getByRole("button", { name: /Save/i });
+      expect(saveButton).toBeInTheDocument();
+      expect(saveButton.className).toContain("disabled");
+
+      // add analyzable
+      fireEvent.change(analyzablesInput, { target: { value: input } });
+      expect(analyzablesInput.value).toBe(input);
+      // add evaluation
+      fireEvent.change(evaluationInput, { target: { value: "malicious" } });
+      expect(screen.getByText("MALICIOUS")).toBeInTheDocument();
+      // add comment
+      fireEvent.change(commentsInput, { target: { value: "my comment" } });
+      expect(commentsInput.value).toBe("my comment");
+
+      // IMPORTANT - wait for the state change
+      await screen.findByText(type);
+
+      expect(saveButton.className).not.toContain("disabled");
+
+      await user.click(saveButton);
+      await waitFor(() => {
+        expect(axios.get).toHaveBeenCalledWith(`${getUrl}`);
+        expect(axios.post).toHaveBeenCalledWith(`${url}`, payload);
+      });
+    },
+  );
 
   test.each([
     {
@@ -225,15 +239,15 @@ describe("test UserEventModal component", () => {
       url: USER_EVENT_ANALYZABLE,
       getUrl: `${USER_EVENT_ANALYZABLE}?username=test&analyzable_name=google.com`,
       payload: {
-        analyzable: {name: "google.com"},
-          data_model_content: {
-            evaluation: "malicious",
-            related_threats: ["my comment"],
-            reliability: 10,
-          },
-          decay_progression: "2",
-          decay_timedelta_days: 0,
-      }
+        analyzable: { name: "google.com" },
+        data_model_content: {
+          evaluation: "malicious",
+          related_threats: ["my comment"],
+          reliability: 10,
+        },
+        decay_progression: "2",
+        decay_timedelta_days: 0,
+      },
     },
     {
       type: "ip wildcard",
@@ -242,14 +256,14 @@ describe("test UserEventModal component", () => {
       getUrl: `${USER_EVENT_IP_WILDCARD}?username=test&network=1.2.3.0/24`,
       payload: {
         network: "1.2.3.0/24",
-          data_model_content: {
-            evaluation: "malicious",
-            related_threats: ["my comment"],
-            reliability: 10,
-          },
-          decay_progression: "2",
-          decay_timedelta_days: 0,
-      }
+        data_model_content: {
+          evaluation: "malicious",
+          related_threats: ["my comment"],
+          reliability: 10,
+        },
+        decay_progression: "2",
+        decay_timedelta_days: 0,
+      },
     },
     {
       type: "domain wildcard",
@@ -258,90 +272,104 @@ describe("test UserEventModal component", () => {
       getUrl: `${USER_EVENT_DOMAIN_WILDCARD}?username=test&query=.*\\.test.com`,
       payload: {
         query: ".*\\.test.com",
-          data_model_content: {
-            evaluation: "malicious",
-            related_threats: ["my comment"],
-            reliability: 10,
-          },
-          decay_progression: "2",
-          decay_timedelta_days: 0,
-      }
-    }
-  ])("UserEventModal - $type (new evaluation) - update event", async ({ type, input, url, getUrl, payload}) => {
-    const user = userEvent.setup();
-    axios.put.mockImplementation(() =>
-      Promise.resolve({ status: 200, data: [""] }),
-    );
-    axios.get.mockImplementation(() =>
-      Promise.resolve({ status: 200, data: { count: 1, results: [{id:2, name: "google.com"}]} }),
-    );
-    render(
-      <BrowserRouter>
-        <UserEventModal toggle={()=> jest.fn()} isOpen/>
-      </BrowserRouter>,
-    );
-
-    const modalTitle = screen.getByRole("heading", {
-      name: /Add your evaluation/i,
-    });
-    expect(modalTitle).toBeInTheDocument();
-
-    const analyzablesInput = screen.getAllByRole("textbox")[0];
-    expect(analyzablesInput).toBeInTheDocument();
-    expect(analyzablesInput.id).toBe("analyzables-0");
-    expect(analyzablesInput.value).toBe("");
-    expect(screen.getByText("Type:")).toBeInTheDocument();
-    expect(screen.getByText("Matches:")).toBeInTheDocument();
-    expect(screen.getByText("supported only for wildcard")).toBeInTheDocument();
-    const evaluationInput = screen.getByRole("combobox", { name: /Evaluation:/i });
-    expect(evaluationInput).toBeInTheDocument();
-    const commentsInput = screen.getAllByRole("textbox")[1];
-    expect(commentsInput).toBeInTheDocument();
-    expect(commentsInput.id).toBe("related_threats-0");
-    expect(commentsInput.value).toBe("");
-    const externalReferencesInput = screen.getAllByRole("textbox")[2];
-    expect(externalReferencesInput).toBeInTheDocument();
-    expect(externalReferencesInput.id).toBe("external_references-0");
-    const killChainPhaseInput = screen.getByRole("combobox", { name: /Kill chain phase:/i });
-    expect(killChainPhaseInput).toBeInTheDocument();
-    expect(screen.getByText("Tags:")).toBeInTheDocument();
-    const advancedFields = screen.getByRole("button", { name: /Advanced fields/i });
-    expect(advancedFields).toBeInTheDocument();
-    const saveButton = screen.getByRole("button", { name: /Save/i });
-    expect(saveButton).toBeInTheDocument();
-    expect(saveButton.className).toContain("disabled");
-
-    /// add analyzable
-    fireEvent.change(analyzablesInput, {target: {value: input}});
-    expect(analyzablesInput.value).toBe(input);
-    // add evaluation
-    fireEvent.change(evaluationInput, {target: {value: "malicious"}});
-    expect(screen.getByText("MALICIOUS")).toBeInTheDocument();
-    // add comment
-    fireEvent.change(commentsInput, {target: {value: "my comment"}});
-    expect(commentsInput.value).toBe("my comment");
-
-    // IMPORTANT - wait for the state change
-    await screen.findByText(type);
-
-    expect(saveButton.className).not.toContain("disabled");
-    await user.click(saveButton);
-
-    await waitFor(()=>{
-      expect(axios.get).toHaveBeenCalledWith(
-        `${getUrl}`
+        data_model_content: {
+          evaluation: "malicious",
+          related_threats: ["my comment"],
+          reliability: 10,
+        },
+        decay_progression: "2",
+        decay_timedelta_days: 0,
+      },
+    },
+  ])(
+    "UserEventModal - $type (new evaluation) - update event",
+    async ({ type, input, url, getUrl, payload }) => {
+      const user = userEvent.setup();
+      axios.put.mockImplementation(() =>
+        Promise.resolve({ status: 200, data: [""] }),
       );
-      expect(axios.patch).toHaveBeenCalledWith(
-        `${url}/2`, payload
+      axios.get.mockImplementation(() =>
+        Promise.resolve({
+          status: 200,
+          data: { count: 1, results: [{ id: 2, name: "google.com" }] },
+        }),
       );
-    } );
-  });
+      render(
+        <BrowserRouter>
+          <UserEventModal toggle={() => jest.fn()} isOpen />
+        </BrowserRouter>,
+      );
+
+      const modalTitle = screen.getByRole("heading", {
+        name: /Add your evaluation/i,
+      });
+      expect(modalTitle).toBeInTheDocument();
+
+      const analyzablesInput = screen.getAllByRole("textbox")[0];
+      expect(analyzablesInput).toBeInTheDocument();
+      expect(analyzablesInput.id).toBe("analyzables-0");
+      expect(analyzablesInput.value).toBe("");
+      expect(screen.getByText("Type:")).toBeInTheDocument();
+      expect(screen.getByText("Matches:")).toBeInTheDocument();
+      expect(
+        screen.getByText("supported only for wildcard"),
+      ).toBeInTheDocument();
+      const evaluationInput = screen.getByRole("combobox", {
+        name: /Evaluation:/i,
+      });
+      expect(evaluationInput).toBeInTheDocument();
+      const commentsInput = screen.getAllByRole("textbox")[1];
+      expect(commentsInput).toBeInTheDocument();
+      expect(commentsInput.id).toBe("related_threats-0");
+      expect(commentsInput.value).toBe("");
+      const externalReferencesInput = screen.getAllByRole("textbox")[2];
+      expect(externalReferencesInput).toBeInTheDocument();
+      expect(externalReferencesInput.id).toBe("external_references-0");
+      const killChainPhaseInput = screen.getByRole("combobox", {
+        name: /Kill chain phase:/i,
+      });
+      expect(killChainPhaseInput).toBeInTheDocument();
+      expect(screen.getByText("Tags:")).toBeInTheDocument();
+      const advancedFields = screen.getByRole("button", {
+        name: /Advanced fields/i,
+      });
+      expect(advancedFields).toBeInTheDocument();
+      const saveButton = screen.getByRole("button", { name: /Save/i });
+      expect(saveButton).toBeInTheDocument();
+      expect(saveButton.className).toContain("disabled");
+
+      /// add analyzable
+      fireEvent.change(analyzablesInput, { target: { value: input } });
+      expect(analyzablesInput.value).toBe(input);
+      // add evaluation
+      fireEvent.change(evaluationInput, { target: { value: "malicious" } });
+      expect(screen.getByText("MALICIOUS")).toBeInTheDocument();
+      // add comment
+      fireEvent.change(commentsInput, { target: { value: "my comment" } });
+      expect(commentsInput.value).toBe("my comment");
+
+      // IMPORTANT - wait for the state change
+      await screen.findByText(type);
+
+      expect(saveButton.className).not.toContain("disabled");
+      await user.click(saveButton);
+
+      await waitFor(() => {
+        expect(axios.get).toHaveBeenCalledWith(`${getUrl}`);
+        expect(axios.patch).toHaveBeenCalledWith(`${url}/2`, payload);
+      });
+    },
+  );
 
   test("UserEventModal - form (add evaluation)", async () => {
     const user = userEvent.setup();
     render(
       <BrowserRouter>
-        <UserEventModal analyzables={[analyzableMock]} toggle={()=> jest.fn()} isOpen/>
+        <UserEventModal
+          analyzables={[analyzableMock]}
+          toggle={() => jest.fn()}
+          isOpen
+        />
       </BrowserRouter>,
     );
 
@@ -358,7 +386,9 @@ describe("test UserEventModal component", () => {
     expect(screen.getByText("artifact")).toBeInTheDocument();
     expect(screen.getByText("Matches:")).toBeInTheDocument();
     expect(screen.getByText("supported only for wildcard")).toBeInTheDocument();
-    const evaluationInput = screen.getByRole("combobox", { name: /Evaluation:/i });
+    const evaluationInput = screen.getByRole("combobox", {
+      name: /Evaluation:/i,
+    });
     expect(evaluationInput).toBeInTheDocument();
     const commentsInput = screen.getAllByRole("textbox")[1];
     expect(commentsInput).toBeInTheDocument();
@@ -366,17 +396,23 @@ describe("test UserEventModal component", () => {
     const externalReferencesInput = screen.getAllByRole("textbox")[2];
     expect(externalReferencesInput).toBeInTheDocument();
     expect(externalReferencesInput.id).toBe("external_references-0");
-    const killChainPhaseInput = screen.getByRole("combobox", { name: /Kill chain phase:/i });
+    const killChainPhaseInput = screen.getByRole("combobox", {
+      name: /Kill chain phase:/i,
+    });
     expect(killChainPhaseInput).toBeInTheDocument();
     expect(screen.getByText("Tags:")).toBeInTheDocument();
 
     // advanced fields
-    const advancedFields = screen.getByRole("button", { name: /Advanced fields/i });
+    const advancedFields = screen.getByRole("button", {
+      name: /Advanced fields/i,
+    });
     expect(advancedFields).toBeInTheDocument();
     await user.click(advancedFields);
     const reliabilityInput = screen.getByText("Reliability:");
     expect(reliabilityInput).toBeInTheDocument();
-    const decayTypeInput = screen.getByRole("combobox", { name: /Decay type:/i });
+    const decayTypeInput = screen.getByRole("combobox", {
+      name: /Decay type:/i,
+    });
     expect(decayTypeInput).toBeInTheDocument();
     const decayDaysInput = screen.getByText("Decay days:");
     expect(decayDaysInput).toBeInTheDocument();
@@ -386,5 +422,4 @@ describe("test UserEventModal component", () => {
     expect(saveButton).toBeInTheDocument();
     expect(saveButton.className).toContain("disabled");
   });
-  
 });

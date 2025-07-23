@@ -64,7 +64,7 @@ You can see the full list of all available analyzers in the [documentation](http
 
 As open source project maintainers, we strongly rely on external support to get the resources and time to work on keeping the project alive, with a constant release of new features, bug fixes and general improvements.
 
-Because of this, we joined [Open Collective](https://opencollective.com/intelowl-project) to obtain non-profit equal level status which allows the organization to receive and manage donations transparently. Please support IntelOwl and all the community by choosing a plan (BRONZE, SILVER, etc).
+Because of this, we joined [Open Collective](https://opencollective.com/intelowl-project) to obtain US and EU non-profit equal level status which allows the organization to receive and manage donations transparently and with tax exemption. Please support IntelOwl and all the community by choosing a plan (BRONZE, SILVER, etc).
 
 <a href="https://opencollective.com/intelowl-project/donate" target="_blank">
   <img src="https://opencollective.com/intelowl-project/donate/button@2x.png?color=blue" width=200 />
@@ -78,7 +78,7 @@ Because of this, we joined [Open Collective](https://opencollective.com/intelowl
 
 [Certego](https://certego.net/?utm_source=intelowl) is a MDR (Managed Detection and Response) and Threat Intelligence Provider based in Italy.
 
-IntelOwl was born out of Certego's Threat intelligence R&D division and is constantly maintained and updated thanks to them.
+IntelOwl was born out of Certego's Threat intelligence R&D division and is mostly maintained and updated thanks to them.
 
 #### The Honeynet Project
 

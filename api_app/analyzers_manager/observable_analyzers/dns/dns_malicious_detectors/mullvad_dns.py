@@ -2,9 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 
-import base64
 import logging
-from urllib.parse import urlparse
 
 import dns.message
 import httpx
@@ -14,13 +12,13 @@ from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
     malicious_detector_response,
 )
-from api_app.choices import Classification
+from api_app.analyzers_manager.observable_analyzers.dns.doh_mixin import DoHMixin
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
 
-class MullvadDNSAnalyzer(ObservableAnalyzer):
+class MullvadDNSAnalyzer(DoHMixin, ObservableAnalyzer):
     """
     MullvadDNSAnalyzer:
 
@@ -36,21 +34,6 @@ class MullvadDNSAnalyzer(ObservableAnalyzer):
     def update(self):
         pass
 
-    @staticmethod
-    def encode_query(observable: str) -> str:
-        """
-        Constructs a DNS query for the given observable (domain) for an A record,
-        converts it to wire format, and encodes it in URL-safe base64.
-        """
-        logger.info(f"Encoding DNS query for {observable}")
-        query = dns.message.make_query(observable, dns.rdatatype.A)
-        wire_query = query.to_wire()
-        encoded_query = (
-            base64.urlsafe_b64encode(wire_query).rstrip(b"=").decode("ascii")
-        )
-        logger.info(f"Mullvad_DNS encoded query for {observable}: {encoded_query}")
-        return encoded_query
-
     def run(self):
         """
         Executes the analyzer:
@@ -61,21 +44,15 @@ class MullvadDNSAnalyzer(ObservableAnalyzer):
           - Parses the DNS response.
           - Depending on the configured mode ("query" or "malicious"), returns either raw data or a flagged result.
         """
-        observable = self.observable_name
-
-        if self.observable_classification == Classification.URL:
-            logger.debug(f"Mullvad_DNS extracting hostname from URL {observable}")
-            hostname = urlparse(observable).hostname
-            observable = hostname
-
-        encoded_query = self.encode_query(observable)
-        complete_url = f"{self.url}?dns={encoded_query}"
-        logger.info(f"Requesting Mullvad DNS for {observable} at: {complete_url}")
+        observable = self.convert_to_domain(
+            self.observable_name, self.observable_classification
+        )
+        complete_url = self.build_query_url(observable)
 
         try:
             response = httpx.Client(http2=True).get(
                 complete_url,
-                headers={"accept": "application/dns-message"},
+                headers=self.headers,
                 timeout=30.0,
             )
             response.raise_for_status()

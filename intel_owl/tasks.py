@@ -479,7 +479,7 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
                 PivotReport, lower_threshold, upper_threshold
             )
         )
-        logger.info(f"documents to add to elastic: {len(all_report_document_list)}")
+        logger.info(f"Documents to add to elastic: {len(all_report_document_list)}")
         if all_report_document_list:
             logger.info(
                 ", ".join(
@@ -489,14 +489,18 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
                     ]
                 )
             )
-            try:
-                bulk(settings.ELASTICSEARCH_DSL_CLIENT, all_report_document_list)
-            except Exception as error:  # pylint: disable=broad-exception-caught
-                logger.exception(error)
+            _, errors = bulk(  # noqa
+                settings.ELASTICSEARCH_DSL_CLIENT,
+                all_report_document_list,
+                raise_on_error=False,
+                stats_only=False,
+            )
+            if not errors:
+                logger.info("Documents correctly inserted!")
             else:
-                logger.info("documents correctly inserted!")
+                logger.error(f"Errors on document indexing: {errors}")
         else:
-            logger.info("no documents to add")
+            logger.info("No documents to add")
 
 
 @shared_task(

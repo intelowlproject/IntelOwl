@@ -8,6 +8,7 @@ import {
   MdFileDownload,
 } from "react-icons/md";
 import { FaRegStopCircle } from "react-icons/fa";
+import { BsFillPlusCircleFill } from "react-icons/bs";
 
 // These function are needed in IconButton because it expects Icon as a function
 
@@ -60,6 +61,15 @@ export function killJobIcon() {
     <span className="d-flex align-items-center">
       <FaRegStopCircle className="me-1" />
       Kill job
+    </span>
+  );
+}
+
+export function addEvaluationIcon() {
+  return (
+    <span className="d-flex align-items-center">
+      <BsFillPlusCircleFill className="me-1" />
+      Your evaluation
     </span>
   );
 }

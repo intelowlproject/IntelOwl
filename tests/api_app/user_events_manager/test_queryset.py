@@ -26,7 +26,7 @@ class TestUserAnalyzableEventQuerySet(CustomTestCase):
         )
         ue = UserAnalyzableEventSerializer(
             data={
-                "analyzable": an.pk,
+                "analyzable": {"name": an.name},
                 "decay_progression": 0,
                 "decay_timedelta_days": 0,
                 "data_model_content": {"evaluation": "malicious", "reliability": 8},

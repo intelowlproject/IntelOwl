@@ -15,15 +15,12 @@ import useTitle from "react-use/lib/useTitle";
 
 import { useSearchParams } from "react-router-dom";
 import { format, toDate } from "date-fns-tz";
-import { USER_EVENT_ANALYZABLE } from "../../constants/apiURLs";
-import { userReportsTableColumns } from "./userReportsTableColumns";
 import { datetimeFormatStr } from "../../constants/miscConst";
 import { TimePicker } from "../common/TimePicker";
 import { JsonEditor } from "../common/JsonEditor";
 
 // constants
 const toPassTableProps = {
-  columns: userReportsTableColumns,
   tableEmptyNode: (
     <>
       <h4>No Data</h4>
@@ -32,14 +29,23 @@ const toPassTableProps = {
   ),
   SubComponent: ({ row }) => (
     <div
-      id={`userreport-jsoninput-${row.id}`}
+      id={`userEvent-jsoninput-${row.id}`}
       style={{ maxHeight: "50vh", width: "100%", overflow: "scroll" }}
       className="row"
     >
       <JsonEditor
         id="user_report_json"
         initialJsonData={{
-          report: row.original,
+          id: row.original.id,
+          analyzable:
+            row.original?.analyzable?.name || row.original?.analyzables,
+          user: row.original.user,
+          decay: row.original.decay,
+          decay_progression: row.original.decay_progression,
+          decay_timedelta_days: row.original.decay_timedelta_days,
+          next_decay: row.original.next_decay,
+          decay_times: row.original.decay_times,
+          data_model: row.original.data_model,
         }}
         width="100%"
         readOnly
@@ -50,15 +56,15 @@ const toPassTableProps = {
 };
 
 // component
-export default function UserReportsTable() {
-  console.debug("UserReportsTable rendered!");
+export default function UserEventsTable({ title, url, columns, description }) {
+  console.debug("UserEventsTable rendered!");
 
   // page title
-  useTitle("IntelOwl | User Reports History", { restoreOnUnmount: true });
+  useTitle("IntelOwl | User Evaluations History", { restoreOnUnmount: true });
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const startTimeParam = searchParams.get("date__gte");
-  const endTimeParam = searchParams.get("date__lte");
+  const startTimeParam = searchParams.get("event_date__gte");
+  const endTimeParam = searchParams.get("event_date__lte");
 
   // default: 24h
   const defaultFromDate = new Date();
@@ -97,8 +103,8 @@ export default function UserReportsTable() {
       });
       setSearchParams({
         ...currentParams,
-        date__gte: format(searchFromDateValue, datetimeFormatStr),
-        date__lte: format(searchToDateValue, datetimeFormatStr),
+        event_date__gte: format(searchFromDateValue, datetimeFormatStr),
+        event_date__lte: format(searchToDateValue, datetimeFormatStr),
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -110,7 +116,11 @@ export default function UserReportsTable() {
   ]);
 
   return areParamsInitialized ? ( // this "if" avoid one request
-    <UserReportsTableComponent
+    <UserEventsTableComponent
+      title={title}
+      url={url}
+      columns={columns}
+      description={description}
       searchFromDateValue={searchFromDateValue}
       searchToDateValue={searchToDateValue}
     />
@@ -119,7 +129,14 @@ export default function UserReportsTable() {
   );
 }
 
-function UserReportsTableComponent({ searchFromDateValue, searchToDateValue }) {
+function UserEventsTableComponent({
+  title,
+  url,
+  columns,
+  description,
+  searchFromDateValue,
+  searchToDateValue,
+}) {
   const [
     data,
     tableNode,
@@ -129,9 +146,12 @@ function UserReportsTableComponent({ searchFromDateValue, searchToDateValue }) {
     tableState,
   ] = useDataTable(
     {
-      url: USER_EVENT_ANALYZABLE,
+      url,
     },
-    toPassTableProps,
+    {
+      ...toPassTableProps,
+      columns,
+    },
   );
 
   // state
@@ -143,7 +163,7 @@ function UserReportsTableComponent({ searchFromDateValue, searchToDateValue }) {
     // check if there is already a filter for the selected item
     const filterIndex = filters.findIndex((filter) => filter.id === name);
     let valueToChange = value;
-    if (["date__gte", "date__lte"].includes(name))
+    if (["event_date__gte", "event_date__lte"].includes(name))
       valueToChange = format(value, datetimeFormatStr);
 
     // If the filter is already present (index>=0) I update the value
@@ -160,12 +180,12 @@ function UserReportsTableComponent({ searchFromDateValue, searchToDateValue }) {
 
   // this update the value after some times, this give user time to pick the datetime
   useDebounceInput(
-    { name: "date__gte", value: fromDateType },
+    { name: "event_date__gte", value: fromDateType },
     1000,
     onChangeFilter,
   );
   useDebounceInput(
-    { name: "date__lte", value: toDateType },
+    { name: "event_date__lte", value: toDateType },
     1000,
     onChangeFilter,
   );
@@ -177,29 +197,29 @@ function UserReportsTableComponent({ searchFromDateValue, searchToDateValue }) {
         <Container fluid>
           {/* Basic */}
           <Row className="mb-2">
-            <Col className="d-flex align-items-center" sm={5}>
-              <h1 id="UserReportsHistory">
-                User Reports History&nbsp;
+            <Col className="d-flex align-items-center" sm={7}>
+              <h1 id="UserEventsHistory">
+                {title}&nbsp;
                 <small className="text-gray">{data?.count} total</small>
               </h1>
               <div className="ms-2">
-                <MdInfoOutline id="userreportstable-infoicon" fontSize="20" />
+                <MdInfoOutline id="usereventstable-infoicon" fontSize="20" />
                 <UncontrolledTooltip
                   trigger="hover"
-                  target="userreportstable-infoicon"
+                  target="usereventstable-infoicon"
                   placement="right"
                   fade={false}
                   innerClassName="p-2 text-start text-nowrap md-fit-content"
                 >
-                  TO DO
+                  {description}
                 </UncontrolledTooltip>
               </div>
             </Col>
             <Col className="align-self-center">
               <TimePicker
-                id="userreportstable__time-picker"
-                fromName="date__gte"
-                toName="date__lte"
+                id="usereventstable__time-picker"
+                fromName="event_date__gte"
+                toName="event_date__lte"
                 fromValue={fromDateType}
                 toValue={toDateType}
                 fromOnChange={setFromDateType}

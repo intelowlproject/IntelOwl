@@ -8,14 +8,14 @@ import History from "../../src/components/History";
 import { INVESTIGATION_BASE_URI } from "../../src/constants/apiURLs";
 
 jest.mock("axios");
-// mock JobsTable, InvestigationsTable and UserReportsTable components
+// mock JobsTable, InvestigationsTable and UserEventsTable components
 jest.mock("../../src/components/jobs/table/JobsTable", () =>
   jest.fn((props) => <div {...props} />),
 );
 jest.mock("../../src/components/investigations/table/InvestigationsTable", () =>
   jest.fn((props) => <div {...props} />),
 );
-jest.mock("../../src/components/userReports/UserReportsTable", () =>
+jest.mock("../../src/components/userEvents/UserEventsTable", () =>
   jest.fn((props) => <div {...props} />),
 );
 
@@ -45,33 +45,86 @@ describe("test History component", () => {
     expect(investigationButton).toBeInTheDocument();
     expect(investigationButton.closest("a").className).not.toContain("active"); // not selected
 
-    const userReportsButton = screen.getByText("User Reports");
-    expect(userReportsButton).toBeInTheDocument();
-    expect(userReportsButton.closest("a").className).not.toContain("active"); // not selected
+    const artifactsButton = screen.getByText("Artifacts evaluations");
+    expect(artifactsButton).toBeInTheDocument();
+    expect(artifactsButton.closest("a").className).not.toContain("active"); // not selected
+
+    const ipWildcardButton = screen.getByText("Ip wildcard evaluations");
+    expect(ipWildcardButton).toBeInTheDocument();
+    expect(ipWildcardButton.closest("a").className).not.toContain("active"); // not selected
+
+    const domainWildcardButton = screen.getByText(
+      "Domain wildcard evaluations",
+    );
+    expect(domainWildcardButton).toBeInTheDocument();
+    expect(domainWildcardButton.closest("a").className).not.toContain("active"); // not selected
 
     // investigation tab selected
     await user.click(investigationButton);
     await waitFor(() => {
       expect(jobsButton.closest("a").className).not.toContain("active"); // not selected
       expect(investigationButton.closest("a").className).toContain("active"); // selected
+      expect(artifactsButton.closest("a").className).not.toContain("active"); // not selected
+      expect(ipWildcardButton.closest("a").className).not.toContain("active"); // not selected
+      expect(domainWildcardButton.closest("a").className).not.toContain(
+        "active",
+      ); // not selected
       const createInvestigationButton = screen.getByRole("button", {
         name: /Create investigation/i,
       });
       expect(createInvestigationButton).toBeInTheDocument();
     });
 
-    // user reports tab selected
-    await user.click(userReportsButton);
+    // user event - analyzables tab selected
+    await user.click(artifactsButton);
     await waitFor(() => {
       expect(jobsButton.closest("a").className).not.toContain("active"); // not selected
       expect(investigationButton.closest("a").className).not.toContain(
         "active",
       ); // not selected
-      expect(userReportsButton.closest("a").className).toContain("active"); // selected
-      const createUserReportButton = screen.getByRole("button", {
-        name: /Create user report/i,
+      expect(artifactsButton.closest("a").className).toContain("active"); // selected
+      const createEvaluationButton = screen.getByRole("button", {
+        name: /New evaluation/i,
       });
-      expect(createUserReportButton).toBeInTheDocument();
+      expect(createEvaluationButton).toBeInTheDocument();
+      expect(ipWildcardButton.closest("a").className).not.toContain("active"); // not selected
+      expect(domainWildcardButton.closest("a").className).not.toContain(
+        "active",
+      ); // not selected
+    });
+
+    // user event - ip wildcard tab selected
+    await user.click(ipWildcardButton);
+    await waitFor(() => {
+      expect(jobsButton.closest("a").className).not.toContain("active"); // not selected
+      expect(investigationButton.closest("a").className).not.toContain(
+        "active",
+      ); // not selected
+      expect(artifactsButton.closest("a").className).not.toContain("active"); // not selected
+      expect(ipWildcardButton.closest("a").className).toContain("active"); // selected
+      const createEvaluationButton = screen.getByRole("button", {
+        name: /New evaluation/i,
+      });
+      expect(createEvaluationButton).toBeInTheDocument();
+      expect(domainWildcardButton.closest("a").className).not.toContain(
+        "active",
+      ); // not selected
+    });
+
+    // user event - domain wildcard tab selected
+    await user.click(domainWildcardButton);
+    await waitFor(() => {
+      expect(jobsButton.closest("a").className).not.toContain("active"); // not selected
+      expect(investigationButton.closest("a").className).not.toContain(
+        "active",
+      ); // not selected
+      expect(artifactsButton.closest("a").className).not.toContain("active"); // not selected
+      expect(ipWildcardButton.closest("a").className).not.toContain("active"); // not selected
+      expect(domainWildcardButton.closest("a").className).toContain("active"); // selected
+      const createEvaluationButton = screen.getByRole("button", {
+        name: /New evaluation/i,
+      });
+      expect(createEvaluationButton).toBeInTheDocument();
     });
   });
 

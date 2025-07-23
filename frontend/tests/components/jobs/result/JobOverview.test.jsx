@@ -1,7 +1,7 @@
 import React from "react";
 import "@testing-library/jest-dom";
 import { render, screen, within } from "@testing-library/react";
-import { BrowserRouter, } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 
 import { JobOverview } from "../../../../src/components/jobs/result/JobOverview";
@@ -12,10 +12,10 @@ jest.mock("../../../../src/components/jobs/result/JobIsRunningAlert", () => ({
 }));
 // mock useNavigate
 const mockedUsedNavigate = jest.fn();
-jest.mock('react-router-dom', () => ({
-    ...jest.requireActual('react-router-dom'),
-   useNavigate: () => mockedUsedNavigate,
- }));
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: () => mockedUsedNavigate,
+}));
 
 describe("test JobOverview (job report)", () => {
   let jobReport;
@@ -72,28 +72,28 @@ describe("test JobOverview (job report)", () => {
       visualizers_requested: ["TestVisualizer"],
       visualizers_to_execute: ["TestVisualizer"],
       visualizer_reports: [
-              {
-                id: 730,
-                name: "Test_page_1",
-                process_time: 0.0,
-                status: "SUCCESS",
-                warnings: [],
-                errors: [],
-                start_time: "2023-10-05T15:57:51.350841Z",
-                end_time: "2023-10-05T15:57:51.547472Z",
-                runtime_configuration: {},
-                config: "TestVisualizer",
-                type: "visualizer",
-                report: [
-                  {
-                    level: 1,
-                    elements: {
-                      type: "horizontal_list",
-                      values: [],
-                    },
-                  },
-                ],
+        {
+          id: 730,
+          name: "Test_page_1",
+          process_time: 0.0,
+          status: "SUCCESS",
+          warnings: [],
+          errors: [],
+          start_time: "2023-10-05T15:57:51.350841Z",
+          end_time: "2023-10-05T15:57:51.547472Z",
+          runtime_configuration: {},
+          config: "TestVisualizer",
+          type: "visualizer",
+          report: [
+            {
+              level: 1,
+              elements: {
+                type: "horizontal_list",
+                values: [],
               },
+            },
+          ],
+        },
       ],
       playbook_requested: "TestPlaybook",
       playbook_to_execute: "TestPlaybook",
@@ -190,52 +190,59 @@ describe("test JobOverview (job report)", () => {
       subSectionButtonName: "Visualizer",
       path: "/jobs/1/visualizer/Test_page_1",
     },
-  ])('Raw sections - from Analyzers Report to $subSectionButtonName', async ({subSectionButtonName, path}) => {
-    render(
-      <BrowserRouter>
-        <JobOverview
-          isRunningJob={false}
-          section="raw"
-          subSection="analyzer"
-          refetch={() => {}}
-          job={jobReport}
-        />
-      </BrowserRouter>,
-    );
-    const user = userEvent.setup();
+  ])(
+    "Raw sections - from Analyzers Report to $subSectionButtonName",
+    async ({ subSectionButtonName, path }) => {
+      render(
+        <BrowserRouter>
+          <JobOverview
+            isRunningJob={false}
+            section="raw"
+            subSection="analyzer"
+            refetch={() => {}}
+            job={jobReport}
+          />
+        </BrowserRouter>,
+      );
+      const user = userEvent.setup();
 
-    // check sections visualizer/raw
-    const visualizerButton = screen.getByRole("button", { name: "Visualizer" });
-    expect(visualizerButton).toBeInTheDocument();
-    expect(visualizerButton.className).toContain("btn-outline-tertiary"); // not selected
-    const rawButton = screen.getByRole("button", { name: "Raw" });
-    expect(rawButton).toBeInTheDocument();
-    expect(rawButton.className).toContain("btn-primary"); // selected
-    // check subsections available
-    const analyzerReport = screen.getByText("Analyzers Report");
-    expect(analyzerReport).toBeInTheDocument();
-    const connectorReport = screen.getByText("Connectors Report");
-    expect(connectorReport).toBeInTheDocument();
-    const pivotReport = screen.getByText("Pivots Report");
-    expect(pivotReport).toBeInTheDocument();
-    const visualizerReport = screen.getByText("Visualizers Report");
-    expect(visualizerReport).toBeInTheDocument();
-    const fullReport = screen.getByText("Full Report");
-    expect(fullReport).toBeInTheDocument();
-    const dataModel = screen.getByText("Data Model");
-    expect(dataModel).toBeInTheDocument();
-    // check active subsection
-    expect(analyzerReport.closest("a").className).toContain("active");
-    expect(connectorReport.closest("a").className).not.toContain("active");
-    expect(pivotReport.closest("a").className).not.toContain("active");
-    expect(visualizerReport.closest("a").className).not.toContain("active");
-    expect(fullReport.closest("a").className).not.toContain("active");
-    expect(dataModel.closest("a").className).not.toContain("active");
+      // check sections visualizer/raw
+      const visualizerButton = screen.getByRole("button", {
+        name: "Visualizer",
+      });
+      expect(visualizerButton).toBeInTheDocument();
+      expect(visualizerButton.className).toContain("btn-outline-tertiary"); // not selected
+      const rawButton = screen.getByRole("button", { name: "Raw" });
+      expect(rawButton).toBeInTheDocument();
+      expect(rawButton.className).toContain("btn-primary"); // selected
+      // check subsections available
+      const analyzerReport = screen.getByText("Analyzers Report");
+      expect(analyzerReport).toBeInTheDocument();
+      const connectorReport = screen.getByText("Connectors Report");
+      expect(connectorReport).toBeInTheDocument();
+      const pivotReport = screen.getByText("Pivots Report");
+      expect(pivotReport).toBeInTheDocument();
+      const visualizerReport = screen.getByText("Visualizers Report");
+      expect(visualizerReport).toBeInTheDocument();
+      const fullReport = screen.getByText("Full Report");
+      expect(fullReport).toBeInTheDocument();
+      const dataModel = screen.getByText("Data Model");
+      expect(dataModel).toBeInTheDocument();
+      // check active subsection
+      expect(analyzerReport.closest("a").className).toContain("active");
+      expect(connectorReport.closest("a").className).not.toContain("active");
+      expect(pivotReport.closest("a").className).not.toContain("active");
+      expect(visualizerReport.closest("a").className).not.toContain("active");
+      expect(fullReport.closest("a").className).not.toContain("active");
+      expect(dataModel.closest("a").className).not.toContain("active");
 
-    await user.click(screen.getByText(subSectionButtonName));
-    await expect(mockedUsedNavigate).toHaveBeenCalledTimes(1);
-    await expect(mockedUsedNavigate).toHaveBeenCalledWith(path, { state: { userChanged: true, jobReport } });
-  });
+      await user.click(screen.getByText(subSectionButtonName));
+      await expect(mockedUsedNavigate).toHaveBeenCalledTimes(1);
+      await expect(mockedUsedNavigate).toHaveBeenCalledWith(path, {
+        state: { userChanged: true, jobReport },
+      });
+    },
+  );
 
   test("Move from Raw section to Visualizer section - no visualizer", async () => {
     // edit job report
@@ -286,7 +293,10 @@ describe("test JobOverview (job report)", () => {
 
     await user.click(visualizerButton);
     await expect(mockedUsedNavigate).toHaveBeenCalledTimes(1);
-    await expect(mockedUsedNavigate).toHaveBeenCalledWith("/jobs/1/visualizer/no-visualizer", { state: { userChanged: true, jobReport } });
+    await expect(mockedUsedNavigate).toHaveBeenCalledWith(
+      "/jobs/1/visualizer/no-visualizer",
+      { state: { userChanged: true, jobReport } },
+    );
   });
 
   test("Move from Visualizer section to Raw section", async () => {
@@ -318,7 +328,10 @@ describe("test JobOverview (job report)", () => {
 
     await user.click(rawButton);
     await expect(mockedUsedNavigate).toHaveBeenCalledTimes(1);
-    await expect(mockedUsedNavigate).toHaveBeenCalledWith("/jobs/1/raw/analyzer", { state: { userChanged: true, jobReport } });
+    await expect(mockedUsedNavigate).toHaveBeenCalledWith(
+      "/jobs/1/raw/analyzer",
+      { state: { userChanged: true, jobReport } },
+    );
   });
 
   test("Move from Visualizer (page 1/2) to Visualizer (page 2/2)", async () => {
@@ -401,7 +414,9 @@ describe("test JobOverview (job report)", () => {
 
     await user.click(secondPageReport);
     await expect(mockedUsedNavigate).toHaveBeenCalledTimes(1);
-    await expect(mockedUsedNavigate).toHaveBeenCalledWith("/jobs/1/visualizer/Test_page_2", { state: { userChanged: true, jobReport } });
+    await expect(mockedUsedNavigate).toHaveBeenCalledWith(
+      "/jobs/1/visualizer/Test_page_2",
+      { state: { userChanged: true, jobReport } },
+    );
   });
-
 });

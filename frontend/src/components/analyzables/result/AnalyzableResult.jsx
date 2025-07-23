@@ -28,7 +28,7 @@ export default function AnalyzableResult() {
   }, [loading]);
 
   // page title
-  useTitle(`IntelOwl | Analyzable (#${analyzableId})`, {
+  useTitle(`IntelOwl | Artifact (#${analyzableId})`, {
     restoreOnUnmount: true,
   });
 

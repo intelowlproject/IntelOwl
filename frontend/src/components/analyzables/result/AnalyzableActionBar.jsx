@@ -1,32 +1,39 @@
 import React from "react";
 import PropTypes from "prop-types";
-// import axios from "axios";
 
 import { ContentSection, IconButton } from "@certego/certego-ui";
 
-import { rescanIcon } from "../../common/icon/actionIcons";
-// import { USER_EVENT_ANALYZABLE } from "../../../constants/apiURLs";
-// import {prettifyErrors} from "../../../utils/api";
+import { rescanIcon, addEvaluationIcon } from "../../common/icon/actionIcons";
+import { UserEventModal } from "../../userEvents/UserEventModal";
 
 export function AnalyzableActionsBar({ analyzable }) {
+  const [showUserEventModal, setShowUserEventModal] = React.useState(false);
+
   return (
     <ContentSection className="d-inline-flex me-2">
-      {/* <IconButton
-        id="addUserReportBtn"
-        Icon={()=>"Add your report"}
+      <IconButton
+        id="addUserEvaluationBtn"
+        Icon={addEvaluationIcon}
         size="sm"
         color="secondary"
-        title="Add your report"
+        title="Add your evaluation"
         titlePlacement="top"
         className="me-2"
-        onClick={()=>addUserReport(analyzable.id)}
-      /> */}
+        onClick={() => setShowUserEventModal(!showUserEventModal)}
+      />
+      {showUserEventModal && (
+        <UserEventModal
+          analyzables={[analyzable]}
+          toggle={setShowUserEventModal}
+          isOpen={showUserEventModal}
+        />
+      )}
       <IconButton
         id="rescanbtn"
         Icon={rescanIcon}
         size="sm"
         color="light"
-        title="Rescan analyzable"
+        title="Rescan artifact"
         titlePlacement="top"
         href={`/scan?observable=${analyzable.name}`}
         target="_blank"

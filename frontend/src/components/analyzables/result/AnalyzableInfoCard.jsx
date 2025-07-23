@@ -70,7 +70,7 @@ export function AnalyzableInfoCard({ analyzable }) {
               placement="left"
               target="AnalyzableInfoCardDropDown"
             >
-              Toggle Analyzable Metadata
+              Toggle Artifact Metadata
             </UncontrolledTooltip>
           </Col>
         </Row>

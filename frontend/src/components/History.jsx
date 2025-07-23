@@ -15,13 +15,24 @@ import { FallBackLoading } from "@certego/certego-ui";
 import { useGuideContext } from "../contexts/GuideContext";
 import { createInvestigation } from "./investigations/result/investigationApi";
 import { datetimeFormatStr, HistoryPages } from "../constants/miscConst";
+import {
+  USER_EVENT_ANALYZABLE,
+  USER_EVENT_DOMAIN_WILDCARD,
+  USER_EVENT_IP_WILDCARD,
+} from "../constants/apiURLs";
+import {
+  userAnalyzableEventsTableColumns,
+  userDomainWildcardEventsTableColumns,
+  userIpWildcardEventsTableColumns,
+} from "./userEvents/userEventsTableColumns";
+import { UserEventModal } from "./userEvents/UserEventModal";
 
 const JobsTable = React.lazy(() => import("./jobs/table/JobsTable"));
 const InvestigationsTable = React.lazy(
   () => import("./investigations/table/InvestigationsTable"),
 );
-const UserReportsTable = React.lazy(
-  () => import("./userReports/UserReportsTable"),
+const UserEventsTable = React.lazy(
+  () => import("./userEvents/UserEventsTable"),
 );
 
 export default function History() {
@@ -29,22 +40,19 @@ export default function History() {
   const location = useLocation();
   const [searchParams, _] = useSearchParams();
 
-  let pageType;
-  let startTimeParam;
-  let endTimeParam;
+  const pageType = location?.pathname?.split("/")[2];
+  let startTimeParam = searchParams.get("event_date__gte");
+  let endTimeParam = searchParams.get("event_date__lte");
+  let createButtonTitle = "New evaluation";
 
-  if (location?.pathname.includes(HistoryPages.JOBS)) {
-    pageType = HistoryPages.JOBS;
+  if (pageType === HistoryPages.JOBS) {
     startTimeParam = searchParams.get("received_request_time__gte");
     endTimeParam = searchParams.get("received_request_time__lte");
-  } else if (location?.pathname.includes(HistoryPages.INVESTIGAITONS)) {
-    pageType = HistoryPages.INVESTIGAITONS;
+    createButtonTitle = "Create job";
+  } else if (pageType === HistoryPages.INVESTIGAITONS) {
     startTimeParam = searchParams.get("start_time__gte");
     endTimeParam = searchParams.get("start_time__lte");
-  } else {
-    pageType = HistoryPages.USER_REPORTS;
-    startTimeParam = searchParams.get("date__gte");
-    endTimeParam = searchParams.get("date__lte");
+    createButtonTitle = "Create Investigation";
   }
 
   const { guideState, setGuideState } = useGuideContext();
@@ -58,6 +66,8 @@ export default function History() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const [showUserEventModal, setShowUserEventModal] = React.useState(false);
+
   const onClick = async () => {
     if (pageType === HistoryPages.JOBS) {
       navigate("/scan");
@@ -69,7 +79,7 @@ export default function History() {
         // handle inside createInvestigation
       }
     } else {
-      // !!!! da aggiungere l'apertura del modale una volta realizzato
+      setShowUserEventModal(!showUserEventModal);
     }
   };
 
@@ -81,12 +91,16 @@ export default function History() {
         size="sm"
         color="darker"
         onClick={onClick}
-        disabled={pageType === HistoryPages.USER_REPORTS} // !! da eliminare dopo aver creato il modale
       >
         <BsFillPlusCircleFill />
-        &nbsp;Create{" "}
-        {pageType.substring(0, pageType.length - 1).replace("-", " ")}
+        &nbsp;{createButtonTitle}
       </Button>
+      {showUserEventModal && (
+        <UserEventModal
+          toggle={setShowUserEventModal}
+          isOpen={showUserEventModal}
+        />
+      )}
     </Col>
   );
 
@@ -135,15 +149,51 @@ export default function History() {
         >
           <RRNavLink
             className="nav-link"
-            to={`/history/user-reports?date__gte=${encodeURIComponent(
+            to={`/history/user-events?event_date__gte=${encodeURIComponent(
               format(startTimeParam, datetimeFormatStr),
-            )}&date__lte=${encodeURIComponent(
+            )}&event_date__lte=${encodeURIComponent(
               format(endTimeParam, datetimeFormatStr),
             )}&ordering=-date`}
           >
-            <span id="user-reports" className="d-flex-center">
+            <span id="user-events" className="d-flex-center">
               <GrDocumentUser />
-              &nbsp;User Reports
+              &nbsp;Artifacts evaluations
+            </span>
+          </RRNavLink>
+        </NavItem>
+        <NavItem
+          className="border-dark"
+          style={{ borderRightStyle: "solid", borderRightWidth: "1px" }}
+        >
+          <RRNavLink
+            className="nav-link"
+            to={`/history/user-ip-wildcard-events?event_date__gte=${encodeURIComponent(
+              format(startTimeParam, datetimeFormatStr),
+            )}&event_date__lte=${encodeURIComponent(
+              format(endTimeParam, datetimeFormatStr),
+            )}&ordering=-date`}
+          >
+            <span id="user-ip-events" className="d-flex-center">
+              <GrDocumentUser />
+              &nbsp;Ip wildcard evaluations
+            </span>
+          </RRNavLink>
+        </NavItem>
+        <NavItem
+          className="border-dark"
+          style={{ borderRightStyle: "solid", borderRightWidth: "1px" }}
+        >
+          <RRNavLink
+            className="nav-link"
+            to={`/history/user-domain-wildcard-events?event_date__gte=${encodeURIComponent(
+              format(startTimeParam, datetimeFormatStr),
+            )}&event_date__lte=${encodeURIComponent(
+              format(endTimeParam, datetimeFormatStr),
+            )}&ordering=-date`}
+          >
+            <span id="user-domain-events" className="d-flex-center">
+              <GrDocumentUser />
+              &nbsp;Domain wildcard evaluations
             </span>
           </RRNavLink>
         </NavItem>
@@ -160,7 +210,30 @@ export default function History() {
             {pageType === HistoryPages.INVESTIGAITONS && (
               <InvestigationsTable />
             )}
-            {pageType === HistoryPages.USER_REPORTS && <UserReportsTable />}
+            {pageType === HistoryPages.USER_EVENTS && (
+              <UserEventsTable
+                title="Artifacts evaluations"
+                url={USER_EVENT_ANALYZABLE}
+                columns={userAnalyzableEventsTableColumns}
+                description="Evaluations related to artifacts given by users"
+              />
+            )}
+            {pageType === HistoryPages.USER_DOMAIN_WILDCARD_EVENTS && (
+              <UserEventsTable
+                title="Domain wildcard evaluaitons"
+                url={USER_EVENT_DOMAIN_WILDCARD}
+                columns={userDomainWildcardEventsTableColumns}
+                description="Evaluations of domain wildcards given by users"
+              />
+            )}
+            {pageType === HistoryPages.USER_IP_WILDCARD_EVENTS && (
+              <UserEventsTable
+                title="Ip wildcard evaluations"
+                url={USER_EVENT_IP_WILDCARD}
+                columns={userIpWildcardEventsTableColumns}
+                description="Evaluations related to networks given by users"
+              />
+            )}
           </Suspense>
         </TabPane>
       </TabContent>

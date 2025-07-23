@@ -2,8 +2,8 @@ import React from "react";
 import "@testing-library/jest-dom";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { getIcon } from "../../../../../../src/components/common/icon/icons";
-import { BooleanVisualizer } from "../../../../../../src/components/common/visualizer/elements/bool";
+import { BaseVisualizer } from "../../../../../src/components/common/visualizer/elements/base";
+import { getIcon } from "../../../../../src/components/common/icon/icons";
 
 // mock useLocation
 jest.mock("react-router-dom", () => ({
@@ -13,39 +13,38 @@ jest.mock("react-router-dom", () => ({
   }),
 }));
 
-describe("BooleanVisualizer component", () => {
+describe("BaseVisualizer component", () => {
   test("required-only params", async () => {
     const { container } = render(
-      <BooleanVisualizer
-        id="test-id"
+      <BaseVisualizer
         size="col-1"
-        value="test bool (required-only params)"
+        value="test base (required-only params)"
+        id="test-id"
       />,
     );
 
+    // check id
+    const idElement = container.querySelector("#test-id");
+    expect(idElement).toBeInTheDocument();
     // chec text (inner span)
     const innerPartComponent = screen.getByText(
-      "test bool (required-only params)",
+      "test base (required-only params)",
     );
     expect(innerPartComponent).toBeInTheDocument();
-    // check italic
-    expect(innerPartComponent.className).not.toContain("fst-italic");
-    // check icon
+    // check no color, bold and italic
+    expect(innerPartComponent.className).toBe("   ");
+    // check no icon
     expect(screen.queryByRole("img")).toBeNull();
     // check no link
     expect(innerPartComponent.closest("div").style).not.toHaveProperty(
       "text-decoration",
       "underline dotted",
     );
-    // check size
-    const sizeComponent = container.firstChild;
-    expect(sizeComponent.className).toBe("col-1");
-    // check color
-    const badgeElement = sizeComponent.firstChild;
-    expect(badgeElement.className).toContain("bg-danger");
-    // check id
-    const idElement = container.querySelector("#test-id");
-    expect(idElement).toBeInTheDocument();
+    // check size and alignment
+    const outerPartComponent = innerPartComponent.closest("div");
+    expect(outerPartComponent.className).toBe(
+      "col-1  p-0 m-1 d-flex align-items-center text-center justify-content-center  ",
+    );
     // check tooltip
     const user = userEvent.setup();
     await user.hover(innerPartComponent);
@@ -57,24 +56,33 @@ describe("BooleanVisualizer component", () => {
 
   test("all params", async () => {
     const { container } = render(
-      <BooleanVisualizer
+      <BaseVisualizer
         id="test-id"
         size="col-2"
-        value="test bool (all params)"
+        value="test base (all params)"
+        alignment="start"
         // this wrapper with div is required to access to the element in the assertions
         icon={<div role="img">{getIcon("like")}</div>}
-        activeColor="success"
+        color="success"
         link="https://google.com"
+        bold
         italic
-        description="description"
+        copyText="test base (copyText)"
+        isChild
+        description="description test all params"
       />,
     );
 
+    // check id
+    const idElement = container.querySelector("#test-id");
+    expect(idElement).toBeInTheDocument();
     // chec text (inner span)
-    const innerPartComponent = screen.getByText("test bool (all params)");
+    const innerPartComponent = screen.getByText("test base (all params)");
     expect(innerPartComponent).toBeInTheDocument();
-    // check italic
-    expect(innerPartComponent.className).toBe("fst-italic");
+    // check color, bold and italic
+    expect(innerPartComponent.className).toBe(
+      "small success fw-bold fst-italic",
+    );
     // check icon
     expect(screen.getByRole("img")).toBeInTheDocument();
     // check link is available
@@ -82,16 +90,11 @@ describe("BooleanVisualizer component", () => {
       "text-decoration",
       "underline dotted",
     );
-    // check size
-    const sizeComponent = container.firstChild;
-    expect(sizeComponent.className).toBe("col-2");
-    // check color
-    const badgeElement = sizeComponent.firstChild;
-    expect(badgeElement.className).toContain("bg-success");
-    // check id
-    const idElement = container.querySelector("#test-id");
-    expect(idElement).toBeInTheDocument();
-    /// check tooltip
+    // check optional elements (like bold, italic...)
+    expect(idElement.className).toBe(
+      "col-2 small p-0 m-1 d-flex align-items-center text-start justify-content-start  success",
+    );
+    // check tooltip
     const user = userEvent.setup();
     await user.hover(innerPartComponent);
     await waitFor(() => {
@@ -104,25 +107,30 @@ describe("BooleanVisualizer component", () => {
     // it's a special case because change the style, but also the interactions
 
     const { container } = render(
-      <BooleanVisualizer
+      <BaseVisualizer
         id="test-id"
         size="col-2"
-        value="test bool (disable)"
+        value="test base (disable)"
+        alignment="start"
         // this wrapper with div is required to access to the element in the assertions
         icon={<div role="img">{getIcon("like")}</div>}
-        activeColor="success"
+        color="success"
         link="https://google.com"
+        bold
         italic
         disable
-        description=""
+        copyText="test base (copyText)"
       />,
     );
 
+    // check id
+    const idElement = container.querySelector("#test-id");
+    expect(idElement).toBeInTheDocument();
     // chec text (inner span)
-    const innerPartComponent = screen.getByText("test bool (disable)");
+    const innerPartComponent = screen.getByText("test base (disable)");
     expect(innerPartComponent).toBeInTheDocument();
-    // check italic
-    expect(innerPartComponent.className).toBe("fst-italic");
+    // check color, bold and italic
+    expect(innerPartComponent.className).toBe(" success fw-bold fst-italic");
     // check icon
     expect(screen.getByRole("img")).toBeInTheDocument();
     // check no link
@@ -130,14 +138,10 @@ describe("BooleanVisualizer component", () => {
       "text-decoration",
       "underline dotted",
     );
-    // check size
-    const sizeComponent = container.firstChild;
-    expect(sizeComponent.className).toBe("col-2");
-    // check color
-    const badgeElement = sizeComponent.firstChild;
-    expect(badgeElement.className).toContain("bg-gray");
-    // check id
-    const idElement = container.querySelector("#test-id");
-    expect(idElement).toBeInTheDocument();
+    // check optional elements (like bold, italic...)
+    const outerPartComponent = innerPartComponent.closest("div");
+    expect(outerPartComponent.className).toBe(
+      "col-2  p-0 m-1 d-flex align-items-center text-start justify-content-start opacity-25 success",
+    );
   });
 });

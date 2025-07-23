@@ -337,7 +337,6 @@ class TestUserDomainWildCardEventViewSet(CustomViewSetTestCase):
             content_type="application/json",
         )
         self.assertEqual(response.status_code, 201, response.content)
-        print(response.json())
         response = self.client.post(
             self.URL,
             data=json.dumps(

@@ -101,11 +101,27 @@ class AbuseIPDB(ObservableAnalyzer):
 
     def _update_data_model(self, data_model) -> None:
         super()._update_data_model(data_model)
+        data_model.tags = []
         report_data = self.report.report.get("data", {})
+        categories_found = self.report.report.get("categories_found", {})
+        data_model.additional_info = {"distinct_users": report_data["numDistinctUsers"]}
         if report_data.get("totalReports", 0):
             self.report: AnalyzerReport
             if report_data["isWhitelisted"]:
                 evaluation = self.report.data_model_class.EVALUATIONS.TRUSTED.value
+                data_model.additional_info["description"] = (
+                    "AbuseIPDB is a service where users can report malicious IP addresses attacking "
+                    + "their infrastructure."
+                    + "This IP address has been whitelisted"
+                )
             else:
                 evaluation = self.report.data_model_class.EVALUATIONS.MALICIOUS.value
+                data_model.additional_info["description"] = (
+                    "AbuseIPDB is a service where users can report malicious IP addresses attacking "
+                    + "their infrastructure."
+                    + "This IP address has been categorized with some malicious "
+                    + "categories"
+                )
             data_model.evaluation = evaluation
+            data_model.reliability = report_data["abuseConfidenceScore"] // 10
+        data_model.tags.extend(list(categories_found.keys()))

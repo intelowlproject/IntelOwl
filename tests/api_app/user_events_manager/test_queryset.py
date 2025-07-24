@@ -49,7 +49,7 @@ class TestUserDomainWildCardEventQuerySet(CustomTestCase):
 
     def test_matches(self):
         an = Analyzable.objects.create(
-            name="test.com",
+            name="a.test.com",
             classification=Analyzable.CLASSIFICATIONS.DOMAIN,
         )
         res = UserDomainWildCardEvent.objects.matches(an)

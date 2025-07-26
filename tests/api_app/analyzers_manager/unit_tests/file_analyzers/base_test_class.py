@@ -1,4 +1,5 @@
 import hashlib
+import logging
 import os
 from contextlib import ExitStack
 from types import SimpleNamespace
@@ -6,6 +7,8 @@ from unittest import TestCase
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from tests.mock_utils import MockUpResponse
+
+logger = logging.getLogger(__name__)
 
 
 class BaseFileAnalyzerTest(TestCase):
@@ -59,71 +62,83 @@ class BaseFileAnalyzerTest(TestCase):
         return set(cls.MIMETYPE_TO_FILENAME.keys())
 
     @classmethod
-    def get_extra_config(self) -> dict:
+    def get_extra_config(cls) -> dict:
         """
         Subclasses can override this to provide additional runtime configuration
         specific to their analyzer (e.g., API keys, URLs, retry counts, etc.).
-
-        Returns:
-            dict: Extra configuration parameters for the analyzer
         """
         return {}
 
     def get_mocked_response(self):
         """
         Subclasses override this to define expected mocked output.
-
-        Can return:
-        1. A single patch object: patch('module.function')
-        2. A list of patch objects: [patch('module.func1'), patch('module.func2')]
-        3. A context manager: patch.multiple() or ExitStack()
         """
-        raise NotImplementedError
+        raise NotImplementedError("Subclasses must implement get_mocked_response()")
 
     @classmethod
-    def _apply_patches(self, patches):
+    def _apply_patches(cls, patches):
         """Helper method to apply single or multiple patches"""
         if patches is None:
             return ExitStack()  # No-op context manager
 
-        # If it's already a context manager, return as-is
         if hasattr(patches, "__enter__") and hasattr(patches, "__exit__"):
             return patches
 
-        # If it's a list of patches, use ExitStack to manage them
         if isinstance(patches, (list, tuple)):
             stack = ExitStack()
             for patch_obj in patches:
                 stack.enter_context(patch_obj)
             return stack
 
-        # Single patch object
         return patches
+
+    def setUp(self):
+        super().setUp()
+        logger.info("Setting up test environment for file analyzer")
+        if self.analyzer_class:
+            analyzer_module = self.analyzer_class.__module__
+            logging.getLogger(analyzer_module).setLevel(logging.CRITICAL)
+            logging.getLogger("api_app.analyzers_manager").setLevel(logging.WARNING)
+
+    def tearDown(self):
+        super().tearDown()
+        logger.info("Tearing down test environment for file analyzer")
+        if self.analyzer_class:
+            analyzer_module = self.analyzer_class.__module__
+            logging.getLogger(analyzer_module).setLevel(logging.NOTSET)
+            logging.getLogger("api_app.analyzers_manager").setLevel(logging.NOTSET)
 
     def test_analyzer_on_supported_filetypes(self):
         if self.analyzer_class is None:
             self.skipTest("analyzer_class is not set")
-        config = AnalyzerConfig.objects.get(
-            python_module=self.analyzer_class.python_module
-        )
-        print(config)
 
-        # If supported_filetypes is None or empty, use all available mimetypes
-        if config.supported_filetypes:
-            supported_types = config.supported_filetypes
-        else:
-            supported_types = self.get_all_supported_mimetypes()
+        logger.info("Starting file analyzer test for: %s", self.analyzer_class.__name__)
+
+        try:
+            config = AnalyzerConfig.objects.get(
+                python_module=self.analyzer_class.python_module
+            )
+        except AnalyzerConfig.DoesNotExist:
+            self.fail(
+                f"No AnalyzerConfig found for {self.analyzer_class.python_module}"
+            )
+
+        logger.debug("Loaded analyzer config: %s", config)
+
+        supported_types = (
+            config.supported_filetypes or self.get_all_supported_mimetypes()
+        )
 
         for mimetype in supported_types:
             with self.subTest(mimetype=mimetype):
+                logger.info("Testing mimetype: %s", mimetype)
 
                 try:
                     file_bytes = self.get_sample_file_bytes(mimetype)
-                except (ValueError, OSError):
-                    print(f"SKIPPING {mimetype}")
+                except (ValueError, OSError) as e:
+                    logger.warning("Skipping %s due to error: %s", mimetype, str(e))
                     continue
 
-                # Apply patches using the improved system
                 patches = self.get_mocked_response()
                 with self._apply_patches(patches):
                     md5 = hashlib.md5(file_bytes).hexdigest()
@@ -133,23 +148,37 @@ class BaseFileAnalyzerTest(TestCase):
                     analyzer.filename = f"test_file_{mimetype}"
                     analyzer.md5 = md5
                     analyzer.read_file_bytes = lambda: file_bytes
+
                     analyzer._job = SimpleNamespace()
                     analyzer._job.analyzable = SimpleNamespace()
                     analyzer._job.analyzable.name = analyzer.filename
                     analyzer._job.analyzable.mimetype = mimetype
+                    analyzer._job.analyzable.sha256 = hashlib.sha256(
+                        file_bytes
+                    ).hexdigest()
+                    analyzer._job_id = ""
 
-                    test_file_path = self.get_sample_file_path(mimetype)
-                    analyzer._FileAnalyzer__filepath = test_file_path
+                    analyzer._FileAnalyzer__filepath = self.get_sample_file_path(
+                        mimetype
+                    )
 
-                    extra_config = self.get_extra_config()
-                    for key, value in extra_config.items():
+                    for key, value in self.get_extra_config().items():
                         setattr(analyzer, key, value)
 
-                    response = analyzer.run()
+                    try:
+                        response = analyzer.run()
+                        logger.info("Analyzer ran successfully for %s", mimetype)
+                    except Exception as e:
+                        logger.exception(
+                            "Analyzer raised an exception for %s", mimetype
+                        )
+                        self.fail(
+                            f"Analyzer run failed for {mimetype}: {type(e).__name__}: {e}"
+                        )
+
                     self.assertIsInstance(
                         response,
                         (dict, MockUpResponse),
                         f"Expected dict or MockUpResponse, got {type(response)} with value: {response}",
                     )
-
-                    print(f"SUCCESS {mimetype}")
+                    logger.debug("Successful result for %s: %s", mimetype, response)

@@ -39,8 +39,8 @@ class Plugin(metaclass=ABCMeta):
         # some post init processing
 
         # monkeypatch if in test suite
-        # if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
-        #     self._monkeypatch()
+        if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
+            self._monkeypatch()
 
     @property
     def name(self):

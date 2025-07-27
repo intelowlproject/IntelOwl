@@ -12,7 +12,7 @@ import requests
 from django.conf import settings
 
 from certego_saas.apps.user.models import User
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse
 
 from ..choices import Classification, PythonModuleBasePaths
 from ..classes import Plugin
@@ -497,32 +497,32 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     def mocked_docker_analyzer_post(*args, **kwargs):
         return MockUpResponse({"key": "test", "status": "running"}, 202)
 
-    def _monkeypatch(self, patches: list = None):
-        """
-        Here, `_monkeypatch` is an instance method and not a class method.
-        This is because when defined with `@classmethod`, we were getting the error
-        ```
-        '_patch' object has no attribute 'is_local'
-        ```
-        whenever multiple analyzers with same parent class were being called.
-        """
-        if patches is None:
-            patches = []
-        # no need to sleep during tests
-        self.poll_distance = 0
-        patches.append(
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    side_effect=self.mocked_docker_analyzer_get,
-                ),
-                patch(
-                    "requests.post",
-                    side_effect=self.mocked_docker_analyzer_post,
-                ),
-            )
-        )
-        return super()._monkeypatch(patches)
+    # def _monkeypatch(self, patches: list = None):
+    #     """
+    #     Here, `_monkeypatch` is an instance method and not a class method.
+    #     This is because when defined with `@classmethod`, we were getting the error
+    #     ```
+    #     '_patch' object has no attribute 'is_local'
+    #     ```
+    #     whenever multiple analyzers with same parent class were being called.
+    #     """
+    #     if patches is None:
+    #         patches = []
+    #     # no need to sleep during tests
+    #     self.poll_distance = 0
+    #     patches.append(
+    #         if_mock_connections(
+    #             patch(
+    #                 "requests.get",
+    #                 side_effect=self.mocked_docker_analyzer_get,
+    #             ),
+    #             patch(
+    #                 "requests.post",
+    #                 side_effect=self.mocked_docker_analyzer_post,
+    #             ),
+    #         )
+    #     )
+    #     return super()._monkeypatch(patches)
 
     def health_check(self, user: User = None) -> bool:
         """

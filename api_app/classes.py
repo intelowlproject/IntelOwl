@@ -39,8 +39,8 @@ class Plugin(metaclass=ABCMeta):
         # some post init processing
 
         # monkeypatch if in test suite
-        if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
-            self._monkeypatch()
+        # if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
+        #     self._monkeypatch()
 
     @property
     def name(self):
@@ -311,15 +311,15 @@ class Plugin(metaclass=ABCMeta):
         self.report.errors.append(str(exc))
         self.report.status = self.report.STATUSES.FAILED
 
-    @classmethod
-    def _monkeypatch(cls, patches: list = None) -> None:
-        """
-        Hook to monkey-patch class for testing purposes.
-        """
-        if patches is None:
-            patches = []
-        for mock_fn in patches:
-            cls.start = mock_fn(cls.start)
+    # @classmethod
+    # def _monkeypatch(cls, patches: list = None) -> None:
+    #     """
+    #     Hook to monkey-patch class for testing purposes.
+    #     """
+    #     if patches is None:
+    #         patches = []
+    #     for mock_fn in patches:
+    #         cls.start = mock_fn(cls.start)
 
     @classmethod
     @property

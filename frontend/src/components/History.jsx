@@ -220,7 +220,7 @@ export default function History() {
             )}
             {pageType === HistoryPages.USER_DOMAIN_WILDCARD_EVENTS && (
               <UserEventsTable
-                title="Domain wildcard evaluaitons"
+                title="Domain wildcard evaluations"
                 url={USER_EVENT_DOMAIN_WILDCARD}
                 columns={userDomainWildcardEventsTableColumns}
                 description="Evaluations of domain wildcards given by users"

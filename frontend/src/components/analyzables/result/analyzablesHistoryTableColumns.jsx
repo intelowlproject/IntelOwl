@@ -33,7 +33,10 @@ export const analyzablesHistoryTableColumns = [
               href={
                 original.type === AnalyzableHistoryTypes.JOB
                   ? `/jobs/${id}/${JobResultSections.VISUALIZER}`
-                  : `/history/user-reports?date__gte=${encodeURIComponent(
+                  : `/history/${original.type.replaceAll(
+                      "_",
+                      "-",
+                    )}s?date__gte=${encodeURIComponent(
                       format(fromDate, datetimeFormatStr),
                     )}&date__lte=${encodeURIComponent(
                       format(new Date(), datetimeFormatStr),

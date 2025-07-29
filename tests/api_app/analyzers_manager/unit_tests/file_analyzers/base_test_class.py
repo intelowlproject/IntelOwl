@@ -94,7 +94,6 @@ class BaseFileAnalyzerTest(TestCase):
 
     def setUp(self):
         super().setUp()
-        logger.info("Setting up test environment for file analyzer")
         if self.analyzer_class:
             analyzer_module = self.analyzer_class.__module__
             logging.getLogger(analyzer_module).setLevel(logging.CRITICAL)
@@ -102,7 +101,6 @@ class BaseFileAnalyzerTest(TestCase):
 
     def tearDown(self):
         super().tearDown()
-        logger.info("Tearing down test environment for file analyzer")
         if self.analyzer_class:
             analyzer_module = self.analyzer_class.__module__
             logging.getLogger(analyzer_module).setLevel(logging.NOTSET)

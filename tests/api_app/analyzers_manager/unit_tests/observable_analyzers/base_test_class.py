@@ -85,6 +85,7 @@ class BaseAnalyzerTest(TestCase):
         analyzer = self.analyzer_class(config)
         analyzer.observable_name = observable_value
         analyzer.observable_classification = observable_type
+        analyzer.report = {}
         analyzer._job = self._create_mock_analyzer_job(
             observable_value, observable_type
         )

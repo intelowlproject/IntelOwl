@@ -12,28 +12,12 @@ import {
 import { format } from "date-fns-tz";
 
 import { FallBackLoading } from "@certego/certego-ui";
-import { useGuideContext } from "../contexts/GuideContext";
-import { createInvestigation } from "./investigations/result/investigationApi";
-import { datetimeFormatStr, HistoryPages } from "../constants/miscConst";
-import {
-  USER_EVENT_ANALYZABLE,
-  USER_EVENT_DOMAIN_WILDCARD,
-  USER_EVENT_IP_WILDCARD,
-} from "../constants/apiURLs";
-import {
-  userAnalyzableEventsTableColumns,
-  userDomainWildcardEventsTableColumns,
-  userIpWildcardEventsTableColumns,
-} from "./userEvents/userEventsTableColumns";
-import { UserEventModal } from "./userEvents/UserEventModal";
+import { useGuideContext } from "../../contexts/GuideContext";
+import { createInvestigation } from "../investigations/result/investigationApi";
+import { datetimeFormatStr, HistoryPages } from "../../constants/miscConst";
+import { UserEventModal } from "../userEvents/UserEventModal";
 
-const JobsTable = React.lazy(() => import("./jobs/table/JobsTable"));
-const InvestigationsTable = React.lazy(
-  () => import("./investigations/table/InvestigationsTable"),
-);
-const UserEventsTable = React.lazy(
-  () => import("./userEvents/UserEventsTable"),
-);
+const HistoryTable = React.lazy(() => import("./HistoryTable"));
 
 export default function History() {
   const navigate = useNavigate();
@@ -41,19 +25,22 @@ export default function History() {
   const [searchParams, _] = useSearchParams();
 
   const pageType = location?.pathname?.split("/")[2];
-  let startTimeParam = searchParams.get("event_date__gte");
-  let endTimeParam = searchParams.get("event_date__lte");
+  let startTimeString = "event_date__gte";
+  let endTimeString = "event_date__lte";
   let createButtonTitle = "New evaluation";
 
   if (pageType === HistoryPages.JOBS) {
-    startTimeParam = searchParams.get("received_request_time__gte");
-    endTimeParam = searchParams.get("received_request_time__lte");
+    startTimeString = "received_request_time__gte";
+    endTimeString = "received_request_time__lte";
     createButtonTitle = "Create job";
   } else if (pageType === HistoryPages.INVESTIGAITONS) {
-    startTimeParam = searchParams.get("start_time__gte");
-    endTimeParam = searchParams.get("start_time__lte");
+    startTimeString = "start_time__gte";
+    endTimeString = "start_time__lte";
     createButtonTitle = "Create Investigation";
   }
+
+  const startTimeParam = searchParams.get(startTimeString);
+  const endTimeParam = searchParams.get(endTimeString);
 
   const { guideState, setGuideState } = useGuideContext();
 
@@ -206,34 +193,11 @@ export default function History() {
       <TabContent activeTab={pageType}>
         <TabPane tabId={pageType} className="mt-2">
           <Suspense fallback={<FallBackLoading />}>
-            {pageType === HistoryPages.JOBS && <JobsTable />}
-            {pageType === HistoryPages.INVESTIGAITONS && (
-              <InvestigationsTable />
-            )}
-            {pageType === HistoryPages.USER_EVENTS && (
-              <UserEventsTable
-                title="Artifacts evaluations"
-                url={USER_EVENT_ANALYZABLE}
-                columns={userAnalyzableEventsTableColumns}
-                description="Evaluations related to artifacts given by users"
-              />
-            )}
-            {pageType === HistoryPages.USER_DOMAIN_WILDCARD_EVENTS && (
-              <UserEventsTable
-                title="Domain wildcard evaluations"
-                url={USER_EVENT_DOMAIN_WILDCARD}
-                columns={userDomainWildcardEventsTableColumns}
-                description="Evaluations of domain wildcards given by users"
-              />
-            )}
-            {pageType === HistoryPages.USER_IP_WILDCARD_EVENTS && (
-              <UserEventsTable
-                title="Ip wildcard evaluations"
-                url={USER_EVENT_IP_WILDCARD}
-                columns={userIpWildcardEventsTableColumns}
-                description="Evaluations related to networks given by users"
-              />
-            )}
+            <HistoryTable
+              pageType={pageType}
+              startTimeString={startTimeString}
+              endTimeString={endTimeString}
+            />
           </Suspense>
         </TabPane>
       </TabContent>

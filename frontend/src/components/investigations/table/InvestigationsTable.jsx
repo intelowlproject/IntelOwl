@@ -21,8 +21,7 @@ import {
 
 import useTitle from "react-use/lib/useTitle";
 
-import { useSearchParams } from "react-router-dom";
-import { format, toDate } from "date-fns-tz";
+import { format } from "date-fns-tz";
 import { INVESTIGATION_BASE_URI } from "../../../constants/apiURLs";
 import { investigationTableColumns } from "./investigationTableColumns";
 import { datetimeFormatStr } from "../../../constants/miscConst";
@@ -39,91 +38,14 @@ const toPassTableProps = {
   ),
 };
 
-// component
-export default function InvestigationsTable() {
-  console.debug("InvestigationsTable rendered!");
-
-  // page title
-  useTitle("IntelOwl | Investigation History", { restoreOnUnmount: true });
-
-  const [searchParams, setSearchParams] = useSearchParams();
-  const analyzedObjectNameParam =
-    searchParams.get("analyzed_object_name") || "";
-  const startTimeParam = searchParams.get("start_time__gte");
-  const endTimeParam = searchParams.get("start_time__lte");
-
-  // default: 24h
-  const defaultFromDate = new Date();
-  defaultFromDate.setDate(defaultFromDate.getDate() - 1);
-  const [searchFromDateValue, setSearchFromDateValue] =
-    React.useState(defaultFromDate);
-  const [searchToDateValue, setSearchToDateValue] = React.useState(new Date());
-
-  // state
-  const [areParamsInitialized, setAreParamsInitialized] = React.useState(false); // used to prevent a request with wrong params
-  const [searchNameRequest, setSearchNameRequest] = React.useState("");
-
-  React.useEffect(() => {
-    // update filter with url params
-    if (startTimeParam) {
-      setSearchFromDateValue(toDate(startTimeParam));
-    }
-    if (endTimeParam) {
-      setSearchToDateValue(toDate(endTimeParam));
-    }
-    if (analyzedObjectNameParam) {
-      setSearchNameRequest(analyzedObjectNameParam);
-    }
-    setAreParamsInitialized(true);
-  }, [analyzedObjectNameParam, startTimeParam, endTimeParam]);
-
-  React.useEffect(() => {
-    // After the initialization each time the time picker change or the filter, update the url
-    // Note: this check is required to avoid infinite loop (url update time picker and time picker update url)
-    if (
-      areParamsInitialized &&
-      (startTimeParam !== format(searchFromDateValue, datetimeFormatStr) ||
-        endTimeParam !== format(searchToDateValue, datetimeFormatStr) ||
-        analyzedObjectNameParam !== searchNameRequest)
-    ) {
-      const currentParams = {};
-      // @ts-ignore
-      searchParams.entries().forEach((element) => {
-        const [paramName, paramValue] = element;
-        currentParams[paramName] = paramValue;
-      });
-      setSearchParams({
-        ...currentParams,
-        start_time__gte: format(searchFromDateValue, datetimeFormatStr),
-        start_time__lte: format(searchToDateValue, datetimeFormatStr),
-        analyzed_object_name: searchNameRequest,
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    setSearchParams,
-    areParamsInitialized,
-    searchFromDateValue,
-    searchToDateValue,
-    searchNameRequest,
-  ]);
-
-  return areParamsInitialized ? ( // this "if" avoid one request
-    <InvestigationTableComponent
-      searchFromDateValue={searchFromDateValue}
-      searchToDateValue={searchToDateValue}
-      searchNameRequest={searchNameRequest}
-    />
-  ) : (
-    <Spinner />
-  );
-}
-
-function InvestigationTableComponent({
+export function InvestigationTable({
   searchFromDateValue,
   searchToDateValue,
   searchNameRequest,
 }) {
+  // page title
+  useTitle("IntelOwl | Investigation History", { restoreOnUnmount: true });
+
   const [
     data,
     tableNode,

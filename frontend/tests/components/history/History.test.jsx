@@ -4,18 +4,12 @@ import axios from "axios";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import History from "../../src/components/History";
-import { INVESTIGATION_BASE_URI } from "../../src/constants/apiURLs";
+import History from "../../../src/components/history/History";
+import { INVESTIGATION_BASE_URI } from "../../../src/constants/apiURLs";
 
 jest.mock("axios");
-// mock JobsTable, InvestigationsTable and UserEventsTable components
-jest.mock("../../src/components/jobs/table/JobsTable", () =>
-  jest.fn((props) => <div {...props} />),
-);
-jest.mock("../../src/components/investigations/table/InvestigationsTable", () =>
-  jest.fn((props) => <div {...props} />),
-);
-jest.mock("../../src/components/userEvents/UserEventsTable", () =>
+// mock HistoryTable components
+jest.mock("../../src/components/history/HistoryTable", () =>
   jest.fn((props) => <div {...props} />),
 );
 
@@ -37,6 +31,13 @@ describe("test History component", () => {
     const jobsButton = screen.getByText("Jobs");
     expect(jobsButton).toBeInTheDocument();
     expect(jobsButton.closest("a").className).toContain("active"); // selected
+    expect(jobsButton.closest("a").href).toContain("/history/jobs");
+    expect(jobsButton.closest("a").href).toContain(
+      "received_request_time__gte",
+    );
+    expect(jobsButton.closest("a").href).toContain(
+      "received_request_time__lte",
+    );
 
     const createJobButton = screen.getByRole("button", { name: /Create job/i });
     expect(createJobButton).toBeInTheDocument();
@@ -44,20 +45,38 @@ describe("test History component", () => {
     const investigationButton = screen.getByText("Investigations");
     expect(investigationButton).toBeInTheDocument();
     expect(investigationButton.closest("a").className).not.toContain("active"); // not selected
+    expect(investigationButton.closest("a").href).toContain(
+      "/history/investigations",
+    );
+    expect(investigationButton.closest("a").href).toContain("start_time__gte");
+    expect(investigationButton.closest("a").href).toContain("start_time__lte");
 
     const artifactsButton = screen.getByText("Artifacts evaluations");
     expect(artifactsButton).toBeInTheDocument();
     expect(artifactsButton.closest("a").className).not.toContain("active"); // not selected
+    expect(artifactsButton.closest("a").href).toContain("/history/user-events");
+    expect(artifactsButton.closest("a").href).toContain("event_date__gte");
+    expect(artifactsButton.closest("a").href).toContain("event_date__lte");
 
     const ipWildcardButton = screen.getByText("Ip wildcard evaluations");
     expect(ipWildcardButton).toBeInTheDocument();
     expect(ipWildcardButton.closest("a").className).not.toContain("active"); // not selected
+    expect(ipWildcardButton.closest("a").href).toContain(
+      "/history/user-ip-wildcard-events",
+    );
+    expect(ipWildcardButton.closest("a").href).toContain("event_date__gte");
+    expect(ipWildcardButton.closest("a").href).toContain("event_date__lte");
 
     const domainWildcardButton = screen.getByText(
       "Domain wildcard evaluations",
     );
     expect(domainWildcardButton).toBeInTheDocument();
     expect(domainWildcardButton.closest("a").className).not.toContain("active"); // not selected
+    expect(domainWildcardButton.closest("a").href).toContain(
+      "/history/user-domain-wildcard-events",
+    );
+    expect(domainWildcardButton.closest("a").href).toContain("event_date__gte");
+    expect(domainWildcardButton.closest("a").href).toContain("event_date__lte");
 
     // investigation tab selected
     await user.click(investigationButton);

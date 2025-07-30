@@ -26,7 +26,7 @@ const ChangePassword = React.lazy(() => import("./auth/ChangePassword"));
 const InvestigationResult = React.lazy(
   () => import("./investigations/result/InvestigationResult"),
 );
-const History = React.lazy(() => import("./History"));
+const History = React.lazy(() => import("./history/History"));
 const ReportsSearch = React.lazy(() => import("./search/ReportsSearch"));
 const Analyzables = React.lazy(() => import("./analyzables/Analyzables"));
 const AnalyzableResult = React.lazy(
@@ -45,7 +45,7 @@ function CustomRedirect() {
   }, []);
 
   const startDatetime = structuredClone(endDatetime);
-  startDatetime.setDate(startDatetime.getDate() - 1);
+  startDatetime.setDate(startDatetime.getDate() - 30);
 
   return (
     <Navigate

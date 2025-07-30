@@ -13,8 +13,7 @@ import {
 
 import useTitle from "react-use/lib/useTitle";
 
-import { useSearchParams } from "react-router-dom";
-import { format, toDate } from "date-fns-tz";
+import { format } from "date-fns-tz";
 import { datetimeFormatStr } from "../../constants/miscConst";
 import { TimePicker } from "../common/TimePicker";
 import { JsonEditor } from "../common/JsonEditor";
@@ -55,81 +54,7 @@ const toPassTableProps = {
   config: { enableExpanded: true, enableFlexLayout: true },
 };
 
-// component
-export default function UserEventsTable({ title, url, columns, description }) {
-  console.debug("UserEventsTable rendered!");
-
-  // page title
-  useTitle("IntelOwl | User Evaluations History", { restoreOnUnmount: true });
-
-  const [searchParams, setSearchParams] = useSearchParams();
-  const startTimeParam = searchParams.get("event_date__gte");
-  const endTimeParam = searchParams.get("event_date__lte");
-
-  // default: 24h
-  const defaultFromDate = new Date();
-  defaultFromDate.setDate(defaultFromDate.getDate() - 1);
-  const [searchFromDateValue, setSearchFromDateValue] =
-    React.useState(defaultFromDate);
-  const [searchToDateValue, setSearchToDateValue] = React.useState(new Date());
-
-  // state
-  const [areParamsInitialized, setAreParamsInitialized] = React.useState(false); // used to prevent a request with wrong params
-
-  React.useEffect(() => {
-    // update filter with url params
-    if (startTimeParam) {
-      setSearchFromDateValue(toDate(startTimeParam));
-    }
-    if (endTimeParam) {
-      setSearchToDateValue(toDate(endTimeParam));
-    }
-    setAreParamsInitialized(true);
-  }, [startTimeParam, endTimeParam]);
-
-  React.useEffect(() => {
-    // After the initialization each time the time picker change or the filter, update the url
-    // Note: this check is required to avoid infinite loop (url update time picker and time picker update url)
-    if (
-      areParamsInitialized &&
-      (startTimeParam !== format(searchFromDateValue, datetimeFormatStr) ||
-        endTimeParam !== format(searchToDateValue, datetimeFormatStr))
-    ) {
-      const currentParams = {};
-      // @ts-ignore
-      searchParams.entries().forEach((element) => {
-        const [paramName, paramValue] = element;
-        currentParams[paramName] = paramValue;
-      });
-      setSearchParams({
-        ...currentParams,
-        event_date__gte: format(searchFromDateValue, datetimeFormatStr),
-        event_date__lte: format(searchToDateValue, datetimeFormatStr),
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    setSearchParams,
-    areParamsInitialized,
-    searchFromDateValue,
-    searchToDateValue,
-  ]);
-
-  return areParamsInitialized ? ( // this "if" avoid one request
-    <UserEventsTableComponent
-      title={title}
-      url={url}
-      columns={columns}
-      description={description}
-      searchFromDateValue={searchFromDateValue}
-      searchToDateValue={searchToDateValue}
-    />
-  ) : (
-    <Spinner />
-  );
-}
-
-function UserEventsTableComponent({
+export function UserEventsTable({
   title,
   url,
   columns,
@@ -137,6 +62,9 @@ function UserEventsTableComponent({
   searchFromDateValue,
   searchToDateValue,
 }) {
+  // page title
+  useTitle("IntelOwl | User Evaluations History", { restoreOnUnmount: true });
+
   const [
     data,
     tableNode,

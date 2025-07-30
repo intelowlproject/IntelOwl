@@ -9,7 +9,7 @@ import { INVESTIGATION_BASE_URI } from "../../../src/constants/apiURLs";
 
 jest.mock("axios");
 // mock HistoryTable components
-jest.mock("../../src/components/history/HistoryTable", () =>
+jest.mock("../../../src/components/history/HistoryTable", () =>
   jest.fn((props) => <div {...props} />),
 );
 

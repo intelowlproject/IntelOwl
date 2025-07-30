@@ -7,8 +7,8 @@ services:
         limits:
           cpus: '1'
           memory: 2000M
-          
-  uwsgi:
+
+  intelowl_uwsgi:
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -18,7 +18,7 @@ services:
     env_file:
       - env_file_app_ci
 
-  
+
   daphne:
     image: intelowlproject/intelowl:ci
     env_file:

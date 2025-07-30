@@ -12,7 +12,7 @@ class GreynoiseLabsTestCase(BaseAnalyzerTest):
 
     @classmethod
     def get_extra_config(cls):
-        return {"_auth_token": "demo_token"}
+        return {"_auth_token": "demo_token", "report": {"error": []}}
 
     @staticmethod
     def get_mocked_response():

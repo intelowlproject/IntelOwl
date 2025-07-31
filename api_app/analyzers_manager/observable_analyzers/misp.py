@@ -4,6 +4,8 @@
 import datetime
 
 import pymisp
+from typing import Optional
+
 from django.conf import settings
 
 from api_app.analyzers_manager import classes
@@ -30,6 +32,8 @@ class MISP(classes.ObservableAnalyzer):
     timeout: int = 5
     published: bool
     metadata: bool
+    published: Optional[bool] = None
+    metadata: Optional[bool] = None
 
     def update(self):
         pass
@@ -56,9 +60,8 @@ class MISP(classes.ObservableAnalyzer):
         if self.enforce_warninglist:
             params["enforce_warninglist"] = self.enforce_warninglist
         # https://pymisp.readthedocs.io/en/latest/modules.html#pymisp.PyMISP
-        # fixme: this should be None as default but is False
-        # so it's not possible to set it as False in this way.
-        #  migration required
+        # default None for published/metadata when unspecified
+
         if self.published:
             params["published"] = self.published
         if self.metadata:

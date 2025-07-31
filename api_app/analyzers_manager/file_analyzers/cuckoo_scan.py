@@ -10,7 +10,6 @@ import requests
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -261,19 +260,3 @@ class CuckooAnalysis(FileAnalyzer):
         logger.info(f"report generated for ({self.filename},{self.md5})")
 
         return result
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.Session.get",
-                    return_value=MockUpResponse({"task": {"status": "reported"}}, 200),
-                ),
-                patch(
-                    "requests.Session.post",
-                    return_value=MockUpResponse({}, 200),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

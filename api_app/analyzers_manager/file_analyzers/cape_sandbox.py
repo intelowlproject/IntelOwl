@@ -11,7 +11,6 @@ from billiard.exceptions import SoftTimeLimitExceeded
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -335,31 +334,3 @@ class CAPEsandbox(FileAnalyzer):
             )
 
         return results
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.Session.get",
-                    return_value=MockUpResponse(
-                        {"error": False, "data": "completed"}, 200
-                    ),
-                ),
-                patch(
-                    "requests.Session.post",
-                    return_value=MockUpResponse(
-                        {
-                            "error": False,
-                            "data": {
-                                "task_ids": [1234],
-                            },
-                            "errors": [],
-                            "url": ["http://fake_url.com/submit/status/1234/"],
-                        },
-                        200,
-                    ),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

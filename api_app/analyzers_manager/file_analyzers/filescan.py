@@ -8,7 +8,6 @@ import requests
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -66,19 +65,3 @@ class FileScanUpload(FileAnalyzer):
             time.sleep(self.poll_distance)
 
         return report
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse({"allFinished": True}, 200),
-                ),
-                patch(
-                    "requests.post",
-                    return_value=MockUpResponse({"flow_id": 1}, 200),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

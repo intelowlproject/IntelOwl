@@ -13,7 +13,6 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerRunException,
 )
 from api_app.analyzers_manager.observable_analyzers.yaraify import YARAify
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -118,23 +117,3 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
             result = response.json()
 
         return result
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.post",
-                    side_effect=[
-                        MockUpResponse({"query_status": "not-available"}, 200),
-                        MockUpResponse(
-                            {"query_status": "queued", "data": {"task_id": 123}}, 200
-                        ),
-                        MockUpResponse(
-                            {"query_status": "ok", "data": {"static_results": []}}, 200
-                        ),
-                    ],
-                )
-            )
-        ]
-        return FileAnalyzer._monkeypatch(patches=patches)

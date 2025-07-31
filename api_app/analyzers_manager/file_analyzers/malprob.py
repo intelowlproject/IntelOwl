@@ -4,7 +4,6 @@ import requests
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -55,25 +54,3 @@ class MalprobScan(FileAnalyzer):
             self.disable_for_rate_limit()
             raise AnalyzerRunException("Limit reached for API")
         return rescan.json()
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.post",
-                    return_value=MockUpResponse(
-                        {
-                            "report": {
-                                "md5": "8a05a189e58ccd7275f7ffdf88c2c191",
-                                "sha1": "a7a70f2f482e6b26eedcf1781b277718078c743a",
-                                "sha256": """ac24043d48dadc390877a6151515565b1fdc1da
-                                b028ee2d95d80bd80085d9376""",
-                            },
-                        },
-                        200,
-                    ),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

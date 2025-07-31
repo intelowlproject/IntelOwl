@@ -1,5 +1,4 @@
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
-from tests.mock_utils import MockUpResponse
 
 
 class Mobsf(FileAnalyzer, DockerBasedAnalyzer):

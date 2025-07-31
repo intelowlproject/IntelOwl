@@ -11,4 +11,4 @@ services:
       env_file:
       - env_file_integrations
       depends_on:
-      - uwsgi
+      - intelowl_uwsgi

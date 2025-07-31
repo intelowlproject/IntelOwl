@@ -1,5 +1,5 @@
 services:
-  uwsgi:
+  intelowl_uwsgi:
     depends_on:
       elasticsearch:
         condition: service_healthy

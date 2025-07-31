@@ -9,6 +9,6 @@ services:
       - env_file_integrations
     volumes:
       - generic_logs:/var/log/intel_owl
-    depends_on:
-      - uwsgi
+      depends_on:
+        - intelowl_uwsgi
 

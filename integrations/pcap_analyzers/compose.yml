@@ -13,5 +13,5 @@ services:
       - generic_logs:/var/log/intel_owl
       - ../integrations/pcap_analyzers/config/suricata/etc:/etc/suricata:ro
       - ../integrations/pcap_analyzers/config/suricata/rules:/var/lib/suricata/rules/
-    depends_on:
-      - uwsgi
+      depends_on:
+        - intelowl_uwsgi

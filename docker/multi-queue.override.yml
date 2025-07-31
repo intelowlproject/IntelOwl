@@ -21,8 +21,8 @@ services:
       - ./docker/entrypoints/celery_local.sh
     env_file:
       - env_file_app
-    depends_on:
-      uwsgi:
+   depends_on:
+      intelowl_uwsgi:
         condition: service_healthy
     <<: *no-healthcheck
 
@@ -40,8 +40,8 @@ services:
       - ./docker/entrypoints/celery_long.sh
     env_file:
       - env_file_app
-    depends_on:
-      uwsgi:
+   depends_on:
+      intelowl_uwsgi:
         condition: service_healthy
     <<: *no-healthcheck
 
@@ -59,7 +59,7 @@ services:
       - ./docker/entrypoints/celery_ingestor.sh
     env_file:
       - env_file_app
-    depends_on:
-      uwsgi:
+   depends_on:
+      intelowl_uwsgi:
         condition: service_healthy
     <<: *no-healthcheck

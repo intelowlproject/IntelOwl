@@ -46,7 +46,7 @@ class HybridAnalysisGet(ObservableAnalyzer):
                 "Supported are: hash, ip, domain and url"
             )
 
-        response = requests.post(self.api_url + uri, data=data, headers=headers)
+        response = requests.get(self.api_url + uri, params=data, headers=headers)
         response.raise_for_status()
 
         result = response.json()
@@ -67,7 +67,7 @@ class HybridAnalysisGet(ObservableAnalyzer):
         patches = [
             if_mock_connections(
                 patch(
-                    "requests.post",
+                    "requests.get",
                     return_value=MockUpResponse(
                         [
                             {

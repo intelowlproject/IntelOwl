@@ -126,3 +126,15 @@ Feel free to contact the main developers at any time on Twitter:
 - [Simone Berni](https://twitter.com/0ssig3no): Backend Maintainer
 - [Federico Gibertoni](https://x.com/fgibertoni1): Maintainer and Community Assistant
 - [Eshaan Bansal](https://twitter.com/eshaan7_): Key Contributor
+
+## Running the tests
+
+To execute the backend tests you need the dependencies used by the project and
+the additional packages required for the test suite. Install them with:
+
+```bash
+pip install -r requirements/project-requirements.txt -r requirements/test-requirements.txt
+```
+
+The tests rely on Django and other libraries provided in these files. Skipping
+this step will usually lead to `ModuleNotFoundError` and other import issues.

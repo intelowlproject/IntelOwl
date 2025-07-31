@@ -12,7 +12,6 @@ from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
 from certego_saas.apps.user.models import User
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 _query_types = [
     "domain",
@@ -297,24 +296,3 @@ class DNSdb(classes.ObservableAnalyzer):
         api_version = self._get_version_endpoint(params.get(name="api_version").value)
 
         return f"https://{server}{api_version}"
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse(
-                        json_data={},
-                        status_code=200,
-                        text='{"cond":"begin"}\n'
-                        '{"obj":{"count":1,"zone_time_first":1349367341,'
-                        '"zone_time_last":1440606099,"rrname":"mocked.data.net.",'
-                        '"rrtype":"A","bailiwick":"net.",'
-                        '"rdata":"0.0.0.0"}}\n'
-                        '{"cond":"limited","msg":"Result limit reached"}\n',
-                    ),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

@@ -7,7 +7,6 @@ import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class FileScanSearch(ObservableAnalyzer):
@@ -33,23 +32,3 @@ class FileScanSearch(ObservableAnalyzer):
         except requests.RequestException as error:
             raise AnalyzerRunException(error)
         return {**response.json(), "query": observable_name_base64}
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse(
-                        {
-                            "items": [],
-                            "count": 0,
-                            "count_search_params": 1,
-                            "method": "and",
-                        },
-                        200,
-                    ),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

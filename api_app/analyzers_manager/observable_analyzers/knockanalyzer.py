@@ -4,7 +4,6 @@ import logging
 from knock import knockpy
 
 from api_app.analyzers_manager import classes
-from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -38,12 +37,3 @@ class KnockAnalyzer(classes.ObservableAnalyzer):
 
         results = json.dumps(results)
         return results
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch.object(knockpy, "KNOCKPY", return_value=None),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

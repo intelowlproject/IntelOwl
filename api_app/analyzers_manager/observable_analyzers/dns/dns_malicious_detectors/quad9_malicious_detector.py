@@ -9,7 +9,6 @@ import requests
 from httpx import Client, ConnectError
 
 from api_app.analyzers_manager import classes
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..dns_responses import malicious_detector_response
 from ..doh_mixin import DoHMixin
@@ -100,17 +99,4 @@ class Quad9MaliciousDetector(DoHMixin, classes.ObservableAnalyzer):
 
         return bool(google_response.json().get("Answer", None))
 
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse({"Answer": False}, 200),
-                ),
-                patch.object(
-                    Quad9MaliciousDetector, "_quad9_dns_query", return_value=False
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)
+   

@@ -14,7 +14,6 @@ from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
 from api_app.mixins import AbuseCHMixin
 from api_app.models import PluginConfig
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -88,25 +87,3 @@ class HuntingAbuseAPI(AbuseCHMixin, ObservableAnalyzer):
             if is_match:
                 return {"fp_status": True, "details": value_dict}
         return {"fp_status": False}
-
-    @classmethod
-    def _monkeypatch(cls):
-        mock_response = {
-            "1": {
-                "time_stamp": "2025-06-04 07:46:14 UTC",
-                "platform": "MalwareBazaar",
-                "entry_type": "sha1_hash",
-                "entry_value": "ac4cb655a78a5634f6a87c82bec33a4391269a3f",
-                "removed_by": "admin",
-                "removal_notes": None,
-            }
-        }
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.post",
-                    return_value=MockUpResponse(mock_response, 200),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches)

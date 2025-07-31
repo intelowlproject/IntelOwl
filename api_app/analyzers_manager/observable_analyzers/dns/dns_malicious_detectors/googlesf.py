@@ -8,7 +8,6 @@ import pysafebrowsing
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import if_mock_connections, patch
 
 from ..dns_responses import malicious_detector_response
 
@@ -50,12 +49,3 @@ class GoogleSF(classes.ObservableAnalyzer):
             googlesb_result["threats"] = result["threats"]
             googlesb_result["platforms"] = result["platforms"]
         return googlesb_result
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch("pysafebrowsing.SafeBrowsing", return_value=MockUpSafeBrowsing()),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

@@ -6,7 +6,6 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.mixins import AbuseCHMixin
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -45,17 +44,3 @@ class MB_GET(AbuseCHMixin, classes.ObservableAnalyzer):
                 result["permalink"] = f"{cls.sample_url}{sha256}"
 
         return result
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.post",
-                    return_value=MockUpResponse(
-                        {"data": [{"sha256_hash": "test"}]}, 200
-                    ),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

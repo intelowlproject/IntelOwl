@@ -10,7 +10,6 @@ from django.conf import settings
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -132,24 +131,3 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
                 )
 
         return json_objects
-
-    @classmethod
-    def _monkeypatch(cls):
-        mock_data = (
-            '{"cidr": "1.10.16.0", "sblid": "SBL256894", "rir": "apnic"}\n'
-            '{"cidr": "2.56.192.0", "sblid": "SBL459831", "rir": "ripencc"}\n'
-            '{"asn":6517,"rir":"arin","domain":"zeromist.net","cc":"US","asname":"ZEROMIST-AS-1"}\n'
-            '{"cidr":"2001:678:738::","sblid":"SBL635837","rir":"ripencc"}'
-        )
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse(
-                        mock_data,
-                        200,
-                    ),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

@@ -5,7 +5,6 @@ import requests
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..dns_responses import malicious_detector_response
 
@@ -41,15 +40,3 @@ class SpamhausWQS(classes.ObservableAnalyzer):
             return malicious_detector_response(self.observable_name, False)
         else:
             raise AnalyzerRunException(f"result not expected: {response.status_code}")
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse({"resp": [1020], "status": 200}, 200),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

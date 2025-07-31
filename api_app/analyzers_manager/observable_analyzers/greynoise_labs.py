@@ -9,7 +9,6 @@ from django.conf import settings
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.models import PluginConfig
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -129,88 +128,3 @@ class GreynoiseLabs(ObservableAnalyzer):
         if auth_token:
             return cls._update_db(auth_token=auth_token)
         return False
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.post",
-                    side_effect=[
-                        MockUpResponse(
-                            {
-                                "data": {
-                                    "noiseRank": {
-                                        "queryInfo": {
-                                            "resultsAvailable": 1,
-                                            "resultsLimit": 1,
-                                        },
-                                        "ips": [
-                                            {
-                                                "ip": "20.235.249.22",
-                                                "noise_score": 12,
-                                                "sensor_pervasiveness": "very low",
-                                                "country_pervasiveness": "low",
-                                                "payload_diversity": "very low",
-                                                "port_diversity": "very low",
-                                                "request_rate": "low",
-                                            }
-                                        ],
-                                    }
-                                }
-                            },
-                            200,
-                        ),
-                        MockUpResponse(
-                            {
-                                "data": {
-                                    "topKnocks": {
-                                        "queryInfo": {
-                                            "resultsAvailable": 1,
-                                            "resultsLimit": 1,
-                                        },
-                                    }
-                                }
-                            },
-                            200,
-                        ),
-                        MockUpResponse(
-                            {
-                                "data": {
-                                    "topC2s": {
-                                        "queryInfo": {
-                                            "resultsAvailable": 1914,
-                                            "resultsLimit": 191,
-                                        },
-                                        "c2s": [
-                                            {
-                                                "source_ip": "91.92.247.12",
-                                                "c2_ips": ["103.245.236.120"],
-                                                "c2_domains": [],
-                                                "hits": 11608,
-                                            },
-                                            {
-                                                "source_ip": "14.225.208.190",
-                                                "c2_ips": ["14.225.213.142"],
-                                                "c2_domains": [],
-                                                "hits": 2091,
-                                                "pervasiveness": 26,
-                                            },
-                                            {
-                                                "source_ip": "157.10.53.101",
-                                                "c2_ips": ["14.225.208.190"],
-                                                "c2_domains": [],
-                                                "hits": 1193,
-                                                "pervasiveness": 23,
-                                            },
-                                        ],
-                                    },
-                                },
-                            },
-                            200,
-                        ),
-                    ],
-                )
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

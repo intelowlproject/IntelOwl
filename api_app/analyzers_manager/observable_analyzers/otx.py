@@ -12,7 +12,6 @@ from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
 from api_app.helpers import get_hash_type
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -211,12 +210,3 @@ class OTX(classes.ObservableAnalyzer):
                 result[field_name] = data
                 logger.debug(f"result: {result}")
         return result
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch("requests.Session.get", return_value=MockUpResponse({}, 200))
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

@@ -12,7 +12,6 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerRunException,
 )
 from api_app.choices import Classification
-from tests.mock_utils import MockResponseNoOp, if_mock_connections, patch
 
 
 class MISP(classes.ObservableAnalyzer):
@@ -105,12 +104,3 @@ class MISP(classes.ObservableAnalyzer):
                 raise AnalyzerRunException(errors)
 
         return {"result_search": result_search, "instance_url": self._url_key_name}
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch("pymisp.PyMISP", return_value=MockResponseNoOp({}, 200)),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

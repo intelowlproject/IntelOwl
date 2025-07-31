@@ -13,7 +13,6 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
 )
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -128,19 +127,3 @@ class IntelX(ObservableAnalyzer):
             result[selectortypeh].append(block["selectorvalue"])
 
         return result
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.Session.post",
-                    return_value=MockUpResponse({"id": 1}, 200),
-                ),
-                patch(
-                    "requests.Session.get",
-                    return_value=MockUpResponse({"selectors": []}, 200),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

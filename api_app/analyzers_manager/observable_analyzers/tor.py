@@ -10,7 +10,6 @@ from django.conf import settings
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -66,22 +65,3 @@ class Tor(classes.ObservableAnalyzer):
             logger.exception(e)
 
         return False
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse(
-                        {},
-                        200,
-                        content=b"""ExitNode D2A4BEE6754A9711EB0FAC47F3059BE6FC0D72C7
-Published 2022-08-17 18:11:11
-LastStatus 2022-08-18 14:00:00
-ExitAddress 93.95.230.253 2022-08-18 14:44:33""",
-                    ),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

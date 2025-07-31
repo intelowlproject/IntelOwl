@@ -6,7 +6,6 @@ from requests import HTTPError
 
 from api_app.analyzers_manager import classes
 from api_app.choices import Classification
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from .criminalip_base import CriminalIpBase
 
@@ -69,28 +68,3 @@ class CriminalIp(classes.ObservableAnalyzer, CriminalIpBase):
                 )
 
         return resp
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse(
-                        {
-                            "data": {
-                                "call_count": 0,
-                                "domain": "example.com",
-                                "reg_dtime": "2023-07-04 05:40:02",
-                                "result": "safe",
-                                "type": "trusted-domain",
-                            },
-                            "message": "api success",
-                            "status": 200,
-                        },
-                        200,
-                    ),
-                )
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

@@ -8,7 +8,6 @@ import dns.message
 import httpx
 
 from api_app.analyzers_manager import classes
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..dns_responses import dns_resolver_response
 from ..doh_mixin import DoHMixin
@@ -54,23 +53,3 @@ class Quad9DNSResolver(DoHMixin, classes.ObservableAnalyzer):
             resolutions.extend([resolution.address for resolution in answer])
 
         return dns_resolver_response(observable, resolutions)
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "httpx.Client.get",
-                    return_value=MockUpResponse(
-                        {
-                            "status": "success",
-                            "data": "example.com. 236 IN A 23.215.0.138",
-                            "message": "DNS query for example.com completed successfully.",
-                        },
-                        200,
-                        content=b"pn\x01\x03\x00\x01\x00\x00\x00\x00\x00\x00\x07example\x03com\x00\x00\x01\x00\x01",
-                    ),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

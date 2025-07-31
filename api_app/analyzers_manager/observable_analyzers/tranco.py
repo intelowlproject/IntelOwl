@@ -7,7 +7,6 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.choices import Classification
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Tranco(classes.ObservableAnalyzer):
@@ -27,15 +26,3 @@ class Tranco(classes.ObservableAnalyzer):
         response.raise_for_status()
 
         return response.json()
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse({}, 200),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

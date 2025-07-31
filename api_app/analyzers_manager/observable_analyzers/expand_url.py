@@ -5,7 +5,6 @@ from bs4 import BeautifulSoup
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -97,25 +96,3 @@ class ExpandURL(ObservableAnalyzer):
             "fake_url": redirection_chain[0],
             "redirection_chain": redirection_chain,
         }
-
-    @classmethod
-    def _monkeypatch(cls):
-
-        redirect_response = MockUpResponse({}, 302)
-        redirect_response.url = "https://firstredirecturl.com"
-
-        final_response = MockUpResponse({}, 200)
-        final_response.url = "https://actualurl.com"
-        final_response.history = [redirect_response]
-        final_response.text = ""
-        final_response.is_redirect = False
-
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=final_response,
-                )
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

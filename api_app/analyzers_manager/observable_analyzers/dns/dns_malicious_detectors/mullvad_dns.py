@@ -13,7 +13,6 @@ from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
     malicious_detector_response,
 )
 from api_app.analyzers_manager.observable_analyzers.dns.doh_mixin import DoHMixin
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -82,23 +81,3 @@ class MullvadDNSAnalyzer(DoHMixin, ObservableAnalyzer):
             raise AnalyzerConfigurationException(
                 f"Invalid mode: {self.mode}. Must be 'query' or 'malicious'."
             )
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "httpx.Client.get",
-                    return_value=MockUpResponse(
-                        {
-                            "status": "success",
-                            "data": "example.com. 236 IN A 23.215.0.138",
-                            "message": "DNS query for example.com completed successfully.",
-                        },
-                        200,
-                        content=b"pn\x01\x03\x00\x01\x00\x00\x00\x00\x00\x00\x07example\x03com\x00\x00\x01\x00\x01",
-                    ),
-                )
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

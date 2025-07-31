@@ -12,7 +12,6 @@ import requests
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..dns_responses import malicious_detector_response
 
@@ -63,17 +62,3 @@ class DNS0EUMaliciousDetector(classes.ObservableAnalyzer):
             logger.info(f"not analyzing {observable} because not a domain")
 
         return malicious_detector_response(self.observable_name, is_malicious)
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse(
-                        {"Answer": [{"data": "negative-caching.dns0.eu"}]}, 200
-                    ),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

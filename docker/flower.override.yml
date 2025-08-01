@@ -25,7 +25,7 @@ services:
       - "5555"
     depends_on:
       - rabbitmq
-      - uwsgi
+      - intelowl_uwsgi
     entrypoint:
       - ./docker/entrypoints/flower.sh
     env_file:

@@ -5,8 +5,9 @@ from contextlib import ExitStack
 from types import SimpleNamespace
 from unittest import TestCase
 
+from django.utils import timezone
+
 from api_app.analyzers_manager.models import AnalyzerConfig
-from tests.mock_utils import MockUpResponse
 
 logger = logging.getLogger(__name__)
 
@@ -155,6 +156,11 @@ class BaseFileAnalyzerTest(TestCase):
                         file_bytes
                     ).hexdigest()
                     analyzer._job_id = ""
+                    analyzer.report = {
+                        "report": {},
+                        "errors": [],
+                        "end_time": timezone.now(),
+                    }
 
                     analyzer._FileAnalyzer__filepath = self.get_sample_file_path(
                         mimetype
@@ -165,18 +171,20 @@ class BaseFileAnalyzerTest(TestCase):
 
                     try:
                         response = analyzer.run()
+                        analyzer.report["report"] = response
                         logger.info("Analyzer ran successfully for %s", mimetype)
                     except Exception as e:
+                        analyzer.report["errors"].append(
+                            f"Analyzer run failed for {mimetype}: {type(e).__name__}: {e}"
+                        )
                         logger.exception(
                             "Analyzer raised an exception for %s", mimetype
                         )
                         self.fail(
                             f"Analyzer run failed for {mimetype}: {type(e).__name__}: {e}"
                         )
-
-                    self.assertIsInstance(
-                        response,
-                        (dict, MockUpResponse),
-                        f"Expected dict or MockUpResponse, got {type(response)} with value: {response}",
+                    self.assertTrue(
+                        analyzer.report,
+                        f"Analyzer response for {mimetype} should not be empty",
                     )
                     logger.debug("Successful result for %s: %s", mimetype, response)

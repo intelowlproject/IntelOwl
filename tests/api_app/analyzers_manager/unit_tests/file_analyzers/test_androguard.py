@@ -41,8 +41,11 @@ class TestAndroguardAnalyzer(BaseFileAnalyzerTest):
         mock_apk.get_androidversion_name.return_value = "1.0.0"
 
         # Configure session mock methods
-        mock_session.addAPK.return_value = (None, mock_apk)  # Returns (a, apk) tuple
-        mock_session.addDEX.return_value = None
+        mock_session.addAPK.return_value = (
+            tuple("sample"),
+            mock_apk,
+        )  # Returns (a, apk) tuple
+        mock_session.addDEX.return_value = tuple("sample_dex")
 
         # Return the patch for get_default_session
         return patch("androguard.misc.get_default_session", return_value=mock_session)

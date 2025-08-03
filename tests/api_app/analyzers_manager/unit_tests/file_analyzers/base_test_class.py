@@ -4,10 +4,12 @@ import os
 from contextlib import ExitStack
 from types import SimpleNamespace
 from unittest import TestCase
+from unittest.mock import MagicMock
 
 from django.utils import timezone
 
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.choices import TLP
 
 logger = logging.getLogger(__name__)
 
@@ -149,6 +151,7 @@ class BaseFileAnalyzerTest(TestCase):
                     analyzer.read_file_bytes = lambda: file_bytes
 
                     analyzer._job = SimpleNamespace()
+                    analyzer._job.TLP = TLP.CLEAR
                     analyzer._job.analyzable = SimpleNamespace()
                     analyzer._job.analyzable.name = analyzer.filename
                     analyzer._job.analyzable.mimetype = mimetype
@@ -156,12 +159,17 @@ class BaseFileAnalyzerTest(TestCase):
                         file_bytes
                     ).hexdigest()
                     analyzer._job_id = ""
-                    analyzer.report = {
-                        "report": {},
-                        "errors": [],
-                        "end_time": timezone.now(),
-                    }
+                    analyzer._job.tlp = "clear"
+                    analyzer.report = MagicMock()
+                    analyzer.report.report = {}
+                    analyzer.report.errors = []
+                    analyzer.report.status = ""
+                    analyzer.report.end_time = timezone.now()
 
+                    # Fake STATUSES enum
+                    analyzer.report.STATUSES = MagicMock()
+                    analyzer.report.STATUSES.FAILED = "failed"
+                    analyzer.report.STATUSES.SUCCESS = "success"
                     analyzer._FileAnalyzer__filepath = self.get_sample_file_path(
                         mimetype
                     )
@@ -171,10 +179,10 @@ class BaseFileAnalyzerTest(TestCase):
 
                     try:
                         response = analyzer.run()
-                        analyzer.report["report"] = response
+                        analyzer.report.report = response
                         logger.info("Analyzer ran successfully for %s", mimetype)
                     except Exception as e:
-                        analyzer.report["errors"].append(
+                        analyzer.report.errors.append(
                             f"Analyzer run failed for {mimetype}: {type(e).__name__}: {e}"
                         )
                         logger.exception(

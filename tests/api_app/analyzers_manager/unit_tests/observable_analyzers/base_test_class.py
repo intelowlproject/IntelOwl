@@ -77,6 +77,7 @@ class BaseAnalyzerTest(TestCase):
         mock_job.analyzable.name = observable_name
         mock_job.tlp = "clear"
         mock_job.TLP = mock_tlp_enum
+        mock_job.user = ""
 
         return mock_job
 

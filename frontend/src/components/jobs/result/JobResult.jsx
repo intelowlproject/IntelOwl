@@ -94,7 +94,7 @@ export default function JobResult() {
   if (job && jobIsRunning && section && subSection && !jobWebsocket.current) {
     const websocketUrl = `${
       window.location.protocol === "https:" ? "wss" : "ws"
-    }://${window.location.hostname}/${WEBSOCKET_JOBS_URI}/${jobId}`;
+    }://${window.location.host}/${WEBSOCKET_JOBS_URI}/${jobId}`;
     console.debug(`connect to websocket API: ${websocketUrl}`);
     jobWebsocket.current = new WebSocket(websocketUrl);
     jobWebsocket.current.onopen = (data) => {

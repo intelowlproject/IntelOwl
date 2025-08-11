@@ -16,7 +16,7 @@ class Hfinger(FileAnalyzer):
     fingerprint_report_mode: int = 2
 
     def run(self):
-        reports = dict()
+        reports = {}
         reports["extraction"] = hfinger_analyze(
             self.filepath, self.fingerprint_report_mode
         )

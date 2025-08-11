@@ -65,7 +65,8 @@ class BaseAnalyzerTest(TestCase):
 
         return patches
 
-    def _create_mock_analyzer_job(self, observable_name, observable_type):
+    @staticmethod
+    def _create_mock_analyzer_job(observable_name, observable_type):
         mock_tlp_enum = SimpleNamespace()
         mock_tlp_enum.CLEAR = SimpleNamespace(value="clear")
         mock_tlp_enum.GREEN = SimpleNamespace(value="green")

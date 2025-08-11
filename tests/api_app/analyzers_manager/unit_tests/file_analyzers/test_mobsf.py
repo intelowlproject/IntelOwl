@@ -1,5 +1,5 @@
 from api_app.analyzers_manager.file_analyzers.mobsf import Mobsf
-from tests.mock_utils import MockUpResponse, patch
+from tests.mock_utils import patch
 
 from .base_test_class import BaseFileAnalyzerTest
 

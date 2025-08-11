@@ -30,7 +30,8 @@ class TestYARAifyFileScan(BaseFileAnalyzerTest):
             patch("requests.post", side_effect=self.mock_requests_post),
         ]
 
-    def mock_requests_post(self, url, files=None, json=None, headers=None, **kwargs):
+    @staticmethod
+    def mock_requests_post(url, files=None, json=None, headers=None, **kwargs):
         # Simulate initial file upload response (returns task_id)
         if files:
             return MagicMock(

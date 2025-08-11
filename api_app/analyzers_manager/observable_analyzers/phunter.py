@@ -49,5 +49,5 @@ class PhunterAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
             raise AnalyzerRunException(f"{self.name} An unexpected error occurred: {e}")
 
     @classmethod
-    def update(self):
+    def update(cls):
         pass

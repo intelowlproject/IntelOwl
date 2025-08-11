@@ -33,7 +33,7 @@ class MnemonicPassiveDNSTestCase(BaseAnalyzerTest):
 
         def side_effect(url, data=None):
             if "cof" in url:
-                return MockUpResponse(cof_response, 200, content_type="text/plain")
+                return MockUpResponse(cof_response, 200)
             return MockUpResponse(json_response, 200)
 
         return patch("requests.get", side_effect=side_effect)

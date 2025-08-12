@@ -6,7 +6,7 @@ from asgiref.sync import sync_to_async
 from channels.layers import channel_layers
 from channels.testing import WebsocketCommunicator
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import TransactionTestCase
 
 from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.constants import TypeChoices
@@ -19,7 +19,7 @@ from intel_owl.tasks import job_set_final_status, run_plugin
 User = get_user_model()
 
 
-class WebsocketTestCase(TestCase, metaclass=abc.ABCMeta):
+class WebsocketTestCase(TransactionTestCase, metaclass=abc.ABCMeta):
     """Class with utilities function for testing websockets"""
 
     @asynccontextmanager

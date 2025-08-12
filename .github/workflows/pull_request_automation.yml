@@ -115,6 +115,9 @@ jobs:
       - name: Run test
         run: |
           docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests
+      - name: Run async tests
+        run: |
+          docker exec intelowl_uwsgi coverage run manage.py test --keepdb async_tests
 
   frontend-tests:
     runs-on: ubuntu-latest

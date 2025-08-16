@@ -44,10 +44,18 @@ class BaseAnalyzerTest(TestCase):
 
     @classmethod
     def get_extra_config(cls) -> dict:
+        """
+        Subclasses can override this to provide additional runtime configuration
+        specific to their analyzer (e.g., API keys, URLs, retry counts, etc.).
+        """
         return {}
 
-    def get_mocked_response(self):
-        return None
+    @classmethod
+    def get_mocked_response(cls):
+        """
+        Subclasses override this to define expected mocked output.
+        """
+        raise NotImplementedError("Subclasses must implement get_mocked_response()")
 
     @classmethod
     def _apply_patches(cls, patches):

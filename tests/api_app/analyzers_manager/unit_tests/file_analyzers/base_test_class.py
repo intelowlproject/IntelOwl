@@ -72,7 +72,8 @@ class BaseFileAnalyzerTest(TestCase):
         """
         return {}
 
-    def get_mocked_response(self):
+    @classmethod
+    def get_mocked_response(cls):
         """
         Subclasses override this to define expected mocked output.
         """
@@ -148,7 +149,7 @@ class BaseFileAnalyzerTest(TestCase):
                     analyzer.file_mimetype = mimetype
                     analyzer.filename = f"test_file_{mimetype}"
                     analyzer.md5 = md5
-                    analyzer.read_file_bytes = lambda: file_bytes
+                    analyzer.read_file_bytes = lambda file_bytes=file_bytes: file_bytes
 
                     analyzer._job = SimpleNamespace()
                     analyzer._job.TLP = TLP.CLEAR

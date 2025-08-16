@@ -116,16 +116,14 @@ class BaseAnalyzerTest(TestCase):
         )
         self.assertTrue(
             response,
-            f"{self.__class__.__name__}: Analyzer response for {observable_type} "
-            "should not be empty",
+            f"{self.__class__.__name__}: Analyzer response for {observable_type} should not be empty",
         )
         logger.info(f"Valid response for {observable_type}")
 
     def test_analyzer_on_supported_observables(self):
         if self.analyzer_class is None:
             self.skipTest(
-                f"{self.__class__.__name__}.test_analyzer_on_supported_observables "
-                "skipped: analyzer_class is not set"
+                f"{self.__class__.__name__}.test_analyzer_on_supported_observables skipped: analyzer_class is not set"
             )
 
         configs = AnalyzerConfig.objects.filter(
@@ -134,8 +132,7 @@ class BaseAnalyzerTest(TestCase):
 
         if not configs.exists():
             self.skipTest(
-                f"{self.__class__.__name__}: No AnalyzerConfig found for "
-                f"{self.analyzer_class.python_module}"
+                f"{self.__class__.__name__}: No AnalyzerConfig found for {self.analyzer_class.python_module}"
             )
 
         config = configs.first()

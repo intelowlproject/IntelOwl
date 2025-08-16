@@ -106,20 +106,18 @@ class BaseAnalyzerTest(TestCase):
             except json.JSONDecodeError:
                 logger.error(f"Invalid JSON response for {observable_type}")
                 self.fail(
-                    f"{self.__class__.__name__}: Analyzer response for {observable_type} "
-                    f"is a string but not valid JSON"
+                    f"{self.__class__.__name__}: Analyzer response for {observable_type} is a string but not valid JSON"
                 )
 
         self.assertIsInstance(
             response,
             (dict, list),
-            f"{self.__class__.__name__}: Analyzer response for {observable_type} "
-            f"should be a dictionary (JSON object) or list",
+            f"{self.__class__.__name__}: Analyzer response for {observable_type} should be a dictionary (JSON object) or list",
         )
         self.assertTrue(
             response,
             f"{self.__class__.__name__}: Analyzer response for {observable_type} "
-            f"should not be empty",
+            "should not be empty",
         )
         logger.info(f"Valid response for {observable_type}")
 
@@ -127,7 +125,7 @@ class BaseAnalyzerTest(TestCase):
         if self.analyzer_class is None:
             self.skipTest(
                 f"{self.__class__.__name__}.test_analyzer_on_supported_observables "
-                f"skipped: analyzer_class is not set"
+                "skipped: analyzer_class is not set"
             )
 
         configs = AnalyzerConfig.objects.filter(

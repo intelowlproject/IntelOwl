@@ -111,9 +111,9 @@ class BaseFileAnalyzerTest(TestCase):
 
     def test_analyzer_on_supported_filetypes(self):
         if self.analyzer_class is None:
-            self.skipTest("analyzer_class is not set")
+            self.skipTest(f"{self.__class__.__name__}: analyzer_class is not set")
 
-        logger.info("Starting file analyzer test for: %s", self.analyzer_class.__name__)
+        logger.info(f"Starting file analyzer test for: {self.analyzer_class.__name__}")
 
         try:
             config = AnalyzerConfig.objects.get(
@@ -124,7 +124,7 @@ class BaseFileAnalyzerTest(TestCase):
                 f"No AnalyzerConfig found for {self.analyzer_class.python_module}"
             )
 
-        logger.debug("Loaded analyzer config: %s", config)
+        logger.debug(f"Loaded analyzer config: {config}")
 
         supported_types = (
             config.supported_filetypes or self.get_all_supported_mimetypes()
@@ -132,12 +132,12 @@ class BaseFileAnalyzerTest(TestCase):
 
         for mimetype in supported_types:
             with self.subTest(mimetype=mimetype):
-                logger.info("Testing mimetype: %s", mimetype)
+                logger.info(f"Testing mimetype: {mimetype}")
 
                 try:
                     file_bytes = self.get_sample_file_bytes(mimetype)
                 except (ValueError, OSError) as e:
-                    logger.warning("Skipping %s due to error: %s", mimetype, str(e))
+                    logger.warning(f"Skipping {mimetype} due to error: {e}")
                     continue
 
                 patches = self.get_mocked_response()
@@ -180,14 +180,12 @@ class BaseFileAnalyzerTest(TestCase):
                     try:
                         response = analyzer.run()
                         analyzer.report.report = response
-                        logger.info("Analyzer ran successfully for %s", mimetype)
+                        logger.info(f"Analyzer ran successfully for {mimetype}")
                     except Exception as e:
                         analyzer.report.errors.append(
                             f"Analyzer run failed for {mimetype}: {type(e).__name__}: {e}"
                         )
-                        logger.exception(
-                            "Analyzer raised an exception for %s", mimetype
-                        )
+                        logger.exception(f"Analyzer raised an exception for {mimetype}")
                         self.fail(
                             f"Analyzer run failed for {mimetype}: {type(e).__name__}: {e}"
                         )
@@ -195,4 +193,4 @@ class BaseFileAnalyzerTest(TestCase):
                         analyzer.report,
                         f"Analyzer response for {mimetype} should not be empty",
                     )
-                    logger.debug("Successful result for %s: %s", mimetype, response)
+                    logger.debug(f"Successful result for {mimetype}: {response}")

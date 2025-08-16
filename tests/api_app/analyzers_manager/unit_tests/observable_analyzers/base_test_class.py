@@ -16,7 +16,7 @@ class BaseAnalyzerTest(TestCase):
 
     def setUp(self):
         super().setUp()
-        logger.info("Setting up test environment")
+        logger.info(f"Setting up test environment for {self.__class__.__name__}")
 
         if self.suppress_analyzer_logs and self.analyzer_class:
             analyzer_module = self.analyzer_class.__module__
@@ -25,7 +25,7 @@ class BaseAnalyzerTest(TestCase):
 
     def tearDown(self):
         super().tearDown()
-        logger.info("Tearing down test environment")
+        logger.info(f"Tearing down test environment for {self.__class__.__name__}")
 
         if self.suppress_analyzer_logs and self.analyzer_class:
             analyzer_module = self.analyzer_class.__module__
@@ -83,7 +83,10 @@ class BaseAnalyzerTest(TestCase):
         return mock_job
 
     def _setup_analyzer(self, config, observable_type, observable_value):
-        logger.info(f"Setting up analyzer for {observable_type}: {observable_value}")
+        logger.info(
+            f"Setting up analyzer {self.analyzer_class.__name__} "
+            f"for {observable_type}: {observable_value}"
+        )
         analyzer = self.analyzer_class(config)
         analyzer.observable_name = observable_value
         analyzer.observable_classification = observable_type
@@ -101,24 +104,31 @@ class BaseAnalyzerTest(TestCase):
             try:
                 response = json.loads(response)
             except json.JSONDecodeError:
-                logger.error("Invalid JSON response for %s", observable_type)
+                logger.error(f"Invalid JSON response for {observable_type}")
                 self.fail(
-                    f"Analyzer response for {observable_type} is a string but not valid JSON"
+                    f"{self.__class__.__name__}: Analyzer response for {observable_type} "
+                    f"is a string but not valid JSON"
                 )
 
         self.assertIsInstance(
             response,
             (dict, list),
-            f"Analyzer response for {observable_type} should be a dictionary (JSON object)",
+            f"{self.__class__.__name__}: Analyzer response for {observable_type} "
+            f"should be a dictionary (JSON object) or list",
         )
         self.assertTrue(
-            response, f"Analyzer response for {observable_type} should not be empty"
+            response,
+            f"{self.__class__.__name__}: Analyzer response for {observable_type} "
+            f"should not be empty",
         )
-        logger.info("Valid response for %s", observable_type)
+        logger.info(f"Valid response for {observable_type}")
 
     def test_analyzer_on_supported_observables(self):
         if self.analyzer_class is None:
-            self.skipTest("analyzer_class is not set")
+            self.skipTest(
+                f"{self.__class__.__name__}.test_analyzer_on_supported_observables "
+                f"skipped: analyzer_class is not set"
+            )
 
         configs = AnalyzerConfig.objects.filter(
             python_module=self.analyzer_class.python_module
@@ -126,7 +136,8 @@ class BaseAnalyzerTest(TestCase):
 
         if not configs.exists():
             self.skipTest(
-                f"No AnalyzerConfig found for {self.analyzer_class.python_module}"
+                f"{self.__class__.__name__}: No AnalyzerConfig found for "
+                f"{self.analyzer_class.python_module}"
             )
 
         config = configs.first()
@@ -136,7 +147,7 @@ class BaseAnalyzerTest(TestCase):
                 continue
 
             with self.subTest(observable_type=observable_type):
-                logger.info("Testing observable type: %s", observable_type)
+                logger.info(f"Testing observable type: {observable_type}")
 
                 patches = self.get_mocked_response()
                 with self._apply_patches(patches):
@@ -148,14 +159,16 @@ class BaseAnalyzerTest(TestCase):
                     try:
                         response = analyzer.run()
                         self._validate_response(response, observable_type)
-                        logger.info("Analyzer run successful for %s", observable_type)
+                        logger.info(f"Analyzer run successful for {observable_type}")
                     except AnalyzerRunException as e:
-                        logger.error("AnalyzerRunException: %s", e)
+                        logger.error(f"AnalyzerRunException for {observable_type}: {e}")
                         self.fail(
-                            f"AnalyzerRunException for {observable_type}: {str(e)}"
+                            f"{self.__class__.__name__}: AnalyzerRunException "
+                            f"for {observable_type}: {e}"
                         )
                     except Exception as e:
-                        logger.exception("Unexpected exception for %s", observable_type)
+                        logger.exception(f"Unexpected exception for {observable_type}")
                         self.fail(
-                            f"Unexpected exception for {observable_type}: {type(e).__name__}: {str(e)}"
+                            f"{self.__class__.__name__}: Unexpected exception "
+                            f"for {observable_type}: {type(e).__name__}: {e}"
                         )

@@ -117,9 +117,10 @@ class BaseFileAnalyzerTest(TestCase):
         logger.info(f"Starting file analyzer test for: {self.analyzer_class.__name__}")
 
         try:
-            config = AnalyzerConfig.objects.get(
+            configs = AnalyzerConfig.objects.filter(
                 python_module=self.analyzer_class.python_module
             )
+            config = configs.first()
         except AnalyzerConfig.DoesNotExist:
             self.fail(
                 f"No AnalyzerConfig found for {self.analyzer_class.python_module}"

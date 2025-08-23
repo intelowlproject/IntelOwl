@@ -65,6 +65,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "android.xml",
                 "test.zip",
                 "sample.dex",
+                "honeyscanner-0.1.7.tar.gz",
             ],
             [
                 "application/onenote",
@@ -94,6 +95,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "text/xml",
                 "application/zip",
                 "application/x-dex",
+                "application/gzip",
             ],
         ):
             try:

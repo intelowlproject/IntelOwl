@@ -90,6 +90,7 @@ export const FileMimeTypes = Object.freeze({
   KOTLIN: "text/x-kotlin",
   SWIFT: "text/x-swift",
   OBJECTIVE_C_CODE: "text/x-objective-c",
+  GZIP: "application/gzip",
 });
 
 export const ObservableClassifications = Object.freeze({

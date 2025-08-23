@@ -194,6 +194,7 @@ class MimeTypes(models.TextChoices):
     SWIFT = "text/x-swift"
     OBJECTIVE_C_CODE = "text/x-objective-c"
     LNK = "application/x-ms-shortcut"
+    GZIP = "application/gzip"
 
     @classmethod
     def _calculate_from_filename(cls, file_name: str) -> Optional["MimeTypes"]:

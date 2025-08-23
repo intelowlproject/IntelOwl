@@ -1,6 +1,7 @@
 import json
 import logging
 import subprocess
+from shlex import quote
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
@@ -22,9 +23,9 @@ class GuardDogGeneric(ObservableAnalyzer):
             process: subprocess.CompletedProcess = subprocess.run(
                 [
                     "/usr/local/bin/guarddog",
-                    self.scan_type,
+                    quote(self.scan_type),
                     "scan",
-                    self.observable_name,
+                    quote(self.observable_name),
                     "--output-format=json",
                 ],
                 capture_output=True,
@@ -36,7 +37,7 @@ class GuardDogGeneric(ObservableAnalyzer):
             return output
 
         except subprocess.CalledProcessError as e:
-            std_error = process.stderr
+            std_error = e.stderr
             logger.error(f"Failed to execute command: {e}, {std_error}")
             raise AnalyzerRunException(f"failed to run guarddog: {std_error}")
 

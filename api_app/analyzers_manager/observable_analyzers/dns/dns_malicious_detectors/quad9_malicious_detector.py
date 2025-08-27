@@ -98,5 +98,3 @@ class Quad9MaliciousDetector(DoHMixin, classes.ObservableAnalyzer):
         google_response.raise_for_status()
 
         return bool(google_response.json().get("Answer", None))
-
-   

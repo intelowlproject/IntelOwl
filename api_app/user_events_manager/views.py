@@ -90,7 +90,7 @@ class UserDomainWildCardEventViewSet(UserEventViewSet):
         try:
             re.compile(query)
         except re.error:
-            raise ValidationError({"detail": "Invalid query"})
+            raise ValidationError({"detail": "Invalid domain query"})
 
         return Response(
             status=HTTPStatus.OK.value,
@@ -114,7 +114,11 @@ class UserIPWildCardEventViewSet(UserEventViewSet):
         if "network" not in request.data:
             raise ValidationError({"detail": "network is required"})
         network = request.data["network"]
-        network = ipaddress.IPv4Network(network)
+
+        try:
+            network = ipaddress.IPv4Network(network)
+        except ValueError:
+            raise ValidationError({"detail": "Invalid network"})
 
         return Response(
             status=HTTPStatus.OK.value,

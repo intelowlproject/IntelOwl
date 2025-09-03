@@ -1,3 +1,9 @@
+import {
+  USER_EVENT_ANALYZABLE,
+  USER_EVENT_IP_WILDCARD,
+  USER_EVENT_DOMAIN_WILDCARD,
+} from "./apiURLs";
+
 export const DecayProgressionTypes = Object.freeze({
   LINEAR: "0",
   INVERSE_EXPONENTIAL: "1",
@@ -14,4 +20,10 @@ export const UserEventTypes = Object.freeze({
   ANALYZABLE: "artifact",
   IP_WILDCARD: "ip_wildcard",
   DOMAIN_WILDCARD: "domain_wildcard",
+});
+
+export const userEventTypesToApiMapping = Object.freeze({
+  artifact: USER_EVENT_ANALYZABLE,
+  ip_wildcard: USER_EVENT_IP_WILDCARD,
+  domain_wildcard: USER_EVENT_DOMAIN_WILDCARD,
 });

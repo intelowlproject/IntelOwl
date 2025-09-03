@@ -4,7 +4,13 @@ import PropTypes from "prop-types";
 import { FieldArray } from "formik";
 import { BsFillTrashFill, BsFillPlusCircleFill } from "react-icons/bs";
 
-export function ListInput({ id, values, formikSetFieldValue, placeholder }) {
+export function ListInput({
+  id,
+  values,
+  formikSetFieldValue,
+  placeholder,
+  formikHandlerBlur,
+}) {
   return (
     <FieldArray
       name={id}
@@ -22,6 +28,7 @@ export function ListInput({ id, values, formikSetFieldValue, placeholder }) {
                         placeholder={placeholder}
                         className="input-dark"
                         value={value}
+                        onBlur={formikHandlerBlur}
                         onChange={(event) => {
                           const attributevalues = values;
                           attributevalues[index] = event.target.value;
@@ -65,6 +72,7 @@ ListInput.propTypes = {
   values: PropTypes.array.isRequired,
   formikSetFieldValue: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
+  formikHandlerBlur: PropTypes.func.isRequired,
 };
 
 ListInput.defaultProps = {

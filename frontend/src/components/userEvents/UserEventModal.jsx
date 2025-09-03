@@ -41,6 +41,7 @@ import {
   DecayProgressionTypes,
   DecayProgressionDescription,
   UserEventTypes,
+  userEventTypesToApiMapping,
 } from "../../constants/userEventsConst";
 import { useAuthStore } from "../../stores/useAuthStore";
 import {
@@ -58,7 +59,8 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
 
   const [inputValue, setInputValue] = React.useState("");
   const [wildcard, setWildcard] = React.useState("");
-  const [inputTypes, setInputTypes] = React.useState({});
+  const [inputState, setInputState] = React.useState({});
+  const [wildcardInputError, setWildcardInputError] = React.useState(null);
 
   const formik = useFormik({
     initialValues: {
@@ -79,11 +81,11 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
       console.debug("validate - values");
       console.debug(values);
       const errors = {};
-      if (
-        values.related_threats.length === 1 &&
-        values.related_threats[0] === ""
-      ) {
-        errors.related_threats = "A comment is required";
+      if (values.analyzables[0] === "") {
+        errors["analyzables-0"] = "Artifact is required";
+      }
+      if (values.related_threats[0] === "") {
+        errors["related_threats-0"] = "Comment is required";
       }
       if (!Number.isInteger(values.decay_timedelta_days)) {
         errors.decay_timedelta_days = "The value must be a number.";
@@ -95,6 +97,15 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
         errors.decay_timedelta_days =
           "You can't have a fixed decay progression and days different from 0";
       }
+      values.analyzables.forEach((analyzable, index) => {
+        if (wildcardInputError) {
+          if (
+            Object.keys(wildcardInputError).includes(analyzable) &&
+            wildcardInputError[analyzable] !== null
+          )
+            errors[`analyzables-${index}`] = wildcardInputError[analyzable];
+        }
+      });
       console.debug("errors", errors);
       return errors;
     },
@@ -108,109 +119,66 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
           editedFields[key] = value;
         }
       });
-
-      const apiCalls = [];
-
-      formik.values.analyzables.forEach((analyzable) => {
-        const evaluation = {
-          decay_progression: formik.values.decay_progression,
-          decay_timedelta_days: formik.values.decay_timedelta_days,
-          data_model_content: {
-            ...editedFields,
-            reliability: formik.values.reliability,
-          },
-        };
-
-        if (inputTypes[analyzable].type === UserEventTypes.IP_WILDCARD) {
-          evaluation.network = analyzable;
-          axios
-            .get(
-              `${USER_EVENT_IP_WILDCARD}?username=${user.username}&network=${analyzable}`,
-            )
-            .then((resp) => {
-              if (resp.data.count === 0) {
-                // create a new evaluation
-                apiCalls.push(
-                  axios.post(`${USER_EVENT_IP_WILDCARD}`, evaluation),
-                );
-              } else {
-                // edit an existing evaluation
-                apiCalls.push(
-                  axios.patch(
-                    `${USER_EVENT_IP_WILDCARD}/${resp.data.results[0].id}`,
-                    evaluation,
-                  ),
-                );
-              }
-            });
-        } else if (
-          inputTypes[analyzable].type === UserEventTypes.DOMAIN_WILDCARD
-        ) {
-          evaluation.query = analyzable;
-          axios
-            .get(
-              `${USER_EVENT_DOMAIN_WILDCARD}?username=${user.username}&query=${analyzable}`,
-            )
-            .then((resp) => {
-              if (resp.data.count === 0) {
-                // create a new evaluation
-                apiCalls.push(
-                  axios.post(`${USER_EVENT_DOMAIN_WILDCARD}`, evaluation),
-                );
-              } else {
-                // edit an existing evaluation
-                apiCalls.push(
-                  axios.patch(
-                    `${USER_EVENT_DOMAIN_WILDCARD}/${resp.data.results[0].id}`,
-                    evaluation,
-                  ),
-                );
-              }
-            });
-        } else {
-          evaluation.analyzable = { name: analyzable };
-          axios
-            .get(
-              `${USER_EVENT_ANALYZABLE}?username=${user.username}&analyzable_name=${analyzable}`,
-            )
-            .then((resp) => {
-              if (resp.data.count === 0) {
-                // create a new evaluation
-                apiCalls.push(
-                  axios.post(`${USER_EVENT_ANALYZABLE}`, evaluation),
-                );
-              } else {
-                // edit an existing evaluation
-                apiCalls.push(
-                  axios.patch(
-                    `${USER_EVENT_ANALYZABLE}/${resp.data.results[0].id}`,
-                    evaluation,
-                  ),
-                );
-              }
-            });
-        }
-      });
+      const evaluation = {
+        decay_progression: formik.values.decay_progression,
+        decay_timedelta_days: formik.values.decay_timedelta_days,
+        data_model_content: {
+          ...editedFields,
+          reliability: formik.values.reliability,
+        },
+      };
 
       const failed = [];
-      const response = await Promise.allSettled(apiCalls);
-      response.forEach((promise, index) => {
-        if (promise.status === "rejected")
-          failed.push(formik.values.analyzables[index]);
+      Promise.allSettled(
+        formik.values.analyzables.map((analyzable) => {
+          if (inputState[analyzable].type === UserEventTypes.IP_WILDCARD)
+            evaluation.network = analyzable;
+          else if (
+            inputState[analyzable].type === UserEventTypes.DOMAIN_WILDCARD
+          )
+            evaluation.query = analyzable;
+          else evaluation.analyzable = { name: analyzable };
+
+          if (inputState[analyzable]?.eventId) {
+            // edit an existing evaluation
+            return axios.patch(
+              `${userEventTypesToApiMapping[inputState[analyzable].type]}/${
+                inputState[analyzable].eventId
+              }`,
+              evaluation,
+            );
+          }
+          // create a new evaluation
+          return axios.post(
+            `${userEventTypesToApiMapping[inputState[analyzable].type]}`,
+            evaluation,
+          );
+        }),
+      ).then((response) => {
+        response.forEach((promise, index) => {
+          if (promise.status === "rejected") {
+            failed.push(formik.values.analyzables[index]);
+            addToast(
+              `Failed to add evaluation for: ${formik.values.analyzables[index]}`,
+              promise?.reason.parsedMsg,
+              "danger",
+            );
+          } else {
+            addToast(
+              `Evaluation added successfully for: ${formik.values.analyzables[index]}`,
+              null,
+              "success",
+            );
+          }
+        });
+        if (failed.length === 0) {
+          formik.setSubmitting(false);
+          formik.resetForm();
+          toggle(false);
+        } else {
+          formik.setFieldValue("analyzables", failed, false);
+        }
       });
-      if (failed.length === 0) {
-        addToast("Evaluation added successfully", null, "success");
-        formik.setSubmitting(false);
-        formik.resetForm();
-        toggle(false);
-      } else {
-        addToast(
-          `Failed to add evaluation for: ${failed.toString()}`,
-          null,
-          "danger",
-        );
-        formik.setFieldValue("analyzables", failed, false);
-      }
       return null;
     },
   });
@@ -222,13 +190,12 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
         obj[analyzable] = { type: UserEventTypes.ANALYZABLE };
       }
     });
-    setInputTypes({ ...inputTypes, ...obj });
+    setInputState({ ...inputState, ...obj });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.initialValues.analyzables]);
 
   useDebounceInput(inputValue, 1000, setWildcard);
 
-  // ip/domain wildcard matches
   React.useEffect(() => {
     if (wildcard !== "") {
       // check ip wildcard
@@ -236,19 +203,33 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
         IP_REGEX.test(wildcard.split(/[/]/)[0]) &&
         wildcard.split(/[/]/).length === 2
       ) {
+        // validate ip wildcard
         axios
           .put(`${USER_EVENT_IP_WILDCARD}/validate`, { network: wildcard })
           .then((response) => {
-            setInputTypes({
-              ...inputTypes,
-              [wildcard]: {
-                type: UserEventTypes.IP_WILDCARD,
-                matchesNumber: response.data.length,
-                matches: response.data,
-              },
-            });
+            setWildcardInputError({ [wildcard]: null });
+            // check if an ip wildcard event already exists for the same user
+            axios
+              .get(
+                `${USER_EVENT_IP_WILDCARD}?username=${user.username}&network=${wildcard}`,
+              )
+              .then((resp) => {
+                setInputState({
+                  ...inputState,
+                  [wildcard]: {
+                    type: UserEventTypes.IP_WILDCARD,
+                    matches: response.data,
+                    eventId:
+                      resp.data.count !== 0 ? resp.data.results[0].id : null,
+                  },
+                });
+              });
           })
-          .catch((error) => console.debug(error));
+          .catch((error) => {
+            setWildcardInputError({
+              [wildcard]: error?.response?.data?.errors?.detail,
+            });
+          });
       } else if (
         !DOMAIN_REGEX.test(wildcard) &&
         !IP_REGEX.test(wildcard) &&
@@ -259,21 +240,46 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
         axios
           .put(`${USER_EVENT_DOMAIN_WILDCARD}/validate`, { query: wildcard })
           .then((response) => {
-            setInputTypes({
-              ...inputTypes,
+            setWildcardInputError({ [wildcard]: null });
+            // check if a domain wildcard event already exists for the same user
+            axios
+              .get(
+                `${USER_EVENT_DOMAIN_WILDCARD}?username=${user.username}&query=${wildcard}`,
+              )
+              .then((resp) => {
+                setInputState({
+                  ...inputState,
+                  [wildcard]: {
+                    type: UserEventTypes.DOMAIN_WILDCARD,
+                    matches: response.data,
+                    eventId:
+                      resp.data.count !== 0 ? resp.data.results[0].id : null,
+                  },
+                });
+              });
+          })
+          .catch((error) => {
+            setWildcardInputError({
+              [wildcard]: error?.response?.data?.errors?.detail,
+            });
+          });
+      } else {
+        // input is not a wildcard
+        setWildcardInputError({ [wildcard]: null });
+        // check if an analyzable event already exists for the same user
+        axios
+          .get(
+            `${USER_EVENT_ANALYZABLE}?username=${user.username}&analyzable_name=${wildcard}`,
+          )
+          .then((resp) => {
+            setInputState({
+              ...inputState,
               [wildcard]: {
-                type: UserEventTypes.DOMAIN_WILDCARD,
-                matchesNumber: response.data.length,
-                matches: response.data,
+                type: UserEventTypes.ANALYZABLE,
+                eventId: resp.data.count !== 0 ? resp.data.results[0].id : null,
               },
             });
-          })
-          .catch((error) => console.debug(error));
-      } else {
-        setInputTypes({
-          ...inputTypes,
-          [wildcard]: { type: UserEventTypes.ANALYZABLE },
-        });
+          });
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -330,6 +336,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                                         placeholder="google.com, 8.8.8.8, https://google.com, 1d5920f4b44b27a802bd77c4f0536f5a, .*\.com"
                                         className="input-dark"
                                         value={value}
+                                        onBlur={formik.handleBlur}
                                         onChange={(event) => {
                                           const attributevalues =
                                             formik.values.analyzables;
@@ -342,7 +349,16 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                                           );
                                           setInputValue(event.target.value);
                                         }}
+                                        invalid={
+                                          formik.touched[
+                                            `analyzables-${index}`
+                                          ] &&
+                                          formik.errors[`analyzables-${index}`]
+                                        }
                                       />
+                                      <FormFeedback>
+                                        {formik.errors[`analyzables-${index}`]}
+                                      </FormFeedback>
                                     </Col>
                                     <Col
                                       sm={2}
@@ -379,7 +395,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                                         Type:
                                       </small>
                                       <small className="text-info ms-2">
-                                        {inputTypes[value]?.type?.replace(
+                                        {inputState[value]?.type?.replace(
                                           "_",
                                           " ",
                                         )}
@@ -392,12 +408,12 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                                       <small className="fst-italic">
                                         Matches:
                                       </small>
-                                      {inputTypes[value]?.type !==
+                                      {inputState[value]?.type !==
                                         UserEventTypes.ANALYZABLE &&
                                       value !== "" ? (
                                         <div>
                                           <small className="text-info ms-2">
-                                            {inputTypes[value]?.matchesNumber}{" "}
+                                            {inputState[value]?.matches?.length}{" "}
                                           </small>
                                           <MdInfoOutline
                                             id="matches-infoicon"
@@ -412,9 +428,9 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                                             fade={false}
                                             innerClassName="p-2 text-start text-nowrap md-fit-content"
                                           >
-                                            {inputTypes[
+                                            {inputState[
                                               value
-                                            ]?.matches.toString()}
+                                            ]?.matches?.toString()}
                                           </UncontrolledTooltip>
                                         </div>
                                       ) : (
@@ -445,7 +461,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                     Evaluation:
                   </Label>
                 </Col>
-                <Col md={8} className="d-flex align-items-center">
+                <Col md={8} className="d-flex flex-column align-items-center">
                   <Input
                     id="userEvent__evaluation"
                     type="select"
@@ -454,6 +470,10 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                     onBlur={formik.handleBlur}
                     onChange={formik.handleChange}
                     className="bg-darker border-dark"
+                    invalid={
+                      formik.touched.evaluation &&
+                      formik.values.evaluation === ""
+                    }
                   >
                     <option value="">Select...</option>
                     {[Evaluations.MALICIOUS, Evaluations.TRUSTED]
@@ -467,6 +487,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                         </option>
                       ))}
                   </Input>
+                  <FormFeedback>Evaluation is required</FormFeedback>
                 </Col>
               </Row>
               <hr />
@@ -486,7 +507,14 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                     id="related_threats"
                     values={formik.values.related_threats}
                     formikSetFieldValue={formik.setFieldValue}
+                    formikHandlerBlur={formik.handleBlur}
                   />
+                  {formik.errors["related_threats-0"] &&
+                    formik.touched["related_threats-0"] && (
+                      <span className="text-danger">
+                        {formik.errors["related_threats-0"]}
+                      </span>
+                    )}
                 </Col>
               </Row>
               <hr />
@@ -506,6 +534,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                     id="external_references"
                     values={formik.values.external_references}
                     formikSetFieldValue={formik.setFieldValue}
+                    formikHandlerBlur={formik.handleBlur}
                   />
                 </Col>
               </Row>

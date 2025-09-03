@@ -123,6 +123,7 @@ export default function Analyzables() {
                 values={formik.values.analyzables}
                 formikSetFieldValue={formik.setFieldValue}
                 placeholder="google.com, 8.8.8.8, https://google.com, 1d5920f4b44b27a802bd77c4f0536f5a"
+                formikHandlerBlur={formik.handleBlur}
               />
             </Col>
             <Col

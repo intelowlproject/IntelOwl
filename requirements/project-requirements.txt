@@ -92,7 +92,7 @@ debloat==1.6.4
 phonenumbers==9.0.3
 die-python==0.4.0
 guarddog==2.1.0 # version greater than 2.1.0 raises dependency conflicts
-
+jbxapi==3.23.0
 
 # httpx required for HTTP/2 support (Mullvad DNS rejects HTTP/1.1 with protocol errors)
 httpx[http2]==0.28.1
@@ -113,4 +113,3 @@ DeepDiff==8.2.0
 lxml==5.3.0
 Faker==36.1.0
 beautifulsoup4==4.13.4
-

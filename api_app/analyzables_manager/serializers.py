@@ -36,12 +36,17 @@ class AnalyzableSerializer(rfs.ModelSerializer):
             analyzable["last_data_model"] = None
             return analyzable
         elif (job and job.data_model) or user_event_data_model:
-            if (job and job.data_model) and (
-                job.data_model.date > user_event_data_model.date
-            ):
+            if not job or not job.data_model:
+                last_data_model = user_event_data_model
+            elif not user_event_data_model:
                 last_data_model = job.data_model
             else:
-                last_data_model = user_event_data_model.data
+                if (job and job.data_model) and (
+                    job.data_model.date > user_event_data_model.date
+                ):
+                    last_data_model = job.data_model
+                else:
+                    last_data_model = user_event_data_model
 
             serializer_class = Classification.get_data_model_class(
                 classification=analyzable["classification"],

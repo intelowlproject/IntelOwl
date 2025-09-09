@@ -84,6 +84,16 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
       if (values.analyzables[0] === "") {
         errors["analyzables-0"] = "Artifact is required";
       }
+      // control used to report the errors produced by requests performed in previous rendering
+      values.analyzables.forEach((analyzable, index) => {
+        if (wildcardInputError) {
+          if (
+            Object.keys(wildcardInputError).includes(analyzable) &&
+            wildcardInputError[analyzable] !== null
+          )
+            errors[`analyzables-${index}`] = wildcardInputError[analyzable];
+        }
+      });
       if (values.related_threats[0] === "") {
         errors["related_threats-0"] = "Comment is required";
       }
@@ -97,15 +107,6 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
         errors.decay_timedelta_days =
           "You can't have a fixed decay progression and days different from 0";
       }
-      values.analyzables.forEach((analyzable, index) => {
-        if (wildcardInputError) {
-          if (
-            Object.keys(wildcardInputError).includes(analyzable) &&
-            wildcardInputError[analyzable] !== null
-          )
-            errors[`analyzables-${index}`] = wildcardInputError[analyzable];
-        }
-      });
       console.debug("errors", errors);
       return errors;
     },
@@ -234,7 +235,8 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
         !DOMAIN_REGEX.test(wildcard) &&
         !IP_REGEX.test(wildcard) &&
         !URL_REGEX.test(wildcard) &&
-        !HASH_REGEX.test(wildcard)
+        !HASH_REGEX.test(wildcard) &&
+        /\*/.test(wildcard) // check if the character * is in the string
       ) {
         // check domain wildcard
         axios

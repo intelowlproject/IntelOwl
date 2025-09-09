@@ -36,9 +36,9 @@ export const analyzablesHistoryTableColumns = [
                   : `/history/${original.type.replaceAll(
                       "_",
                       "-",
-                    )}s?date__gte=${encodeURIComponent(
+                    )}s?event_date__gte=${encodeURIComponent(
                       format(fromDate, datetimeFormatStr),
-                    )}&date__lte=${encodeURIComponent(
+                    )}&event_date__lte=${encodeURIComponent(
                       format(new Date(), datetimeFormatStr),
                     )}&ordering=-date&id=${id}`
               }

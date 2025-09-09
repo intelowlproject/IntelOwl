@@ -232,6 +232,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
             });
           });
       } else if (
+        // check if the input is not a known observable
         !DOMAIN_REGEX.test(wildcard) &&
         !IP_REGEX.test(wildcard) &&
         !URL_REGEX.test(wildcard) &&

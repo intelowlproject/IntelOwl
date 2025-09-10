@@ -208,3 +208,90 @@ class PivotConfigViewSetTestCase(
         self.client.force_authenticate(m_user.user)
         response = self.client.delete(f"{self.URL}/{pc1.name}")
         self.assertEqual(response.status_code, 204)
+
+    def test_get(self):
+        # 1 - existing pivot
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(f"{self.URL}/AbuseIpToSubmission")
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(
+            response.json(),
+            {
+                "config": {"queue": "default", "soft_time_limit": 60},
+                "delay": "00:00:00",
+                "description": "This Plugin leverages results from the Abusix analyzer to "
+                "extract the abuse contacts of an IP address to pivot to the "
+                "AbuseSubmitter connector.",
+                "disabled": True,
+                "health_check_status": True,
+                "health_check_task": None,
+                "id": 1,
+                "name": "AbuseIpToSubmission",
+                "parameters": {
+                    "field_to_compare": {
+                        "description": "Dotted path to the field",
+                        "id": 315,
+                        "is_secret": False,
+                        "required": True,
+                        "type": "str",
+                        "value": None,
+                    }
+                },
+                "playbooks_choice": ["Send_Abuse_Email"],
+                "python_module": "compare.Compare",
+                "related_analyzer_configs": ["Abusix"],
+                "related_configs": ["Abusix"],
+                "related_connector_configs": [],
+                "routing_key": "default",
+                "soft_time_limit": 60,
+            },
+        )
+        # 2 - missing pivot
+        response = self.client.get(f"{self.URL}/non_existing")
+        self.assertEqual(response.status_code, 404, response.content)
+        result = response.json()
+        self.assertEqual(result, {"detail": "No PivotConfig matches the given query."})
+
+    def test_get_config(self):
+        # 1 - existing pivot
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(f"{self.URL}/AbuseIpToSubmission/plugin_config")
+        self.assertEqual(response.status_code, 200, response.content)
+        result = response.json()
+        result["user_config"][0].pop(
+            "updated_at"
+        )  # auto filled by the model and hard to mock
+        self.assertEqual(
+            result,
+            {
+                "organization_config": [],
+                "user_config": [
+                    {
+                        "analyzer_config": None,
+                        "attribute": "field_to_compare",
+                        "connector_config": None,
+                        "description": "Dotted path to the field",
+                        "exist": True,
+                        "for_organization": False,
+                        "id": 291,
+                        "ingestor_config": None,
+                        "is_secret": False,
+                        "organization": None,
+                        "owner": None,
+                        "parameter": 315,
+                        "pivot_config": "AbuseIpToSubmission",
+                        "required": True,
+                        "type": "str",
+                        "value": "abuse_contacts.0",
+                        "visualizer_config": None,
+                    }
+                ],
+            },
+        )
+        # 3 - missing pivot
+        response = self.client.get(f"{self.URL}/missing_pivot/plugin_config")
+        self.assertEqual(response.status_code, 404, response.content)
+        self.assertEqual(
+            response.json(),
+            {"errors": {"pivot config": "Requested plugin does not exist."}},
+        )

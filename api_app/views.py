@@ -7,6 +7,7 @@ import uuid
 from abc import ABCMeta, abstractmethod
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Q
 from django.db.models.functions import Trunc
 from django.http import FileResponse
@@ -1454,7 +1455,10 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
     )
     def plugin_config(self, request, name=None):
         logger.info(f"get plugin_config from user {request.user}, name {name}")
-        obj: PythonConfig = self.get_queryset().get(name=name)
+        try:
+            obj: PythonConfig = self.get_queryset().get(name=name)
+        except ObjectDoesNotExist:
+            raise NotFound("Requested plugin does not exist.")
         try:
             plugin_configs: PluginConfig = PluginConfig.objects.filter(
                 **{obj.snake_case_name: obj.pk}
@@ -1494,7 +1498,7 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
                         param_obj["exist"] = True
                     org_config.append(copy.deepcopy(param_obj))
                 # override default config with user config (if any)
-                print(pc.data)
+                logger.debug(pc.data)
                 for config in [
                     config
                     for config in pc.data

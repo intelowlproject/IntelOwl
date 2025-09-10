@@ -176,6 +176,102 @@ class AnalyzerConfigViewSetTestCase(
         response = self.client.delete(f"{self.URL}/{ac1.name}")
         self.assertEqual(response.status_code, 204)
 
+    def test_get(self):
+        # 1 - existing analyzer
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(f"{self.URL}/Quad9_DNS")
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(
+            response.json(),
+            {
+                "config": {"queue": "default", "soft_time_limit": 30},
+                "description": "Retrieve current domain resolution with Quad9 DoH (DNS over "
+                "HTTPS)",
+                "disabled": True,
+                "docker_based": False,
+                "id": 101,
+                "mapping_data_model": {},
+                "maximum_tlp": "AMBER",
+                "name": "Quad9_DNS",
+                "not_supported_filetypes": [],
+                "observable_supported": ["domain", "url"],
+                "parameters": {
+                    "query_type": {
+                        "description": "Query type against the chosen " "DNS resolver.",
+                        "id": 206,
+                        "is_secret": False,
+                        "required": False,
+                        "type": "str",
+                        "value": None,
+                    }
+                },
+                "python_module": "dns.dns_resolvers.quad9_dns_resolver.Quad9DNSResolver",
+                "run_hash": False,
+                "run_hash_type": "",
+                "supported_filetypes": [],
+                "type": "observable",
+            },
+        )
+        # 2 - missing analyzer
+        response = self.client.get(f"{self.URL}/non_existing")
+        self.assertEqual(response.status_code, 404, response.content)
+        result = response.json()
+        self.assertEqual(
+            result, {"detail": "No AnalyzerConfig matches the given query."}
+        )
+
+    def test_get_config(self):
+        # 1 - existing analyzer
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(f"{self.URL}/Quad9_DNS/plugin_config")
+        self.assertEqual(response.status_code, 200, response.content)
+        result = response.json()
+        result["user_config"][0].pop(
+            "updated_at"
+        )  # auto filled by the model and hard to mock
+        self.assertEqual(
+            result,
+            {
+                "organization_config": [],
+                "user_config": [
+                    {
+                        "analyzer_config": "Quad9_DNS",
+                        "attribute": "query_type",
+                        "connector_config": None,
+                        "description": "Query type against the chosen DNS resolver.",
+                        "exist": True,
+                        "for_organization": False,
+                        "id": 159,
+                        "ingestor_config": None,
+                        "is_secret": False,
+                        "organization": None,
+                        "owner": None,
+                        "parameter": 206,
+                        "pivot_config": None,
+                        "required": False,
+                        "type": "str",
+                        "value": "A",
+                        "visualizer_config": None,
+                    }
+                ],
+            },
+        )
+        # 2 - existing analyzer, no config
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(f"{self.URL}/Quad9_Malicious_Detector/plugin_config")
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(
+            response.json(), {"organization_config": [], "user_config": []}
+        )
+        # 3 - missing analyzer
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(f"{self.URL}/missing_analyzer/plugin_config")
+        self.assertEqual(response.status_code, 404, response.content)
+        self.assertEqual(
+            response.json(),
+            {"errors": {"analyzer config": "Requested plugin does not exist."}},
+        )
+
 
 class AnalyzerActionViewSetTests(CustomViewSetTestCase, PluginActionViewsetTestCase):
     fixtures = [

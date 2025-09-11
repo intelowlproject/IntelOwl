@@ -21,10 +21,10 @@ import {
 
 import useTitle from "react-use/lib/useTitle";
 
-import { format } from "date-fns-tz";
+import { format, fromZonedTime } from "date-fns-tz";
 import { INVESTIGATION_BASE_URI } from "../../../constants/apiURLs";
 import { investigationTableColumns } from "./investigationTableColumns";
-import { datetimeFormatStr } from "../../../constants/miscConst";
+import { datetimeFormatStr, localTimezone } from "../../../constants/miscConst";
 import { TimePicker } from "../../common/TimePicker";
 
 // constants
@@ -90,12 +90,18 @@ export function InvestigationTable({
 
   // this update the value after some times, this give user time to pick the datetime
   useDebounceInput(
-    { name: "start_time__gte", value: fromDateType },
+    {
+      name: "start_time__gte",
+      value: fromZonedTime(fromDateType, localTimezone).toISOString(),
+    },
     1000,
     onChangeFilter,
   );
   useDebounceInput(
-    { name: "start_time__lte", value: toDateType },
+    {
+      name: "start_time__lte",
+      value: fromZonedTime(toDateType, localTimezone).toISOString(),
+    },
     1000,
     onChangeFilter,
   );

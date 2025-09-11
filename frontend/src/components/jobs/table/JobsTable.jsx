@@ -3,6 +3,7 @@ import React from "react";
 import { Container, Row, Col, UncontrolledTooltip } from "reactstrap";
 import { MdInfoOutline } from "react-icons/md";
 
+import { fromZonedTime } from "date-fns-tz";
 import {
   Loader,
   SyncButton,
@@ -16,7 +17,7 @@ import { format } from "date-fns";
 import { jobTableColumns } from "./jobTableColumns";
 import { JOB_BASE_URI } from "../../../constants/apiURLs";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
-import { datetimeFormatStr } from "../../../constants/miscConst";
+import { datetimeFormatStr, localTimezone } from "../../../constants/miscConst";
 import { TimePicker } from "../../common/TimePicker";
 
 // constants
@@ -75,12 +76,18 @@ export function JobsTable({ searchFromDateValue, searchToDateValue }) {
 
   // this update the value after some times, this give user time to pick the datetime
   useDebounceInput(
-    { name: "received_request_time__gte", value: fromDateType },
+    {
+      name: "received_request_time__gte",
+      value: fromZonedTime(fromDateType, localTimezone).toISOString(),
+    },
     1000,
     onChangeFilter,
   );
   useDebounceInput(
-    { name: "received_request_time__lte", value: toDateType },
+    {
+      name: "received_request_time__lte",
+      value: fromZonedTime(toDateType, localTimezone).toISOString(),
+    },
     1000,
     onChangeFilter,
   );

@@ -13,8 +13,8 @@ import {
 
 import useTitle from "react-use/lib/useTitle";
 
-import { format } from "date-fns-tz";
-import { datetimeFormatStr } from "../../constants/miscConst";
+import { format, fromZonedTime } from "date-fns-tz";
+import { datetimeFormatStr, localTimezone } from "../../constants/miscConst";
 import { TimePicker } from "../common/TimePicker";
 import { JsonEditor } from "../common/JsonEditor";
 
@@ -108,12 +108,18 @@ export function UserEventsTable({
 
   // this update the value after some times, this give user time to pick the datetime
   useDebounceInput(
-    { name: "event_date__gte", value: fromDateType },
+    {
+      name: "event_date__gte",
+      value: fromZonedTime(fromDateType, localTimezone).toISOString(),
+    },
     1000,
     onChangeFilter,
   );
   useDebounceInput(
-    { name: "event_date__lte", value: toDateType },
+    {
+      name: "event_date__lte",
+      value: fromZonedTime(toDateType, localTimezone).toISOString(),
+    },
     1000,
     onChangeFilter,
   );

@@ -2,10 +2,10 @@ import React, { Suspense } from "react";
 import { FallBackLoading } from "@certego/certego-ui";
 import { Navigate, useParams } from "react-router-dom";
 
-import { format } from "date-fns";
+import { fromZonedTime } from "date-fns-tz";
 import AuthGuard from "../wrappers/AuthGuard";
 import IfAuthRedirectGuard from "../wrappers/IfAuthRedirectGuard";
-import { datetimeFormatStr, JobResultSections } from "../constants/miscConst";
+import { JobResultSections, localTimezone } from "../constants/miscConst";
 
 const Home = React.lazy(() => import("./home/Home"));
 const Login = React.lazy(() => import("./auth/Login"));
@@ -50,9 +50,9 @@ function CustomRedirect() {
   return (
     <Navigate
       to={`/history/jobs?received_request_time__gte=${encodeURIComponent(
-        format(startDatetime, datetimeFormatStr),
+        fromZonedTime(startDatetime, localTimezone).toISOString(),
       )}&received_request_time__lte=${encodeURIComponent(
-        format(endDatetime, datetimeFormatStr),
+        fromZonedTime(endDatetime, localTimezone).toISOString(),
       )}&ordering=-received_request_time`}
       replace
     />

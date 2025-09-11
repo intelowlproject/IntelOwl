@@ -23,6 +23,7 @@ export const HTTPMethods = Object.freeze({
 });
 
 export const datetimeFormatStr = "yyyy-MM-dd'T'HH:mm:ss";
+export const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 export const HistoryPages = Object.freeze({
   JOBS: "jobs",

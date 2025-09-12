@@ -79,10 +79,7 @@ describe("test UserEventModal component", () => {
     const externalReferencesInput = screen.getAllByRole("textbox")[2];
     expect(externalReferencesInput).toBeInTheDocument();
     expect(externalReferencesInput.id).toBe("external_references-0");
-    const killChainPhaseInput = screen.getByRole("combobox", {
-      name: /Kill chain phase:/i,
-    });
-    expect(killChainPhaseInput).toBeInTheDocument();
+    expect(screen.getByText("Kill chain phase:")).toBeInTheDocument();
     expect(screen.getByText("Tags:")).toBeInTheDocument();
 
     // advanced fields
@@ -196,10 +193,7 @@ describe("test UserEventModal component", () => {
       const externalReferencesInput = screen.getAllByRole("textbox")[2];
       expect(externalReferencesInput).toBeInTheDocument();
       expect(externalReferencesInput.id).toBe("external_references-0");
-      const killChainPhaseInput = screen.getByRole("combobox", {
-        name: /Kill chain phase:/i,
-      });
-      expect(killChainPhaseInput).toBeInTheDocument();
+      expect(screen.getByText("Kill chain phase:")).toBeInTheDocument();
       expect(screen.getByText("Tags:")).toBeInTheDocument();
       const advancedFields = screen.getByRole("button", {
         name: /Advanced fields/i,
@@ -325,10 +319,7 @@ describe("test UserEventModal component", () => {
       const externalReferencesInput = screen.getAllByRole("textbox")[2];
       expect(externalReferencesInput).toBeInTheDocument();
       expect(externalReferencesInput.id).toBe("external_references-0");
-      const killChainPhaseInput = screen.getByRole("combobox", {
-        name: /Kill chain phase:/i,
-      });
-      expect(killChainPhaseInput).toBeInTheDocument();
+      expect(screen.getByText("Kill chain phase:")).toBeInTheDocument();
       expect(screen.getByText("Tags:")).toBeInTheDocument();
       const advancedFields = screen.getByRole("button", {
         name: /Advanced fields/i,
@@ -396,10 +387,7 @@ describe("test UserEventModal component", () => {
     const externalReferencesInput = screen.getAllByRole("textbox")[2];
     expect(externalReferencesInput).toBeInTheDocument();
     expect(externalReferencesInput.id).toBe("external_references-0");
-    const killChainPhaseInput = screen.getByRole("combobox", {
-      name: /Kill chain phase:/i,
-    });
-    expect(killChainPhaseInput).toBeInTheDocument();
+    expect(screen.getByText("Kill chain phase:")).toBeInTheDocument();
     expect(screen.getByText("Tags:")).toBeInTheDocument();
 
     // advanced fields

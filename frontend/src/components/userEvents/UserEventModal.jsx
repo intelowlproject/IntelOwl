@@ -22,9 +22,11 @@ import { MdInfoOutline } from "react-icons/md";
 import {
   ArrowToggleIcon,
   addToast,
+  selectStyles,
   useDebounceInput,
 } from "@certego/certego-ui";
 
+import ReactSelect from "react-select";
 import {
   USER_EVENT_ANALYZABLE,
   USER_EVENT_IP_WILDCARD,
@@ -34,6 +36,7 @@ import {
 import {
   Evaluations,
   DataModelKillChainPhases,
+  DataModelKillChainPhasesDescriptions,
 } from "../../constants/dataModelConst";
 import { ListInput } from "../common/form/ListInput";
 import { TagSelectInput } from "../common/form/TagSelectInput";
@@ -114,10 +117,17 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
       const editedFields = {};
       Object.entries(formik.values).forEach(([key, value]) => {
         if (
-          JSON.stringify(value) !== JSON.stringify(formik.initialValues[key]) &&
-          key !== "analyzables"
+          /* order matters! kill chain also HTML and cannot be converted into JSON
+          check before the fields and then check if they are different from the default values
+          */
+          !["analyzables", "kill_chain_phase"].includes(key) &&
+          JSON.stringify(value) !== JSON.stringify(formik.initialValues[key])
         ) {
           editedFields[key] = value;
+        }
+        // special cases for kill chain: it has a key with html as value
+        if (formik.values.kill_chain_phase !== "") {
+          editedFields.kill_chain_phase = formik.values.kill_chain_phase.value;
         }
       });
       const evaluation = {
@@ -553,28 +563,40 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                     Kill chain phase:
                   </Label>
                 </Col>
-                <Col md={8} className="d-flex align-items-center">
-                  <Input
-                    id="userEvent__kill_chain_phase"
-                    type="select"
-                    name="kill_chain_phase"
-                    value={formik.values.kill_chain_phase}
-                    onBlur={formik.handleBlur}
-                    onChange={formik.handleChange}
-                    className="bg-darker border-dark"
-                  >
-                    <option value="">Select...</option>
-                    {Object.values(DataModelKillChainPhases)
+                <Col sm={8}>
+                  <ReactSelect
+                    isClearable
+                    // @ts-ignore
+                    options={Object.values(DataModelKillChainPhases)
                       .sort()
-                      .map((value) => (
-                        <option
-                          key={`userEvent__kill_chain_phase-select-option-${value}`}
-                          value={value}
-                        >
-                          {value.toUpperCase()}
-                        </option>
-                      ))}
-                  </Input>
+                      .map((killChainPhase) => ({
+                        value: killChainPhase,
+                        label: (
+                          <div
+                            id={`killChainPhase__${killChainPhase}`}
+                            className="d-flex justify-content-start align-items-start flex-column"
+                          >
+                            <div className="d-flex justify-content-start align-items-baseline flex-column">
+                              <div>{killChainPhase}&nbsp;</div>
+                              <div className="small text-left text-muted">
+                                {DataModelKillChainPhasesDescriptions[
+                                  killChainPhase.toUpperCase()
+                                ] || ""}
+                              </div>
+                            </div>
+                          </div>
+                        ),
+                      }))}
+                    styles={selectStyles}
+                    value={formik.values.kill_chain_phase}
+                    onChange={(killChainPhase) =>
+                      formik.setFieldValue(
+                        "kill_chain_phase",
+                        killChainPhase,
+                        false,
+                      )
+                    }
+                  />
                 </Col>
               </Row>
               <hr />

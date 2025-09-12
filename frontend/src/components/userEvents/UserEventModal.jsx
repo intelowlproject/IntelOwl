@@ -54,6 +54,37 @@ import {
   HASH_REGEX,
 } from "../../constants/regexConst";
 
+const evaluationOptions = Object.freeze([
+  Object.freeze({
+    label: "EXTREMELY EVIL",
+    description:
+      "Set the evaluation to malicious with max reliability. Set to malicious artifacts related to malwares.",
+    evaluation: Evaluations.MALICIOUS,
+    reliability: 10,
+  }),
+  Object.freeze({
+    label: "MALICIOUS",
+    description:
+      "Set the evaluation to malicious with medium reliability. Set to malicious artifacts that COULD be related to malwares.",
+    evaluation: Evaluations.MALICIOUS,
+    reliability: 6,
+  }),
+  Object.freeze({
+    label: "CLEAN",
+    description:
+      "Set the evaluation to trusted with medium reliability. Set to trusted artifacts previously infected.",
+    evaluation: Evaluations.TRUSTED,
+    reliability: 6,
+  }),
+  Object.freeze({
+    label: "TRUSTED",
+    description:
+      "Set the evaluation to trusted with max reliability. Set to trusted artifacts that will NEVER be related to malicious behaviours.",
+    evaluation: Evaluations.TRUSTED,
+    reliability: 10,
+  }),
+]);
+
 export function UserEventModal({ analyzables, toggle, isOpen }) {
   console.debug("UserEventModal rendered!");
 
@@ -120,16 +151,29 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
           /* order matters! kill chain also HTML and cannot be converted into JSON
           check before the fields and then check if they are different from the default values
           */
-          !["analyzables", "kill_chain_phase"].includes(key) &&
+          !["evaluation", "analyzables", "kill_chain_phase"].includes(key) &&
           JSON.stringify(value) !== JSON.stringify(formik.initialValues[key])
         ) {
           editedFields[key] = value;
         }
         // special cases for kill chain: it has a key with html as value
-        if (formik.values.kill_chain_phase !== "") {
+        if (key === "kill_chain_phase" && value !== "") {
           editedFields.kill_chain_phase = formik.values.kill_chain_phase.value;
         }
+        // special cases for evaluation: it has a key with html and some other fields
+        if (key === "evaluation" && value !== "") {
+          console.debug(key, value, value.value);
+          console.debug(
+            evaluationOptions.find(
+              (evOption) => evOption.label === value.value,
+            ),
+          );
+          editedFields[key] = evaluationOptions.find(
+            (evOption) => evOption.label === value.value,
+          ).evaluation;
+        }
       });
+      console.debug("editedFields", editedFields);
       const evaluation = {
         decay_progression: formik.values.decay_progression,
         decay_timedelta_days: formik.values.decay_timedelta_days,
@@ -138,6 +182,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
           reliability: formik.values.reliability,
         },
       };
+      console.debug("evaluation", evaluation);
 
       const failed = [];
       Promise.allSettled(
@@ -297,6 +342,8 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wildcard]);
+
+  console.debug(formik.values);
 
   return (
     <Modal
@@ -474,32 +521,40 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                     Evaluation:
                   </Label>
                 </Col>
-                <Col md={8} className="d-flex flex-column align-items-center">
-                  <Input
-                    id="userEvent__evaluation"
-                    type="select"
-                    name="evaluation"
-                    value={formik.values.evaluation}
-                    onBlur={formik.handleBlur}
-                    onChange={formik.handleChange}
-                    className="bg-darker border-dark"
-                    invalid={
-                      formik.touched.evaluation &&
-                      formik.values.evaluation === ""
-                    }
-                  >
-                    <option value="">Select...</option>
-                    {[Evaluations.MALICIOUS, Evaluations.TRUSTED]
-                      .sort()
-                      .map((value) => (
-                        <option
-                          key={`userEvent__evaluation-select-option-${value}`}
-                          value={value}
+                <Col sm={8}>
+                  <ReactSelect
+                    isClearable={false}
+                    // @ts-ignore
+                    options={evaluationOptions.map((evaluation) => ({
+                      value: evaluation.label,
+                      label: (
+                        <div
+                          id={`evaluation__${evaluation.label}`}
+                          className="d-flex justify-content-start align-items-start flex-column"
                         >
-                          {value.toUpperCase()}
-                        </option>
-                      ))}
-                  </Input>
+                          <div className="d-flex justify-content-start align-items-baseline flex-column">
+                            <div>{evaluation.label}&nbsp;</div>
+                            <div className="small text-left text-muted">
+                              {evaluation.description}
+                            </div>
+                          </div>
+                        </div>
+                      ),
+                    }))}
+                    styles={selectStyles}
+                    value={formik.values.evaluation}
+                    onChange={(evaluation) => {
+                      formik.setFieldValue("evaluation", evaluation, false);
+                      console.debug("called set evaluation");
+                      formik.setFieldValue(
+                        "reliability",
+                        evaluationOptions.find(
+                          (evOption) => evOption.label === evaluation.value,
+                        ).reliability,
+                        false,
+                      );
+                    }}
+                  />
                   <FormFeedback>Evaluation is required</FormFeedback>
                 </Col>
               </Row>
@@ -566,10 +621,8 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                 <Col sm={8}>
                   <ReactSelect
                     isClearable
-                    // @ts-ignore
-                    options={Object.values(DataModelKillChainPhases)
-                      .sort()
-                      .map((killChainPhase) => ({
+                    options={Object.values(DataModelKillChainPhases).map(
+                      (killChainPhase) => ({
                         value: killChainPhase,
                         label: (
                           <div
@@ -586,7 +639,8 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                             </div>
                           </div>
                         ),
-                      }))}
+                      }),
+                    )}
                     styles={selectStyles}
                     value={formik.values.kill_chain_phase}
                     onChange={(killChainPhase) =>

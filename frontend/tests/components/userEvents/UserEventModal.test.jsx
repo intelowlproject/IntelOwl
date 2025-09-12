@@ -406,7 +406,7 @@ describe("test UserEventModal component", () => {
     expect(saveButton.className).toContain("disabled");
   });
 
-  test("UserEventModal - form (add evaluation with customer reliability)", async () => {
+  test("UserEventModal - form (killchain and custom reliability)", async () => {
     const user = userEvent.setup();
       axios.put.mockImplementation(() =>
         Promise.resolve({ status: 200, data: [""] }),
@@ -443,7 +443,8 @@ describe("test UserEventModal component", () => {
       const externalReferencesInput = screen.getAllByRole("textbox")[2];
       expect(externalReferencesInput).toBeInTheDocument();
       expect(externalReferencesInput.id).toBe("external_references-0");
-      expect(screen.getByText("Kill chain phase:")).toBeInTheDocument();
+      const killChainPhaseInput = screen.getAllByRole("combobox")[1];
+      expect(killChainPhaseInput).toBeInTheDocument();
       expect(screen.getByText("Tags:")).toBeInTheDocument();
       const advancedFieldsButton = screen.getByRole("button", {
         name: /Advanced fields/i,
@@ -454,8 +455,8 @@ describe("test UserEventModal component", () => {
       expect(saveButton.className).toContain("disabled");
 
       // add analyzable
-      fireEvent.change(analyzablesInput, { target: { value: "google.com" } });
-      expect(analyzablesInput.value).toBe("google.com");
+      fireEvent.change(analyzablesInput, { target: { value: "test.com" } });
+      expect(analyzablesInput.value).toBe("test.com");
       // add evaluation
       await userEvent.click(evaluationInput);
       await userEvent.click(screen.getByText("TRUSTED"));
@@ -464,6 +465,11 @@ describe("test UserEventModal component", () => {
       // add comment
       fireEvent.change(commentsInput, { target: { value: "my comment" } });
       expect(commentsInput.value).toBe("my comment");
+      // add kill chain phase
+      await userEvent.click(killChainPhaseInput);
+      await userEvent.click(screen.getByText("action"));
+      expect(screen.getByText("action")).toBeInTheDocument();
+      expect(screen.queryByText('c2')).not.toBeInTheDocument();  // check other option are not visible
       // change reliability
       await userEvent.click(advancedFieldsButton);
       const reliabilityInput = screen.getByRole("spinbutton", {
@@ -480,15 +486,16 @@ describe("test UserEventModal component", () => {
 
       await user.click(saveButton);
       await waitFor(() => {
-        expect(axios.get).toHaveBeenCalledWith(`${`${USER_EVENT_ANALYZABLE}?username=test&analyzable_name=google.com`}`);
+        expect(axios.get).toHaveBeenCalledWith(`${`${USER_EVENT_ANALYZABLE}?username=test&analyzable_name=test.com`}`);
         expect(axios.post).toHaveBeenCalledWith(
           `${USER_EVENT_ANALYZABLE}`,
           {
-            analyzable: { name: "google.com" },
+            analyzable: { name: "test.com" },
             data_model_content: {
               evaluation: "trusted",
               related_threats: ["my comment"],
               reliability: 9,
+              kill_chain_phase: "action",
             },
             decay_progression: "0",
             decay_timedelta_days: 120,

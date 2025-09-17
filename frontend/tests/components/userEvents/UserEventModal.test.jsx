@@ -406,7 +406,7 @@ describe("test UserEventModal component", () => {
     expect(saveButton.className).toContain("disabled");
   });
 
-  test("UserEventModal - form (killchain and custom reliability)", async () => {
+  test("UserEventModal - form (killchain, tags and custom reliability)", async () => {
     const user = userEvent.setup();
     axios.put.mockImplementation(() =>
       Promise.resolve({ status: 200, data: [""] }),
@@ -443,7 +443,8 @@ describe("test UserEventModal component", () => {
     expect(externalReferencesInput.id).toBe("external_references-0");
     const killChainPhaseInput = screen.getAllByRole("combobox")[1];
     expect(killChainPhaseInput).toBeInTheDocument();
-    expect(screen.getByText("Tags:")).toBeInTheDocument();
+    const tagsInput = screen.getAllByRole("combobox")[2];
+    expect(tagsInput).toBeInTheDocument();
     const advancedFieldsButton = screen.getByRole("button", {
       name: /Advanced fields/i,
     });
@@ -463,6 +464,15 @@ describe("test UserEventModal component", () => {
     // add comment
     fireEvent.change(commentsInput, { target: { value: "my comment" } });
     expect(commentsInput.value).toBe("my comment");
+    // add tags (2 of them)
+    await userEvent.click(tagsInput);
+    await userEvent.click(screen.getByText("phishing"));
+    expect(screen.getByText("phishing")).toBeInTheDocument();
+    expect(screen.queryByText("malware")).not.toBeInTheDocument(); // check other option are not visible
+    await userEvent.click(tagsInput);
+    await userEvent.click(screen.getByText("malware"));
+    expect(screen.getByText("malware")).toBeInTheDocument();
+    expect(screen.queryByText("abused")).not.toBeInTheDocument(); // check other option are not visible
     // add kill chain phase
     await userEvent.click(killChainPhaseInput);
     await userEvent.click(screen.getByText("action"));
@@ -494,6 +504,7 @@ describe("test UserEventModal component", () => {
           related_threats: ["my comment"],
           reliability: 9,
           kill_chain_phase: "action",
+          tags: ["phishing", "malware"]
         },
         decay_progression: "0",
         decay_timedelta_days: 120,

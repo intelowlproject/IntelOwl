@@ -4,6 +4,15 @@ export const EvaluationIcons = Object.freeze({
   malicious: "malware",
 });
 
+export const Tags = Object.freeze({
+  PHISHING: "phishing",
+  MALWARE: "malware",
+  SOCIAL_ENGINEERING: "social_engineering",
+  ANONYMIZER: "anonymizer",
+  TOR_EXIT_NODE: "tor_exit_node",
+  ABUSED: "abused",
+});
+
 export const TagsIcons = Object.freeze({
   phishing: "hook",
   anonymizer: "incognito",

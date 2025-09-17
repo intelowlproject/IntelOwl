@@ -12,6 +12,7 @@ import {
   Input,
   FormFeedback,
   UncontrolledTooltip,
+  Badge,
 } from "reactstrap";
 import PropTypes from "prop-types";
 import { useFormik, FormikProvider, FieldArray } from "formik";
@@ -21,6 +22,7 @@ import { MdInfoOutline } from "react-icons/md";
 
 import {
   ArrowToggleIcon,
+  MultiSelectCreatableInput,
   addToast,
   selectStyles,
   useDebounceInput,
@@ -37,9 +39,9 @@ import {
   Evaluations,
   DataModelKillChainPhases,
   DataModelKillChainPhasesDescriptions,
+  Tags,
 } from "../../constants/dataModelConst";
 import { ListInput } from "../common/form/ListInput";
-import { TagSelectInput } from "../common/form/TagSelectInput";
 import {
   DecayProgressionTypes,
   DecayProgressionDescription,
@@ -53,6 +55,7 @@ import {
   URL_REGEX,
   HASH_REGEX,
 } from "../../constants/regexConst";
+import { TagsColors } from "../../constants/colorConst";
 
 const evaluationOptions = Object.freeze([
   Object.freeze({
@@ -147,18 +150,24 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
     onSubmit: async () => {
       const editedFields = {};
       Object.entries(formik.values).forEach(([key, value]) => {
+        // console.debug(`onSubmit: ${  key  }, value: ${  JSON.stringify(value)}`)
         if (
           /* order matters! kill chain also HTML and cannot be converted into JSON
           check before the fields and then check if they are different from the default values
           */
-          !["evaluation", "analyzables", "kill_chain_phase"].includes(key) &&
+          !["evaluation", "analyzables", "kill_chain_phase", "tags"].includes(
+            key,
+          ) &&
           JSON.stringify(value) !== JSON.stringify(formik.initialValues[key])
         ) {
           editedFields[key] = value;
         }
         // special cases for kill chain: it has a key with html as value
         if (key === "kill_chain_phase" && value !== "") {
-          editedFields.kill_chain_phase = formik.values.kill_chain_phase.value;
+          editedFields.kill_chain_phase = value.value;
+        }
+        if (key === "tags" && value.length) {
+          editedFields.tags = value.map((tag) => tag.value);
         }
         // special cases for evaluation: it has a key with html and some other fields
         if (key === "evaluation" && value !== "") {
@@ -660,12 +669,16 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                 Tags:
               </Label>
               <Col sm={8}>
-                <TagSelectInput
-                  id="userEvent-tagselectinput"
-                  selectedTags={formik.values.tags}
-                  setSelectedTags={(selectedTags) =>
-                    formik.setFieldValue("tags", selectedTags, false)
-                  }
+                <MultiSelectCreatableInput
+                  id="scanform-tagsselectinput"
+                  options={Object.values(Tags).map((tag) => ({
+                    value: tag,
+                    label: <Badge color={TagsColors[tag]}>{tag}</Badge>,
+                  }))}
+                  value={formik.values.tags}
+                  styles={selectStyles}
+                  onChange={(tag) => formik.setFieldValue("tags", tag, false)}
+                  isClearable
                 />
               </Col>
             </FormGroup>

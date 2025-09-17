@@ -112,7 +112,7 @@ describe("test UserEventModal component", () => {
         data_model_content: {
           evaluation: "malicious",
           related_threats: ["my comment"],
-          reliability: 6,
+          reliability: 10,
         },
         decay_progression: "0",
         decay_timedelta_days: 120,
@@ -128,7 +128,7 @@ describe("test UserEventModal component", () => {
         data_model_content: {
           evaluation: "malicious",
           related_threats: ["my comment"],
-          reliability: 6,
+          reliability: 10,
         },
         decay_progression: "0",
         decay_timedelta_days: 120,
@@ -144,7 +144,7 @@ describe("test UserEventModal component", () => {
         data_model_content: {
           evaluation: "malicious",
           related_threats: ["my comment"],
-          reliability: 6,
+          reliability: 10,
         },
         decay_progression: "0",
         decay_timedelta_days: 120,
@@ -203,10 +203,8 @@ describe("test UserEventModal component", () => {
       fireEvent.change(analyzablesInput, { target: { value: input } });
       expect(analyzablesInput.value).toBe(input);
       // add evaluation
-      await userEvent.click(evaluationInput);
-      await userEvent.click(screen.getByText("MALICIOUS"));
+      fireEvent.change(evaluationInput, { target: { value: "malicious" } });
       expect(screen.getByText("MALICIOUS")).toBeInTheDocument();
-      expect(screen.queryByText("EXTREMELY EVIL")).not.toBeInTheDocument(); // check other option are not visible
       // add comment
       fireEvent.change(commentsInput, { target: { value: "my comment" } });
       expect(commentsInput.value).toBe("my comment");
@@ -233,9 +231,9 @@ describe("test UserEventModal component", () => {
       payload: {
         analyzable: { name: "google.com" },
         data_model_content: {
-          evaluation: "malicious",
+          evaluation: "trusted",
           related_threats: ["my comment"],
-          reliability: 10,
+          reliability: 6,
         },
         decay_progression: "0",
         decay_timedelta_days: 120,
@@ -249,9 +247,9 @@ describe("test UserEventModal component", () => {
       payload: {
         network: "1.2.3.0/24",
         data_model_content: {
-          evaluation: "malicious",
+          evaluation: "trusted",
           related_threats: ["my comment"],
-          reliability: 10,
+          reliability: 6,
         },
         decay_progression: "0",
         decay_timedelta_days: 120,
@@ -265,9 +263,9 @@ describe("test UserEventModal component", () => {
       payload: {
         query: ".*\\.test.com",
         data_model_content: {
-          evaluation: "malicious",
+          evaluation: "trusted",
           related_threats: ["my comment"],
-          reliability: 10,
+          reliability: 6,
         },
         decay_progression: "0",
         decay_timedelta_days: 120,
@@ -329,10 +327,8 @@ describe("test UserEventModal component", () => {
       fireEvent.change(analyzablesInput, { target: { value: input } });
       expect(analyzablesInput.value).toBe(input);
       // add evaluation
-      await userEvent.click(evaluationInput);
-      await userEvent.click(screen.getByText("EXTREMELY EVIL"));
-      expect(screen.getByText("EXTREMELY EVIL")).toBeInTheDocument();
-      expect(screen.queryByText("MALICIOUS")).not.toBeInTheDocument(); // check other option are not visible
+      fireEvent.change(evaluationInput, { target: { value: "trusted" } });
+      expect(screen.getByText("TRUSTED")).toBeInTheDocument();
       // add comment
       fireEvent.change(commentsInput, { target: { value: "my comment" } });
       expect(commentsInput.value).toBe("my comment");
@@ -457,10 +453,8 @@ describe("test UserEventModal component", () => {
     fireEvent.change(analyzablesInput, { target: { value: "test.com" } });
     expect(analyzablesInput.value).toBe("test.com");
     // add evaluation
-    await userEvent.click(evaluationInput);
-    await userEvent.click(screen.getByText("TRUSTED"));
-    expect(screen.getByText("TRUSTED")).toBeInTheDocument();
-    expect(screen.queryByText("EXTREMELY EVIL")).not.toBeInTheDocument(); // check other option are not visible
+    fireEvent.change(evaluationInput, { target: { value: "malicious" } });
+    expect(screen.getByText("MALICIOUS")).toBeInTheDocument();
     // add comment
     fireEvent.change(commentsInput, { target: { value: "my comment" } });
     expect(commentsInput.value).toBe("my comment");
@@ -500,7 +494,7 @@ describe("test UserEventModal component", () => {
       expect(axios.post).toHaveBeenCalledWith(`${USER_EVENT_ANALYZABLE}`, {
         analyzable: { name: "test.com" },
         data_model_content: {
-          evaluation: "trusted",
+          evaluation: "malicious",
           related_threats: ["my comment"],
           reliability: 9,
           kill_chain_phase: "action",

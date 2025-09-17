@@ -57,36 +57,10 @@ import {
 } from "../../constants/regexConst";
 import { TagsColors } from "../../constants/colorConst";
 
-const evaluationOptions = Object.freeze([
-  Object.freeze({
-    label: "EXTREMELY EVIL",
-    description:
-      "Set the evaluation to malicious with max reliability. Set to malicious artifacts related to malwares.",
-    evaluation: DataModelEvaluations.MALICIOUS,
-    reliability: 10,
-  }),
-  Object.freeze({
-    label: "MALICIOUS",
-    description:
-      "Set the evaluation to malicious with medium reliability. Set to malicious artifacts that COULD be related to malwares.",
-    evaluation: DataModelEvaluations.MALICIOUS,
-    reliability: 6,
-  }),
-  Object.freeze({
-    label: "CLEAN",
-    description:
-      "Set the evaluation to trusted with medium reliability. Set to trusted artifacts previously infected.",
-    evaluation: DataModelEvaluations.TRUSTED,
-    reliability: 6,
-  }),
-  Object.freeze({
-    label: "TRUSTED",
-    description:
-      "Set the evaluation to trusted with max reliability. Set to trusted artifacts that will NEVER be related to malicious behaviours.",
-    evaluation: DataModelEvaluations.TRUSTED,
-    reliability: 10,
-  }),
-]);
+const evaluationOptions = [
+  { evaluation: DataModelEvaluations.MALICIOUS, reliability: 10 },
+  { evaluation: DataModelEvaluations.TRUSTED, reliability: 6 },
+];
 
 export function UserEventModal({ analyzables, toggle, isOpen }) {
   console.debug("UserEventModal rendered!");
@@ -155,9 +129,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
           /* order matters! kill chain also HTML and cannot be converted into JSON
           check before the fields and then check if they are different from the default values
           */
-          !["evaluation", "analyzables", "kill_chain_phase", "tags"].includes(
-            key,
-          ) &&
+          !["analyzables", "kill_chain_phase", "tags"].includes(key) &&
           JSON.stringify(value) !== JSON.stringify(formik.initialValues[key])
         ) {
           editedFields[key] = value;
@@ -168,18 +140,6 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
         }
         if (key === "tags" && value.length) {
           editedFields.tags = value.map((tag) => tag.value);
-        }
-        // special cases for evaluation: it has a key with html and some other fields
-        if (key === "evaluation" && value !== "") {
-          console.debug(key, value, value.value);
-          console.debug(
-            evaluationOptions.find(
-              (evOption) => evOption.label === value.value,
-            ),
-          );
-          editedFields[key] = evaluationOptions.find(
-            (evOption) => evOption.label === value.value,
-          ).evaluation;
         }
       });
       console.debug("editedFields", editedFields);
@@ -531,44 +491,73 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                   </Label>
                 </Col>
                 <Col sm={8}>
-                  <ReactSelect
-                    isClearable={false}
-                    // @ts-ignore
-                    options={evaluationOptions.map((evaluation) => ({
-                      value: evaluation.label,
-                      label: (
-                        <div
-                          id={`evaluation__${evaluation.label}`}
-                          className="d-flex justify-content-start align-items-start flex-column"
-                        >
-                          <div className="d-flex justify-content-start align-items-baseline flex-column">
-                            <div>{evaluation.label}&nbsp;</div>
-                            <div className="small text-left text-muted">
-                              {evaluation.description}
-                            </div>
-                          </div>
-                        </div>
-                      ),
-                    }))}
-                    styles={selectStyles}
+                  <Input
+                    id="userEvent__evaluation"
+                    type="select"
+                    name="evaluation"
                     value={formik.values.evaluation}
-                    onChange={(evaluation) => {
-                      formik.setFieldValue("evaluation", evaluation, false);
-                      console.debug("called set evaluation");
+                    onBlur={formik.handleBlur}
+                    onChange={(event) => {
+                      const evCode = event.target.value;
+                      formik.setFieldValue("evaluation", evCode, false);
                       formik.setFieldValue(
                         "reliability",
                         evaluationOptions.find(
-                          (evOption) => evOption.label === evaluation.value,
+                          (element) => element.evaluation === evCode,
                         ).reliability,
                         false,
                       );
                     }}
-                  />
+                    className="bg-darker border-dark"
+                    invalid={
+                      formik.touched.evaluation &&
+                      formik.values.evaluation === ""
+                    }
+                  >
+                    <option value="">Select...</option>
+                    {evaluationOptions.map((value) => (
+                      <option
+                        key={`userEvent__evaluation-select-option-${value.evaluation}`}
+                        value={value.evaluation}
+                      >
+                        {value.evaluation.toUpperCase()}
+                      </option>
+                    ))}
+                  </Input>
                   <FormFeedback>Evaluation is required</FormFeedback>
                 </Col>
               </Row>
-              <hr />
             </FormGroup>
+            <hr />
+            <FormGroup>
+              <Row>
+                <Col md={2} className="d-flex align-items-center">
+                  <Label className="me-2 mb-0" for="userEvent__reliability">
+                    Reliability:
+                  </Label>
+                </Col>
+                <Col md={8} className="d-flex-column align-items-center">
+                  <Input
+                    id="userEvent__reliability"
+                    type="number"
+                    name="reliability"
+                    value={formik.values.reliability}
+                    onBlur={formik.handleBlur}
+                    onChange={formik.handleChange}
+                    invalid={
+                      !Number.isInteger(formik.values.reliability) ||
+                      formik.values.reliability <= 0 ||
+                      formik.values.reliability > 10
+                    }
+                    className="bg-darker border-0"
+                  />
+                  <FormFeedback>
+                    The reliability value must be a number between 1 and 10
+                  </FormFeedback>
+                </Col>
+              </Row>
+            </FormGroup>
+            <hr />
             <FormGroup>
               <Row>
                 <Col md={2} className="d-flex align-items-center">
@@ -701,35 +690,6 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
             </Row>
             {isOpenAdvancedFields && (
               <>
-                <FormGroup className="mt-4">
-                  <Row>
-                    <Col md={2} className="d-flex align-items-center">
-                      <Label className="me-2 mb-0" for="userEvent__reliability">
-                        Reliability:
-                      </Label>
-                    </Col>
-                    <Col md={8} className="d-flex-column align-items-center">
-                      <Input
-                        id="userEvent__reliability"
-                        type="number"
-                        name="reliability"
-                        value={formik.values.reliability}
-                        onBlur={formik.handleBlur}
-                        onChange={formik.handleChange}
-                        invalid={
-                          !Number.isInteger(formik.values.reliability) ||
-                          formik.values.reliability <= 0 ||
-                          formik.values.reliability > 10
-                        }
-                        className="bg-darker border-0"
-                      />
-                      <FormFeedback>
-                        The reliability value must be a number between 1 and 10
-                      </FormFeedback>
-                    </Col>
-                  </Row>
-                  <hr />
-                </FormGroup>
                 <FormGroup className="mt-4">
                   <Row>
                     <Col md={2} className="d-flex align-items-center">

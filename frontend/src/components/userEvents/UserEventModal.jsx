@@ -525,6 +525,10 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                     ))}
                   </Input>
                   <FormFeedback>Evaluation is required</FormFeedback>
+                  <small className="mt-1 fst-italic">
+                    Reliability indicates how much you are confident about your
+                    evaluation. Higher is the values, higher is the confidence.
+                  </small>
                 </Col>
               </Row>
             </FormGroup>

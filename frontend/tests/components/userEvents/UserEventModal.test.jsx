@@ -498,7 +498,7 @@ describe("test UserEventModal component", () => {
           related_threats: ["my comment"],
           reliability: 9,
           kill_chain_phase: "action",
-          tags: ["phishing", "malware"]
+          tags: ["phishing", "malware"],
         },
         decay_progression: "0",
         decay_timedelta_days: 120,

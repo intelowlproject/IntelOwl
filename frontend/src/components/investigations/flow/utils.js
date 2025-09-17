@@ -1,6 +1,6 @@
 import { getLayoutedElements } from "../../common/flows/getLayoutedElements";
 import { JobFinalStatuses } from "../../../constants/jobConst";
-import { TagsIcons } from "../../../constants/dataModelConst";
+import { DataModelTagsIcons } from "../../../constants/dataModelConst";
 
 /* eslint-disable id-length */
 function addJobNode(
@@ -21,7 +21,7 @@ function addJobNode(
     const customTags = [];
     const tags = [];
     engineFields.tags.forEach((tag) => {
-      if (Object.keys(TagsIcons).includes(tag)) {
+      if (Object.keys(DataModelTagsIcons).includes(tag)) {
         tags.push(tag);
       } else {
         customTags.push(tag);

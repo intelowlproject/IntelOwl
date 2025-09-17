@@ -17,7 +17,7 @@ import { VerticalListVisualizer } from "../../common/visualizer/elements/vertica
 import { BooleanVisualizer } from "../../common/visualizer/elements/bool";
 
 import { LastEvaluationComponent } from "../../common/engineBadges";
-import { TagsIcons } from "../../../constants/dataModelConst";
+import { DataModelTagsIcons } from "../../../constants/dataModelConst";
 import { TagsColors } from "../../../constants/colorConst";
 import { getIcon } from "../../common/icon/icons";
 import { AnalyzableHistoryTypes } from "../../../constants/miscConst";
@@ -167,14 +167,14 @@ export function AnalyzableOverview({ analyzable }) {
                     value={tag}
                     id={`tags-${index}`}
                     icon={
-                      Object.keys(TagsIcons).includes(tag) ? (
-                        getIcon(TagsIcons?.[tag])
+                      Object.keys(DataModelTagsIcons).includes(tag) ? (
+                        getIcon(DataModelTagsIcons?.[tag])
                       ) : (
                         <FaTag />
                       )
                     }
                     activeColor={
-                      Object.keys(TagsIcons).includes(tag)
+                      Object.keys(DataModelTagsIcons).includes(tag)
                         ? TagsColors?.[tag]
                         : "secondary"
                     }

@@ -1,10 +1,10 @@
 /* eslint-disable id-length */
-export const EvaluationIcons = Object.freeze({
+export const DataModelEvaluationIcons = Object.freeze({
   trusted: "like",
   malicious: "malware",
 });
 
-export const Tags = Object.freeze({
+export const DataModelTags = Object.freeze({
   PHISHING: "phishing",
   MALWARE: "malware",
   SOCIAL_ENGINEERING: "social_engineering",
@@ -13,7 +13,7 @@ export const Tags = Object.freeze({
   ABUSED: "abused",
 });
 
-export const TagsIcons = Object.freeze({
+export const DataModelTagsIcons = Object.freeze({
   phishing: "hook",
   anonymizer: "incognito",
   malware: "malware",
@@ -23,7 +23,7 @@ export const TagsIcons = Object.freeze({
   ip_only: "networkNode",
 });
 
-export const Evaluations = Object.freeze({
+export const DataModelEvaluations = Object.freeze({
   TRUSTED: "trusted",
   MALICIOUS: "malicious",
 });

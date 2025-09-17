@@ -36,10 +36,10 @@ import {
 } from "../../constants/apiURLs";
 
 import {
-  Evaluations,
+  DataModelEvaluations,
   DataModelKillChainPhases,
   DataModelKillChainPhasesDescriptions,
-  Tags,
+  DataModelTags,
 } from "../../constants/dataModelConst";
 import { ListInput } from "../common/form/ListInput";
 import {
@@ -62,28 +62,28 @@ const evaluationOptions = Object.freeze([
     label: "EXTREMELY EVIL",
     description:
       "Set the evaluation to malicious with max reliability. Set to malicious artifacts related to malwares.",
-    evaluation: Evaluations.MALICIOUS,
+    evaluation: DataModelEvaluations.MALICIOUS,
     reliability: 10,
   }),
   Object.freeze({
     label: "MALICIOUS",
     description:
       "Set the evaluation to malicious with medium reliability. Set to malicious artifacts that COULD be related to malwares.",
-    evaluation: Evaluations.MALICIOUS,
+    evaluation: DataModelEvaluations.MALICIOUS,
     reliability: 6,
   }),
   Object.freeze({
     label: "CLEAN",
     description:
       "Set the evaluation to trusted with medium reliability. Set to trusted artifacts previously infected.",
-    evaluation: Evaluations.TRUSTED,
+    evaluation: DataModelEvaluations.TRUSTED,
     reliability: 6,
   }),
   Object.freeze({
     label: "TRUSTED",
     description:
       "Set the evaluation to trusted with max reliability. Set to trusted artifacts that will NEVER be related to malicious behaviours.",
-    evaluation: Evaluations.TRUSTED,
+    evaluation: DataModelEvaluations.TRUSTED,
     reliability: 10,
   }),
 ]);
@@ -671,7 +671,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
               <Col sm={8}>
                 <MultiSelectCreatableInput
                   id="scanform-tagsselectinput"
-                  options={Object.values(Tags).map((tag) => ({
+                  options={Object.values(DataModelTags).map((tag) => ({
                     value: tag,
                     label: <Badge color={TagsColors[tag]}>{tag}</Badge>,
                   }))}

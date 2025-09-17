@@ -6,7 +6,10 @@ import { VscFile } from "react-icons/vsc";
 import { TbWorld } from "react-icons/tb";
 import classnames from "classnames";
 import { EvaluationColors, TagsColors } from "../../constants/colorConst";
-import { EvaluationIcons, TagsIcons } from "../../constants/dataModelConst";
+import {
+  DataModelEvaluationIcons,
+  DataModelTagsIcons,
+} from "../../constants/dataModelConst";
 import { getIcon } from "./icon/icons";
 
 export function EvaluationBadge(props) {
@@ -14,7 +17,7 @@ export function EvaluationBadge(props) {
 
   const color = EvaluationColors?.[evaluation];
   const divClass = classnames(`bg-${color}`, className);
-  const icon = EvaluationIcons?.[evaluation];
+  const icon = DataModelEvaluationIcons?.[evaluation];
 
   return (
     <Badge
@@ -95,9 +98,9 @@ export function TagsBadge(props) {
   const { id, tag, className } = props;
   let color = "";
   let icon = "";
-  if (Object.keys(TagsIcons).includes(tag)) {
+  if (Object.keys(DataModelTagsIcons).includes(tag)) {
     color = TagsColors?.[tag];
-    icon = getIcon(TagsIcons?.[tag]);
+    icon = getIcon(DataModelTagsIcons?.[tag]);
   } else if (tag === "not_found") {
     color = "accent";
     icon = "Not Found";

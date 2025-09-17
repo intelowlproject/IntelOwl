@@ -124,7 +124,6 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
     onSubmit: async () => {
       const editedFields = {};
       Object.entries(formik.values).forEach(([key, value]) => {
-        // console.debug(`onSubmit: ${  key  }, value: ${  JSON.stringify(value)}`)
         if (
           /* order matters! kill chain also HTML and cannot be converted into JSON
           check before the fields and then check if they are different from the default values
@@ -525,10 +524,6 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                     ))}
                   </Input>
                   <FormFeedback>Evaluation is required</FormFeedback>
-                  <small className="mt-1 fst-italic">
-                    Reliability indicates how much you are confident about your
-                    evaluation. Higher is the values, higher is the confidence.
-                  </small>
                 </Col>
               </Row>
             </FormGroup>
@@ -558,6 +553,15 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                   <FormFeedback>
                     The reliability value must be a number between 1 and 10
                   </FormFeedback>
+                  <div className="row mt-2">
+                    <Col>
+                      <small className="fst-italic">
+                        Reliability indicates how much you are confident about
+                        your evaluation. Higher is the values, higher is the
+                        confidence.
+                      </small>
+                    </Col>
+                  </div>
                 </Col>
               </Row>
             </FormGroup>
@@ -796,7 +800,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
 }
 
 UserEventModal.propTypes = {
-  analyzables: PropTypes.arrayOf(Object),
+  analyzables: PropTypes.array,
   toggle: PropTypes.func.isRequired,
   isOpen: PropTypes.bool.isRequired,
 };

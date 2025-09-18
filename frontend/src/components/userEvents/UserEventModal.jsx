@@ -208,19 +208,24 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
   });
 
   React.useEffect(() => {
+    // this useEffect populate initial state in case the model is accessed from previously searched analyzables
     const obj = {};
-    formik.initialValues.analyzables.forEach((analyzable) => {
-      if (analyzable !== "") {
-        obj[analyzable] = { type: UserEventTypes.ANALYZABLE };
+    analyzables.forEach((analyzable) => {
+      if (analyzable.name !== "") {
+        obj[analyzable.name] = {
+          type: UserEventTypes.ANALYZABLE,
+          eventId: analyzable.id,
+        };
       }
     });
     setInputState({ ...inputState, ...obj });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formik.initialValues.analyzables]);
+  }, [analyzables]);
 
   useDebounceInput(inputValue, 1000, setWildcard);
 
   React.useEffect(() => {
+    // this useEffect detect the type of user event while typing
     if (wildcard !== "") {
       // check ip wildcard
       if (
@@ -311,7 +316,8 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wildcard]);
 
-  console.debug(formik.values);
+  console.debug("userEventModal - formik values", formik.values);
+  console.debug("userEventModal - inputState", inputState);
 
   return (
     <Modal
@@ -504,7 +510,8 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                         evaluationOptions.find(
                           (element) => element.evaluation === evCode,
                         ).reliability,
-                        false,
+                        // second set must trigger the validate or update evaluation with pre-populated form won't work
+                        true,
                       );
                     }}
                     className="bg-darker border-dark"

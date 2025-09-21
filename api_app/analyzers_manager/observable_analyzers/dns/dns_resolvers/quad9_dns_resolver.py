@@ -28,9 +28,6 @@ class Quad9DNSResolver(classes.ObservableAnalyzer):
 
         params = {"name": observable, "type": self.query_type}
 
-        # sometimes it can respond with 503, I suppose to avoid DoS.
-        # In 1k requests just 20 fails and at least with 30 requests between 2 failures
-        # with 2 or 3 attempts the analyzer should get the data
         attempt_number = 3
         for attempt in range(attempt_number):
             try:
@@ -38,30 +35,24 @@ class Quad9DNSResolver(classes.ObservableAnalyzer):
                     self.url, headers=self.headers, params=params, timeout=10
                 )
             except requests.exceptions.ConnectionError as exception:
-                # if the last attempt fails, raise an error
                 if attempt == attempt_number - 1:
                     raise exception
             else:
                 quad9_response.raise_for_status()
                 break
 
-        raw_answers = quad9_response.json().get("Answer", [])
+        raw_answers = quad9_response.json().get("Answer", []) or []
 
-        # normalize records to avoid AttributeError on CNAME
+        # normalize records to avoid issues with missing fields or CNAMEs
         resolutions = []
         for record in raw_answers:
             rtype = record.get("type")
-            if rtype in (1, 28, 5):  # A, AAAA, CNAME
-                resolutions.append(
-                    {
-                        "name": record.get("name"),
-                        "type": rtype,
-                        "TTL": record.get("TTL"),
-                        "data": record.get("data"),
-                    }
-                )
+            if rtype in (1, 28):  # A and AAAA
+                resolutions.append(record.get("data"))
+            elif rtype == 5:  # CNAME
+                resolutions.append(f"CNAME: {record.get('data')}")
             else:
-                resolutions.append(record)
+                resolutions.append(record.get("data", ""))
 
         return dns_resolver_response(self.observable_name, resolutions)
 
@@ -71,7 +62,15 @@ class Quad9DNSResolver(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockUpResponse({"Answer": ["test1", "test2"]}, 200),
+                    return_value=MockUpResponse(
+                        {
+                            "Answer": [
+                                {"type": 1, "data": "1.2.3.4"},
+                                {"type": 5, "data": "example.com"},
+                            ]
+                        },
+                        200,
+                    ),
                 ),
             )
         ]

@@ -1,5 +1,5 @@
 # https://github.com/jasonish/docker-suricata/tree/master/7.0
-FROM jasonish/suricata:7.0
+FROM jasonish/suricata:8.0
 
 ENV PROJECT_PATH=/opt/deploy
 ENV LOG_PATH=/var/log/intel_owl/pcap_analyzers

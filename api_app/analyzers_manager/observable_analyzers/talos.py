@@ -9,7 +9,6 @@ from django.conf import settings
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -68,15 +67,3 @@ class Talos(classes.ObservableAnalyzer):
                 f"https://www.talosintelligence.com/reputation_center/lookup?search={self.report.job.analyzable.name}"
             )
             data_model.evaluation = self.EVALUATIONS.MALICIOUS.value
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse({}, 200, content=b"91.192.100.61"),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

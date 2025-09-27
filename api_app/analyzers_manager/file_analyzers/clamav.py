@@ -4,7 +4,6 @@
 import logging
 
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
-from tests.mock_utils import MockUpResponse
 
 logger = logging.getLogger(__name__)
 
@@ -46,9 +45,3 @@ class ClamAV(FileAnalyzer, DockerBasedAnalyzer):
                 logger.error(f"no detections extracted? {self.job_id}")
 
         return {"detections": list(set(detections)), "raw_report": report}
-
-    @staticmethod
-    def mocked_docker_analyzer_get(*args, **kwargs):
-        return MockUpResponse(
-            {"key": "test", "returncode": 0, "report": "OK real_signature\n"}, 200
-        )

@@ -58,8 +58,3 @@ class UltraDNSDNSResolver(classes.ObservableAnalyzer):
             )
 
         return dns_resolver_response(self.observable_name, resolutions)
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = []
-        return super()._monkeypatch(patches=patches)

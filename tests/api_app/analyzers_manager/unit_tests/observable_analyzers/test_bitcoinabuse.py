@@ -1,0 +1,35 @@
+from unittest.mock import patch
+
+from api_app.analyzers_manager.observable_analyzers.bitcoinabuse import BitcoinAbuseAPI
+from tests.api_app.analyzers_manager.unit_tests.observable_analyzers.base_test_class import (
+    BaseAnalyzerTest,
+)
+from tests.mock_utils import MockUpResponse
+
+
+class BitcoinAbuseAPITestCase(BaseAnalyzerTest):
+    analyzer_class = BitcoinAbuseAPI
+
+    @staticmethod
+    def get_mocked_response():
+        mock_response = {
+            "address": "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2",
+            "reports": [
+                {
+                    "id": 123456,
+                    "date": "2023-01-15T10:30:00Z",
+                    "description": "Ransomware payment address",
+                    "category": "ransomware",
+                }
+            ],
+            "total_reports": 1,
+        }
+
+        return patch(
+            "requests.get",
+            return_value=MockUpResponse(mock_response, 200),
+        )
+
+    @classmethod
+    def get_extra_config(cls) -> dict:
+        return {"_api_key_name": "test_api_key"}

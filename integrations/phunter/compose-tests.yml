@@ -1,0 +1,6 @@
+services:
+  phunter:
+    build:
+      context: ../integrations/phunter
+      dockerfile: Dockerfile
+    image: intelowlproject/intelowl_phunter:test

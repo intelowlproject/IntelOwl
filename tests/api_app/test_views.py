@@ -166,14 +166,6 @@ class JobViewSetTests(CustomViewSetTestCase):
                     "tlp": Job.TLP.GREEN.value,
                 }
             )
-            self.job5, _ = Job.objects.get_or_create(
-                **{
-                    "user": self.superuser,
-                    "analyzable": self.analyzable,
-                    "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
-                    "tlp": Job.TLP.AMBER.value,
-                }
-            )
             self.investigation1, _ = Investigation.objects.get_or_create(
                 name="test_investigation1", owner=self.superuser
             )
@@ -181,10 +173,16 @@ class JobViewSetTests(CustomViewSetTestCase):
             self.investigation2, _ = Investigation.objects.get_or_create(
                 name="test_investigation2", owner=self.superuser
             )
-            self.investigation2.jobs.add(self.job5)
+            self.investigation2.jobs.add(self.job2)
+            # in this way we can check we filter investagion looking for child job and not only the one in the root
+            self.job2.add_child(
+                user=self.superuser,
+                analyzable=self.analyzable,
+                playbook_to_execute=PlaybookConfig.objects.get(name="Dns"),
+                tlp=Job.TLP.AMBER.value,
+            )
 
     def tearDown(self):
-        self.job5.delete()
         self.job4.delete()
         self.job3.delete()
         self.job2.delete()

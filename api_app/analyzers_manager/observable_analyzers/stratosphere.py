@@ -10,7 +10,6 @@ from django.conf import settings
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -117,15 +116,3 @@ class Stratos(classes.ObservableAnalyzer):
             os.remove(db_loc1)
             os.remove(db_loc2)
             self.updater()
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse({}, 200, content=b"7.7.7.7"),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

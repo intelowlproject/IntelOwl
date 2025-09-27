@@ -10,7 +10,6 @@ import requests
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..dns_responses import malicious_detector_response
 
@@ -52,15 +51,3 @@ class CloudFlareMaliciousDetector(classes.ObservableAnalyzer):
             raise AnalyzerRunException("Connection to CloudFlare failed")
 
         return malicious_detector_response(self.observable_name, is_malicious)
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse({"Answer": [{"data": "0.0.0.0"}]}, 200),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

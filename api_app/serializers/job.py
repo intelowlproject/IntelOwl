@@ -1288,3 +1288,24 @@ class JobBISerializer(AbstractBIInterface, ModelSerializer):
     @staticmethod
     def get_playbook(instance: Job):
         return instance.playbook_to_execute.name if instance.playbook_to_execute else ""
+
+
+class JobAnalyzableHistorySerializer(rfs.ModelSerializer):
+    id = rfs.CharField(source="pk")
+    user = rfs.CharField(source="user.username", allow_null=False, read_only=True)
+    data_model = rfs.SerializerMethodField()
+    date = rfs.DateTimeField(
+        source="finished_analysis_time", read_only=True, allow_null=False
+    )
+    playbook = rfs.CharField(
+        source="playbook_to_execute.name", allow_null=True, read_only=True
+    )
+
+    class Meta:
+        model = Job
+        fields = ["playbook", "user", "date", "data_model", "id"]
+
+    def get_data_model(self, instance: Job):
+        if instance.data_model:
+            return instance.data_model.serialize()
+        return {}

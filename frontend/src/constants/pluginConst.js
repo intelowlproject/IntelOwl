@@ -34,15 +34,6 @@ export const PluginConfigTypesNumeric = Object.freeze({
   SECRET: "2",
 });
 
-export const AllPluginSupportedTypes = Object.freeze({
-  IP: "ip",
-  URL: "url",
-  DOMAIN: "domain",
-  HASH: "hash",
-  GENERIC: "generic",
-  FILE: "file",
-});
-
 export const PluginConfigTypes = Object.freeze({
   USER_CONFIG: "userConfig",
   ORG_CONFIG: "orgConfig",

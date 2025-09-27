@@ -4,7 +4,6 @@
 import requests
 
 from api_app.analyzers_manager import classes
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class YETI(classes.ObservableAnalyzer):
@@ -35,15 +34,3 @@ class YETI(classes.ObservableAnalyzer):
         resp.raise_for_status()
 
         return resp.json()
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.post",
-                    return_value=MockUpResponse([], 200),
-                )
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

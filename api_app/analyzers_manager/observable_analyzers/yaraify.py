@@ -7,7 +7,6 @@ import requests
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.choices import Classification
 from api_app.mixins import AbuseCHMixin
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -38,15 +37,3 @@ class YARAify(AbuseCHMixin, ObservableAnalyzer):
 
         result = response.json()
         return result
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.post",
-                    return_value=MockUpResponse({}, 200),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

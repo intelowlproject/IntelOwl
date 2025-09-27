@@ -67,7 +67,3 @@ class BoxJS(FileAnalyzer, DockerBasedAnalyzer):
         report["uris"] = list(set(report["uris"]))  # uniq
 
         return report
-
-    # disable mockup connections for this class
-    @classmethod
-    def _monkeypatch(cls, patches: list = None) -> None: ...  # noqa: E704

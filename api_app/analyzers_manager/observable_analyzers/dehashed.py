@@ -10,7 +10,6 @@ from requests.structures import CaseInsensitiveDict
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.choices import Classification
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -104,15 +103,3 @@ class DehashedSearch(ObservableAnalyzer):
             logger.info(f"{self.__repr__()} -> got {len(entries_fetched)} entries")
 
         return total_entries
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse({"entries": [{"id": "test"}]}, 200),
-                )
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

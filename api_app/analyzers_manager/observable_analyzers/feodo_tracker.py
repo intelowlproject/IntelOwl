@@ -13,7 +13,6 @@ from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.mixins import AbuseCHMixin
 from api_app.models import PluginConfig
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -103,55 +102,3 @@ class Feodo_Tracker(AbuseCHMixin, classes.ObservableAnalyzer):
                     return False
                 logger.info(f"ended download of db from Feodo Tracker at {db_location}")
         return True
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse(
-                        [
-                            {
-                                "ip_address": "196.218.123.202",
-                                "port": 13783,
-                                "status": "offline",
-                                "hostname": "host-196.218.123.202-static.tedata.net",
-                                "as_number": 8452,
-                                "as_name": "TE-AS TE-AS",
-                                "country": "EG",
-                                "first_seen": "2023-10-23 17:04:20",
-                                "last_online": "2024-02-06",
-                                "malware": "Pikabot",
-                            },
-                            {
-                                "ip_address": "51.161.81.190",
-                                "port": 13721,
-                                "status": "offline",
-                                "hostname": None,
-                                "as_number": 16276,
-                                "as_name": "OVH",
-                                "country": "CA",
-                                "first_seen": "2023-12-18 18:29:21",
-                                "last_online": "2024-01-23",
-                                "malware": "Pikabot",
-                            },
-                            {
-                                "ip_address": "185.117.90.142",
-                                "port": 2222,
-                                "status": "offline",
-                                "hostname": None,
-                                "as_number": 59711,
-                                "as_name": "HZ-EU-AS",
-                                "country": "NL",
-                                "first_seen": "2024-01-17 18:58:25",
-                                "last_online": "2024-01-22",
-                                "malware": "QakBot",
-                            },
-                        ],
-                        200,
-                    ),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

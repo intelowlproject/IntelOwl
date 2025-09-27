@@ -161,6 +161,29 @@ class Classification(models.TextChoices):
 
         return classification
 
+    @classmethod
+    def get_data_model_class(cls, classification: str) -> typing.Type:
+        from api_app.data_model_manager.models import (
+            DomainDataModel,
+            FileDataModel,
+            IPDataModel,
+        )
+
+        if classification == cls.IP.value:
+            return IPDataModel
+        elif classification in [
+            cls.URL.value,
+            cls.DOMAIN.value,
+        ]:
+            return DomainDataModel
+        elif classification in [
+            cls.HASH.value,
+            cls.FILE.value,
+        ]:
+            return FileDataModel
+        else:
+            raise NotImplementedError()
+
 
 class ScanMode(models.IntegerChoices):
     FORCE_NEW_ANALYSIS = 1

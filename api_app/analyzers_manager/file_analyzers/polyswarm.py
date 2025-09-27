@@ -1,18 +1,14 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import abc
 import logging
 
 from polyswarm_api.api import PolyswarmAPI
 
-from api_app.analyzers_manager.classes import FileAnalyzer
+from api_app.analyzers_manager.classes import BaseAnalyzerMixin, FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
-
-import abc
-
-from api_app.analyzers_manager.classes import BaseAnalyzerMixin
 
 
 class PolyswarmBase(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
@@ -66,43 +62,3 @@ class Polyswarm(FileAnalyzer, PolyswarmBase):
         result = self.construct_result(result)
 
         return result
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch.object(
-                    Polyswarm,
-                    "run",
-                    # flake8: noqa
-                    return_value={
-                        "assertions": [
-                            {"engine": "Kaspersky", "asserts": "Benign"},
-                            {"engine": "Qihoo 360", "asserts": "Benign"},
-                            {"engine": "XVirus", "asserts": "Benign"},
-                            {"engine": "SecureAge", "asserts": "Benign"},
-                            {"engine": "DrWeb", "asserts": "Benign"},
-                            {"engine": "Proton", "asserts": "Benign"},
-                            {"engine": "Electron", "asserts": "Benign"},
-                            {"engine": "Filseclab", "asserts": "Benign"},
-                            {"engine": "ClamAV", "asserts": "Benign"},
-                            {"engine": "SecondWrite", "asserts": "Benign"},
-                            {"engine": "Ikarus", "asserts": "Benign"},
-                            {"engine": "NanoAV", "asserts": "Benign"},
-                            {"engine": "Alibaba", "asserts": "Benign"},
-                        ],
-                        "positives": 0,
-                        "total": 13,
-                        "PolyScore": 0.33460048640798623,
-                        "sha256": "50f4d8be8d47d26ecb04f1a24f17a39f3ea194d8cdc3b833aef2df88e1ce828b",
-                        "md5": "76deca20806c16df50ffeda163fd50e9",
-                        "sha1": "99ff1cd17aea94feb355e7bdb01e9f788a4971bb",
-                        "extended_type": "GIF image data, version 89a, 821 x 500",
-                        "first_seen": "2024-07-27T20:20:12.121980",
-                        "last_seen": "2024-07-27T20:20:12.121980",
-                        "permalink": "https://polyswarm.network/scan/results/file/50f4d8be8d47d26ecb04f1a24f17a39f3ea194d8cdc3b833aef2df88e1ce828b/76218824984622961",
-                    },
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

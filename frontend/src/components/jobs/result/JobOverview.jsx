@@ -25,7 +25,7 @@ import {
   ReportedPluginTooltip,
 } from "./utils/reportedPlugins";
 import { StatusIcon } from "../../common/icon/StatusIcon";
-import VisualizerReport from "./visualizer/visualizer";
+import VisualizerReport from "../../common/visualizer/visualizer";
 import { JobFinalStatuses } from "../../../constants/jobConst";
 import { PluginStatuses } from "../../../constants/pluginConst";
 import { JobResultSections } from "../../../constants/miscConst";
@@ -200,6 +200,28 @@ export function JobOverview({
             <JsonEditor
               id="job_full_report_json"
               initialJsonData={job}
+              height="65vh"
+              width="100%"
+              readOnly
+            />
+          </div>
+        ),
+      },
+      {
+        name: "data_model",
+        nav: (
+          <div className="d-flex-center">
+            <strong>Data Model</strong>
+          </div>
+        ),
+        report: (
+          <div
+            id={`jobdatamodel-jsoninput-${job.id}`}
+            style={{ height: "65vh", overflow: "scroll" }}
+          >
+            <JsonEditor
+              id="job_data_model_json"
+              initialJsonData={job.data_model}
               height="65vh"
               width="100%"
               readOnly

@@ -5,7 +5,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { format } from "date-fns";
-import Search from "../../../src/components/search/Search";
+import ReportsSearch from "../../../src/components/search/ReportsSearch";
 import { PLUGIN_REPORT_QUERIES } from "../../../src/constants/apiURLs";
 
 jest.mock("axios");
@@ -14,7 +14,7 @@ describe("test Search component", () => {
   test("Search page - fields", async () => {
     render(
       <BrowserRouter>
-        <Search />
+        <ReportsSearch />
       </BrowserRouter>,
     );
 
@@ -129,7 +129,7 @@ describe("test Search component", () => {
 
     render(
       <BrowserRouter>
-        <Search />
+        <ReportsSearch />
       </BrowserRouter>,
     );
 

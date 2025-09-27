@@ -14,7 +14,6 @@ from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
     malicious_detector_response,
 )
 from api_app.choices import Classification
-from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -85,20 +84,3 @@ class WebRisk(classes.ObservableAnalyzer):
                 threats_list.append("UNWANTED_SOFTWARE")
             web_risk_result["threats"] = threats_list
         return web_risk_result
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "api_app.analyzers_manager.observable_analyzers.dns."
-                    "dns_malicious_detectors.google_webrisk.WebRiskServiceClient"
-                ),
-                patch.object(
-                    service_account.Credentials,
-                    "from_service_account_info",
-                    return_value={},
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

@@ -6,8 +6,6 @@ import logging
 import mwdblib
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.analyzers_manager.file_analyzers.mwdb_scan import mocked_mwdb_response
-from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -38,15 +36,3 @@ class MWDBGet(ObservableAnalyzer):
             result["permalink"] = f"https://mwdb.cert.pl/file/{self.observable_name}"
 
         return result
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "mwdblib.MWDB",
-                    side_effect=mocked_mwdb_response,
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

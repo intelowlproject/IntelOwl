@@ -12,7 +12,6 @@ import requests
 from django.conf import settings
 
 from certego_saas.apps.user.models import User
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..choices import Classification, PythonModuleBasePaths
 from ..classes import Plugin
@@ -399,7 +398,11 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         )
 
     def _docker_run(
-        self, req_data: dict, req_files: dict = None, analyzer_name: str = None
+        self,
+        req_data: dict,
+        req_files: dict = None,
+        analyzer_name: str = None,
+        avoid_polling: bool = False,
     ) -> dict:
         """
         Helper function that takes of care of requesting new analysis,
@@ -433,8 +436,8 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             self._raise_container_not_running()
 
         # step #2: raise AnalyzerRunException in case of error
-        # Modified to support synchronous analyzer BBOT that return results directly in the initial response, avoiding unnecessary polling.
-        if analyzer_name == "BBOT_Analyzer":
+        # Modified to support synchronous analyzers that return results directly in the initial response, avoiding unnecessary polling.
+        if avoid_polling:
             report = resp1.json().get("report", None)
             err = resp1.json().get("error", None)
         else:
@@ -482,43 +485,6 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         if not self.__raise_in_case_bad_request(self.name, resp, params_to_check=[]):
             raise AssertionError
         return resp
-
-    @staticmethod
-    def mocked_docker_analyzer_get(*args, **kwargs):
-        return MockUpResponse(
-            {"key": "test", "returncode": 0, "report": {"test": "This is a test."}}, 200
-        )
-
-    @staticmethod
-    def mocked_docker_analyzer_post(*args, **kwargs):
-        return MockUpResponse({"key": "test", "status": "running"}, 202)
-
-    def _monkeypatch(self, patches: list = None):
-        """
-        Here, `_monkeypatch` is an instance method and not a class method.
-        This is because when defined with `@classmethod`, we were getting the error
-        ```
-        '_patch' object has no attribute 'is_local'
-        ```
-        whenever multiple analyzers with same parent class were being called.
-        """
-        if patches is None:
-            patches = []
-        # no need to sleep during tests
-        self.poll_distance = 0
-        patches.append(
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    side_effect=self.mocked_docker_analyzer_get,
-                ),
-                patch(
-                    "requests.post",
-                    side_effect=self.mocked_docker_analyzer_post,
-                ),
-            )
-        )
-        return super()._monkeypatch(patches)
 
     def health_check(self, user: User = None) -> bool:
         """

@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import React from "react";
-import { Container, Row, Col, UncontrolledTooltip, Spinner } from "reactstrap";
+import { Container, Row, Col, UncontrolledTooltip } from "reactstrap";
 import { MdInfoOutline } from "react-icons/md";
 
 import {
@@ -12,89 +12,12 @@ import {
 } from "@certego/certego-ui";
 
 import useTitle from "react-use/lib/useTitle";
-import { useSearchParams } from "react-router-dom";
-import { format, toDate } from "date-fns";
+import { format } from "date-fns";
 import { jobTableColumns } from "./jobTableColumns";
-
 import { JOB_BASE_URI } from "../../../constants/apiURLs";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { datetimeFormatStr } from "../../../constants/miscConst";
 import { TimePicker } from "../../common/TimePicker";
-
-// component
-export default function JobsTable() {
-  console.debug("JobsTable rendered!");
-
-  // page title
-  useTitle("IntelOwl | Jobs History", { restoreOnUnmount: true });
-
-  const [searchParams, setSearchParams] = useSearchParams();
-  const startTimeParam = searchParams.get("received_request_time__gte");
-  const endTimeParam = searchParams.get("received_request_time__lte");
-
-  // default: 24h
-  const defaultFromDate = new Date();
-  defaultFromDate.setDate(defaultFromDate.getDate() - 1);
-  const [searchFromDateValue, setSearchFromDateValue] =
-    React.useState(defaultFromDate);
-  const [searchToDateValue, setSearchToDateValue] = React.useState(new Date());
-
-  // state
-  const [areParamsInitialized, setAreParamsInitialized] = React.useState(false); // used to prevent a request with wrong params
-
-  React.useEffect(() => {
-    if (startTimeParam) {
-      setSearchFromDateValue(toDate(startTimeParam));
-    }
-    if (endTimeParam) {
-      setSearchToDateValue(toDate(endTimeParam));
-    }
-    setAreParamsInitialized(true);
-  }, [startTimeParam, endTimeParam]);
-
-  React.useEffect(() => {
-    // After the initialization each time the time picker change, update the url
-    // Note: this check is required to avoid infinite loop (url update time picker and time picker update url)
-    if (
-      areParamsInitialized &&
-      (startTimeParam !== format(searchFromDateValue, datetimeFormatStr) ||
-        endTimeParam !== format(searchToDateValue, datetimeFormatStr))
-    ) {
-      const currentParams = {};
-      // @ts-ignore
-      searchParams.entries().forEach((element) => {
-        const [paramName, paramValue] = element;
-        currentParams[paramName] = paramValue;
-      });
-      setSearchParams({
-        ...currentParams,
-        received_request_time__gte: format(
-          searchFromDateValue,
-          datetimeFormatStr,
-        ),
-        received_request_time__lte: format(
-          searchToDateValue,
-          datetimeFormatStr,
-        ),
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    setSearchParams,
-    areParamsInitialized,
-    searchFromDateValue,
-    searchToDateValue,
-  ]);
-
-  return areParamsInitialized ? ( // this "if" avoid one request
-    <JobsTableComponent
-      searchFromDateValue={searchFromDateValue}
-      searchToDateValue={searchToDateValue}
-    />
-  ) : (
-    <Spinner />
-  );
-}
 
 // constants
 const toPassTableProps = {
@@ -107,7 +30,9 @@ const toPassTableProps = {
   ),
 };
 
-function JobsTableComponent({ searchFromDateValue, searchToDateValue }) {
+export function JobsTable({ searchFromDateValue, searchToDateValue }) {
+  useTitle("IntelOwl | Jobs History", { restoreOnUnmount: true });
+
   const [playbooksLoading, playbooksError] = usePluginConfigurationStore(
     (state) => [state.playbooksLoading, state.playbooksError],
   );

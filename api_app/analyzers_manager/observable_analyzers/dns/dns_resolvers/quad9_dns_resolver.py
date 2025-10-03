@@ -29,6 +29,9 @@ class Quad9DNSResolver(DoHMixin, classes.ObservableAnalyzer):
         )
         complete_url = self.build_query_url(observable)
 
+        # sometimes it can respond with 503, I suppose to avoid DoS.
+        # In 1k requests just 20 fails and at least with 30 requests between 2 failures
+        # with 2 or 3 attemps the analyzer should get the data
         attempt_number = 3
         quad9_response = None
         for attempt in range(attempt_number):
@@ -42,16 +45,10 @@ class Quad9DNSResolver(DoHMixin, classes.ObservableAnalyzer):
             else:
                 quad9_response.raise_for_status()
 
-        raw_answers = quad9_response.json().get("Answer", []) or []
+        json_response = quad9_response.json()
+        resolutions: list[str] = []
+        for answer in json_response.get("Answer", []):
+            if "data" in answer:
+                resolutions.append(answer["data"])
 
-        resolutions = []
-        for record in raw_answers:
-            rtype = record.get("type")
-            if rtype in (1, 28):  # A and AAAA
-                resolutions.append(record.get("data"))
-            elif rtype == 5:  # CNAME
-                resolutions.append(f"CNAME: {record.get('data')}")
-            else:
-                resolutions.append(record.get("data", ""))
-
-        return dns_resolver_response(self.observable_name, resolutions)
+        return dns_resolver_response(observable, resolutions)

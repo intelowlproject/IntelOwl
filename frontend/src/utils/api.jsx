@@ -55,7 +55,7 @@ export function prettifyErrors(errorResponse) {
       "another_key": ["error", "another error"],
     }
   */
-  if (Object.keys(errorResponse.response.data?.errors) > 0) {
+  if (Object.keys(errorResponse.response.data?.errors).length > 0) {
     const prettyHTMLList = [];
     Object.entries(errorResponse.response.data?.errors).forEach(
       ([errorField, errorItem]) => {

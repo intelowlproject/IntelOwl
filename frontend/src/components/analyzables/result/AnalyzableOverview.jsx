@@ -195,7 +195,7 @@ export function AnalyzableOverview({ analyzable }) {
                 ),
               ],
               [
-                "Comments",
+                "Reasons",
                 analyzable.last_data_model.related_threats.map(
                   (value, index) => (
                     <BaseVisualizer

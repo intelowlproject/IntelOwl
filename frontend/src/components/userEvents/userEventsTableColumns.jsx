@@ -107,7 +107,7 @@ export const userEventsTableEndColumns = [
     maxWidth: 100,
   },
   {
-    Header: "Comments",
+    Header: "Reasons",
     id: "related_threats",
     accessor: (userEvent) => userEvent.data_model.related_threats,
     Cell: ({ value: comments, row }) =>

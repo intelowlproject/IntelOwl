@@ -106,7 +106,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
         }
       });
       if (values.related_threats[0] === "") {
-        errors["related_threats-0"] = "Comment is required";
+        errors["related_threats-0"] = "Reason is required";
       }
       if (!Number.isInteger(values.decay_timedelta_days)) {
         errors.decay_timedelta_days = "The value must be a number.";
@@ -580,7 +580,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                     className="me-2 mb-0 required"
                     for="userEvent__related_threats"
                   >
-                    Comments:
+                    Reasons:
                   </Label>
                 </Col>
                 <Col md={10}>

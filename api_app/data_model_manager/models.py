@@ -120,6 +120,9 @@ class BaseDataModel(models.Model):
 
     class Meta:
         abstract = True
+        indexes = [
+            models.Index(fields=["date"]),
+        ]
 
     @property
     def owner(self) -> User:

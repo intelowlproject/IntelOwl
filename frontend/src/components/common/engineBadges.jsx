@@ -13,7 +13,7 @@ import {
 import { getIcon } from "./icon/icons";
 
 export function EvaluationBadge(props) {
-  const { id, evaluation, className } = props;
+  const { id, evaluation, label, className } = props;
 
   const color = EvaluationColors?.[evaluation];
   const divClass = classnames(`bg-${color}`, className);
@@ -24,13 +24,13 @@ export function EvaluationBadge(props) {
       id={`evaluation__job${id}_${evaluation}`}
       className={`d-flex-center ${divClass}`}
     >
-      {getIcon(icon)}
+      {getIcon(icon)}&nbsp;{label}
       <UncontrolledTooltip
         target={`evaluation__job${id}_${evaluation}`}
         placement="top"
         fade={false}
       >
-        {evaluation.toUpperCase()}
+        {label || evaluation.toUpperCase()}
       </UncontrolledTooltip>
     </Badge>
   );
@@ -39,10 +39,12 @@ export function EvaluationBadge(props) {
 EvaluationBadge.propTypes = {
   id: PropTypes.string.isRequired,
   evaluation: PropTypes.string.isRequired,
+  label: PropTypes.string,
   className: PropTypes.string,
 };
 
 EvaluationBadge.defaultProps = {
+  label: "",
   className: null,
 };
 

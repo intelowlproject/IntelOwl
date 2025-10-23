@@ -44,7 +44,7 @@ export const Classifications = Object.freeze({
 
 export const AnalyzableHistoryTypes = Object.freeze({
   JOB: "job",
-  USER_EVENT: "user_event",
-  USER_DOMAIN_WILDCARD_EVENT: "user_domain_wildcard_event",
-  USER_IP_WILDCARD_EVENT: "user_ip_wildcard_event",
+  USER_EVENT: "user_evaluation",
+  USER_DOMAIN_WILDCARD_EVENT: "user_domain_wildcard_evaluation",
+  USER_IP_WILDCARD_EVENT: "user_ip_wildcard_evaluation",
 });

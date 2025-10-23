@@ -1,3 +1,4 @@
+import logging
 from typing import Type, Union
 
 from django.core.exceptions import ValidationError
@@ -12,6 +13,8 @@ from api_app.data_model_manager.queryset import BaseDataModelQuerySet
 from api_app.defaults import file_directory_path
 from api_app.helpers import calculate_md5, calculate_sha1, calculate_sha256
 from certego_saas.models import User
+
+logger = logging.getLogger(__name__)
 
 
 class Analyzable(models.Model):
@@ -77,6 +80,7 @@ class Analyzable(models.Model):
                     ).values_list("data_model__pk", flat=True)
                 )
             query |= query2
+        logger.debug(f"{query=}")
         return self.get_data_model_class().objects.filter(query)
 
     def get_data_model_class(self) -> Type[BaseDataModel]:

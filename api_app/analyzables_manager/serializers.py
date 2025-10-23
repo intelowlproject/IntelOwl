@@ -1,9 +1,13 @@
+import logging
+
 from rest_framework import serializers as rfs
 
 from api_app.analyzables_manager.models import Analyzable
 from api_app.choices import Classification
 from api_app.models import Job
 from api_app.serializers.job import JobRelatedField
+
+logger = logging.getLogger(__name__)
 
 
 class AnalyzableSerializer(rfs.ModelSerializer):
@@ -23,6 +27,7 @@ class AnalyzableSerializer(rfs.ModelSerializer):
         ]
 
     def to_representation(self, instance):
+        logger.debug(f"{instance=}")
         analyzable = super().to_representation(instance)
         job = (
             Job.objects.filter(id__in=analyzable["jobs"])

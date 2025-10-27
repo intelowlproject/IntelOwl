@@ -75,8 +75,12 @@ describe("test UserEventModal component", () => {
     expect(basicEvaluationTab.closest("a").className).toContain("active"); // selected
     const advancedEvaluationTab = screen.getByText("Advanced");
     expect(advancedEvaluationTab).toBeInTheDocument();
-    expect(advancedEvaluationTab.closest("a").className).not.toContain("active"); // selected
-    const malicious10 = screen.getByRole("radio", { name: "Confirmed malicious" });
+    expect(advancedEvaluationTab.closest("a").className).not.toContain(
+      "active",
+    ); // selected
+    const malicious10 = screen.getByRole("radio", {
+      name: "Confirmed malicious",
+    });
     expect(malicious10).toBeInTheDocument();
     expect(malicious10).toBeChecked();
     const malicious7 = screen.getByRole("radio", { name: "Malicious" });
@@ -211,8 +215,12 @@ describe("test UserEventModal component", () => {
       expect(basicEvaluationTab.closest("a").className).toContain("active"); // selected
       const advancedEvaluationTab = screen.getByText("Advanced");
       expect(advancedEvaluationTab).toBeInTheDocument();
-      expect(advancedEvaluationTab.closest("a").className).not.toContain("active"); // selected
-      const malicious10 = screen.getByRole("radio", { name: "Confirmed malicious" });
+      expect(advancedEvaluationTab.closest("a").className).not.toContain(
+        "active",
+      ); // selected
+      const malicious10 = screen.getByRole("radio", {
+        name: "Confirmed malicious",
+      });
       expect(malicious10).toBeInTheDocument();
       expect(malicious10).toBeChecked(); // selected - default
       const malicious7 = screen.getByRole("radio", { name: "Malicious" });
@@ -349,8 +357,12 @@ describe("test UserEventModal component", () => {
       expect(basicEvaluationTab.closest("a").className).toContain("active"); // selected
       const advancedEvaluationTab = screen.getByText("Advanced");
       expect(advancedEvaluationTab).toBeInTheDocument();
-      expect(advancedEvaluationTab.closest("a").className).not.toContain("active"); // selected
-      const malicious10 = screen.getByRole("radio", { name: "Confirmed malicious" });
+      expect(advancedEvaluationTab.closest("a").className).not.toContain(
+        "active",
+      ); // selected
+      const malicious10 = screen.getByRole("radio", {
+        name: "Confirmed malicious",
+      });
       expect(malicious10).toBeInTheDocument();
       expect(malicious10).toBeChecked(); // selected - default
       const malicious7 = screen.getByRole("radio", { name: "Malicious" });
@@ -431,8 +443,12 @@ describe("test UserEventModal component", () => {
     expect(basicEvaluationTab.closest("a").className).toContain("active"); // selected
     const advancedEvaluationTab = screen.getByText("Advanced");
     expect(advancedEvaluationTab).toBeInTheDocument();
-    expect(advancedEvaluationTab.closest("a").className).not.toContain("active"); // selected
-    const malicious10 = screen.getByRole("radio", { name: "Confirmed malicious" });
+    expect(advancedEvaluationTab.closest("a").className).not.toContain(
+      "active",
+    ); // selected
+    const malicious10 = screen.getByRole("radio", {
+      name: "Confirmed malicious",
+    });
     expect(malicious10).toBeInTheDocument();
     expect(malicious10).toBeChecked(); // selected - default
     const malicious7 = screen.getByRole("radio", { name: "Malicious" });
@@ -500,23 +516,27 @@ describe("test UserEventModal component", () => {
     expect(screen.getByText("supported only for wildcard")).toBeInTheDocument();
     expect(screen.getByText("Evaluation:")).toBeInTheDocument();
     const basicEvaluationTab = screen.getByText("Basic");
-      expect(basicEvaluationTab).toBeInTheDocument();
-      expect(basicEvaluationTab.closest("a").className).toContain("active"); // selected
-      const advancedEvaluationTab = screen.getByText("Advanced");
-      expect(advancedEvaluationTab).toBeInTheDocument();
-      expect(advancedEvaluationTab.closest("a").className).not.toContain("active"); // selected
-      const malicious10 = screen.getByRole("radio", { name: "Confirmed malicious" });
-      expect(malicious10).toBeInTheDocument();
-      expect(malicious10).toBeChecked(); // selected - default
-      const malicious7 = screen.getByRole("radio", { name: "Malicious" });
-      expect(malicious7).toBeInTheDocument();
-      expect(malicious7).not.toBeChecked();
-      const trusted8 = screen.getByRole("radio", { name: "Currently trusted" });
-      expect(trusted8).toBeInTheDocument();
-      expect(trusted8).not.toBeChecked();
-      const trusted10 = screen.getByRole("radio", { name: "Trusted" });
-      expect(trusted10).toBeInTheDocument();
-      expect(trusted10).not.toBeChecked();
+    expect(basicEvaluationTab).toBeInTheDocument();
+    expect(basicEvaluationTab.closest("a").className).toContain("active"); // selected
+    const advancedEvaluationTab = screen.getByText("Advanced");
+    expect(advancedEvaluationTab).toBeInTheDocument();
+    expect(advancedEvaluationTab.closest("a").className).not.toContain(
+      "active",
+    ); // selected
+    const malicious10 = screen.getByRole("radio", {
+      name: "Confirmed malicious",
+    });
+    expect(malicious10).toBeInTheDocument();
+    expect(malicious10).toBeChecked(); // selected - default
+    const malicious7 = screen.getByRole("radio", { name: "Malicious" });
+    expect(malicious7).toBeInTheDocument();
+    expect(malicious7).not.toBeChecked();
+    const trusted8 = screen.getByRole("radio", { name: "Currently trusted" });
+    expect(trusted8).toBeInTheDocument();
+    expect(trusted8).not.toBeChecked();
+    const trusted10 = screen.getByRole("radio", { name: "Trusted" });
+    expect(trusted10).toBeInTheDocument();
+    expect(trusted10).not.toBeChecked();
     const reasonInput = screen.getAllByRole("textbox")[1];
     expect(reasonInput).toBeInTheDocument();
     expect(reasonInput.id).toBe("related_threats-0");

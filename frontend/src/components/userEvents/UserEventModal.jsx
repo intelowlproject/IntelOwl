@@ -159,6 +159,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
       console.debug("errors", errors);
       return errors;
     },
+    validateOnMount: true,
     onSubmit: async () => {
       const editedFields = {};
       delete formik.values.basic_evaluation; // not needed in the request

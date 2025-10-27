@@ -11,7 +11,6 @@ import {
   USER_EVENT_DOMAIN_WILDCARD,
 } from "../../../src/constants/apiURLs";
 import { mockedUseTagsStore, mockedUseAuthStore } from "../../mock";
-import { ReliabilityBar } from "../../../src/components/common/engineBadges";
 
 jest.mock("axios");
 jest.mock("../../../src/stores/useAuthStore", () => ({
@@ -71,14 +70,42 @@ describe("test UserEventModal component", () => {
     expect(screen.getByText("Matches:")).toBeInTheDocument();
     expect(screen.getByText("supported only for wildcard")).toBeInTheDocument();
     expect(screen.getByText("Evaluation:")).toBeInTheDocument();
-    const commentsInput = screen.getAllByRole("textbox")[1];
-    expect(commentsInput).toBeInTheDocument();
-    expect(commentsInput.id).toBe("related_threats-0");
+    const basicEvaluationTab = screen.getByText("Basic");
+    expect(basicEvaluationTab).toBeInTheDocument();
+    expect(basicEvaluationTab.closest("a").className).toContain("active"); // selected
+    const advancedEvaluationTab = screen.getByText("Advanced");
+    expect(advancedEvaluationTab).toBeInTheDocument();
+    expect(advancedEvaluationTab.closest("a").className).not.toContain("active"); // selected
+    const malicious10 = screen.getByRole("radio", { name: "Confirmed malicious" });
+    expect(malicious10).toBeInTheDocument();
+    expect(malicious10).toBeChecked();
+    const malicious7 = screen.getByRole("radio", { name: "Malicious" });
+    expect(malicious7).toBeInTheDocument();
+    expect(malicious7).not.toBeChecked();
+    const trusted8 = screen.getByRole("radio", { name: "Currently trusted" });
+    expect(trusted8).toBeInTheDocument();
+    expect(trusted8).not.toBeChecked();
+    const trusted10 = screen.getByRole("radio", { name: "Trusted" });
+    expect(trusted10).toBeInTheDocument();
+    expect(trusted10).not.toBeChecked();
+    const reasonInput = screen.getAllByRole("textbox")[1];
+    expect(reasonInput).toBeInTheDocument();
+    expect(reasonInput.id).toBe("related_threats-0");
     const externalReferencesInput = screen.getAllByRole("textbox")[2];
     expect(externalReferencesInput).toBeInTheDocument();
     expect(externalReferencesInput.id).toBe("external_references-0");
     expect(screen.getByText("Kill chain phase:")).toBeInTheDocument();
     expect(screen.getByText("Tags:")).toBeInTheDocument();
+
+    // advanced evaluation
+    await user.click(advancedEvaluationTab);
+    const malicious = screen.getByRole("radio", { name: "malicious" });
+    expect(malicious).toBeInTheDocument();
+    expect(malicious).toBeChecked();
+    const trusted = screen.getByRole("radio", { name: "trusted" });
+    expect(trusted).toBeInTheDocument();
+    expect(trusted).not.toBeChecked();
+    expect(screen.getByText("Reliability: 10")).toBeInTheDocument();
 
     // advanced fields
     const advancedFields = screen.getByRole("button", {
@@ -86,8 +113,6 @@ describe("test UserEventModal component", () => {
     });
     expect(advancedFields).toBeInTheDocument();
     await user.click(advancedFields);
-    const reliabilityInput = screen.getByText("Reliability:");
-    expect(reliabilityInput).toBeInTheDocument();
     const decayTypeInput = screen.getByRole("combobox", {
       name: /Decay type:/i,
     });
@@ -111,7 +136,7 @@ describe("test UserEventModal component", () => {
         analyzable: { name: "google.com" },
         data_model_content: {
           evaluation: "malicious",
-          related_threats: ["my comment"],
+          related_threats: ["my reason"],
           reliability: 10,
         },
         decay_progression: "0",
@@ -127,7 +152,7 @@ describe("test UserEventModal component", () => {
         network: "1.2.3.0/24",
         data_model_content: {
           evaluation: "malicious",
-          related_threats: ["my comment"],
+          related_threats: ["my reason"],
           reliability: 10,
         },
         decay_progression: "0",
@@ -143,7 +168,7 @@ describe("test UserEventModal component", () => {
         query: ".*\\.test.com",
         data_model_content: {
           evaluation: "malicious",
-          related_threats: ["my comment"],
+          related_threats: ["my reason"],
           reliability: 10,
         },
         decay_progression: "0",
@@ -180,15 +205,33 @@ describe("test UserEventModal component", () => {
       expect(
         screen.getByText("supported only for wildcard"),
       ).toBeInTheDocument();
-      const evaluationInput = screen.getAllByRole("combobox")[0];
-      expect(evaluationInput).toBeInTheDocument();
-      const commentsInput = screen.getAllByRole("textbox")[1];
-      expect(commentsInput).toBeInTheDocument();
-      expect(commentsInput.id).toBe("related_threats-0");
-      expect(commentsInput.value).toBe("");
+      expect(screen.getByText("Evaluation:")).toBeInTheDocument();
+      const basicEvaluationTab = screen.getByText("Basic");
+      expect(basicEvaluationTab).toBeInTheDocument();
+      expect(basicEvaluationTab.closest("a").className).toContain("active"); // selected
+      const advancedEvaluationTab = screen.getByText("Advanced");
+      expect(advancedEvaluationTab).toBeInTheDocument();
+      expect(advancedEvaluationTab.closest("a").className).not.toContain("active"); // selected
+      const malicious10 = screen.getByRole("radio", { name: "Confirmed malicious" });
+      expect(malicious10).toBeInTheDocument();
+      expect(malicious10).toBeChecked(); // selected - default
+      const malicious7 = screen.getByRole("radio", { name: "Malicious" });
+      expect(malicious7).toBeInTheDocument();
+      expect(malicious7).not.toBeChecked();
+      const trusted8 = screen.getByRole("radio", { name: "Currently trusted" });
+      expect(trusted8).toBeInTheDocument();
+      expect(trusted8).not.toBeChecked();
+      const trusted10 = screen.getByRole("radio", { name: "Trusted" });
+      expect(trusted10).toBeInTheDocument();
+      expect(trusted10).not.toBeChecked();
+      const reasonInput = screen.getAllByRole("textbox")[1];
+      expect(reasonInput).toBeInTheDocument();
+      expect(reasonInput.id).toBe("related_threats-0");
+      expect(reasonInput.value).toBe("");
       const externalReferencesInput = screen.getAllByRole("textbox")[2];
       expect(externalReferencesInput).toBeInTheDocument();
       expect(externalReferencesInput.id).toBe("external_references-0");
+      expect(externalReferencesInput.value).toBe("");
       expect(screen.getByText("Kill chain phase:")).toBeInTheDocument();
       expect(screen.getByText("Tags:")).toBeInTheDocument();
       const advancedFields = screen.getByRole("button", {
@@ -197,17 +240,13 @@ describe("test UserEventModal component", () => {
       expect(advancedFields).toBeInTheDocument();
       const saveButton = screen.getByRole("button", { name: /Save/i });
       expect(saveButton).toBeInTheDocument();
-      expect(saveButton.className).toContain("disabled");
 
       // add analyzable
       fireEvent.change(analyzablesInput, { target: { value: input } });
       expect(analyzablesInput.value).toBe(input);
-      // add evaluation
-      fireEvent.change(evaluationInput, { target: { value: "malicious" } });
-      expect(screen.getByText("MALICIOUS")).toBeInTheDocument();
-      // add comment
-      fireEvent.change(commentsInput, { target: { value: "my comment" } });
-      expect(commentsInput.value).toBe("my comment");
+      // add reason
+      fireEvent.change(reasonInput, { target: { value: "my reason" } });
+      expect(reasonInput.value).toBe("my reason");
 
       // IMPORTANT - wait for the state change
       await screen.findByText(type);
@@ -232,8 +271,8 @@ describe("test UserEventModal component", () => {
         analyzable: { name: "google.com" },
         data_model_content: {
           evaluation: "trusted",
-          related_threats: ["my comment"],
-          reliability: 6,
+          related_threats: ["my reason"],
+          reliability: 8,
         },
         decay_progression: "0",
         decay_timedelta_days: 120,
@@ -248,8 +287,8 @@ describe("test UserEventModal component", () => {
         network: "1.2.3.0/24",
         data_model_content: {
           evaluation: "trusted",
-          related_threats: ["my comment"],
-          reliability: 6,
+          related_threats: ["my reason"],
+          reliability: 8,
         },
         decay_progression: "0",
         decay_timedelta_days: 120,
@@ -264,8 +303,8 @@ describe("test UserEventModal component", () => {
         query: ".*\\.test.com",
         data_model_content: {
           evaluation: "trusted",
-          related_threats: ["my comment"],
-          reliability: 6,
+          related_threats: ["my reason"],
+          reliability: 8,
         },
         decay_progression: "0",
         decay_timedelta_days: 120,
@@ -304,12 +343,29 @@ describe("test UserEventModal component", () => {
       expect(
         screen.getByText("supported only for wildcard"),
       ).toBeInTheDocument();
-      const evaluationInput = screen.getAllByRole("combobox")[0];
-      expect(evaluationInput).toBeInTheDocument();
-      const commentsInput = screen.getAllByRole("textbox")[1];
-      expect(commentsInput).toBeInTheDocument();
-      expect(commentsInput.id).toBe("related_threats-0");
-      expect(commentsInput.value).toBe("");
+      expect(screen.getByText("Evaluation:")).toBeInTheDocument();
+      const basicEvaluationTab = screen.getByText("Basic");
+      expect(basicEvaluationTab).toBeInTheDocument();
+      expect(basicEvaluationTab.closest("a").className).toContain("active"); // selected
+      const advancedEvaluationTab = screen.getByText("Advanced");
+      expect(advancedEvaluationTab).toBeInTheDocument();
+      expect(advancedEvaluationTab.closest("a").className).not.toContain("active"); // selected
+      const malicious10 = screen.getByRole("radio", { name: "Confirmed malicious" });
+      expect(malicious10).toBeInTheDocument();
+      expect(malicious10).toBeChecked(); // selected - default
+      const malicious7 = screen.getByRole("radio", { name: "Malicious" });
+      expect(malicious7).toBeInTheDocument();
+      expect(malicious7).not.toBeChecked();
+      const trusted8 = screen.getByRole("radio", { name: "Currently trusted" });
+      expect(trusted8).toBeInTheDocument();
+      expect(trusted8).not.toBeChecked();
+      const trusted10 = screen.getByRole("radio", { name: "Trusted" });
+      expect(trusted10).toBeInTheDocument();
+      expect(trusted10).not.toBeChecked();
+      const reasonInput = screen.getAllByRole("textbox")[1];
+      expect(reasonInput).toBeInTheDocument();
+      expect(reasonInput.id).toBe("related_threats-0");
+      expect(reasonInput.value).toBe("");
       const externalReferencesInput = screen.getAllByRole("textbox")[2];
       expect(externalReferencesInput).toBeInTheDocument();
       expect(externalReferencesInput.id).toBe("external_references-0");
@@ -321,17 +377,15 @@ describe("test UserEventModal component", () => {
       expect(advancedFields).toBeInTheDocument();
       const saveButton = screen.getByRole("button", { name: /Save/i });
       expect(saveButton).toBeInTheDocument();
-      expect(saveButton.className).toContain("disabled");
 
       /// add analyzable
       fireEvent.change(analyzablesInput, { target: { value: input } });
       expect(analyzablesInput.value).toBe(input);
       // add evaluation
-      fireEvent.change(evaluationInput, { target: { value: "trusted" } });
-      expect(screen.getByText("TRUSTED")).toBeInTheDocument();
-      // add comment
-      fireEvent.change(commentsInput, { target: { value: "my comment" } });
-      expect(commentsInput.value).toBe("my comment");
+      user.click(trusted8);
+      // add reason
+      fireEvent.change(reasonInput, { target: { value: "my reason" } });
+      expect(reasonInput.value).toBe("my reason");
 
       // IMPORTANT - wait for the state change
       await screen.findByText(type);
@@ -372,9 +426,27 @@ describe("test UserEventModal component", () => {
     expect(screen.getByText("Matches:")).toBeInTheDocument();
     expect(screen.getByText("supported only for wildcard")).toBeInTheDocument();
     expect(screen.getByText("Evaluation:")).toBeInTheDocument();
-    const commentsInput = screen.getAllByRole("textbox")[1];
-    expect(commentsInput).toBeInTheDocument();
-    expect(commentsInput.id).toBe("related_threats-0");
+    const basicEvaluationTab = screen.getByText("Basic");
+    expect(basicEvaluationTab).toBeInTheDocument();
+    expect(basicEvaluationTab.closest("a").className).toContain("active"); // selected
+    const advancedEvaluationTab = screen.getByText("Advanced");
+    expect(advancedEvaluationTab).toBeInTheDocument();
+    expect(advancedEvaluationTab.closest("a").className).not.toContain("active"); // selected
+    const malicious10 = screen.getByRole("radio", { name: "Confirmed malicious" });
+    expect(malicious10).toBeInTheDocument();
+    expect(malicious10).toBeChecked(); // selected - default
+    const malicious7 = screen.getByRole("radio", { name: "Malicious" });
+    expect(malicious7).toBeInTheDocument();
+    expect(malicious7).not.toBeChecked();
+    const trusted8 = screen.getByRole("radio", { name: "Currently trusted" });
+    expect(trusted8).toBeInTheDocument();
+    expect(trusted8).not.toBeChecked();
+    const trusted10 = screen.getByRole("radio", { name: "Trusted" });
+    expect(trusted10).toBeInTheDocument();
+    expect(trusted10).not.toBeChecked();
+    const reasonInput = screen.getAllByRole("textbox")[1];
+    expect(reasonInput).toBeInTheDocument();
+    expect(reasonInput.id).toBe("related_threats-0");
     const externalReferencesInput = screen.getAllByRole("textbox")[2];
     expect(externalReferencesInput).toBeInTheDocument();
     expect(externalReferencesInput.id).toBe("external_references-0");
@@ -387,8 +459,6 @@ describe("test UserEventModal component", () => {
     });
     expect(advancedFields).toBeInTheDocument();
     await user.click(advancedFields);
-    const reliabilityInput = screen.getByText("Reliability:");
-    expect(reliabilityInput).toBeInTheDocument();
     const decayTypeInput = screen.getByRole("combobox", {
       name: /Decay type:/i,
     });
@@ -402,7 +472,7 @@ describe("test UserEventModal component", () => {
     expect(saveButton.className).toContain("disabled");
   });
 
-  test("UserEventModal - form (killchain, tags and custom reliability)", async () => {
+  test("UserEventModal - artifact (new evaluation) - set killchain, tags and advanced evaluation", async () => {
     const user = userEvent.setup();
     axios.put.mockImplementation(() =>
       Promise.resolve({ status: 200, data: [""] }),
@@ -428,23 +498,50 @@ describe("test UserEventModal component", () => {
     expect(screen.getByText("Type:")).toBeInTheDocument();
     expect(screen.getByText("Matches:")).toBeInTheDocument();
     expect(screen.getByText("supported only for wildcard")).toBeInTheDocument();
-    const evaluationInput = screen.getAllByRole("combobox")[0];
-    expect(evaluationInput).toBeInTheDocument();
-    const commentsInput = screen.getAllByRole("textbox")[1];
-    expect(commentsInput).toBeInTheDocument();
-    expect(commentsInput.id).toBe("related_threats-0");
-    expect(commentsInput.value).toBe("");
+    expect(screen.getByText("Evaluation:")).toBeInTheDocument();
+    const basicEvaluationTab = screen.getByText("Basic");
+      expect(basicEvaluationTab).toBeInTheDocument();
+      expect(basicEvaluationTab.closest("a").className).toContain("active"); // selected
+      const advancedEvaluationTab = screen.getByText("Advanced");
+      expect(advancedEvaluationTab).toBeInTheDocument();
+      expect(advancedEvaluationTab.closest("a").className).not.toContain("active"); // selected
+      const malicious10 = screen.getByRole("radio", { name: "Confirmed malicious" });
+      expect(malicious10).toBeInTheDocument();
+      expect(malicious10).toBeChecked(); // selected - default
+      const malicious7 = screen.getByRole("radio", { name: "Malicious" });
+      expect(malicious7).toBeInTheDocument();
+      expect(malicious7).not.toBeChecked();
+      const trusted8 = screen.getByRole("radio", { name: "Currently trusted" });
+      expect(trusted8).toBeInTheDocument();
+      expect(trusted8).not.toBeChecked();
+      const trusted10 = screen.getByRole("radio", { name: "Trusted" });
+      expect(trusted10).toBeInTheDocument();
+      expect(trusted10).not.toBeChecked();
+    const reasonInput = screen.getAllByRole("textbox")[1];
+    expect(reasonInput).toBeInTheDocument();
+    expect(reasonInput.id).toBe("related_threats-0");
+    expect(reasonInput.value).toBe("");
     const externalReferencesInput = screen.getAllByRole("textbox")[2];
     expect(externalReferencesInput).toBeInTheDocument();
     expect(externalReferencesInput.id).toBe("external_references-0");
-    const killChainPhaseInput = screen.getAllByRole("combobox")[1];
+    const killChainPhaseInput = screen.getAllByRole("combobox")[0];
     expect(killChainPhaseInput).toBeInTheDocument();
-    const tagsInput = screen.getAllByRole("combobox")[2];
+    expect(screen.getByText("Tags:")).toBeInTheDocument();
+    const tagsInput = screen.getAllByRole("combobox")[1];
     expect(tagsInput).toBeInTheDocument();
     const advancedFieldsButton = screen.getByRole("button", {
       name: /Advanced fields/i,
     });
     expect(advancedFieldsButton).toBeInTheDocument();
+    await user.click(advancedEvaluationTab);
+    const malicious = screen.getByRole("radio", { name: "malicious" });
+    expect(malicious).toBeInTheDocument();
+    expect(malicious).toBeChecked();
+    const trusted = screen.getByRole("radio", { name: "trusted" });
+    expect(trusted).toBeInTheDocument();
+    expect(trusted).not.toBeChecked();
+    expect(screen.getByText("Reliability: 10")).toBeInTheDocument();
+
     const saveButton = screen.getByRole("button", { name: /Save/i });
     expect(saveButton).toBeInTheDocument();
     expect(saveButton.className).toContain("disabled");
@@ -452,12 +549,17 @@ describe("test UserEventModal component", () => {
     // add analyzable
     fireEvent.change(analyzablesInput, { target: { value: "test.com" } });
     expect(analyzablesInput.value).toBe("test.com");
-    // add evaluation
-    fireEvent.change(evaluationInput, { target: { value: "malicious" } });
-    expect(screen.getByText("MALICIOUS")).toBeInTheDocument();
-    // add comment
-    fireEvent.change(commentsInput, { target: { value: "my comment" } });
-    expect(commentsInput.value).toBe("my comment");
+    // add advanced evaluation
+    await user.click(trusted);
+    // change reliability
+    const reliabilityInput = screen.getByRole("slider");
+    expect(reliabilityInput).toBeInTheDocument();
+    expect(reliabilityInput.value).toBe("10");
+    fireEvent.change(reliabilityInput, { target: { value: "9" } });
+    expect(screen.getByText("Reliability: 9")).toBeInTheDocument();
+    // add reason
+    fireEvent.change(reasonInput, { target: { value: "my reason" } });
+    expect(reasonInput.value).toBe("my reason");
     // add tags (2 of them)
     await userEvent.click(tagsInput);
     await userEvent.click(screen.getByText("phishing"));
@@ -472,14 +574,6 @@ describe("test UserEventModal component", () => {
     await userEvent.click(screen.getByText("action"));
     expect(screen.getByText("action")).toBeInTheDocument();
     expect(screen.queryByText("c2")).not.toBeInTheDocument(); // check other option are not visible
-    // change reliability
-    await userEvent.click(advancedFieldsButton);
-    const reliabilityInput = screen.getByRole("spinbutton", {
-      name: /reliability/i,
-    });
-    expect(reliabilityInput).toBeInTheDocument();
-    userEvent.clear(reliabilityInput); // remove previous text, or type() works in append
-    userEvent.type(reliabilityInput, "9");
 
     // IMPORTANT - wait for the state change
     await screen.findByText("artifact");
@@ -494,9 +588,9 @@ describe("test UserEventModal component", () => {
       expect(axios.post).toHaveBeenCalledWith(`${USER_EVENT_ANALYZABLE}`, {
         analyzable: { name: "test.com" },
         data_model_content: {
-          evaluation: "malicious",
-          related_threats: ["my comment"],
-          reliability: 9,
+          evaluation: "trusted",
+          related_threats: ["my reason"],
+          reliability: "9",
           kill_chain_phase: "action",
           tags: ["phishing", "malware"],
         },

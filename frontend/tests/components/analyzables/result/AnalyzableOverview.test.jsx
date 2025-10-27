@@ -168,7 +168,7 @@ describe("test AnalyzableOverview", () => {
     expect(screen.getByText("scanner")).toBeInTheDocument();
     expect(screen.getByText("External References (1)")).toBeInTheDocument();
     expect(screen.getByText("test references")).toBeInTheDocument();
-    expect(screen.getByText("Comments (1)")).toBeInTheDocument();
+    expect(screen.getByText("Reasons (1)")).toBeInTheDocument();
     expect(screen.getAllByText("my comment")[0]).toBeInTheDocument();
 
     // History
@@ -217,7 +217,7 @@ describe("test AnalyzableOverview", () => {
       screen.getAllByRole("cell", { name: "admin" })[1],
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("cell", { name: "user event" }),
+      screen.getByRole("cell", { name: "user evaluation" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("cell", { name: "MALICIOUS" })).toBeInTheDocument();
   });

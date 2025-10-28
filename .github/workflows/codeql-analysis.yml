@@ -65,7 +65,7 @@ jobs:
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3.28.0
+      uses: github/codeql-action/init@v4.31.0
       with:
         languages: python
         # Override the default behavior so that the action doesn't attempt
@@ -93,4 +93,4 @@ jobs:
     #   make release
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3.28.0
+      uses: github/codeql-action/analyze@v4.31.0

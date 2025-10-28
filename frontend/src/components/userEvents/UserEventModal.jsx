@@ -53,8 +53,6 @@ import {
   DecayProgressionDescription,
   UserEventTypes,
   userEventTypesToApiMapping,
-  TrustedReliabilityDescription,
-  MaliciousReliabilityDescription,
 } from "../../constants/userEventsConst";
 import { useAuthStore } from "../../stores/useAuthStore";
 import {
@@ -72,28 +70,32 @@ const evaluationOptions = [
     evaluation: DataModelEvaluations.MALICIOUS,
     label: "Confirmed malicious",
     reliability: 10,
-    description: "Confirmed malicious",
+    description:
+      "Artifact that has been verified as actively involved in malicious activity (phishing site, download sample, c2, ...).",
   },
   {
     id: 1,
     evaluation: DataModelEvaluations.MALICIOUS,
     label: "Malicious",
     reliability: 7,
-    description: "Malicious",
+    description:
+      "Artifact that is associated with potentially malicious operations (connectivity check, etc.).",
   },
   {
     id: 2,
     evaluation: DataModelEvaluations.TRUSTED,
     label: "Currently trusted",
     reliability: 8,
-    description: "Currently trusted",
+    description:
+      "Artifact that shows no sign of malicious behavior at present, though its status could change over time.",
   },
   {
     id: 3,
     evaluation: DataModelEvaluations.TRUSTED,
     label: "Trusted",
     reliability: 10,
-    description: "Trusted",
+    description:
+      "A well-known and trusted artifact associated with a widely used legitimate service (es: google.com, 8.8.8.8, etc...)",
   },
 ];
 
@@ -643,7 +645,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                             overwrite the previous settings.
                           </small>
                         )}
-                        <small className="fst-italic">
+                        <small>
                           {
                             evaluationOptions[formik.values.basic_evaluation]
                               ?.description
@@ -729,15 +731,11 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                           />
                         </FormGroup>
                       </div>
-                      <small className="fst-italic">
+                      <small>
                         {formik.values.evaluation.toString() ===
                         DataModelEvaluations.MALICIOUS
-                          ? MaliciousReliabilityDescription[
-                              formik.values.reliability
-                            ]
-                          : TrustedReliabilityDescription[
-                              formik.values.reliability
-                            ]}
+                          ? "An artifact associated with malicious behavior. Using the reliability slider, you can adjust the level of confidence that the artifact has that evaluation."
+                          : "An artifact with no evidence of malicious activity. Using the reliability slider, you can adjust the level of confidence that the artifact has that evaluation."}
                       </small>
                     </TabPane>
                   </TabContent>

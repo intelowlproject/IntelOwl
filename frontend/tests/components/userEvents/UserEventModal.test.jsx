@@ -59,16 +59,16 @@ describe("test UserEventModal component", () => {
     {
       title: "add evaluation",
       analyzables: [analyzableMock],
-      artifact: "google.com"
+      artifact: "google.com",
     },
-  ])("UserEventModal - form ($title)", async ({_, analyzables, artifact}) => {
+  ])("UserEventModal - form ($title)", async ({ _, analyzables, artifact }) => {
     const user = userEvent.setup();
     render(
       <BrowserRouter>
-        <UserEventModal 
+        <UserEventModal
           analyzables={analyzables}
-          toggle={() => jest.fn()} 
-          isOpen 
+          toggle={() => jest.fn()}
+          isOpen
         />
       </BrowserRouter>,
     );
@@ -191,7 +191,7 @@ describe("test UserEventModal component", () => {
         decay_progression: "0",
         decay_timedelta_days: 120,
       },
-    }
+    },
   };
 
   test.each([
@@ -550,7 +550,9 @@ describe("test UserEventModal component", () => {
     expect(reasonInput.value).toBe("my reason");
     // basic evaluation tab
     await user.click(basicEvaluationTab);
-    const advancedEvalWarning = screen.getByText("Advanced reliability has been set and save correctly. Selecting a new basic evaluation will overwrite the previous settings.");
+    const advancedEvalWarning = screen.getByText(
+      "Advanced reliability has been set and save correctly. Selecting a new basic evaluation will overwrite the previous settings.",
+    );
     expect(advancedEvalWarning).toBeInTheDocument();
     // set advanced evaluation
     await user.click(malicious7);

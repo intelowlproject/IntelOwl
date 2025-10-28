@@ -64,12 +64,17 @@ import {
 import { TagsColors } from "../../constants/colorConst";
 import { EvaluationBadge } from "../common/engineBadges";
 
+const RELIABILITY_CONFIRMED_MALICIOUS = 10;
+const RELIABILITY_MALICIOUS = 7;
+const RELIABILITY_CURRENTLY_TRUSTED = 8;
+const RELIABILITY_TRUSTED = 10;
+
 const evaluationOptions = [
   {
     id: 0,
     evaluation: DataModelEvaluations.MALICIOUS,
     label: "Confirmed malicious",
-    reliability: 10,
+    reliability: RELIABILITY_CONFIRMED_MALICIOUS,
     description:
       "Artifact that has been verified as actively involved in malicious activity (phishing site, download sample, c2, ...).",
   },
@@ -77,7 +82,7 @@ const evaluationOptions = [
     id: 1,
     evaluation: DataModelEvaluations.MALICIOUS,
     label: "Malicious",
-    reliability: 7,
+    reliability: RELIABILITY_MALICIOUS,
     description:
       "Artifact that is associated with potentially malicious operations (connectivity check, etc.).",
   },
@@ -85,7 +90,7 @@ const evaluationOptions = [
     id: 2,
     evaluation: DataModelEvaluations.TRUSTED,
     label: "Currently trusted",
-    reliability: 8,
+    reliability: RELIABILITY_CURRENTLY_TRUSTED,
     description:
       "Artifact that shows no sign of malicious behavior at present, though its status could change over time.",
   },
@@ -93,16 +98,11 @@ const evaluationOptions = [
     id: 3,
     evaluation: DataModelEvaluations.TRUSTED,
     label: "Trusted",
-    reliability: 10,
+    reliability: RELIABILITY_TRUSTED,
     description:
       "A well-known and trusted artifact associated with a widely used legitimate service (es: google.com, 8.8.8.8, etc...)",
   },
 ];
-
-const basicEvaluationValue = {
-  malicious: [7, 10],
-  trusted: [8, 10],
-};
 
 export function UserEventModal({ analyzables, toggle, isOpen }) {
   console.debug("UserEventModal rendered!");
@@ -641,14 +641,16 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                       <div className="d-flex flex-column">
                         {((formik.values.evaluation.toString() ===
                           DataModelEvaluations.MALICIOUS &&
-                          !basicEvaluationValue.malicious.includes(
-                            formik.values.reliability,
-                          )) ||
+                          ![
+                            RELIABILITY_CONFIRMED_MALICIOUS,
+                            RELIABILITY_MALICIOUS,
+                          ].includes(formik.values.reliability)) ||
                           (formik.values.evaluation.toString() ===
                             DataModelEvaluations.TRUSTED &&
-                            !basicEvaluationValue.trusted.includes(
-                              formik.values.reliability,
-                            ))) && (
+                            ![
+                              RELIABILITY_CURRENTLY_TRUSTED,
+                              RELIABILITY_TRUSTED,
+                            ].includes(formik.values.reliability))) && (
                           <small
                             className="d-flex align-items-center mb-0 px-2 py-1"
                             style={{

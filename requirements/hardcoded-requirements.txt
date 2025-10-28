@@ -4,7 +4,7 @@
 # So please add a comment for each dependency explaining where the related code must be updated.
 
 # docker/Dockerfile
-pycti==6.5.1
+pycti==6.8.8
 # integrations/malware_tools_analyzers/Dockerfile
 flare-capa==9.0.0
 flare-floss==3.1.1

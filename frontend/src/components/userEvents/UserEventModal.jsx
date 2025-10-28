@@ -99,6 +99,11 @@ const evaluationOptions = [
   },
 ];
 
+const basicEvaluationValue = {
+  malicious: [7, 10],
+  trusted: [8, 10],
+};
+
 export function UserEventModal({ analyzables, toggle, isOpen }) {
   console.debug("UserEventModal rendered!");
 
@@ -373,9 +378,18 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
       labelledBy="User evaluation modal"
       isOpen={isOpen}
       style={{ minWidth: "70%" }}
-      toggle={() => toggle(false)}
+      toggle={() => {
+        formik.resetForm();
+        toggle(false);
+      }}
     >
-      <ModalHeader className="mx-2" toggle={() => toggle(false)}>
+      <ModalHeader
+        className="mx-2"
+        toggle={() => {
+          formik.resetForm();
+          toggle(false);
+        }}
+      >
         <small className="text-info">Add your evaluation</small>
       </ModalHeader>
       <ModalBody className="m-2">
@@ -627,10 +641,14 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                       <div className="d-flex flex-column">
                         {((formik.values.evaluation.toString() ===
                           DataModelEvaluations.MALICIOUS &&
-                          ![7, 10].includes(formik.values.reliability)) ||
+                          !basicEvaluationValue.malicious.includes(
+                            formik.values.reliability,
+                          )) ||
                           (formik.values.evaluation.toString() ===
                             DataModelEvaluations.TRUSTED &&
-                            ![8, 10].includes(formik.values.reliability))) && (
+                            !basicEvaluationValue.trusted.includes(
+                              formik.values.reliability,
+                            ))) && (
                           <small
                             className="d-flex align-items-center mb-0 px-2 py-1"
                             style={{

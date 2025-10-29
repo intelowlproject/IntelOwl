@@ -230,7 +230,6 @@ export function JobOverview({
         ),
       },
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       job,
       analyzersLoading,
@@ -308,7 +307,6 @@ export function JobOverview({
         );
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [job]);
 
   useEffect(() => {
@@ -370,7 +368,6 @@ export function JobOverview({
     }
 
     setUIElements(newUIElements);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [job]);
 
   const elementsToShow = isSelectedUI ? UIElements : rawElements;

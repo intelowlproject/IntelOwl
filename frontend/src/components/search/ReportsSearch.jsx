@@ -116,7 +116,6 @@ export default function ReportsSearch() {
   useEffect(() => {
     // this hook is required to run a request when the page is visited the first time
     formik.handleSubmit();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

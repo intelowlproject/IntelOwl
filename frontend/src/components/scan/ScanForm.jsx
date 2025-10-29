@@ -108,7 +108,6 @@ export default function ScanForm() {
         setGuideState({ run: true, stepIndex: 3 });
       }, 100);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   console.debug(
@@ -418,7 +417,6 @@ export default function ScanForm() {
         )[0],
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playbooksLoading]);
 
   useEffect(() => {
@@ -428,7 +426,6 @@ export default function ScanForm() {
     } else if (isSampleParam) {
       selectObservableType(JobTypes.FILE);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [observableParam, playbooksLoading, isSampleParam]);
 
   /* With the setFieldValue the validation and rerender don't work properly: the last update seems to not trigger the validation
@@ -439,7 +436,6 @@ export default function ScanForm() {
   */
   React.useEffect(() => {
     formik.validateForm();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values]);
 
   const [isRuntimeConfigModalOpen, setRuntimeConfigModalOpen] =
@@ -464,7 +460,6 @@ export default function ScanForm() {
         updateSelectedObservable(observable, index),
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toggleMultipleObservablesModal, formik.values.observable_names]);
 
   console.debug(`classification: ${formik.values.classification}`);

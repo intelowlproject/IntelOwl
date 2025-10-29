@@ -228,7 +228,6 @@ export function PlaybookConfigForm({ playbookConfig, toggle, isEditing }) {
       setSelectedPluginsParams(params);
       setEditableConfig(config);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     formik.values.analyzers,
     formik.values.connectors,
@@ -244,7 +243,6 @@ export function PlaybookConfigForm({ playbookConfig, toggle, isEditing }) {
       selectedPluginsParams,
       editableConfig,
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jsonInput]);
 
   /* With the setFieldValue the validation and rerender don't work properly: the last update seems to not trigger the validation
@@ -255,13 +253,11 @@ export function PlaybookConfigForm({ playbookConfig, toggle, isEditing }) {
     */
   React.useEffect(() => {
     formik.validateForm();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values]);
 
   // reset errors if the user change any field after a failed submission
   React.useEffect(() => {
     if (formik.submitCount && responseError) setResponseError(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values]);
 
   return (

@@ -73,7 +73,6 @@ export default function JobResult() {
     window.addEventListener("blur", () => setToNotify(true));
     if (!job && respData && !loading && error == null) setJob(respData);
     if (!loading) setInitialLoading(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
 
   // page title

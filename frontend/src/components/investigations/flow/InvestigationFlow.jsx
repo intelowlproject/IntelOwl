@@ -51,7 +51,6 @@ export function InvestigationFlow(props) {
     );
     setNodes(initialNodes);
     setEdges(initialEdges);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [investigationTree]);
 
   return (

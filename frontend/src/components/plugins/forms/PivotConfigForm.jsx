@@ -218,13 +218,11 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing }) {
     */
   React.useEffect(() => {
     formik.validateForm();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values]);
 
   // reset errors if the user change any field after a failed submission
   React.useEffect(() => {
     if (formik.submitCount && responseError) setResponseError(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values]);
 
   return (

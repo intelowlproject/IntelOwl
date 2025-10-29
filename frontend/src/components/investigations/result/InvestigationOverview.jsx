@@ -39,7 +39,6 @@ export function InvestigationOverview({
   // refetch tree after the investigation is complete
   React.useEffect(() => {
     if (!loading) refetchTree();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRunningInvestigation]);
 
   const [isEditing, setIsEditing] = React.useState(false);

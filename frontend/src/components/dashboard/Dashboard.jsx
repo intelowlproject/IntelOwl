@@ -46,7 +46,6 @@ export default function Dashboard() {
         setGuideState({ run: true, stepIndex: 9 });
       }, 100);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   console.debug("Dashboard rendered!");

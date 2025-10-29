@@ -50,7 +50,6 @@ export default function History() {
         setGuideState({ run: true, stepIndex: 7 });
       }, 200);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [showUserEventModal, setShowUserEventModal] = React.useState(false);

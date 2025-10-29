@@ -45,7 +45,6 @@ export function JobIsRunningFlow({ job }) {
   React.useEffect(() => {
     const updatedNodes = getNodes(job);
     setNodes(updatedNodes);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [job]);
 
   const reactFlowInstance = useReactFlow();

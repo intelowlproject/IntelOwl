@@ -71,7 +71,6 @@ export default function HistoryTable({
       }
       setSearchParams(newParams);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     setSearchParams,
     areParamsInitialized,

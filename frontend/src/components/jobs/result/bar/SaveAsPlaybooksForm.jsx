@@ -61,7 +61,6 @@ export function SaveAsPlaybookForm({ onFormSubmit }) {
         formik.setSubmitting(false);
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [onFormSubmit],
   );
 

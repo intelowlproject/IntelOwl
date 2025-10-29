@@ -192,7 +192,6 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
       }
     });
     setInputState({ ...inputState, ...obj });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.initialValues.analyzables]);
 
   useDebounceInput(inputValue, 1000, setWildcard);
@@ -285,7 +284,6 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
           });
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wildcard]);
 
   return (

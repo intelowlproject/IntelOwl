@@ -42,7 +42,6 @@ export default function UserMenu(props) {
 
   React.useEffect(() => {
     fetchAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

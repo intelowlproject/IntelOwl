@@ -34,6 +34,7 @@ export default defineConfig([{
         sourceType: "commonjs",
 
         parserOptions: {
+            sourceType: "module",
             ecmaFeatures: {
                 legacyDecorators: true,
                 jsx: true,

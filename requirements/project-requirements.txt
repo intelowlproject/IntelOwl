@@ -48,7 +48,7 @@ intezer-sdk==1.24.0
 lief==0.15.1
 maxminddb==2.6.0
 geoip2==4.8.0
-mwdblib==4.5.0
+mwdblib==4.6.0
 oletools==0.60.2
 OTXv2==1.5.12
 peepdf-fork==0.4.3

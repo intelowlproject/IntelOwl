@@ -20,7 +20,7 @@ Authlib==1.6.5
 djangorestframework==3.15.2
 djangorestframework-filters==1.0.0.dev2
 drf-spectacular==0.28.0
-django-rest-email-auth==4.0.0
+django-rest-email-auth==5.0.0
 
 # infra
 boto3==1.39.4

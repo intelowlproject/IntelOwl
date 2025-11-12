@@ -1,8 +1,9 @@
 import ipaddress
+import logging
 
 from django.db import transaction
-from pydantic import ValidationError
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzables_manager.serializers import AnalyzableSerializer
@@ -19,6 +20,8 @@ from api_app.user_events_manager.models import (
     UserIPWildCardEvent,
 )
 from api_app.user_events_manager.validators import validate_ipv4_network
+
+logger = logging.getLogger(__name__)
 
 
 class UserEventSerializer(serializers.ModelSerializer):
@@ -56,6 +59,8 @@ class UserAnalyzableEventSerializer(UserEventSerializer):
         classification = Classification.calculate_observable(
             self._validated_data["analyzable"]["name"]
         )
+        if classification == Classification.GENERIC:
+            raise ValidationError("Cannot create an user event for a generic")
         serializer_class = Classification.get_data_model_class(
             classification=classification,
         ).get_serializer()
@@ -64,6 +69,7 @@ class UserAnalyzableEventSerializer(UserEventSerializer):
         self._errors.update(serializer.errors)
         self._validated_data["data_model_content"] = serializer
         self._validated_data["analyzable"]["classification"] = classification
+        logger.debug(f"{self._validated_data=}")
         return res and res2
 
     def save(self, **kwargs):

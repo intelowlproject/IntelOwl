@@ -28,7 +28,6 @@ class TestUserAnalyzableEventViewSet(CustomViewSetTestCase):
             },
             context={"request": MockUpRequest(user=self.user)},
         )
-
         u.is_valid(raise_exception=True)
         self.res = u.save()
 
@@ -82,6 +81,7 @@ class TestUserAnalyzableEventViewSet(CustomViewSetTestCase):
             name="test2.com",
             classification=Classification.DOMAIN,
         )
+        # create user event
         self.client.force_authenticate(user=self.user)
         response = self.client.post(
             self.URL,
@@ -95,6 +95,7 @@ class TestUserAnalyzableEventViewSet(CustomViewSetTestCase):
             ),
             content_type="application/json",
         )
+        # check duplicates are not allowed
         self.assertEqual(response.status_code, 201, response.content)
         response = self.client.post(
             self.URL,
@@ -109,6 +110,7 @@ class TestUserAnalyzableEventViewSet(CustomViewSetTestCase):
             content_type="application/json",
         )
         self.assertEqual(response.status_code, 409, response.content)
+        # create an user event for another user
         self.client.force_authenticate(user=self.superuser)
         response = self.client.post(
             self.URL,
@@ -123,7 +125,7 @@ class TestUserAnalyzableEventViewSet(CustomViewSetTestCase):
             content_type="application/json",
         )
         self.assertEqual(response.status_code, 201, response.content)
-
+        # create an evaluation for the same user, but for a different analyzable
         self.client.force_authenticate(user=self.user)
         an3 = Analyzable.objects.filter(
             name="test3.com", classification=Classification.DOMAIN
@@ -145,6 +147,20 @@ class TestUserAnalyzableEventViewSet(CustomViewSetTestCase):
         self.assertTrue(an3.exists())
         an.delete()
         an3.delete()
+        # test generic analyzables are not allowed
+        response = self.client.post(
+            self.URL,
+            data=json.dumps(
+                {
+                    "analyzable": {"name": "google.com:445"},
+                    "decay_progression": 0,
+                    "decay_timedelta_days": 3,
+                    "data_model_content": {"evaluation": "malicious", "reliability": 8},
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
 
     def test_update(self):
         payload = {

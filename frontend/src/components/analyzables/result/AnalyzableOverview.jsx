@@ -102,7 +102,7 @@ export function AnalyzableOverview({ analyzable }) {
               ],
               [
                 "Last Evaluation",
-                analyzable.last_data_model.evaluation && (
+                analyzable?.last_data_model?.evaluation && (
                   <div
                     className="d-flex justify-content-center"
                     style={{ width: "200px" }}
@@ -120,12 +120,21 @@ export function AnalyzableOverview({ analyzable }) {
                 <DateHoverable
                   ago
                   noHover
-                  value={analyzable.last_data_model.date}
+                  value={
+                    analyzable?.last_data_model?.date ||
+                    analyzable.discovery_date
+                  }
                   format="hh:mm:ss a MMM do, yyyy"
                 />,
               ],
-              ["Malware Family", analyzable.last_data_model.malware_family],
-              ["Killchain Phase", analyzable.last_data_model.kill_chain_phase],
+              [
+                "Malware Family",
+                analyzable?.last_data_model?.malware_family || "",
+              ],
+              [
+                "Killchain Phase",
+                analyzable?.last_data_model?.kill_chain_phase || "",
+              ],
             ].map(([title, value], index) => (
               <TitleVisualizer
                 id={`title-visualizer__element-${index}`}
@@ -162,7 +171,7 @@ export function AnalyzableOverview({ analyzable }) {
             values={[
               [
                 "Tags",
-                (analyzable.last_data_model.tags || []).map((tag, index) => (
+                (analyzable?.last_data_model?.tags || []).map((tag, index) => (
                   <BooleanVisualizer
                     value={tag}
                     id={`tags-${index}`}
@@ -184,7 +193,7 @@ export function AnalyzableOverview({ analyzable }) {
               ],
               [
                 "External References",
-                analyzable.last_data_model.external_references.map(
+                (analyzable?.last_data_model?.external_references || []).map(
                   (value, index) => (
                     <BaseVisualizer
                       value={value}
@@ -196,7 +205,7 @@ export function AnalyzableOverview({ analyzable }) {
               ],
               [
                 "Reasons",
-                analyzable.last_data_model.related_threats.map(
+                (analyzable?.last_data_model?.related_threats || []).map(
                   (value, index) => (
                     <BaseVisualizer
                       value={value}

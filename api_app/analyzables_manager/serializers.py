@@ -34,11 +34,16 @@ class AnalyzableSerializer(rfs.ModelSerializer):
             .order_by("-finished_analysis_time")
             .first()
         )
-        user_event_data_model = (
-            instance.get_all_user_events_data_model().order_by("-date").first()
-        )
+        try:
+            user_event_data_model = (
+                instance.get_all_user_events_data_model().order_by("-date").first()
+            )
+        except NotImplementedError:
+            user_event_data_model = None
+        logger.debug(f"{job=}, {user_event_data_model=}")
         if not job and not user_event_data_model:
             analyzable["last_data_model"] = None
+            logger.debug(f"no data {analyzable=}")
             return analyzable
         elif (job and job.data_model) or user_event_data_model:
             if not job or not job.data_model:
@@ -57,6 +62,7 @@ class AnalyzableSerializer(rfs.ModelSerializer):
                 classification=analyzable["classification"],
             ).get_serializer()
             analyzable["last_data_model"] = serializer_class(last_data_model).data
+        logger.debug(f"before return {analyzable=}")
         return analyzable
 
     def create(self, validated_data):

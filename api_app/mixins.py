@@ -853,6 +853,10 @@ class RulesUtiliyMixin:
         if analyzer_rules_file_version is None:
             return False
 
+        logger.info(
+            f"Latest version of rules is {latest_version} \
+                     and last downloaded version is: {analyzer_rules_file_version.last_downloaded_version}"
+        )
         return latest_version == analyzer_rules_file_version.last_downloaded_version
 
     @staticmethod
@@ -887,10 +891,10 @@ class RulesUtiliyMixin:
 
     @staticmethod
     def _download_rules(
-        rule_set_download_url,
-        rule_set_directory,
-        rule_file_path,
-        latest_version,
+        rule_set_download_url: str,
+        rule_set_directory: str,
+        rule_file_path: str,
+        latest_version: str,
         analyzer_module: PythonModule,
     ):
 

@@ -5,9 +5,6 @@
 
 # docker/Dockerfile
 pycti==6.8.8
-# integrations/malware_tools_analyzers/Dockerfile
-flare-capa==9.0.0
-flare-floss==3.1.1
 
 # other unmanaged versions
 # droydlys - they make no new versions, we pin the commit

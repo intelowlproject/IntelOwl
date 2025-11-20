@@ -1,3 +1,4 @@
+import subprocess
 from unittest.mock import patch
 
 from api_app.analyzers_manager.file_analyzers.capa_info import CapaInfo
@@ -9,18 +10,30 @@ class TestCapaInfoAnalyzer(BaseFileAnalyzerTest):
     analyzer_class = CapaInfo
 
     def get_mocked_response(self):
-        mock_response = {
-            "rules": [
-                {"name": "create process", "namespace": "host-interaction/process"},
-                {"name": "read file", "namespace": "host-interaction/file"},
+        response_from_command = subprocess.CompletedProcess(
+            args=[
+                "capa",
+                "--quiet",
+                "--json",
+                "-r",
+                "/opt/deploy/files_required/capa/capa-rules",
+                "-s",
+                "/opt/deploy/files_required/capa/sigs",
+                "/opt/deploy/files_required/06ebf06587b38784e2af42dd5fbe56e5",
             ],
-            "meta": {"analysis": "mocked capa analysis"},
-        }
-        return patch.object(CapaInfo, "_docker_run", return_value=mock_response)
+            returncode=0,
+            stdout='{"meta": {}, "rules": {"contain obfuscated stackstrings": {}, "enumerate PE sections":{}}}',
+            stderr="",
+        )
+        return [
+            patch.object(CapaInfo, "update", return_value=True),
+            patch("subprocess.run", return_value=response_from_command),
+        ]
 
     def get_extra_config(self):
         return {
             "shellcode": False,
             "arch": "64",
-            "args": [],
+            "timeout": 15,
+            "force_pull_signatures": False,
         }

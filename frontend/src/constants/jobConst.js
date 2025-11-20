@@ -171,7 +171,6 @@ export const FileExtensions = Object.freeze({
   YAML: "yaml",
   SRC: "src",
   HTA: "hta",
-  PUB: "pub",
   HTTPS: "https",
   SYS: "sys",
   EML: "eml",
@@ -191,6 +190,7 @@ export const FileExtensions = Object.freeze({
   /* This is a list of valid tld that are also file extnesions.
   This could generate some false positives in the auto-extraction, if they are too much filter them.
   sh
+  pub
   */
 });
 

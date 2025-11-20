@@ -110,7 +110,8 @@ describe("test AnalyzableOverview", () => {
             name: "google.com",
             discovery_date: jobDate,
             md5: "1d5920f4b44b27a802bd77c4f0536f5a",
-            sha256: "d4c9d9027326271a89ce51fcaf328ed673f17be33469ff979e8ab8dd501e664f",
+            sha256:
+              "d4c9d9027326271a89ce51fcaf328ed673f17be33469ff979e8ab8dd501e664f",
             sha1: "baea954b95731c68ae6e45bd1e252eb4560cdc45",
             classification: "domain",
             mimetype: null,
@@ -234,7 +235,8 @@ describe("test AnalyzableOverview", () => {
             name: "1.1.1.1:443",
             discovery_date: jobDate,
             md5: "ecd3de7f98cd6d1606c6a48827f401b5",
-            sha256: "d517fa0b3424c1ce3eedeabc3acb2cb4d0190b235485f1bdc890a2dc28e032a4",
+            sha256:
+              "d517fa0b3424c1ce3eedeabc3acb2cb4d0190b235485f1bdc890a2dc28e032a4",
             sha1: "5850ce82c78a3e186a6478d03d6f62e37ab9fa44",
             classification: "generic",
             mimetype: null,

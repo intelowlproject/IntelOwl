@@ -71,7 +71,7 @@ class UserAnalyzableEvent(UserEvent):
         },
         editable=False,
     )
-    data_model_object_id = models.PositiveIntegerField(editable=False)
+    data_model_object_id = models.PositiveIntegerField(editable=False, db_index=True)
     data_model = GenericForeignKey("data_model_content_type", "data_model_object_id")
 
     decay_progression = models.IntegerField(

@@ -1309,9 +1309,6 @@ class JobAnalyzableHistorySerializer(rfs.ModelSerializer):
         logger.debug(f"{instance=}")
         logger.debug(f"{instance.analyzable=}")
 
-        if (
-            instance.analyzable.classification != Classification.GENERIC.value
-            and instance.data_model
-        ):
+        if instance.data_model:
             return instance.data_model.serialize()
         return {}

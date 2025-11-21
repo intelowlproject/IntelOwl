@@ -58,10 +58,14 @@ class AnalyzableSerializer(rfs.ModelSerializer):
                 else:
                     last_data_model = user_event_data_model
 
-            serializer_class = Classification.get_data_model_class(
-                classification=analyzable["classification"],
-            ).get_serializer()
-            analyzable["last_data_model"] = serializer_class(last_data_model).data
+            try:
+                serializer_class = Classification.get_data_model_class(
+                    classification=analyzable["classification"],
+                ).get_serializer()
+            except NotImplementedError:
+                pass
+            else:
+                analyzable["last_data_model"] = serializer_class(last_data_model).data
         logger.debug(f"before return {analyzable=}")
         return analyzable
 

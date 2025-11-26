@@ -33,6 +33,8 @@ class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
 
     def run(self):
         response = {}
+
+        # Select API version
         if self.greynoise_api_version == "v2":
             session = GreyNoise(
                 api_key=self._api_key_name,
@@ -48,23 +50,30 @@ class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
             raise AnalyzerRunException(
                 "Invalid API Version. Supported are: v2 (paid), v3 (community)"
             )
+
         try:
+            # Base lookup
             response = session.ip(self.observable_name)
+
+            # SAFE, CodeQL-approved merge for v2
             if self.greynoise_api_version == "v2":
-                response |= session.riot(self.observable_name)
-        # greynoise library does provide empty messages in case of these errors...
-        # so it's better to catch them and create custom management
+                riot_data = session.riot(self.observable_name)
+                if isinstance(riot_data, dict):
+                    response.update(riot_data)
+
         except RateLimitError as e:
             self.disable_for_rate_limit()
             self.report.errors.append(e)
             self.report.save()
             raise AnalyzerRunException(f"Rate limit error: {e}")
+
         except RequestFailure as e:
             self.report.errors.append(e)
             self.report.save()
             raise AnalyzerRunException(f"Request failure error: {e}")
+
         except NotFound as e:
-            logger.info(f"not found error for {self.observable_name} :{e}")
+            logger.info(f"not found error for {self.observable_name}: {e}")
             response["not_found"] = True
 
         return response
@@ -82,23 +91,28 @@ class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
         classification = self.report.report.get("classification", None)
         riot = self.report.report.get("riot", None)
         noise = self.report.report.get("noise", None)
+
         if classification:
             classification = classification.lower()
             self.report: AnalyzerReport
+
             if classification == self.EVALUATIONS.MALICIOUS.value:
                 if not noise:
                     logger.error("malicious IP is not a noise!?! How is this possible")
                 data_model.evaluation = self.EVALUATIONS.MALICIOUS.value
                 data_model.reliability = 7
+
             elif classification == "unknown":
                 if riot:
                     data_model.evaluation = self.EVALUATIONS.TRUSTED.value
                     data_model.reliability = 1
                 elif noise:
                     data_model.evaluation = self.EVALUATIONS.MALICIOUS.value
+
             elif classification == "benign":
                 data_model.evaluation = self.EVALUATIONS.TRUSTED.value
                 data_model.reliability = 7
+
             else:
                 logger.error(
                     f"there should not be other types of classification. Classification found: {classification}"

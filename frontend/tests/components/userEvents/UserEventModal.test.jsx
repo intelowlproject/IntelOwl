@@ -63,6 +63,9 @@ describe("test UserEventModal component", () => {
     },
   ])("UserEventModal - form ($title)", async ({ _, analyzables, artifact }) => {
     const user = userEvent.setup();
+    axios.get.mockImplementation(() =>
+        Promise.resolve({ status: 200, data: { count: 0 } }),
+      );
     render(
       <BrowserRouter>
         <UserEventModal
@@ -84,7 +87,9 @@ describe("test UserEventModal component", () => {
     expect(analyzablesInput.value).toBe(artifact);
     expect(screen.getByText("Type:")).toBeInTheDocument();
     expect(screen.getByText("Matches:")).toBeInTheDocument();
-    expect(screen.getByText("supported only for wildcard")).toBeInTheDocument();
+    await waitFor(() => {
+          expect(screen.getByText("supported only for wildcard")).toBeInTheDocument();
+        });
     expect(screen.getByText("Evaluation:")).toBeInTheDocument();
     const basicEvaluationTab = screen.getByText("Basic");
     expect(basicEvaluationTab).toBeInTheDocument();

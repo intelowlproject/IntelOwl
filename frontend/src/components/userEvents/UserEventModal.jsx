@@ -259,14 +259,20 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
     // this useEffect populate initial state in case the model is accessed from previously searched analyzables
     const obj = {};
     analyzables.forEach((analyzable) => {
-      if (analyzable.name !== "") {
-        obj[analyzable.name] = {
-          type: UserEventTypes.ANALYZABLE,
-          eventId: analyzable.id,
-        };
+      if (analyzable.name !== "" && analyzable.name !== undefined) {
+        axios
+          .get(
+            `${USER_EVENT_ANALYZABLE}?username=${user.username}&analyzable_name=${analyzable.name}`,
+          )
+          .then((resp) => {
+            obj[analyzable.name] = {
+              type: UserEventTypes.ANALYZABLE,
+              eventId: resp.data.count !== 0 ? resp.data.results[0].id : null,
+            };
+            setInputState({ ...inputState, ...obj });
+          });
       }
     });
-    setInputState({ ...inputState, ...obj });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [analyzables]);
 

@@ -149,8 +149,8 @@ function parseElementFields(rawElement) {
       validatedFields.base64 = parseString(rawElement.base64);
       validatedFields.title = parseString(rawElement.title);
       validatedFields.description = parseString(rawElement.description);
-      validatedFields.maxWidth = rawElement.max_width || 500;
-      validatedFields.maxHeight = rawElement.max_height || 400;
+      validatedFields.maxWidth = parseString(rawElement.max_width || "500px");
+      validatedFields.maxHeight = parseString(rawElement.max_height || "400px");
       validatedFields.allowExpand = parseBool(rawElement.allow_expand ?? true);
       break;
     }

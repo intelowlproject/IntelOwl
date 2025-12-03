@@ -64,8 +64,8 @@ export function ImageVisualizer({
   }, [imageSrc]);
 
   const containerStyle = {
-    maxWidth: maxWidth || 500,
-    maxHeight: maxHeight || 400,
+    maxWidth: maxWidth || "500px",
+    maxHeight: maxHeight || "400px",
     overflow: "hidden",
     display: "flex",
     flexDirection: "column",
@@ -74,7 +74,7 @@ export function ImageVisualizer({
 
   const imageStyle = {
     maxWidth: "100%",
-    maxHeight: maxHeight ? maxHeight - 40 : 360,
+    maxHeight: maxHeight || "360px",
     objectFit: "contain",
     cursor: !disable && allowExpand && !hasError ? "pointer" : "default",
     opacity: disable ? 0.5 : 1,
@@ -93,6 +93,16 @@ export function ImageVisualizer({
       );
     }
 
+    const imageElement = (
+      <img
+        src={imageSrc}
+        alt={title || "Visualizer Image"}
+        style={{ ...imageStyle, display: isLoading ? "none" : "block" }}
+        onLoad={handleImageLoad}
+        onError={handleImageError}
+      />
+    );
+
     return (
       <>
         {isLoading && (
@@ -104,21 +114,22 @@ export function ImageVisualizer({
             Loading...
           </div>
         )}
-        <img
-          src={imageSrc}
-          alt={title || "Visualizer Image"}
-          style={{ ...imageStyle, display: isLoading ? "none" : "block" }}
-          onLoad={handleImageLoad}
-          onError={handleImageError}
-          onClick={toggleModal}
-          role={allowExpand && !disable ? "button" : undefined}
-          tabIndex={allowExpand && !disable ? 0 : undefined}
-          onKeyDown={(e) => {
-            if ((e.key === "Enter" || e.key === " ") && allowExpand && !disable) {
-              toggleModal();
-            }
-          }}
-        />
+        {allowExpand && !disable ? (
+          <button
+            type="button"
+            onClick={toggleModal}
+            style={{
+              border: "none",
+              background: "transparent",
+              padding: 0,
+              cursor: "pointer",
+            }}
+          >
+            {imageElement}
+          </button>
+        ) : (
+          imageElement
+        )}
       </>
     );
   };
@@ -157,12 +168,18 @@ export function ImageVisualizer({
 
       {/* Modal for expanded view */}
       <Modal isOpen={isModalOpen} toggle={toggleModal} size="xl" centered>
-        <ModalHeader toggle={toggleModal}>{title || "Image Preview"}</ModalHeader>
+        <ModalHeader toggle={toggleModal}>
+          {title || "Image Preview"}
+        </ModalHeader>
         <ModalBody className="text-center p-4">
           <img
             src={imageSrc}
             alt={title || "Visualizer Image"}
-            style={{ maxWidth: "100%", maxHeight: "80vh", objectFit: "contain" }}
+            style={{
+              maxWidth: "100%",
+              maxHeight: "80vh",
+              objectFit: "contain",
+            }}
           />
           {description && <p className="text-muted mt-3 mb-0">{description}</p>}
         </ModalBody>
@@ -177,8 +194,8 @@ ImageVisualizer.propTypes = {
   base64: PropTypes.string,
   title: PropTypes.string,
   description: PropTypes.string,
-  maxWidth: PropTypes.number,
-  maxHeight: PropTypes.number,
+  maxWidth: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  maxHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   allowExpand: PropTypes.bool,
   disable: PropTypes.bool,
   size: PropTypes.string,
@@ -189,8 +206,8 @@ ImageVisualizer.defaultProps = {
   base64: "",
   title: "",
   description: "",
-  maxWidth: 500,
-  maxHeight: 400,
+  maxWidth: "500px",
+  maxHeight: "400px",
   allowExpand: true,
   disable: false,
   size: "col-auto",

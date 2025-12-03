@@ -14,6 +14,7 @@ from api_app.visualizers_manager.classes import (
     VisualizableBool,
     VisualizableDownload,
     VisualizableHorizontalList,
+    VisualizableImage,
     VisualizableLevel,
     VisualizableLevelSize,
     VisualizableObject,
@@ -677,3 +678,60 @@ class VisualizableTableColumnTestCase(CustomTestCase):
             "disable_sort_by": True,
         }
         self.assertEqual(expected_result, result)
+
+
+class VisualizableImageTestCase(CustomTestCase):
+    def test_to_dict_with_url(self):
+        img = VisualizableImage(
+            url="https://example.com/image.png",
+            title="Test Image",
+            description="A test image",
+            max_width=400,
+            max_height=300,
+            allow_expand=True,
+        )
+        result = img.to_dict()
+
+        self.assertEqual(result["type"], "image")
+        self.assertEqual(result["url"], "https://example.com/image.png")
+        self.assertEqual(result["title"], "Test Image")
+        self.assertEqual(result["description"], "A test image")
+        self.assertEqual(result["max_width"], 400)
+        self.assertEqual(result["max_height"], 300)
+        self.assertEqual(result["allow_expand"], True)
+
+    def test_to_dict_with_base64(self):
+        img = VisualizableImage(
+            base64="iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAA",
+            title="Base64 Image",
+        )
+        result = img.to_dict()
+
+        self.assertEqual(result["type"], "image")
+        self.assertEqual(result["base64"], "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAA")
+        self.assertEqual(result["url"], "")
+        self.assertEqual(result["title"], "Base64 Image")
+
+    def test_requires_url_or_base64(self):
+        with self.assertRaises(ValueError) as context:
+            VisualizableImage(title="No source")
+        self.assertIn("url", str(context.exception).lower())
+
+    def test_default_values(self):
+        img = VisualizableImage(url="https://example.com/img.png")
+        result = img.to_dict()
+
+        self.assertEqual(result["max_width"], 500)
+        self.assertEqual(result["max_height"], 400)
+        self.assertEqual(result["allow_expand"], True)
+        self.assertEqual(result["disable"], False)
+        self.assertEqual(result["alignment"], "center")
+
+    def test_disabled_image(self):
+        img = VisualizableImage(
+            url="https://example.com/img.png",
+            disable=True,
+        )
+        result = img.to_dict()
+
+        self.assertEqual(result["disable"], True)

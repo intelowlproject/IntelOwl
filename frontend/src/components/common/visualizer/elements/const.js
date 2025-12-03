@@ -6,4 +6,5 @@ export const VisualizerComponentType = Object.freeze({
   TITLE: "title",
   TABLE: "table",
   DOWNLOAD: "download",
+  IMAGE: "image",
 });

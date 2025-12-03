@@ -8,6 +8,7 @@ import { BooleanVisualizer } from "./elements/bool";
 import { BaseVisualizer } from "./elements/base";
 import { VerticalListVisualizer } from "./elements/verticalList";
 import { TitleVisualizer } from "./elements/title";
+import { ImageVisualizer } from "./elements/image";
 
 import { VisualizerComponentType } from "./elements/const";
 import { getIcon } from "../icon/icons";
@@ -27,6 +28,24 @@ import { DownloadVisualizer } from "./elements/download";
 function convertToElement(element, idElement, isChild = false) {
   let visualizerElement;
   switch (element.type) {
+    case VisualizerComponentType.IMAGE: {
+      visualizerElement = (
+        <ImageVisualizer
+          key={idElement}
+          id={idElement}
+          size={element.size}
+          disable={element.disable}
+          url={element.url}
+          base64={element.base64}
+          title={element.title}
+          description={element.description}
+          maxWidth={element.maxWidth}
+          maxHeight={element.maxHeight}
+          allowExpand={element.allowExpand}
+        />
+      );
+      break;
+    }
     case VisualizerComponentType.DOWNLOAD: {
       visualizerElement = (
         <DownloadVisualizer

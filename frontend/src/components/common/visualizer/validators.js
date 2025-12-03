@@ -144,6 +144,16 @@ function parseElementFields(rawElement) {
 
   // validation for the elements
   switch (validatedFields.type) {
+    case VisualizerComponentType.IMAGE: {
+      validatedFields.url = parseString(rawElement.url);
+      validatedFields.base64 = parseString(rawElement.base64);
+      validatedFields.title = parseString(rawElement.title);
+      validatedFields.description = parseString(rawElement.description);
+      validatedFields.maxWidth = rawElement.max_width || 500;
+      validatedFields.maxHeight = rawElement.max_height || 400;
+      validatedFields.allowExpand = parseBool(rawElement.allow_expand ?? true);
+      break;
+    }
     case VisualizerComponentType.DOWNLOAD: {
       validatedFields.value = parseString(rawElement.value);
       validatedFields.mimetype = parseMimetype(rawElement.mimetype);

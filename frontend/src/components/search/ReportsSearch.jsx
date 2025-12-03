@@ -230,11 +230,11 @@ export default function ReportsSearch() {
               </Input>
             </Col>
           </Row>
-          <Row id="search-input-fields-second-row">
+          <Row id="search-input-fields-second-row" className="flex-wrap">
             <Col
               xxl={4}
               sm={12}
-              className="d-flex align-items-center flex-wrap mt-3"
+              className="d-flex align-items-center flex-wrap mt-3 overflow-hidden"
             >
               <Label className="col-3 fw-bold mb-0">Start time:</Label>
               <div className="d-flex flex-column align-item-start">
@@ -252,7 +252,8 @@ export default function ReportsSearch() {
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                       invalid={formik.errors.startTime}
-                      className="col-6"
+                      className="bg-darker border-dark"
+                      style={{ maxWidth: "200px" }}
                     />
                   </div>
                   <div className="d-flex align-items-center">
@@ -268,7 +269,8 @@ export default function ReportsSearch() {
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                       invalid={formik.errors.startTime}
-                      className="col-6"
+                      className="bg-darker border-dark"
+                      style={{ maxWidth: "200px" }}
                     />
                   </div>
                 </div>
@@ -282,7 +284,7 @@ export default function ReportsSearch() {
             <Col
               xxl={4}
               sm={12}
-              className="d-flex align-items-center flex-wrap mt-3"
+              className="d-flex align-items-center flex-wrap mt-3 overflow-hidden"
             >
               <Label className="col-3 fw-bold mb-0">End time:</Label>
               <div className="d-flex flex-column align-item-start">
@@ -300,7 +302,8 @@ export default function ReportsSearch() {
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                       invalid={formik.errors.endTime}
-                      className="col-6"
+                      className="bg-darker border-dark"
+                      style={{ maxWidth: "200px" }}
                     />
                   </div>
                   <div className="d-flex align-items-center">
@@ -316,7 +319,8 @@ export default function ReportsSearch() {
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                       invalid={formik.errors.endTime}
-                      className="col-6"
+                      className="bg-darker border-dark"
+                      style={{ maxWidth: "200px" }}
                     />
                   </div>
                 </div>

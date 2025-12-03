@@ -65,8 +65,6 @@ export function ImageVisualizer({
 
   const containerStyle = {
     maxWidth: maxWidth || "500px",
-    maxHeight: maxHeight || "400px",
-    overflow: "hidden",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -74,7 +72,7 @@ export function ImageVisualizer({
 
   const imageStyle = {
     maxWidth: "100%",
-    maxHeight: maxHeight || "360px",
+    maxHeight: maxHeight || "400px",
     objectFit: "contain",
     cursor: !disable && allowExpand && !hasError ? "pointer" : "default",
     opacity: disable ? 0.5 : 1,

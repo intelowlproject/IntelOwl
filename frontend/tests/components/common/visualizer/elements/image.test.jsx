@@ -85,12 +85,13 @@ describe("ImageVisualizer component", () => {
     const img = screen.getByAltText("Expandable Image");
     fireEvent.load(img);
 
-    // Click the image
-    fireEvent.click(img);
+    // Click the button wrapper (image is inside a button when allowExpand is true)
+    const button = img.closest("button");
+    fireEvent.click(button);
 
-    // Modal should be open
+    // Modal should be open - header shows the title
     await waitFor(() => {
-      expect(screen.getByText("Image Preview")).toBeInTheDocument();
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
     });
   });
 

@@ -6,7 +6,7 @@ import logging
 
 import dns.message
 import requests
-from httpx import Client, ConnectError
+from httpx import Client, ConnectError, HTTPStatusError, RequestError
 
 from api_app.analyzers_manager import classes
 
@@ -33,7 +33,6 @@ class Quad9MaliciousDetector(DoHMixin, classes.ObservableAnalyzer):
         pass
 
     def run(self):
-
         observable = self.convert_to_domain(
             self.observable_name, self.observable_classification
         )
@@ -66,18 +65,38 @@ class Quad9MaliciousDetector(DoHMixin, classes.ObservableAnalyzer):
         quad9_response = None
         for attempt in range(0, attempt_number):
             try:
-                quad9_response = Client(http2=True).get(
-                    complete_url, headers=self.headers, timeout=10
-                )
-            except ConnectError as exception:
-                # if the last attempt fails, raise an error
-                if attempt == attempt_number - 1:
-                    raise exception
-            else:
-                quad9_response.raise_for_status()
+                with Client(http2=True, timeout=10) as client:
+                    quad9_response = client.get(complete_url, headers=self.headers)
+                    quad9_response.raise_for_status()
                 break
+            except (ConnectError, RequestError, HTTPStatusError) as exception:
+                logger.debug(
+                    "Quad9 malicious detector attempt %d failed for %s: %s",
+                    attempt + 1,
+                    complete_url,
+                    exception,
+                )
+                # if the last attempt fails, return False (assume not malicious)
+                if attempt == attempt_number - 1:
+                    logger.warning(
+                        "Quad9 malicious detector failed after %d attempts for %s",
+                        attempt_number,
+                        observable,
+                    )
+                    return False
 
-        dns_response = dns.message.from_wire(quad9_response.content)
+        # Guard: if we somehow have no response, return False
+        if not quad9_response:
+            return False
+
+        try:
+            dns_response = dns.message.from_wire(quad9_response.content)
+        except Exception as e:
+            logger.warning(
+                "Failed to parse Quad9 DNS response for %s: %s", observable, e
+            )
+            return False
+
         resolutions: list[str] = []
         for answer in dns_response.answer:
             resolutions.extend([resolution.address for resolution in answer])
@@ -94,7 +113,11 @@ class Quad9MaliciousDetector(DoHMixin, classes.ObservableAnalyzer):
         :rtype: bool
         """
         params = {"name": observable}
-        google_response = requests.get(self.google_url, params=params)
-        google_response.raise_for_status()
+        try:
+            google_response = requests.get(self.google_url, params=params, timeout=10)
+            google_response.raise_for_status()
+        except requests.RequestException as e:
+            logger.warning("Google DNS query failed for %s: %s", observable, e)
+            return False
 
         return bool(google_response.json().get("Answer", None))

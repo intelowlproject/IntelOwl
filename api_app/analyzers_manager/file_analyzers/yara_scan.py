@@ -100,17 +100,24 @@ class YaraRepo:
 
     def _update_zip(self):
         logger.info(f"About to download zip file from {self.url} to {self.directory}")
-        response = requests.get(self.url, stream=True)
         try:
+            response = requests.get(self.url, stream=True, timeout=30)
             response.raise_for_status()
-        except Exception as e:
-            logger.exception(e)
+        except requests.RequestException as e:
+            logger.exception(f"Failed to download zip from {self.url}: {e}")
             os.makedirs(
                 self.directory, exist_ok=True
             )  # still create the folder or raise errors
-        else:
+            return
+
+        try:
             zipfile_ = zipfile.ZipFile(io.BytesIO(response.content))
             zipfile_.extractall(self.directory)
+        except zipfile.BadZipFile:
+            logger.error(f"Downloaded file from {self.url} is not a valid zip file")
+            os.makedirs(
+                self.directory, exist_ok=True
+            )  # still create the folder to avoid errors
 
     def _update_git(self):
         try:

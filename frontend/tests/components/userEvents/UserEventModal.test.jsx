@@ -467,10 +467,14 @@ describe("test UserEventModal component", () => {
     fireEvent.change(malwareFamilyInput, { target: { value: "ursnif" } });
     expect(malwareFamilyInput.value).toBe("ursnif");
     // add related artifacts
-    fireEvent.change(relatedThreatsInput, { target: { value: "anotherArtifact.com" } });
+    fireEvent.change(relatedThreatsInput, {
+      target: { value: "anotherArtifact.com" },
+    });
     expect(relatedThreatsInput.value).toBe("anotherArtifact.com");
     // add external references
-    fireEvent.change(externalReferencesInput, { target: { value: "http://test.com" } });
+    fireEvent.change(externalReferencesInput, {
+      target: { value: "http://test.com" },
+    });
     expect(externalReferencesInput.value).toBe("http://test.com");
     // add killchain phase
     await userEvent.click(killChainPhaseInput);

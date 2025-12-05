@@ -200,7 +200,7 @@ describe("test AnalyzableOverview", () => {
     expect(
       screen.getByRole("columnheader", { name: "Description" }),
     ).toBeInTheDocument();
-    
+
     expect(screen.getByText("my reason")).toBeInTheDocument();
     // cell - job
     expect(screen.getByRole("cell", { name: "#13" })).toBeInTheDocument();

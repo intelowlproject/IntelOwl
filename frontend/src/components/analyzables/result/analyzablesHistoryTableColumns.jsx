@@ -159,7 +159,7 @@ export const analyzablesHistoryTableColumns = [
       } else if (value.type === AnalyzableHistoryTypes.JOB) {
         text = "Custom Analysis";
       } else {
-        text = value.data_model.related_threats.toString();
+        text = value.reason;
       }
       return text;
     },

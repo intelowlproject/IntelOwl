@@ -69,6 +69,7 @@ describe("test AnalyzableOverview", () => {
               rank: null,
               resolutions: [],
             },
+            reason: "my reason",
             data_model_object_id: 15,
             decay_progression: 0,
             decay_timedelta_days: 3,
@@ -199,6 +200,8 @@ describe("test AnalyzableOverview", () => {
     expect(
       screen.getByRole("columnheader", { name: "Description" }),
     ).toBeInTheDocument();
+    
+    expect(screen.getByText("my reason")).toBeInTheDocument();
     // cell - job
     expect(screen.getByRole("cell", { name: "#13" })).toBeInTheDocument();
     expect(screen.getByText("#13").href).toContain("/jobs/13/visualizer");

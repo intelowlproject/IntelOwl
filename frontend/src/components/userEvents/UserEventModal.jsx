@@ -128,6 +128,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
       tags: [],
       malware_family: "",
       // advanced fields
+      reason: "",
       evaluation: DataModelEvaluations.MALICIOUS,
       reliability: 10,
       decay_progression: DecayProgressionTypes.LINEAR,
@@ -150,8 +151,8 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
             errors[`analyzables-${index}`] = wildcardInputError[analyzable];
         }
       });
-      if (values.related_threats[0] === "") {
-        errors["related_threats-0"] = "Reason is required";
+      if (values.reason === "") {
+        errors.reason = "Reason is required";
       }
       if (!Number.isInteger(values.decay_timedelta_days)) {
         errors.decay_timedelta_days = "The value must be a number.";
@@ -168,34 +169,29 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
     },
     validateOnMount: true,
     onSubmit: async () => {
-      const editedFields = {};
-      delete formik.values.basic_evaluation; // not needed in the request
-      Object.entries(formik.values).forEach(([key, value]) => {
-        if (
-          /* order matters! kill chain also HTML and cannot be converted into JSON
-          check before the fields and then check if they are different from the default values
-          */
-          !["analyzables", "kill_chain_phase", "tags"].includes(key) &&
-          JSON.stringify(value) !== JSON.stringify(formik.initialValues[key])
-        ) {
-          editedFields[key] = value;
-        }
-        // special cases for kill chain: it has a key with html as value
-        if (key === "kill_chain_phase" && value !== "") {
-          editedFields.kill_chain_phase = value.value;
-        }
-        if (key === "tags" && value.length) {
-          editedFields.tags = value.map((tag) => tag.value);
-        }
-      });
-      console.debug("editedFields", editedFields);
       const evaluation = {
+        reason: formik.values.reason,
         decay_progression: formik.values.decay_progression,
         decay_timedelta_days: formik.values.decay_timedelta_days,
         data_model_content: {
-          ...editedFields,
           evaluation: formik.values.evaluation,
           reliability: formik.values.reliability,
+          external_references:
+            formik.values.external_references[0] !== ""
+              ? formik.values.external_references
+              : [],
+          related_threats:
+            formik.values.related_threats[0] !== ""
+              ? formik.values.related_threats
+              : [],
+          malware_family: formik.values.malware_family,
+          kill_chain_phase:
+            formik.values.kill_chain_phase !== ""
+              ? formik.values.kill_chain_phase.value
+              : "",
+          tags: formik.values.tags.length
+            ? formik.values.tags.map((tag) => tag.value)
+            : [],
         },
       };
       console.debug("evaluation", evaluation);
@@ -772,11 +768,54 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
             <FormGroup>
               <Row>
                 <Col md={2} className="d-flex align-items-center">
-                  <Label
-                    className="me-2 mb-0 required"
-                    for="userEvent__related_threats"
-                  >
+                  <Label className="me-2 mb-0 required" for="userEvent__reason">
                     Reason:
+                  </Label>
+                </Col>
+                <Col md={8}>
+                  <Input
+                    id="reason"
+                    name="reason"
+                    type="text"
+                    className="input-dark"
+                    values={formik.values.reason}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    invalid={formik.errors.reason && formik.touched.reason}
+                  />
+                  {formik.errors.reason && formik.touched.reason && (
+                    <span className="text-danger">{formik.errors.reason}</span>
+                  )}
+                </Col>
+              </Row>
+            </FormGroup>
+            <hr />
+            <FormGroup>
+              <Row>
+                <Col md={2} className="d-flex align-items-center">
+                  <Label className="me-2 mb-0" for="userEvent__malware_family">
+                    Malware family:
+                  </Label>
+                </Col>
+                <Col md={8}>
+                  <Input
+                    id="malware_family"
+                    name="malware_family"
+                    type="text"
+                    className="input-dark"
+                    values={formik.values.reason}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
+                </Col>
+              </Row>
+            </FormGroup>
+            <hr />
+            <FormGroup>
+              <Row>
+                <Col md={2} className="d-flex align-items-center">
+                  <Label className="me-2 mb-0" for="userEvent__related_threats">
+                    Related Artifacts:
                   </Label>
                 </Col>
                 <Col md={10}>
@@ -786,16 +825,10 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                     formikSetFieldValue={formik.setFieldValue}
                     formikHandlerBlur={formik.handleBlur}
                   />
-                  {formik.errors["related_threats-0"] &&
-                    formik.touched["related_threats-0"] && (
-                      <span className="text-danger">
-                        {formik.errors["related_threats-0"]}
-                      </span>
-                    )}
                 </Col>
               </Row>
-              <hr />
             </FormGroup>
+            <hr />
             <FormGroup>
               <Row>
                 <Col md={2} className="d-flex align-items-center">

@@ -25,6 +25,7 @@ class UserEvent(models.Model):
         on_delete=models.CASCADE,
     )
     date = models.DateTimeField(default=now, editable=False, db_index=True)
+    reason = models.CharField(max_length=256, default=str)
     data_model: ForeignKey
 
     decay_progression = models.IntegerField(

@@ -117,8 +117,17 @@ describe("test UserEventModal component", () => {
     expect(trusted10).not.toBeChecked();
     const reasonInput = screen.getAllByRole("textbox")[1];
     expect(reasonInput).toBeInTheDocument();
-    expect(reasonInput.id).toBe("related_threats-0");
-    const externalReferencesInput = screen.getAllByRole("textbox")[2];
+    expect(reasonInput.id).toBe("reason");
+    expect(reasonInput.value).toBe("");
+    const malwareFamilyInput = screen.getAllByRole("textbox")[2];
+    expect(malwareFamilyInput).toBeInTheDocument();
+    expect(malwareFamilyInput.id).toBe("malware_family");
+    expect(malwareFamilyInput.value).toBe("");
+    const relatedThreatsInput = screen.getAllByRole("textbox")[3];
+    expect(relatedThreatsInput).toBeInTheDocument();
+    expect(relatedThreatsInput.id).toBe("related_threats-0");
+    expect(relatedThreatsInput.value).toBe("");
+    const externalReferencesInput = screen.getAllByRole("textbox")[4];
     expect(externalReferencesInput).toBeInTheDocument();
     expect(externalReferencesInput.id).toBe("external_references-0");
     expect(screen.getByText("Kill chain phase:")).toBeInTheDocument();
@@ -162,9 +171,14 @@ describe("test UserEventModal component", () => {
         analyzable: { name: "google.com" },
         data_model_content: {
           evaluation: "malicious",
-          related_threats: ["my reason"],
           reliability: 10,
+          malware_family: "",
+          kill_chain_phase: "",
+          related_threats: [],
+          external_references: [],
+          tags: [],
         },
+        reason: "my reason",
         decay_progression: "0",
         decay_timedelta_days: 120,
       },
@@ -177,9 +191,14 @@ describe("test UserEventModal component", () => {
         network: "1.2.3.0/24",
         data_model_content: {
           evaluation: "malicious",
-          related_threats: ["my reason"],
           reliability: 10,
+          malware_family: "",
+          kill_chain_phase: "",
+          related_threats: [],
+          external_references: [],
+          tags: [],
         },
+        reason: "my reason",
         decay_progression: "0",
         decay_timedelta_days: 120,
       },
@@ -192,9 +211,14 @@ describe("test UserEventModal component", () => {
         query: ".*\\.test.com",
         data_model_content: {
           evaluation: "malicious",
-          related_threats: ["my reason"],
           reliability: 10,
+          malware_family: "",
+          kill_chain_phase: "",
+          related_threats: [],
+          external_references: [],
+          tags: [],
         },
+        reason: "my reason",
         decay_progression: "0",
         decay_timedelta_days: 120,
       },
@@ -296,9 +320,17 @@ describe("test UserEventModal component", () => {
       expect(trusted10).not.toBeChecked();
       const reasonInput = screen.getAllByRole("textbox")[1];
       expect(reasonInput).toBeInTheDocument();
-      expect(reasonInput.id).toBe("related_threats-0");
+      expect(reasonInput.id).toBe("reason");
       expect(reasonInput.value).toBe("");
-      const externalReferencesInput = screen.getAllByRole("textbox")[2];
+      const malwareFamilyInput = screen.getAllByRole("textbox")[2];
+      expect(malwareFamilyInput).toBeInTheDocument();
+      expect(malwareFamilyInput.id).toBe("malware_family");
+      expect(malwareFamilyInput.value).toBe("");
+      const relatedThreatsInput = screen.getAllByRole("textbox")[3];
+      expect(relatedThreatsInput).toBeInTheDocument();
+      expect(relatedThreatsInput.id).toBe("related_threats-0");
+      expect(relatedThreatsInput.value).toBe("");
+      const externalReferencesInput = screen.getAllByRole("textbox")[4];
       expect(externalReferencesInput).toBeInTheDocument();
       expect(externalReferencesInput.id).toBe("external_references-0");
       expect(externalReferencesInput.value).toBe("");
@@ -331,7 +363,7 @@ describe("test UserEventModal component", () => {
     },
   );
 
-  test("UserEventModal - set killchain, tags and advanced evaluation", async () => {
+  test("UserEventModal - advanced fields (killchain, malware family, related threat, external ref, tags and advanced evaluation)", async () => {
     const user = userEvent.setup();
     axios.put.mockImplementation(() =>
       Promise.resolve({ status: 200, data: [""] }),
@@ -382,9 +414,17 @@ describe("test UserEventModal component", () => {
     expect(trusted10).not.toBeChecked();
     const reasonInput = screen.getAllByRole("textbox")[1];
     expect(reasonInput).toBeInTheDocument();
-    expect(reasonInput.id).toBe("related_threats-0");
+    expect(reasonInput.id).toBe("reason");
     expect(reasonInput.value).toBe("");
-    const externalReferencesInput = screen.getAllByRole("textbox")[2];
+    const malwareFamilyInput = screen.getAllByRole("textbox")[2];
+    expect(malwareFamilyInput).toBeInTheDocument();
+    expect(malwareFamilyInput.id).toBe("malware_family");
+    expect(malwareFamilyInput.value).toBe("");
+    const relatedThreatsInput = screen.getAllByRole("textbox")[3];
+    expect(relatedThreatsInput).toBeInTheDocument();
+    expect(relatedThreatsInput.id).toBe("related_threats-0");
+    expect(relatedThreatsInput.value).toBe("");
+    const externalReferencesInput = screen.getAllByRole("textbox")[4];
     expect(externalReferencesInput).toBeInTheDocument();
     expect(externalReferencesInput.id).toBe("external_references-0");
     const killChainPhaseInput = screen.getAllByRole("combobox")[0];
@@ -423,6 +463,20 @@ describe("test UserEventModal component", () => {
     // add reason
     fireEvent.change(reasonInput, { target: { value: "my reason" } });
     expect(reasonInput.value).toBe("my reason");
+    // add malware family
+    fireEvent.change(malwareFamilyInput, { target: { value: "ursnif" } });
+    expect(malwareFamilyInput.value).toBe("ursnif");
+    // add related artifacts
+    fireEvent.change(relatedThreatsInput, { target: { value: "anotherArtifact.com" } });
+    expect(relatedThreatsInput.value).toBe("anotherArtifact.com");
+    // add external references
+    fireEvent.change(externalReferencesInput, { target: { value: "http://test.com" } });
+    expect(externalReferencesInput.value).toBe("http://test.com");
+    // add killchain phase
+    await userEvent.click(killChainPhaseInput);
+    await userEvent.click(screen.getByText("action"));
+    expect(screen.getByText("action")).toBeInTheDocument();
+    expect(screen.queryByText("c2")).not.toBeInTheDocument(); // check other option are not visible
     // add tags (2 of them)
     await userEvent.click(tagsInput);
     await userEvent.click(screen.getByText("phishing"));
@@ -431,12 +485,16 @@ describe("test UserEventModal component", () => {
     await userEvent.click(tagsInput);
     await userEvent.click(screen.getByText("malware"));
     expect(screen.getByText("malware")).toBeInTheDocument();
+<<<<<<< Updated upstream
     expect(screen.queryByText("scanner")).not.toBeInTheDocument(); // check other option are not visible
     // add kill chain phase
     await userEvent.click(killChainPhaseInput);
     await userEvent.click(screen.getByText("action"));
     expect(screen.getByText("action")).toBeInTheDocument();
     expect(screen.queryByText("c2")).not.toBeInTheDocument(); // check other option are not visible
+=======
+    expect(screen.queryByText("abused")).not.toBeInTheDocument(); // check other option are not visible
+>>>>>>> Stashed changes
 
     // IMPORTANT - wait for the state change
     await screen.findByText("artifact");
@@ -452,11 +510,14 @@ describe("test UserEventModal component", () => {
         analyzable: { name: "test.com" },
         data_model_content: {
           evaluation: "trusted",
-          related_threats: ["my reason"],
           reliability: "9",
+          malware_family: "ursnif",
+          related_threats: ["anotherArtifact.com"],
+          external_references: ["http://test.com"],
           kill_chain_phase: "action",
           tags: ["phishing", "malware"],
         },
+        reason: "my reason",
         decay_progression: "0",
         decay_timedelta_days: 120,
       });
@@ -514,9 +575,17 @@ describe("test UserEventModal component", () => {
     expect(trusted10).not.toBeChecked();
     const reasonInput = screen.getAllByRole("textbox")[1];
     expect(reasonInput).toBeInTheDocument();
-    expect(reasonInput.id).toBe("related_threats-0");
+    expect(reasonInput.id).toBe("reason");
     expect(reasonInput.value).toBe("");
-    const externalReferencesInput = screen.getAllByRole("textbox")[2];
+    const malwareFamilyInput = screen.getAllByRole("textbox")[2];
+    expect(malwareFamilyInput).toBeInTheDocument();
+    expect(malwareFamilyInput.id).toBe("malware_family");
+    expect(malwareFamilyInput.value).toBe("");
+    const relatedThreatsInput = screen.getAllByRole("textbox")[3];
+    expect(relatedThreatsInput).toBeInTheDocument();
+    expect(relatedThreatsInput.id).toBe("related_threats-0");
+    expect(relatedThreatsInput.value).toBe("");
+    const externalReferencesInput = screen.getAllByRole("textbox")[4];
     expect(externalReferencesInput).toBeInTheDocument();
     expect(externalReferencesInput.id).toBe("external_references-0");
     const killChainPhaseInput = screen.getAllByRole("combobox")[0];
@@ -579,9 +648,14 @@ describe("test UserEventModal component", () => {
         analyzable: { name: "test.com" },
         data_model_content: {
           evaluation: "malicious",
-          related_threats: ["my reason"],
           reliability: 7,
+          kill_chain_phase: "",
+          malware_family: "",
+          related_threats: [],
+          external_references: [],
+          tags: [],
         },
+        reason: "my reason",
         decay_progression: "0",
         decay_timedelta_days: 120,
       });

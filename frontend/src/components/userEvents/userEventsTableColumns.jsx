@@ -129,7 +129,7 @@ export const userEventsTableEndColumns = [
   {
     Header: "Reasons",
     id: "related_threats",
-    accessor: (userEvent) => userEvent.data_model.related_threats,
+    accessor: (userEvent) => userEvent.reason,
     Cell: ({ value: comments, row }) =>
       comments.length > 0 && (
         <TableCell

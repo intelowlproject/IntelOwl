@@ -431,7 +431,7 @@ describe("test UserEventModal component", () => {
     await userEvent.click(tagsInput);
     await userEvent.click(screen.getByText("malware"));
     expect(screen.getByText("malware")).toBeInTheDocument();
-    expect(screen.queryByText("abused")).not.toBeInTheDocument(); // check other option are not visible
+    expect(screen.queryByText("scanner")).not.toBeInTheDocument(); // check other option are not visible
     // add kill chain phase
     await userEvent.click(killChainPhaseInput);
     await userEvent.click(screen.getByText("action"));

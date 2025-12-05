@@ -10,17 +10,18 @@ export const DataModelTags = Object.freeze({
   SOCIAL_ENGINEERING: "social_engineering",
   ANONYMIZER: "anonymizer",
   TOR_EXIT_NODE: "tor_exit_node",
-  ABUSED: "abused",
+  SCANNER: "scanner",
+  // update DataModelTagsIcons, TagsColors and DataModelTags (in backend)
 });
 
 export const DataModelTagsIcons = Object.freeze({
   phishing: "hook",
-  anonymizer: "incognito",
   malware: "malware",
   social_engineering: "creditCard",
+  anonymizer: "incognito",
   tor_exit_node: "tor",
   scanner: "magnifyingGlass",
-  ip_only: "networkNode",
+  // same keys of DataModelTags values
 });
 
 export const DataModelEvaluations = Object.freeze({

@@ -13,16 +13,16 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="useranalyzableevent",
             name="reason",
-            field=models.CharField(default=str, max_length=256, null=True),
+            field=models.CharField(default="", max_length=256, null=True),
         ),
         migrations.AddField(
             model_name="userdomainwildcardevent",
             name="reason",
-            field=models.CharField(default=str, max_length=256, null=True),
+            field=models.CharField(default="", max_length=256, null=True),
         ),
         migrations.AddField(
             model_name="useripwildcardevent",
             name="reason",
-            field=models.CharField(default=str, max_length=256, null=True),
+            field=models.CharField(default="", max_length=256, null=True),
         ),
     ]

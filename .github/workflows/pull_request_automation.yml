@@ -16,10 +16,10 @@ jobs:
     outputs:
       frontend: ${{steps.diff_check.outputs.frontend}}
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v6.0.1
         with:
           ref: ${{ github.base_ref }}
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v6.0.1
         with:
           clean: false
       - name: Generate diffs
@@ -34,7 +34,7 @@ jobs:
 
     steps:
       - name: Checkout IntelOwl
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6.0.1
 
       - name: Set up Python
         uses: actions/setup-python@v5.4.0
@@ -72,7 +72,7 @@ jobs:
           access_token: ${{ github.token }}
 
       - name: Checkout IntelOwl
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6.0.1
 
       - name: Prepare Launch
         run: |
@@ -125,7 +125,7 @@ jobs:
     if: ${{ needs.detect-changes.outputs.frontend > 0 }}
 
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v6.0.1
       - name: Set up NodeJS
         uses: actions/setup-node@v4
         with:

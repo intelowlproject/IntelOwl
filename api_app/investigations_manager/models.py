@@ -1,5 +1,5 @@
+import datetime
 import logging
-from datetime import datetime
 from typing import List
 
 from django.conf import settings
@@ -22,7 +22,7 @@ class Investigation(OwnershipAbstractModel, ListCachable):
     name = models.CharField(max_length=100)
     description = models.TextField(default="", blank=True)
 
-    start_time = models.DateTimeField(default=datetime.now)
+    start_time = models.DateTimeField(default=datetime.datetime.now)
     end_time = models.DateTimeField(default=None, null=True, blank=True)
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,

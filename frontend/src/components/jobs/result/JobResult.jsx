@@ -17,7 +17,7 @@ import {
   setNotificationFavicon,
 } from "../notifications";
 
-import { JobFinalStatuses } from "../../../constants/jobConst";
+import { JobFinalStatuses, JobStatuses } from "../../../constants/jobConst";
 
 export default function JobResult() {
   console.debug("JobResult rendered!");
@@ -45,16 +45,16 @@ export default function JobResult() {
   const jobIsRunning =
     data.job === undefined ||
     [
-      "pending",
-      "running",
-      "analyzers_running",
-      "connectors_running",
-      "pivots_running",
-      "visualizers_running",
-      "analyzers_completed",
-      "connectors_completed",
-      "pivots_completed",
-      "visualizers_completed",
+      JobStatuses.PENDING,
+      JobStatuses.PENDING,
+      JobStatuses.ANALYZERS_RUNNING,
+      JobStatuses.ANALYZERS_COMPLETED,
+      JobStatuses.CONNECTORS_RUNNING,
+      JobStatuses.CONNECTORS_COMPLETED,
+      JobStatuses.PIVOTS_RUNNING,
+      JobStatuses.PIVOTS_COMPLETED,
+      JobStatuses.VISUALIZERS_RUNNING,
+      JobStatuses.VISUALIZERS_COMPLETED,
     ].includes(data.job?.status);
 
   console.debug(

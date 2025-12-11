@@ -1,6 +1,8 @@
+import datetime
 import logging
 from http import HTTPStatus
 
+from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -10,6 +12,7 @@ from rest_framework.response import Response
 from api_app.analyzables_manager.filters import AnalyzableFilter
 from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzables_manager.serializers import AnalyzableSerializer
+from api_app.investigations_manager.models import Investigation
 from api_app.serializers.job import JobAnalyzableHistorySerializer
 from api_app.user_events_manager.serializers import (
     UserAnalyzableEventSerializer,
@@ -30,6 +33,25 @@ class AnalyzableViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         user = self.request.user
         return super().get_queryset().visible_for_user(user)
+
+    @action(detail=True)
+    def related_investigation_number(self, request, pk=None):
+        logger.debug(f"get_related_investigation_number: {pk}")
+        try:
+            analyzable: Analyzable = self.get_queryset().get(pk=pk)
+        except Analyzable.DoesNotExist:
+            raise ValidationError({"detail": "Requested analyzable does not exist."})
+        logger.debug(f"{analyzable=}")
+        related_investigation_number = Investigation.investigation_for_analyzable(
+            Investigation.objects.filter(
+                start_time__gte=timezone.now() - datetime.timedelta(days=30),
+            ),
+            analyzable.name,
+        ).count()
+        return Response(
+            status=HTTPStatus.OK.value,
+            data={"related_investigation_number": related_investigation_number},
+        )
 
     @action(detail=True)
     def history(self, request, pk=None):

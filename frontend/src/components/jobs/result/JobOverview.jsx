@@ -50,6 +50,7 @@ const NO_VISUALIZER_UI_ELEMENT_CODE = "no-visualizer";
 export function JobOverview({
   isRunningJob,
   job,
+  relatedInvestigationNumber,
   refetch,
   section,
   subSection,
@@ -398,7 +399,10 @@ export function JobOverview({
           {/* job metadata card */}
           <Row className="g-0">
             <Col>
-              <JobInfoCard job={job} />
+              <JobInfoCard
+                job={job}
+                relatedInvestigationNumber={relatedInvestigationNumber}
+              />
             </Col>
           </Row>
           {isRunningJob && (
@@ -501,6 +505,7 @@ export function JobOverview({
 JobOverview.propTypes = {
   isRunningJob: PropTypes.bool.isRequired,
   job: PropTypes.object.isRequired,
+  relatedInvestigationNumber: PropTypes.number.isRequired,
   refetch: PropTypes.func.isRequired,
   section: PropTypes.string.isRequired,
   subSection: PropTypes.string.isRequired,

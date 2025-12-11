@@ -100,7 +100,7 @@ describe("test JobOverview (job report)", () => {
       investigation: null,
       investigation_id: null,
       investigation_name: null,
-      related_investigation_number: 0,
+      analyzable_id: 1,
     };
   });
 
@@ -113,6 +113,7 @@ describe("test JobOverview (job report)", () => {
           subSection="analyzer"
           refetch={() => {}}
           job={jobReport}
+          relatedInvestigationNumber={10}
         />
       </BrowserRouter>,
     );

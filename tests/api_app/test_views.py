@@ -170,10 +170,6 @@ class JobViewSetTests(CustomViewSetTestCase):
                 name="test_investigation1", owner=self.superuser
             )
             self.investigation1.jobs.add(self.job)
-            self.investigation2, _ = Investigation.objects.get_or_create(
-                name="test_investigation2", owner=self.superuser
-            )
-            self.investigation2.jobs.add(self.job2)
             # in this way we can check we filter investagion looking for child job and not only the one in the root
             self.job2.add_child(
                 user=self.superuser,
@@ -314,7 +310,7 @@ class JobViewSetTests(CustomViewSetTestCase):
         self.assertEqual(content["status"], self.job.status, msg=msg)
         self.assertEqual(content["investigation_id"], self.investigation1.pk)
         self.assertEqual(content["investigation_name"], self.investigation1.name)
-        self.assertEqual(content["related_investigation_number"], 2)
+        self.assertEqual(content["analyzable_id"], self.analyzable.pk)
 
     def test_delete(self):
         self.assertEqual(Job.objects.count(), 5)

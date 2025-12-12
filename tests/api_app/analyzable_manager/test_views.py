@@ -13,7 +13,11 @@ from tests import CustomViewSetTestCase
 
 @patch(
     "api_app.analyzables_manager.views.timezone.now",
-    return_value=datetime.datetime(2025, 12, 12, tzinfo=datetime.timezone.utc),
+    return_value=datetime.datetime(2025, 1, 2, tzinfo=datetime.timezone.utc),
+)
+@patch(
+    "api_app.investigations_manager.models.now",
+    return_value=datetime.datetime(2025, 1, 2, tzinfo=datetime.timezone.utc),
 )
 class TestAnalyzablesViewSet(CustomViewSetTestCase):
     URL = "/api/analyzable"
@@ -31,7 +35,7 @@ class TestAnalyzablesViewSet(CustomViewSetTestCase):
             data_model=self.domain_data_model,
             playbook_to_execute=PlaybookConfig.objects.first(),
             finished_analysis_time=datetime.datetime(
-                2025, 12, 12, tzinfo=datetime.timezone.utc
+                2025, 1, 1, tzinfo=datetime.timezone.utc
             ),
             user=self.user,
         )
@@ -46,7 +50,7 @@ class TestAnalyzablesViewSet(CustomViewSetTestCase):
             data_model=self.domain_data_model2,
             playbook_to_execute=PlaybookConfig.objects.first(),
             finished_analysis_time=datetime.datetime(
-                2025, 12, 12, tzinfo=datetime.timezone.utc
+                2025, 1, 1, tzinfo=datetime.timezone.utc
             ),
             user=self.user,
         )
@@ -64,7 +68,7 @@ class TestAnalyzablesViewSet(CustomViewSetTestCase):
             data_model=self.domain_data_model3,
             playbook_to_execute=PlaybookConfig.objects.first(),
             finished_analysis_time=datetime.datetime(
-                2025, 12, 12, tzinfo=datetime.timezone.utc
+                2025, 1, 1, tzinfo=datetime.timezone.utc
             ),
             user=self.user,
         )
@@ -73,7 +77,7 @@ class TestAnalyzablesViewSet(CustomViewSetTestCase):
             analyzable=self.an,
             playbook_to_execute=PlaybookConfig.objects.get(name="Dns"),
             finished_analysis_time=datetime.datetime(
-                2025, 12, 12, tzinfo=datetime.timezone.utc
+                2025, 1, 1, tzinfo=datetime.timezone.utc
             ),
             tlp=Job.TLP.AMBER.value,
         )  # check similar investigation works with children
@@ -84,7 +88,9 @@ class TestAnalyzablesViewSet(CustomViewSetTestCase):
             analyzable=self.an3, data_model=self.domain_data_model31, user=self.user
         )
         self.investigation, _ = Investigation.objects.get_or_create(
-            name="test_investigation", owner=self.superuser
+            name="test_investigation",
+            owner=self.superuser,
+            start_time=datetime.datetime(2025, 1, 1, tzinfo=datetime.timezone.utc),
         )
         self.investigation.jobs.add(self.job3)
 

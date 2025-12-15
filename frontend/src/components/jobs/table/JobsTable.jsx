@@ -13,11 +13,10 @@ import {
 } from "@certego/certego-ui";
 
 import useTitle from "react-use/lib/useTitle";
-import { format } from "date-fns";
 import { jobTableColumns } from "./jobTableColumns";
 import { JOB_BASE_URI } from "../../../constants/apiURLs";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
-import { datetimeFormatStr, localTimezone } from "../../../constants/miscConst";
+import { localTimezone } from "../../../constants/miscConst";
 import { TimePicker } from "../../common/TimePicker";
 
 // constants
@@ -31,7 +30,7 @@ const toPassTableProps = {
   ),
 };
 
-export function JobsTable({ searchFromDateValue, searchToDateValue }) {
+export default function JobsTable({ searchFromDateValue, searchToDateValue }) {
   useTitle("IntelOwl | Jobs History", { restoreOnUnmount: true });
 
   const [playbooksLoading, playbooksError] = usePluginConfigurationStore(
@@ -64,7 +63,10 @@ export function JobsTable({ searchFromDateValue, searchToDateValue }) {
     // If the filter is already present (index>=0) I update the value
     if (filterIndex !== -1) {
       // Note: this check is required to avoid infinite loop
-      if (filters[filterIndex].value === format(value, datetimeFormatStr))
+      if (
+        filters[filterIndex].value ===
+        fromZonedTime(value, localTimezone).toISOString()
+      )
         return null;
       filters[filterIndex].value = value;
     }

@@ -1,17 +1,18 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 const { createProxyMiddleware } = require("http-proxy-middleware");
 
-module.exports = function (app) {
+const TARGET_SERVER = "http://localhost";
+
+module.exports = function proxy(app) {
   app.use(
-    createProxyMiddleware("/ws", {
-      target: "ws://localhost/",
+    createProxyMiddleware("/ws/jobs", {
+      target: TARGET_SERVER,
       // eslint-disable-next-line id-length
       ws: true,
     }),
   );
   app.use(
     createProxyMiddleware("/api", {
-      target: "http://localhost",
+      target: TARGET_SERVER,
     }),
   );
 };

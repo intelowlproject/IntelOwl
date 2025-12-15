@@ -13,8 +13,8 @@ import {
 
 import useTitle from "react-use/lib/useTitle";
 
-import { format, fromZonedTime } from "date-fns-tz";
-import { datetimeFormatStr, localTimezone } from "../../constants/miscConst";
+import { fromZonedTime } from "date-fns-tz";
+import { localTimezone } from "../../constants/miscConst";
 import { TimePicker } from "../common/TimePicker";
 import { JsonEditor } from "../common/JsonEditor";
 
@@ -54,7 +54,7 @@ const toPassTableProps = {
   config: { enableExpanded: true, enableFlexLayout: true },
 };
 
-export function UserEventsTable({
+export default function UserEventsTable({
   title,
   url,
   columns,
@@ -92,7 +92,7 @@ export function UserEventsTable({
     const filterIndex = filters.findIndex((filter) => filter.id === name);
     let valueToChange = value;
     if (["event_date__gte", "event_date__lte"].includes(name))
-      valueToChange = format(value, datetimeFormatStr);
+      valueToChange = fromZonedTime(value, localTimezone).toISOString();
 
     // If the filter is already present (index>=0) I update the value
     if (filterIndex !== -1) {

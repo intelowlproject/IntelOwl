@@ -5,9 +5,6 @@ import { Spinner } from "reactstrap";
 import { useSearchParams } from "react-router-dom";
 
 import { HistoryPages } from "../../constants/miscConst";
-import { JobsTable } from "../jobs/table/JobsTable";
-import { InvestigationTable } from "../investigations/table/InvestigationsTable";
-import { UserEventsTable } from "../userEvents/UserEventsTable";
 import {
   USER_EVENT_ANALYZABLE,
   USER_EVENT_DOMAIN_WILDCARD,
@@ -19,15 +16,18 @@ import {
   userIpWildcardEventsTableColumns,
 } from "../userEvents/userEventsTableColumns";
 
+const JobsTable = React.lazy(() => import("../jobs/table/JobsTable"));
+const InvestigationTable = React.lazy(
+  () => import("../investigations/table/InvestigationsTable"),
+);
+const UserEventsTable = React.lazy(
+  () => import("../userEvents/UserEventsTable"),
+);
+
 // component
-export default function HistoryTable({
-  pageType,
-  startTimeString,
-  endTimeString,
-}) {
+export function HistoryTable({ pageType, startTimeParam, endTimeParam }) {
+  console.debug("HistoryTable rendered");
   const [searchParams, setSearchParams] = useSearchParams();
-  const startTimeParam = searchParams.get(startTimeString);
-  const endTimeParam = searchParams.get(endTimeString);
   // needed only for investigations table
   const analyzedObjectNameParam =
     searchParams.get("analyzed_object_name") || "";
@@ -79,22 +79,19 @@ export default function HistoryTable({
     searchToDateValue,
   ]);
 
-  return areParamsInitialized ? ( // this "if" avoid one request
-    <>
-      {pageType === HistoryPages.JOBS && (
-        <JobsTable
-          searchFromDateValue={searchFromDateValue}
-          searchToDateValue={searchToDateValue}
-        />
-      )}
-      {pageType === HistoryPages.INVESTIGAITONS && (
+  let tableComponent;
+  switch (pageType) {
+    case HistoryPages.INVESTIGAITONS:
+      tableComponent = (
         <InvestigationTable
           searchFromDateValue={searchFromDateValue}
           searchToDateValue={searchToDateValue}
           searchNameRequest={searchNameRequest}
         />
-      )}
-      {pageType === HistoryPages.USER_EVENTS && (
+      );
+      break;
+    case HistoryPages.USER_EVENTS:
+      tableComponent = (
         <UserEventsTable
           title="Artifacts evaluations"
           url={USER_EVENT_ANALYZABLE}
@@ -103,8 +100,10 @@ export default function HistoryTable({
           searchFromDateValue={searchFromDateValue}
           searchToDateValue={searchToDateValue}
         />
-      )}
-      {pageType === HistoryPages.USER_DOMAIN_WILDCARD_EVENTS && (
+      );
+      break;
+    case HistoryPages.USER_DOMAIN_WILDCARD_EVENTS:
+      tableComponent = (
         <UserEventsTable
           title="Domain wildcard evaluations"
           url={USER_EVENT_DOMAIN_WILDCARD}
@@ -113,8 +112,10 @@ export default function HistoryTable({
           searchFromDateValue={searchFromDateValue}
           searchToDateValue={searchToDateValue}
         />
-      )}
-      {pageType === HistoryPages.USER_IP_WILDCARD_EVENTS && (
+      );
+      break;
+    case HistoryPages.USER_IP_WILDCARD_EVENTS:
+      tableComponent = (
         <UserEventsTable
           title="Ip wildcard evaluations"
           url={USER_EVENT_IP_WILDCARD}
@@ -123,8 +124,19 @@ export default function HistoryTable({
           searchFromDateValue={searchFromDateValue}
           searchToDateValue={searchToDateValue}
         />
-      )}
-    </>
+      );
+      break;
+    default:
+      tableComponent = (
+        <JobsTable
+          searchFromDateValue={searchFromDateValue}
+          searchToDateValue={searchToDateValue}
+        />
+      );
+  }
+
+  return areParamsInitialized ? ( // this "if" avoid one request
+    tableComponent
   ) : (
     <Spinner />
   );
@@ -132,6 +144,6 @@ export default function HistoryTable({
 
 HistoryTable.propTypes = {
   pageType: PropTypes.string.isRequired,
-  startTimeString: PropTypes.string.isRequired,
-  endTimeString: PropTypes.string.isRequired,
+  startTimeParam: PropTypes.string.isRequired,
+  endTimeParam: PropTypes.string.isRequired,
 };

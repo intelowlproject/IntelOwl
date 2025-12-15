@@ -21,10 +21,10 @@ import {
 
 import useTitle from "react-use/lib/useTitle";
 
-import { format, fromZonedTime } from "date-fns-tz";
+import { fromZonedTime } from "date-fns-tz";
 import { INVESTIGATION_BASE_URI } from "../../../constants/apiURLs";
 import { investigationTableColumns } from "./investigationTableColumns";
-import { datetimeFormatStr, localTimezone } from "../../../constants/miscConst";
+import { localTimezone } from "../../../constants/miscConst";
 import { TimePicker } from "../../common/TimePicker";
 
 // constants
@@ -38,7 +38,7 @@ const toPassTableProps = {
   ),
 };
 
-export function InvestigationTable({
+export default function InvestigationTable({
   searchFromDateValue,
   searchToDateValue,
   searchNameRequest,
@@ -74,7 +74,7 @@ export function InvestigationTable({
     const filterIndex = filters.findIndex((filter) => filter.id === name);
     let valueToChange = value;
     if (["start_time__gte", "start_time__lte"].includes(name))
-      valueToChange = format(value, datetimeFormatStr);
+      valueToChange = fromZonedTime(value, localTimezone).toISOString();
 
     // If the filter is already present (index>=0) I update the value
     if (filterIndex !== -1) {

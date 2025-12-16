@@ -34,6 +34,7 @@ export default function History() {
     startTimeString = "start_time__gte";
     endTimeString = "start_time__lte";
   }
+
   const startTimeParam = searchParams.get(startTimeString);
   const endTimeParam = searchParams.get(endTimeString);
 

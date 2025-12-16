@@ -9,15 +9,19 @@ import { INVESTIGATION_BASE_URI } from "../../../src/constants/apiURLs";
 
 jest.mock("axios");
 // mock HistoryTable components
-jest.mock("../../../src/components/history/HistoryTable", () =>
-  jest.fn((props) => <div {...props} />),
-);
+jest.mock("../../../src/components/history/HistoryTable", () => ({
+  HistoryTable: jest.fn((props) => <div {...props} />),
+}));
 
 describe("test History component", () => {
   test("history page", async () => {
     const user = userEvent.setup();
     render(
-      <MemoryRouter initialEntries={["/history/jobs"]}>
+      <MemoryRouter
+        initialEntries={[
+          "/history/jobs?received_request_time__gte=2025-12-08T15%3A28%3A05.317Z&received_request_time__lte=2025-12-15T15%3A28%3A05.317Z&ordering=-received_request_time",
+        ]}
+      >
         <History />
       </MemoryRouter>,
     );
@@ -151,7 +155,11 @@ describe("test History component", () => {
     axios.post.mockImplementation(() => Promise.resolve({ data: {} }));
     const user = userEvent.setup();
     render(
-      <MemoryRouter>
+      <MemoryRouter
+        initialEntries={[
+          "/history/jobs?received_request_time__gte=2025-12-08T15%3A28%3A05.317Z&received_request_time__lte=2025-12-15T15%3A28%3A05.317Z&ordering=-received_request_time",
+        ]}
+      >
         <History />
       </MemoryRouter>,
     );

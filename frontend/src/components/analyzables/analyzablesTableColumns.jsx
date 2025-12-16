@@ -1,8 +1,9 @@
 /* eslint-disable react/prop-types */
 import React from "react";
-import { UncontrolledTooltip } from "reactstrap";
+import { UncontrolledTooltip, Badge } from "reactstrap";
 import { MdOutlineRefresh } from "react-icons/md";
 import { IoSearch } from "react-icons/io5";
+import { BsFillPlusCircleFill } from "react-icons/bs";
 
 import {
   DateHoverable,
@@ -156,20 +157,38 @@ export const analyzablesTableColumns = [
     Header: "Tags",
     id: "tags",
     accessor: (analyzable) => analyzable?.last_data_model?.tags,
-    Cell: ({ value: tags, row }) =>
-      tags ? (
-        <div className="d-flex justify-content-center py-2">
-          {tags.map((tag, index) => (
+    Cell: ({ value: tags, row }) => {
+      let lastTags = null;
+      if (tags?.length > 10) {
+        lastTags = tags?.slice(10, tags.length);
+      }
+
+      return tags ? (
+        <div className="d-flex justify-content-center py-2 flex-wrap">
+          {tags?.slice(0, 9).map((tag, index) => (
             <TagsBadge
               id={`tag-row${row.id}_${index}`}
               tag={tag}
-              className="ms-1"
+              className="ms-1 mb-1"
             />
           ))}
+          {lastTags && (
+            <Badge id="last_tags" className="d-flex-center ms-1 mb-1">
+              <BsFillPlusCircleFill />
+              <UncontrolledTooltip
+                target="last_tags"
+                placement="top"
+                fade={false}
+              >
+                {lastTags.toString()}
+              </UncontrolledTooltip>
+            </Badge>
+          )}
         </div>
       ) : (
         <div />
-      ),
+      );
+    },
     disableSortBy: true,
     maxWidth: 100,
     Filter: DefaultColumnFilter,

@@ -64,7 +64,7 @@ class CleanBrowsing(ObservableAnalyzer):
             packet += bytes([len(part)]) + part.encode("utf-8")
         packet += b"\x00"
 
-        packet += b"\x00\x01\x00\x01"  
+        packet += b"\x00\x01\x00\x01"
         return packet
 
     def _check_if_blocked(self, binary_response):

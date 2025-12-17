@@ -530,6 +530,7 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
     VList = VisualizableVerticalList
     HList = VisualizableHorizontalList
     Table = VisualizableTable
+    Image = VisualizableImage
 
     TableColumn = VisualizableTableColumn
 

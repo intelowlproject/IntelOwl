@@ -1,13 +1,12 @@
 /* eslint-disable react/prop-types */
 import React from "react";
-import { UncontrolledTooltip, Badge } from "reactstrap";
-import { BsFillPlusCircleFill } from "react-icons/bs";
 
 import { DefaultColumnFilter, DateHoverable } from "@certego/certego-ui";
 
-import { LastEvaluationComponent, TagsBadge } from "../common/engineBadges";
+import { LastEvaluationComponent } from "../common/engineBadges";
 import { UserEventDecay } from "./UserEventDecay";
 import TableCell from "../common/TableCell";
+import TagsCell from "../common/TagsCell";
 
 export const userEventsTableStartColumns = [
   {
@@ -91,38 +90,7 @@ export const userEventsTableEndColumns = [
     Header: "Tags",
     id: "tags",
     accessor: (userEvent) => userEvent.data_model.tags,
-    Cell: ({ value: tags, row }) => {
-      let lastTags = null;
-      if (tags?.length > 10) {
-        lastTags = tags?.slice(10, tags.length);
-      }
-
-      return tags ? (
-        <div className="d-flex justify-content-center py-2 flex-wrap">
-          {tags?.slice(0, 9).map((tag, index) => (
-            <TagsBadge
-              id={`tag-row${row.id}_${index}`}
-              tag={tag}
-              className="ms-1 mb-1"
-            />
-          ))}
-          {lastTags && (
-            <Badge id="last_tags" className="d-flex-center ms-1 mb-1">
-              <BsFillPlusCircleFill />
-              <UncontrolledTooltip
-                target="last_tags"
-                placement="top"
-                fade={false}
-              >
-                {lastTags.toString()}
-              </UncontrolledTooltip>
-            </Badge>
-          )}
-        </div>
-      ) : (
-        <div />
-      );
-    },
+    Cell: ({ value: tags, row }) => <TagsCell values={tags} rowId={row.id} />,
     disableSortBy: true,
     maxWidth: 100,
   },

@@ -10,7 +10,8 @@ import {
 import { format } from "date-fns-tz";
 
 import TableCell from "../../common/TableCell";
-import { TagsBadge, LastEvaluationComponent } from "../../common/engineBadges";
+import TagsCell from "../../common/TagsCell";
+import { LastEvaluationComponent } from "../../common/engineBadges";
 import {
   JobResultSections,
   AnalyzableHistoryTypes,
@@ -130,20 +131,7 @@ export const analyzablesHistoryTableColumns = [
     Header: "Tags",
     id: "tags",
     accessor: "data_model.tags",
-    Cell: ({ value, row }) =>
-      value ? (
-        <div className="d-flex justify-content-center py-2">
-          {value.map((tag, index) => (
-            <TagsBadge
-              id={`row${row.id}_${index}`}
-              tag={tag}
-              className="ms-1"
-            />
-          ))}
-        </div>
-      ) : (
-        <div />
-      ),
+    Cell: ({ value: tags, row }) => <TagsCell values={tags} rowId={row.id} />,
     disableSortBy: true,
     maxWidth: 100,
     Filter: DefaultColumnFilter,

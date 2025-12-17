@@ -15,7 +15,7 @@ export default function TagsCell({ values, rowId }) {
     <div className="d-flex justify-content-center py-2 flex-wrap">
       {values?.slice(0, 9).map((tag, index) => (
         <TagsBadge
-          id={`tag-row${rowId}_${index}`}
+          id={`row${rowId}_${index}`}
           tag={tag}
           className="ms-1 mb-1"
         />

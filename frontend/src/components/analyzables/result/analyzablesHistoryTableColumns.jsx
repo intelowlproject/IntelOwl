@@ -131,7 +131,7 @@ export const analyzablesHistoryTableColumns = [
     Header: "Tags",
     id: "tags",
     accessor: "data_model.tags",
-    Cell: ({ value: tags, row }) => <TagsCell values={tags} rowId={row.id} />,
+    Cell: ({ value, row }) => <TagsCell values={value} rowId={row.id} />,
     disableSortBy: true,
     maxWidth: 100,
     Filter: DefaultColumnFilter,

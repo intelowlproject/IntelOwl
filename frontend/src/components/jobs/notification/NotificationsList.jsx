@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import DOMPurify from "dompurify";
 import {
   ListGroup,
   ListGroupItem,
@@ -43,7 +44,9 @@ export default function NotificationsList({ notifications, refetchFn }) {
           </div>
           <ListGroupItemText
             className="text-light"
-            dangerouslySetInnerHTML={{ __html: notif?.body }}
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(notif?.body),
+            }}
           />
           <div className="d-flex">
             {notif?.read === false && (

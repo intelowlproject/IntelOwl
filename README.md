@@ -47,6 +47,26 @@ It provides:
 We try hard to keep our documentation well written, easy to understand and always updated.
 All info about installation, usage, configuration and contribution can be found [here](https://intelowlproject.github.io/docs/)
 
+
+### Update Checker
+A new management command is available to check whether the running
+IntelOwl instance is behind the latest published release.
+This is useful for administrators who want to be notified when an upgrade is available.
+#### Run manually
+```bash
+python manage.py check_updates
+```
+The command fetches the latest release tag from the configured source
+and compares it to the local version.
+#### Configuration
+Defaults can be overridden in settings:
+```python
+REACT_APP_INTELOWL_VERSION = "6.4.0"        # local version string
+UPDATE_CHECK_URL = "https://api.github.com/repos/intelowlproject/IntelOwl/releases/latest"
+```
+No updates are installed automatically; the command only logs whether a new version is available. For periodic checks, you can schedule this command using cron or another job scheduler.
+
+
 ### Publications and Media
 
 To know more about the project and its growth over time, you may be interested in reading [the official blog posts and/or videos about the project by clicking on this link](https://intelowlproject.github.io/docs/IntelOwl/introduction/#publications-and-media)

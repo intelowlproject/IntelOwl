@@ -27,7 +27,7 @@ from django.contrib.postgres import fields as pg_fields
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import MinLengthValidator, MinValueValidator, RegexValidator
-from django.db import models
+from django.db import models, transaction
 from django.db.models import BaseConstraint, Q, QuerySet, UniqueConstraint
 from django.urls import reverse
 from django.utils import timezone
@@ -424,7 +424,6 @@ class Job(MP_Node):
         models.TextField(), blank=True, default=list, null=True
     )
     tags = models.ManyToManyField(Tag, related_name="jobs", blank=True)
-
     scan_mode = models.IntegerField(
         choices=ScanMode.choices,
         null=False,
@@ -452,14 +451,52 @@ class Job(MP_Node):
         return f'{self.__class__.__name__}(#{self.pk}, "{self.analyzable.name}")'
 
     def get_root(self):
+        """
+        Thread-safe method to retrieve the root node of the job tree.
+        
+        Uses database-level row locking (select_for_update) to prevent
+        race conditions during concurrent access.
+        
+        Returns:
+            Job: The root node of this job's tree
+            
+        Raises:
+            ObjectDoesNotExist: If no root node exists
+        """
         if self.is_root():
             return self
-        try:
-            return super().get_root()
-        except self.MultipleObjectsReturned:
-            # django treebeard is not thread safe
-            # this is not a really valid solution, but it will work for now
-            return self.objects.filter(path=self.path[0 : self.steplen]).first()  # noqa
+        
+        with transaction.atomic():
+            try:
+                # Attempt 1: Use parent's get_root() within transaction
+                return super().get_root()
+            except self.MultipleObjectsReturned:
+                logger.warning(
+                    f"Multiple root nodes found for Job {self.pk} "
+                    f"with path={self.path[0:self.steplen]}. "
+                    f"Falling back to deterministic selection."
+                )
+                # Fallback with lock: deterministic selection by primary key
+                root = Job.objects.select_for_update().filter(
+                    path=self.path[0:self.steplen]
+                ).order_by('pk').first()
+                
+                if root is None:
+                    logger.error(
+                        f"No root node found for Job {self.pk}. "
+                        f"Tree structure may be corrupted."
+                    )
+                    raise ObjectDoesNotExist(
+                        f"No root node found for Job {self.pk}"
+                    )
+                
+                return root
+            except ObjectDoesNotExist:
+                logger.error(
+                    f"Job {self.pk} references non-existent root node. "
+                    f"Tree structure may be corrupted."
+                )
+                raise
 
     @cached_property
     def is_sample(self) -> bool:

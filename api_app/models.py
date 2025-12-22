@@ -453,19 +453,19 @@ class Job(MP_Node):
     def get_root(self):
         """
         Thread-safe method to retrieve the root node of the job tree.
-        
+
         Uses database-level row locking (select_for_update) to prevent
         race conditions during concurrent access.
-        
+
         Returns:
             Job: The root node of this job's tree
-            
+
         Raises:
             ObjectDoesNotExist: If no root node exists
         """
         if self.is_root():
             return self
-        
+
         with transaction.atomic():
             try:
                 # Attempt 1: Use parent's get_root() within transaction
@@ -477,11 +477,11 @@ class Job(MP_Node):
                     f"Falling back to deterministic selection."
                 )
                 # Fallback with lock: deterministic selection by primary key
-                root = Job.objects.select_for_update().filter(
+                root_node = Job.objects.select_for_update().filter(
                     path=self.path[0:self.steplen]
                 ).order_by('pk').first()
-                
-                if root is None:
+
+                if root_node is None:
                     logger.error(
                         f"No root node found for Job {self.pk}. "
                         f"Tree structure may be corrupted."
@@ -489,8 +489,8 @@ class Job(MP_Node):
                     raise ObjectDoesNotExist(
                         f"No root node found for Job {self.pk}"
                     )
-                
-                return root
+
+                return root_node
             except ObjectDoesNotExist:
                 logger.error(
                     f"Job {self.pk} references non-existent root node. "

@@ -120,7 +120,7 @@ export default function ReportsSearch() {
   }, []);
 
   return (
-    <Container fluid>
+    <Container fluid className="overflow-hidden">
       <FormikProvider value={formik}>
         <Form onSubmit={formik.handleSubmit}>
           <Row className="mb-2">
@@ -230,46 +230,75 @@ export default function ReportsSearch() {
               </Input>
             </Col>
           </Row>
-          <Row id="search-input-fields-second-row">
+          <Row
+            id="search-input-fields-second-row"
+            className="flex-wrap overflow-hidden g-0"
+          >
             <Col
-              xxl={4}
-              sm={12}
-              className="d-flex align-items-center flex-wrap mt-3"
+              xl={6}
+              lg={12}
+              className="d-flex align-items-start flex-wrap mt-3 pe-2"
+              style={{ maxWidth: "100%", overflow: "hidden" }}
             >
-              <Label className="col-3 fw-bold mb-0">Start time:</Label>
-              <div className="d-flex flex-column align-item-start">
-                <div className="d-flex flex-column flex-wrap">
-                  <div className="d-flex align-items-center mb-1">
-                    <Label className="col-3 mb-0" for="search__fromStartTime">
+              <Label className="col-12 col-lg-3 fw-bold mb-2 mb-lg-0">
+                Start time:
+              </Label>
+              <div
+                className="col-12 col-lg-9 d-flex flex-column align-item-start"
+                style={{ minWidth: 0, maxWidth: "100%" }}
+              >
+                <div className="d-flex flex-column flex-wrap w-100">
+                  <div className="d-flex align-items-center mb-1 flex-wrap w-100">
+                    <Label
+                      className="col-12 col-sm-auto mb-0 mb-sm-0 mb-1 me-2"
+                      for="search__fromStartTime"
+                      style={{ minWidth: "fit-content" }}
+                    >
                       from
                     </Label>
-                    <Input
-                      id="search__fromStartTime"
-                      type="datetime-local"
-                      name="fromStartTime"
-                      autoComplete="off"
-                      value={formik.values.fromStartTime}
-                      onBlur={formik.handleBlur}
-                      onChange={formik.handleChange}
-                      invalid={formik.errors.startTime}
-                      className="col-6"
-                    />
+                    <div
+                      className="col-12 col-sm flex-grow-1"
+                      style={{ minWidth: 0, maxWidth: "100%" }}
+                    >
+                      <Input
+                        id="search__fromStartTime"
+                        type="datetime-local"
+                        name="fromStartTime"
+                        autoComplete="off"
+                        value={formik.values.fromStartTime}
+                        onBlur={formik.handleBlur}
+                        onChange={formik.handleChange}
+                        invalid={formik.errors.startTime}
+                        className="bg-darker border-dark"
+                        style={{ width: "100%", maxWidth: "100%", minWidth: 0 }}
+                      />
+                    </div>
                   </div>
-                  <div className="d-flex align-items-center">
-                    <Label className="col-3 mb-0" for="search__toStartTime">
+                  <div className="d-flex align-items-center flex-wrap w-100">
+                    <Label
+                      className="col-12 col-sm-auto mb-0 mb-sm-0 mb-1 me-2"
+                      for="search__toStartTime"
+                      style={{ minWidth: "fit-content" }}
+                    >
                       to
                     </Label>
-                    <Input
-                      id="search__toStartTime"
-                      type="datetime-local"
-                      name="toStartTime"
-                      autoComplete="off"
-                      value={formik.values.toStartTime}
-                      onBlur={formik.handleBlur}
-                      onChange={formik.handleChange}
-                      invalid={formik.errors.startTime}
-                      className="col-6"
-                    />
+                    <div
+                      className="col-12 col-sm flex-grow-1"
+                      style={{ minWidth: 0, maxWidth: "100%" }}
+                    >
+                      <Input
+                        id="search__toStartTime"
+                        type="datetime-local"
+                        name="toStartTime"
+                        autoComplete="off"
+                        value={formik.values.toStartTime}
+                        onBlur={formik.handleBlur}
+                        onChange={formik.handleChange}
+                        invalid={formik.errors.startTime}
+                        className="bg-darker border-dark"
+                        style={{ width: "100%", maxWidth: "100%", minWidth: 0 }}
+                      />
+                    </div>
                   </div>
                 </div>
                 {formik.errors.startTime && (
@@ -280,44 +309,70 @@ export default function ReportsSearch() {
               </div>
             </Col>
             <Col
-              xxl={4}
-              sm={12}
-              className="d-flex align-items-center flex-wrap mt-3"
+              xl={6}
+              lg={12}
+              className="d-flex align-items-start flex-wrap mt-3 pe-2"
+              style={{ maxWidth: "100%", overflow: "hidden" }}
             >
-              <Label className="col-3 fw-bold mb-0">End time:</Label>
-              <div className="d-flex flex-column align-item-start">
-                <div className="d-flex flex-column flex-wrap">
-                  <div className="d-flex align-items-center mb-1">
-                    <Label className="col-3 mb-0" for="search__fromEndTime">
+              <Label className="col-12 col-lg-3 fw-bold mb-2 mb-lg-0">
+                End time:
+              </Label>
+              <div
+                className="col-12 col-lg-9 d-flex flex-column align-item-start"
+                style={{ minWidth: 0, maxWidth: "100%" }}
+              >
+                <div className="d-flex flex-column flex-wrap w-100">
+                  <div className="d-flex align-items-center mb-1 flex-wrap w-100">
+                    <Label
+                      className="col-12 col-sm-auto mb-0 mb-sm-0 mb-1 me-2"
+                      for="search__fromEndTime"
+                      style={{ minWidth: "fit-content" }}
+                    >
                       from
                     </Label>
-                    <Input
-                      id="search__fromEndTime"
-                      type="datetime-local"
-                      name="fromEndTime"
-                      autoComplete="off"
-                      value={formik.values.fromEndTime}
-                      onBlur={formik.handleBlur}
-                      onChange={formik.handleChange}
-                      invalid={formik.errors.endTime}
-                      className="col-6"
-                    />
+                    <div
+                      className="col-12 col-sm flex-grow-1"
+                      style={{ minWidth: 0, maxWidth: "100%" }}
+                    >
+                      <Input
+                        id="search__fromEndTime"
+                        type="datetime-local"
+                        name="fromEndTime"
+                        autoComplete="off"
+                        value={formik.values.fromEndTime}
+                        onBlur={formik.handleBlur}
+                        onChange={formik.handleChange}
+                        invalid={formik.errors.endTime}
+                        className="bg-darker border-dark"
+                        style={{ width: "100%", maxWidth: "100%", minWidth: 0 }}
+                      />
+                    </div>
                   </div>
-                  <div className="d-flex align-items-center">
-                    <Label className="col-3 mb-0" for="search__toEndTime">
+                  <div className="d-flex align-items-center flex-wrap w-100">
+                    <Label
+                      className="col-12 col-sm-auto mb-0 mb-sm-0 mb-1 me-2"
+                      for="search__toEndTime"
+                      style={{ minWidth: "fit-content" }}
+                    >
                       to
                     </Label>
-                    <Input
-                      id="search__toEndTime"
-                      type="datetime-local"
-                      name="toEndTime"
-                      autoComplete="off"
-                      value={formik.values.toEndTime}
-                      onBlur={formik.handleBlur}
-                      onChange={formik.handleChange}
-                      invalid={formik.errors.endTime}
-                      className="col-6"
-                    />
+                    <div
+                      className="col-12 col-sm flex-grow-1"
+                      style={{ minWidth: 0, maxWidth: "100%" }}
+                    >
+                      <Input
+                        id="search__toEndTime"
+                        type="datetime-local"
+                        name="toEndTime"
+                        autoComplete="off"
+                        value={formik.values.toEndTime}
+                        onBlur={formik.handleBlur}
+                        onChange={formik.handleChange}
+                        invalid={formik.errors.endTime}
+                        className="bg-darker border-dark"
+                        style={{ width: "100%", maxWidth: "100%", minWidth: 0 }}
+                      />
+                    </div>
                   </div>
                 </div>
                 {formik.errors.endTime && (
@@ -325,7 +380,7 @@ export default function ReportsSearch() {
                 )}
               </div>
             </Col>
-            <Col xxl={3} sm={12} className="d-flex align-items-center mt-3">
+            <Col xl={12} lg={12} className="d-flex align-items-center mt-3">
               <Label
                 className="col-xxl-4 col-sm-3 fw-bold mb-0"
                 for="search__errors"

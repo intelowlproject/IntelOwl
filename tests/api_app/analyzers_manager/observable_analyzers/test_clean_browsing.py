@@ -1,13 +1,18 @@
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 from django.test import TestCase
-from api_app.analyzers_manager.observable_analyzers.CleanBrowsing import CleanBrowsing
+
+from IntelOwl.api_app.analyzers_manager.observable_analyzers.clean_browsing import (
+    CleanBrowsing,
+)
+
 
 class CleanBrowsingTest(TestCase):
-    
+
     def setUp(self):
         self.observable_name = "google.com"
         # This binary simulates a "Blocked" response (RCODE 3)
-        self.blocked_content = b'\x00\x00\x81\x83\x00\x01\x00\x00\x00\x00\x00\x00'
+        self.blocked_content = b"\x00\x00\x81\x83\x00\x01\x00\x00\x00\x00\x00\x00"
 
     @patch("api_app.analyzers_manager.observable_analyzers.CleanBrowsing.requests.get")
     def test_routing_security(self, mock_get):
@@ -20,7 +25,7 @@ class CleanBrowsingTest(TestCase):
         analyzer = CleanBrowsing(MagicMock())
         analyzer.observable_name = self.observable_name
         analyzer.filter_type = "security"
-        
+
         analyzer.run()
 
         # Check URL
@@ -39,7 +44,7 @@ class CleanBrowsingTest(TestCase):
         analyzer = CleanBrowsing(MagicMock())
         analyzer.observable_name = self.observable_name
         analyzer.filter_type = "adult"
-        
+
         analyzer.run()
 
         args, _ = mock_get.call_args
@@ -56,7 +61,7 @@ class CleanBrowsingTest(TestCase):
         analyzer = CleanBrowsing(MagicMock())
         analyzer.observable_name = self.observable_name
         # We don't set filter_type here to test defaults
-        
+
         analyzer.run()
 
         args, _ = mock_get.call_args

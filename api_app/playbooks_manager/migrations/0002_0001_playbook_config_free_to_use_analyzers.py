@@ -108,7 +108,7 @@ plugin = {
                     "https://github.com/dr4k0nia/yara-rules",
                     "https://github.com/Yara-Rules/rules.git",
                     "https://github.com/Neo23x0/signature-base.git",
-                    "https://yaraify-api.abuse.ch/download/yaraify-rules.zip",
+                    "https://yaraify.abuse.ch/yarahub/yaraify-rules.zip",
                 ],
             },
             "APKiD": {},

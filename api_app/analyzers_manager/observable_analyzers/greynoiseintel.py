@@ -73,7 +73,7 @@ class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
             raise AnalyzerRunException(f"Request failure error: {e}")
 
         except NotFound as e:
-            logger.info(f"not found error for {self.observable_name}: {e}")
+            logger.info("Greynoise lookup returned no results for observable")
             response["not_found"] = True
 
         return response
@@ -98,7 +98,7 @@ class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
 
             if classification == self.EVALUATIONS.MALICIOUS.value:
                 if not noise:
-                    logger.error("malicious IP is not a noise!?! How is this possible")
+                    logger.error("Greynoise inconsistency detected: malicious classification without noise flag")
                 data_model.evaluation = self.EVALUATIONS.MALICIOUS.value
                 data_model.reliability = 7
 
@@ -114,8 +114,8 @@ class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
                 data_model.reliability = 7
 
             else:
-                logger.error(
-                    f"there should not be other types of classification. Classification found: {classification}"
+                logger.warning(
+                      "Unexpected classification received from Greynoise analyzer"
                 )
 
     @classmethod

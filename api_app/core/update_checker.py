@@ -4,6 +4,7 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
+
 def normalize_version(v):
     """
     Convert '1.2.3' → (1, 2, 3) so versions can be compared.
@@ -78,8 +79,7 @@ def check_for_update():
         # fallback string compare if parsing failed
         if latest_str != current_version_str:
             logger.warning(
-                f"Update available: {latest_str} "
-                f"(current: {current_version_str})"
+                f"Update available: {latest_str} " f"(current: {current_version_str})"
             )
         return
 
@@ -90,8 +90,7 @@ def check_for_update():
         )
     elif latest < current:
         logger.info(
-            f"Local version ahead of release: "
-            f"{current_version_str} > {latest_str}"
+            f"Local version ahead of release: " f"{current_version_str} > {latest_str}"
         )
     else:
         logger.info(f"IntelOwl version up to date ({current_version_str})")

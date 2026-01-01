@@ -32,7 +32,7 @@ Please delete options that are not relevant.
 - [ ] I have inserted the copyright banner at the start of the file: ```# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl # See the file 'LICENSE' for copying permission.```
 - [ ] Please avoid adding new libraries as requirements whenever it is possible. Use new libraries only if strictly needed to solve the issue you are working for. In case of doubt, ask a maintainer permission to use a specific library.
 - [ ] If external libraries/packages with restrictive licenses were added, they were added in the [Legal Notice](https://github.com/certego/IntelOwl/blob/master/.github/legal_notice.md) section.
-- [ ] Linters (`Black`, `Flake`, `Isort`) gave 0 errors. If you have correctly installed [pre-commit](https://intelowlproject.github.io/docs/IntelOwl/contribute/#how-to-start-setup-project-and-development-instance), it does these checks and adjustments on your behalf.
+- [ ] Linters (`Ruff`) gave 0 errors. If you have correctly installed [pre-commit](https://intelowlproject.github.io/docs/IntelOwl/contribute/#how-to-start-setup-project-and-development-instance), it does these checks and adjustments on your behalf.
 - [ ] I have added tests for the feature/bug I solved (see `tests` folder). All the tests (new and old ones) gave 0 errors.
 - [ ] If the GUI has been modified:
     - [ ] I have a provided a screenshot of the result in the PR.

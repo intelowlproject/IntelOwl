@@ -26,7 +26,6 @@ select = [
 ]
 
 ignore = [
-    "W503",  # line break before binary operator (conflicts with black)
     "E231",  # missing whitespace after ','
     "W605",  # invalid escape sequence
 ]

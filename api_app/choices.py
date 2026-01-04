@@ -1,5 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import _operator
 import enum
 import ipaddress
 import logging
@@ -7,7 +8,6 @@ import re
 import typing
 from pathlib import PosixPath
 
-import _operator
 from django.db import models
 
 logger = logging.getLogger(__name__)

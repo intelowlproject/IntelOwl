@@ -18,11 +18,6 @@ select = [
     "W",   # pycodestyle warnings
     "F",   # pyflakes
     "I",   # isort
-    "N",   # pep8-naming
-    "UP",  # pyupgrade
-    "B",   # flake8-bugbear
-    "C4",  # flake8-comprehensions
-    "DJ",  # flake8-django
 ]
 
 ignore = [
@@ -35,7 +30,6 @@ ignore = [
 
 [tool.ruff.lint.isort]
 known-first-party = ["certego_saas"]
-profile = "black"
 
 [tool.ruff.format]
 quote-style = "double"

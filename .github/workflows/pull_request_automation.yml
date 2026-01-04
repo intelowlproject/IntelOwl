@@ -46,10 +46,13 @@ jobs:
           pip3 install --upgrade pip
           pip3 install -r requirements/test-requirements.txt
 
-      - name: Lint and format with Ruff
+      - name: Lint with Ruff
         run: |
           ruff check . --output-format=github
-          ruff format --check .
+
+      - name: Check formatting with Black
+        run: |
+          black . --check --diff --exclude "migrations|venv"
       
       - name: Perform ShellCheck Analysis
         run: bash <(curl -s https://raw.githubusercontent.com/CICDToolbox/shellcheck/master/pipeline.sh)

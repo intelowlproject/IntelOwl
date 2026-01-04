@@ -2,11 +2,13 @@ repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.8.6
     hooks:
-      # Run the linter
+      # Run the linter (replaces flake8 + isort)
       - id: ruff
         args: [--fix]
-      # Run the formatter
-      - id: ruff-format
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
   - repo: https://github.com/pre-commit/mirrors-eslint
     rev: v8.16.0
     hooks:

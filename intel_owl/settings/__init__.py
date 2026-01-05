@@ -76,3 +76,16 @@ from .rest import *  # lgtm [py/polluting-import]
 from .security import *  # lgtm [py/polluting-import]
 from .storage import *  # lgtm [py/polluting-import]
 from .websocket import *  # lgtm [py/polluting-import]
+
+# Load local development settings if available (overrides above)
+try:
+    from .local import *  # lgtm [py/polluting-import]
+except ImportError:
+    pass
+
+
+# Load local development settings if available (overrides above)
+try:
+    from .local import *  # lgtm [py/polluting-import]
+except ImportError:
+    pass

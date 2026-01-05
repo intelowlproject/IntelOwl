@@ -7,11 +7,17 @@ import { TlpChoices } from "../../constants/advancedSettingsConst";
 
 export function TLPTag(props) {
   const { value, ...rest } = props;
+  
+  // Handle case where value is undefined/null
+  if (!value) {
+    return <Badge color="secondary">No TLP</Badge>;
+  }
+  
   const badgeId = `tlptag-badge__${value}`;
   const color = TLPColors?.[value] || "#dfe1e2";
   const tooltipText = TLPDescriptions?.[value] || "invalid";
 
-  return value ? (
+  return (
     <Badge
       id={badgeId}
       color={null}
@@ -27,7 +33,7 @@ export function TLPTag(props) {
         {tooltipText}
       </UncontrolledTooltip>
     </Badge>
-  ) : null;
+  );
 }
 
 TLPTag.propTypes = {

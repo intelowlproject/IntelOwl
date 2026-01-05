@@ -598,6 +598,7 @@ class JobSerializer(_AbstractJobViewSerializer):
             "received_request_time",
             "finished_analysis_time",
             "process_time",
+            "tlp",
             "warnings",
             "errors",
         )

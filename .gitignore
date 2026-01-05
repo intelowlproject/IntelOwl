@@ -50,4 +50,4 @@ coverage.xml
 /.env
 
 # post run dev
-integrations/malware_tools_analyzers/clamav/sigs
+integrations/malware_tools_analyzers/clamav/sigsintel_owl/settings/local.py

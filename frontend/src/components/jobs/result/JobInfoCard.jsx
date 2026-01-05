@@ -34,6 +34,7 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
   const [isOpenJobInfoCard, setIsOpenJobInfoCard] = React.useState(false);
   const [isOpenJobWarnings, setIsOpenJobWarnings] = React.useState(false);
   const [isOpenJobErrors, setIsOpenJobErrors] = React.useState(false);
+  
 
   const investigationTimeRange = 30;
   const endDateRelatedInvestigation = new Date();
@@ -43,7 +44,6 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
   startDateRelatedInvestigation.setDate(
     startDateRelatedInvestigation.getDate() - investigationTimeRange,
   );
-
   return (
     <div id="JobInfoCardSection">
       <ContentSection className="mb-0 bg-darker">
@@ -195,14 +195,13 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
                 <PlaybookTag
                   key={job.playbook_to_execute}
                   playbook={job.playbook_to_execute}
-                  className="mr-2"
                 />,
               ],
               [
                 "Tags",
                 job.tags.length ? (
                   job.tags.map((tag) => (
-                    <JobTag key={tag.label} tag={tag} className="me-2" />
+                    <JobTag key={tag.label} tag={tag} />
                   ))
                 ) : (
                   <small className="fst-italic text-gray">None</small>

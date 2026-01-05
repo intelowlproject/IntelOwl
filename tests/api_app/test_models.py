@@ -548,7 +548,6 @@ class JobTestCase(CustomTestCase):
             j1.pivots_to_execute.filter(name="test").values_list("pk", flat=True), []
         )
 
-
     def test_get_root_returns_self_when_is_root(self):
         """Test that get_root() returns self when the job is already a root node."""
         an = Analyzable.objects.create(
@@ -602,7 +601,9 @@ class JobTestCase(CustomTestCase):
         )
         # Call get_root multiple times and verify consistent results
         results = [root_job.get_root().pk for _ in range(10)]
-        self.assertEqual(len(set(results)), 1, "get_root() should return consistent results")
+        self.assertEqual(
+            len(set(results)), 1, "get_root() should return consistent results"
+        )
         root_job.delete()
         an.delete()
 
@@ -610,7 +611,7 @@ class JobTestCase(CustomTestCase):
         """
         Test that get_root() handles corrupted tree data (multiple roots with same path)
         by returning a deterministic result based on PK ordering.
-        
+
         This simulates the race condition that can occur with django-treebeard
         under high concurrency, where multiple root nodes may exist with the same path.
         """
@@ -625,7 +626,7 @@ class JobTestCase(CustomTestCase):
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
         )
         root_path = root_job.path
-        
+
         # Manually create a duplicate root with the same path to simulate corruption
         # This bypasses treebeard's normal creation to force the error condition
         duplicate_root = Job.objects.create(
@@ -635,29 +636,32 @@ class JobTestCase(CustomTestCase):
             path=root_path,  # Same path as original root
             depth=root_job.depth,
         )
-        
+
         # Create a child job under the original root
         child_job = root_job.add_child(
             user=self.user,
             analyzable=an,
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
         )
-        
+
         # When get_root is called on the child, it should handle the
         # MultipleObjectsReturned exception and return the root with lowest PK
-        with self.assertLogs('api_app.models', level='ERROR') as log_context:
+        with self.assertLogs("api_app.models", level="ERROR") as log_context:
             result = child_job.get_root()
-        
+
         # Verify deterministic result - should always return the job with lowest PK
         expected_root = min(root_job, duplicate_root, key=lambda j: j.pk)
         self.assertEqual(result.pk, expected_root.pk)
-        
+
         # Verify error was logged
         self.assertTrue(
-            any("Tree Integrity Error: Multiple roots found" in msg for msg in log_context.output),
-            "Expected error log about multiple roots"
+            any(
+                "Tree Integrity Error: Multiple roots found" in msg
+                for msg in log_context.output
+            ),
+            "Expected error log about multiple roots",
         )
-        
+
         # Cleanup
         child_job.delete()
         duplicate_root.delete()

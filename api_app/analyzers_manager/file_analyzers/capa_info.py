@@ -11,6 +11,10 @@ from shlex import quote
 
 import requests
 from django.conf import settings
+cache_dir = Path(settings.MEDIA_ROOT) / "capa_cache"
+cache_dir.mkdir(parents=True, exist_ok=True)
+
+os.environ["XDG_CACHE_HOME"] = str(cache_dir)
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
@@ -41,6 +45,7 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
             shutil.rmtree(SIGNATURE_LOCATION)
 
         os.makedirs(SIGNATURE_LOCATION)
+
         logger.info(f"Created fresh signatures directory at {SIGNATURE_LOCATION}")
 
         signatures_url = "https://api.github.com/repos/mandiant/capa/contents/sigs"
@@ -96,6 +101,11 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
 
     def run(self):
         try:
+
+            cache_dir = Path(settings.MEDIA_ROOT) / "capa_cache"
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            os.environ["XDG_CACHE_HOME"] = str(cache_dir)
+
 
             response = requests.get(
                 "https://api.github.com/repos/mandiant/capa-rules/releases/latest"

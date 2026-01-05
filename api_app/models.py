@@ -457,9 +457,22 @@ class Job(MP_Node):
         try:
             return super().get_root()
         except self.MultipleObjectsReturned:
-            # django treebeard is not thread safe
-            # this is not a really valid solution, but it will work for now
-            return self.objects.filter(path=self.path[0 : self.steplen]).first()  # noqa
+            # django-treebeard is not thread safe - this indicates a data integrity issue.
+            # We intentionally avoid select_for_update() to prevent potential database
+            # deadlocks in high-concurrency environments (e.g., multiple Celery workers).
+            # Using order_by('pk').first() ensures all concurrent requests get the same
+            # deterministic root node, even if multiple roots exist due to a race condition.
+            # Note: The root cause is in django-treebeard's tree modification operations,
+            # not in this read operation.
+            root_node = type(self).objects.filter(
+                path=self.path[0 : self.steplen]
+            ).order_by("pk").first()
+            logger.error(
+                f"Tree Integrity Error: Multiple roots found for Job {self.pk} "
+                f"(path: {self.path}). Returning deterministic root "
+                f"(PK: {root_node.pk if root_node else 'None'}) as fallback."
+            )
+            return root_node
 
     @cached_property
     def is_sample(self) -> bool:

@@ -4,9 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers.quad9_dns_resolver import (
-    Quad9DNSResolver,
-)
+from api_app.analyzers_manager.observable_analyzers.dns import Quad9DNSResolver
 
 
 @pytest.mark.django_db
@@ -15,16 +13,18 @@ def test_quad9_dns_resolver_handles_non_utf8(mock_get):
     class MockResponse:
         content = b"\xd5\x00\x01"
 
-        def raise_for_status(self):
+        @staticmethod
+        def raise_for_status():
             pass
 
-        def json(self):
+        @staticmethod
+        def json():
             return {"Answer": [{"data": "1.1.1.1"}]}
 
     mock_get.return_value = MockResponse()
 
     analyzer = Quad9DNSResolver(
-        observable_name="test.com", observable_classification="domain"
+        observable_name="test.com", observable_classification="domain", config={}
     )
 
     result = analyzer.run()

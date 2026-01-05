@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 import datetime
 from json import loads
-from unittest.mock import patch
+
 
 from celery._state import get_current_app
 from celery.canvas import Signature
@@ -615,8 +615,10 @@ class JobTestCase(CustomTestCase):
 
         This simulates the race condition that can occur with django-treebeard
         under high concurrency, where multiple root nodes may exist with the same path.
-        We use mocking because treebeard's save() prevents direct path manipulation.
+        We use raw SQL to bypass treebeard's save() which normally prevents duplicate paths.
         """
+        from django.db import connection
+
         an = Analyzable.objects.create(
             name="test.com",
             classification=Classification.DOMAIN,
@@ -633,19 +635,44 @@ class JobTestCase(CustomTestCase):
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
         )
 
-        # Mock treebeard's get_root to raise MultipleObjectsReturned
-        # This simulates the race condition without needing to corrupt the DB
-        from treebeard.mp_tree import MP_Node
+        # Use raw SQL to create a duplicate root with the same path
+        # This bypasses treebeard's save() logic that normally prevents this
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO api_app_job (
+                    path, depth, numchild, status, received_request_time,
+                    tlp, scan_mode, sent_to_bi, user_id, analyzable_id,
+                    runtime_configuration
+                )
+                VALUES (%s, %s, %s, %s, NOW(), %s, %s, %s, %s, %s, %s)
+                RETURNING id
+                """,
+                [
+                    root_job.path,  # Same path as original root - creates duplicate
+                    root_job.depth,
+                    0,
+                    Job.STATUSES.REPORTED_WITHOUT_FAILS.value,
+                    Job.TLP.CLEAR.value,
+                    1,
+                    False,
+                    self.user.id,
+                    an.id,
+                    "{}",
+                ],
+            )
+            duplicate_root_id = cursor.fetchone()[0]
 
-        with patch.object(
-            MP_Node, "get_root", side_effect=Job.MultipleObjectsReturned()
-        ):
-            with self.assertLogs("api_app.models", level="ERROR") as log_context:
-                result = child_job.get_root()
+        # When get_root is called on the child, it should handle the
+        # MultipleObjectsReturned exception and return the root with lowest PK
+        with self.assertLogs("api_app.models", level="ERROR") as log_context:
+            result = child_job.get_root()
 
         # Verify we got a result (the fallback query should work)
         self.assertIsNotNone(result)
-        self.assertEqual(result.pk, root_job.pk)
+        # Should return the job with lowest PK (deterministic ordering)
+        expected_pk = min(root_job.pk, duplicate_root_id)
+        self.assertEqual(result.pk, expected_pk)
 
         # Verify error was logged
         self.assertTrue(
@@ -656,7 +683,9 @@ class JobTestCase(CustomTestCase):
             "Expected error log about multiple roots",
         )
 
-        # Cleanup
+        # Cleanup - use raw SQL for duplicate since it wasn't created via ORM properly
+        with connection.cursor() as cursor:
+            cursor.execute("DELETE FROM api_app_job WHERE id = %s", [duplicate_root_id])
         child_job.delete()
         root_job.delete()
         an.delete()

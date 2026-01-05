@@ -3,7 +3,6 @@
 import datetime
 from json import loads
 
-
 from celery._state import get_current_app
 from celery.canvas import Signature
 from django.core.exceptions import ValidationError

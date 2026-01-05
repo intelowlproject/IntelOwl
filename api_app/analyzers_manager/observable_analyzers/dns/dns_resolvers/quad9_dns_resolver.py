@@ -45,7 +45,10 @@ class Quad9DNSResolver(DoHMixin, classes.ObservableAnalyzer):
             else:
                 quad9_response.raise_for_status()
 
-        json_response = quad9_response.json()
+        try:
+            json_response = quad9_response.json()
+        except Exception:
+            json_response = {}
         resolutions: list[str] = []
         for answer in json_response.get("Answer", []):
             if "data" in answer:

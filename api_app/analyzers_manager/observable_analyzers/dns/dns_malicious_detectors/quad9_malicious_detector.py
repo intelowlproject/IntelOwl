@@ -81,10 +81,10 @@ class Quad9MaliciousDetector(DoHMixin, classes.ObservableAnalyzer):
         resolutions: list[str] = []
         for answer in dns_response.answer:
             for record in answer:
-             if hasattr(record, "address"):  
-              resolutions.append(record.address)
-             elif hasattr(record, "target"): 
-              resolutions.append(record.target)
+                if hasattr(record, "address"):
+                    resolutions.append(record.address)
+                elif hasattr(record, "target"):
+                    resolutions.append(record.target)
 
         return bool(resolutions)
 

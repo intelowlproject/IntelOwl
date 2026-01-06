@@ -8,21 +8,21 @@ from django.db import migrations
 def migrate(apps, schema_editor):
     playbook_config = apps.get_model("playbooks_manager", "PlaybookConfig")
     pc = playbook_config.objects.get(name="FREE_TO_USE_ANALYZERS")
-    
+
     # Update the YARAify URL to the new yarahub endpoint
-    if "analyzers" in pc.runtime_configuration:
-        if "Yara" in pc.runtime_configuration["analyzers"]:
-            yara_config = pc.runtime_configuration["analyzers"]["Yara"]
-            if "repositories" in yara_config:
-                repositories = yara_config["repositories"]
-                # Replace old YARAify URL with new yarahub URL
-                old_url = "https://yaraify-api.abuse.ch/download/yaraify-rules.zip"
-                new_url = "https://yaraify.abuse.ch/yarahub/yaraify-rules.zip"
-                
-                if old_url in repositories:
-                    index = repositories.index(old_url)
-                    repositories[index] = new_url
-    
+    repositories = (
+        pc.runtime_configuration.get("analyzers", {})
+        .get("Yara", {})
+        .get("repositories", [])
+    )
+
+    old_url = "https://yaraify-api.abuse.ch/download/yaraify-rules.zip"
+    new_url = "https://yaraify.abuse.ch/yarahub/yaraify-rules.zip"
+
+    if old_url in repositories:
+        index = repositories.index(old_url)
+        repositories[index] = new_url
+
     pc.full_clean()
     pc.save()
 
@@ -30,21 +30,21 @@ def migrate(apps, schema_editor):
 def reverse_migrate(apps, schema_editor):
     playbook_config = apps.get_model("playbooks_manager", "PlaybookConfig")
     pc = playbook_config.objects.get(name="FREE_TO_USE_ANALYZERS")
-    
+
     # Revert to the old YARAify URL
-    if "analyzers" in pc.runtime_configuration:
-        if "Yara" in pc.runtime_configuration["analyzers"]:
-            yara_config = pc.runtime_configuration["analyzers"]["Yara"]
-            if "repositories" in yara_config:
-                repositories = yara_config["repositories"]
-                # Replace new yarahub URL with old YARAify URL
-                old_url = "https://yaraify-api.abuse.ch/download/yaraify-rules.zip"
-                new_url = "https://yaraify.abuse.ch/yarahub/yaraify-rules.zip"
-                
-                if new_url in repositories:
-                    index = repositories.index(new_url)
-                    repositories[index] = old_url
-    
+    repositories = (
+        pc.runtime_configuration.get("analyzers", {})
+        .get("Yara", {})
+        .get("repositories", [])
+    )
+
+    old_url = "https://yaraify-api.abuse.ch/download/yaraify-rules.zip"
+    new_url = "https://yaraify.abuse.ch/yarahub/yaraify-rules.zip"
+
+    if new_url in repositories:
+        index = repositories.index(new_url)
+        repositories[index] = old_url
+
     pc.full_clean()
     pc.save()
 

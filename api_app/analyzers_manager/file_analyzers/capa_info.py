@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import pwd, grp
 import json
 import logging
 import os
@@ -11,10 +12,19 @@ from shlex import quote
 
 import requests
 from django.conf import settings
-cache_dir = Path(settings.MEDIA_ROOT) / "capa_cache"
-cache_dir.mkdir(parents=True, exist_ok=True)
 
-os.environ["XDG_CACHE_HOME"] = str(cache_dir)
+def run(self):
+    try:
+        cache_dir = Path(os.getenv("XDG_CACHE_HOME", "/opt/intelowl/.cache"))
+
+        if not cache_dir.exists():
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            try:
+                uid = pwd.getpwnam("intelowl").pw_uid
+                gid = grp.getgrnam("intelowl").gr_gid
+                os.chown(cache_dir, uid, gid)
+            except Exception:
+                pass
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException

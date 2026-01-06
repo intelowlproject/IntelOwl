@@ -639,12 +639,14 @@ class JobTestCase(CustomTestCase):
 
         # Patch treebeard's MP_Node.get_root to raise MultipleObjectsReturned
         # This simulates the race condition where multiple roots exist
-        with patch(
-            "treebeard.mp_tree.MP_Node.get_root",
-            side_effect=Job.MultipleObjectsReturned("Multiple roots found"),
+        with (
+            patch(
+                "treebeard.mp_tree.MP_Node.get_root",
+                side_effect=Job.MultipleObjectsReturned("Multiple roots found"),
+            ),
+            self.assertLogs("api_app.models", level="ERROR") as log_context,
         ):
-            with self.assertLogs("api_app.models", level="ERROR") as log_context:
-                result = child_job.get_root()
+            result = child_job.get_root()
 
         # Verify we got a result (the fallback query should work)
         self.assertIsNotNone(result)

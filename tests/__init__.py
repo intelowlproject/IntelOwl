@@ -13,6 +13,7 @@ from rest_framework.test import APIClient
 from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import Classification
+from api_app.decorators import abstractclassproperty
 from api_app.models import AbstractReport, Job
 
 User = get_user_model()
@@ -242,9 +243,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
 
 
 class ViewSetTestCaseMixin:
-    @classmethod
-    @property
-    @abstractmethod
+    @abstractclassproperty
     def model_class(cls) -> Type[Model]:
         raise NotImplementedError()
 

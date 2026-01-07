@@ -15,6 +15,7 @@ from api_app.analyzers_manager.queryset import AnalyzerReportQuerySet
 from api_app.choices import TLP, Classification, PythonModuleBasePaths
 from api_app.data_model_manager.fields import SetField
 from api_app.data_model_manager.models import BaseDataModel
+from api_app.decorators import classproperty
 from api_app.fields import ChoiceArrayField
 from api_app.models import AbstractReport, PythonConfig, PythonModule
 
@@ -300,8 +301,7 @@ class AnalyzerConfig(PythonConfig):
         blank=True,
     )
 
-    @classmethod
-    @property
+    @classproperty
     def serializer_class(cls):
         from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 
@@ -341,13 +341,11 @@ class AnalyzerConfig(PythonConfig):
         self.clean_observable_supported()
         self.clean_filetypes()
 
-    @classmethod
-    @property
+    @classproperty
     def plugin_type(cls) -> str:
         return "1"
 
-    @classmethod
-    @property
+    @classproperty
     def config_exception(cls):
         return AnalyzerConfigurationException
 

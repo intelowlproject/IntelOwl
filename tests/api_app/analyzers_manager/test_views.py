@@ -6,6 +6,7 @@ from unittest.mock import patch
 from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.choices import Classification, PythonModuleBasePaths
+from api_app.decorators import classproperty
 from api_app.models import Job, PythonModule
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
@@ -22,8 +23,7 @@ class AnalyzerConfigViewSetTestCase(
 
     URL = "/api/analyzer"
 
-    @classmethod
-    @property
+    @classproperty
     def model_class(cls) -> Type[AnalyzerConfig]:
         return AnalyzerConfig
 

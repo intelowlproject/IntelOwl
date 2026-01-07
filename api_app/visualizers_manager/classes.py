@@ -10,6 +10,7 @@ from django.db.models import QuerySet
 from api_app.analyzers_manager.models import MimeTypes
 from api_app.choices import PythonModuleBasePaths
 from api_app.classes import Plugin
+from api_app.decorators import classproperty
 from api_app.models import AbstractReport
 from api_app.visualizers_manager.enums import (
     VisualizableAlignment,
@@ -538,18 +539,15 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
     Page = VisualizablePage
     Level = VisualizableLevel
 
-    @classmethod
-    @property
+    @classproperty
     def python_base_path(cls):
         return PythonModuleBasePaths.Visualizer.value
 
-    @classmethod
-    @property
+    @classproperty
     def report_model(cls):
         return VisualizerReport
 
-    @classmethod
-    @property
+    @classproperty
     def config_model(cls) -> Type[VisualizerConfig]:
         return VisualizerConfig
 

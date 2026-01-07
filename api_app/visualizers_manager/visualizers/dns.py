@@ -27,6 +27,7 @@ from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers.google_dns
 from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers.quad9_dns_resolver import (  # noqa: E501
     Quad9DNSResolver,
 )
+from api_app.decorators import classproperty
 from api_app.models import Job
 from api_app.visualizers_manager.classes import VisualizableObject, Visualizer
 from api_app.visualizers_manager.decorators import (
@@ -37,8 +38,7 @@ logger = getLogger(__name__)
 
 
 class DNS(Visualizer):
-    @classmethod
-    @property
+    @classproperty
     def first_level_analyzers(cls) -> List[str]:
         return [  # noqa
             ClassicDNSResolver.python_module,
@@ -48,8 +48,7 @@ class DNS(Visualizer):
             Quad9DNSResolver.python_module,
         ]
 
-    @classmethod
-    @property
+    @classproperty
     def second_level_analyzers(cls) -> List[str]:
         return [  # noqa
             CloudFlareMaliciousDetector.python_module,

@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 from typing import Type
 
+from api_app.decorators import classproperty
 from api_app.visualizers_manager.models import VisualizerConfig
 from tests import CustomViewSetTestCase
 from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
@@ -12,8 +13,7 @@ class VisualizerConfigViewSetTestCase(
 ):
     URL = "/api/visualizer"
 
-    @classmethod
-    @property
+    @classproperty
     def model_class(cls) -> Type[VisualizerConfig]:
         return VisualizerConfig
 

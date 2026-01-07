@@ -17,6 +17,7 @@ from django.db import models
 from django.utils.functional import cached_property
 
 from api_app.choices import PythonModuleBasePaths
+from api_app.decorators import classproperty
 from api_app.interfaces import CreateJobsFromPlaybookInterface  # skipcq: PYL-R0401
 from api_app.models import AbstractReport, Job, PythonConfig, PythonModule
 
@@ -117,20 +118,17 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
             self.related_analyzer_configs.all() or self.related_connector_configs.all()
         )
 
-    @classmethod
-    @property
+    @classproperty
     def plugin_type(cls) -> str:
         return "5"
 
-    @classmethod
-    @property
+    @classproperty
     def serializer_class(cls) -> Type["PythonConfigSerializer"]:
         from api_app.pivots_manager.serializers import PivotConfigSerializer
 
         return PivotConfigSerializer
 
-    @classmethod
-    @property
+    @classproperty
     def config_exception(cls):
         return PivotConfigurationException
 

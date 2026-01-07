@@ -3,6 +3,7 @@ from typing import Type
 from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import Classification
+from api_app.decorators import classproperty
 from api_app.models import Job, PythonModule
 from api_app.pivots_manager.models import PivotConfig, PivotMap
 from api_app.playbooks_manager.models import PlaybookConfig
@@ -15,8 +16,7 @@ from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
 class PivotMapViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
     URL = "/api/pivot_map"
 
-    @classmethod
-    @property
+    @classproperty
     def model_class(cls) -> Type[PivotMap]:
         return PivotMap
 
@@ -110,8 +110,7 @@ class PivotConfigViewSetTestCase(
         super().tearDown()
         self.pc.delete()
 
-    @classmethod
-    @property
+    @classproperty
     def model_class(cls) -> Type[PivotConfig]:
         return PivotConfig
 

@@ -5,6 +5,7 @@ import logging
 from rest_framework import mixins
 from rest_framework.exceptions import NotFound
 
+from api_app.decorators import classproperty
 from api_app.models import PluginConfig
 
 from ..permissions import isPluginActionsPermission
@@ -40,8 +41,7 @@ class AnalyzerConfigViewSet(
 
 
 class AnalyzerActionViewSet(PythonReportActionViewSet):
-    @classmethod
-    @property
+    @classproperty
     def report_model(cls):
         return AnalyzerReport
 

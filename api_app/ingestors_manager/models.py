@@ -9,6 +9,7 @@ from django.db.models import QuerySet
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
 
 from api_app.choices import PythonModuleBasePaths
+from api_app.decorators import classproperty
 from api_app.ingestors_manager.exceptions import IngestorConfigurationException
 from api_app.ingestors_manager.queryset import IngestorQuerySet, IngestorReportQuerySet
 from api_app.interfaces import CreateJobsFromPlaybookInterface
@@ -123,18 +124,15 @@ class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
     def disabled_in_organizations(self) -> QuerySet:
         return OrganizationPluginConfiguration.objects.none()
 
-    @classmethod
-    @property
+    @classproperty
     def plugin_type(cls) -> str:
         return "4"
 
-    @classmethod
-    @property
+    @classproperty
     def config_exception(cls):
         return IngestorConfigurationException
 
-    @classmethod
-    @property
+    @classproperty
     def serializer_class(cls):
         from api_app.ingestors_manager.serializers import IngestorConfigSerializer
 

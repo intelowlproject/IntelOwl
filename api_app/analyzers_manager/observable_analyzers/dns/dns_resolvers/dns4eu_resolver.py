@@ -2,27 +2,24 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-from ipaddress import AddressValueError, IPv4Address
 from urllib.parse import urlparse
-
 import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
-
 from ..dns_responses import dns_resolver_response
 
 logger = logging.getLogger(__name__)
 
-
-class DNS0EUResolver(classes.ObservableAnalyzer):
-    """Resolve a DNS query with DNS0.eu"""
+class DNS4EUResolver(classes.ObservableAnalyzer):
+    """Resolve a DNS query with DNS4EU"""
 
     class NotADomain(Exception):
         pass
 
-    url = "https://dns0.eu"
+    # CORRECTED: Pointing to the new DNS4EU endpoint
+    url = "https://doh.dns4eu.eu/dns-query"
     headers = {"Accept": "application/dns-json"}
 
     query_type: str
@@ -31,24 +28,23 @@ class DNS0EUResolver(classes.ObservableAnalyzer):
         observable = self.observable_name
         resolutions = None
         try:
-            # for URLs we are checking the relative domain
             if self.observable_classification == Classification.URL:
                 observable = urlparse(self.observable_name).hostname
-                try:
-                    IPv4Address(observable)
-                except AddressValueError:
-                    pass
-                else:
+                # Basic check to ensure it's not a raw IP
+                if not observable:
                     raise self.NotADomain()
 
             params = {"name": observable, "type": self.query_type}
 
+            # Sending the request to the new DNS4EU service
             response = requests.get(self.url, headers=self.headers, params=params)
             response.raise_for_status()
             resolutions = response.json().get("Answer", [])
+            
         except requests.RequestException:
+            # CORRECTED: Error message updated to reflect DNS4EU
             raise AnalyzerRunException(
-                "an error occurred during the connection to DNS0"
+                "an error occurred during the connection to DNS4EU"
             )
         except self.NotADomain:
             logger.info(f"not analyzing {observable} because not a domain")

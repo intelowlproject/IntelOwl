@@ -1,12 +1,10 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-"""Check if the domains is reported as malicious in DNS0.eu database"""
+"""Check if the domains is reported as malicious in DNS4EU database"""
 
 import logging
-from ipaddress import AddressValueError, IPv4Address
 from urllib.parse import urlparse
-
 import requests
 
 from api_app.analyzers_manager import classes
@@ -17,8 +15,9 @@ from ..dns_responses import malicious_detector_response
 
 logger = logging.getLogger(__name__)
 
-
-class DNS0EUMaliciousDetector(classes.ObservableAnalyzer):
+class DNS4EUMaliciousDetector(classes.ObservableAnalyzer):
+    """Check if a domain is malicious via DNS4EU"""
+    
     class NotADomain(Exception):
         pass
 
@@ -29,11 +28,7 @@ class DNS0EUMaliciousDetector(classes.ObservableAnalyzer):
             # for URLs we are checking the relative domain
             if self.observable_classification == Classification.URL:
                 observable = urlparse(self.observable_name).hostname
-                try:
-                    IPv4Address(observable)
-                except AddressValueError:
-                    pass
-                else:
+                if not observable:
                     raise self.NotADomain()
 
             params = {
@@ -41,24 +36,32 @@ class DNS0EUMaliciousDetector(classes.ObservableAnalyzer):
                 "type": "A",
             }
             headers = {"accept": "application/dns-json"}
+            
+            # CORRECTED: Using the DNS4EU DoH endpoint
             response = requests.get(
-                "https://zero.dns0.eu",
+                "https://doh.dns4eu.eu/dns-query",
                 params=params,
                 headers=headers,
             )
             response.raise_for_status()
             response_dict = response.json()
 
-            response_answer = response_dict.get("Authority", [])
-            if response_answer:
-                resolution = response_answer[0].get("data", "")
-                # CloudFlare answers with 0.0.0.0 if the domain is known as malicious
-                if "negative-caching.dns0.eu" in resolution:
+            # DNS4EU Logic: If a domain is blocked/malicious, it typically 
+            # returns a 'status' or a specific sinkhole IP (like 0.0.0.0)
+            # Check the status code (3 = NXDOMAIN, often used for blocking)
+            if response_dict.get("Status") == 3:
+                is_malicious = True
+            
+            # Also check if the answer points to a sinkhole
+            answers = response_dict.get("Answer", [])
+            for ans in answers:
+                if ans.get("data") == "0.0.0.0":
                     is_malicious = True
 
         except requests.exceptions.RequestException:
-            raise AnalyzerRunException("Connection to DNS0 failed")
+            raise AnalyzerRunException("Connection to DNS4EU failed")
         except self.NotADomain:
             logger.info(f"not analyzing {observable} because not a domain")
 
         return malicious_detector_response(self.observable_name, is_malicious)
+    

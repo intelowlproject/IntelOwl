@@ -25,6 +25,13 @@ class DNS4EUMaliciousDetector(classes.ObservableAnalyzer):
         """Exception for non-domain observables"""
         pass
 
+    def update(self):
+        """
+        Required by IntelOwl Plugin base class.
+        This analyzer does not require background updates.
+        """
+        pass
+
     def run(self):
         """
         Execute the analysis

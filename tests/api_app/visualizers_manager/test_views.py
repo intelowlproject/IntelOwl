@@ -1,11 +1,14 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-from typing import Type
+from __future__ import annotations
 
+from typing import Type, TYPE_CHECKING
 from api_app.decorators import classproperty
-from api_app.visualizers_manager.models import VisualizerConfig
 from tests import CustomViewSetTestCase
 from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
+
+if TYPE_CHECKING:
+    from api_app.visualizers_manager.models import VisualizerConfig
 
 
 class VisualizerConfigViewSetTestCase(
@@ -14,7 +17,9 @@ class VisualizerConfigViewSetTestCase(
     URL = "/api/visualizer"
 
     @classproperty
-    def model_class(cls) -> Type[VisualizerConfig]:
+    def model_class(cls) -> "Type['VisualizerConfig']":
+        from api_app.visualizers_manager.models import VisualizerConfig
+
         return VisualizerConfig
 
     def test_get(self):

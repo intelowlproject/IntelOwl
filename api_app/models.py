@@ -1,5 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+# pylint: disable=cyclic-import
+# Reason: Harmless in Django due to bidirectional model relationships; resolved lazily at runtime via app registry
 import datetime
 import json
 import logging

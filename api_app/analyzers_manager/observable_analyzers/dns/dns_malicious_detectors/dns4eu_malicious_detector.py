@@ -15,13 +15,20 @@ from ..dns_responses import malicious_detector_response
 
 logger = logging.getLogger(__name__)
 
+
 class DNS4EUMaliciousDetector(classes.ObservableAnalyzer):
-    """Check if a domain is malicious via DNS4EU"""
-    
+    """
+    Check if a domain is malicious via DNS4EU
+    """
+
     class NotADomain(Exception):
+        """Exception for non-domain observables"""
         pass
 
     def run(self):
+        """
+        Execute the analysis
+        """
         observable = self.observable_name
         is_malicious = False
         try:
@@ -36,22 +43,22 @@ class DNS4EUMaliciousDetector(classes.ObservableAnalyzer):
                 "type": "A",
             }
             headers = {"accept": "application/dns-json"}
-            
-            # CORRECTED: Using the DNS4EU DoH endpoint
+
+            # Using the DNS4EU DoH endpoint
             response = requests.get(
                 "https://doh.dns4eu.eu/dns-query",
                 params=params,
                 headers=headers,
+                timeout=10
             )
             response.raise_for_status()
             response_dict = response.json()
 
-            # DNS4EU Logic: If a domain is blocked/malicious, it typically 
+            # DNS4EU Logic: If a domain is blocked/malicious, it typically
             # returns a 'status' or a specific sinkhole IP (like 0.0.0.0)
-            # Check the status code (3 = NXDOMAIN, often used for blocking)
             if response_dict.get("Status") == 3:
                 is_malicious = True
-            
+
             # Also check if the answer points to a sinkhole
             answers = response_dict.get("Answer", [])
             for ans in answers:
@@ -61,7 +68,7 @@ class DNS4EUMaliciousDetector(classes.ObservableAnalyzer):
         except requests.exceptions.RequestException:
             raise AnalyzerRunException("Connection to DNS4EU failed")
         except self.NotADomain:
-            logger.info(f"not analyzing {observable} because not a domain")
+            logger.info("not analyzing %s because not a domain", observable)
 
         return malicious_detector_response(self.observable_name, is_malicious)
     

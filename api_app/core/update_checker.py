@@ -27,8 +27,7 @@ def fetch_latest_version():
     update_url = getattr(settings, "UPDATE_CHECK_URL", None)
 
     if not update_url:
-        logger.warning("UPDATE_CHECK_URL not configured")
-        return None
+        return None, "UPDATE_CHECK_URL not configured"
 
     try:
         resp = requests.get(
@@ -37,38 +36,37 @@ def fetch_latest_version():
             timeout=5,
         )
         resp.raise_for_status()
-
-        data = resp.json()
-        tag = data.get("tag_name")
-        if not tag:
-            logger.warning("release response missing tag_name")
-            return None
-
-        # remove optional 'v' prefix
-        return tag.lstrip("v")
-
     except requests.RequestException as exc:
         logger.error(f"update check failed: {exc}")
-        return None
+        return None, "Failed to fetch release information"
+
+    try:
+        data = resp.json()
     except ValueError:
         logger.error("invalid JSON in update response")
-        return None
+        return None, "Invalid response from update server"
+
+    tag = data.get("tag_name")
+    if not tag:
+        return None, "Release response missing tag_name"
+
+    return tag.lstrip("v"), None
 
 
 def check_for_update():
     """
-    Compare the running IntelOwl version with the latest available one
-    and log a warning if a newer version exists.
+    Compare the running IntelOwl version with the latest available one.
+
+    Returns:
+        (success: bool, message: str)
     """
     current_version_str = getattr(settings, "INTEL_OWL_VERSION", None)
-    latest_str = fetch_latest_version()
-
     if not current_version_str:
-        logger.warning("INTEL_OWL_VERSION setting missing")
-        return
+        return False, "INTEL_OWL_VERSION setting missing"
 
-    if not latest_str:
-        return  # fetch logged any errors
+    latest_str, error = fetch_latest_version()
+    if error:
+        return False, error
 
     current_version_str = str(current_version_str).lstrip("v")
 
@@ -76,21 +74,24 @@ def check_for_update():
     latest = normalize_version(latest_str)
 
     if not current or not latest:
-        # fallback string compare if parsing failed
         if latest_str != current_version_str:
-            logger.warning(
-                f"Update available: {latest_str} " f"(current: {current_version_str})"
+            return (
+                True,
+                f"Update available: {latest_str} (current: {current_version_str})",
             )
-        return
+        return True, f"IntelOwl version up to date ({current_version_str})"
 
     if latest > current:
-        logger.warning(
+        return (
+            True,
             f"New IntelOwl version available: {latest_str} "
-            f"(current: {current_version_str})"
+            f"(current: {current_version_str})",
         )
-    elif latest < current:
-        logger.info(
-            f"Local version ahead of release: " f"{current_version_str} > {latest_str}"
+
+    if latest < current:
+        return (
+            True,
+            f"Local version ahead of release: " f"{current_version_str} > {latest_str}",
         )
-    else:
-        logger.info(f"IntelOwl version up to date ({current_version_str})")
+
+    return True, f"IntelOwl version up to date ({current_version_str})"

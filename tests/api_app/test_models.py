@@ -616,6 +616,7 @@ class JobTestCase(CustomTestCase):
         under high concurrency. We use mocking because the path field has a
         UNIQUE constraint in the database, preventing real duplicates.
         """
+        import logging
         from unittest.mock import patch
 
         an = Analyzable.objects.create(
@@ -640,34 +641,43 @@ class JobTestCase(CustomTestCase):
         # Import MP_Node to patch its get_root method
         from treebeard.mp_tree import MP_Node
 
-        # Patch treebeard's MP_Node.get_root to raise MultipleObjectsReturned
-        # This simulates the race condition where multiple roots exist
-        # We use patch.object to patch the method directly on the class
-        with (
-            patch.object(
-                MP_Node,
-                "get_root",
-                side_effect=Job.MultipleObjectsReturned("Multiple roots found"),
-            ),
-            self.assertLogs("api_app.models", level="ERROR") as log_context,
-        ):
-            result = child_job.get_root()
+        # Temporarily re-enable logging (CI disables it via DISABLE_LOGGING_TEST)
+        # Save the current logging disable level and re-enable
+        previous_disable_level = logging.root.manager.disable
+        logging.disable(logging.NOTSET)
 
-        # Verify we got a result (the fallback query should work)
-        self.assertIsNotNone(result)
-        # The fallback query finds root_job (the only actual root)
-        self.assertEqual(result.pk, root_job.pk)
+        try:
+            # Patch treebeard's MP_Node.get_root to raise MultipleObjectsReturned
+            # This simulates the race condition where multiple roots exist
+            # We use patch.object to patch the method directly on the class
+            with (
+                patch.object(
+                    MP_Node,
+                    "get_root",
+                    side_effect=Job.MultipleObjectsReturned("Multiple roots found"),
+                ),
+                self.assertLogs("api_app.models", level="ERROR") as log_context,
+            ):
+                result = child_job.get_root()
 
-        # Verify error was logged
-        self.assertTrue(
-            any(
-                "Tree Integrity Error: Multiple roots found" in msg
-                for msg in log_context.output
-            ),
-            "Expected error log about multiple roots",
-        )
+            # Verify we got a result (the fallback query should work)
+            self.assertIsNotNone(result)
+            # The fallback query finds root_job (the only actual root)
+            self.assertEqual(result.pk, root_job.pk)
 
-        # Cleanup
-        child_job.delete()
-        root_job.delete()
-        an.delete()
+            # Verify error was logged
+            self.assertTrue(
+                any(
+                    "Tree Integrity Error: Multiple roots found" in msg
+                    for msg in log_context.output
+                ),
+                "Expected error log about multiple roots",
+            )
+        finally:
+            # Restore the previous logging disable level
+            logging.disable(previous_disable_level)
+
+            # Cleanup
+            child_job.delete()
+            root_job.delete()
+            an.delete()

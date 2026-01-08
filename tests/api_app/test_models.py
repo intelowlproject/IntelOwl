@@ -637,11 +637,16 @@ class JobTestCase(CustomTestCase):
         # Verify child_job is not a root (needed for the test to work)
         self.assertFalse(child_job.is_root())
 
+        # Import MP_Node to patch its get_root method
+        from treebeard.mp_tree import MP_Node
+
         # Patch treebeard's MP_Node.get_root to raise MultipleObjectsReturned
         # This simulates the race condition where multiple roots exist
+        # We use patch.object to patch the method directly on the class
         with (
-            patch(
-                "treebeard.mp_tree.MP_Node.get_root",
+            patch.object(
+                MP_Node,
+                "get_root",
                 side_effect=Job.MultipleObjectsReturned("Multiple roots found"),
             ),
             self.assertLogs("api_app.models", level="ERROR") as log_context,

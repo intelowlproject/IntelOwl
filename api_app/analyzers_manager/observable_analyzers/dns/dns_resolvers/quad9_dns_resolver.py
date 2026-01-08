@@ -46,9 +46,14 @@ class Quad9DNSResolver(DoHMixin, classes.ObservableAnalyzer):
                 quad9_response.raise_for_status()
 
         json_response = quad9_response.json()
+        try:
+            json_response = quad9_response.json()
+        except Exception:
+            json_response = {}
         resolutions: list[str] = []
         for answer in json_response.get("Answer", []):
-            if "data" in answer:
-                resolutions.append(answer["data"])
+            data = answer.get("data")  # safe access
+            if data is not None:  # skip None values
+                resolutions.append(data)
 
         return dns_resolver_response(observable, resolutions)

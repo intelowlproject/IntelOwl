@@ -2,7 +2,8 @@
 # See the file 'LICENSE' for copying permission.
 from __future__ import annotations
 
-from typing import Type, TYPE_CHECKING
+from typing import TYPE_CHECKING, Type
+
 from api_app.decorators import classproperty
 from tests import CustomViewSetTestCase
 from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin

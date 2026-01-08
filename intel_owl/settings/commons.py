@@ -55,7 +55,7 @@ GIT_SSH_SCRIPT_PATH = (
     PROJECT_LOCATION / "api_app" / "analyzers_manager" / "ssh_gitpython.sh"
 )
 
-# Update checker settings 
+# Update checker settings
 UPDATE_CHECK_URL = get_secret(
     "UPDATE_CHECK_URL",
     "https://api.github.com/repos/intelowlproject/IntelOwl/releases/latest",

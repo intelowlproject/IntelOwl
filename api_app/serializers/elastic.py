@@ -1,7 +1,7 @@
 import datetime
 import logging
 from dataclasses import dataclass
-
+from api_app.models import ReportStatus
 from rest_framework import serializers
 from rest_framework.validators import ValidationError
 

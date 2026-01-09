@@ -657,9 +657,9 @@ class JobTestCase(CustomTestCase):
         # The fallback query finds root_job (the only actual root)
         self.assertEqual(result.pk, root_job.pk)
 
-        # Verify error was logged (using mock to avoid CI logging disable issues)
-        mock_logger.error.assert_called_once()
-        call_args = mock_logger.error.call_args[0][0]
+        # Verify warning was logged (using mock to avoid CI logging disable issues)
+        mock_logger.warning.assert_called_once()
+        call_args = mock_logger.warning.call_args[0][0]
         self.assertIn("Tree Integrity Error", call_args)
         self.assertIn("Multiple roots found", call_args)
 

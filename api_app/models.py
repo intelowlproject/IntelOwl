@@ -472,7 +472,7 @@ class Job(MP_Node):
                 .order_by("pk")
                 .first()
             )
-            logger.error(
+            logger.warning(
                 f"Tree Integrity Error: Multiple roots found for Job {self.pk} "
                 f"(path: {self.path}). Returning deterministic root "
                 f"(PK: {root_node.pk if root_node else 'None'}) as fallback."

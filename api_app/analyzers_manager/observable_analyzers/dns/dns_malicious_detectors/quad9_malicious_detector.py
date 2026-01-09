@@ -79,6 +79,8 @@ class Quad9MaliciousDetector(DoHMixin, classes.ObservableAnalyzer):
 
         dns_response = dns.message.from_wire(quad9_response.content)
         resolutions: list[str] = []
+        # Collect only routable DNS targets (A/AAAA → address, CNAME/NS → target).
+        # MX and TXT records are skipped since they do not resolve to connectivity endpoints.
         for answer in dns_response.answer:
             for record in answer:
                 if hasattr(record, "address"):
@@ -86,7 +88,7 @@ class Quad9MaliciousDetector(DoHMixin, classes.ObservableAnalyzer):
                 elif hasattr(record, "target"):
                     resolutions.append(str(record.target))
 
-        return bool(resolutions), resolutions
+        return bool(resolutions)
 
     def _google_dns_query(self, observable) -> bool:
         """Perform a DNS query with Google service, return True if Google answer the

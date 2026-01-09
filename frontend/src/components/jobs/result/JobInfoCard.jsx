@@ -45,6 +45,7 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
     startDateRelatedInvestigation.getDate() - investigationTimeRange,
   );
   return (
+    
     <div id="JobInfoCardSection">
       <ContentSection className="mb-0 bg-darker">
         <Row>
@@ -66,7 +67,7 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
               size="xs"
               style={{ fontSize: "0.8rem" }}
             >
-              Similar Investigations: <br /> {relatedInvestigationNumber}
+              Investigations: <br /> {relatedInvestigationNumber}
             </Button>
             <UncontrolledTooltip
               placement="top"
@@ -141,7 +142,7 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
               <ArrowToggleIcon isExpanded={isOpenJobInfoCard} />
             </Button>
             <UncontrolledTooltip placement="left" target="JobInfoCardDropDown">
-              Toggle Job Metadata
+              Toggle Job
             </UncontrolledTooltip>
           </Col>
         </Row>
@@ -152,7 +153,7 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
             horizontal
             className="align-items-start flex-wrap flex-lg-nowrap"
           >
-            {[
+            { [
               ["Status", <StatusTag status={job.status} className="py-0" />],
               ["TLP", <TLPTag value={job.tlp} />],
               ["User", job.user?.username],

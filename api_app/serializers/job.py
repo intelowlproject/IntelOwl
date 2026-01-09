@@ -572,6 +572,7 @@ class JobSerializer(_AbstractJobViewSerializer):
             "tags",
             "comments",
             "status",
+            "tlp",
             "pivots_to_execute",
             "analyzers_to_execute",
             "analyzers_requested",
@@ -696,6 +697,11 @@ class RestJobSerializer(JobSerializer):
             "delete": has_perm,
             "plugin_actions": has_perm,
         }
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        logger.info(f"RestJobSerializer serializing job {instance.pk}: tlp={getattr(instance, 'tlp', 'MISSING')}, serialized_tlp={data.get('tlp', 'MISSING_IN_DATA')}")
+        return data
 
 
 class WsJobSerializer(JobSerializer):

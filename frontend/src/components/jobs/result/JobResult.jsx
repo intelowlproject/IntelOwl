@@ -20,8 +20,6 @@ import {
 import { JobFinalStatuses, JobStatuses } from "../../../constants/jobConst";
 
 export default function JobResult() {
-  console.debug("JobResult rendered!");
-
   // state
   const location = useLocation();
   const [dataIsDownloading, setDataIsDownloading] = React.useState(true);
@@ -40,7 +38,7 @@ export default function JobResult() {
   const { section } = params;
   const { subSection } = params;
 
-  const jobWebsocket = React.useRef();
+  const jobWebsocket = React.useRef(null);
 
   const jobIsRunning =
     data.job === undefined ||
@@ -56,11 +54,6 @@ export default function JobResult() {
       JobStatuses.VISUALIZERS_RUNNING,
       JobStatuses.VISUALIZERS_COMPLETED,
     ].includes(data.job?.status);
-
-  console.debug(
-    `JobResult - dataIsDownloading: ${dataIsDownloading}, jobIsRunning: ${jobIsRunning}, ` +
-      `notified: ${notified}, toNotify: ${toNotify}`,
-  );
 
   // useAxios caches the request by default
   const [{ data: jobData, loading: jobLoading, error: jobError }, refetchJob] =
@@ -81,13 +74,6 @@ export default function JobResult() {
     });
     window.addEventListener("blur", () => setToNotify(true));
 
-    console.debug(
-      "JobResult - jobLoading useEffect",
-      !data.job,
-      jobData,
-      !jobLoading,
-      jobError == null,
-    );
     if (!data.job && jobData && !jobLoading && jobError == null) {
       axios
         .get(
@@ -96,9 +82,9 @@ export default function JobResult() {
         .then((response) => response.data.related_investigation_number)
         .catch((_) => -1)
         // use "then" instead of "finally"vecause it doesn't support parameters
-        .then((relatedInvestigationNumber) =>
-          setData({ relatedInvestigationNumber, job: jobData }),
-        );
+        .then((relatedInvestigationNumber) => {
+          setData({ relatedInvestigationNumber, job: jobData });
+        });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobLoading]);
@@ -106,7 +92,7 @@ export default function JobResult() {
   useEffect(() => {
     if (data.job) setDataIsDownloading(false);
   }, [data]);
-
+  
   // page title
   useTitle(
     `IntelOwl | Job (#${jobId}, ${
@@ -136,28 +122,25 @@ export default function JobResult() {
     const websocketUrl = `${
       window.location.protocol === "https:" ? "wss" : "ws"
     }://${window.location.host}/${WEBSOCKET_JOBS_URI}/${jobId}`;
-    console.debug(`connect to websocket API: ${websocketUrl}`);
-    jobWebsocket.current = new WebSocket(websocketUrl);
-    jobWebsocket.current.onopen = (jobWsData) => {
-      console.debug("ws opened:");
-      console.debug(jobWsData);
+   
+    const currentWebsocket = new WebSocket(websocketUrl);
+    jobWebsocket.current = currentWebsocket;
+    
+    currentWebsocket.onopen = () => {
+      // open
     };
-    jobWebsocket.current.onclose = (jobWsData) => {
-      console.debug("ws closed:");
-      console.debug(jobWsData);
+    currentWebsocket.onclose = () => {
+     // close
     };
-    jobWebsocket.current.onmessage = (jobWsData) => {
-      console.debug("ws received:");
-      console.debug(jobWsData);
+    currentWebsocket.onmessage = (jobWsData) => {
       const wsJobData = JSON.parse(jobWsData.data);
       if (Object.values(JobFinalStatuses).includes(wsJobData.status)) {
-        jobWebsocket.current.close(1000);
+        currentWebsocket.close(1000);
       }
       setData({ ...data, job: wsJobData });
     };
-    jobWebsocket.current.onerror = (jobWsData) => {
-      console.debug("ws error:");
-      console.debug(jobWsData);
+    currentWebsocket.onerror = () => {
+      // error
     };
   }
 
@@ -173,8 +156,6 @@ export default function JobResult() {
     generateJobNotification(data.job.observable_name, data.job.id);
     setNotified(true);
   }
-
-  console.debug("JobResult - data", data);
 
   return (
     <Loader

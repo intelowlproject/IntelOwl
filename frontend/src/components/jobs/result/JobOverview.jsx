@@ -55,9 +55,6 @@ export function JobOverview({
   section,
   subSection,
 }) {
-  console.debug("JobOverview rendered");
-  console.debug(`section: ${section}, subSection: ${subSection}`);
-
   const isSelectedUI = section === JobResultSections.VISUALIZER;
 
   const [

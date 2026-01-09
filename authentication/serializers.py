@@ -22,9 +22,7 @@ from api_app.models import Job
 from certego_saas.apps.user.serializers import (
     UserAccessSerializer as CertegoUserAccessSerializer,
 )
-from certego_saas.apps.user.serializers import (
-    UserSerializer,
-)
+from certego_saas.apps.user.serializers import UserSerializer
 from certego_saas.ext.upload import Slack
 from certego_saas.models import User
 from certego_saas.settings import certego_apps_settings

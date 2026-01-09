@@ -5,11 +5,6 @@ from dataclasses import dataclass
 from rest_framework import serializers
 from rest_framework.validators import ValidationError
 
-from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.choices import ReportStatus
-from api_app.connectors_manager.models import ConnectorConfig
-from api_app.pivots_manager.models import PivotConfig
-
 logger = logging.getLogger(__name__)
 
 

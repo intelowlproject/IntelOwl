@@ -8,27 +8,10 @@ import shutil
 import subprocess
 from pathlib import Path
 from shlex import quote
-import pwd
+
 import requests
-
-
-def ensure_xdg_cache_home():
-    cache_dir = Path(os.getenv("XDG_CACHE_HOME", "/opt/intelowl/.cache"))
-    try:
-        cache_dir.mkdir(parents=True, exist_ok=True)
-
-        # ensure intelowl user owns it (runtime safety)
-        try:
-            pw = pwd.getpwnam("intelowl")
-            os.chown(cache_dir, pw.pw_uid, pw.pw_gid)
-        except Exception as e:
-            logger.warning(f"Unable to chown XDG cache dir: {e}")
-    except Exception:
-        pass
-
-    os.environ["XDG_CACHE_HOME"] = str(cache_dir)
-
 from django.conf import settings
+
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.models import PythonModule
@@ -113,7 +96,10 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
 
     def run(self):
         try:
-            ensure_xdg_cache_home()
+            cache_dir = Path(os.getenv("XDG_CACHE_HOME", "/opt/intelowl/.cache"))
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            os.environ["XDG_CACHE_HOME"] = str(cache_dir)
+
             response = requests.get(
                 "https://api.github.com/repos/mandiant/capa-rules/releases/latest"
             )

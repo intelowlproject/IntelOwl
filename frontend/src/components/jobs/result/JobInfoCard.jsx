@@ -88,7 +88,7 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
                   size="xs"
                   style={{ fontSize: "0.8rem" }}
                 >
-                  Investigation: <br /> {job.investigation_name}
+                  Similar Investigation: <br /> {job.investigation_name}
                 </Button>
                 <UncontrolledTooltip
                   placement="top"
@@ -142,7 +142,7 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
               <ArrowToggleIcon isExpanded={isOpenJobInfoCard} />
             </Button>
             <UncontrolledTooltip placement="left" target="JobInfoCardDropDown">
-              Toggle Job
+              Toggle Job Metadata
             </UncontrolledTooltip>
           </Col>
         </Row>

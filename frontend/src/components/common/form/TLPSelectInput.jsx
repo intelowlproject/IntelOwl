@@ -54,9 +54,16 @@ TLPSelectInputLabel.propTypes = {
 };
 
 export function TLPSelectInput(props) {
-  const { formik } = props;
+  const { formik, onChange } = props;
   console.debug("TLPSelectInput - formik:");
   console.debug(formik);
+
+  const handleChange = (event) => {
+    formik.handleChange(event);
+    if (onChange) {
+      onChange(event.target.value);
+    }
+  };
 
   return (
     <div>
@@ -72,7 +79,7 @@ export function TLPSelectInput(props) {
               name="tlp"
               value={tlp}
               invalid={formik.errors.tlp && formik.touched.tlp}
-              onChange={formik.handleChange}
+              onChange={handleChange}
               checked={formik.values.tlp.includes(tlp)}
             />
           </FormGroup>
@@ -89,4 +96,9 @@ export function TLPSelectInput(props) {
 
 TLPSelectInput.propTypes = {
   formik: PropTypes.object.isRequired,
+  onChange: PropTypes.func,
+};
+
+TLPSelectInput.defaultProps = {
+  onChange: null,
 };

@@ -101,6 +101,9 @@ export default function ScanForm() {
   */
   const [inputValue, setInputValue] = React.useState("");
   const [recentScansInput, setRecentScansInput] = React.useState("");
+  
+  // Track if user has manually changed TLP to prevent playbook from overwriting it
+  const [userSetTLP, setUserSetTLP] = React.useState(false);
 
   React.useEffect(() => {
     if (guideState.tourActive) {
@@ -297,7 +300,10 @@ export default function ScanForm() {
     runtimeConfiguration,
   ) => {
     formik.setFieldValue("tags", tags, false);
-    formik.setFieldValue("tlp", tlp, false);
+    // Only update TLP if user hasn't manually set it
+    if (!userSetTLP) {
+      formik.setFieldValue("tlp", tlp, false);
+    }
     formik.setFieldValue("scan_mode", _scanMode, false);
     // null for playbooks with force new
     console.debug(`scanCheckTime : ${scanCheckTime}`);
@@ -761,7 +767,10 @@ export default function ScanForm() {
             <FormGroup row>
               <TLPSelectInputLabel size={3} />
               <Col sm={9}>
-                <TLPSelectInput formik={formik} />
+                <TLPSelectInput 
+                  formik={formik} 
+                  onChange={() => setUserSetTLP(true)}
+                />
               </Col>
             </FormGroup>
             <hr />

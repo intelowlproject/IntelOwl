@@ -24,7 +24,9 @@ export function TLPTag(props) {
       style={{
         borderRadius: 5,
         userSelect: "none",
-        border: `1px solid ${color}`,
+        backgroundColor: color,
+        color: value === "CLEAR" ? "#000000" : "#FFFFFF",
+        fontWeight: "bold",
       }}
       {...rest}
     >

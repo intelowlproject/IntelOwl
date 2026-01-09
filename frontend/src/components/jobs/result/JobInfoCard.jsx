@@ -34,7 +34,6 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
   const [isOpenJobInfoCard, setIsOpenJobInfoCard] = React.useState(false);
   const [isOpenJobWarnings, setIsOpenJobWarnings] = React.useState(false);
   const [isOpenJobErrors, setIsOpenJobErrors] = React.useState(false);
-  
 
   const investigationTimeRange = 30;
   const endDateRelatedInvestigation = new Date();
@@ -45,7 +44,6 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
     startDateRelatedInvestigation.getDate() - investigationTimeRange,
   );
   return (
-    
     <div id="JobInfoCardSection">
       <ContentSection className="mb-0 bg-darker">
         <Row>
@@ -153,7 +151,7 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
             horizontal
             className="align-items-start flex-wrap flex-lg-nowrap"
           >
-            { [
+            {[
               ["Status", <StatusTag status={job.status} className="py-0" />],
               ["TLP", <TLPTag value={job.tlp} />],
               ["User", job.user?.username],
@@ -201,9 +199,7 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
               [
                 "Tags",
                 job.tags.length ? (
-                  job.tags.map((tag) => (
-                    <JobTag key={tag.label} tag={tag} />
-                  ))
+                  job.tags.map((tag) => <JobTag key={tag.label} tag={tag} />)
                 ) : (
                   <small className="fst-italic text-gray">None</small>
                 ),

@@ -92,7 +92,7 @@ export default function JobResult() {
   useEffect(() => {
     if (data.job) setDataIsDownloading(false);
   }, [data]);
-  
+
   // page title
   useTitle(
     `IntelOwl | Job (#${jobId}, ${
@@ -122,15 +122,15 @@ export default function JobResult() {
     const websocketUrl = `${
       window.location.protocol === "https:" ? "wss" : "ws"
     }://${window.location.host}/${WEBSOCKET_JOBS_URI}/${jobId}`;
-   
+
     const currentWebsocket = new WebSocket(websocketUrl);
     jobWebsocket.current = currentWebsocket;
-    
+
     currentWebsocket.onopen = () => {
       // open
     };
     currentWebsocket.onclose = () => {
-     // close
+      // close
     };
     currentWebsocket.onmessage = (jobWsData) => {
       const wsJobData = JSON.parse(jobWsData.data);

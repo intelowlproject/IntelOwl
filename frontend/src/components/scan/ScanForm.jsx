@@ -101,7 +101,7 @@ export default function ScanForm() {
   */
   const [inputValue, setInputValue] = React.useState("");
   const [recentScansInput, setRecentScansInput] = React.useState("");
-  
+
   // Track if user has manually changed TLP to prevent playbook from overwriting it
   const [userSetTLP, setUserSetTLP] = React.useState(false);
 
@@ -767,8 +767,8 @@ export default function ScanForm() {
             <FormGroup row>
               <TLPSelectInputLabel size={3} />
               <Col sm={9}>
-                <TLPSelectInput 
-                  formik={formik} 
+                <TLPSelectInput
+                  formik={formik}
                   onChange={() => setUserSetTLP(true)}
                 />
               </Col>

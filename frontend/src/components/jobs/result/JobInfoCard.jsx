@@ -29,7 +29,7 @@ import { JobIsRunningAlert } from "./JobIsRunningAlert";
 import { JobFinalStatuses } from "../../../constants/jobConst";
 import { datetimeFormatStr } from "../../../constants/miscConst";
 
-export function JobInfoCard({ job, relatedInvestigationNumber }) {
+export function JobInfoCard({ job, relatedInvestigationNumber = 0}) {
   // local state
   const [isOpenJobInfoCard, setIsOpenJobInfoCard] = React.useState(false);
   const [isOpenJobWarnings, setIsOpenJobWarnings] = React.useState(false);
@@ -287,5 +287,5 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
 
 JobInfoCard.propTypes = {
   job: PropTypes.object.isRequired,
-  relatedInvestigationNumber: PropTypes.number.isRequired,
+  relatedInvestigationNumber: PropTypes.number,
 };

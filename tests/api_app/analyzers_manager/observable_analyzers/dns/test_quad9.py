@@ -32,15 +32,16 @@ class Quad9DNSResolverTestCase(CustomTestCase):
         analyzer.observable_name = "example.com"
         analyzer.observable_classification = "domain"
 
-        with patch.object(
-            analyzer, "convert_to_domain", return_value="example.com"
-        ), patch.object(
-            analyzer,
-            "build_query_url",
-            return_value="https://dns.quad9.net/dns-query?dns=example",
+        with (
+            patch.object(analyzer, "convert_to_domain", return_value="example.com"),
+            patch.object(
+                analyzer,
+                "build_query_url",
+                return_value="https://dns.quad9.net/dns-query?dns=example",
+            ),
+            self.assertRaises(dns.message.ShortHeader),
         ):
-            with self.assertRaises(dns.message.ShortHeader):
-                analyzer.run()
+            analyzer.run()
 
     @patch("dns.message.from_wire")
     @patch("httpx.Client.get")
@@ -71,15 +72,15 @@ class Quad9DNSResolverTestCase(CustomTestCase):
         analyzer.observable_name = "example.com"
         analyzer.observable_classification = "domain"
 
-        with patch.object(
-            analyzer, "convert_to_domain", return_value="example.com"
-        ), patch.object(
-            analyzer,
-            "build_query_url",
-            return_value="https://dns.quad9.net/dns-query?dns=example",
+        with (
+            patch.object(analyzer, "convert_to_domain", return_value="example.com"),
+            patch.object(
+                analyzer,
+                "build_query_url",
+                return_value="https://dns.quad9.net/dns-query?dns=example",
+            ),
         ):
             result = analyzer.run()
-
             self.assertCountEqual(result["resolutions"], ["1.1.1.1", "8.8.8.8"])
 
 
@@ -115,15 +116,15 @@ class Quad9MaliciousDetectorTestCase(CustomTestCase):
         detector.observable_name = "malicious.com"
         detector.observable_classification = "domain"
 
-        with patch.object(
-            detector, "convert_to_domain", return_value="malicious.com"
-        ), patch.object(
-            detector,
-            "build_query_url",
-            return_value="https://dns.quad9.net/dns-query?dns=malicious",
+        with (
+            patch.object(detector, "convert_to_domain", return_value="malicious.com"),
+            patch.object(
+                detector,
+                "build_query_url",
+                return_value="https://dns.quad9.net/dns-query?dns=malicious",
+            ),
         ):
             result = detector.run()
-
             self.assertEqual(result["observable"], "malicious.com")
             self.assertTrue(result["malicious"])
 
@@ -153,14 +154,14 @@ class Quad9MaliciousDetectorTestCase(CustomTestCase):
         detector.observable_name = "safe.com"
         detector.observable_classification = "domain"
 
-        with patch.object(
-            detector, "convert_to_domain", return_value="safe.com"
-        ), patch.object(
-            detector,
-            "build_query_url",
-            return_value="https://dns.quad9.net/dns-query?dns=safe",
+        with (
+            patch.object(detector, "convert_to_domain", return_value="safe.com"),
+            patch.object(
+                detector,
+                "build_query_url",
+                return_value="https://dns.quad9.net/dns-query?dns=safe",
+            ),
         ):
             result = detector.run()
-
             self.assertEqual(result["observable"], "safe.com")
             self.assertFalse(result["malicious"])

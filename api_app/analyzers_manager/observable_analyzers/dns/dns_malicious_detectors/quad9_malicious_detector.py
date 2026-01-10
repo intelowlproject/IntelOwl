@@ -4,9 +4,7 @@
 """Check if the domains is reported as malicious in Quad9 database"""
 import logging
 
-import dns.message
 import requests
-from httpx import Client, ConnectError
 
 from api_app.analyzers_manager import classes
 
@@ -38,7 +36,8 @@ class Quad9MaliciousDetector(DoHMixin, classes.ObservableAnalyzer):
             self.observable_name, self.observable_classification
         )
 
-        quad9_answer = self._quad9_dns_query(observable)
+        resolutions = self.quad9_dns_query(observable)
+        quad9_answer = bool(resolutions)
         # if Quad9 has not an answer the site could be malicious
         if not quad9_answer:
             # Google dns request
@@ -49,46 +48,6 @@ class Quad9MaliciousDetector(DoHMixin, classes.ObservableAnalyzer):
                 return malicious_detector_response(self.observable_name, True)
 
         return malicious_detector_response(self.observable_name, False)
-
-    def _quad9_dns_query(self, observable) -> bool:
-        """Perform a DNS query with Quad9 service, return True if Quad9 answer the
-        DNS query with a non-empty response.
-
-        :param observable: domain to resolve
-        :type observable: str
-        """
-        complete_url = self.build_query_url(observable)
-
-        # sometimes it can respond with 503, I suppose to avoid DoS.
-        # In 1k requests just 20 fails and at least with 30 requests between 2 failures
-        # with 2 or 3 attemps the analyzer should get the data
-        attempt_number = 3
-        quad9_response = None
-        for attempt in range(0, attempt_number):
-            try:
-                quad9_response = Client(http2=True).get(
-                    complete_url, headers=self.headers, timeout=10
-                )
-            except ConnectError as exception:
-                # if the last attempt fails, raise an error
-                if attempt == attempt_number - 1:
-                    raise exception
-            else:
-                quad9_response.raise_for_status()
-                break
-
-        dns_response = dns.message.from_wire(quad9_response.content)
-        resolutions: list[str] = []
-        # Collect only routable DNS targets (A/AAAA → address, CNAME/NS → target).
-        # MX and TXT records are skipped since they do not resolve to connectivity endpoints.
-        for answer in dns_response.answer:
-            for record in answer:
-                if hasattr(record, "address"):
-                    resolutions.append(record.address)
-                elif hasattr(record, "target"):
-                    resolutions.append(str(record.target))
-
-        return bool(resolutions)
 
     def _google_dns_query(self, observable) -> bool:
         """Perform a DNS query with Google service, return True if Google answer the

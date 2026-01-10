@@ -4,6 +4,7 @@ from abc import ABCMeta
 from urllib.parse import urlparse
 
 import dns.message
+import httpx
 
 from api_app.analyzers_manager.classes import BaseAnalyzerMixin
 from api_app.choices import Classification
@@ -46,3 +47,38 @@ class DoHMixin(BaseAnalyzerMixin, metaclass=ABCMeta):
     def build_query_url(self, observable_name: str) -> str:
         encoded_query = self.encode_query(observable_name)
         return f"{self.url}?dns={encoded_query}"
+
+    def quad9_dns_query(self, observable: str) -> list[str]:
+        """Perform a DNS query with Quad9 service.
+
+        :param observable: domain to resolve
+        :type observable: str
+        :return: List of DNS resolutions
+        :rtype: list[str]
+        """
+        complete_url = self.build_query_url(observable)
+
+        attempt_number = 3
+        quad9_response = None
+        for attempt in range(attempt_number):
+            try:
+                quad9_response = httpx.Client(http2=True).get(
+                    complete_url, headers=self.headers, timeout=10
+                )
+            except httpx.ConnectError as exception:
+                if attempt == attempt_number - 1:
+                    raise exception
+            else:
+                quad9_response.raise_for_status()
+                break
+
+        dns_response = dns.message.from_wire(quad9_response.content)
+        resolutions: list[str] = []
+        for answer in dns_response.answer:
+            for record in answer:
+                if hasattr(record, "address"):
+                    resolutions.append(record.address)
+                elif hasattr(record, "target"):
+                    resolutions.append(str(record.target))
+
+        return resolutions

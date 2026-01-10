@@ -40,9 +40,10 @@ def test_quad9_dns_resolver_handles_dns_error(mock_get):
         analyzer,
         "build_query_url",
         return_value="https://dns.quad9.net/dns-query?dns=example",
+    ), pytest.raises(
+        dns.message.ShortHeader
     ):
-        with pytest.raises(dns.message.ShortHeader):
-            analyzer.run()
+        analyzer.run()
 
 
 @pytest.mark.django_db

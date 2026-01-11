@@ -3,6 +3,7 @@
 
 """Base class for Quad9 analyzers"""
 import logging
+from abc import ABCMeta
 
 import dns.message
 import httpx
@@ -12,7 +13,7 @@ from .doh_mixin import DoHMixin
 logger = logging.getLogger(__name__)
 
 
-class Quad9Base(DoHMixin):
+class Quad9Base(DoHMixin, metaclass=ABCMeta):
     """Base class for Quad9 DNS analyzers with shared query functionality."""
 
     url: str = "https://dns.quad9.net/dns-query"

@@ -7,15 +7,13 @@ import logging
 from api_app.analyzers_manager import classes
 
 from ..dns_responses import dns_resolver_response
-from ..doh_mixin import DoHMixin
+from ..quad9_base import Quad9Base
 
 logger = logging.getLogger(__name__)
 
 
-class Quad9DNSResolver(DoHMixin, classes.ObservableAnalyzer):
+class Quad9DNSResolver(Quad9Base, classes.ObservableAnalyzer):
     """Resolve a DNS query with Quad9"""
-
-    url: str = "https://dns.quad9.net/dns-query"
 
     @classmethod
     def update(cls) -> bool:

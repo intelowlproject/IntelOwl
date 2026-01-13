@@ -2,13 +2,10 @@ from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
 
-from IntelOwl.api_app.analyzers_manager.observable_analyzers.clean_browsing import (
-    CleanBrowsing,
-)
+from api_app.analyzers_manager.observable_analyzers.clean_browsing import CleanBrowsing
 
 
 class CleanBrowsingTest(TestCase):
-
     def setUp(self):
         self.observable_name = "google.com"
         # This binary simulates a "Blocked" response (RCODE 3)

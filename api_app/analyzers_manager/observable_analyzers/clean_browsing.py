@@ -122,3 +122,4 @@ class CleanBrowsing(ObservableAnalyzer):
             return True
 
         return False
+    

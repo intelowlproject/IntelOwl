@@ -63,3 +63,4 @@ class CleanBrowsingTest(TestCase):
 
         args, _ = mock_get.call_args
         self.assertEqual(args[0], CleanBrowsing.URL_FAMILY)
+        

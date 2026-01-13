@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 from django.db import migrations
 from django.db.models.fields.related_descriptors import (
     ForwardManyToOneDescriptor,
@@ -7,11 +10,14 @@ from django.db.models.fields.related_descriptors import (
     ReverseOneToOneDescriptor,
 )
 
-plugin = {'python_module': {'health_check_schedule': None, 'update_schedule': None, 'module': 'CleanBrowsing.CleanBrowsing', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'CleanBrowsing', 'description': 'Check if a domain is blocked by CleanBrowsing DNS filters.', 'disabled': False, 'soft_time_limit': 15, 'routing_key': 'default', 'health_check_status': True, 'type': 'observable', 'docker_based': False, 'maximum_tlp': 'RED', 'observable_supported': ['domain'], 'supported_filetypes': [], 'run_hash': False, 'run_hash_type': '', 'not_supported_filetypes': [], 'mapping_data_model': {}, 'model': 'analyzers_manager.AnalyzerConfig'}
+# FIXED LINE BELOW: Changed 'CleanBrowsing.CleanBrowsing' to 'clean_browsing.CleanBrowsing'
+plugin = {'python_module': {'health_check_schedule': None, 'update_schedule': None, 'module': 'clean_browsing.CleanBrowsing', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'CleanBrowsing', 'description': 'Check if a domain is blocked by CleanBrowsing DNS filters.', 'disabled': False, 'soft_time_limit': 15, 'routing_key': 'default', 'health_check_status': True, 'type': 'observable', 'docker_based': False, 'maximum_tlp': 'RED', 'observable_supported': ['domain'], 'supported_filetypes': [], 'run_hash': False, 'run_hash_type': '', 'not_supported_filetypes': [], 'mapping_data_model': {}, 'model': 'analyzers_manager.AnalyzerConfig'}
 
-params = [{'python_module': {'module': 'CleanBrowsing.CleanBrowsing', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'filter_type', 'type': 'str', 'description': 'Choose family, adult, or security.', 'is_secret': False, 'required': False}]
+# FIXED LINE BELOW: Changed 'CleanBrowsing.CleanBrowsing' to 'clean_browsing.CleanBrowsing'
+params = [{'python_module': {'module': 'clean_browsing.CleanBrowsing', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'filter_type', 'type': 'str', 'description': 'Choose family, adult, or security.', 'is_secret': False, 'required': False}]
 
-values = [{'parameter': {'python_module': {'module': 'CleanBrowsing.CleanBrowsing', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'filter_type', 'type': 'str', 'description': 'Choose family, adult, or security.', 'is_secret': False, 'required': False}, 'analyzer_config': 'CleanBrowsing', 'connector_config': None, 'visualizer_config': None, 'ingestor_config': None, 'pivot_config': None, 'for_organization': False, 'value': 'family', 'updated_at': '2025-12-18T03:00:38.021609Z', 'owner': None}]
+# FIXED LINE BELOW: Changed 'CleanBrowsing.CleanBrowsing' to 'clean_browsing.CleanBrowsing'
+values = [{'parameter': {'python_module': {'module': 'clean_browsing.CleanBrowsing', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'filter_type', 'type': 'str', 'description': 'Choose family, adult, or security.', 'is_secret': False, 'required': False}, 'analyzer_config': 'CleanBrowsing', 'connector_config': None, 'visualizer_config': None, 'ingestor_config': None, 'pivot_config': None, 'for_organization': False, 'value': 'family', 'updated_at': '2025-12-18T03:00:38.021609Z', 'owner': None}]
 
 
 def _get_real_obj(Model, field, value):
@@ -104,5 +110,3 @@ class Migration(migrations.Migration):
             migrate, reverse_migrate
         )
     ]
-        
-        

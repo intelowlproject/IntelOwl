@@ -11,7 +11,9 @@ class CleanBrowsingTest(TestCase):
         # This binary simulates a "Blocked" response (RCODE 3)
         self.blocked_content = b"\x00\x00\x81\x83\x00\x01\x00\x00\x00\x00\x00\x00"
 
-    @patch("api_app.analyzers_manager.observable_analyzers.CleanBrowsing.requests.get")
+    @patch(
+        "api_app.analyzers_manager.observable_analyzers.clean_browsing.CleanBrowsing.requests.get"
+    )
     def test_routing_security(self, mock_get):
         """Test that selecting 'security' hits the correct Security URL"""
         mock_response = MagicMock()
@@ -30,7 +32,9 @@ class CleanBrowsingTest(TestCase):
         called_url = args[0]
         self.assertEqual(called_url, CleanBrowsing.URL_SECURITY)
 
-    @patch("api_app.analyzers_manager.observable_analyzers.CleanBrowsing.requests.get")
+    @patch(
+        "api_app.analyzers_manager.observable_analyzers.clean_browsing.CleanBrowsing.requests.get"
+    )
     def test_routing_adult(self, mock_get):
         """Test that selecting 'adult' hits the correct Adult URL"""
         mock_response = MagicMock()
@@ -47,7 +51,9 @@ class CleanBrowsingTest(TestCase):
         args, _ = mock_get.call_args
         self.assertEqual(args[0], CleanBrowsing.URL_ADULT)
 
-    @patch("api_app.analyzers_manager.observable_analyzers.CleanBrowsing.requests.get")
+    @patch(
+        "api_app.analyzers_manager.observable_analyzers.clean_browsing.CleanBrowsing.requests.get"
+    )
     def test_default_family(self, mock_get):
         """Test that default hits the Family URL"""
         mock_response = MagicMock()

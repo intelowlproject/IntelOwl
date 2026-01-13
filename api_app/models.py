@@ -70,7 +70,7 @@ logger = logging.getLogger(__name__)
 class UpdateCheckStatus(models.Model):
     """
     Stores global state for IntelOwl update checks.
-    This model is intended to be used as a singleton (accessed via get_or_create(pk=1)). 
+    This model is intended to be used as a singleton (accessed via get_or_create(pk=1)).
     Ensures that update notifications are emitted only once per version.
     """
 

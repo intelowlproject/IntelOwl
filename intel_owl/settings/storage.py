@@ -65,10 +65,10 @@ else:
             # Fast path: file already exists
             if os.path.exists(_path):
                 return _path
-            
+
             # Ensure directory exists (safe to call multiple times)
             os.makedirs(path_dir, exist_ok=True)
-            
+
             # Use file lock to prevent race conditions
             lock = FileLock(lock_path, timeout=300)  # 5 minute timeout
             try:
@@ -92,7 +92,7 @@ else:
                                 content = s3_file_object.read()
                                 with open(temp_path, "wb") as temp_file:
                                     temp_file.write(content)
-                            
+
                             # Atomic rename operation (POSIX-compliant)
                             os.rename(temp_path, _path)
                             logger.info(
@@ -133,3 +133,4 @@ else:
 
     DEFAULT_FILE_STORAGE = "intel_owl.settings.S3Boto3StorageWrapper"
     AWS_STORAGE_BUCKET_NAME = secrets.get_secret("AWS_STORAGE_BUCKET_NAME")
+

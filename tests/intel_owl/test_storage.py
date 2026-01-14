@@ -89,9 +89,7 @@ class S3StorageRetrieveTestCase(CustomTestCase):
             # Simulate 5 concurrent retrievals (typical job scenario)
             with ThreadPoolExecutor(max_workers=5) as executor:
                 futures = [
-                    executor.submit(
-                        self.storage.retrieve, file, f"analyzer_{i}"
-                    )
+                    executor.submit(self.storage.retrieve, file, f"analyzer_{i}")
                     for i in range(5)
                 ]
                 paths = [f.result() for f in futures]
@@ -128,9 +126,7 @@ class S3StorageRetrieveTestCase(CustomTestCase):
             # Concurrent writes from 10 analyzers
             with ThreadPoolExecutor(max_workers=10) as executor:
                 futures = [
-                    executor.submit(
-                        self.storage.retrieve, file, f"analyzer_{i}"
-                    )
+                    executor.submit(self.storage.retrieve, file, f"analyzer_{i}")
                     for i in range(10)
                 ]
                 paths = [f.result() for f in futures]
@@ -258,9 +254,7 @@ class S3StorageRetrieveTestCase(CustomTestCase):
             # Multiple analyzers creating directories simultaneously
             with ThreadPoolExecutor(max_workers=10) as executor:
                 futures = [
-                    executor.submit(
-                        self.storage.retrieve, file, f"analyzer_{i}"
-                    )
+                    executor.submit(self.storage.retrieve, file, f"analyzer_{i}")
                     for i in range(10)
                 ]
                 # Should not raise FileExistsError
@@ -268,3 +262,4 @@ class S3StorageRetrieveTestCase(CustomTestCase):
 
         # Verify all files exist
         self.assertTrue(all(os.path.exists(p) for p in paths))
+

@@ -39,14 +39,17 @@ class Threatminer(classes.ObservableAnalyzer):
         except requests.Timeout:
             return {
                 "status": "failed",
-                "message": "Threatminer API request timed out — external service may be slow or unavailable."
+                "message": "Threatminer API request timed out — external service may be slow or unavailable.",
             }
         except requests.RequestException as e:
             # Gracefully handle server-side errors (e.g. 500, 502, etc.)
             if response and response.status_code >= 500:
                 return {
                     "status": "failed",
-                    "message": f"Threatminer API returned server error ({response.status_code}) — this is an external service issue. Try again later."
+                    "message": (
+                        f"Threatminer API returned server error ({response.status_code}) "
+                        "— this is an external service issue. Try again later."
+                    ),
                 }
             else:
                 # Re-raise other errors (e.g. 400, 401, connection refused)

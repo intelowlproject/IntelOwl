@@ -3,7 +3,6 @@
 
 import logging
 import os
-import tempfile
 
 from django.core.files.storage import FileSystemStorage
 from filelock import FileLock, Timeout
@@ -41,18 +40,18 @@ else:
         def retrieve(self, file, analyzer):
             """
             Retrieve a file from S3 storage, downloading it locally if necessary.
-            
+
             This method implements file locking to prevent race conditions when
             multiple analyzers attempt to download the same file concurrently.
             Uses a double-check pattern with file locking to ensure atomic operations.
-            
+
             Args:
                 file: The file object to retrieve
                 analyzer: The analyzer name (used for directory organization)
-            
+
             Returns:
                 str: The local file path
-            
+
             Raises:
                 FileNotFoundError: If the file doesn't exist in S3
                 RuntimeError: If file download fails after waiting for lock
@@ -62,7 +61,7 @@ else:
             name = file.name
             _path = os.path.join(path_dir, name)
             lock_path = f"{_path}.lock"
-            
+
             # Fast path: file already exists
             if os.path.exists(_path):
                 return _path
@@ -82,7 +81,7 @@ else:
                                 f"File '{name}' does not exist in S3 bucket "
                                 f"'{self.bucket_name if hasattr(self, 'bucket_name') else 'unknown'}'"
                             )
-                        
+
                         # Download to temporary file first for atomic write
                         temp_path = f"{_path}.tmp"
                         try:
@@ -129,7 +128,7 @@ else:
                     exc_info=True,
                 )
                 raise
-            
+
             return _path
 
     DEFAULT_FILE_STORAGE = "intel_owl.settings.S3Boto3StorageWrapper"

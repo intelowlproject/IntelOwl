@@ -47,10 +47,10 @@ class Quad9MaliciousDetector(Quad9Base, classes.ObservableAnalyzer):
                 logger.warning(
                     f"Inconclusive result for {observable}: Google DNS SERVFAIL (Status 2)"
                 )
+                self.report.errors.append("inconclusive (google dns servfail)")
                 return malicious_detector_response(
                     self.observable_name,
                     False,
-                    errors="inconclusive (google dns servfail)",
                 )
 
             # if Google response, Quad9 marked the site as malicious,

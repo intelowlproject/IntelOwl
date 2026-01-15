@@ -2,6 +2,9 @@ import logging
 
 import requests
 from django.conf import settings
+from django.utils.timezone import now
+
+from api_app.models import UpdateCheckStatus
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +77,11 @@ def check_for_update():
     current = normalize_version(current_version_str)
     latest = normalize_version(latest_str)
 
+    state, _ = UpdateCheckStatus.objects.get_or_create(pk=1)
+    state.last_checked_at = now()
+
     if not current or not latest:
+        state.save(update_fields=["last_checked_at"])
         if latest_str != current_version_str:
             return (
                 True,
@@ -83,16 +90,29 @@ def check_for_update():
         return True, f"IntelOwl version up to date ({current_version_str})"
 
     if latest > current:
+        if state.latest_version != latest_str or not state.notified:
+            logger.warning(
+                "New IntelOwl version available: %s (current: %s)",
+                latest_str,
+                current_version_str,
+            )
+            state.latest_version = latest_str
+            state.notified = True
+
+        state.save(update_fields=["latest_version", "notified", "last_checked_at"])
         return (
             True,
             f"New IntelOwl version available: {latest_str} "
             f"(current: {current_version_str})",
         )
 
+    state.save(update_fields=["last_checked_at"])
+
     if latest < current:
         return (
             True,
-            f"Local version ahead of release: " f"{current_version_str} > {latest_str}",
+            f"Local version ahead of release: "
+            f"{current_version_str} > {latest_str}",
         )
 
     return True, f"IntelOwl version up to date ({current_version_str})"

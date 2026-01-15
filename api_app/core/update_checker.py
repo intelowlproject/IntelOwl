@@ -5,6 +5,7 @@ from django.conf import settings
 from django.utils.timezone import now
 
 from api_app.models import UpdateCheckStatus
+from api_app.user_events_manager.queryset import UserEventQuerySet
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +97,17 @@ def check_for_update():
                 latest_str,
                 current_version_str,
             )
+
+            UserEventQuerySet.notify_admins(
+                title="New IntelOwl version available",
+                message=(
+                    f"Version {latest_str} is available "
+                    f"(current: {current_version_str})"
+                ),
+                persistent=True,
+                severity="warning",
+            )
+
             state.latest_version = latest_str
             state.notified = True
 
@@ -111,8 +123,7 @@ def check_for_update():
     if latest < current:
         return (
             True,
-            f"Local version ahead of release: "
-            f"{current_version_str} > {latest_str}",
+            f"Local version ahead of release: " f"{current_version_str} > {latest_str}",
         )
 
     return True, f"IntelOwl version up to date ({current_version_str})"

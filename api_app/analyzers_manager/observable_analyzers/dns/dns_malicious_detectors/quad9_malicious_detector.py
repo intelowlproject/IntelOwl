@@ -41,13 +41,16 @@ class Quad9MaliciousDetector(Quad9Base, classes.ObservableAnalyzer):
         if not quad9_answer:
             # Google dns request
             google_answer = self._google_dns_query(observable)
-            # To handle dns server internal error
+            # To handle DNS server internal error
             # inconclusive result
             if google_answer is None:
+                logger.warning(
+                    f"Inconclusive result for {observable}: Google DNS SERVFAIL (Status 2)"
+                )
                 return malicious_detector_response(
                     self.observable_name,
                     False,
-                    note="inconclusive (google dns servfail)",
+                    errors="inconclusive (google dns servfail)",
                 )
 
             # if Google response, Quad9 marked the site as malicious,
@@ -70,8 +73,7 @@ class Quad9MaliciousDetector(Quad9Base, classes.ObservableAnalyzer):
         google_response = requests.get(self.google_url, params=params)
         google_response.raise_for_status()
         data = google_response.json()
-        status = data.get("Status")
         # the DNS server encountered an internal error
-        if status == 2:
+        if data.get("Status") == 2:
             return None
         return bool(data.get("Answer", None))

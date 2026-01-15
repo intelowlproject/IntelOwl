@@ -5,7 +5,11 @@
 
 
 def malicious_detector_response(
-    observable: str, malicious: bool, timeout: bool = False, note: str = None
+    observable: str,
+    malicious: bool,
+    timeout: bool = False,
+    note: str = None,
+    errors: str = None,
 ) -> dict:
     """Standard response for malicious detector analyzers
 
@@ -27,7 +31,8 @@ def malicious_detector_response(
         report["timeout"] = True
     if note:
         report["note"] = note
-
+    if errors:
+        report["errors"] = errors
     return report
 
 

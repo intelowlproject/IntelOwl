@@ -5,6 +5,7 @@ from pathlib import PosixPath
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import Classification
+from api_app.decorators import classproperty
 from api_app.mixins import VirusTotalv3AnalyzerMixin, VirusTotalv3BaseMixin
 from tests import CustomTestCase
 from tests.mock_utils import MockUpResponse
@@ -62,8 +63,7 @@ possible_responses = {
 
 
 class VirusTotalv3Base(VirusTotalv3BaseMixin):
-    @classmethod
-    @property
+    @classproperty
     def python_base_path(cls) -> PosixPath:
         return pathlib.PosixPath(r"/")
 
@@ -76,8 +76,7 @@ class VirusTotalv3Base(VirusTotalv3BaseMixin):
 
 
 class VirusTotalv3Analyzer(VirusTotalv3AnalyzerMixin):
-    @classmethod
-    @property
+    @classproperty
     def python_base_path(cls) -> PosixPath:
         return pathlib.PosixPath(r"/")
 

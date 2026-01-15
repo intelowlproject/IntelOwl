@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from api_app.decorators import classproperty
 from api_app.ingestors_manager.models import IngestorConfig
 from certego_saas.apps.organization.organization import Membership, Organization
 from tests import CustomViewSetTestCase
@@ -12,8 +13,7 @@ class IngestorConfigViewSetTestCase(
 ):
     URL = "/api/ingestor"
 
-    @classmethod
-    @property
+    @classproperty
     def model_class(cls) -> IngestorConfig:
         return IngestorConfig
 

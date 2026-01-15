@@ -19,10 +19,9 @@ class DoHMixin(BaseAnalyzerMixin, metaclass=ABCMeta):
     headers: dict = {"Accept": "application/dns-message"}
     query_type: str
 
-    @staticmethod
-    def convert_to_domain(observable: str, classification: str) -> str:
+    def convert_to_domain(self, observable: str, classification: str) -> str:
         if classification == Classification.URL:
-            logger.debug(f"Mullvad_DNS extracting hostname from URL {observable}")
+            logger.debug(f"{self} extracting hostname from URL {observable}")
             hostname = urlparse(observable).hostname
             observable = hostname
         return observable

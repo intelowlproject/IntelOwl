@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from requests import HTTPError
 
+from api_app.decorators import abstractclassproperty, classproperty
 from api_app.models import AbstractReport, Job, PythonConfig, PythonModule
 from certego_saas.apps.user.models import User
 
@@ -52,9 +53,7 @@ class Plugin(metaclass=ABCMeta):
         """
         return self._config.name
 
-    @classmethod
-    @property
-    @abstractmethod
+    @abstractclassproperty
     def python_base_path(cls) -> PosixPath:
         NotImplementedError()
 
@@ -243,18 +242,14 @@ class Plugin(metaclass=ABCMeta):
         if settings.STAGE_CI:
             raise e
 
-    @classmethod
-    @property
-    @abstractmethod
+    @abstractclassproperty
     def report_model(cls) -> typing.Type[AbstractReport]:
         """
         Returns Model to be used for *init_report_object*
         """
         raise NotImplementedError()
 
-    @classmethod
-    @property
-    @abstractmethod
+    @abstractclassproperty
     def config_model(cls) -> typing.Type[PythonConfig]:
         """
         Returns Model to be used for *init_report_object*
@@ -321,8 +316,7 @@ class Plugin(metaclass=ABCMeta):
         for mock_fn in patches:
             cls.start = mock_fn(cls.start)
 
-    @classmethod
-    @property
+    @classproperty
     def python_module(cls) -> PythonModule:
         """
         Get the Python module associated with the plugin.

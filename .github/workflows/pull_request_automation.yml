@@ -46,17 +46,13 @@ jobs:
           pip3 install --upgrade pip
           pip3 install -r requirements/test-requirements.txt
 
-      - name: Black formatter
+      - name: Lint with Ruff
         run: |
-          black . --check --diff --exclude "migrations|venv|.ipython|docs_env|.cache"
+          ruff check . --output-format=github
 
-      - name: Lint with flake8 (PEP8 enforcer + linter)
+      - name: Check formatting with Black
         run: |
-          flake8 . --config=.flake8 --show-source
-
-      - name: isort
-        run: |
-          isort . --profile black --filter-files --check-only --diff --skip configuration/ldap_config.py
+          black . --check --diff --exclude "migrations|venv"
       
       - name: Perform ShellCheck Analysis
         run: bash <(curl -s https://raw.githubusercontent.com/CICDToolbox/shellcheck/master/pipeline.sh)

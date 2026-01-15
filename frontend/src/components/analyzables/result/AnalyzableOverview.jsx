@@ -229,7 +229,7 @@ export function AnalyzableOverview({ analyzable }) {
                   />
                 }
                 values={values}
-                size="col-2"
+                size="col-3"
                 disable={values.length === 0}
               />
             ))}

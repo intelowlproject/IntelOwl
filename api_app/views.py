@@ -4,7 +4,7 @@ import copy
 import datetime
 import logging
 import uuid
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -23,6 +23,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from api_app.choices import Classification, ScanMode
+from api_app.decorators import abstractclassproperty
 from api_app.exceptions import NotImplementedException
 from api_app.websocket import JobConsumer
 from certego_saas.apps.organization.permissions import (
@@ -1027,9 +1028,7 @@ class PythonReportActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         IsObjectUserOrSameOrgPermission,
     ]
 
-    @classmethod
-    @property
-    @abstractmethod
+    @abstractclassproperty
     def report_model(cls):
         """
         Abstract property that should return the model class for the report.

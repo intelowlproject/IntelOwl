@@ -6,6 +6,26 @@ from django.http import HttpResponse
 logger = logging.getLogger(__name__)
 
 
+class classproperty(property):
+    """Read-only class property descriptor.
+    Replacement for deprecated @classmethod + @property.
+    """
+
+    def __get__(self, obj, owner=None):
+        return self.fget(owner if owner is not None else type(obj))
+
+
+class abstractclassproperty(property):
+    """Abstract read-only class property.
+    Enforced when the class uses ABCMeta metaclass.
+    """
+
+    __isabstractmethod__ = True
+
+    def __get__(self, obj, owner=None):
+        return self.fget(owner if owner is not None else type(obj))
+
+
 def deprecated_endpoint(deprecation_date=None, end_of_life_date=None):
     """
     Returns a decorator which informs requester that

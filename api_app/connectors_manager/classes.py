@@ -4,6 +4,8 @@ import abc
 import logging
 from typing import Type
 
+from api_app.decorators import classproperty
+
 from ..choices import PythonModuleBasePaths, ReportStatus
 from ..classes import Plugin
 from .exceptions import ConnectorConfigurationException, ConnectorRunException
@@ -20,18 +22,15 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
      and `run(self)` functions.
     """
 
-    @classmethod
-    @property
+    @classproperty
     def python_base_path(cls):
         return PythonModuleBasePaths.Connector.value
 
-    @classmethod
-    @property
+    @classproperty
     def report_model(cls) -> Type[ConnectorReport]:
         return ConnectorReport
 
-    @classmethod
-    @property
+    @classproperty
     def config_model(cls) -> Type[ConnectorConfig]:
         return ConnectorConfig
 

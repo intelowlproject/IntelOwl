@@ -5,6 +5,7 @@ from typing import Type
 from api_app.analyzables_manager.models import Analyzable
 from api_app.choices import Classification
 from api_app.connectors_manager.models import ConnectorConfig, ConnectorReport
+from api_app.decorators import classproperty
 from api_app.models import Job, PluginConfig
 from tests import CustomViewSetTestCase, PluginActionViewsetTestCase
 from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
@@ -15,8 +16,7 @@ class ConnectorConfigViewSetTestCase(
 ):
     URL = "/api/connector"
 
-    @classmethod
-    @property
+    @classproperty
     def model_class(cls) -> Type[ConnectorConfig]:
         return ConnectorConfig
 

@@ -2,8 +2,8 @@
 # See the file 'LICENSE' for copying permission.
 
 """This module contains various serializers used in the authentication process
-    for the IntelOwl project. These serializers handle user access, user profile,
-    registration, email verification, login, and token generation.
+for the IntelOwl project. These serializers handle user access, user profile,
+registration, email verification, login, and token generation.
 """
 
 import logging

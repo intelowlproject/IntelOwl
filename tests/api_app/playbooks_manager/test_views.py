@@ -4,6 +4,7 @@ from typing import Type
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import PythonModuleBasePaths, ScanMode
+from api_app.decorators import classproperty
 from api_app.models import PythonModule, Tag
 from api_app.playbooks_manager.models import PlaybookConfig
 from certego_saas.apps.organization.membership import Membership
@@ -17,8 +18,7 @@ class PlaybookConfigViewSetTestCase(
 ):
     URL = "/api/playbook"
 
-    @classmethod
-    @property
+    @classproperty
     def model_class(cls) -> Type[PlaybookConfig]:
         return PlaybookConfig
 

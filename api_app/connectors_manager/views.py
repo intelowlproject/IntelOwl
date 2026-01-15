@@ -3,6 +3,8 @@
 
 import logging
 
+from api_app.decorators import classproperty
+
 from ..views import PluginConfigViewSet, PythonConfigViewSet, PythonReportActionViewSet
 from .models import ConnectorConfig, ConnectorReport
 from .serializers import ConnectorConfigSerializer
@@ -21,8 +23,7 @@ class ConnectorConfigViewSet(PythonConfigViewSet):
 
 
 class ConnectorActionViewSet(PythonReportActionViewSet):
-    @classmethod
-    @property
+    @classproperty
     def report_model(cls):
         return ConnectorReport
 

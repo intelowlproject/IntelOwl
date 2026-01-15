@@ -11,6 +11,7 @@ from typing import Dict, Tuple
 import requests
 from django.conf import settings
 
+from api_app.decorators import classproperty
 from certego_saas.apps.user.models import User
 
 from ..choices import Classification, PythonModuleBasePaths
@@ -67,8 +68,7 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
             return data_model
         return None
 
-    @classmethod
-    @property
+    @classproperty
     def config_exception(cls):
         """Returns the AnalyzerConfigurationException class."""
         return AnalyzerConfigurationException
@@ -78,14 +78,12 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         """Returns the name of the analyzer."""
         return self._config.name
 
-    @classmethod
-    @property
+    @classproperty
     def report_model(cls):
         """Returns the AnalyzerReport model."""
         return AnalyzerReport
 
-    @classmethod
-    @property
+    @classproperty
     def config_model(cls):
         """Returns the AnalyzerConfig model."""
         return AnalyzerConfig
@@ -183,8 +181,7 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             self.observable_name = self._job.analyzable.name
             self.observable_classification = self._job.analyzable.classification
 
-    @classmethod
-    @property
+    @classproperty
     def python_base_path(cls):
         return PythonModuleBasePaths.ObservableAnalyzer.value
 
@@ -232,8 +229,7 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         self.__filepath = None
         self.file_mimetype = self._job.analyzable.mimetype
 
-    @classmethod
-    @property
+    @classproperty
     def python_base_path(cls) -> PosixPath:
         return PythonModuleBasePaths[FileAnalyzer.__name__].value
 

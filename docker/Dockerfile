@@ -64,7 +64,8 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && touch ${LOG_PATH}/django/certego_saas.log ${LOG_PATH}/django/certego_saas_errors.log \
     && touch ${LOG_PATH}/django/authentication.log ${LOG_PATH}/django/authentication_errors.log \
     && touch ${LOG_PATH}/asgi/daphne.log \
-    && chown -R www-data:www-data ${LOG_PATH} /opt/deploy/ \
+    && mkdir -p ${PYTHONPATH}/.cache \
+    && chown -R www-data:www-data ${LOG_PATH} /opt/deploy/ ${PYTHONPATH}/.cache \
     && ${PYTHONPATH}/docker/scripts/watchman_install.sh \
     # download github stuff
     && ${PYTHONPATH}/api_app/analyzers_manager/repo_downloader.sh
@@ -78,4 +79,6 @@ COPY --from=frontend-build /build /var/www/reactapp
 # Path(HOME_DIR).mkdir(parents=True, exist_ok=True)
 # so we have to set the home env variable to allow to create its directory
 ENV HOME="${PYTHONPATH}"
+ENV XDG_CACHE_HOME="${PYTHONPATH}/.cache"
+
 

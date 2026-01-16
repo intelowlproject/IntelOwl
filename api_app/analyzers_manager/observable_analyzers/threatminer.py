@@ -34,9 +34,27 @@ class Threatminer(classes.ObservableAnalyzer):
             )
 
         try:
-            response = requests.get(self.url + uri, params=params)
+            response = requests.get(self.url + uri, params=params, timeout=30)
             response.raise_for_status()
+
+        except requests.Timeout:
+            error_message = "Threatminer API request timed out — external service may be slow or unavailable."
+            self.report.errors.append(error_message)
+            return {"threatminer_error": error_message}
+
+        except requests.HTTPError as http_err:
+            if response is not None and response.status_code >= 500:
+                error_message = (
+                    f"Threatminer API returned server error ({response.status_code}) "
+                    "— this is an external service issue. Try again later."
+                )
+                self.report.errors.append(error_message)
+                return {"threatminer_error": error_message}
+            raise AnalyzerRunException(f"Threatminer request failed: {str(http_err)}")
+
         except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+            error_message = f"Threatminer request failed: {str(e)}"
+            self.report.errors.append(error_message)
+            return {"threatminer_error": error_message}
 
         return response.json()

@@ -44,8 +44,12 @@ describe("test TimePicker component", () => {
     // Check that the value starts with the formatted date (with or without .000)
     const expectedFrom = format(fromDate, datetimeFormatStr);
     const expectedTo = format(toDate, datetimeFormatStr);
-    expect(firstDateInput.value).toMatch(new RegExp(`^${expectedFrom}(\\.000)?$`));
-    expect(secondDateInput.value).toMatch(new RegExp(`^${expectedTo}(\\.000)?$`));
+    expect(firstDateInput.value).toMatch(
+      new RegExp(`^${expectedFrom}(\\.000)?$`),
+    );
+    expect(secondDateInput.value).toMatch(
+      new RegExp(`^${expectedTo}(\\.000)?$`),
+    );
 
     /* datetime-local input is editable only with fireEvent, user.type doesn't work:
     https://github.com/testing-library/user-event/issues/399#issuecomment-656084165 */

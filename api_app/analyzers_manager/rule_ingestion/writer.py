@@ -1,4 +1,4 @@
-oimport os
+import os
 import hashlib
 import logging
 
@@ -6,8 +6,9 @@ logger = logging.getLogger(__name__)
 
 YARA_RULES_DIR = "/opt/deploy/files_required/yara/unprotect_it"
 
+
 def write_yara_rules(rules):
-    os.makedirs(YARA_RULES_DIR, exist_ok = True)
+    os.makedirs(YARA_RULES_DIR, exist_ok=True)
 
     written = 0
 
@@ -15,14 +16,13 @@ def write_yara_rules(rules):
         if not isinstance(rule, str):
             continue
 
-
         rule_hash = hashlib.sha256(rule.encode()).hexdigest()
         file_path = os.path.join(YARA_RULES_DIR, f"{rule_hash}.yar")
 
         if os.path.exists(file_path):
             continue
 
-        with open(file_path, "w")  as f:
+        with open(file_path, "w") as f:
             f.write(rule)
 
         written += 1

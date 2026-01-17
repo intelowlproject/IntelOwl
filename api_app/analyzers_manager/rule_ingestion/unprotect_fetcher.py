@@ -1,14 +1,15 @@
 import requests
-import logging 
+import logging
 
 logger = logging.getLogger(__name__)
 
 UNPROTECT_API_URL = "https://unprotect.it/api/detection_rules/"
 
+
 def fetch_detection_rules():
     """
-   Fetch detection rules from unprotect.it API.
-   Returns a list of rule objects(raw JSON).
+    Fetch detection rules from unprotect.it API.
+    Returns a list of rule objects(raw JSON).
 
     """
     try:
@@ -23,4 +24,3 @@ def fetch_detection_rules():
     except Exception as e:
         logger.error(f"Failed to fetch rules from unprotect.it: {e}")
         return []
-    

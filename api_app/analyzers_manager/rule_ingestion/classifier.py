@@ -1,21 +1,22 @@
 import logging
+
 logger = logging.getLogger(__name__)
+
 
 def classify_rules(rules):
     """
-   Classify unprotect.it rules by engine.
-   Returns a dict with keys: 'yara', 'capa'
+    Classify unprotect.it rules by engine.
+    Returns a dict with keys: 'yara', 'capa'
 
     """
     classified = {
-        "yara":[],
-        "capa":[],
+        "yara": [],
+        "capa": [],
     }
 
     for rule in rules:
-        if not isinstance(rule,dict):
+        if not isinstance(rule, dict):
             continue
-
 
         rule_type = rule.get("type", {}).get("name")
         rule_content = rule.get("rule")
@@ -28,7 +29,5 @@ def classify_rules(rules):
 
         elif rule_type.lower() == "capa":
             classified["capa"].append(rule_content)
-
-
 
     return classified

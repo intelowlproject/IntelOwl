@@ -1,4 +1,4 @@
-import os
+oimport os
 import hashlib
 import logging
 
@@ -25,7 +25,7 @@ def write_yara_rules(rules):
         with open(file_path, "w")  as f:
             f.write(rule)
 
-        written +=1
+        written += 1
         logger.info(f"Written YARA rule hash={rule_hash}")
         logger.debug(rule[:200])
 

@@ -1,9 +1,12 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-
+#standerd library
 import logging
+
+#third-party
 import requests
+
 
 logger = logging.getLogger(__name__)
 

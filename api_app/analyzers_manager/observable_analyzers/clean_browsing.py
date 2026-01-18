@@ -16,7 +16,7 @@ class CleanBrowsing(ObservableAnalyzer):
         # 1. Get Configuration
         filter_type = self.configuration.get("filter_type", "family")
 
-        # 2. Dynamic URL Construction (Maintainer Request)
+        # 2. Dynamic URL Construction (Requested by Maintainer)
         # Result: https://doh.cleanbrowsing.org/doh/family-filter/
         url = f"{self.BASE_URL}{filter_type}-filter/"
 
@@ -32,7 +32,6 @@ class CleanBrowsing(ObservableAnalyzer):
             response = requests.get(url, params=params, headers=headers, timeout=10)
 
             # 4. Check Response
-            # We treat any non-200 as a potential error or failure
             if response.status_code != 200:
                 raise AnalyzerRunException(
                     f"CleanBrowsing API returned status {response.status_code}"

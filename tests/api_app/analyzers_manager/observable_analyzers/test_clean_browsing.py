@@ -15,6 +15,7 @@ class CleanBrowsingTest(TestCase):
         # RCODE 0 (Allowed) - 4th byte ends in 0
         self.allowed_content = b"\x00\x00\x81\x80\x00\x01\x00\x00\x00\x00\x00\x00"
 
+    # NOTE: The patch path is lowercase 'clean_browsing' (the module), NOT 'CleanBrowsing' (the class)
     @patch("api_app.analyzers_manager.observable_analyzers.clean_browsing.requests.get")
     def test_routing_security_blocked(self, mock_get):
         """Test 'security' filter routing and blocked response"""
@@ -29,11 +30,9 @@ class CleanBrowsingTest(TestCase):
 
         result = analyzer.run()
 
-        # Verify URL (Security Filter)
         args, _ = mock_get.call_args
         self.assertIn("security-filter", args[0])
 
-        # Verify Result (Blocked)
         self.assertEqual(result["status"], "blocked")
         self.assertEqual(result["filter_used"], "security")
 
@@ -51,11 +50,9 @@ class CleanBrowsingTest(TestCase):
 
         result = analyzer.run()
 
-        # Verify URL (Adult Filter)
         args, _ = mock_get.call_args
         self.assertIn("adult-filter", args[0])
 
-        # Verify Result (Allowed)
         self.assertEqual(result["status"], "allowed")
         self.assertEqual(result["filter_used"], "adult")
 
@@ -69,7 +66,6 @@ class CleanBrowsingTest(TestCase):
 
         analyzer = CleanBrowsing(MagicMock())
         analyzer.observable_name = self.observable_name
-        # No config set -> defaults to family
 
         analyzer.run()
 

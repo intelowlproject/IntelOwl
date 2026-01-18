@@ -20,9 +20,9 @@ class CleanBrowsingTest(TestCase):
     @patch("api_app.analyzers_manager.observable_analyzers.clean_browsing.requests.get")
     def test_routing_security_blocked(self, mock_get):
         """Test 'security' filter routing and blocked response"""
-
+        # FIXED: Added json_data=None
         mock_get.return_value = MockUpResponse(
-            status_code=200, content=self.blocked_content
+            json_data=None, status_code=200, content=self.blocked_content
         )
 
         analyzer = CleanBrowsing(MagicMock())
@@ -39,8 +39,9 @@ class CleanBrowsingTest(TestCase):
     @patch("api_app.analyzers_manager.observable_analyzers.clean_browsing.requests.get")
     def test_routing_adult_allowed(self, mock_get):
         """Test 'adult' filter routing and allowed response"""
+        # FIXED: Added json_data=None
         mock_get.return_value = MockUpResponse(
-            status_code=200, content=self.allowed_content
+            json_data=None, status_code=200, content=self.allowed_content
         )
 
         analyzer = CleanBrowsing(MagicMock())
@@ -57,8 +58,9 @@ class CleanBrowsingTest(TestCase):
     @patch("api_app.analyzers_manager.observable_analyzers.clean_browsing.requests.get")
     def test_default_family(self, mock_get):
         """Test default filter (family)"""
+        # FIXED: Added json_data=None
         mock_get.return_value = MockUpResponse(
-            status_code=200, content=self.blocked_content
+            json_data=None, status_code=200, content=self.blocked_content
         )
 
         analyzer = CleanBrowsing(MagicMock())

@@ -2,8 +2,9 @@
 # See the file 'LICENSE' for copying permission.
 
 import requests
-from api_app.exceptions import AnalyzerRunException
 from requests.exceptions import RequestException
+
+from api_app.exceptions import AnalyzerRunException
 
 # Constants
 BASE_URL = "https://haveibeenpwned.com/api/v3/"

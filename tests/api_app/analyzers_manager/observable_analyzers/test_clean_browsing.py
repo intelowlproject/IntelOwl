@@ -58,7 +58,7 @@ class CleanBrowsingTest(TestCase):
     @patch("api_app.analyzers_manager.observable_analyzers.clean_browsing.requests.get")
     def test_default_family(self, mock_get):
         """Test default filter (family)"""
-        # FIXED: Added json_data=None
+        
         mock_get.return_value = MockUpResponse(
             json_data=None, status_code=200, content=self.blocked_content
         )

@@ -13,17 +13,21 @@ class CleanBrowsing(ObservableAnalyzer):
     BASE_URL = "https://doh.cleanbrowsing.org/doh/"
     url: str = BASE_URL
 
+    @classmethod
+    def update(cls):
+        """
+        No update required for this analyzer as it uses a live API.
+        """
+        return True
+
     def run(self):
-        # 1. Get Configuration
+
         filter_type = self.configuration.get("filter_type", "family")
 
-        # 2. Dynamic URL Construction (Requested by Maintainer)
-        # Result: https://doh.cleanbrowsing.org/doh/family-filter/
         url = f"{self.BASE_URL}{filter_type}-filter/"
 
-        # 3. Create DNS Packet
         binary_dns = self._create_dns_query(self.observable_name)
-        # Remove padding '=' per DNS-over-HTTPS spec
+
         b64_payload = base64.urlsafe_b64encode(binary_dns).decode("utf-8").rstrip("=")
 
         try:
@@ -32,7 +36,6 @@ class CleanBrowsing(ObservableAnalyzer):
 
             response = requests.get(url, params=params, headers=headers, timeout=10)
 
-            # 4. Check Response
             if response.status_code != 200:
                 raise AnalyzerRunException(
                     f"CleanBrowsing API returned status {response.status_code}"
@@ -40,7 +43,6 @@ class CleanBrowsing(ObservableAnalyzer):
 
             is_blocked = self._check_if_blocked(response.content)
 
-            # 5. Return Result
             return {
                 "filter_used": filter_type,
                 "status": "blocked" if is_blocked else "allowed",

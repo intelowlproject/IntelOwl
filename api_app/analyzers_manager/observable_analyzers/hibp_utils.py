@@ -24,7 +24,10 @@ def get_headers(api_key: str = None) -> dict:
 
 
 def make_hibp_request(
-    url: str, params: dict = None, api_key: str = None, timeout: int = 10
+    url: str,
+    params: dict = None,
+    api_key: str = None,
+    timeout: int = 10,
 ) -> dict | list | str:
     """
     Make a GET request to HIBP API and handle common responses.
@@ -41,25 +44,26 @@ def make_hibp_request(
             params=params or {},
             headers=get_headers(api_key),
             timeout=timeout,
-            verify=True,
+            verify=True,  # Enforce SSL verification
         )
 
         if response.status_code == 200:
-            if "application/json" in response.headers.get("Content-Type", ""):
+            content_type = response.headers.get("Content-Type", "")
+            if "application/json" in content_type:
                 return response.json()
             else:
                 return response.text
         elif response.status_code == 404:
+            # No breaches found - treat as success with empty result
             return [] if "json" in url else ""
         elif response.status_code == 403:
             raise AnalyzerRunException(
                 "Forbidden: Check API key or User-Agent."
-            )
+            )  # noqa: E501
         elif response.status_code == 429:
             retry_after = response.headers.get("Retry-After", "unknown")
             raise AnalyzerRunException(
-                "Rate limit hit. Retry after "
-                f"{retry_after} seconds."
+                "Rate limit hit. Retry after " f"{retry_after} seconds."
             )
         else:
             response.raise_for_status()

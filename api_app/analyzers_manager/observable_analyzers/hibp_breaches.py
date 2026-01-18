@@ -10,8 +10,16 @@ from .hibp_utils import BASE_URL, make_hibp_request, normalize_breach_data
 class HibpBreaches(ObservableAnalyzer):
     """
     Analyzer for HaveIBeenPwned breaches (emails and domains).
+
     Supports: email, domain.
-    Requires API key (use test key for dev).
+    Requires API key (use test key
+    '00000000000000000000000000000000' for development).
+
+    Note for domains:
+    - Uses public /breaches?domain= endpoint
+    → shows which breaches affected the domain
+    - Does NOT return individual leaked email addresses
+    (requires verified domain + paid key)
     """
 
     _api_key_name: str
@@ -21,13 +29,14 @@ class HibpBreaches(ObservableAnalyzer):
 
     @classmethod
     def update(cls) -> bool:
-        pass
+        """HIBP Breaches analyzer does not require periodic updates."""
+        return True
 
     def run(self):
         if self.observable_classification not in ["email", "domain"]:
             raise AnalyzerRunException(
                 "Unsupported observable type "
-                f"{self.observable_classification}. "
+                f"{self.observable_classification!r}. "
                 "Supported: email, domain."
             )
 
@@ -43,7 +52,7 @@ class HibpBreaches(ObservableAnalyzer):
                 "truncateResponse": self.truncate_response,
                 "includeUnverified": self.include_unverified,
             }
-        else:
+        else:  # domain
             endpoint = f"{BASE_URL}breaches"
             params = {"domain": self.observable_name}
 
@@ -58,9 +67,21 @@ class HibpBreaches(ObservableAnalyzer):
             else "No breaches found."
         )
 
-        return {
+        result = {
             "success": True,
             "breach_count": breach_count,
             "breaches": normalized_breaches,
             "summary": summary,
         }
+
+        # Optional but very useful warning for users
+        if self.observable_classification == "domain":
+            result["note"] = (
+                "Domain search uses the public /breaches?domain= endpoint. "
+                "It shows only breach names/dates/counts — "
+                "not individual leaked emails. "
+                "Full leaked email list requires domain ownership "
+                "verification in HIBP dashboard."
+            )
+
+        return result

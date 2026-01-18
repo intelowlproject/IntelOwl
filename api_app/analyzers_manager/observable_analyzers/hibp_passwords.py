@@ -14,13 +14,20 @@ class HibpPasswords(ObservableAnalyzer):
     Analyzer for HaveIBeenPwned pwned passwords (k-anonymity).
     Supports: generic (password string).
     No API key required.
+    Uses privacy-preserving k-anonymity
+    (only first 5 chars of SHA-1 hash are sent).
     """
+
+    @classmethod
+    def update(cls) -> bool:
+        """HIBP Passwords analyzer does not require periodic updates."""
+        return True
 
     def run(self):
         if self.observable_classification != "generic":
             raise AnalyzerRunException(
                 "Unsupported observable type "
-                f"{self.observable_classification}. "
+                f"{self.observable_classification!r}. "
                 "Supported: generic (password)."
             )
 
@@ -36,7 +43,7 @@ class HibpPasswords(ObservableAnalyzer):
 
         exposure_count = 0
         for line in hashes:
-            if ':' in line:
+            if ":" in line:
                 hash_suffix, count = line.split(":", 1)
                 if hash_suffix == suffix:
                     exposure_count = int(count)

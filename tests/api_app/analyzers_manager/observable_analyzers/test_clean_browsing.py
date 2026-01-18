@@ -1,21 +1,23 @@
 from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
+from requests.exceptions import RequestException
 
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.observable_analyzers.clean_browsing import CleanBrowsing
 
 
 class CleanBrowsingTest(TestCase):
     def setUp(self):
         self.observable_name = "google.com"
-        # This binary simulates a "Blocked" response (RCODE 3)
+        # RCODE 3 (Blocked) - 4th byte ends in 3
         self.blocked_content = b"\x00\x00\x81\x83\x00\x01\x00\x00\x00\x00\x00\x00"
+        # RCODE 0 (Allowed) - 4th byte ends in 0
+        self.allowed_content = b"\x00\x00\x81\x80\x00\x01\x00\x00\x00\x00\x00\x00"
 
-    @patch(
-        "api_app.analyzers_manager.observable_analyzers.clean_browsing.CleanBrowsing.requests.get"
-    )
-    def test_routing_security(self, mock_get):
-        """Test that selecting 'security' hits the correct Security URL"""
+    @patch("api_app.analyzers_manager.observable_analyzers.clean_browsing.requests.get")
+    def test_routing_security_blocked(self, mock_get):
+        """Test 'security' filter routing and blocked response"""
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.content = self.blocked_content
@@ -23,39 +25,43 @@ class CleanBrowsingTest(TestCase):
 
         analyzer = CleanBrowsing(MagicMock())
         analyzer.observable_name = self.observable_name
-        analyzer.filter_type = "security"
+        analyzer.configuration = {"filter_type": "security"}
 
-        analyzer.run()
+        result = analyzer.run()
 
-        # Check URL
+        # Verify URL (Security Filter)
         args, _ = mock_get.call_args
-        called_url = args[0]
-        self.assertEqual(called_url, CleanBrowsing.URL_SECURITY)
+        self.assertIn("security-filter", args[0])
 
-    @patch(
-        "api_app.analyzers_manager.observable_analyzers.clean_browsing.CleanBrowsing.requests.get"
-    )
-    def test_routing_adult(self, mock_get):
-        """Test that selecting 'adult' hits the correct Adult URL"""
+        # Verify Result (Blocked)
+        self.assertEqual(result["status"], "blocked")
+        self.assertEqual(result["filter_used"], "security")
+
+    @patch("api_app.analyzers_manager.observable_analyzers.clean_browsing.requests.get")
+    def test_routing_adult_allowed(self, mock_get):
+        """Test 'adult' filter routing and allowed response"""
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.content = self.blocked_content
+        mock_response.content = self.allowed_content
         mock_get.return_value = mock_response
 
         analyzer = CleanBrowsing(MagicMock())
         analyzer.observable_name = self.observable_name
-        analyzer.filter_type = "adult"
+        analyzer.configuration = {"filter_type": "adult"}
 
-        analyzer.run()
+        result = analyzer.run()
 
+        # Verify URL (Adult Filter)
         args, _ = mock_get.call_args
-        self.assertEqual(args[0], CleanBrowsing.URL_ADULT)
+        self.assertIn("adult-filter", args[0])
 
-    @patch(
-        "api_app.analyzers_manager.observable_analyzers.clean_browsing.CleanBrowsing.requests.get"
-    )
+        # Verify Result (Allowed)
+        self.assertEqual(result["status"], "allowed")
+        self.assertEqual(result["filter_used"], "adult")
+
+    @patch("api_app.analyzers_manager.observable_analyzers.clean_browsing.requests.get")
     def test_default_family(self, mock_get):
-        """Test that default hits the Family URL"""
+        """Test default filter (family)"""
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.content = self.blocked_content
@@ -63,9 +69,20 @@ class CleanBrowsingTest(TestCase):
 
         analyzer = CleanBrowsing(MagicMock())
         analyzer.observable_name = self.observable_name
-        # We don't set filter_type here to test defaults
+        # No config set -> defaults to family
 
         analyzer.run()
 
         args, _ = mock_get.call_args
-        self.assertEqual(args[0], CleanBrowsing.URL_FAMILY)
+        self.assertIn("family-filter", args[0])
+
+    @patch("api_app.analyzers_manager.observable_analyzers.clean_browsing.requests.get")
+    def test_connection_error(self, mock_get):
+        """Test that connection errors raise AnalyzerRunException"""
+        mock_get.side_effect = RequestException("Connection timeout")
+
+        analyzer = CleanBrowsing(MagicMock())
+        analyzer.observable_name = self.observable_name
+
+        with self.assertRaises(AnalyzerRunException):
+            analyzer.run()

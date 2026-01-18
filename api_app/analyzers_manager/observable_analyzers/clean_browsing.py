@@ -11,6 +11,7 @@ from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
 class CleanBrowsing(ObservableAnalyzer):
     BASE_URL = "https://doh.cleanbrowsing.org/doh/"
+    url: str = BASE_URL
 
     def run(self):
         # 1. Get Configuration

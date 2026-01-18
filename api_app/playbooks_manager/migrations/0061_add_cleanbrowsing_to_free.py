@@ -38,7 +38,7 @@ def reverse_migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("playbooks_manager", "0059_add_ipquery_analyzer_free_to_use"),
+        ("playbooks_manager", "0060_update_yaraify_url_free_to_use"),
         ("analyzers_manager", "0171_analyzer_config_cleanbrowsing"),
     ]
 

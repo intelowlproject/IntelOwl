@@ -32,7 +32,10 @@ class HibpPasswords(ObservableAnalyzer):
             )
 
         password = self.observable_name
-        sha1_hash = hashlib.sha1(password.encode("utf-8")).hexdigest().upper()
+        # Required by official HIBP Pwned Passwords API (k-anonymity model)
+        # Only first 5 hex chars of SHA-1 are sent — full password/hash never leaves client
+        # Safe & intentional per HIBP design: https://haveibeenpwned.com/API/v3#PwnedPasswords
+        sha1_hash = hashlib.sha1(password.encode("utf-8")).hexdigest().upper()  # nosec
         prefix = sha1_hash[:5]
         suffix = sha1_hash[5:]
 

@@ -1,12 +1,11 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-#standerd library
+# standard library
 import logging
 
-#third-party
+# third-party
 import requests
-
 
 logger = logging.getLogger(__name__)
 
@@ -16,8 +15,7 @@ UNPROTECT_API_URL = "https://unprotect.it/api/detection_rules/"
 def fetch_detection_rules():
     """
     Fetch detection rules from unprotect.it API.
-    Returns a list of rule objects(raw JSON).
-
+    Returns a list of rule objects (raw JSON).
     """
     try:
         response = requests.get(UNPROTECT_API_URL, timeout=15)
@@ -26,8 +24,8 @@ def fetch_detection_rules():
         data = response.json()
         rules = data.get("results", [])
 
-        logger.info(f"Fetched {len(rules)} rules from unprotect.it")
+        logger.info("Fetched %d rules from unprotect.it", len(rules))
         return rules
-    except Exception as e:
-        logger.error(f"Failed to fetch rules from unprotect.it: {e}")
+    except requests.RequestException as e:
+        logger.error("Failed to fetch rules from unprotect.it: %s", e)
         return []

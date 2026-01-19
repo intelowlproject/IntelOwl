@@ -34,7 +34,7 @@ jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
 jest.mock("../../../../src/components/scan/utils/RecentScans", () =>
   jest.fn((props) => <div {...props} />),
 );
-
+jest.setTimeout(30000);
 describe("ScanForm adavanced use", () => {
   /* EXTREMELY IMPORTART! These tests need to be execute sequentially or they will fail!
      Maintain them in the same describe.

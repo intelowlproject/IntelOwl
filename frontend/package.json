@@ -38,7 +38,7 @@
   "scripts": {
     "start": "PORT=3001 react-scripts start",
     "build": "react-scripts build",
-    "test": "jest",
+    "test": "TZ=UTC jest",
     "eject": "react-scripts eject",
     "lint": "eslint src/ --ext .js,.jsx",
     "lint:fix": "npm run lint -- --fix",

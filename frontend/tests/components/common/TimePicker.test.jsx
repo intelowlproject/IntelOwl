@@ -40,7 +40,11 @@ describe("test TimePicker component", () => {
     expect(firstDateInput).toBeInTheDocument();
     const secondDateInput = container.querySelector("#DatePicker__lte");
     expect(secondDateInput).toBeInTheDocument();
+<<<<<<< HEAD
     // datetime saves also milliseconds, but browsers may not include them in the value
+=======
+    // datetime saves also milliseconds, but browsers may include them in the value
+>>>>>>> fde44539 (fixed - tests)
     // Check that the value starts with the formatted date (with or without .000)
     const expectedFrom = format(fromDate, datetimeFormatStr);
     const expectedTo = format(toDate, datetimeFormatStr);

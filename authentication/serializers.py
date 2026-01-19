@@ -2,8 +2,8 @@
 # See the file 'LICENSE' for copying permission.
 
 """This module contains various serializers used in the authentication process
-    for the IntelOwl project. These serializers handle user access, user profile,
-    registration, email verification, login, and token generation.
+for the IntelOwl project. These serializers handle user access, user profile,
+registration, email verification, login, and token generation.
 """
 
 import logging
@@ -22,7 +22,9 @@ from api_app.models import Job
 from certego_saas.apps.user.serializers import (
     UserAccessSerializer as CertegoUserAccessSerializer,
 )
-from certego_saas.apps.user.serializers import UserSerializer
+from certego_saas.apps.user.serializers import (
+    UserSerializer,
+)
 from certego_saas.ext.upload import Slack
 from certego_saas.models import User
 from certego_saas.settings import certego_apps_settings

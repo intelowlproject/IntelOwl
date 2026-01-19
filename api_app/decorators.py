@@ -72,11 +72,3 @@ def prevent_signal_recursion(func):
             del instance._dirty
 
     return no_recursion
-
-
-class classproperty:
-    def __init__(self, method=None):
-        self.fget = method
-
-    def __get__(self, instance, owner=None):
-        return self.fget(owner)

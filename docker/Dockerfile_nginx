@@ -1,4 +1,4 @@
-FROM library/nginx:1.27.3-alpine
+FROM library/nginx:1.29.2-alpine
 
 ENV NGINX_LOG_DIR=/var/log/nginx
 # this is to avoid having these logs redirected to stdout/stderr

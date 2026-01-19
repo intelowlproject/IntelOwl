@@ -6,7 +6,6 @@ from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import (  # AnalyzerConfigurationException
     AnalyzerRunException,
 )
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -96,25 +95,3 @@ class Validin(classes.ObservableAnalyzer):
             return self._run_all_queries(endpoints, headers)
         else:
             return self._run_specific_query(endpoints, headers)
-
-    @classmethod
-    def _monkeypatch(cls):
-        response = {
-            "key": "191.121.10.0",
-            "effective_opts": {"type": "ip4", "limit": 100, "wildcard": False},
-            "status": "finished",
-            "query_key": "191.121.10.0",
-            "records": {},
-            "records_returned": 0,
-            "limited": False,
-            "error": None,
-        }
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse(response, 200),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

@@ -57,7 +57,7 @@ describe("test Ingestors component", () => {
     });
     expect(playbookExecutedColumnHeader).toBeInTheDocument();
     const scheduleColumnHeader = screen.getByRole("columnheader", {
-      name: "Schedule",
+      name: "Schedule (m/h/dM/MY/d)",
     });
     expect(scheduleColumnHeader).toBeInTheDocument();
   });

@@ -1,3 +1,4 @@
+import logging
 from typing import Type, Union
 
 from django.core.exceptions import ValidationError
@@ -7,16 +8,13 @@ from django.utils.timezone import now
 
 from api_app.analyzables_manager.queryset import AnalyzableQuerySet
 from api_app.choices import Classification
-from api_app.data_model_manager.models import (
-    BaseDataModel,
-    DomainDataModel,
-    FileDataModel,
-    IPDataModel,
-)
+from api_app.data_model_manager.models import BaseDataModel
 from api_app.data_model_manager.queryset import BaseDataModelQuerySet
 from api_app.defaults import file_directory_path
 from api_app.helpers import calculate_md5, calculate_sha1, calculate_sha256
 from certego_saas.models import User
+
+logger = logging.getLogger(__name__)
 
 
 class Analyzable(models.Model):
@@ -82,23 +80,11 @@ class Analyzable(models.Model):
                     ).values_list("data_model__pk", flat=True)
                 )
             query |= query2
+        logger.debug(f"{query=}")
         return self.get_data_model_class().objects.filter(query)
 
     def get_data_model_class(self) -> Type[BaseDataModel]:
-        if self.classification == Classification.IP.value:
-            return IPDataModel
-        elif self.classification in [
-            Classification.URL.value,
-            Classification.DOMAIN.value,
-        ]:
-            return DomainDataModel
-        elif self.classification in [
-            Classification.HASH.value,
-            Classification.FILE.value,
-        ]:
-            return FileDataModel
-        else:
-            raise NotImplementedError()
+        return self.CLASSIFICATIONS.get_data_model_class(self.classification)
 
     def _set_hashes(self, value: Union[str, bytes]):
         if isinstance(value, str):
@@ -111,6 +97,10 @@ class Analyzable(models.Model):
             self.sha1 = calculate_sha1(value)
 
     def clean(self):
+        if self.file:
+            self.classification = Classification.FILE.value
+        else:
+            self.classification = Classification.calculate_observable(self.name)
         if self.classification == Classification.FILE.value:
             from api_app.analyzers_manager.models import MimeTypes
 

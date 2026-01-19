@@ -7,7 +7,6 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class CheckPhish(classes.ObservableAnalyzer):
@@ -64,18 +63,3 @@ class CheckPhish(classes.ObservableAnalyzer):
             if status_json == "DONE":
                 return result
         raise AnalyzerRunException(f'Job "{job_id}" status retrieval failed.')
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.post",
-                    side_effect=[
-                        MockUpResponse({"jobID": "sample job ID"}, 200),
-                        MockUpResponse({"status": "DONE"}, 200),
-                    ],
-                ),
-            ),
-        ]
-        return super()._monkeypatch(patches=patches)

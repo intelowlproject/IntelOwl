@@ -38,6 +38,7 @@ print_help () {
   echo "    --pcap_analyzers            Uses the integrations/pcap_analyzers/compose.yml"
   echo "                                file."
   echo "    --bbot                      Uses the integrations/bbot/compose.yml"
+  echo "    --phunter                   Uses the integrations/phunter/compose.yml"
   echo "    --multi_queue               Uses the multiqueue.override.yml compose file."
   echo "    --nfs                       Uses the nfs.override.yml compose file."
   echo "    --traefik_prod              Uses the traefik.yml and traefik_prod.yml compose file."
@@ -100,7 +101,7 @@ check_parameters "$@" && shift 2
 
 current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
 
-docker_analyzers=("pcap_analyzers" "tor_analyzers" "malware_tools_analyzers" "thug" "cyberchef" "phoneinfoga" "phishing_analyzers" "nuclei_analyzer" "bbot")
+docker_analyzers=("pcap_analyzers" "tor_analyzers" "malware_tools_analyzers" "thug" "cyberchef" "phoneinfoga" "phishing_analyzers" "nuclei_analyzer" "bbot" "phunter")
 
 
 for value in "${docker_analyzers[@]}"; do
@@ -180,6 +181,10 @@ while [[ $# -gt 0 ]]; do
     ;;
   --bbot)
     analyzers["bbot"]=true
+    shift 1
+    ;;
+  --phunter)
+    analyzers["phunter"]=true
     shift 1
     ;;
   --multi_queue)

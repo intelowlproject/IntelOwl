@@ -12,7 +12,6 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
 )
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -111,26 +110,3 @@ class Pulsedive(ObservableAnalyzer):
                 raise AnalyzerRunException(err)
 
         return result
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    side_effect=[
-                        MockUpResponse(
-                            {}, 404
-                        ),  # 404 so `__submit_for_analysis` is called
-                        MockUpResponse(
-                            {"status": "done", "data": {"test": "test"}}, 200
-                        ),
-                    ],
-                ),
-                patch(
-                    "requests.post",
-                    side_effect=lambda *args, **kwargs: MockUpResponse({"qid": 1}, 200),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

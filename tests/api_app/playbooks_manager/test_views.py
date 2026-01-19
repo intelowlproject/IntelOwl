@@ -164,3 +164,63 @@ class PlaybookConfigViewSetTestCase(
             pc.delete()
         finally:
             ac.delete()
+
+    def test_get(self):
+        # 1 - existing visualizer
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(f"{self.URL}/Dns")
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(
+            response.json(),
+            {
+                "analyzers": [
+                    "AdGuard",
+                    "Classic_DNS",
+                    "CloudFlare_DNS",
+                    "CloudFlare_Malicious_Detector",
+                    "DNS0_EU",
+                    "DNS0_EU_Malicious_Detector",
+                    "Google_DNS",
+                    "Quad9_DNS",
+                    "Quad9_Malicious_Detector",
+                    "UltraDNS_DNS",
+                    "UltraDNS_Malicious_Detector",
+                ],
+                "connectors": [],
+                "description": "Retrieve information from DNS about the domain",
+                "disabled": False,
+                "for_organization": False,
+                "id": 1,
+                "is_editable": False,
+                "name": "Dns",
+                "owner": None,
+                "pivots": [],
+                "runtime_configuration": {
+                    "analyzers": {},
+                    "connectors": {},
+                    "pivots": {},
+                    "visualizers": {},
+                },
+                "scan_check_time": "1:00:00:00",
+                "scan_mode": 2,
+                "starting": True,
+                "tags": [],
+                "tlp": "AMBER",
+                "type": ["domain"],
+                "visualizers": ["DNS"],
+                "weight": 0,
+            },
+        )
+        # 2 - missing playbook
+        response = self.client.get(f"{self.URL}/non_existing")
+        self.assertEqual(response.status_code, 404, response.content)
+        result = response.json()
+        self.assertEqual(
+            result, {"detail": "No PlaybookConfig matches the given query."}
+        )
+
+    def test_get_config(self):
+        # 1 - existing playbook
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(f"{self.URL}/Dns/plugin_config")
+        self.assertEqual(response.status_code, 404, response.content)

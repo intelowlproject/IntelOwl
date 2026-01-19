@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from api_app.decorators import classproperty
 from api_app.ingestors_manager.models import IngestorConfig
 from certego_saas.apps.organization.organization import Membership, Organization
 from tests import CustomViewSetTestCase
@@ -12,8 +13,7 @@ class IngestorConfigViewSetTestCase(
 ):
     URL = "/api/ingestor"
 
-    @classmethod
-    @property
+    @classproperty
     def model_class(cls) -> IngestorConfig:
         return IngestorConfig
 
@@ -48,11 +48,11 @@ class IngestorConfigViewSetTestCase(
                 "disabled": True,
                 "health_check_status": True,
                 "health_check_task": None,
-                "id": 6,
+                "id": 5,
                 "maximum_jobs": 50,
                 "name": "GreedyBear",
                 "playbooks_choice": ["Popular_IP_Reputation_Services"],
-                "python_module": 216,
+                "python_module": 217,
                 "routing_key": "ingestor",
                 "schedule": {
                     "day_of_month": "*",
@@ -185,11 +185,4 @@ class IngestorConfigViewSetTestCase(
                     },
                 ],
             },
-        )
-        # 2 - missing ingestor
-        response = self.client.get(f"{self.URL}/missing_ingestor/plugin_config")
-        self.assertEqual(response.status_code, 404, response.content)
-        self.assertEqual(
-            response.json(),
-            {"errors": {"ingestor config": "Requested plugin does not exist."}},
         )

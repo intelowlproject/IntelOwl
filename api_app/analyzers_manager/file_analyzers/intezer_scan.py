@@ -11,7 +11,6 @@ from intezer_sdk.analysis import FileAnalysis
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import if_mock_connections, patch
 
 
 class IntezerScan(FileAnalyzer):
@@ -66,14 +65,3 @@ class IntezerScan(FileAnalyzer):
             timeout=timedelta(seconds=self.timeout),
         )
         return analysis.result()
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch.object(FileAnalysis, "send", return_value=None),
-                patch.object(FileAnalysis, "wait_for_completion", return_value=None),
-                patch.object(FileAnalysis, "result", return_value={"test": "test"}),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

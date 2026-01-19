@@ -29,7 +29,7 @@ import { JobIsRunningAlert } from "./JobIsRunningAlert";
 import { JobFinalStatuses } from "../../../constants/jobConst";
 import { datetimeFormatStr } from "../../../constants/miscConst";
 
-export function JobInfoCard({ job }) {
+export function JobInfoCard({ job, relatedInvestigationNumber }) {
   // local state
   const [isOpenJobInfoCard, setIsOpenJobInfoCard] = React.useState(false);
   const [isOpenJobWarnings, setIsOpenJobWarnings] = React.useState(false);
@@ -66,7 +66,7 @@ export function JobInfoCard({ job }) {
               size="xs"
               style={{ fontSize: "0.8rem" }}
             >
-              Similar Investigations: <br /> {job.related_investigation_number}
+              Similar Investigations: <br /> {relatedInvestigationNumber}
             </Button>
             <UncontrolledTooltip
               placement="top"
@@ -287,4 +287,5 @@ export function JobInfoCard({ job }) {
 
 JobInfoCard.propTypes = {
   job: PropTypes.object.isRequired,
+  relatedInvestigationNumber: PropTypes.number.isRequired,
 };

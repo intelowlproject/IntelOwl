@@ -34,7 +34,7 @@ def deprecated_endpoint(deprecation_date=None, end_of_life_date=None):
                 if deprecation_date:
                     response.headers["X-Deprecation-Date"] = deprecation_date
                 if end_of_life_date:
-                    response.headers["X-End-Of-Life-Date"] = deprecation_date
+                    response.headers["X-End-Of-Life-Date"] = end_of_life_date
             return response
 
         return wrapper_deprecated

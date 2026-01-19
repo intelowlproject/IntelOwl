@@ -5,7 +5,6 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Ip2location(classes.ObservableAnalyzer):
@@ -39,30 +38,3 @@ class Ip2location(classes.ObservableAnalyzer):
 
         response = location_info.json()
         return response
-
-    @classmethod
-    def _monkeypatch(cls):
-        sample_response = {
-            "ip": "8.8.8.8",
-            "country_code": "US",
-            "country_name": "United States of America",
-            "region_name": "California",
-            "city_name": "Mountain View",
-            "latitude": 37.405992,
-            "longitude": -122.078515,
-            "zip_code": "94043",
-            "time_zone": "-07:00",
-            "asn": "15169",
-            "as": "Google LLC",
-            "is_proxy": False,
-        }
-
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse(sample_response, 200),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

@@ -194,6 +194,7 @@ class MimeTypes(models.TextChoices):
     SWIFT = "text/x-swift"
     OBJECTIVE_C_CODE = "text/x-objective-c"
     LNK = "application/x-ms-shortcut"
+    GZIP = "application/gzip"
 
     @classmethod
     def _calculate_from_filename(cls, file_name: str) -> Optional["MimeTypes"]:
@@ -349,3 +350,13 @@ class AnalyzerConfig(PythonConfig):
     @property
     def config_exception(cls):
         return AnalyzerConfigurationException
+
+
+class AnalyzerRulesFileVersion(models.Model):
+    last_downloaded_version = models.CharField(max_length=50, blank=True, default="")
+    download_url = models.URLField(max_length=200, blank=True, default="")
+    downloaded_at = models.DateTimeField(auto_now_add=True)
+
+    python_module = models.ForeignKey(
+        PythonModule, on_delete=models.PROTECT, related_name="rules_version"
+    )

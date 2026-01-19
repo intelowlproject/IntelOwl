@@ -8,7 +8,6 @@ from typing import Dict, Generator, List, Union
 
 import django.core
 from django.conf import settings
-from django.core.cache import cache
 from django.db.models import Q, QuerySet
 from django.http import QueryDict
 from django.utils.timezone import now
@@ -595,8 +594,8 @@ class JobSerializer(_AbstractJobViewSerializer):
             "connector_reports",
             "pivot_reports",
             "visualizer_reports",
+            "analyzable_id",
             "received_request_time",
-            "related_investigation_number",
             "finished_analysis_time",
             "process_time",
             "warnings",
@@ -636,9 +635,7 @@ class JobSerializer(_AbstractJobViewSerializer):
     playbook_to_execute = rfs.SlugRelatedField(read_only=True, slug_field="name")
     investigation_id = rfs.SerializerMethodField(read_only=True, default=None)
     investigation_name = rfs.SerializerMethodField(read_only=True, default=None)
-    related_investigation_number = rfs.SerializerMethodField(
-        read_only=True, default=None
-    )
+    analyzable_id = rfs.SerializerMethodField(read_only=True, default=None)
     permissions = rfs.SerializerMethodField()
     data_model = rfs.SerializerMethodField()
     is_sample = rfs.BooleanField(read_only=True)
@@ -657,25 +654,8 @@ class JobSerializer(_AbstractJobViewSerializer):
             return root_investigation.name
         return instance.investigation
 
-    def get_related_investigation_number(self, instance: Job) -> int:
-        # this query is cpu intensive, and it's done for very often:
-        # during an analysis each time an analyzer it's completed this query is done from the websocket
-        cache_key = f"{instance.id}_related_investigation_number"
-        cached_investigation_number = cache.get(cache_key)
-        logger.debug(f"{cache_key=}: {cached_investigation_number=}")
-        if cached_investigation_number is not None:
-            logger.debug(f"used cache: {cache_key=}")
-            return cached_investigation_number
-
-        related_investigation_number = Investigation.investigation_for_analyzable(
-            Investigation.objects.filter(
-                start_time__gte=now() - datetime.timedelta(days=30),
-            ),
-            instance.analyzable.name,
-        ).count()
-        cache.set(cache_key, related_investigation_number, 60)
-        logger.debug(f"set cache: {cache_key=} for {related_investigation_number=}")
-        return related_investigation_number
+    def get_analyzable_id(self, instance: Job) -> int:
+        return instance.analyzable.pk
 
     def get_fields(self):
         # this method override is required for a cyclic import
@@ -1288,3 +1268,27 @@ class JobBISerializer(AbstractBIInterface, ModelSerializer):
     @staticmethod
     def get_playbook(instance: Job):
         return instance.playbook_to_execute.name if instance.playbook_to_execute else ""
+
+
+class JobAnalyzableHistorySerializer(rfs.ModelSerializer):
+    id = rfs.CharField(source="pk")
+    user = rfs.CharField(source="user.username", allow_null=False, read_only=True)
+    data_model = rfs.SerializerMethodField()
+    date = rfs.DateTimeField(
+        source="finished_analysis_time", read_only=True, allow_null=False
+    )
+    playbook = rfs.CharField(
+        source="playbook_to_execute.name", allow_null=True, read_only=True
+    )
+
+    class Meta:
+        model = Job
+        fields = ["playbook", "user", "date", "data_model", "id"]
+
+    def get_data_model(self, instance: Job):
+        logger.debug(f"{instance=}")
+        logger.debug(f"{instance.analyzable=}")
+
+        if instance.data_model:
+            return instance.data_model.serialize()
+        return {}

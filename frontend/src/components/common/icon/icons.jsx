@@ -25,7 +25,7 @@ import { ImExit } from "react-icons/im";
 import { SiVirustotal, SiVirtualbox, SiVmware } from "react-icons/si";
 import { RiAlarmWarningFill, RiAliensFill } from "react-icons/ri";
 
-import { GiLighthouse, GiRetroController } from "react-icons/gi";
+import { GiLighthouse, GiRetroController, GiGarlic } from "react-icons/gi";
 import { HiFilter } from "react-icons/hi";
 import {
   MdCloudSync,
@@ -59,6 +59,7 @@ const generalIcons = Object.freeze({
   lighthouseOn: <GiLighthouse />,
   controller: <GiRetroController />,
   exit: <ImExit />,
+  tor: <GiGarlic />,
   connection: <MdSignalWifiStatusbarConnectedNoInternet2 />,
   lock: <FaLock />,
   lockOpen: <FaLockOpen />,

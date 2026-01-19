@@ -84,7 +84,7 @@ jobs:
         if: contains(github.base_ref, 'master')
         run: |
           cp docker/env_file_integrations_template docker/env_file_integrations
-          ./start ci up --all_analyzers -- --build -d
+          ./start ci up --malware_tools_analyzers --phishing_analyzers -- --build -d
         env:
           DOCKER_BUILDKIT: 1
           BUILDKIT_PROGRESS: "plain"
@@ -115,6 +115,9 @@ jobs:
       - name: Run test
         run: |
           docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests
+      - name: Run async tests
+        run: |
+          docker exec intelowl_uwsgi coverage run manage.py test --keepdb async_tests
 
   frontend-tests:
     runs-on: ubuntu-latest
@@ -128,7 +131,7 @@ jobs:
         with:
           node-version: 18
       - name: Cache node modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.npm
           key: npm-build-${{ hashFiles('frontend/package-lock.json') }}

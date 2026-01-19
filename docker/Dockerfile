@@ -24,7 +24,7 @@ ARG WATCHMAN=false
 ARG TARGETARCH
 ENV watch_logs_cmd="watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
 # This is required to allow compatibility with different OpenCTI instances
-ARG PYCTI_VERSION=6.5.1
+ARG PYCTI_VERSION=6.8.8
 # this is required for if/else statements
 SHELL ["/bin/bash", "-c"]
 
@@ -51,7 +51,7 @@ COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
 COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
 WORKDIR $PYTHONPATH
 
-RUN pip3 install --no-cache-dir --compile -r project-requirements.txt \
+RUN pip3 install --no-cache-dir --use-pep517 --compile -r project-requirements.txt \
     && pip3 install --no-cache-dir pycti==${PYCTI_VERSION} \
     && pip3 install --no-cache-dir --compile -r certego-requirements.txt
 

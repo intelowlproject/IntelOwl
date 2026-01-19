@@ -1,16 +1,20 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from json import dumps as json_dumps
+import logging
+import subprocess
+from json import dumps, loads
+from shlex import quote
 
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
+logger = logging.getLogger(__name__)
+
 
 class Floss(FileAnalyzer, DockerBasedAnalyzer):
     name: str = "Floss"
-    url: str = "http://malware_tools_analyzers:4002/floss"
-    ranking_url: str = "http://malware_tools_analyzers:4002/stringsifter"
+    url: str = "http://malware_tools_analyzers:4002/stringsifter"
     # interval between http request polling
     poll_distance: int = 10
     # http request polling max number of tries
@@ -29,30 +33,39 @@ class Floss(FileAnalyzer, DockerBasedAnalyzer):
         pass
 
     def run(self):
-        # get binary
-        binary = self.read_file_bytes()
-        # make request data
-        fname = str(self.filename).replace("/", "_").replace(" ", "_")
         # From floss v3 there is prompt that can be overcome
         # by using the flag --no static.
         # We can lose static strings considering that we can easily
         # retrieve them with more simple tools
-        args = [f"@{fname}", "--json", "--no", "static"]
-        req_data = {"args": args, "timeout": self.timeout}
-        req_files = {fname: binary}
-        result = self._docker_run(req_data, req_files)
-        if not isinstance(result, dict):
-            raise AnalyzerRunException(
-                f"result from floss tool is not a dict but is {type(result)}."
-                f" Full dump: {result}"
+        try:
+            process: subprocess.CompletedProcess = subprocess.run(
+                [
+                    "/usr/local/bin/floss",
+                    "--json",
+                    "--no",
+                    "static",
+                    "--",
+                    quote(self.filepath),
+                ],
+                capture_output=True,
+                text=True,
+                check=True,
             )
+
+            result = loads(process.stdout)
+
+        except subprocess.CalledProcessError as e:
+            stderr = e.stderr
+            logger.info(f"Floss failed to run for {self.filename} with command {e}")
+            raise AnalyzerRunException(
+                f" Analyzer for {self.filename} failed with error: {stderr}"
+            )
+
         result["exceeded_max_number_of_strings"] = {}
-        # we are changing the endpoint of _docker_run to stringsifter
-        self.url = self.ranking_url
 
         for key in self.max_no_of_strings:
             if self.rank_strings[key]:
-                strings = json_dumps(result["strings"][key])
+                strings = dumps(result["strings"][key])
                 # 4 is the number of arguments that we are already passing
                 analyzable_strings = strings[: self.OS_MAX_ARGS - 5]
                 args = [

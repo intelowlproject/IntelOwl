@@ -8,7 +8,6 @@ import pypssl
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 from certego_saas.apps.user.models import User
-from tests.mock_utils import MockResponseNoOp, if_mock_connections, patch
 
 
 class CIRCL_PSSL(classes.ObservableAnalyzer):
@@ -55,12 +54,3 @@ class CIRCL_PSSL(classes.ObservableAnalyzer):
 
     def _get_health_check_url(self, user: User = None) -> typing.Optional[str]:
         return self.url
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch("pypssl.PyPSSL", return_value=MockResponseNoOp({}, 200)),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

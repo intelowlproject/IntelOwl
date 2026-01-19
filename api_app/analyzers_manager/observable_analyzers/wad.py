@@ -7,7 +7,6 @@ from wad.detection import Detector
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -32,24 +31,3 @@ class WAD(classes.ObservableAnalyzer):
             return results
         else:
             raise AnalyzerRunException("no results returned for the provided url")
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch.object(
-                    Detector,
-                    "detect",
-                    return_value={
-                        "https://www.google.com/": [
-                            {
-                                "app": "Google Web Server",
-                                "ver": "null",
-                                "type": "Web Servers",
-                            }
-                        ]
-                    },
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

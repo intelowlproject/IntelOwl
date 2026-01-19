@@ -55,7 +55,7 @@ export function prettifyErrors(errorResponse) {
       "another_key": ["error", "another error"],
     }
   */
-  if (errorResponse.response?.data?.errors) {
+  if (Object.keys(errorResponse.response.data?.errors).length > 0) {
     const prettyHTMLList = [];
     Object.entries(errorResponse.response.data?.errors).forEach(
       ([errorField, errorItem]) => {
@@ -70,5 +70,20 @@ export function prettifyErrors(errorResponse) {
     return <ul>{prettyHTMLList}</ul>;
   }
 
+  // other types of errors
+  /**
+    "errors": [
+        {
+          "detail": [
+              "You are not owner or admin of the organization"
+          ]
+        }
+    ]
+  */
+  /**
+   "errors": [
+        "Config with this parameters already exists"
+    ]
+  */
   return JSON.stringify(errorResponse.response?.data);
 }

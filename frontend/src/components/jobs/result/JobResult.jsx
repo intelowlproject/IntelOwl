@@ -3,8 +3,13 @@ import useTitle from "react-use/lib/useTitle";
 import { useParams, useLocation } from "react-router-dom";
 
 import { Loader } from "@certego/certego-ui";
+import axios from "axios";
 import useAxios from "axios-hooks";
-import { WEBSOCKET_JOBS_URI, JOB_BASE_URI } from "../../../constants/apiURLs";
+import {
+  WEBSOCKET_JOBS_URI,
+  JOB_BASE_URI,
+  ANALYZABLES_URI,
+} from "../../../constants/apiURLs";
 import { JobOverview } from "./JobOverview";
 
 import {
@@ -12,15 +17,18 @@ import {
   setNotificationFavicon,
 } from "../notifications";
 
-import { JobFinalStatuses } from "../../../constants/jobConst";
+import { JobFinalStatuses, JobStatuses } from "../../../constants/jobConst";
 
 export default function JobResult() {
   console.debug("JobResult rendered!");
 
   // state
   const location = useLocation();
-  const [initialLoading, setInitialLoading] = React.useState(true);
-  const [job, setJob] = React.useState(location.state?.jobReport || undefined);
+  const [dataIsDownloading, setDataIsDownloading] = React.useState(true);
+  const [data, setData] = React.useState({
+    relatedInvestigationNumber: undefined,
+    job: location.state?.jobReport || undefined,
+  });
   // this state var is used to check if we notified the user, in this way we avoid to notify more than once
   const [notified, setNotified] = React.useState(false);
   // this state var is used to check if the user changed page, in case he waited the result on the page we avoid the notification
@@ -35,29 +43,30 @@ export default function JobResult() {
   const jobWebsocket = React.useRef();
 
   const jobIsRunning =
-    job === undefined ||
+    data.job === undefined ||
     [
-      "pending",
-      "running",
-      "analyzers_running",
-      "connectors_running",
-      "pivots_running",
-      "visualizers_running",
-      "analyzers_completed",
-      "connectors_completed",
-      "pivots_completed",
-      "visualizers_completed",
-    ].includes(job.status);
+      JobStatuses.PENDING,
+      JobStatuses.PENDING,
+      JobStatuses.ANALYZERS_RUNNING,
+      JobStatuses.ANALYZERS_COMPLETED,
+      JobStatuses.CONNECTORS_RUNNING,
+      JobStatuses.CONNECTORS_COMPLETED,
+      JobStatuses.PIVOTS_RUNNING,
+      JobStatuses.PIVOTS_COMPLETED,
+      JobStatuses.VISUALIZERS_RUNNING,
+      JobStatuses.VISUALIZERS_COMPLETED,
+    ].includes(data.job?.status);
 
   console.debug(
-    `JobResult - initialLoading: ${initialLoading}, jobIsRunning: ${jobIsRunning}, ` +
+    `JobResult - dataIsDownloading: ${dataIsDownloading}, jobIsRunning: ${jobIsRunning}, ` +
       `notified: ${notified}, toNotify: ${toNotify}`,
   );
 
   // useAxios caches the request by default
-  const [{ data: respData, loading, error }, refetchJob] = useAxios({
-    url: `${JOB_BASE_URI}/${jobId}`,
-  });
+  const [{ data: jobData, loading: jobLoading, error: jobError }, refetchJob] =
+    useAxios({
+      url: `${JOB_BASE_URI}/${jobId}`,
+    });
 
   useEffect(() => {
     /* INITIAL SETUP:
@@ -71,16 +80,42 @@ export default function JobResult() {
       setToNotify(false);
     });
     window.addEventListener("blur", () => setToNotify(true));
-    if (!job && respData && !loading && error == null) setJob(respData);
-    if (!loading) setInitialLoading(false);
+
+    console.debug(
+      "JobResult - jobLoading useEffect",
+      !data.job,
+      jobData,
+      !jobLoading,
+      jobError == null,
+    );
+    if (!data.job && jobData && !jobLoading && jobError == null) {
+      axios
+        .get(
+          `${ANALYZABLES_URI}/${jobData.analyzable_id}/related_investigation_number`,
+        )
+        .then((response) => response.data.related_investigation_number)
+        .catch((_) => -1)
+        // use "then" instead of "finally"vecause it doesn't support parameters
+        .then((relatedInvestigationNumber) =>
+          setData({ relatedInvestigationNumber, job: jobData }),
+        );
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading]);
+  }, [jobLoading]);
+
+  useEffect(() => {
+    if (data.job) setDataIsDownloading(false);
+  }, [data]);
 
   // page title
   useTitle(
     `IntelOwl | Job (#${jobId}, ${
       // eslint-disable-next-line no-nested-ternary
-      job ? (job.is_sample ? job.file_name : job.observable_name) : ""
+      data.job
+        ? data.job.is_sample
+          ? data.job.file_name
+          : data.job.observable_name
+        : ""
     })`,
     { restoreOnUnmount: true },
   );
@@ -91,32 +126,38 @@ export default function JobResult() {
   only in the last page (section and subSection) or we will create 3 ws, one for each redirect:
   jobs/1 -> jobs/1/visualizer -> jobs/1/visualizer/loading
   */
-  if (job && jobIsRunning && section && subSection && !jobWebsocket.current) {
+  if (
+    data.job &&
+    jobIsRunning &&
+    section &&
+    subSection &&
+    !jobWebsocket.current
+  ) {
     const websocketUrl = `${
       window.location.protocol === "https:" ? "wss" : "ws"
-    }://${window.location.hostname}/${WEBSOCKET_JOBS_URI}/${jobId}`;
+    }://${window.location.host}/${WEBSOCKET_JOBS_URI}/${jobId}`;
     console.debug(`connect to websocket API: ${websocketUrl}`);
     jobWebsocket.current = new WebSocket(websocketUrl);
-    jobWebsocket.current.onopen = (data) => {
+    jobWebsocket.current.onopen = (jobWsData) => {
       console.debug("ws opened:");
-      console.debug(data);
+      console.debug(jobWsData);
     };
-    jobWebsocket.current.onclose = (data) => {
+    jobWebsocket.current.onclose = (jobWsData) => {
       console.debug("ws closed:");
-      console.debug(data);
+      console.debug(jobWsData);
     };
-    jobWebsocket.current.onmessage = (data) => {
+    jobWebsocket.current.onmessage = (jobWsData) => {
       console.debug("ws received:");
-      console.debug(data);
-      const jobData = JSON.parse(data.data);
-      if (Object.values(JobFinalStatuses).includes(jobData.status)) {
+      console.debug(jobWsData);
+      const wsJobData = JSON.parse(jobWsData.data);
+      if (Object.values(JobFinalStatuses).includes(wsJobData.status)) {
         jobWebsocket.current.close(1000);
       }
-      setJob(jobData);
+      setData({ ...data, job: wsJobData });
     };
-    jobWebsocket.current.onerror = (data) => {
+    jobWebsocket.current.onerror = (jobWsData) => {
       console.debug("ws error:");
-      console.debug(data);
+      console.debug(jobWsData);
     };
   }
 
@@ -129,18 +170,21 @@ export default function JobResult() {
 
   // notify the user when the job ends, he left the web page and we didn't notified the user before.
   if (!jobIsRunning && toNotify && !notified) {
-    generateJobNotification(job.observable_name, job.id);
+    generateJobNotification(data.job.observable_name, data.job.id);
     setNotified(true);
   }
 
+  console.debug("JobResult - data", data);
+
   return (
     <Loader
-      loading={initialLoading}
-      error={error}
+      loading={dataIsDownloading}
+      error={jobError}
       render={() => (
         <JobOverview
           isRunningJob={jobIsRunning}
-          job={job}
+          job={data.job}
+          relatedInvestigationNumber={data.relatedInvestigationNumber}
           refetch={refetchJob}
           section={section}
           subSection={subSection}

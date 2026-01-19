@@ -4,7 +4,6 @@
 import requests
 
 from api_app.analyzers_manager.classes import FileAnalyzer
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class MalpediaScan(FileAnalyzer):
@@ -28,15 +27,3 @@ class MalpediaScan(FileAnalyzer):
 
         result = response.json()
         return result
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.post",
-                    return_value=MockUpResponse({}, 200),
-                )
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

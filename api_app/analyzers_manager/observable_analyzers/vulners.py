@@ -3,7 +3,6 @@ import logging
 import requests
 
 from api_app.analyzers_manager import classes
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -50,16 +49,3 @@ class Vulners(classes.ObservableAnalyzer):
     # this is a framework implication
     def update(self) -> bool:
         pass
-
-    @classmethod
-    def _monkeypatch(cls):
-        response = {"result": "OK", "data": {"score": [6.5, "NONE"]}}
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.post",
-                    return_value=MockUpResponse(response, 200),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

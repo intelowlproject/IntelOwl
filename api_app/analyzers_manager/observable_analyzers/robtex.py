@@ -9,7 +9,6 @@ import requests
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Robtex(classes.ObservableAnalyzer):
@@ -49,17 +48,3 @@ class Robtex(classes.ObservableAnalyzer):
                     loaded_results.append(json.loads(item))
 
         return loaded_results
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse(
-                        {}, 200, text='{"test1":"test1"}\r\n{"test2":"test2"}'
-                    ),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

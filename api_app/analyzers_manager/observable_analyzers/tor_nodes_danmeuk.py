@@ -9,7 +9,6 @@ from django.conf import settings
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -63,26 +62,3 @@ class TorNodesDanMeUK(classes.ObservableAnalyzer):
             logger.exception(e)
 
         return False
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse(
-                        {},
-                        200,
-                        content=b"""100.10.37.131
-100.14.156.183
-100.16.153.149
-100.4.55.171
-100.8.8.137
-101.100.141.137
-101.55.125.10
-102.119.243.196""",
-                    ),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

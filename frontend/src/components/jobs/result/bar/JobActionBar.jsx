@@ -13,7 +13,7 @@ import { JobResultSections } from "../../../../constants/miscConst";
 import {
   DeleteIcon,
   CommentIcon,
-  retryJobIcon,
+  rescanIcon,
   downloadReportIcon,
 } from "../../../common/icon/actionIcons";
 import { fileDownload } from "../../../../utils/files";
@@ -87,7 +87,7 @@ export function JobActionsBar({ job }) {
       )}
       <IconButton
         id="rescanbtn"
-        Icon={retryJobIcon}
+        Icon={rescanIcon}
         onClick={handleRetry}
         color="light"
         size="sm"

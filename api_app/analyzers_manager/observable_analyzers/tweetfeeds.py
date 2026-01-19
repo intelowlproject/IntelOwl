@@ -8,7 +8,6 @@ from django.conf import settings
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -107,36 +106,3 @@ class TweetFeeds(ObservableAnalyzer):
                 return False
             logger.info(f"TweetFeeds updated {db_url}")
         return True
-
-    @classmethod
-    def _monkeypatch(cls):
-        response = [
-            {
-                "date": "2024-03-19 00:31:36",
-                "user": "Metemcyber",
-                "type": "url",
-                "value": "http://210.56.49.214",
-                "tags": ["#phishing"],
-                "tweet": "https://twitter.com/Metemcyber/status/1769884392477077774",
-            },
-            {
-                "date": "2024-03-19 00:31:36",
-                "user": "Metemcyber",
-                "type": "url",
-                "value": "https://www.bhafulp.cn",
-                "tags": ["#phishing"],
-                "tweet": "https://twitter.com/Metemcyber/status/1769884392477077774",
-            },
-        ]
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse(
-                        response,
-                        200,
-                    ),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

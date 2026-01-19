@@ -1,4 +1,5 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+
 # See the file 'LICENSE' for copying permission.
 import logging
 import math
@@ -7,7 +8,6 @@ from ail_typo_squatting import typo
 from ail_typo_squatting.dns_local import resolving
 
 from api_app.analyzers_manager import classes
-from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -57,13 +57,3 @@ class AilTypoSquatting(classes.ObservableAnalyzer):
                 )
 
         return response
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch.object(typo, "runAll", return_value=None),
-                patch.object(resolving, "dnsResolving", return_value=None),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

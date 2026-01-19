@@ -2,6 +2,34 @@
 
 [**Upgrade Guide**](https://intelowlproject.github.io/docs/IntelOwl/installation/#update-to-the-most-recent-version)
 
+## [v6.5.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.5.0)
+Happy new year! :sparkler: And Happy Birthday IntelOwl! :tada: 
+
+We are celebrating the 6th IntelOwl Birthday! :sunglasses: WOW! Such a Milestone!
+
+And we reached almost 4.5k stars! :star: Thank you for your support!
+
+This release merges all the developments performed by our Google Summer of Code contributors for this year. You can read the related blogs for more info about:
+- [Akshit Maheshwary](https://x.com/Akshit20437406): [IntelOwl Improvements: Analyzers and Integrations](https://intelowlproject.github.io/blogs/gsoc_25_new_analyzers_and_integrations)
+- [Pranjal Gupta](https://github.com/pranjalg1331): [IntelOwl improvements: refactor analyzer tests](https://intelowlproject.github.io/blogs/gsoc25_refactor_analyzer_tests)
+
+A special thanks to the new maintainer and GSoC mentor for the 2025: [Federico Gibertoni](https://github.com/fgibertoni).
+
+The UI now supports a new page for the so called "Artifacts" or "Analyzables". They are a representation of an observable or a sample.
+Thanks to this new section, you can now store your evaluations for each observables/samples and make them count in your analyses results!
+Please take time to explore this new section in the GUI and provide feedback!
+[Docs reference](https://intelowlproject.github.io/docs/IntelOwl/usage/#analyzables-artifacts)
+
+As usual, we add new plugins. This release brings the following new ones:
+* [Hunting Abuse.ch](https://hunting.abuse.ch/api/): new central API for Abuse.ch
+* [YaraX](https://virustotal.github.io/yara-x/docs/intro/getting-started/) integration: you can now run your Yara rules with the new engine written in Rust
+* Now [Floss](https://github.com/mandiant/flare-floss) and [Capa](https://github.com/mandiant/capa) are integrated directly in the main container so you don't need anymore to run the optional container `malware_tools_analyzers" for them.
+* [Phunter](https://github.com/N0rz3/Phunter) which requires the execution of a new optional container with `--phunter`.
+* [JoeSandbox](https://www.joesandbox.com/), a malware analysis tool.
+* "ExpandURL" which takes a shortened URL and provides us the actual expanded URL, along with full redirection chain.
+
+We don't mention here all the other adjustments, fixes and dependencies upgrades. Please check the full changelog for that.
+
 ## [v6.4.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.4.0)
 This release mostly provides important changes in the backend part that will be supported in the UI in the next releases.
 * Analyzable: Representation of an observable or a sample: every job is linked to the scanned analyzable.

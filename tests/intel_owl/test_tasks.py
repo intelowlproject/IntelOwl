@@ -17,7 +17,6 @@ from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.user.models import User
 from intel_owl.tasks import send_plugin_report_to_elastic
 from tests import CustomTestCase
-from tests.mock_utils import MockResponseNoOp
 
 _now = datetime.datetime(2024, 10, 29, 11, tzinfo=datetime.UTC)
 
@@ -199,7 +198,7 @@ class SendElasticTestCase(CustomTestCase):
 
         with patch(
             "intel_owl.tasks.bulk",
-            return_value=MockResponseNoOp(json_data={}, status_code=200),
+            return_value=(4, []),
         ) as mocked_elastic_bulk:
             send_plugin_report_to_elastic()
             self.assertTrue(mocked_elastic_bulk.assert_called_once)
@@ -330,7 +329,7 @@ class SendElasticTestCase(CustomTestCase):
     def test_update(self, *args, **kwargs):
         with patch(
             "intel_owl.tasks.bulk",
-            return_value=MockResponseNoOp(json_data={}, status_code=200),
+            return_value=(4, []),
         ) as mocked_elastic_bulk:
             send_plugin_report_to_elastic()
             self.assertTrue(mocked_elastic_bulk.assert_called_once)

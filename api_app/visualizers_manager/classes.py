@@ -146,7 +146,6 @@ class VisualizableTitle(VisualizableObject):
 
 
 class VisualizableDownload(VisualizableObject):
-
     def __init__(
         self,
         value: str,
@@ -186,6 +185,63 @@ class VisualizableDownload(VisualizableObject):
             "description",
             "add_metadata_in_description",
             "link",
+        ]
+
+
+class VisualizableImage(VisualizableObject):
+    """
+    A visualizable component for displaying images in the visualizer.
+
+    Supports two image sources:
+    - url: A URL to fetch the image from (e.g., URLscan screenshot)
+    - base64: Base64 encoded image data
+
+    At least one of url or base64 must be provided.
+    If both are provided, url takes precedence.
+    """
+
+    def __init__(
+        self,
+        value: str = "",
+        url: str = "",
+        base64: str = "",
+        title: str = "",
+        description: str = "",
+        max_width: int = 500,
+        max_height: int = 400,
+        allow_expand: bool = True,
+        size: VisualizableSize = VisualizableSize.S_AUTO,
+        alignment: VisualizableAlignment = VisualizableAlignment.CENTER,
+        disable: bool = False,
+    ):
+        if not url and not base64:
+            raise ValueError("VisualizableImage requires either 'url' or 'base64'")
+
+        super().__init__(size, alignment, disable)
+        self.value = value or title  # value is used as alt text
+        self.url = url
+        self.base64 = base64
+        self.title = title
+        self.description = description
+        self.max_width = max_width
+        self.max_height = max_height
+        self.allow_expand = allow_expand
+
+    @property
+    def type(self) -> str:
+        return "image"
+
+    @property
+    def attributes(self) -> List[str]:
+        return super().attributes + [
+            "value",
+            "url",
+            "base64",
+            "title",
+            "description",
+            "max_width",
+            "max_height",
+            "allow_expand",
         ]
 
 
@@ -474,6 +530,7 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
     VList = VisualizableVerticalList
     HList = VisualizableHorizontalList
     Table = VisualizableTable
+    Image = VisualizableImage
 
     TableColumn = VisualizableTableColumn
 
@@ -553,7 +610,6 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
         return PivotReport.objects.filter(job=self._job)
 
     def get_data_models(self) -> QuerySet:
-
         data_model_class = self._job.analyzable.get_data_model_class()
         analyzer_reports_pk = [report.pk for report in self.get_analyzer_reports()]
         return data_model_class.objects.filter(analyzers_report__in=analyzer_reports_pk)

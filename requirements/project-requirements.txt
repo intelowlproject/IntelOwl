@@ -1,5 +1,5 @@
 # django libs
-Django==4.2.17
+Django==4.2.27
 psycopg2-binary==2.9.6
 django-auth-ldap==5.1.0
 django-radius==1.5.0
@@ -10,20 +10,20 @@ django-celery-results==2.5.0
 django-ses == 4.4.0
 django-iam-dbauth==0.2.1
 django-prettyjson==0.4.1
-django-silk==5.3.2
+django-silk==5.4.3
 django-treebeard==4.7
 django-solo==2.4.0
 django_extensions==3.2.3
-jsonschema==4.23.0
+jsonschema==4.25.1
 # django rest framework libs
-Authlib==1.4.0
+Authlib==1.6.5
 djangorestframework==3.15.2
 djangorestframework-filters==1.0.0.dev2
 drf-spectacular==0.28.0
 django-rest-email-auth==4.0.0
 
 # infra
-boto3==1.26.143
+boto3==1.39.4
 celery[sqs,redis]==5.4.0
 dataclasses==0.6
 # https://github.com/advisories/GHSA-q4qm-xhf9-4p8f
@@ -40,15 +40,15 @@ elasticsearch-dsl==8.17.0
 # plugins
 GitPython==3.1.41
 checkdmarc==5.7.9
-dnspython==2.7.0
+dnspython==2.8.0
 dnstwist[full]==20250130
 google>=3.0.0
-google-cloud-webrisk==1.17.0
-intezer-sdk==1.21
+google-cloud-webrisk==1.19.0
+intezer-sdk==1.24.0
 lief==0.15.1
 maxminddb==2.6.0
 geoip2==4.8.0
-mwdblib==4.5.0
+mwdblib==4.6.0
 oletools==0.60.2
 OTXv2==1.5.12
 peepdf-fork==0.4.3
@@ -70,7 +70,7 @@ py-tlsh==4.7.2
 quark-engine==25.1.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8
-yara-python==4.5.0
+yara-python==4.5.1
 greynoise==2.3.0
 XLMMacroDeobfuscator[secure]==0.2.3
 thinkst-zippy==0.1.2
@@ -81,15 +81,21 @@ permhash==0.1.4
 ail_typo_squatting==2.7.4
 iocextract==1.16.1
 ioc-finder==7.0.0
-polyswarm-api==3.10.0
-knock-subdomains==7.0.1
+polyswarm-api==3.14.1
+knock-subdomains==8.0.0
 dotnetfile==0.2.4
 docxpy==0.8.5
 pylnk3==0.4.2
 androguard==3.4.0a1 # version >=4.x of androguard raises a dependency conflict with quark-engine==25.1.1
 wad==0.4.6
 debloat==1.6.4
+phonenumbers==9.0.3
 die-python==0.4.0
+# guarddog==2.1.0 # version greater than 2.1.0 raises dependency conflicts. Commenting this out due to dependency conflicts.
+jbxapi==3.23.0
+yara-x==1.10.0
+flare-floss==3.1.1
+flare-capa==9.2.1
 
 # httpx required for HTTP/2 support (Mullvad DNS rejects HTTP/1.1 with protocol errors)
 httpx[http2]==0.28.1
@@ -105,7 +111,8 @@ pyzipper==0.3.6
 
 # others
 dateparser==1.2.0
-DeepDiff==8.2.0
+DeepDiff==8.6.1
 # phishing form compiler module
-lxml==5.3.0
+lxml==6.0.2
 Faker==36.1.0
+beautifulsoup4==4.14.2

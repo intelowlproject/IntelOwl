@@ -64,13 +64,11 @@ You can see the full list of all available analyzers in the [documentation](http
 
 As open source project maintainers, we strongly rely on external support to get the resources and time to work on keeping the project alive, with a constant release of new features, bug fixes and general improvements.
 
-Because of this, we joined [Open Collective](https://opencollective.com/intelowl-project) to obtain non-profit equal level status which allows the organization to receive and manage donations transparently. Please support IntelOwl and all the community by choosing a plan (BRONZE, SILVER, etc).
+Because of this, we joined [Open Collective](https://opencollective.com/intelowl-project) to obtain US and EU non-profit equal level status which allows the organization to receive and manage donations transparently and with tax exemption. Please support IntelOwl and all the community by choosing a plan (BRONZE, SILVER, etc).
 
 <a href="https://opencollective.com/intelowl-project/donate" target="_blank">
   <img src="https://opencollective.com/intelowl-project/donate/button@2x.png?color=blue" width=200 />
 </a>
-
-### 🥇 GOLD
 
 #### Certego
 
@@ -78,7 +76,7 @@ Because of this, we joined [Open Collective](https://opencollective.com/intelowl
 
 [Certego](https://certego.net/?utm_source=intelowl) is a MDR (Managed Detection and Response) and Threat Intelligence Provider based in Italy.
 
-IntelOwl was born out of Certego's Threat intelligence R&D division and is constantly maintained and updated thanks to them.
+IntelOwl was born out of Certego's Threat intelligence R&D division and is mostly maintained and updated thanks to them.
 
 #### The Honeynet Project
 
@@ -95,16 +93,6 @@ Since its birth this project has been participating in the [Google Summer of Cod
 
 If you are interested in participating in the next Google Summer of Code, check all the info available in the [dedicated repository](https://github.com/intelowlproject/gsoc)!
 
-
-### 🥈 SILVER
-
-#### ThreatHunter.ai
-
-<a href="https://threathunter.ai?utm_source=intelowl"> <img style="border: 0.2px solid black" width=194 height=80 src="static/threathunter_logo.png" alt="ThreatHunter.ai logo"> </a>
-
-[ThreatHunter.ai®](https://threathunter.ai?utm_source=intelowl), is a 100% Service-Disabled Veteran-Owned Small Business started in 2007 under the name Milton Security Group. ThreatHunter.ai is the global leader in Dynamic Threat Hunting. Operating a true 24x7x365 Security Operation Center with AI/ML-enhanced human Threat Hunters, ThreatHunter.ai has changed the industry in how threats are found, and mitigated in real time. For over 15 years, our teams of Threat Hunters have stopped hundreds of thousands of threats and assisted organizations in defending against threat actors around the clock.
-
-### 🥉 BRONZE
 
 #### Docker
 

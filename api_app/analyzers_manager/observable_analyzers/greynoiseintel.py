@@ -8,7 +8,6 @@ from greynoise.exceptions import NotFound, RateLimitError, RequestFailure
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -103,13 +102,3 @@ class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
                 logger.error(
                     f"there should not be other types of classification. Classification found: {classification}"
                 )
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch.object(GreyNoise, "ip", return_value={"noise": True}),
-                patch.object(GreyNoise, "riot", return_value={"riot": True}),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

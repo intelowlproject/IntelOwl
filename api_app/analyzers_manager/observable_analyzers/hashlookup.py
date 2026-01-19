@@ -5,7 +5,6 @@ from pyhashlookup import Hashlookup, PyHashlookupError
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponseNoOp, if_mock_connections, patch
 
 
 class HashLookupServer(classes.ObservableAnalyzer):
@@ -24,14 +23,3 @@ class HashLookupServer(classes.ObservableAnalyzer):
             raise AnalyzerRunException(e)
 
         return result
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "pyhashlookup.Hashlookup", return_value=MockResponseNoOp({}, 200)
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

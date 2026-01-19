@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
@@ -7,6 +9,8 @@ from api_app.interfaces import OwnershipAbstractModel
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.ext.upload.elastic import BISerializer
 from intel_owl.settings._util import get_environment
+
+logger = logging.getLogger(__name__)
 
 
 class AbstractBIInterface(BISerializer):
@@ -63,6 +67,7 @@ class ModelWithOwnershipSerializer(rfs.ModelSerializer):
     )
 
     def validate(self, attrs):
+        logger.debug(f"{attrs=}")
         org = attrs.pop("organization", None)
         if org:
             # 1 - we are owner  OR
@@ -77,6 +82,7 @@ class ModelWithOwnershipSerializer(rfs.ModelSerializer):
                 raise ValidationError(
                     {"detail": "You are not owner or admin of the organization"}
                 )
+        logger.debug(f"{attrs=}")
         return super().validate(attrs)
 
     def to_representation(self, instance: OwnershipAbstractModel):

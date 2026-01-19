@@ -26,8 +26,8 @@ Please delete options that are not relevant.
     - [ ] Check if it could make sense to add that analyzer/connector to other [freely available playbooks](https://intelowlproject.github.io/docs/IntelOwl/usage/#list-of-pre-built-playbooks).
     - [ ] I have provided the resulting raw JSON of a finished analysis and a screenshot of the results.
     - [ ] If the plugin interacts with an external service, I have created an attribute called precisely `url` that contains this information. This is required for Health Checks (HEAD HTTP requests). 
-    - [ ] If the plugin requires mocked testing, `_monkeypatch()` was used in its class to apply the necessary decorators.
-    - [ ] I have added that raw JSON sample to the `MockUpResponse` of the `_monkeypatch()` method. This serves us to provide a valid sample for testing.
+    - [ ] If a new analyzer has beed added, I have created a unittest for it in the appropriate dir. I have also mocked all the external calls, so that no real calls are being made while testing.
+    - [ ] I have added that raw JSON sample to the `get_mocker_response()` method of the unittest class. This serves us to provide a valid sample for testing. 
     - [ ] I have created the corresponding `DataModel` for the new analyzer following the [documentation](https://intelowlproject.github.io/docs/IntelOwl/contribute/#how-to-create-a-datamodel)
 - [ ] I have inserted the copyright banner at the start of the file: ```# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl # See the file 'LICENSE' for copying permission.```
 - [ ] Please avoid adding new libraries as requirements whenever it is possible. Use new libraries only if strictly needed to solve the issue you are working for. In case of doubt, ask a maintainer permission to use a specific library.

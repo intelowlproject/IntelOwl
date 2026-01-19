@@ -98,7 +98,3 @@ class StringsInfo(FileAnalyzer, DockerBasedAnalyzer):
             result["uris"] = list(set(result["uris"]))
 
         return result
-
-    # disable mockup connections for this class
-    @classmethod
-    def _monkeypatch(cls, patches: list = None) -> None: ...  # noqa: E704

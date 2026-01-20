@@ -20,17 +20,22 @@ class PhishStats(ObservableAnalyzer):
 
     @classmethod
     def update(cls) -> bool:
-        pass
+        return False
 
     def __build_phishstats_url(self) -> str:
         to_analyze_observable_classification = self.observable_classification
         to_analyze_observable_name = self.observable_name
+
         if self.observable_classification == Classification.URL:
-            to_analyze_observable_name = urlparse(self.observable_name).hostname
+            to_analyze_observable_name = urlparse(
+                self.observable_name
+            ).hostname
             try:
                 IPv4Address(to_analyze_observable_name)
             except AddressValueError:
-                to_analyze_observable_classification = Classification.DOMAIN
+                to_analyze_observable_classification = (
+                    Classification.DOMAIN
+                )
             else:
                 to_analyze_observable_classification = Classification.IP
 
@@ -40,7 +45,8 @@ class PhishStats(ObservableAnalyzer):
             )
         elif to_analyze_observable_classification == Classification.DOMAIN:
             endpoint = (
-                f"phishing?_where=(url,like,~{to_analyze_observable_name}~)&_sort=-date"
+                f"phishing?_where=(url,like,~{to_analyze_observable_name}~)"
+                "&_sort=-date"
             )
         elif to_analyze_observable_classification == Classification.GENERIC:
             endpoint = (
@@ -51,6 +57,7 @@ class PhishStats(ObservableAnalyzer):
             raise AnalyzerRunException(
                 "Phishstats require either of IP, URL, Domain or Generic"
             )
+
         return f"{self.url}/{endpoint}"
 
     def run(self):
@@ -58,4 +65,8 @@ class PhishStats(ObservableAnalyzer):
         response = requests.get(api_url)
         response.raise_for_status()
 
-        return {"api_url": api_url, "results": response.json()}
+        return {
+            "api_url": api_url,
+            "results": response.json(),
+        }
+

@@ -18,7 +18,6 @@ class PhishStats(ObservableAnalyzer):
 
     url: str = "https://api.phishstats.info/api/phishing"
 
-
     @classmethod
     def update(cls) -> bool:
         pass

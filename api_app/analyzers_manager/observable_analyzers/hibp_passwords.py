@@ -4,7 +4,7 @@
 import hashlib
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.exceptions import AnalyzerRunException
+# from api_app.exceptions import AnalyzerRunException
 
 from .hibp_utils import PWNED_PASSWORDS_URL, make_hibp_request
 
@@ -25,7 +25,7 @@ class HibpPasswords(ObservableAnalyzer):
 
     def run(self):
         if self.observable_classification != "generic":
-            raise AnalyzerRunException(
+            raise RuntimeError(
                 "Unsupported observable type "
                 f"{self.observable_classification!r}. "
                 "Supported: generic (password)."
@@ -41,7 +41,14 @@ class HibpPasswords(ObservableAnalyzer):
 
         endpoint = f"{PWNED_PASSWORDS_URL}{prefix}"
         response_text = make_hibp_request(endpoint)
-
+        # Parse the Pwned Passwords range response (k-anonymity model):
+        # - The server returns a list of lines in format: "HASH_SUFFIX:COUNT"
+        # - Only suffixes matching the sent prefix are returned
+        # - We compare our remaining hash (suffix) against each line
+        # - If a match is found → that count is the number of times this password was seen
+        # - If no match → password was not found in any breach
+        # This ensures the full password or full hash is never sent to the server
+        # Reference: https://haveibeenpwned.com/API/v3#PwnedPasswords
         hashes = response_text.splitlines() if response_text else []
 
         exposure_count = 0

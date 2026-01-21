@@ -2,10 +2,15 @@
 # See the file 'LICENSE' for copying permission.
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.exceptions import AnalyzerRunException
+# from api_app.exceptions import AnalyzerRunException
 
 from .hibp_utils import BASE_URL, make_hibp_request, normalize_breach_data
 
+import re
+
+EMAIL_REGEX = re.compile(
+    r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+)
 
 class HibpBreaches(ObservableAnalyzer):
     """
@@ -33,35 +38,42 @@ class HibpBreaches(ObservableAnalyzer):
         return True
 
     def run(self):
-        if self.observable_classification not in ["email", "domain"]:
-            raise AnalyzerRunException(
-                "Unsupported observable type "
-                f"{self.observable_classification!r}. "
-                "Supported: email, domain."
+        observable = self.observable_name.strip()
+        classification = self.observable_classification
+
+        if classification == "domain":
+            resolved_type = "domain"
+
+        elif classification == "generic" and EMAIL_REGEX.match(observable):
+            resolved_type = "email"
+
+        else:
+            raise RuntimeError(
+                "Unsupported observable. Use a valid domain or email."
             )
 
         api_key = self._api_key_name
         if not api_key:
-            raise AnalyzerRunException(
+            raise RuntimeError(
                 "API key required for breach checks (email or domain)."
             )
 
-        if self.observable_classification == "email":
-            endpoint = f"{BASE_URL}breachedaccount/{self.observable_name}"
+        if resolved_type == "email":
+            endpoint = f"{BASE_URL}breachedaccount/{observable}"
             params = {
                 "truncateResponse": self.truncate_response,
                 "includeUnverified": self.include_unverified,
             }
         else:  # domain
             endpoint = f"{BASE_URL}breaches"
-            params = {"domain": self.observable_name}
+            params = {"domain": observable}
 
         breaches = make_hibp_request(endpoint, params=params, api_key=api_key)
 
         normalized_breaches = normalize_breach_data(breaches)
         breach_count = len(normalized_breaches)
         summary = (
-            f"{self.observable_classification.capitalize()} found in "
+            f"{resolved_type.capitalize()} found in "
             f"{breach_count} breaches."
             if breach_count > 0
             else "No breaches found."

@@ -1,16 +1,14 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import re
+
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-# from api_app.exceptions import AnalyzerRunException
 
 from .hibp_utils import BASE_URL, make_hibp_request, normalize_breach_data
 
-import re
+EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
 
-EMAIL_REGEX = re.compile(
-    r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
-)
 
 class HibpBreaches(ObservableAnalyzer):
     """
@@ -50,13 +48,13 @@ class HibpBreaches(ObservableAnalyzer):
         else:
             raise RuntimeError(
                 "Unsupported observable. Use a valid domain or email."
-            )
+            )  # noqa: E501
 
         api_key = self._api_key_name
         if not api_key:
             raise RuntimeError(
                 "API key required for breach checks (email or domain)."
-            )
+            )  # noqa: E501
 
         if resolved_type == "email":
             endpoint = f"{BASE_URL}breachedaccount/{observable}"
@@ -74,7 +72,7 @@ class HibpBreaches(ObservableAnalyzer):
         breach_count = len(normalized_breaches)
         summary = (
             f"{resolved_type.capitalize()} found in "
-            f"{breach_count} breaches."
+            f"{breach_count} breaches."  # noqa: E501
             if breach_count > 0
             else "No breaches found."
         )

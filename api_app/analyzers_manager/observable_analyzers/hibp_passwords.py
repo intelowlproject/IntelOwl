@@ -4,7 +4,6 @@
 import hashlib
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-# from api_app.exceptions import AnalyzerRunException
 
 from .hibp_utils import PWNED_PASSWORDS_URL, make_hibp_request
 
@@ -32,22 +31,28 @@ class HibpPasswords(ObservableAnalyzer):
             )
 
         password = self.observable_name
+
         # Required by official HIBP Pwned Passwords API (k-anonymity model)
-        # Only first 5 hex chars of SHA-1 are sent — full password/hash never leaves client
-        # Safe & intentional per HIBP design: https://haveibeenpwned.com/API/v3#PwnedPasswords
-        sha1_hash = hashlib.sha1(password.encode("utf-8")).hexdigest().upper()  # nosec
+        # Only first 5 hex chars of SHA-1 are sent — full password/hash
+        # never leaves client. Safe & intentional per HIBP design:
+        # https://haveibeenpwned.com/API/v3#PwnedPasswords
+        sha1_hash = (
+            hashlib.sha1(password.encode("utf-8")).hexdigest().upper()
+        )  # nosec  # noqa: E501
+
         prefix = sha1_hash[:5]
         suffix = sha1_hash[5:]
 
         endpoint = f"{PWNED_PASSWORDS_URL}{prefix}"
         response_text = make_hibp_request(endpoint)
+
         # Parse the Pwned Passwords range response (k-anonymity model):
-        # - The server returns a list of lines in format: "HASH_SUFFIX:COUNT"
+        # - Server returns lines in format: "HASH_SUFFIX:COUNT"
         # - Only suffixes matching the sent prefix are returned
         # - We compare our remaining hash (suffix) against each line
-        # - If a match is found → that count is the number of times this password was seen
-        # - If no match → password was not found in any breach
-        # This ensures the full password or full hash is never sent to the server
+        # - If match found → count is number of times this password was seen
+        # - If no match → password not found in any breach
+        # This ensures full password/hash never leaves client
         # Reference: https://haveibeenpwned.com/API/v3#PwnedPasswords
         hashes = response_text.splitlines() if response_text else []
 

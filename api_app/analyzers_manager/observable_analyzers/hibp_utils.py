@@ -4,8 +4,6 @@
 import requests
 from requests.exceptions import RequestException
 
-# from api_app.exceptions import AnalyzerRunException
-
 # Constants
 BASE_URL = "https://haveibeenpwned.com/api/v3/"
 PWNED_PASSWORDS_URL = "https://api.pwnedpasswords.com/range/"
@@ -57,14 +55,12 @@ def make_hibp_request(
             # No breaches found - treat as success with empty result
             return [] if "json" in url else ""
         elif response.status_code == 403:
-            raise RuntimeError(
-                "Forbidden: Check API key or User-Agent."
-            )  # noqa: E501
+            raise RuntimeError("Forbidden: Check API key or User-Agent.")  # noqa: E501
         elif response.status_code == 429:
             retry_after = response.headers.get("Retry-After", "unknown")
             raise RuntimeError(
                 "Rate limit hit. Retry after " f"{retry_after} seconds."
-            )
+            )  # noqa: E501
         else:
             response.raise_for_status()
 

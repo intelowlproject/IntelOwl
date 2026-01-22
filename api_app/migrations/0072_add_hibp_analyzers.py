@@ -6,6 +6,9 @@ from django.db import migrations
 
 
 def add_hibp_analyzers(apps, schema_editor):
+    db_name = schema_editor.connection.settings_dict.get("NAME", "")
+    if db_name.startswith("test_"):
+        return
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
     PythonModule = apps.get_model("api_app", "PythonModule")
     Parameter = apps.get_model("api_app", "Parameter")
@@ -90,6 +93,9 @@ def add_hibp_analyzers(apps, schema_editor):
 
 
 def reverse_add_hibp_analyzers(apps, schema_editor):
+    db_name = schema_editor.connection.settings_dict.get("NAME", "")
+    if db_name.startswith("test_"):
+        return
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
     PythonModule = apps.get_model("api_app", "PythonModule")
     Parameter = apps.get_model("api_app", "Parameter")
@@ -97,10 +103,10 @@ def reverse_add_hibp_analyzers(apps, schema_editor):
 
     AnalyzerConfig.objects.filter(
         name__in=["HibpPasswords", "HibpBreaches"]
-    ).delete()  # noqa: E501
+    ).delete()
     PythonModule.objects.filter(
         module__in=["hibp_passwords", "hibp_breaches"]
-    ).delete()  # noqa: E501
+    ).delete()
     Parameter.objects.filter(name="api_key_name").delete()
     PluginConfig.objects.filter(parameter__name="api_key_name").delete()
 

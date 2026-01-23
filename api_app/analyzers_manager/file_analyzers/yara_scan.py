@@ -156,10 +156,9 @@ class YaraRepo:
                 if settings.GIT_KEY_PATH.exists():
                     os.remove(settings.GIT_KEY_PATH)
 
-    # NEW: Unprotect.it API unpdate logic            
+    # NEW: Unprotect.it API update logic            
     def _update_unprotect_api(self):
-        logger.info(f"Fetching rules from Unprotect.it API: {self.url}")
-
+        logger.info(f"Fetching rules from Unprotect.it API:{self.url}")
         os.makedirs(self.directory, exist_ok=True)
 
         next_url = self.url
@@ -168,7 +167,7 @@ class YaraRepo:
                 response = requests.get(next_url, timeout=30)
                 response.raise_for_status()
                 data = response.json()
-            except Exception as e:
+            except Exception:
                 logger.exception("Failed to fetch Unprotect.it rules")
                 return
             

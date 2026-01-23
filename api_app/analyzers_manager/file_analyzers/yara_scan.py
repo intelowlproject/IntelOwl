@@ -1,4 +1,4 @@
-#This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import dataclasses
 import io
@@ -84,7 +84,7 @@ class YaraRepo:
             self._directory = path / directory_name
         return self._directory
 
-    def is_unprotect_api(self) ->bool:
+    def is_unprotect_api(self) -> bool:
         return "unprotect.it/api/detection_rules" in self.url
 
     def update(self):
@@ -155,7 +155,8 @@ class YaraRepo:
                 del os.environ["GIT_SSH"]
                 if settings.GIT_KEY_PATH.exists():
                     os.remove(settings.GIT_KEY_PATH)
-#NEW:Unprotect.it API update logic   
+
+    # NEW:Unprotect.it API update logic
     def _update_unprotect_api(self):
         logger.info(f"Fetching rules from Unprotect.it API:{self.url}")
         os.makedirs(self.directory, exist_ok=True)
@@ -169,7 +170,6 @@ class YaraRepo:
             except Exception:
                 logger.exception("Failed to fetch Unprotect.it rules")
                 return
-
 
             rules = data.get("results", [])
             next_url = data.get("next")
@@ -186,13 +186,12 @@ class YaraRepo:
                 if not rule_name or not rule_content:
                     continue
 
-                safe_name =(
+                safe_name = (
                     rule_name.lower()
                     .replace(" ", "_")
                     .replace("/", "_")
                     .replace("\\", "_")
-                    .replace(":","_")
-
+                    .replace(":", "_")
                 )
                 file_path = self.directory / f"{safe_name}.yar"
 
@@ -201,7 +200,6 @@ class YaraRepo:
                         f.write(rule_content)
                 except Exception:
                     logger.warning(f"Failed to write rule {rule_name}")
-
 
     def delete_lock_file(self):
         lock_file_path = self.directory / ".git" / "index.lock"

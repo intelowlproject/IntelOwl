@@ -84,9 +84,16 @@ class YaraRepo:
             self._directory = path / directory_name
         return self._directory
 
+    def is_unprotect_api(self) ->bool:
+        return "unprotect.it/api/detection_rules" in self.url
+
     def update(self):
         logger.info(f"Starting update of {self.url}")
-        if self.is_zip():
+
+        if self.is_unprotect_api():
+            self._update_unprotect_api()
+            return
+        elif self.is_zip():
             # private url not supported at the moment for private
             self._update_zip()
         else:
@@ -148,6 +155,54 @@ class YaraRepo:
                 del os.environ["GIT_SSH"]
                 if settings.GIT_KEY_PATH.exists():
                     os.remove(settings.GIT_KEY_PATH)
+
+    # NEW: Unprotect.it API unpdate logic            
+    def _update_unprotect_api(self):
+        logger.info(f"Fetching rules from Unprotect.it API: {self.url}")
+
+        os.makedirs(self.directory, exist_ok=True)
+
+        next_url = self.url
+        while next_url:
+            try:
+                response = requests.get(next_url, timeout=30)
+                response.raise_for_status()
+                data = response.json()
+            except Exception as e:
+                logger.exception("Failed to fetch Unprotect.it rules")
+                return
+            
+            rules = data.get("results", [])
+            next_url = data.get("next")
+
+            for rule in rules:
+                if not isinstance(rule, dict):
+                    continue
+                if rule.get("engine") != "yara":
+                    continue
+
+                rule_name = rule.get("name")
+                rule_content = rule.get("rule")
+
+                if not rule_name or not rule_content:
+                    continue
+
+                safe_name =(
+                    rule_name.lower()
+                    .replace(" ", "_")
+                    .replace("/", "_")
+                    .replace("\\", "_")
+                    .replace(":","_")
+
+                )
+                file_path = self.directory / f"{safe_name}.yar"
+             
+                try:
+                    with open(file_path, "w", encoding="utf-8") as f:
+                        f.write(rule_content)
+                except Exception:
+                    logger.warning(f"Failed to write rule {rule_name}")
+
 
     def delete_lock_file(self):
         lock_file_path = self.directory / ".git" / "index.lock"

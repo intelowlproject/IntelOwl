@@ -1,4 +1,4 @@
-# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+170# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import dataclasses
 import io
@@ -155,8 +155,7 @@ class YaraRepo:
                 del os.environ["GIT_SSH"]
                 if settings.GIT_KEY_PATH.exists():
                     os.remove(settings.GIT_KEY_PATH)
-
-    #NEW:Unprotect.it API update logic            
+#NEW:Unprotect.it API update logic        
     def _update_unprotect_api(self):
         logger.info(f"Fetching rules from Unprotect.it API:{self.url}")
         os.makedirs(self.directory, exist_ok=True)
@@ -170,6 +169,7 @@ class YaraRepo:
             except Exception:
                 logger.exception("Failed to fetch Unprotect.it rules")
                 return
+            
             
             rules = data.get("results", [])
             next_url = data.get("next")
@@ -195,7 +195,7 @@ class YaraRepo:
 
                 )
                 file_path = self.directory / f"{safe_name}.yar"
-             
+
                 try:
                     with open(file_path, "w", encoding="utf-8") as f:
                         f.write(rule_content)

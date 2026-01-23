@@ -156,7 +156,7 @@ class YaraRepo:
                 if settings.GIT_KEY_PATH.exists():
                     os.remove(settings.GIT_KEY_PATH)
 
-    # NEW: Unprotect.it API update logic            
+    #NEW:Unprotect.it API update logic            
     def _update_unprotect_api(self):
         logger.info(f"Fetching rules from Unprotect.it API:{self.url}")
         os.makedirs(self.directory, exist_ok=True)

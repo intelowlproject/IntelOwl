@@ -15,14 +15,14 @@ plugin = {
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },
     "name": "HibpBreaches",
-    "description": "Analyzer for HaveIBeenPwned breaches (emails and domains).",  # noqa: E501
+    "description": 'Analyzer for HaveIBeenPwned breaches (emails and domains). Checks against <a href="https://haveibeenpwned.com">Have I Been Pwned</a> database (<a href="https://haveibeenpwned.com/API/v3#Breaches">API docs</a>).',  # noqa: E501
     "disabled": False,
     "soft_time_limit": 30,
     "routing_key": "default",
     "health_check_status": True,
     "type": "observable",
     "docker_based": False,
-    "maximum_tlp": "GREEN",
+    "maximum_tlp": "AMBER",
     "observable_supported": ["domain", "generic"],
     "supported_filetypes": [],
     "run_hash": False,

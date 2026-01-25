@@ -79,7 +79,12 @@ def check_for_update() -> tuple[bool, str]:
         return True, f"IntelOwl version up to date ({current_version_str})"
 
     if latest > current:
-        if state.latest_version != latest_str or not state.notified:
+        if state.latest_version != latest_str:
+            state.latest_version = latest_str
+            state.notified = False
+            update_fields.update({"latest_version", "notified"})
+
+        if not state.notified:
             logger.info(
                 "New IntelOwl version available: %s (current: %s)",
                 latest_str,
@@ -96,11 +101,11 @@ def check_for_update() -> tuple[bool, str]:
                 for_admins=True,
             )
 
-            state.latest_version = latest_str
             state.notified = True
-            update_fields.update({"latest_version", "notified"})
+            update_fields.add("notified")
 
         state.save(update_fields=list(update_fields))
+
         return (
             True,
             f"New IntelOwl version available: {latest_str} "

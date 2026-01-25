@@ -12,8 +12,8 @@ from django.utils.functional import cached_property
 from certego_saas.apps.organization.organization import Organization
 
 if TYPE_CHECKING:
-    from api_app.playbooks_manager.models import PlaybookConfig
     from api_app.models import Job
+    from api_app.playbooks_manager.models import PlaybookConfig
 
 from django.core.files import File
 from django.http import QueryDict

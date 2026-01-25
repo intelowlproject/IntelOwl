@@ -25,7 +25,7 @@ import {
   ReportedPluginTooltip,
 } from "./utils/reportedPlugins";
 import { StatusIcon } from "../../common/icon/StatusIcon";
-import VisualizerReport from "./visualizer/visualizer";
+import VisualizerReport from "../../common/visualizer/visualizer";
 import { JobFinalStatuses } from "../../../constants/jobConst";
 import { PluginStatuses } from "../../../constants/pluginConst";
 import { JobResultSections } from "../../../constants/miscConst";
@@ -50,6 +50,7 @@ const NO_VISUALIZER_UI_ELEMENT_CODE = "no-visualizer";
 export function JobOverview({
   isRunningJob,
   job,
+  relatedInvestigationNumber,
   refetch,
   section,
   subSection,
@@ -200,6 +201,28 @@ export function JobOverview({
             <JsonEditor
               id="job_full_report_json"
               initialJsonData={job}
+              height="65vh"
+              width="100%"
+              readOnly
+            />
+          </div>
+        ),
+      },
+      {
+        name: "data_model",
+        nav: (
+          <div className="d-flex-center">
+            <strong>Data Model</strong>
+          </div>
+        ),
+        report: (
+          <div
+            id={`jobdatamodel-jsoninput-${job.id}`}
+            style={{ height: "65vh", overflow: "scroll" }}
+          >
+            <JsonEditor
+              id="job_data_model_json"
+              initialJsonData={job.data_model}
               height="65vh"
               width="100%"
               readOnly
@@ -376,7 +399,10 @@ export function JobOverview({
           {/* job metadata card */}
           <Row className="g-0">
             <Col>
-              <JobInfoCard job={job} />
+              <JobInfoCard
+                job={job}
+                relatedInvestigationNumber={relatedInvestigationNumber}
+              />
             </Col>
           </Row>
           {isRunningJob && (
@@ -479,6 +505,7 @@ export function JobOverview({
 JobOverview.propTypes = {
   isRunningJob: PropTypes.bool.isRequired,
   job: PropTypes.object.isRequired,
+  relatedInvestigationNumber: PropTypes.number.isRequired,
   refetch: PropTypes.func.isRequired,
   section: PropTypes.string.isRequired,
   subSection: PropTypes.string.isRequired,

@@ -1,10 +1,13 @@
 import ipaddress
+import logging
 
 from django.db import transaction
-from pydantic import ValidationError
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from api_app.analyzables_manager.models import Analyzable
+from api_app.analyzables_manager.serializers import AnalyzableSerializer
+from api_app.choices import Classification
 from api_app.data_model_manager.models import DomainDataModel, IPDataModel
 from api_app.data_model_manager.serializers import (
     DataModelRelatedField,
@@ -17,11 +20,14 @@ from api_app.user_events_manager.models import (
     UserIPWildCardEvent,
 )
 from api_app.user_events_manager.validators import validate_ipv4_network
-from authentication.serializers import UserProfileSerializer
+
+logger = logging.getLogger(__name__)
 
 
 class UserEventSerializer(serializers.ModelSerializer):
-    user = UserProfileSerializer(read_only=True)
+    user = serializers.CharField(
+        source="user.username", allow_null=False, read_only=True
+    )
 
     date = serializers.DateTimeField(read_only=True)
 
@@ -40,7 +46,7 @@ class UserEventSerializer(serializers.ModelSerializer):
 
 class UserAnalyzableEventSerializer(UserEventSerializer):
 
-    analyzable = serializers.PrimaryKeyRelatedField(queryset=Analyzable.objects.all())
+    analyzable = AnalyzableSerializer(required=True)
     data_model_content = serializers.JSONField(write_only=True, source="data_model")
     data_model = DataModelRelatedField(read_only=True)
 
@@ -50,22 +56,34 @@ class UserAnalyzableEventSerializer(UserEventSerializer):
 
     def is_valid(self, *, raise_exception=False):
         res = super().is_valid(raise_exception=raise_exception)
-        analyzable = Analyzable.objects.get(pk=self.initial_data["analyzable"])
-        serializer_class = analyzable.get_data_model_class().get_serializer()
+        classification = Classification.calculate_observable(
+            self._validated_data["analyzable"]["name"]
+        )
+        if classification == Classification.GENERIC:
+            raise ValidationError("Cannot create an user event for a generic")
+        serializer_class = Classification.get_data_model_class(
+            classification=classification,
+        ).get_serializer()
         serializer = serializer_class(data=self.initial_data["data_model_content"])
         res2 = serializer.is_valid(raise_exception=raise_exception)
         self._errors.update(serializer.errors)
         self._validated_data["data_model_content"] = serializer
+        self._validated_data["analyzable"]["classification"] = classification
+        logger.debug(f"{self._validated_data=}")
         return res and res2
 
     def save(self, **kwargs):
         with transaction.atomic():
+            analyzable = self.validated_data["analyzable"]
+            an, _ = Analyzable.objects.get_or_create(
+                name=analyzable["name"], classification=analyzable["classification"]
+            )
             data_model = self.validated_data.pop("data_model_content").save()
-            return super().save(**kwargs, data_model=data_model)
+            return super().save(**kwargs, data_model=data_model, analyzable=an)
 
 
 class UserDomainWildCardEventSerializer(UserEventSerializer):
-
+    query = serializers.CharField(required=True)
     analyzables = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
     data_model_content = DomainDataModelSerializer(write_only=True, source="data_model")
     data_model = DomainDataModelSerializer(read_only=True)

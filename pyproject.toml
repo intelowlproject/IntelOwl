@@ -1,15 +1,39 @@
-[tool.black]
-exclude = '''
-/(
-  venv
-  | frontend
-  | node_modules
-)/
-'''
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-use_parentheses = true
-known_first_party = ["certego_saas"]
+[tool.ruff]
+line-length = 140
+target-version = "py311"
+
+exclude = [
+    "venv",
+    "frontend",
+    "node_modules",
+    "migrations",
+    "docs",
+    "virtualenv",
+    "configuration/ldap_config.py",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+]
+
+ignore = [
+    "E231",  # missing whitespace after ','
+    "W605",  # invalid escape sequence
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # unused imports in __init__ files
+
+[tool.ruff.lint.isort]
+known-first-party = ["certego_saas"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
 [tool.codereviewdoctor]
 disable = ["missing-reverse-migration"]

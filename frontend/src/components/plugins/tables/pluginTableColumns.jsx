@@ -519,13 +519,13 @@ export const ingestorTableColumns = [
     maxWidth: 200,
   },
   {
-    Header: "Schedule",
+    Header: "Schedule (m/h/dM/MY/d)",
     id: "schedule",
     accessor: "schedule",
     Cell: ({ value }) => (
       <span>
-        {value.minute} {value.hour} {value.day_of_week} {value.day_of_month}{" "}
-        {value.month_of_year}
+        {value.minute} {value.hour} {value.day_of_month} {value.month_of_year}{" "}
+        {value.day_of_week}
       </span>
     ),
     disableSortBy: true,

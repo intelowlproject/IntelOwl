@@ -4,6 +4,7 @@ import logging
 from typing import Any
 
 from django.core.cache import cache
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import SerializerMethodField
@@ -123,31 +124,50 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
             )
 
     def validate(self, attrs):
+        logger.debug(f"{attrs=}")
         if self.partial:
             # we are in an update
             return attrs
         _value = attrs["value"]
         self.validate_value_type(_value, attrs["parameter"])
 
+        res = super().validate(attrs)
+        logger.debug(f"{res=}")
         # ingestor have their own users!
         if ingestor := attrs["ingestor_config"]:
             user_request = attrs["owner"]
-            if not user_request.is_superuser:
-                raise ValidationError(
-                    "Ingestor configuration can be changed only by admins"
-                )
-            else:
+            # if we are setting at organization level
+            if attrs["for_organization"]:
+                if (
+                    ingestor.user.has_membership()
+                    and ingestor.user.membership.organization
+                    == user_request.membership.organization
+                ):
+                    attrs["owner"] = ingestor.user
+                else:
+                    raise ValidationError(
+                        "You have a different organization than the ingestor."
+                    )
+            elif user_request.is_superuser:
                 attrs["owner"] = ingestor.user
-        res = super().validate(attrs)
+            else:
+                raise ValidationError(
+                    "Ingestor configuration can be changed only by admins, or at organization level."
+                )
 
         return res
 
     def create(self, validated_data):
+        logger.debug(f"{validated_data=}")
         value = validated_data.pop("value", None)
         if PluginConfig.objects.filter(**validated_data).exists():
             raise ValidationError("Config with this parameters already exists")
         validated_data["value"] = value
-        return super().create(validated_data)
+        try:
+            serialized_element = super().create(validated_data)
+        except DjangoValidationError as error:
+            raise ValidationError(error.message)
+        return serialized_element
 
     def update(self, instance, validated_data):
         self.validate_value_type(validated_data["value"], instance.parameter)

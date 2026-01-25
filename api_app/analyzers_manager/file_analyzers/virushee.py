@@ -9,7 +9,6 @@ import requests
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -74,24 +73,3 @@ class VirusheeFileUpload(FileAnalyzer):
             time.sleep(self.poll_distance)
 
         return response_json
-
-    @classmethod
-    def _monkeypatch(cls):
-        cls.poll_distance = 0  # for tests
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.Session.get",
-                    side_effect=[
-                        MockUpResponse({"message": "hash_not_found"}, 404),
-                        MockUpResponse({"message": "analysis_in_progress"}, 202),
-                        MockUpResponse({"result": "test"}, 200),
-                    ],
-                ),
-                patch(
-                    "requests.Session.post",
-                    return_value=MockUpResponse({"task": "123-456-789"}, 201),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

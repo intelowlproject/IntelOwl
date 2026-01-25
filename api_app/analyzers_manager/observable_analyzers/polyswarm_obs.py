@@ -4,13 +4,11 @@ from polyswarm_api.api import PolyswarmAPI
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import if_mock_connections, patch
 
 from ...choices import Classification
+from ..file_analyzers.polyswarm import PolyswarmBase
 
 logger = logging.getLogger(__name__)
-
-from ..file_analyzers.polyswarm import PolyswarmBase
 
 
 class PolyswarmObs(ObservableAnalyzer, PolyswarmBase):
@@ -38,29 +36,3 @@ class PolyswarmObs(ObservableAnalyzer, PolyswarmBase):
                     f"Failed to get assertions from Polyswarm for {self.observable_name}"
                 )
             return self.construct_result(result)
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch.object(
-                    PolyswarmObs,
-                    "run",
-                    # flake8: noqa
-                    return_value={
-                        "positives": 1,
-                        "total": 1,
-                        "PolyScore": 0.5,
-                        "sha256": "sha256",
-                        "md5": "md5",
-                        "sha1": "sha1",
-                        "extended_type": "extended_type",
-                        "first_seen": "2024-05-22T12:25:45.001333Z",
-                        "last_seen": "2024-05-22T12:25:45.001333Z",
-                        "permalink": "https://polyswarm.network/permalink",
-                        "assertions": [{"engine": "engine", "asserts": "Malicious"}],
-                    },
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

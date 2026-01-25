@@ -6,7 +6,6 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
-from tests.mock_utils import MockUpResponse
 
 logger = logging.getLogger(__name__)
 
@@ -88,21 +87,3 @@ class Phoneinfoga(classes.ObservableAnalyzer, classes.DockerBasedAnalyzer):
                 self.report.errors.append(str(e))
 
         return result
-
-    @staticmethod
-    def mocked_docker_analyzer_post(*args, **kwargs):
-        mockrespose = {
-            "result": {
-                "valid": True,
-                "number": "33679368229",
-                "local_format": "0679368229",
-                "international_format": "+33679368229",
-                "country_prefix": "+33",
-                "country_code": "FR",
-                "country_name": "France",
-                "location": "",
-                "carrier": "Orange France SA",
-                "line_type": "mobile",
-            }
-        }
-        return MockUpResponse(mockrespose, 200)

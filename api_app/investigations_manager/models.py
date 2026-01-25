@@ -1,16 +1,17 @@
+import datetime
 import logging
-from datetime import datetime
 from typing import List
 
 from django.conf import settings
 from django.db import models
 from django.db.models import QuerySet
+from django.utils.timezone import now
 
 from api_app.choices import TLP
 from api_app.interfaces import OwnershipAbstractModel
 from api_app.investigations_manager.choices import InvestigationStatusChoices
 from api_app.investigations_manager.queryset import InvestigationQuerySet
-from api_app.models import Job, ListCachable
+from api_app.models import Analyzable, Job, ListCachable
 from certego_saas.apps.user.models import User
 
 logger = logging.getLogger(__name__)
@@ -21,7 +22,7 @@ class Investigation(OwnershipAbstractModel, ListCachable):
     name = models.CharField(max_length=100)
     description = models.TextField(default="", blank=True)
 
-    start_time = models.DateTimeField(default=datetime.now)
+    start_time = models.DateTimeField(default=datetime.datetime.now)
     end_time = models.DateTimeField(default=None, null=True, blank=True)
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -105,12 +106,24 @@ class Investigation(OwnershipAbstractModel, ListCachable):
     def investigation_for_analyzable(
         cls, queryset: models.QuerySet, analyzed_object_name: str
     ) -> models.QuerySet:
-        related_job_id_list = [
-            job_data[0]
-            for job_data in Job.objects.filter(
-                analyzable__name__icontains=analyzed_object_name
-            ).values_list("id")
-        ]
+        from django.db.models import Q
+
+        jobs = Job.objects.filter(
+            Q(finished_analysis_time__gte=now() - datetime.timedelta(days=30))
+        )
+        analyzable = Analyzable.objects.filter(name=analyzed_object_name).first()
+        if (
+            not analyzable
+            or analyzable.classification == analyzable.CLASSIFICATIONS.DOMAIN.value
+        ):
+            jobs = jobs.filter(
+                Q(analyzable__name=analyzed_object_name)
+                | Q(analyzable__name__endswith=f".{analyzed_object_name}")
+            )
+        else:
+            # if we have an ip, we don't need to check the subdomains
+            jobs = jobs.filter(Q(analyzable__name=analyzed_object_name))
+        related_job_id_list = [job_data.get_root().id for job_data in jobs]
         return queryset.filter(jobs__id__in=related_job_id_list).distinct()
 
     @property

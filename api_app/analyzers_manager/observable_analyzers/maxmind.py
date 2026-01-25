@@ -20,7 +20,6 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerRunException,
 )
 from api_app.models import PluginConfig
-from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -222,12 +221,6 @@ class Maxmind(classes.ObservableAnalyzer):
         if auth_token:
             return cls._maxmind_db_manager.update_all_dbs(cls._api_key_name)
         return False
-
-    @classmethod
-    def _monkeypatch(cls):
-        # completely skip because does not work without connection.
-        patches = [if_mock_connections(patch.object(cls, "run", return_value={}))]
-        return super()._monkeypatch(patches=patches)
 
     def _update_data_model(self, data_model) -> None:
         from api_app.analyzers_manager.models import AnalyzerReport

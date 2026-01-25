@@ -13,7 +13,6 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerRunException,
 )
 from api_app.choices import Classification
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +37,7 @@ class InQuest(ObservableAnalyzer):
         hash_type = hash_lengths.get(len(self.observable_name))
         if not hash_type:
             raise AnalyzerRunException(
-                f"Given Hash: '{hash}' is not supported."
+                f"Given Hash: '{self.observable_name}' is not supported. "
                 "Supported hash types are: 'md5', 'sha1', 'sha256', 'sha512'."
             )
         return hash_type
@@ -123,15 +122,3 @@ class InQuest(ObservableAnalyzer):
 
         result["link"] = f"https://labs.inquest.net/{link}"
         return result
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse({}, 200),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

@@ -4,9 +4,10 @@ import copy
 import datetime
 import logging
 import uuid
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Q
 from django.db.models.functions import Trunc
 from django.http import FileResponse
@@ -22,6 +23,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from api_app.choices import Classification, ScanMode
+from api_app.decorators import abstractclassproperty
 from api_app.exceptions import NotImplementedException
 from api_app.websocket import JobConsumer
 from certego_saas.apps.organization.permissions import (
@@ -1026,9 +1028,7 @@ class PythonReportActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         IsObjectUserOrSameOrgPermission,
     ]
 
-    @classmethod
-    @property
-    @abstractmethod
+    @abstractclassproperty
     def report_model(cls):
         """
         Abstract property that should return the model class for the report.
@@ -1454,7 +1454,10 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
     )
     def plugin_config(self, request, name=None):
         logger.info(f"get plugin_config from user {request.user}, name {name}")
-        obj: PythonConfig = self.get_queryset().get(name=name)
+        try:
+            obj: PythonConfig = self.get_queryset().get(name=name)
+        except ObjectDoesNotExist:
+            raise NotFound("Requested plugin does not exist.")
         try:
             plugin_configs: PluginConfig = PluginConfig.objects.filter(
                 **{obj.snake_case_name: obj.pk}
@@ -1494,7 +1497,7 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
                         param_obj["exist"] = True
                     org_config.append(copy.deepcopy(param_obj))
                 # override default config with user config (if any)
-                print(pc.data)
+                logger.debug(pc.data)
                 for config in [
                     config
                     for config in pc.data

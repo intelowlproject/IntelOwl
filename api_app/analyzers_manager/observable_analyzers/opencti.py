@@ -5,7 +5,6 @@ import pycti
 from pycti.api.opencti_api_client import File
 
 from api_app.analyzers_manager import classes
-from tests.mock_utils import if_mock_connections, patch
 
 # for lighter output (credits: Cortex-Analyzers/opencti)
 RESULT_TRIM_MAP = {
@@ -78,17 +77,3 @@ class OpenCTI(classes.ObservableAnalyzer):
             observable["reports"] = reports
 
         return observables
-
-    @classmethod
-    def _monkeypatch(cls):
-        mock_obs = [{"id": 1, "observable_value": "8.8.8.8", "objectMarkingIds": []}]
-        mock_report = [{"id": 1, "observable_value": "8.8.8.8", "objects": []}]
-
-        patches = [
-            if_mock_connections(
-                patch("pycti.OpenCTIApiClient", return_value=None),
-                patch("pycti.StixCyberObservable.list", return_value=mock_obs),
-                patch("pycti.Report.list", return_value=mock_report),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

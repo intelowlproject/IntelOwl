@@ -15,6 +15,7 @@ from api_app.analyzers_manager.queryset import AnalyzerReportQuerySet
 from api_app.choices import TLP, Classification, PythonModuleBasePaths
 from api_app.data_model_manager.fields import SetField
 from api_app.data_model_manager.models import BaseDataModel
+from api_app.decorators import classproperty
 from api_app.fields import ChoiceArrayField
 from api_app.models import AbstractReport, PythonConfig, PythonModule
 
@@ -194,6 +195,7 @@ class MimeTypes(models.TextChoices):
     SWIFT = "text/x-swift"
     OBJECTIVE_C_CODE = "text/x-objective-c"
     LNK = "application/x-ms-shortcut"
+    GZIP = "application/gzip"
 
     @classmethod
     def _calculate_from_filename(cls, file_name: str) -> Optional["MimeTypes"]:
@@ -299,8 +301,7 @@ class AnalyzerConfig(PythonConfig):
         blank=True,
     )
 
-    @classmethod
-    @property
+    @classproperty
     def serializer_class(cls):
         from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 
@@ -340,12 +341,20 @@ class AnalyzerConfig(PythonConfig):
         self.clean_observable_supported()
         self.clean_filetypes()
 
-    @classmethod
-    @property
+    @classproperty
     def plugin_type(cls) -> str:
         return "1"
 
-    @classmethod
-    @property
+    @classproperty
     def config_exception(cls):
         return AnalyzerConfigurationException
+
+
+class AnalyzerRulesFileVersion(models.Model):
+    last_downloaded_version = models.CharField(max_length=50, blank=True, default="")
+    download_url = models.URLField(max_length=200, blank=True, default="")
+    downloaded_at = models.DateTimeField(auto_now_add=True)
+
+    python_module = models.ForeignKey(
+        PythonModule, on_delete=models.PROTECT, related_name="rules_version"
+    )

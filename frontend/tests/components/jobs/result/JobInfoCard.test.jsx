@@ -87,7 +87,7 @@ describe("test JobInfoCard (job report)", () => {
             investigation: 1,
             investigation_id: 1,
             investigation_name: "test investigation",
-            related_investigation_number: 10,
+            analyzable_id: 1,
             process_time: 0.23,
             tlp: "AMBER",
             warnings: [],
@@ -160,6 +160,7 @@ describe("test JobInfoCard (job report)", () => {
             playbook_requested: "TestPlaybook",
             playbook_to_execute: "TestPlaybook",
           }}
+          relatedInvestigationNumber={10}
         />
       </BrowserRouter>,
     );

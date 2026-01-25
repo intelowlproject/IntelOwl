@@ -25,6 +25,7 @@ class UserEvent(models.Model):
         on_delete=models.CASCADE,
     )
     date = models.DateTimeField(default=now, editable=False, db_index=True)
+    reason = models.CharField(max_length=256, default="", null=True)
     data_model: ForeignKey
 
     decay_progression = models.IntegerField(
@@ -81,6 +82,9 @@ class UserAnalyzableEvent(UserEvent):
 
     class Meta:
         unique_together = (("user", "analyzable"),)
+        indexes = [
+            models.Index(fields=["data_model_content_type", "data_model_object_id"])
+        ]
 
     def clean(self):
         super().clean()

@@ -51,8 +51,3 @@ class UltraDNSMaliciousDetector(classes.ObservableAnalyzer):
             raise Exception(f"DNS query failed: {e}")
 
         return malicious_detector_response(self.observable_name, is_malicious)
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = []
-        return super()._monkeypatch(patches=patches)

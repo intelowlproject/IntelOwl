@@ -4,7 +4,6 @@ import time
 import requests
 
 from api_app.analyzers_manager.classes import FileAnalyzer
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -147,22 +146,3 @@ class MobSF_Service(FileAnalyzer):
         }
 
         return results
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.post",
-                    return_value=MockUpResponse(
-                        {
-                            "file_name": "diva-beta.apk",
-                            "hash": "82ab8b2193b3cfb1c737e3a786be363a",
-                            "scan_type": "apk",
-                        },
-                        200,
-                    ),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

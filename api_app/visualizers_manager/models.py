@@ -4,6 +4,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from api_app.choices import PythonModuleBasePaths
+from api_app.decorators import classproperty
 from api_app.models import AbstractReport, PythonConfig, PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.exceptions import VisualizerConfigurationException
@@ -43,18 +44,15 @@ class VisualizerConfig(PythonConfig):
         "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
     )
 
-    @classmethod
-    @property
+    @classproperty
     def plugin_type(cls) -> str:
         return "3"
 
-    @classmethod
-    @property
+    @classproperty
     def config_exception(cls):
         return VisualizerConfigurationException
 
-    @classmethod
-    @property
+    @classproperty
     def serializer_class(cls):
         from api_app.visualizers_manager.serializers import VisualizerConfigSerializer
 

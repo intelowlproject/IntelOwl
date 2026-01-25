@@ -10,7 +10,7 @@ from requests import HTTPError
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MagicMock, if_mock_connections, patch
+from tests.mock_utils import MagicMock
 
 logger = logging.getLogger(__name__)
 
@@ -127,10 +127,3 @@ class MWDB_Scan(FileAnalyzer):
         )
 
         return result
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(patch("mwdblib.MWDB", return_value=MockUpMWDB()))
-        ]
-        return super()._monkeypatch(patches=patches)

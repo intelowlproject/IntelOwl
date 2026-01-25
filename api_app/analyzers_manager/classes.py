@@ -11,8 +11,8 @@ from typing import Dict, Tuple
 import requests
 from django.conf import settings
 
+from api_app.decorators import classproperty
 from certego_saas.apps.user.models import User
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..choices import Classification, PythonModuleBasePaths
 from ..classes import Plugin
@@ -68,8 +68,7 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
             return data_model
         return None
 
-    @classmethod
-    @property
+    @classproperty
     def config_exception(cls):
         """Returns the AnalyzerConfigurationException class."""
         return AnalyzerConfigurationException
@@ -79,14 +78,12 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         """Returns the name of the analyzer."""
         return self._config.name
 
-    @classmethod
-    @property
+    @classproperty
     def report_model(cls):
         """Returns the AnalyzerReport model."""
         return AnalyzerReport
 
-    @classmethod
-    @property
+    @classproperty
     def config_model(cls):
         """Returns the AnalyzerConfig model."""
         return AnalyzerConfig
@@ -184,8 +181,7 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             self.observable_name = self._job.analyzable.name
             self.observable_classification = self._job.analyzable.classification
 
-    @classmethod
-    @property
+    @classproperty
     def python_base_path(cls):
         return PythonModuleBasePaths.ObservableAnalyzer.value
 
@@ -233,8 +229,7 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         self.__filepath = None
         self.file_mimetype = self._job.analyzable.mimetype
 
-    @classmethod
-    @property
+    @classproperty
     def python_base_path(cls) -> PosixPath:
         return PythonModuleBasePaths[FileAnalyzer.__name__].value
 
@@ -399,7 +394,11 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         )
 
     def _docker_run(
-        self, req_data: dict, req_files: dict = None, analyzer_name: str = None
+        self,
+        req_data: dict,
+        req_files: dict = None,
+        analyzer_name: str = None,
+        avoid_polling: bool = False,
     ) -> dict:
         """
         Helper function that takes of care of requesting new analysis,
@@ -433,8 +432,8 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             self._raise_container_not_running()
 
         # step #2: raise AnalyzerRunException in case of error
-        # Modified to support synchronous analyzer BBOT that return results directly in the initial response, avoiding unnecessary polling.
-        if analyzer_name == "BBOT_Analyzer":
+        # Modified to support synchronous analyzers that return results directly in the initial response, avoiding unnecessary polling.
+        if avoid_polling:
             report = resp1.json().get("report", None)
             err = resp1.json().get("error", None)
         else:
@@ -482,43 +481,6 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         if not self.__raise_in_case_bad_request(self.name, resp, params_to_check=[]):
             raise AssertionError
         return resp
-
-    @staticmethod
-    def mocked_docker_analyzer_get(*args, **kwargs):
-        return MockUpResponse(
-            {"key": "test", "returncode": 0, "report": {"test": "This is a test."}}, 200
-        )
-
-    @staticmethod
-    def mocked_docker_analyzer_post(*args, **kwargs):
-        return MockUpResponse({"key": "test", "status": "running"}, 202)
-
-    def _monkeypatch(self, patches: list = None):
-        """
-        Here, `_monkeypatch` is an instance method and not a class method.
-        This is because when defined with `@classmethod`, we were getting the error
-        ```
-        '_patch' object has no attribute 'is_local'
-        ```
-        whenever multiple analyzers with same parent class were being called.
-        """
-        if patches is None:
-            patches = []
-        # no need to sleep during tests
-        self.poll_distance = 0
-        patches.append(
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    side_effect=self.mocked_docker_analyzer_get,
-                ),
-                patch(
-                    "requests.post",
-                    side_effect=self.mocked_docker_analyzer_post,
-                ),
-            )
-        )
-        return super()._monkeypatch(patches)
 
     def health_check(self, user: User = None) -> bool:
         """

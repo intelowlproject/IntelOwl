@@ -5,7 +5,6 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -88,61 +87,3 @@ class BGPRanking(classes.ObservableAnalyzer):
         final_response["asn"] = asn
 
         return final_response
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse(
-                        {
-                            "meta": {"ip": "143.255.153.0/24"},
-                            "response": {
-                                "2024-03-07T12:00:00": {
-                                    "asn": "264643",
-                                    "prefix": "143.255.153.0/24",
-                                    "source": "caida",
-                                }
-                            },
-                        },
-                        200,
-                    ),
-                ),
-                patch(
-                    "requests.post",
-                    side_effect=[
-                        MockUpResponse(
-                            {
-                                "meta": {"asn": "5577"},
-                                "response": {
-                                    "asn_description": "ROOT, LU",
-                                    "ranking": {
-                                        "rank": 0.0004720052083333333,
-                                        "position": 7084,
-                                        "total_known_asns": 15375,
-                                    },
-                                },
-                            },
-                            200,
-                        ),
-                        MockUpResponse(
-                            {
-                                "meta": {"asn": "5577", "period": 5},
-                                "response": {
-                                    "asn_history": [
-                                        ["2019-11-10", 0.00036458333333333335],
-                                        ["2019-11-11", 0.00036168981481481485],
-                                        ["2019-11-12", 0.0003761574074074074],
-                                        ["2019-11-13", 0.0003530092592592593],
-                                        ["2019-11-14", 0.0003559027777777778],
-                                    ]
-                                },
-                            },
-                            200,
-                        ),
-                    ],
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

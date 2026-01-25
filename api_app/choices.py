@@ -1,5 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import _operator
 import enum
 import ipaddress
 import logging
@@ -7,7 +8,6 @@ import re
 import typing
 from pathlib import PosixPath
 
-import _operator
 from django.db import models
 
 logger = logging.getLogger(__name__)
@@ -160,6 +160,29 @@ class Classification(models.TextChoices):
             classification = cls.IP
 
         return classification
+
+    @classmethod
+    def get_data_model_class(cls, classification: str) -> typing.Type:
+        from api_app.data_model_manager.models import (
+            DomainDataModel,
+            FileDataModel,
+            IPDataModel,
+        )
+
+        if classification == cls.IP.value:
+            return IPDataModel
+        elif classification in [
+            cls.URL.value,
+            cls.DOMAIN.value,
+        ]:
+            return DomainDataModel
+        elif classification in [
+            cls.HASH.value,
+            cls.FILE.value,
+        ]:
+            return FileDataModel
+        else:
+            raise NotImplementedError()
 
 
 class ScanMode(models.IntegerChoices):

@@ -10,7 +10,6 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
 )
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class SSAPINet(classes.ObservableAnalyzer):
@@ -61,15 +60,3 @@ class SSAPINet(classes.ObservableAnalyzer):
             except Exception as err:
                 raise AnalyzerRunException(f"Failed to convert to base64 string {err}")
         return resp.json()
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse({}, 200, content=b"hello world"),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

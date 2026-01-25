@@ -6,7 +6,6 @@ import logging
 import querycontacts
 
 from api_app.analyzers_manager import classes
-from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -24,15 +23,3 @@ class Abusix(classes.ObservableAnalyzer):
 
     def update(self) -> bool:
         pass
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "querycontacts.ContactFinder.find",
-                    return_value=["network-abuse@google.com"],
-                )
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

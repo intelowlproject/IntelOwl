@@ -88,8 +88,3 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
                 timeout = True
 
         return dns_resolver_response(self.observable_name, resolutions, timeout)
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = []
-        return super()._monkeypatch(patches=patches)

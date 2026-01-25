@@ -1,10 +1,9 @@
 {
   "name": "intelowl",
-  "version": "6.4.0",
+  "version": "6.5.0",
   "private": true,
-  "proxy": "http://localhost:80/",
   "dependencies": {
-    "@certego/certego-ui": "^0.1.17",
+    "@certego/certego-ui": "^0.1.19",
     "@dagrejs/dagre": "^1.1.4",
     "ace-builds": "^1.38.0",
     "axios": "^1.8.3",
@@ -15,6 +14,7 @@
     "date-fns-tz": "^3.2.0",
     "flag-icons": "^7.2.3",
     "formik": "^2.4.6",
+    "http-proxy-middleware": "^2.0.6",
     "js-cookie": "^3.0.5",
     "md5": "^2.3.0",
     "prop-types": "^15.8.1",

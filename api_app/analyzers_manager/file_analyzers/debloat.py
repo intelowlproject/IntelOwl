@@ -13,7 +13,6 @@ from debloat.processor import process_pe
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -125,26 +124,3 @@ class Debloat(FileAnalyzer):
     @classmethod
     def update(cls) -> bool:
         pass
-
-    @classmethod
-    def _monkeypatch(cls, patches: list = None):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "debloat.processor.process_pe",
-                    return_value=MockUpResponse(
-                        {
-                            "success": True,
-                            "original_size": 3840392,
-                            "debloated_file": "TVqQAAMAAAAEAAAA//",
-                            "debloated_hash": "f7f92eadfb444e7fce27efa2007a955a",
-                            "debloated_size": 813976,
-                            "size_reduction_percentage": 78.80487200264973,
-                            "debloated_sha256": "f7f92eadfb444e7fce27efa2007a955a",
-                        },
-                        200,
-                    ),
-                )
-            ),
-        ]
-        return super()._monkeypatch(patches)

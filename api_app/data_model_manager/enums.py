@@ -14,7 +14,8 @@ class DataModelTags(Choices):
     SOCIAL_ENGINEERING = "social_engineering"
     ANONYMIZER = "anonymizer"
     TOR_EXIT_NODE = "tor_exit_node"
-    ABUSED = "abused"
+    SCANNER = "scanner"
+    # IMPORTANT! update DataModelTags Object in frontend!
 
 
 class DataModelEvaluations(Choices):

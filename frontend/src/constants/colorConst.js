@@ -64,10 +64,10 @@ export const EvaluationColors = Object.freeze({
 
 export const TagsColors = Object.freeze({
   phishing: "danger",
-  anonymizer: "warning",
   malware: "danger",
   social_engineering: "secondary",
+  anonymizer: "warning",
   tor_exit_node: "warning",
   scanner: "danger",
-  ip_only: "secondary",
+  // the keys must be the same of DataModelTags
 });

@@ -24,6 +24,7 @@ from api_app.choices import ReportStatus, Status
 from intel_owl import secrets
 from intel_owl.celery import app, get_queue_name
 from intel_owl.settings._util import get_environment
+from api_app.update_checker import check_for_update
 
 logger = logging.getLogger(__name__)
 
@@ -511,6 +512,20 @@ def enable_configuration_for_org_for_rate_limit(org_configuration_pk: int):
         pk=org_configuration_pk
     )
     opc.enable()
+
+
+@shared_task(
+    base=FailureLoggedTask,
+    name="intelowl_weekly_update_check",
+    soft_time_limit=30,
+)
+def intelowl_weekly_update_check():
+    """
+    Weekly task that checks if a new IntelOwl version is available.
+    If a newer version exists, an admin GUI notification is triggered.
+    """
+    logger.info("Running weekly IntelOwl update check task")
+    check_for_update()
 
 
 # set logger

@@ -75,7 +75,7 @@ class UpdateCheckStatus(models.Model):
     """
 
     latest_version = models.CharField(
-        max_length=50,
+        max_length=20,
         null=True,
         blank=True,
         help_text="Latest version detected during update check",
@@ -95,7 +95,6 @@ class UpdateCheckStatus(models.Model):
 
     class Meta:
         verbose_name = "Update check status"
-        verbose_name_plural = "Update check status"
 
     def __str__(self) -> str:
         return (

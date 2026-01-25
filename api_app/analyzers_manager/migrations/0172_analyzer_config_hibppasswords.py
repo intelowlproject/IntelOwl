@@ -15,7 +15,7 @@ plugin = {
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },
     "name": "HibpPasswords",
-    "description": 'Analyzer for HaveIBeenPwned pwned passwords using k-anonymity model. (<a href="https://haveibeenpwned.com/API/v3#PwnedPasswords">API documentation</a>).',  # noqa: E501
+    "description": "[HaveIBeenPwned Pwned Passwords](https://haveibeenpwned.com/API/v3#PwnedPasswords) is a security analysis tool that checks whether passwords have been exposed in known data breaches, using a privacy-preserving k-anonymity model.",  # noqa: E501
     "disabled": False,
     "soft_time_limit": 30,
     "routing_key": "default",
@@ -128,9 +128,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     atomic = True
     dependencies = [
-        ("api_app", "0071_delete_last_elastic_report"),
-        ("analyzers_manager", "0170_update_yaraify_archive"),
-        ("analyzers_manager", "0171_analyzer_config_hibpbreaches"),
+        ('analyzers_manager', '0171_analyzer_config_hibpbreaches'),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

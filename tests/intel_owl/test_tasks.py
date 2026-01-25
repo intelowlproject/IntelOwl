@@ -48,7 +48,7 @@ class SendElasticTestCase(CustomTestCase):
             config=AnalyzerConfig.objects.get(
                 python_module=PythonModule.objects.get(
                     base_path=PythonModuleBasePaths.ObservableAnalyzer.value,
-                    module="dns.dns_malicious_detectors.dns0_eu_malicious_detector.DNS0EUMaliciousDetector",
+                    module="dns.dns_malicious_detectors.dns4eu_malicious_detector.DNS4EUMaliciousDetector",
                 )
             ),
             job=self.job,
@@ -217,7 +217,7 @@ class SendElasticTestCase(CustomTestCase):
                                 "organization": {"name": "test_elastic_org"},
                             },
                             "config": {
-                                "name": "DNS0_EU_Malicious_Detector",
+                                "name": "DNS4EU_Malicious_Detector",
                                 "plugin_name": "analyzer",
                             },
                             "job": {"id": self.job.id},
@@ -348,7 +348,7 @@ class SendElasticTestCase(CustomTestCase):
                                 "organization": {"name": "test_elastic_org"},
                             },
                             "config": {
-                                "name": "DNS0_EU_Malicious_Detector",
+                                "name": "DNS4EU_Malicious_Detector",
                                 "plugin_name": "analyzer",
                             },
                             "end_time": datetime.datetime(

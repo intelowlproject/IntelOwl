@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
-from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers.dns0_eu_resolver import (
-    DNS0EUResolver,
+from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers.dns4eu_resolver import (
+    DNS4EUResolver,
 )
 from tests.api_app.analyzers_manager.unit_tests.observable_analyzers.base_test_class import (
     BaseAnalyzerTest,
@@ -9,8 +9,8 @@ from tests.api_app.analyzers_manager.unit_tests.observable_analyzers.base_test_c
 from tests.mock_utils import MockUpResponse
 
 
-class DNS0EUResolverTestCase(BaseAnalyzerTest):
-    analyzer_class = DNS0EUResolver
+class DNS4EUResolverTestCase(BaseAnalyzerTest):
+    analyzer_class = DNS4EUResolver
 
     @staticmethod
     def get_mocked_response():

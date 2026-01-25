@@ -1,7 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-"""Check if the domains is reported as malicious in DNS0.eu database"""
+"""Check if the domains is reported as malicious in DNS4EU database"""
 
 import logging
 from ipaddress import AddressValueError, IPv4Address
@@ -18,7 +18,7 @@ from ..dns_responses import malicious_detector_response
 logger = logging.getLogger(__name__)
 
 
-class DNS0EUMaliciousDetector(classes.ObservableAnalyzer):
+class DNS4EUMaliciousDetector(classes.ObservableAnalyzer):
     class NotADomain(Exception):
         pass
 
@@ -41,23 +41,26 @@ class DNS0EUMaliciousDetector(classes.ObservableAnalyzer):
                 "type": "A",
             }
             headers = {"accept": "application/dns-json"}
+            # Use protective endpoint to check for blocking
             response = requests.get(
-                "https://zero.dns0.eu",
+                "https://protective.joindns4.eu/dns-query",
                 params=params,
                 headers=headers,
             )
             response.raise_for_status()
             response_dict = response.json()
 
-            response_answer = response_dict.get("Authority", [])
-            if response_answer:
-                resolution = response_answer[0].get("data", "")
-                # CloudFlare answers with 0.0.0.0 if the domain is known as malicious
-                if "negative-caching.dns0.eu" in resolution:
+            # DNS4EU blocks by returning 0.0.0.0 or specific sinkhole IPs
+            # Valid answers are in "Answer" section
+            answers = response_dict.get("Answer", [])
+            for answer in answers:
+                data = answer.get("data", "")
+                if data == "0.0.0.0" or data == "51.15.69.11":
                     is_malicious = True
+                    break
 
         except requests.exceptions.RequestException:
-            raise AnalyzerRunException("Connection to DNS0 failed")
+            raise AnalyzerRunException("Connection to DNS4EU failed")
         except self.NotADomain:
             logger.info(f"not analyzing {observable} because not a domain")
 

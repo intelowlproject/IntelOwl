@@ -16,13 +16,13 @@ from ..dns_responses import dns_resolver_response
 logger = logging.getLogger(__name__)
 
 
-class DNS0EUResolver(classes.ObservableAnalyzer):
-    """Resolve a DNS query with DNS0.eu"""
+class DNS4EUResolver(classes.ObservableAnalyzer):
+    """Resolve a DNS query with DNS4EU"""
 
     class NotADomain(Exception):
         pass
 
-    url = "https://dns0.eu"
+    url = "https://unfiltered.joindns4.eu/dns-query"
     headers = {"Accept": "application/dns-json"}
 
     query_type: str
@@ -48,7 +48,7 @@ class DNS0EUResolver(classes.ObservableAnalyzer):
             resolutions = response.json().get("Answer", [])
         except requests.RequestException:
             raise AnalyzerRunException(
-                "an error occurred during the connection to DNS0"
+                "an error occurred during the connection to DNS4EU"
             )
         except self.NotADomain:
             logger.info(f"not analyzing {observable} because not a domain")

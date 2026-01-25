@@ -1,20 +1,13 @@
 import logging
 
 import requests
-from certego_saas_notifications.models import Notification
 from django.conf import settings
 from django.utils.timezone import now
-
-from api_app.models import UpdateCheckStatus
 
 logger = logging.getLogger(__name__)
 
 
 def normalize_version(v: str) -> tuple[int, ...]:
-    """
-    Convert '1.2.3' → (1, 2, 3) so versions can be compared.
-    Stops at the first non-numeric part.
-    """
     parts: list[int] = []
     for x in v.split("."):
         if x.isdigit():
@@ -25,10 +18,6 @@ def normalize_version(v: str) -> tuple[int, ...]:
 
 
 def fetch_latest_version() -> tuple[str | None, str | None]:
-    """
-    Fetch the latest IntelOwl version string from the update URL.
-    Returns a version string without any leading 'v', or None on error.
-    """
     update_url = getattr(settings, "UPDATE_CHECK_URL", None)
 
     if not update_url:
@@ -59,12 +48,10 @@ def fetch_latest_version() -> tuple[str | None, str | None]:
 
 
 def check_for_update() -> tuple[bool, str]:
-    """
-    Compare the running IntelOwl version with the latest available one.
+    from certego_saas_notifications.models import Notification
 
-    Returns:
-        (success: bool, message: str)
-    """
+    from api_app.models import UpdateCheckStatus
+
     current_version_str = getattr(settings, "INTEL_OWL_VERSION", None)
     if not current_version_str:
         return False, "INTEL_OWL_VERSION setting missing"
@@ -76,7 +63,7 @@ def check_for_update() -> tuple[bool, str]:
     current_version_str = str(current_version_str).lstrip("v")
 
     current = normalize_version(current_version_str)
-    latest = normalize_version(latest_str)
+    latest = normalize_version(latest_str) if latest_str else ()
 
     state, _ = UpdateCheckStatus.objects.get_or_create(pk=1)
     state.last_checked_at = now()
@@ -124,7 +111,7 @@ def check_for_update() -> tuple[bool, str]:
         state.save(update_fields=list(update_fields))
         return (
             True,
-            f"Local version ahead of release: " f"{current_version_str} > {latest_str}",
+            f"Local version ahead of release: {current_version_str} > {latest_str}",
         )
 
     state.save(update_fields=list(update_fields))

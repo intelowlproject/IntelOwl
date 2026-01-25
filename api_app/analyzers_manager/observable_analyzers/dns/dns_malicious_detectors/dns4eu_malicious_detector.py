@@ -55,7 +55,7 @@ class DNS4EUMaliciousDetector(classes.ObservableAnalyzer):
             answers = response_dict.get("Answer", [])
             for answer in answers:
                 data = answer.get("data", "")
-                if data == "0.0.0.0" or data == "51.15.69.11":
+                if data in ("0.0.0.0", "51.15.69.11"):
                     is_malicious = True
                     break
 
@@ -65,3 +65,7 @@ class DNS4EUMaliciousDetector(classes.ObservableAnalyzer):
             logger.info(f"not analyzing {observable} because not a domain")
 
         return malicious_detector_response(self.observable_name, is_malicious)
+
+    @classmethod
+    def update(cls) -> bool:
+        return True

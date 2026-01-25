@@ -54,3 +54,7 @@ class DNS4EUResolver(classes.ObservableAnalyzer):
             logger.info(f"not analyzing {observable} because not a domain")
 
         return dns_resolver_response(self.observable_name, resolutions)
+
+    @classmethod
+    def update(cls) -> bool:
+        return True

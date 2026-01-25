@@ -1,8 +1,8 @@
-from unittest.mock import patch, MagicMock
-
-from django.test import TestCase, override_settings
+from unittest.mock import MagicMock, patch
 
 from api_app.update_checker import check_for_update
+from django.test import TestCase, override_settings
+
 from api_app.models import UpdateCheckStatus
 
 

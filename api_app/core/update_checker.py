@@ -1,11 +1,11 @@
 import logging
 
 import requests
+from certego_saas_notifications.models import Notification
 from django.conf import settings
 from django.utils.timezone import now
 
 from api_app.models import UpdateCheckStatus
-from certego_saas_notifications.models import Notification
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,3 @@
-import json
-import os
-import shutil
 
 from django.test import TestCase
 

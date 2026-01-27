@@ -24,9 +24,11 @@ class AilTypoSquatting(classes.ObservableAnalyzer):
 
     def run(self):
         response = {}
-        logger.info(f"""running AilTypoSquatting on {self.observable_name}
+        logger.info(
+            f"""running AilTypoSquatting on {self.observable_name}
                     with tlp {self._job.tlp}
-                    and dns resolving {self.dns_resolving}""")
+                    and dns resolving {self.dns_resolving}"""
+        )
 
         response["algorithms"] = typo.runAll(
             domain=self.observable_name,
@@ -38,8 +40,10 @@ class AilTypoSquatting(classes.ObservableAnalyzer):
             # for "x.com", response["algorithms"][0]=".com"
             # which is not valid for look up
             if len(self.observable_name.split(".")[0]) == 1:
-                logger.info(f"""running dns resolving on {self.observable_name}
-                     excluding {response['algorithms'][0]}""")
+                logger.info(
+                    f"""running dns resolving on {self.observable_name}
+                     excluding {response['algorithms'][0]}"""
+                )
                 response["dnsResolving"] = resolving.dnsResolving(
                     resultList=response["algorithms"][1:],
                     domain=self.observable_name,

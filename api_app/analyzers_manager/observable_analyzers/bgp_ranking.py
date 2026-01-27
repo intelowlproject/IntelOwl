@@ -57,9 +57,11 @@ class BGPRanking(classes.ObservableAnalyzer):
         if final_response["asn_rank"] is None:
             raise AnalyzerRunException(f"ASN rank not found in {response}")
 
-        logger.info(f"""ASN rank: {final_response['asn_rank']},
+        logger.info(
+            f"""ASN rank: {final_response['asn_rank']},
             position: {final_response['asn_position']},
-            from {self.observable_name}""")
+            from {self.observable_name}"""
+        )
 
         if self.period:
             # get ASN history from extracted ASN
@@ -76,8 +78,10 @@ class BGPRanking(classes.ObservableAnalyzer):
             )
             if final_response["asn_history"] is None:
                 raise AnalyzerRunException(f"ASN history not found in {response}")
-            logger.info(f"""ASN history: {final_response['asn_history']}
-                for {self.observable_name}""")
+            logger.info(
+                f"""ASN history: {final_response['asn_history']}
+                for {self.observable_name}"""
+            )
         # we are using the ASN in a variable
         # initially to avoid repetitive calculations
         final_response["asn"] = asn

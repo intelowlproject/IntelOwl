@@ -1,5 +1,9 @@
+import json  # noqa: F401
+import os    # noqa: F401
+import shutil # noqa: F401
 
 from django.test import TestCase
+
 
 from api_app.analyzers_manager.file_analyzers.yara_scan import YaraScan
 from api_app.models import PluginConfig, PythonModule

@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("api_app", "0071_delete_last_elastic_report"),
-        ("django_celery_beat", "0018_improve_crontab_helptext"),
+        ("django_celery_beat", "__latest__"),
     ]
 
     operations = [

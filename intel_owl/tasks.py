@@ -517,18 +517,6 @@ def enable_configuration_for_org_for_rate_limit(org_configuration_pk: int):
     opc.enable()
 
 
-@shared_task(
-    base=FailureLoggedTask,
-    name="intelowl_weekly_update_check",
-    soft_time_limit=30,
-)
-def intelowl_weekly_update_check():
-    logger.info("Running weekly IntelOwl update check task")
-    from api_app.update_checker import check_for_update
-
-    check_for_update()
-
-
 # set logger
 @signals.setup_logging.connect
 def config_loggers(*args, **kwags):

@@ -1,8 +1,8 @@
 from unittest.mock import MagicMock, patch
 
-from api_app.update_checker import check_for_update
 from django.test import TestCase, override_settings
 
+from api_app.core.update_checker import check_for_update
 from api_app.models import UpdateCheckStatus
 
 
@@ -13,8 +13,8 @@ class UpdateCheckerTests(TestCase):
         UpdateCheckStatus.objects.all().delete()
 
     @override_settings(INTEL_OWL_VERSION="1.0.0", UPDATE_CHECK_URL="http://dummy")
-    @patch("api_app.update_checker.Notification.objects.create")
-    @patch("api_app.update_checker.requests.get")
+    @patch("api_app.core.update_checker.Notification")
+    @patch("api_app.core.update_checker.requests.get")
     def test_new_version_triggers_notification(self, mock_get, mock_notify):
         mock_response = MagicMock()
         mock_response.json.return_value = {"tag_name": "v2.0.0"}
@@ -25,15 +25,15 @@ class UpdateCheckerTests(TestCase):
 
         self.assertTrue(success)
         self.assertIn("New IntelOwl version available", msg)
-        mock_notify.assert_called_once()
+        mock_notify.objects.create.assert_called_once()
 
         state = UpdateCheckStatus.objects.get(pk=1)
         self.assertEqual(state.latest_version, "2.0.0")
         self.assertTrue(state.notified)
 
     @override_settings(INTEL_OWL_VERSION="2.0.0", UPDATE_CHECK_URL="http://dummy")
-    @patch("api_app.update_checker.Notification.objects.create")
-    @patch("api_app.update_checker.requests.get")
+    @patch("api_app.core.update_checker.Notification")
+    @patch("api_app.core.update_checker.requests.get")
     def test_same_version_no_notification(self, mock_get, mock_notify):
         mock_response = MagicMock()
         mock_response.json.return_value = {"tag_name": "v2.0.0"}
@@ -44,10 +44,10 @@ class UpdateCheckerTests(TestCase):
 
         self.assertTrue(success)
         self.assertIn("up to date", msg)
-        mock_notify.assert_not_called()
+        mock_notify.objects.create.assert_not_called()
 
     @override_settings(INTEL_OWL_VERSION="3.0.0", UPDATE_CHECK_URL="http://dummy")
-    @patch("api_app.update_checker.requests.get")
+    @patch("api_app.core.update_checker.requests.get")
     def test_local_version_ahead(self, mock_get):
         mock_response = MagicMock()
         mock_response.json.return_value = {"tag_name": "v2.0.0"}
@@ -66,7 +66,7 @@ class UpdateCheckerTests(TestCase):
 
     @override_settings(INTEL_OWL_VERSION="1.0.0", UPDATE_CHECK_URL="http://dummy")
     @patch(
-        "api_app.update_checker.requests.get",
+        "api_app.core.update_checker.requests.get",
         side_effect=__import__("requests").RequestException("boom"),
     )
     def test_fetch_error(self, mock_get):
@@ -75,7 +75,7 @@ class UpdateCheckerTests(TestCase):
         self.assertIn("Failed to fetch", msg)
 
     @override_settings(INTEL_OWL_VERSION="1.0.0", UPDATE_CHECK_URL="http://dummy")
-    @patch("api_app.update_checker.requests.get")
+    @patch("api_app.core.update_checker.requests.get")
     def test_invalid_json_response(self, mock_get):
         mock_response = MagicMock()
         mock_response.json.side_effect = ValueError()
@@ -87,7 +87,7 @@ class UpdateCheckerTests(TestCase):
         self.assertIn("Invalid response", msg)
 
     @override_settings(INTEL_OWL_VERSION="1.0.0", UPDATE_CHECK_URL="http://dummy")
-    @patch("api_app.update_checker.requests.get")
+    @patch("api_app.core.update_checker.requests.get")
     def test_missing_tag_name(self, mock_get):
         mock_response = MagicMock()
         mock_response.json.return_value = {}
@@ -99,8 +99,8 @@ class UpdateCheckerTests(TestCase):
         self.assertIn("missing tag_name", msg)
 
     @override_settings(INTEL_OWL_VERSION="1.0.0", UPDATE_CHECK_URL="http://dummy")
-    @patch("api_app.update_checker.Notification.objects.create")
-    @patch("api_app.update_checker.requests.get")
+    @patch("api_app.core.update_checker.Notification")
+    @patch("api_app.core.update_checker.requests.get")
     def test_notification_sent_only_once(self, mock_get, mock_notify):
         mock_response = MagicMock()
         mock_response.json.return_value = {"tag_name": "v2.0.0"}
@@ -110,4 +110,4 @@ class UpdateCheckerTests(TestCase):
         check_for_update()
         check_for_update()
 
-        self.assertEqual(mock_notify.call_count, 1)
+        self.assertEqual(mock_notify.objects.create.call_count, 1)

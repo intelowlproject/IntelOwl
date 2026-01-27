@@ -1,6 +1,7 @@
-from django.db import migrations, models
-import django.utils.timezone
 import json
+
+import django.utils.timezone
+from django.db import migrations, models
 
 
 def create_weekly_update_task(apps, schema_editor):
@@ -16,8 +17,9 @@ def create_weekly_update_task(apps, schema_editor):
         name="Weekly IntelOwl Update Check",
         defaults={
             "interval": schedule,
-            "task": "api_app.tasks.intelowl_weekly_update_check",
+            "task": "api_app.core.tasks.scheduled_update_check",
             "kwargs": json.dumps({}),
+            "enabled": True,
         },
     )
 
@@ -38,6 +40,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="UpdateCheckStatus",
             fields=[
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 (
                     "latest_version",
                     models.CharField(
@@ -64,7 +75,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "created_at",
-                    models.DateTimeField(default=django.utils.timezone.now),
+                    models.DateTimeField(
+                        default=django.utils.timezone.now,
+                        editable=False,
+                    ),
                 ),
                 (
                     "updated_at",
@@ -72,8 +86,11 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
-                "verbose_name": "Update check status",
+                "verbose_name": "Update check info",
             },
         ),
-        migrations.RunPython(create_weekly_update_task, remove_weekly_update_task),
+        migrations.RunPython(
+            create_weekly_update_task,
+            remove_weekly_update_task,
+        ),
     ]

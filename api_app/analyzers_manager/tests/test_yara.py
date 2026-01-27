@@ -1,7 +1,11 @@
+import json
+import os
+import shutil
+
 from django.test import TestCase
 
 from api_app.analyzers_manager.file_analyzers.yara_scan import YaraScan
-from api_app.models import PythonModule, PluginConfig
+from api_app.models import PluginConfig, PythonModule
 
 class TestYaraAnalyzer(TestCase):
     def setUp(self):

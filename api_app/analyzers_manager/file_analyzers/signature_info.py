@@ -30,7 +30,7 @@ class SignatureInfo(FileAnalyzer):
                 self.filepath,
             ]
             p = Popen(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE)
-            (out, err) = p.communicate()
+            out, err = p.communicate()
             output = out.decode()
 
             if p.returncode == 1:

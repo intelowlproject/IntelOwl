@@ -256,6 +256,7 @@ def job_pipeline(
     job_id: int,
 ):
     from api_app.models import Job
+    from api_app.websocket import JobConsumer
 
     job = Job.objects.get(pk=job_id)
     try:
@@ -270,6 +271,14 @@ def job_pipeline(
         ):
             report.status = report.STATUSES.FAILED.value
             report.save()
+
+        # Set job to FAILED status and record completion time
+        job.status = Job.STATUSES.FAILED.value
+        job.finished_analysis_time = now()
+        job.save(update_fields=["status", "finished_analysis_time"])
+
+        # Notify WebSocket clients of the failure
+        JobConsumer.serialize_and_send_job(job)
 
 
 @shared_task(base=FailureLoggedTask, name="run_plugin", soft_time_limit=500)

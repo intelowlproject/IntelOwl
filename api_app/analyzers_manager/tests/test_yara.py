@@ -1,7 +1,7 @@
 from django.test import TestCase
-from api_app.models import PythonModule, PluginConfig
-from api_app.analyzers_manager.file_analyzers.yara_scan import YaraScan
 
+from api_app.analyzers_manager.file_analyzers.yara_scan import YaraScan
+from api_app.models import PythonModule, PluginConfig
 
 class TestYaraAnalyzer(TestCase):
     def setUp(self):

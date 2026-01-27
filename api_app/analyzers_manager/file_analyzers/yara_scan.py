@@ -209,8 +209,6 @@ class YaraRepo:
 
     logger.info("Unprotect.it API update completed")
 
-
-
     def delete_lock_file(self):
         lock_file_path = self.directory / ".git" / "index.lock"
         lock_file_path.unlink(missing_ok=False)

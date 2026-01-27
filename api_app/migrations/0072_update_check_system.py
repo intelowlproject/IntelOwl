@@ -10,7 +10,7 @@ def create_weekly_update_task(apps, schema_editor):
 
     schedule, _ = IntervalSchedule.objects.get_or_create(
         every=7,
-        period=IntervalSchedule.DAYS,
+        period="days",
     )
 
     PeriodicTask.objects.update_or_create(

@@ -117,12 +117,7 @@ describe("NotificationsList Component - Security & XSS Prevention", () => {
       );
 
       const link = screen.queryByRole("link");
-      if (link) {
-        const href = link.getAttribute("href");
-        if (href) {
-          expect(href).not.toContain("javascript:");
-        }
-      }
+      expect(link).not.toBeInTheDocument();
     });
 
     test("prevents onclick attribute injection", () => {
@@ -219,6 +214,7 @@ describe("NotificationsList Component - Security & XSS Prevention", () => {
       const link = screen.getByRole("link", { name: "Google" });
       expect(link).toHaveAttribute("href", "https://google.com");
       expect(link).toHaveAttribute("target", "_blank");
+      expect(link).toHaveAttribute("rel", "noopener noreferrer");
       expect(link).toHaveClass("link-primary");
     });
   });

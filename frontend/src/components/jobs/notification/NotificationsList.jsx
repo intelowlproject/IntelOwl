@@ -9,8 +9,42 @@ import {
 import { IoCheckmarkDoneSharp } from "react-icons/io5";
 
 import { ContentSection, IconButton, DateHoverable } from "@certego/certego-ui";
+import ReactMarkdown from "react-markdown";
 
 import { notificationMarkAsRead } from "./notificationApi";
+
+const markdownComponents = {
+  // eslint-disable-next-line id-length
+  em: ({ node: _node, ...props }) => <i className="text-code" {...props} />,
+  // eslint-disable-next-line id-length
+  a: ({ node: _node, href, children, ...props }) => {
+    // eslint-disable-next-line no-script-url
+    if (href && href.startsWith("javascript:")) {
+      return null;
+    }
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="link-primary"
+        {...props}
+      >
+        {children}
+      </a>
+    );
+  },
+};
+
+markdownComponents.em.propTypes = {
+  node: PropTypes.object,
+};
+
+markdownComponents.a.propTypes = {
+  node: PropTypes.object,
+  href: PropTypes.string,
+  children: PropTypes.node,
+};
 
 export default function NotificationsList({ notifications, refetchFn }) {
   const markAsReadCb = React.useCallback(
@@ -41,10 +75,11 @@ export default function NotificationsList({ notifications, refetchFn }) {
               <DateHoverable value={notif?.created_at} format="p P (z)" />
             </small>
           </div>
-          <ListGroupItemText
-            className="text-light"
-            dangerouslySetInnerHTML={{ __html: notif?.body }}
-          />
+          <ListGroupItemText className="text-light">
+            <ReactMarkdown components={markdownComponents}>
+              {notif?.body}
+            </ReactMarkdown>
+          </ListGroupItemText>
           <div className="d-flex">
             {notif?.read === false && (
               <IconButton

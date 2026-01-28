@@ -14,9 +14,9 @@ class UpdateCheckerTests(TestCase):
         UpdateCheckStatus.objects.all().delete()
 
     @override_settings(INTEL_OWL_VERSION="1.0.0", UPDATE_CHECK_URL="http://dummy")
-    @patch("api_app.core.update_checker.Notification")
+    @patch("api_app.core.update_checker.UserEventQuerySet")
     @patch("api_app.core.update_checker.requests.get")
-    def test_new_version_triggers_notification(self, mock_get, mock_notify):
+    def test_new_version_triggers_notification(self, mock_get, mock_user_events):
         mock_response = MagicMock()
         mock_response.json.return_value = {"tag_name": "v2.0.0"}
         mock_response.raise_for_status.return_value = None
@@ -26,16 +26,16 @@ class UpdateCheckerTests(TestCase):
 
         self.assertTrue(success)
         self.assertIn("New IntelOwl version available", msg)
-        mock_notify.objects.create.assert_called_once()
+        mock_user_events.notify_admins.assert_called_once()
 
         state = UpdateCheckStatus.objects.get(pk=1)
         self.assertEqual(state.latest_version, "2.0.0")
         self.assertTrue(state.notified)
 
     @override_settings(INTEL_OWL_VERSION="2.0.0", UPDATE_CHECK_URL="http://dummy")
-    @patch("api_app.core.update_checker.Notification")
+    @patch("api_app.core.update_checker.UserEventQuerySet")
     @patch("api_app.core.update_checker.requests.get")
-    def test_same_version_no_notification(self, mock_get, mock_notify):
+    def test_same_version_no_notification(self, mock_get, mock_user_events):
         mock_response = MagicMock()
         mock_response.json.return_value = {"tag_name": "v2.0.0"}
         mock_response.raise_for_status.return_value = None
@@ -45,7 +45,7 @@ class UpdateCheckerTests(TestCase):
 
         self.assertTrue(success)
         self.assertIn("up to date", msg)
-        mock_notify.objects.create.assert_not_called()
+        mock_user_events.notify_admins.assert_not_called()
 
     @override_settings(INTEL_OWL_VERSION="3.0.0", UPDATE_CHECK_URL="http://dummy")
     @patch("api_app.core.update_checker.requests.get")
@@ -100,9 +100,9 @@ class UpdateCheckerTests(TestCase):
         self.assertIn("missing tag_name", msg)
 
     @override_settings(INTEL_OWL_VERSION="1.0.0", UPDATE_CHECK_URL="http://dummy")
-    @patch("api_app.core.update_checker.Notification")
+    @patch("api_app.core.update_checker.UserEventQuerySet")
     @patch("api_app.core.update_checker.requests.get")
-    def test_notification_sent_only_once(self, mock_get, mock_notify):
+    def test_notification_sent_only_once(self, mock_get, mock_user_events):
         mock_response = MagicMock()
         mock_response.json.return_value = {"tag_name": "v2.0.0"}
         mock_response.raise_for_status.return_value = None
@@ -111,4 +111,4 @@ class UpdateCheckerTests(TestCase):
         check_for_update()
         check_for_update()
 
-        self.assertEqual(mock_notify.objects.create.call_count, 1)
+        self.assertEqual(mock_user_events.notify_admins.call_count, 1)

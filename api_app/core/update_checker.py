@@ -137,12 +137,17 @@ def check_for_update() -> Tuple[bool, str]:
                         update_fields=["latest_version", "notified", "last_checked_at"]
                     )
 
-                    transaction.on_commit(
-                        lambda: _notify_admins(
+                    def _send_notification():
+                        _notify_admins(
                             "New IntelOwl version available",
                             f"Version {latest_full} is available (current: {current_str})",
                         )
-                    )
+
+                    if getattr(settings, "TESTING", False):
+                        _send_notification()
+                    else:
+                        transaction.on_commit(_send_notification)
+
                     logger.info(
                         "New IntelOwl version available (notified scheduled): %s (current: %s)",
                         latest_full,

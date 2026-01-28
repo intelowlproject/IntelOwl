@@ -6,6 +6,7 @@ from api_app.core.update_checker import check_for_update
 from api_app.models import UpdateCheckStatus
 
 
+@override_settings(TESTING=True)
 class UpdateCheckerTests(TestCase):
     """Tests for IntelOwl update check system."""
 

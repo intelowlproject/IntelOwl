@@ -31,8 +31,7 @@ class OrklSearch(classes.ObservableAnalyzer):
                 }
         else:
             response = requests.get(
-                url=f"""{self.url}/library/search?query={self.observable_name}
-                &full={self.full}&limit={self.limit}""",
+                url=f"{self.url}/library/search?query={self.observable_name}&full={self.full}&limit={self.limit}",
                 headers=headers,
             )
 

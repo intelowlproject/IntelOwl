@@ -31,7 +31,7 @@ if __name__ == "__main__":
             continue
         with open(file, "r+", encoding="utf_8") as f:
             lines = f.readlines()
-            if not (lines[0].strip() != header0.strip() and lines[1].strip() != header1.strip()):
+            if lines[0].strip() == header0.strip() and lines[1].strip() == header1.strip():
                 print("\tSkipping")
                 continue
             else:

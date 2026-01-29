@@ -48,7 +48,7 @@ class ZoomEye(classes.ObservableAnalyzer):
                 self.final_url += f"history={self.history}&"
             self.final_url += f"ip={self.observable_name}"
         else:
-            raise AnalyzerConfigurationException(f"search type: '{self.search_type}' not supported.Supported are: 'host', 'web', 'both'")
+            raise AnalyzerConfigurationException(f"search type: '{self.search_type}' not supported. Supported are: 'host', 'web', 'both'")
 
     def run(self):
         self.__build_zoomeye_url()

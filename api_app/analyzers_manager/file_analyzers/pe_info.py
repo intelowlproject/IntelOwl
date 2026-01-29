@@ -136,10 +136,7 @@ class PEInfo(FileAnalyzer):
                 architecture = str(machine_value) + " => Not x86/64 or Itanium"
             results["architecture"] = architecture
 
-            results["os"] = (
-                f"{pe.OPTIONAL_HEADER.MajorOperatingSystemVersion}"
-                f".{pe.OPTIONAL_HEADER.MinorOperatingSystemVersion}"
-            )
+            results["os"] = f"{pe.OPTIONAL_HEADER.MajorOperatingSystemVersion}.{pe.OPTIONAL_HEADER.MinorOperatingSystemVersion}"
 
             results["dhashicon_hash"] = self._dhashicon()
             results["impfuzzy_hash"] = self._impfuzzy()
@@ -149,9 +146,7 @@ class PEInfo(FileAnalyzer):
             results["imagebase"] = hex(pe.OPTIONAL_HEADER.ImageBase)
 
             timestamp = pe.FILE_HEADER.TimeDateStamp
-            results["compilation_timestamp"] = datetime.utcfromtimestamp(
-                timestamp
-            ).strftime("%Y-%m-%d %H:%M:%S")
+            results["compilation_timestamp"] = datetime.utcfromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
 
             results["import_table"] = self._extract_import_table(pe)
             results["export_table"] = self._extract_export_table(full_dump)
@@ -160,8 +155,7 @@ class PEInfo(FileAnalyzer):
 
         except pefile.PEFormatError as e:
             warning_message = (
-                f"job_id:{self.job_id} analyzer:{self.analyzer_name}"
-                f" md5:{self.md5} filename: {self.filename} PEFormatError {e}"
+                f"job_id:{self.job_id} analyzer:{self.analyzer_name} md5:{self.md5} filename: {self.filename} PEFormatError {e}"
             )
             logger.warning(warning_message)
             self.report.errors.append(warning_message)
@@ -195,9 +189,7 @@ class PEInfo(FileAnalyzer):
             ico[0].save(icon_path)
             # resize
             exe_icon = Image.open(icon_path)
-            exe_icon = exe_icon.convert("L").resize(
-                (hash_size + 1, hash_size), Image.ANTIALIAS
-            )
+            exe_icon = exe_icon.convert("L").resize((hash_size + 1, hash_size), Image.ANTIALIAS)
             diff = []
             for row in range(hash_size):
                 for col in range(hash_size):

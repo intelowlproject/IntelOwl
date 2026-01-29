@@ -21,10 +21,7 @@ class UrlDNA(ObservableAnalyzer):
 
     # Scan options
     device = "DESKTOP"
-    user_agent = (
-        "Mozilla/5.0 (Windows NT 10.0;Win64;x64) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36"
-    )
+    user_agent = "Mozilla/5.0 (Windows NT 10.0;Win64;x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36"
     viewport_width = 1920
     viewport_height = 1080
     waiting_time = 5
@@ -50,10 +47,7 @@ class UrlDNA(ObservableAnalyzer):
             scan_id = self.__urldna_new_scan()
             result = self.__poll_for_result(scan_id)
         else:
-            raise AnalyzerRunException(
-                f"Not supported analysis_type {self.urldna_analysis}. "
-                "Supported are 'SEARCH' and 'NEW_SCAN'."
-            )
+            raise AnalyzerRunException(f"Not supported analysis_type {self.urldna_analysis}. Supported are 'SEARCH' and 'NEW_SCAN'.")
         return result
 
     def __urldna_new_scan(self) -> str:

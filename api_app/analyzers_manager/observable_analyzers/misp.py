@@ -36,9 +36,7 @@ class MISP(classes.ObservableAnalyzer):
     def run(self):
         # this allows self-signed certificates to be used
         ssl_param = (
-            f"{settings.PROJECT_LOCATION}/configuration/misp_ssl.crt"
-            if self.ssl_check and self.self_signed_certificate
-            else self.ssl_check
+            f"{settings.PROJECT_LOCATION}/configuration/misp_ssl.crt" if self.ssl_check and self.self_signed_certificate else self.ssl_check
         )
         misp_instance = pymisp.PyMISP(
             url=self._url_key_name,
@@ -93,8 +91,7 @@ class MISP(classes.ObservableAnalyzer):
                 pass
             else:
                 raise AnalyzerConfigurationException(
-                    f"Observable {self.observable_classification} not supported."
-                    "Currently supported are: ip, domain, hash, url, generic."
+                    f"Observable {self.observable_classification} not supported.Currently supported are: ip, domain, hash, url, generic."
                 )
 
         result_search = misp_instance.search(**params)

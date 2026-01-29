@@ -28,10 +28,7 @@ class Threatminer(classes.ObservableAnalyzer):
         elif self.observable_classification == Classification.HASH:
             uri = "sample.php"
         else:
-            raise AnalyzerRunException(
-                "Unable to retrieve the uri for classification"
-                f" {self.observable_classification}"
-            )
+            raise AnalyzerRunException(f"Unable to retrieve the uri for classification {self.observable_classification}")
 
         try:
             response = requests.get(self.url + uri, params=params, timeout=30)
@@ -45,8 +42,7 @@ class Threatminer(classes.ObservableAnalyzer):
         except requests.HTTPError as http_err:
             if response is not None and response.status_code >= 500:
                 error_message = (
-                    f"Threatminer API returned server error ({response.status_code}) "
-                    "— this is an external service issue. Try again later."
+                    f"Threatminer API returned server error ({response.status_code}) — this is an external service issue. Try again later."
                 )
                 self.report.errors.append(error_message)
                 return {"threatminer_error": error_message}

@@ -12,9 +12,7 @@ from api_app.models import AbstractReport, PythonConfig, PythonModule
 
 class ConnectorReport(AbstractReport):
     objects = ConnectorReportQuerySet.as_manager()
-    config = models.ForeignKey(
-        "ConnectorConfig", related_name="reports", null=False, on_delete=models.CASCADE
-    )
+    config = models.ForeignKey("ConnectorConfig", related_name="reports", null=False, on_delete=models.CASCADE)
 
     class Meta:
         unique_together = [("config", "job")]
@@ -22,9 +20,7 @@ class ConnectorReport(AbstractReport):
 
 
 class ConnectorConfig(PythonConfig):
-    maximum_tlp = models.CharField(
-        null=False, default=TLP.CLEAR, choices=TLP.choices, max_length=50
-    )
+    maximum_tlp = models.CharField(null=False, default=TLP.CLEAR, choices=TLP.choices, max_length=50)
     run_on_failure = models.BooleanField(null=False, default=True)
     python_module = models.ForeignKey(
         PythonModule,
@@ -32,9 +28,7 @@ class ConnectorConfig(PythonConfig):
         related_name="%(class)ss",
         limit_choices_to={"base_path": PythonModuleBasePaths.Connector.value},
     )
-    orgs_configuration = GenericRelation(
-        "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
-    )
+    orgs_configuration = GenericRelation("api_app.OrganizationPluginConfiguration", related_name="%(class)s")
 
     @classproperty
     def plugin_type(cls) -> str:

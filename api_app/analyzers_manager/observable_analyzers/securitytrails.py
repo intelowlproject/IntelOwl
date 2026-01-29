@@ -33,9 +33,7 @@ class SecurityTrails(classes.ObservableAnalyzer):
                 elif self.securitytrails_current_type == "tags":
                     uri = f"domain/{self.observable_name}/tags"
                 else:
-                    raise AnalyzerRunException(
-                        "Not supported endpoint for current analysis."
-                    )
+                    raise AnalyzerRunException("Not supported endpoint for current analysis.")
 
             elif self.securitytrails_analysis == "history":
                 if self.securitytrails_history_analysis == "whois":
@@ -43,19 +41,12 @@ class SecurityTrails(classes.ObservableAnalyzer):
                 elif self.securitytrails_history_analysis == "dns":
                     uri = f"history/{self.observable_name}/dns/a"
                 else:
-                    raise AnalyzerRunException(
-                        "Not supported endpoint for current analysis."
-                    )
+                    raise AnalyzerRunException("Not supported endpoint for current analysis.")
 
             else:
-                raise AnalyzerRunException(
-                    f"Not supported analysis type: {self.securitytrails_analysis}."
-                )
+                raise AnalyzerRunException(f"Not supported analysis type: {self.securitytrails_analysis}.")
         else:
-            raise AnalyzerRunException(
-                f"Not supported observable type: {self.observable_classification}. "
-                "Supported are ip and domain."
-            )
+            raise AnalyzerRunException(f"Not supported observable type: {self.observable_classification}. Supported are ip and domain.")
 
         try:
             response = requests.get(self.url + uri, headers=headers)

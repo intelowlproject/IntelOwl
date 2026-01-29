@@ -98,9 +98,7 @@ class AbstractConfigTestCase(CustomTestCase):
         muc: VisualizerConfig = VisualizerConfig(
             name="test",
             description="test",
-            python_module=PythonModule.objects.get(
-                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
-            ),
+            python_module=PythonModule.objects.get(base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"),
             disabled=False,
             routing_key="wrong_key",
         )
@@ -110,9 +108,7 @@ class AbstractConfigTestCase(CustomTestCase):
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module=PythonModule.objects.get(
-                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
-            ),
+            python_module=PythonModule.objects.get(base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"),
             disabled=False,
         )
         result = muc._is_configured(self.user)
@@ -123,9 +119,7 @@ class AbstractConfigTestCase(CustomTestCase):
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module=PythonModule.objects.get(
-                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
-            ),
+            python_module=PythonModule.objects.get(base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"),
             disabled=False,
         )
         param = Parameter.objects.create(
@@ -144,9 +138,7 @@ class AbstractConfigTestCase(CustomTestCase):
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module=PythonModule.objects.get(
-                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
-            ),
+            python_module=PythonModule.objects.get(base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"),
             disabled=False,
         )
         param = Parameter.objects.create(
@@ -166,9 +158,7 @@ class AbstractConfigTestCase(CustomTestCase):
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module=PythonModule.objects.get(
-                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
-            ),
+            python_module=PythonModule.objects.get(base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"),
             disabled=False,
         )
         param = Parameter.objects.create(
@@ -196,9 +186,7 @@ class AbstractConfigTestCase(CustomTestCase):
         muc = VisualizerConfig.objects.create(
             name="test",
             description="test",
-            python_module=PythonModule.objects.get(
-                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
-            ),
+            python_module=PythonModule.objects.get(base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"),
             disabled=False,
         )
         param = Parameter.objects.create(
@@ -225,9 +213,7 @@ class AbstractConfigTestCase(CustomTestCase):
         muc = VisualizerConfig.objects.create(
             name="test",
             description="test",
-            python_module=PythonModule.objects.get(
-                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
-            ),
+            python_module=PythonModule.objects.get(base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"),
             disabled=False,
         )
         self.assertTrue(muc.is_runnable(self.user))
@@ -237,9 +223,7 @@ class AbstractConfigTestCase(CustomTestCase):
         muc = VisualizerConfig.objects.create(
             name="test",
             description="test",
-            python_module=PythonModule.objects.get(
-                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
-            ),
+            python_module=PythonModule.objects.get(base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"),
             disabled=True,
         )
         self.assertFalse(muc.is_runnable(self.user))
@@ -249,9 +233,7 @@ class AbstractConfigTestCase(CustomTestCase):
         muc = VisualizerConfig.objects.create(
             name="test",
             description="test",
-            python_module=PythonModule.objects.get(
-                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
-            ),
+            python_module=PythonModule.objects.get(base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"),
             disabled=False,
         )
         org = Organization.objects.create(name="test_org")
@@ -278,9 +260,7 @@ class AbstractConfigTestCase(CustomTestCase):
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module=PythonModule.objects.get(
-                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
-            ),
+            python_module=PythonModule.objects.get(base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"),
             disabled=True,
         )
         job.visualizers_to_execute.set([muc])
@@ -301,17 +281,11 @@ class AbstractConfigTestCase(CustomTestCase):
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module=PythonModule.objects.get(
-                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
-            ),
+            python_module=PythonModule.objects.get(base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"),
             disabled=True,
         )
         job.visualizers_to_execute.set([muc])
-        gen_signature = (
-            VisualizerConfig.objects.filter(pk=muc.pk)
-            .annotate_runnable(self.user)
-            .get_signatures(job)
-        )
+        gen_signature = VisualizerConfig.objects.filter(pk=muc.pk).annotate_runnable(self.user).get_signatures(job)
         with self.assertRaises(RuntimeWarning):
             try:
                 next(gen_signature)
@@ -328,17 +302,11 @@ class AbstractConfigTestCase(CustomTestCase):
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module=PythonModule.objects.get(
-                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
-            ),
+            python_module=PythonModule.objects.get(base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"),
             disabled=False,
         )
         job.visualizers_to_execute.set([muc])
-        gen_signature = (
-            VisualizerConfig.objects.filter(pk=muc.pk)
-            .annotate_runnable(self.user)
-            .get_signatures(job)
-        )
+        gen_signature = VisualizerConfig.objects.filter(pk=muc.pk).annotate_runnable(self.user).get_signatures(job)
         try:
             signature = next(gen_signature)
         except StopIteration as e:
@@ -416,17 +384,13 @@ class PluginConfigTestCase(CustomTestCase):
         cc, created2 = ConnectorConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module=PythonModule.objects.get(
-                module="misp.MISP", base_path=PythonModuleBasePaths.Connector.value
-            ),
+            python_module=PythonModule.objects.get(module="misp.MISP", base_path=PythonModuleBasePaths.Connector.value),
             disabled=False,
         )
         vc, created3 = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module=PythonModule.objects.get(
-                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
-            ),
+            python_module=PythonModule.objects.get(base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"),
             disabled=False,
         )
         param = Parameter.objects.create(
@@ -469,7 +433,6 @@ class PluginConfigTestCase(CustomTestCase):
 
 
 class JobTestCase(CustomTestCase):
-
     def test_get_analyzers_data_models(self):
         an1 = Analyzable.objects.create(
             name="test.com",
@@ -531,9 +494,7 @@ class JobTestCase(CustomTestCase):
 
         del j1.pivots_to_execute
         j1.analyzers_to_execute.set([ac])
-        self.assertCountEqual(
-            j1.pivots_to_execute.filter(name="test").values_list("pk", flat=True), []
-        )
+        self.assertCountEqual(j1.pivots_to_execute.filter(name="test").values_list("pk", flat=True), [])
 
         del j1.pivots_to_execute
         j1.analyzers_to_execute.set([ac, ac2, ac3])
@@ -544,9 +505,7 @@ class JobTestCase(CustomTestCase):
 
         del j1.pivots_to_execute
         j1.analyzers_to_execute.set([ac, ac3])
-        self.assertCountEqual(
-            j1.pivots_to_execute.filter(name="test").values_list("pk", flat=True), []
-        )
+        self.assertCountEqual(j1.pivots_to_execute.filter(name="test").values_list("pk", flat=True), [])
 
     def test_get_root_returns_self_when_is_root(self):
         """Test that get_root() returns self when the job is already a root node."""
@@ -601,9 +560,7 @@ class JobTestCase(CustomTestCase):
         )
         # Call get_root multiple times and verify consistent results
         results = [root_job.get_root().pk for _ in range(10)]
-        self.assertEqual(
-            len(set(results)), 1, "get_root() should return consistent results"
-        )
+        self.assertEqual(len(set(results)), 1, "get_root() should return consistent results")
         root_job.delete()
         an.delete()
 

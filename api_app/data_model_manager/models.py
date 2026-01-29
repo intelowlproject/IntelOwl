@@ -69,9 +69,7 @@ class BaseDataModel(models.Model):
         default=None,
         choices=DataModelEvaluations.choices,
     )
-    reliability = PositiveIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(10)], default=5
-    )
+    reliability = PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(10)], default=5)
     kill_chain_phase = LowercaseCharField(
         default=None,
         null=True,
@@ -87,15 +85,9 @@ class BaseDataModel(models.Model):
     related_threats = SetField(
         LowercaseCharField(max_length=100), default=list, blank=True
     )  # threats/related_threats, used as a pointer to other IOCs
-    tags = SetField(
-        LowercaseCharField(max_length=100), null=True, blank=True, default=None
-    )
-    malware_family = LowercaseCharField(
-        max_length=100, null=True, blank=True, default=None
-    )
-    additional_info = models.JSONField(
-        default=dict
-    )  # field for additional information related to a specific analyzer
+    tags = SetField(LowercaseCharField(max_length=100), null=True, blank=True, default=None)
+    malware_family = LowercaseCharField(max_length=100, null=True, blank=True, default=None)
+    additional_info = models.JSONField(default=dict)  # field for additional information related to a specific analyzer
     date = models.DateTimeField(default=now)
     analyzers_report = GenericRelation(
         to="analyzers_manager.AnalyzerReport",
@@ -131,9 +123,7 @@ class BaseDataModel(models.Model):
         elif self.jobs.exists():
             return self.jobs.first().user
 
-    def merge(
-        self, other: Union["BaseDataModel", Dict], append: bool = True
-    ) -> "BaseDataModel":
+    def merge(self, other: Union["BaseDataModel", Dict], append: bool = True) -> "BaseDataModel":
         if not self.pk:
             raise ValueError("Unable to merge a model that was not saved.")
         if not isinstance(other, (self.__class__, dict)):
@@ -165,15 +155,11 @@ class BaseDataModel(models.Model):
                     continue
                 elif isinstance(field, ForeignKey):
                     if isinstance(other_attr, dict):
-                        other_attr = field.related_model.objects.get_or_create(
-                            **other_attr
-                        )
+                        other_attr = field.related_model.objects.get_or_create(**other_attr)
                     elif isinstance(other_attr, models.Model):
                         pass
                     else:
-                        logger.error(
-                            f"Field {field_name} has wrong type with value {other_attr}"
-                        )
+                        logger.error(f"Field {field_name} has wrong type with value {other_attr}")
                         continue
                     result_attr = other_attr
                 else:
@@ -208,9 +194,7 @@ class BaseDataModel(models.Model):
 
     @classmethod
     def get_fields(cls) -> Dict:
-        return {
-            field.name: field for field in cls._meta.fields + cls._meta.many_to_many
-        }
+        return {field.name: field for field in cls._meta.fields + cls._meta.many_to_many}
 
     @classmethod
     def get_serializer(cls) -> Type[ModelSerializer]:
@@ -234,22 +218,12 @@ class DomainDataModel(BaseDataModel):
 
 class IPDataModel(BaseDataModel):
     ietf_report = models.ManyToManyField(IETFReport, related_name="ips")  # pdns
-    asn = models.IntegerField(
-        null=True, blank=True, default=None
-    )  # BGPRanking, MaxMind
-    asn_rank = models.DecimalField(
-        null=True, blank=True, default=None, decimal_places=20, max_digits=21
-    )  # BGPRanking
+    asn = models.IntegerField(null=True, blank=True, default=None)  # BGPRanking, MaxMind
+    asn_rank = models.DecimalField(null=True, blank=True, default=None, decimal_places=20, max_digits=21)  # BGPRanking
     certificates = models.JSONField(null=True, blank=True, default=None)  # CIRCL_PSSL
-    org_name = LowercaseCharField(
-        max_length=100, null=True, blank=True, default=None
-    )  # GreyNoise
-    country_code = LowercaseCharField(
-        max_length=100, null=True, blank=True, default=None
-    )  # MaxMind, AbuseIPDB
-    registered_country_code = LowercaseCharField(
-        max_length=100, null=True, blank=True, default=None
-    )  # MaxMind, AbuseIPDB
+    org_name = LowercaseCharField(max_length=100, null=True, blank=True, default=None)  # GreyNoise
+    country_code = LowercaseCharField(max_length=100, null=True, blank=True, default=None)  # MaxMind, AbuseIPDB
+    registered_country_code = LowercaseCharField(max_length=100, null=True, blank=True, default=None)  # MaxMind, AbuseIPDB
     isp = LowercaseCharField(max_length=100, null=True, blank=True, default=None)
     resolutions = SetField(models.URLField(), default=list)
     # AbuseIPDB
@@ -266,18 +240,12 @@ class IPDataModel(BaseDataModel):
 
 
 class FileDataModel(BaseDataModel):
-    signatures = models.ManyToManyField(
-        Signature, related_name="files"
-    )  # ClamAvFileAnalyzer,
+    signatures = models.ManyToManyField(Signature, related_name="files")  # ClamAvFileAnalyzer,
     # MalwareBazaarFileAnalyzer (signatures/yara_rules), Yara (report.list_el.match)
     # Yaraify (report.data.tasks.static_result)
-    comments = SetField(
-        LowercaseCharField(max_length=100), default=list, blank=True
-    )  # MalwareBazaarFileAnalyzer,
+    comments = SetField(LowercaseCharField(max_length=100), default=list, blank=True)  # MalwareBazaarFileAnalyzer,
     # VirusTotalV3FileAnalyzer (data.relationships.comments)
-    file_information = models.JSONField(
-        default=dict, blank=True
-    )  # MalwareBazaarFileAnalyzer, OneNoteInfo (files),
+    file_information = models.JSONField(default=dict, blank=True)  # MalwareBazaarFileAnalyzer, OneNoteInfo (files),
     # QuarkEngineAPK (crimes.confidence, threat_level, total_score)
     # RtfInfo (exploit_equation_editor, exploit_ole2link_vuln)
     stats = models.JSONField(default=dict, blank=True)  # PdfInfo (peepdf_stats)

@@ -41,8 +41,7 @@ class Suricata:
             parser.add_argument("--reload_rules", action="store_true")
             args = parser.parse_args()
             logger.info(
-                f"received args: filename: {args.filename}, md5: {args.file_md5},"
-                f" reload_rules {args.reload_rules}, job_id: {args.job_id}"
+                f"received args: filename: {args.filename}, md5: {args.file_md5}, reload_rules {args.reload_rules}, job_id: {args.job_id}"
             )
             self.filename = str(args.filename)
             self.job_id = args.job_id

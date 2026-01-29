@@ -33,10 +33,7 @@ class Stalkphish(classes.ObservableAnalyzer):
         elif obs_clsfn == Classification.IP:
             uri = f"search/ipv4/{self.observable_name}"
         else:
-            raise AnalyzerRunException(
-                f"not supported observable type {obs_clsfn}."
-                " Supported are: ip, domain, url or generic."
-            )
+            raise AnalyzerRunException(f"not supported observable type {obs_clsfn}. Supported are: ip, domain, url or generic.")
 
         try:
             response = requests.get(self.url + uri, headers=headers)

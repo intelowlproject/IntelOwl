@@ -59,8 +59,7 @@ class IsObjectSameOrgPermission(BasePermission):
         return (
             obj.owner.has_membership()
             and request.user.has_membership()
-            and obj.owner.membership.organization_id
-            == request.user.membership.organization_id
+            and obj.owner.membership.organization_id == request.user.membership.organization_id
         )
 
 
@@ -97,8 +96,7 @@ class IsObjectAdminPermission(BasePermission):
             return (
                 request.user.has_membership()
                 and request.user.membership.is_admin
-                and obj_owner.membership.organization
-                == request.user.membership.organization
+                and obj_owner.membership.organization == request.user.membership.organization
             )
 
 

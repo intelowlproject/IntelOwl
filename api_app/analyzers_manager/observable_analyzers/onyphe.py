@@ -31,10 +31,7 @@ class Onyphe(classes.ObservableAnalyzer):
         elif obs_clsfn == Classification.URL:
             uri = f"hostname/{self.observable_name}"
         else:
-            raise AnalyzerRunException(
-                f"not supported observable type {obs_clsfn}."
-                " Supported are: ip, domain and url."
-            )
+            raise AnalyzerRunException(f"not supported observable type {obs_clsfn}. Supported are: ip, domain and url.")
 
         try:
             response = requests.get(self.url + uri, headers=headers)

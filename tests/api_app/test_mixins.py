@@ -24,16 +24,12 @@ possible_responses = {
                             {
                                 "type": "url",
                                 "id": "b33ca60c36a2dbdb354936f83e3232ae886eeb237f61bfdd19420410f585c0c2",
-                                "context_attributes": {
-                                    "url": "http://www.microsoft.com/pki/certs/MicRooCerAut_2010-06-23.crt"
-                                },
+                                "context_attributes": {"url": "http://www.microsoft.com/pki/certs/MicRooCerAut_2010-06-23.crt"},
                             },
                             {
                                 "type": "url",
                                 "id": "e1deefc8a4613fe9c16014d5cce4de4a6e12f3caccf80838a04c82faa4b42434",
-                                "context_attributes": {
-                                    "url": "http://pki.goog/gsr1/gsr1.crt"
-                                },
+                                "context_attributes": {"url": "http://pki.goog/gsr1/gsr1.crt"},
                             },
                         ],
                         "links": {"self": "redacted", "related": "redacted"},
@@ -91,16 +87,10 @@ class VirusTotalv3Analyzer(VirusTotalv3AnalyzerMixin):
 class VirusTotalMixinTestCase(CustomTestCase):
     def setUp(self) -> None:
         self.base = VirusTotalv3Base()
-        self.analyzer_file = VirusTotalv3Analyzer(
-            AnalyzerConfig.objects.get(name="VirusTotal_v3_Get_File")
-        )
-        self.analyzer_observable = VirusTotalv3Analyzer(
-            AnalyzerConfig.objects.get(name="VirusTotal_v3_Get_Observable")
-        )
+        self.analyzer_file = VirusTotalv3Analyzer(AnalyzerConfig.objects.get(name="VirusTotal_v3_Get_File"))
+        self.analyzer_observable = VirusTotalv3Analyzer(AnalyzerConfig.objects.get(name="VirusTotal_v3_Get_Observable"))
 
-        self.base.url = self.analyzer_file.url = self.analyzer_observable.url = (
-            "https://www.virustotal.com/api/v3/"
-        )
+        self.base.url = self.analyzer_file.url = self.analyzer_observable.url = "https://www.virustotal.com/api/v3/"
         self._api_key_name = self._api_key_name = "123456"
 
     def test_get_requests_params_and_uri(self):
@@ -114,9 +104,7 @@ class VirusTotalMixinTestCase(CustomTestCase):
             "collections",
             "historical_ssl_certificates",
         ]
-        params, uri, relationships_requested = self.base._get_requests_params_and_uri(
-            Classification.DOMAIN, "google.com", True
-        )
+        params, uri, relationships_requested = self.base._get_requests_params_and_uri(Classification.DOMAIN, "google.com", True)
         self.assertIn("relationships", params)
         self.assertListEqual(relationships_requested, expected_relationships)
         self.assertEqual(params["relationships"], ",".join(expected_relationships))
@@ -130,9 +118,7 @@ class VirusTotalMixinTestCase(CustomTestCase):
             "collections",
             "historical_ssl_certificates",
         ]
-        params, uri, relationships_requested = self.base._get_requests_params_and_uri(
-            Classification.IP, "8.8.8.8", True
-        )
+        params, uri, relationships_requested = self.base._get_requests_params_and_uri(Classification.IP, "8.8.8.8", True)
         self.assertIn("relationships", params)
         self.assertListEqual(relationships_requested, expected_relationships)
         self.assertEqual(params["relationships"], ",".join(expected_relationships))

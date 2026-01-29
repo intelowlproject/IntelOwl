@@ -23,9 +23,7 @@ class TestAndroguardAnalyzer(BaseFileAnalyzerTest):
             "com.example.MainActivity",
             "com.example.SettingsActivity",
         ]
-        mock_apk.get_requested_third_party_permissions.return_value = [
-            "com.google.android.c2dm.permission.RECEIVE"
-        ]
+        mock_apk.get_requested_third_party_permissions.return_value = ["com.google.android.c2dm.permission.RECEIVE"]
         mock_apk.get_providers.return_value = ["com.example.DataProvider"]
         mock_apk.get_features.return_value = [
             "android.hardware.camera",

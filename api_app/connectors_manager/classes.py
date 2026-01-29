@@ -51,20 +51,13 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
         if (
             self._config.run_on_failure
             or not self._job.analyzerreports.count()
-            or self._job.analyzerreports.exclude(
-                status=ReportStatus.FAILED.value
-            ).exists()
+            or self._job.analyzerreports.exclude(status=ReportStatus.FAILED.value).exists()
         ):
             logger.info(
-                f"Running connector {self.__class__.__name__} "
-                f"even if job status is {self._job.status} because"
-                "run on failure is set"
+                f"Running connector {self.__class__.__name__} even if job status is {self._job.status} becauserun on failure is set"
             )
         else:
-            raise ConnectorRunException(
-                "An analyzer has failed,"
-                f" unable to run connector {self.__class__.__name__}"
-            )
+            raise ConnectorRunException(f"An analyzer has failed, unable to run connector {self.__class__.__name__}")
 
     def after_run(self):
         super().after_run()

@@ -11,9 +11,7 @@ from api_app.visualizers_manager.visualizers.passive_dns.analyzer_extractor impo
 
 
 @visualizable_error_handler_with_params("pdns_table")
-def pdns_table(
-    raw_pdns_data: List[PDNSReport], table_columns: List[Visualizer.TableColumn]
-) -> VisualizableObject:
+def pdns_table(raw_pdns_data: List[PDNSReport], table_columns: List[Visualizer.TableColumn]) -> VisualizableObject:
     visualizable_reports = []
     for raw_report in raw_pdns_data:
         visualizable_reports.append(__visualize_report(raw_report))

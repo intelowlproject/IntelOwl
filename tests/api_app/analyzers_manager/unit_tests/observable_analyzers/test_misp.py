@@ -12,9 +12,7 @@ class MISPTestCase(BaseAnalyzerTest):
 
     @staticmethod
     def get_mocked_response():
-        return patch(
-            "pymisp.PyMISP", return_value=MockResponseNoOp({"response": "mocked"}, 200)
-        )
+        return patch("pymisp.PyMISP", return_value=MockResponseNoOp({"response": "mocked"}, 200))
 
     @classmethod
     def get_extra_config(cls) -> dict:

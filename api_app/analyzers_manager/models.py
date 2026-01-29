@@ -24,9 +24,7 @@ logger = getLogger(__name__)
 
 class AnalyzerReport(AbstractReport):
     objects = AnalyzerReportQuerySet.as_manager()
-    config = models.ForeignKey(
-        "AnalyzerConfig", related_name="reports", null=False, on_delete=models.CASCADE
-    )
+    config = models.ForeignKey("AnalyzerConfig", related_name="reports", null=False, on_delete=models.CASCADE)
     data_model_content_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE,
@@ -42,16 +40,10 @@ class AnalyzerReport(AbstractReport):
 
     class Meta:
         unique_together = [("config", "job")]
-        indexes = AbstractReport.Meta.indexes + [
-            models.Index(fields=["data_model_content_type", "data_model_object_id"])
-        ]
+        indexes = AbstractReport.Meta.indexes + [models.Index(fields=["data_model_content_type", "data_model_object_id"])]
 
     def clean(self):
-        if (
-            self.data_model_content_type
-            and ContentType.objects.get_for_model(model=self.data_model_class)
-            != self.data_model_content_type
-        ):
+        if self.data_model_content_type and ContentType.objects.get_for_model(model=self.data_model_class) != self.data_model_content_type:
             raise ValidationError("Wrong data model for this report")
 
     @property
@@ -60,17 +52,12 @@ class AnalyzerReport(AbstractReport):
 
     def _validation_before_data_model(self) -> bool:
         if not self.status == self.STATUSES.SUCCESS.value:
-            logger.info(
-                f"Skipping data model of {self.config.name} for job {self.config_id} because status is "
-                f"{self.status}"
-            )
+            logger.info(f"Skipping data model of {self.config.name} for job {self.config_id} because status is {self.status}")
             return False
         data_model_keys = self.data_model_class.get_fields().keys()
         for data_model_key in self.config.mapping_data_model.values():
             if data_model_key not in data_model_keys:
-                self.errors.append(
-                    f"Field {data_model_key} not available in {self.data_model_class.__name__}"
-                )
+                self.errors.append(f"Field {data_model_key} not available in {self.data_model_class.__name__}")
         return True
 
     def _create_data_model_dictionary(self) -> Dict:
@@ -233,17 +220,12 @@ class MimeTypes(models.TextChoices):
             mimetype = cls._calculate_from_filename(file_name)
 
         if mimetype is None:
-            mimetype = magic_from_buffer(
-                buffer.encode() if isinstance(buffer, str) else buffer, mime=True
-            )
+            mimetype = magic_from_buffer(buffer.encode() if isinstance(buffer, str) else buffer, mime=True)
             logger.debug(f"mimetype is {mimetype}")
             try:
                 mimetype = cls(mimetype)
             except ValueError:
-                logger.info(
-                    f"Unable to valid a {cls.__name__} for mimetype {mimetype}"
-                    f" for file {file_name}"
-                )
+                logger.info(f"Unable to valid a {cls.__name__} for mimetype {mimetype} for file {file_name}")
             else:
                 mimetype = mimetype.value
 
@@ -254,9 +236,7 @@ class AnalyzerConfig(PythonConfig):
     # generic
     type = models.CharField(choices=TypeChoices.choices, null=False, max_length=50)
     docker_based = models.BooleanField(null=False, default=False)
-    maximum_tlp = models.CharField(
-        null=False, default=TLP.RED, choices=TLP.choices, max_length=50
-    )
+    maximum_tlp = models.CharField(null=False, default=TLP.RED, choices=TLP.choices, max_length=50)
     python_module = models.ForeignKey(
         PythonModule,
         on_delete=models.PROTECT,
@@ -270,9 +250,7 @@ class AnalyzerConfig(PythonConfig):
     )
     # obs
     observable_supported = ChoiceArrayField(
-        models.CharField(
-            null=False, choices=Classification.choices[:-1], max_length=30
-        ),
+        models.CharField(null=False, choices=Classification.choices[:-1], max_length=30),
         default=list,
         blank=True,
     )
@@ -284,17 +262,13 @@ class AnalyzerConfig(PythonConfig):
         blank=True,
     )
     run_hash = models.BooleanField(default=False)
-    run_hash_type = models.CharField(
-        blank=True, choices=HashChoices.choices, max_length=10
-    )
+    run_hash_type = models.CharField(blank=True, choices=HashChoices.choices, max_length=10)
     not_supported_filetypes = ChoiceArrayField(
         models.CharField(null=False, max_length=90, choices=MimeTypes.choices),
         default=list,
         blank=True,
     )
-    orgs_configuration = GenericRelation(
-        "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
-    )
+    orgs_configuration = GenericRelation("api_app.OrganizationPluginConfiguration", related_name="%(class)s")
     mapping_data_model = models.JSONField(
         default=dict,
         help_text="Mapping analyzer_report_key: data_model_key. Keys preceded by the symbol $ will be considered as constants.",
@@ -309,27 +283,17 @@ class AnalyzerConfig(PythonConfig):
 
     def clean_observable_supported(self):
         if self.type == TypeChoices.OBSERVABLE and not self.observable_supported:
-            raise ValidationError(
-                "You have to specify at least one type of observable supported"
-            )
+            raise ValidationError("You have to specify at least one type of observable supported")
         if self.type != TypeChoices.OBSERVABLE and self.observable_supported:
-            raise ValidationError(
-                "You can't specify an observable type if you do not support observable"
-            )
+            raise ValidationError("You can't specify an observable type if you do not support observable")
 
     def clean_filetypes(self):
         if self.type == TypeChoices.FILE:
             if self.supported_filetypes and self.not_supported_filetypes:
-                raise ValidationError(
-                    "Please specify only one between "
-                    "supported_filetypes and not_supported_filetypes"
-                )
+                raise ValidationError("Please specify only one between supported_filetypes and not_supported_filetypes")
         else:
             if self.supported_filetypes or self.not_supported_filetypes:
-                raise ValidationError(
-                    "You can't specify supported_filetypes or "
-                    "not_supported_filetypes if you do not support files"
-                )
+                raise ValidationError("You can't specify supported_filetypes or not_supported_filetypes if you do not support files")
 
     def clean_run_hash_type(self):
         if self.run_hash and not self.run_hash_type:
@@ -355,6 +319,4 @@ class AnalyzerRulesFileVersion(models.Model):
     download_url = models.URLField(max_length=200, blank=True, default="")
     downloaded_at = models.DateTimeField(auto_now_add=True)
 
-    python_module = models.ForeignKey(
-        PythonModule, on_delete=models.PROTECT, related_name="rules_version"
-    )
+    python_module = models.ForeignKey(PythonModule, on_delete=models.PROTECT, related_name="rules_version")

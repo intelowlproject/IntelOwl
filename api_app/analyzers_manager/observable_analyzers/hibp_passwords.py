@@ -24,11 +24,7 @@ class HibpPasswords(ObservableAnalyzer):
 
     def run(self):
         if self.observable_classification != "generic":
-            raise RuntimeError(
-                "Unsupported observable type "
-                f"{self.observable_classification!r}. "
-                "Supported: generic (password)."
-            )
+            raise RuntimeError(f"Unsupported observable type {self.observable_classification!r}. Supported: generic (password).")
 
         password = self.observable_name
 
@@ -36,9 +32,7 @@ class HibpPasswords(ObservableAnalyzer):
         # Only first 5 hex chars of SHA-1 are sent — full password/hash
         # never leaves client. Safe & intentional per HIBP design:
         # https://haveibeenpwned.com/API/v3#PwnedPasswords
-        sha1_hash = (
-            hashlib.sha1(password.encode("utf-8")).hexdigest().upper()
-        )  # nosec  # noqa: E501
+        sha1_hash = hashlib.sha1(password.encode("utf-8")).hexdigest().upper()  # nosec  # noqa: E501
 
         prefix = sha1_hash[:5]
         suffix = sha1_hash[5:]
@@ -64,11 +58,7 @@ class HibpPasswords(ObservableAnalyzer):
                     exposure_count = int(count)
                     break
 
-        summary = (
-            f"Password exposed {exposure_count} times in breaches."
-            if exposure_count > 0
-            else "Password not found in known breaches."
-        )
+        summary = f"Password exposed {exposure_count} times in breaches." if exposure_count > 0 else "Password not found in known breaches."
 
         return {
             "success": True,

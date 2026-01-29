@@ -27,10 +27,7 @@ class Censys(classes.ObservableAnalyzer):
         if self.censys_analysis == "search":
             uri = f"/hosts/{self.observable_name}"
         else:
-            raise AnalyzerRunException(
-                f"not supported observable type {self.observable_classification}."
-                "Supported is IP"
-            )
+            raise AnalyzerRunException(f"not supported observable type {self.observable_classification}.Supported is IP")
         response = requests.get(
             self.url + uri,
             auth=(self._api_id_name, self._api_secret_name),

@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 """Check if the domains is reported as malicious for GoogleSafeBrowsing"""
+
 from typing import Dict, List
 
 import pysafebrowsing
@@ -34,9 +35,7 @@ class GoogleSF(classes.ObservableAnalyzer):
     def run(self):
         sb_instance = pysafebrowsing.SafeBrowsing(self._api_key_name)
         response = sb_instance.lookup_urls([self.observable_name])
-        if self.observable_name in response and isinstance(
-            response[self.observable_name], dict
-        ):
+        if self.observable_name in response and isinstance(response[self.observable_name], dict):
             result = response[self.observable_name]
         else:
             raise AnalyzerRunException(f"result not expected: {response}")

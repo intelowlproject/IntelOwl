@@ -16,12 +16,8 @@ class PulsediveTestCase(BaseAnalyzerTest):
             patch(
                 "requests.get",
                 side_effect=[
-                    MockUpResponse(
-                        {}, 404
-                    ),  # First call returns 404 -> triggers submission
-                    MockUpResponse(
-                        {"status": "done", "data": {"indicator": "example.com"}}, 200
-                    ),  # Polling result
+                    MockUpResponse({}, 404),  # First call returns 404 -> triggers submission
+                    MockUpResponse({"status": "done", "data": {"indicator": "example.com"}}, 200),  # Polling result
                 ],
             ),
             patch("requests.post", return_value=MockUpResponse({"qid": 1}, 200)),

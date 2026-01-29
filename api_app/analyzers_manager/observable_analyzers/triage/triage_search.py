@@ -26,10 +26,7 @@ class TriageSearch(ObservableAnalyzer, TriageMixin):
         elif self.analysis_type == "submit":
             self.__triage_submit()
         else:
-            raise AnalyzerConfigurationException(
-                f"analysis type '{self.analysis_type}' not supported."
-                "Supported are: 'search', 'submit'."
-            )
+            raise AnalyzerConfigurationException(f"analysis type '{self.analysis_type}' not supported.Supported are: 'search', 'submit'.")
 
         return self.final_report
 
@@ -52,9 +49,7 @@ class TriageSearch(ObservableAnalyzer, TriageMixin):
 
         logger.info(f"triage {self.observable_name} sending URL for analysis")
         for _try in range(self.max_tries):
-            logger.info(
-                f"triage {self.observable_name} polling for result try #{_try + 1}"
-            )
+            logger.info(f"triage {self.observable_name} polling for result try #{_try + 1}")
             self.response = self.session.post(self.url + "samples", json=data)
             if self.response.status_code == 200:
                 break
@@ -64,6 +59,4 @@ class TriageSearch(ObservableAnalyzer, TriageMixin):
             self.response.raise_for_status()
             self.manage_submission_response()
         else:
-            raise AnalyzerRunException(
-                f"response not available for {self.observable_name}"
-            )
+            raise AnalyzerRunException(f"response not available for {self.observable_name}")

@@ -14,9 +14,7 @@ from api_app.pivots_manager.views import (
 router = routers.DefaultRouter(trailing_slash=False)
 router.register(r"pivot", PivotConfigViewSet, basename="pivot")
 router.register(r"pivot_map", PivotMapViewSet, basename="pivot_map")
-router.register(
-    r"pivot/(?P<name>\w+)", PivotPluginConfigViewSet, basename="plugin-config-pivot"
-)
+router.register(r"pivot/(?P<name>\w+)", PivotPluginConfigViewSet, basename="plugin-config-pivot")
 
 urlpatterns = [
     path(r"", include(router.urls)),

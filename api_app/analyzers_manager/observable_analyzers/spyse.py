@@ -33,14 +33,9 @@ class Spyse(classes.ObservableAnalyzer):
             elif re.match(REGEX_CVE, self.observable_name):
                 endpoint = "cve"
             else:
-                raise AnalyzerRunException(
-                    f"{self.analyzer_name} with `generic` supports email and CVE only."
-                )
+                raise AnalyzerRunException(f"{self.analyzer_name} with `generic` supports email and CVE only.")
         else:
-            raise AnalyzerRunException(
-                f"{self.observable_classification} not supported."
-                "Supported are: IP, domain and generic."
-            )
+            raise AnalyzerRunException(f"{self.observable_classification} not supported.Supported are: IP, domain and generic.")
         return f"{self.url}/{endpoint}/{self.observable_name}"
 
     def run(self):

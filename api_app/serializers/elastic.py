@@ -39,9 +39,7 @@ class ElasticRequestSerializer(serializers.Serializer):
         required=False,
     )
     name = serializers.CharField(required=False)
-    status = serializers.ChoiceField(
-        choices=ReportStatus.final_statuses(), required=False
-    )
+    status = serializers.ChoiceField(choices=ReportStatus.final_statuses(), required=False)
     errors = serializers.BooleanField(required=False, allow_null=True)
     start_start_time = serializers.DateTimeField(required=False)
     end_start_time = serializers.DateTimeField(required=False)
@@ -53,18 +51,10 @@ class ElasticRequestSerializer(serializers.Serializer):
         result = super().validate(attrs)
         logger.debug(f"{result=}")
 
-        if (
-            result.get("start_start_time")
-            and result.get("end_start_time")
-            and result["start_start_time"] > result["end_start_time"]
-        ):
+        if result.get("start_start_time") and result.get("end_start_time") and result["start_start_time"] > result["end_start_time"]:
             logger.debug("oi")
             raise ValidationError("start date must be equal or lower than end date")
-        if (
-            result.get("start_end_time")
-            and result.get("end_end_time")
-            and result["start_end_time"] > result["end_end_time"]
-        ):
+        if result.get("start_end_time") and result.get("end_end_time") and result["start_end_time"] > result["end_end_time"]:
             raise ValidationError("start date must be equal or lower than end date")
         return result
 

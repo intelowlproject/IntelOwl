@@ -36,9 +36,7 @@ class MalprobScan(FileAnalyzer):
                 self.disable_for_rate_limit()
                 raise AnalyzerRunException("Limit reached for API")
             elif scan.status_code == 302:
-                logger.info(
-                    f"status 302: file already exists | Rescanning the file: {self.md5}"
-                )
+                logger.info(f"status 302: file already exists | Rescanning the file: {self.md5}")
             else:
                 return scan.json()
 

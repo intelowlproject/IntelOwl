@@ -23,11 +23,7 @@ class PlaybookConfigAdminView(AbstractConfigAdminView, ModelWithOwnershipAdminVi
         "scan_mode",
         "starting",
     ) + ModelWithOwnershipAdminView.list_display
-    list_filter = (
-        AbstractConfigAdminView.list_filter
-        + ("starting",)
-        + ModelWithOwnershipAdminView.list_filter
-    )
+    list_filter = AbstractConfigAdminView.list_filter + ("starting",) + ModelWithOwnershipAdminView.list_filter
 
     @staticmethod
     def _get_plugins(qs):

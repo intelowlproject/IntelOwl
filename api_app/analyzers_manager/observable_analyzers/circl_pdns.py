@@ -26,10 +26,7 @@ class CIRCL_PDNS(classes.ObservableAnalyzer):
             # You should save CIRCL credentials with this template: "<user>|<pwd>"
         self.split_credentials = self._pdns_credentials.split("|")
         if len(self.split_credentials) != 2:
-            raise AnalyzerRunException(
-                "CIRCL credentials not properly configured."
-                "Template to use: '<user>|<pwd>'"
-            )
+            raise AnalyzerRunException("CIRCL credentials not properly configured.Template to use: '<user>|<pwd>'")
 
     def run(self):
         user, pwd = self.split_credentials
@@ -38,18 +35,14 @@ class CIRCL_PDNS(classes.ObservableAnalyzer):
         try:
             result = pdns.query(self.domain, timeout=5)
         except pypdns.errors.UnauthorizedError as e:
-            raise AnalyzerRunException(
-                f"Credentials are not valid: UnauthorizedError: {e}"
-            )
+            raise AnalyzerRunException(f"Credentials are not valid: UnauthorizedError: {e}")
 
         for result_item in result:
             keys_to_decode = ["time_first", "time_last"]
             for key_to_decode in keys_to_decode:
                 time_extracted = result_item.get(key_to_decode, None)
                 if time_extracted and isinstance(time_extracted, datetime.datetime):
-                    result_item[key_to_decode] = time_extracted.strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    )
+                    result_item[key_to_decode] = time_extracted.strftime("%Y-%m-%d %H:%M:%S")
 
         return result
 

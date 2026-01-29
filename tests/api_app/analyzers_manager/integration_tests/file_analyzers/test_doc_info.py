@@ -92,9 +92,7 @@ class DocInfoTestCase(CustomTestCase):
             "Doc_Info",
             DocInfo,
         )
-        self.assertIn(
-            "https://kendallvilleglass.com/vers/ber.php", urls1_xls_report["uris"]
-        )
+        self.assertIn("https://kendallvilleglass.com/vers/ber.php", urls1_xls_report["uris"])
         urls2_xls_report = self._analyze_sample(
             "urls2.xls",
             "b4b3a2223765ac84c9b1b05dbf7c6503",

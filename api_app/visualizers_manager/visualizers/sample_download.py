@@ -23,7 +23,6 @@ logger = getLogger(__name__)
 
 
 class SampleDownload(Visualizer):
-
     @classmethod
     def update(cls) -> bool:
         pass
@@ -32,9 +31,7 @@ class SampleDownload(Visualizer):
     def _download_button(self):
         # first attempt is download with VT
         try:
-            vt_report = self.get_analyzer_reports().get(
-                config__python_module=VirusTotalv3SampleDownload.python_module
-            )
+            vt_report = self.get_analyzer_reports().get(config__python_module=VirusTotalv3SampleDownload.python_module)
         except AnalyzerReport.DoesNotExist:
             pass
         else:
@@ -48,9 +45,7 @@ class SampleDownload(Visualizer):
 
         # second attempt is download with VT
         try:
-            uri_report = self.get_analyzer_reports().get(
-                config__python_module=DownloadFileFromUri.python_module
-            )
+            uri_report = self.get_analyzer_reports().get(config__python_module=DownloadFileFromUri.python_module)
         except AnalyzerReport.DoesNotExist:
             raise Exception("no VirusTotal nor uri analyzer used")
         else:

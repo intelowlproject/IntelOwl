@@ -26,9 +26,7 @@ class CuckooAnalysis(FileAnalyzer):
         # it depends on version and configuration
         self.session = requests.Session()
         if not hasattr(self, "_api_key_name"):
-            logger.info(
-                f"{self.__repr__()}, (md5: {self.md5}) -> Continuing w/o API key.."
-            )
+            logger.info(f"{self.__repr__()}, (md5: {self.md5}) -> Continuing w/o API key..")
         else:
             self.session.headers["Authorization"] = f"Bearer {self._api_key_name}"
 
@@ -55,16 +53,10 @@ class CuckooAnalysis(FileAnalyzer):
         post_success = False
         response = None
         for chance in range(self.max_post_tries):
-            logger.info(
-                f"request #{chance} for file analysis of ({self.filename},{self.md5})"
-            )
-            response = self.session.post(
-                self._url_key_name + "tasks/create/file", files=files
-            )
+            logger.info(f"request #{chance} for file analysis of ({self.filename},{self.md5})")
+            response = self.session.post(self._url_key_name + "tasks/create/file", files=files)
             if response.status_code != 200:
-                logger.info(
-                    f"failed post to start cuckoo analysis, status code {response.status_code}"
-                )
+                logger.info(f"failed post to start cuckoo analysis, status code {response.status_code}")
                 time.sleep(5)
                 continue
             post_success = True
@@ -72,28 +64,18 @@ class CuckooAnalysis(FileAnalyzer):
 
         if post_success:
             json_response = response.json()
-            self.task_id = (
-                json_response["task_ids"][0]
-                if "task_ids" in json_response.keys()
-                else json_response.get("task_id", 1)
-            )
+            self.task_id = json_response["task_ids"][0] if "task_ids" in json_response.keys() else json_response.get("task_id", 1)
         else:
-            raise AnalyzerRunException(
-                "failed max tries to post file to cuckoo for analysis"
-            )
+            raise AnalyzerRunException("failed max tries to post file to cuckoo for analysis")
 
     def __cuckoo_poll_result(self):
-        logger.info(
-            f"polling result for ({self.filename},{self.md5}), task_id: #{self.task_id}"
-        )
+        logger.info(f"polling result for ({self.filename},{self.md5}), task_id: #{self.task_id}")
 
         # poll for the result
         poll_time = 15
         get_success = False
         for chance in range(self.max_poll_tries):
-            logger.info(
-                f"polling request #{chance + 1} for file ({self.filename},{self.md5})"
-            )
+            logger.info(f"polling request #{chance + 1} for file ({self.filename},{self.md5})")
             url = self._url_key_name + "tasks/view/" + str(self.task_id)
             response = self.session.get(url)
             json_response = response.json()
@@ -102,27 +84,17 @@ class CuckooAnalysis(FileAnalyzer):
                 get_success = True
                 break
             elif status == "failed_processing":
-                raise AnalyzerRunException(
-                    "sandbox analysis failed."
-                    f"cuckoo id: #{self.task_id}, status: 'failed_processing'"
-                )
+                raise AnalyzerRunException(f"sandbox analysis failed.cuckoo id: #{self.task_id}, status: 'failed_processing'")
             else:
                 time.sleep(poll_time)
 
         if not get_success:
-            raise AnalyzerRunException(
-                f"sandbox analysis timed out. cuckoo id: #{self.task_id}"
-            )
+            raise AnalyzerRunException(f"sandbox analysis timed out. cuckoo id: #{self.task_id}")
 
     def __cuckoo_retrieve_and_create_report(self):
-        logger.info(
-            f"generating report for ({self.filename},{self.md5}), "
-            f"task_id #{self.task_id}"
-        )
+        logger.info(f"generating report for ({self.filename},{self.md5}), task_id #{self.task_id}")
         # download the report
-        response = self.session.get(
-            self._url_key_name + "tasks/report/" + str(self.task_id) + "/json"
-        )
+        response = self.session.get(self._url_key_name + "tasks/report/" + str(self.task_id) + "/json")
         json_response = response.json()
 
         # extract most IOCs as possible from signatures data reports
@@ -191,10 +163,7 @@ class CuckooAnalysis(FileAnalyzer):
         # get network data
         network_data = json_response.get("network", {})
         uri = [(network["uri"]) for network in network_data.get("http", [])]
-        domains = [
-            {"ip": network["ip"], "domain": network["domain"]}
-            for network in network_data.get("domains", [])
-        ]
+        domains = [{"ip": network["ip"], "domain": network["domain"]} for network in network_data.get("domains", [])]
 
         # extract all dns domain requested,...
         # .. can be used as IOC even if the conn was not successful
@@ -202,11 +171,7 @@ class CuckooAnalysis(FileAnalyzer):
         dns_data = network_data.get("dns", {})
         for dns_dict in dns_data:
             # if there are A records and we received an answer
-            if (
-                dns_dict.get("type", "") == "A"
-                and dns_dict.get("answers", [])
-                and dns_dict.get("request", "")
-            ):
+            if dns_dict.get("type", "") == "A" and dns_dict.get("answers", []) and dns_dict.get("request", ""):
                 dns_answered_list.append(dns_dict["request"])
 
         # other info

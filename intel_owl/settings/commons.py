@@ -40,17 +40,9 @@ BASE_ANALYZER_OBSERVABLE_PYTHON_PATH = PosixPath(
         "api_app.analyzers_manager.observable_analyzers",
     )
 )
-BASE_ANALYZER_FILE_PYTHON_PATH = PosixPath(
-    get_secret(
-        "BASE_ANALYZER_FILE_PYTHON_PATH", "api_app.analyzers_manager.file_analyzers"
-    )
-)
-BASE_ENGINE_MODULES_PYTHON_PATH = PosixPath(
-    get_secret("BASE_ENGINE_MODULES_PYTHON_PATH", "api_app.engines_manager.engines")
-)
+BASE_ANALYZER_FILE_PYTHON_PATH = PosixPath(get_secret("BASE_ANALYZER_FILE_PYTHON_PATH", "api_app.analyzers_manager.file_analyzers"))
+BASE_ENGINE_MODULES_PYTHON_PATH = PosixPath(get_secret("BASE_ENGINE_MODULES_PYTHON_PATH", "api_app.engines_manager.engines"))
 
 REPO_DOWNLOADER_ENABLED = get_secret("REPO_DOWNLOADER_ENABLED", "True") == "True"
 GIT_KEY_PATH = MEDIA_ROOT / "my_gitpython_key"
-GIT_SSH_SCRIPT_PATH = (
-    PROJECT_LOCATION / "api_app" / "analyzers_manager" / "ssh_gitpython.sh"
-)
+GIT_SSH_SCRIPT_PATH = PROJECT_LOCATION / "api_app" / "analyzers_manager" / "ssh_gitpython.sh"

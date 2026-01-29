@@ -66,18 +66,14 @@ class YaraX(FileAnalyzer, RulesUtiliyMixin):
 
         except Exception as e:
             logger.exception(f"Failed to update yara-forge rules. Error: {e}")
-            raise AnalyzerRunException(
-                f"Failed to update yara-forge ruleset. Error: {e}"
-            )
+            raise AnalyzerRunException(f"Failed to update yara-forge ruleset. Error: {e}")
 
         return False
 
     def run(self):
-
         if self.rule_set not in ("core", "extended", "full"):
             raise AnalyzerRunException(
-                "Please select the correct ruleset pack from available options."
-                " Available options are core, extended, full"
+                "Please select the correct ruleset pack from available options. Available options are core, extended, full"
             )
 
         rule_dir = f"{BASE_RULES_LOCATION}/{self.rule_set}"
@@ -87,9 +83,7 @@ class YaraX(FileAnalyzer, RulesUtiliyMixin):
         latest_version = response.json()["tag_name"]
 
         update_status = (
-            True
-            if self._check_if_latest_version(latest_version, self.python_module)
-            else self.update(self.rule_set, self.python_module)
+            True if self._check_if_latest_version(latest_version, self.python_module) else self.update(self.rule_set, self.python_module)
         )
 
         if not os.path.isdir(rule_dir) and not update_status:
@@ -108,9 +102,7 @@ class YaraX(FileAnalyzer, RulesUtiliyMixin):
             rules = compiler.build()
             logger.info("Successfully compiled and built rules")
 
-            logger.info(
-                f"Starting scanning file: {self.filename} having hash: {self.md5} with {self.rule_set} rules"
-            )
+            logger.info(f"Starting scanning file: {self.filename} having hash: {self.md5} with {self.rule_set} rules")
             scanner = yara_x.Scanner(rules)
 
             result = []
@@ -146,9 +138,7 @@ class YaraX(FileAnalyzer, RulesUtiliyMixin):
             return {"results": "No Match"} if not result else {"results": result}
 
         except yara_x.CompileError as e:
-            logger.error(
-                f"Failed to compile {self.rule_set} rules present at {rules_file_path} with error {e}"
-            )
+            logger.error(f"Failed to compile {self.rule_set} rules present at {rules_file_path} with error {e}")
             raise AnalyzerRunException(f"Failed to compile {self.rule_set} rules")
 
         except yara_x.ScanError as e:

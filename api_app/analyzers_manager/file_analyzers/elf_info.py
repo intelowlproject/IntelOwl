@@ -16,9 +16,7 @@ class ELFInfo(FileAnalyzer):
     @staticmethod
     def _convert_to_dict(element):
         if type(element) is Container:
-            return {
-                key: ELFInfo._convert_to_dict(value) for key, value in element.items()
-            }
+            return {key: ELFInfo._convert_to_dict(value) for key, value in element.items()}
         else:
             return element
 
@@ -40,10 +38,7 @@ class ELFInfo(FileAnalyzer):
             results["little_endian"] = elf.little_endian
 
         except ELFError as e:
-            warning_message = (
-                f"job_id:{self.job_id} analyzer:{self.analyzer_name}"
-                f" md5:{self.md5} filename: {self.filename} ELFError {e}"
-            )
+            warning_message = f"job_id:{self.job_id} analyzer:{self.analyzer_name} md5:{self.md5} filename: {self.filename} ELFError {e}"
             logger.warning(warning_message)
             self.report.errors.append(warning_message)
             self.report.status = self.report.STATUSES.FAILED

@@ -16,19 +16,11 @@ from api_app.validators import validate_runtime_configuration
 
 class PlaybookConfig(AbstractConfig, OwnershipAbstractModel):
     objects = PlaybookConfigQuerySet.as_manager()
-    type = ChoiceArrayField(
-        models.CharField(choices=Classification.choices, null=False, max_length=50)
-    )
+    type = ChoiceArrayField(models.CharField(choices=Classification.choices, null=False, max_length=50))
 
-    analyzers = models.ManyToManyField(
-        "analyzers_manager.AnalyzerConfig", related_name="playbooks", blank=True
-    )
-    connectors = models.ManyToManyField(
-        "connectors_manager.ConnectorConfig", related_name="playbooks", blank=True
-    )
-    pivots = models.ManyToManyField(
-        "pivots_manager.PivotConfig", related_name="used_by_playbooks", blank=True
-    )
+    analyzers = models.ManyToManyField("analyzers_manager.AnalyzerConfig", related_name="playbooks", blank=True)
+    connectors = models.ManyToManyField("connectors_manager.ConnectorConfig", related_name="playbooks", blank=True)
+    pivots = models.ManyToManyField("pivots_manager.PivotConfig", related_name="used_by_playbooks", blank=True)
 
     runtime_configuration = models.JSONField(
         blank=True,
@@ -41,27 +33,20 @@ class PlaybookConfig(AbstractConfig, OwnershipAbstractModel):
         null=False,
         blank=False,
         default=ScanMode.CHECK_PREVIOUS_ANALYSIS.value,
-        help_text=(
-            "If it's not a starting playbook,"
-            " this must be set to `check_previous_analysis`"
-        ),
+        help_text=("If it's not a starting playbook, this must be set to `check_previous_analysis`"),
     )
     scan_check_time = models.DurationField(
         null=True,
         blank=True,
         default=datetime.timedelta(hours=24),
-        help_text=(
-            "Time range checked if the scan_mode is set to `check_previous_analysis`"
-        ),
+        help_text=("Time range checked if the scan_mode is set to `check_previous_analysis`"),
     )
 
     tags = models.ManyToManyField(Tag, related_name="playbooks", blank=True)
 
     tlp = models.CharField(max_length=8, choices=TLP.choices)
 
-    starting = models.BooleanField(
-        default=True, help_text="If False, the playbook can only be executed by pivots"
-    )
+    starting = models.BooleanField(default=True, help_text="If False, the playbook can only be executed by pivots")
 
     class Meta:
         ordering = ["name", "disabled"]
@@ -83,28 +68,14 @@ class PlaybookConfig(AbstractConfig, OwnershipAbstractModel):
         return min(tlps, default=TLP.CLEAR).value
 
     def clean_scan(self):
-        if (
-            self.scan_mode == ScanMode.FORCE_NEW_ANALYSIS.value
-            and self.scan_check_time is not None
-        ):
-            raise ValidationError(
-                f"You can't have set mode to {ScanMode.FORCE_NEW_ANALYSIS.name}"
-                " and have check_time set"
-            )
-        elif (
-            self.scan_mode == ScanMode.CHECK_PREVIOUS_ANALYSIS.value
-            and self.scan_check_time is None
-        ):
-            raise ValidationError(
-                f"You can't have set mode to {ScanMode.CHECK_PREVIOUS_ANALYSIS.name}"
-                " and not have check_time set"
-            )
+        if self.scan_mode == ScanMode.FORCE_NEW_ANALYSIS.value and self.scan_check_time is not None:
+            raise ValidationError(f"You can't have set mode to {ScanMode.FORCE_NEW_ANALYSIS.name} and have check_time set")
+        elif self.scan_mode == ScanMode.CHECK_PREVIOUS_ANALYSIS.value and self.scan_check_time is None:
+            raise ValidationError(f"You can't have set mode to {ScanMode.CHECK_PREVIOUS_ANALYSIS.name} and not have check_time set")
 
     def clean_starting(self):
         if not self.starting and self.scan_mode != ScanMode.FORCE_NEW_ANALYSIS.value:
-            raise ValidationError(
-                "Not starting playbooks must always force new analysis"
-            )
+            raise ValidationError("Not starting playbooks must always force new analysis")
 
     def clean(self) -> None:
         super().clean()

@@ -21,9 +21,7 @@ class DocGuardUpload(FileAnalyzer):
             headers["x-api-key"] = self._api_key_name
         else:
             warning = "No API key retrieved"
-            logger.info(
-                f"{warning}. Continuing without API key..." f" <- {self.__repr__()}"
-            )
+            logger.info(f"{warning}. Continuing without API key... <- {self.__repr__()}")
             self.report.errors.append(warning)
 
         binary = self.read_file_bytes()

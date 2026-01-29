@@ -26,10 +26,7 @@ class DocGuard_Hash(classes.ObservableAnalyzer):
         hash_lengths = {32: "md5", 64: "sha256"}
         hash_type = hash_lengths.get(len(self.observable_name))
         if not hash_type:
-            raise AnalyzerRunException(
-                f"Given Hash: '{hash}' is not supported."
-                "Supported hash types are: 'md5', 'sha256'."
-            )
+            raise AnalyzerRunException(f"Given Hash: '{hash}' is not supported.Supported hash types are: 'md5', 'sha256'.")
         return hash_type
 
     def run(self):
@@ -39,9 +36,7 @@ class DocGuard_Hash(classes.ObservableAnalyzer):
             headers["x-api-key"] = self._api_key_name
         else:
             warning = "No API key retrieved"
-            logger.info(
-                f"{warning}. Continuing without API key..." f" <- {self.__repr__()}"
-            )
+            logger.info(f"{warning}. Continuing without API key... <- {self.__repr__()}")
             self.report.errors.append(warning)
 
         uri = f"{self.observable_name}"

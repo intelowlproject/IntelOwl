@@ -21,10 +21,7 @@ PG_SSL = secrets.get_secret("DB_SSL", False) == "True"
 PG_ENGINE = "django.db.backends.postgresql"
 if AWS_RDS_IAM_ROLE:
     if PG_PASSWORD:
-        print(
-            "you specified both a DB password and that you want to use"
-            " IAM roles for authentication. Choose one"
-        )
+        print("you specified both a DB password and that you want to use IAM roles for authentication. Choose one")
         sys.exit(3)
     # SSL is mandatory for AWS RDS
     PG_SSL = True

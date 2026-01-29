@@ -31,18 +31,11 @@ class WiGLE(classes.ObservableAnalyzer):
         if self.search_type == "WiFi Network":
             uri = f"/api/v3/detail/wifi/{self.args.get('wifiNetworkId')}"
         elif self.search_type == "CDMA Network":
-            uri = (
-                f"/api/v3/detail/cell/CDMA/{self.args.get('sid')}/"
-                f"{self.args.get('nid')}/{self.args.get('bsid')}"
-            )
+            uri = f"/api/v3/detail/cell/CDMA/{self.args.get('sid')}/{self.args.get('nid')}/{self.args.get('bsid')}"
         elif self.search_type == "Bluetooth Network":
             uri = f"/api/v3/detail/bt/{self.args.get('btNetworkId')}"
         elif self.search_type == "GSM/LTE/WCDMA Network":
-            uri = (
-                "/api/v3/detail/cell/"
-                f"{self.args.get('type')}/{self.args.get('operator')}/"
-                f"{self.args.get('lac')}/{self.args.get('cid')}"
-            )
+            uri = f"/api/v3/detail/cell/{self.args.get('type')}/{self.args.get('operator')}/{self.args.get('lac')}/{self.args.get('cid')}"
         else:
             raise AnalyzerConfigurationException(
                 f"search type: '{self.search_type}' not supported."

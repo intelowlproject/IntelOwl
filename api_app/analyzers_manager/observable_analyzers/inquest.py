@@ -37,8 +37,7 @@ class InQuest(ObservableAnalyzer):
         hash_type = hash_lengths.get(len(self.observable_name))
         if not hash_type:
             raise AnalyzerRunException(
-                f"Given Hash: '{self.observable_name}' is not supported. "
-                "Supported hash types are: 'md5', 'sha1', 'sha256', 'sha512'."
+                f"Given Hash: '{self.observable_name}' is not supported. Supported hash types are: 'md5', 'sha1', 'sha256', 'sha512'."
             )
         return hash_type
 
@@ -57,27 +56,20 @@ class InQuest(ObservableAnalyzer):
             headers["Authorization"] = self._api_key_name
         else:
             warning = "No API key retrieved"
-            logger.info(
-                f"{warning}. Continuing without API key..." f" <- {self.__repr__()}"
-            )
+            logger.info(f"{warning}. Continuing without API key... <- {self.__repr__()}")
             self.report.errors.append(warning)
 
         if self.inquest_analysis == "dfi_search":
             link = "dfi"
             if self.observable_classification == Classification.HASH:
-                uri = (
-                    f"/api/dfi/search/hash/{self.hash_type}?hash={self.observable_name}"
-                )
+                uri = f"/api/dfi/search/hash/{self.hash_type}?hash={self.observable_name}"
 
             elif self.observable_classification in [
                 Classification.IP,
                 Classification.URL,
                 Classification.DOMAIN,
             ]:
-                uri = (
-                    f"/api/dfi/search/ioc/{self.observable_classification}"
-                    f"?keyword={self.observable_name}"
-                )
+                uri = f"/api/dfi/search/ioc/{self.observable_classification}?keyword={self.observable_name}"
 
             elif self.observable_classification == Classification.GENERIC:
                 try:
@@ -104,17 +96,13 @@ class InQuest(ObservableAnalyzer):
 
         else:
             raise AnalyzerConfigurationException(
-                f"analysis type: '{self.inquest_analysis}' not supported."
-                "Supported are: 'dfi_search', 'iocdb_search', 'repdb_search'."
+                f"analysis type: '{self.inquest_analysis}' not supported.Supported are: 'dfi_search', 'iocdb_search', 'repdb_search'."
             )
 
         response = requests.get(self.url + uri, headers=headers, timeout=30)
         response.raise_for_status()
         result = response.json()
-        if (
-            self.inquest_analysis == "dfi_search"
-            and self.observable_classification == Classification.HASH
-        ):
+        if self.inquest_analysis == "dfi_search" and self.observable_classification == Classification.HASH:
             result["hash_type"] = self.hash_type
 
         if self.generic_identifier_mode == "auto":

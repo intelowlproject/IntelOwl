@@ -13,9 +13,7 @@ class TestFileInfo(BaseFileAnalyzerTest):
             # Mock file type detection
             patch(
                 "magic.from_file",
-                side_effect=lambda path, mime=False: (
-                    "application/pdf" if mime else "PDF document, version 1.4"
-                ),
+                side_effect=lambda path, mime=False: ("application/pdf" if mime else "PDF document, version 1.4"),
             ),
             # Mock hash functions
             patch(

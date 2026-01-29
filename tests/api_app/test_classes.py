@@ -28,9 +28,7 @@ class PluginTestCase(CustomTestCase):
         )
         self.cc, _ = ConnectorConfig.objects.get_or_create(
             name="test",
-            python_module=PythonModule.objects.get(
-                base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP"
-            ),
+            python_module=PythonModule.objects.get(base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP"),
             description="test",
             disabled=False,
             run_on_failure=False,
@@ -48,9 +46,7 @@ class PluginTestCase(CustomTestCase):
 
     def test_start_no_errors(self):
         # I can't implement the Plugin class directly because of django installed_apps
-        with patch.multiple(Connector, __abstractmethods__=set()), patch.object(
-            Connector, "run"
-        ) as run:
+        with patch.multiple(Connector, __abstractmethods__=set()), patch.object(Connector, "run") as run:
             run.return_value = {}
             plugin = Connector(self.cc)
             try:
@@ -64,9 +60,7 @@ class PluginTestCase(CustomTestCase):
         def raise_error(self):
             raise TypeError("Test")
 
-        with patch.multiple(Connector, __abstractmethods__=set()), patch.multiple(
-            Connector, run=raise_error
-        ):
+        with patch.multiple(Connector, __abstractmethods__=set()), patch.multiple(Connector, run=raise_error):
             plugin = Connector(self.cc)
             with self.assertRaises(TypeError):
                 plugin.start(self.job.pk, {}, uuid())

@@ -43,10 +43,7 @@ def driver_exception_handler(func):
         try:
             return func(self, *args, **kwargs)
         except WebDriverException as e:
-            logger.exception(
-                f"Error while performing {func.__name__}"
-                f"{' for url=' + url if func.__name__ == 'navigate' else ''}: {e}"
-            )
+            logger.exception(f"Error while performing {func.__name__}{' for url=' + url if func.__name__ == 'navigate' else ''}: {e}")
             # default is 5
             self.restart(motivation=func.__name__, timeout_wait_page=5)
             func(self, *args, **kwargs)
@@ -69,22 +66,16 @@ class DriverWrapper:
         self.last_url: str = ""
         self.base_port = 17000
         self.port_pool_size = 100
-        self._driver: Remote = self._init_driver(
-            self.window_width, self.window_height, self.user_agent
-        )
+        self._driver: Remote = self._init_driver(self.window_width, self.window_height, self.user_agent)
 
-    def _pick_free_port_from_pool(
-        self, sw_options: {}, options: ChromiumOptions
-    ) -> Remote:
+    def _pick_free_port_from_pool(self, sw_options: {}, options: ChromiumOptions) -> Remote:
         tries: int = 0
         while tries < self.port_pool_size:
             picked_port = randint(self.base_port, self.base_port + self.port_pool_size)
             sw_options.update({"port": picked_port})
 
             # traffic must go back to host running selenium-wire
-            options.add_argument(
-                f"--proxy-server=http://phishing_analyzers:{picked_port}"
-            )
+            options.add_argument(f"--proxy-server=http://phishing_analyzers:{picked_port}")
             try:
                 driver = Remote(
                     command_executor="http://selenium-hub:4444/wd/hub",
@@ -92,20 +83,14 @@ class DriverWrapper:
                     seleniumwire_options=sw_options,
                 )
             except ServerException:
-                logger.info(
-                    f"Failed to create driver with {picked_port=}. Trying with another one..."
-                )
+                logger.info(f"Failed to create driver with {picked_port=}. Trying with another one...")
                 tries += 1
             else:
                 logger.info(f"Found free port {picked_port}. Creating driver...")
                 return driver
-        raise RuntimeError(
-            "Failed to retrieve a free port for MitM proxy! Try restarting the job"
-        )
+        raise RuntimeError("Failed to retrieve a free port for MitM proxy! Try restarting the job")
 
-    def _init_driver(
-        self, window_width: int, window_height: int, user_agent: str
-    ) -> Remote:
+    def _init_driver(self, window_width: int, window_height: int, user_agent: str) -> Remote:
         logger.info(f"Adding proxy with option: {self.proxy}")
         logger.info("Creating Chromium driver...")
         sw_options: {} = {
@@ -140,9 +125,7 @@ class DriverWrapper:
             user_agent=self.user_agent,
         )
         if self.last_url:
-            logger.info(
-                f"{self._driver.session_id}: Navigating to {self.last_url} after driver has restarted"
-            )
+            logger.info(f"{self._driver.session_id}: Navigating to {self.last_url} after driver has restarted")
             self.navigate(self.last_url, timeout_wait_page=timeout_wait_page)
 
     @driver_exception_handler
@@ -158,20 +141,13 @@ class DriverWrapper:
         # `timeout_wait_page` seconds. waiting for any visible input tag to appear
         if timeout_wait_page:
             try:
-                WebDriverWait(self._driver, timeout=timeout_wait_page).until(
-                    EC.visibility_of_any_elements_located((By.TAG_NAME, "input"))
-                )
+                WebDriverWait(self._driver, timeout=timeout_wait_page).until(EC.visibility_of_any_elements_located((By.TAG_NAME, "input")))
             except TimeoutException:
-                logger.info(
-                    "Timeout for input tag to appear exceeded! "
-                    "This could mean that the page has no input tag to compile!"
-                )
+                logger.info("Timeout for input tag to appear exceeded! This could mean that the page has no input tag to compile!")
 
     @driver_exception_handler
     def get_page_source(self) -> str:
-        logger.info(
-            f"{self._driver.session_id}: Extracting page source for url {self.last_url}"
-        )
+        logger.info(f"{self._driver.session_id}: Extracting page source for url {self.last_url}")
         return self._driver.page_source
 
     @driver_exception_handler
@@ -181,9 +157,7 @@ class DriverWrapper:
 
     @driver_exception_handler
     def get_base64_screenshot(self) -> str:
-        logger.info(
-            f"{self._driver.session_id}: Extracting screenshot of page as base64 for url {self.last_url}"
-        )
+        logger.info(f"{self._driver.session_id}: Extracting screenshot of page as base64 for url {self.last_url}")
         return self._driver.get_screenshot_as_base64()
 
     def iter_requests(self) -> Iterator[Request]:

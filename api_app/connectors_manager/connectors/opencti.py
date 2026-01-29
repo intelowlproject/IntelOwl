@@ -49,9 +49,7 @@ class OpenCTI(classes.Connector):
         elif self._job.analyzable.classification == Classification.IP:
             ip_version = helpers.get_ip_version(self._job.analyzable.name)
             if ip_version in [4, 6]:
-                obs_type = INTELOWL_OPENCTI_TYPE_MAP[Classification.IP][
-                    f"v{ip_version}"
-                ]  # v4/v6
+                obs_type = INTELOWL_OPENCTI_TYPE_MAP[Classification.IP][f"v{ip_version}"]  # v4/v6
             else:
                 obs_type = INTELOWL_OPENCTI_TYPE_MAP[Classification.GENERIC]  # text
         else:
@@ -68,10 +66,7 @@ class OpenCTI(classes.Connector):
                 "sha-1": self._job.analyzable.sha1,
                 "sha-256": self._job.analyzable.sha256,
             }
-        elif (
-            self._job.analyzable.classification == Classification.HASH
-            and observable_data["type"] == "file"
-        ):
+        elif self._job.analyzable.classification == Classification.HASH and observable_data["type"] == "file":
             # add hash instead of value
             matched_type = helpers.get_hash_type(self._job.analyzable.name)
             observable_data["hashes"] = {matched_type: self._job.analyzable.name}
@@ -159,9 +154,7 @@ class OpenCTI(classes.Connector):
             x_opencti_report_status=2,  # Analyzed
         )
         # Create the external reference
-        external_reference = pycti.ExternalReference(
-            self.opencti_instance, None
-        ).create(
+        external_reference = pycti.ExternalReference(self.opencti_instance, None).create(
             source_name="IntelOwl Analysis",
             description="View analysis report on the IntelOwl instance",
             url=f"{settings.WEB_CLIENT_URL}/jobs/{self.job_id}",
@@ -177,9 +170,7 @@ class OpenCTI(classes.Connector):
         )
 
         return {
-            "observable": pycti.StixCyberObservable(self.opencti_instance, File).read(
-                id=observable["id"]
-            ),
+            "observable": pycti.StixCyberObservable(self.opencti_instance, File).read(id=observable["id"]),
             "report": pycti.Report(self.opencti_instance).read(id=report["id"]),
         }
 
@@ -194,9 +185,7 @@ class OpenCTI(classes.Connector):
                 patch("pycti.Label.create", return_value={"id": 1}),
                 patch("pycti.Report.create", return_value={"id": 1}),
                 patch("pycti.ExternalReference.create", return_value={"id": 1}),
-                patch(
-                    "pycti.StixDomainObject.add_external_reference", return_value=None
-                ),
+                patch("pycti.StixDomainObject.add_external_reference", return_value=None),
                 patch(
                     "pycti.Report.add_stix_object_or_stix_relationship",
                     return_value=None,

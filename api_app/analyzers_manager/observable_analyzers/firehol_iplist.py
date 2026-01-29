@@ -29,9 +29,7 @@ class FireHol_IPList(classes.ObservableAnalyzer):
         result = {}
 
         if not self.list_names:
-            raise AnalyzerConfigurationException(
-                "list_names is empty in custom analyzer config, add an iplist"
-            )
+            raise AnalyzerConfigurationException("list_names is empty in custom analyzer config, add an iplist")
 
         for list_name in self.list_names:
             result[list_name] = False
@@ -44,9 +42,7 @@ class FireHol_IPList(classes.ObservableAnalyzer):
             db_list = db.split("\n")
 
             for ip_or_subnet in db_list:
-                if ip_or_subnet and ipaddress.ip_address(ip) in ipaddress.ip_network(
-                    ip_or_subnet
-                ):
+                if ip_or_subnet and ipaddress.ip_address(ip) in ipaddress.ip_network(ip_or_subnet):
                     result[list_name] = True
                     break
 
@@ -55,9 +51,7 @@ class FireHol_IPList(classes.ObservableAnalyzer):
     @staticmethod
     def download_iplist(list_name):
         if ".ipset" not in list_name and ".netset" not in list_name:
-            raise AnalyzerConfigurationException(
-                f"extension missing from {list_name} (add .ipset or .netset to name)"
-            )
+            raise AnalyzerConfigurationException(f"extension missing from {list_name} (add .ipset or .netset to name)")
 
         try:
             iplist_location = f"{db_path}/{list_name}"

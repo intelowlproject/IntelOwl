@@ -12,18 +12,14 @@ class CreateJobsFromPlaybookInterfaceTestCase(CustomTestCase):
             self.name = "Test"
 
     def test_validate_playbook_to_execute(self):
-        default_pc = PlaybookConfig.objects.create(
-            name="Playbook", type=["ip"], description="test"
-        )
+        default_pc = PlaybookConfig.objects.create(name="Playbook", type=["ip"], description="test")
         a = self.Test(PlaybookConfig.objects.filter(pk=default_pc.pk))
         try:
             a.validate_playbooks(self.user)
         except RuntimeError as e:
             self.fail(e)
         default_pc.delete()
-        pc_owned = PlaybookConfig.objects.create(
-            name="Playbook", type=["ip"], description="test", owner=self.user
-        )
+        pc_owned = PlaybookConfig.objects.create(name="Playbook", type=["ip"], description="test", owner=self.user)
         a = self.Test(PlaybookConfig.objects.filter(pk=pc_owned.pk))
         try:
             a.validate_playbooks(self.user)
@@ -32,9 +28,7 @@ class CreateJobsFromPlaybookInterfaceTestCase(CustomTestCase):
 
         pc_owned.delete()
 
-        pc_not_owned = PlaybookConfig.objects.create(
-            name="Playbook", type=["ip"], description="test", owner=self.superuser
-        )
+        pc_not_owned = PlaybookConfig.objects.create(name="Playbook", type=["ip"], description="test", owner=self.superuser)
         a = self.Test(PlaybookConfig.objects.filter(pk=pc_not_owned.pk))
         with self.assertRaises(RuntimeError):
             a.validate_playbooks(self.user)

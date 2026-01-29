@@ -71,9 +71,7 @@ class HudsonRock(classes.ObservableAnalyzer):
                     ]
                 )
             )
-            response = requests.post(
-                url, headers=headers, json={"ip": self.observable_name}
-            )
+            response = requests.post(url, headers=headers, json={"ip": self.observable_name})
 
         elif self.observable_classification == Classification.DOMAIN:
             url = (
@@ -93,26 +91,17 @@ class HudsonRock(classes.ObservableAnalyzer):
                     ]
                 )
             )
-            response = requests.post(
-                url, headers=headers, json={"domains": [self.observable_name]}
-            )
+            response = requests.post(url, headers=headers, json={"domains": [self.observable_name]})
 
         elif self.observable_classification == Classification.GENERIC:
             # checking for email
             regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b"
             if re.fullmatch(regex, self.observable_name):
-                url = (
-                    self.url
-                    + "/search-by-login"
-                    + self.get_param_url(["sortby", "page", "installed_software"])
-                )
-                response = requests.post(
-                    url, headers=headers, json={"login": self.observable_name}
-                )
+                url = self.url + "/search-by-login" + self.get_param_url(["sortby", "page", "installed_software"])
+                response = requests.post(url, headers=headers, json={"login": self.observable_name})
         else:
             raise AnalyzerConfigurationException(
-                f"Invalid observable type {self.observable_classification}"
-                + f"{self.observable_name} for HudsonRock"
+                f"Invalid observable type {self.observable_classification}" + f"{self.observable_name} for HudsonRock"
             )
         response.raise_for_status()
         return response.json()

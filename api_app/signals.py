@@ -90,14 +90,10 @@ def post_migrate_api_app(
     for module in PythonModule.objects.filter(health_check_schedule__isnull=False):
         for config in module.configs.filter(health_check_task__isnull=True):
             config.generate_health_check_periodic_task()
-    for module in PythonModule.objects.filter(
-        update_schedule__isnull=False, update_task__isnull=True
-    ):
+    for module in PythonModule.objects.filter(update_schedule__isnull=False, update_task__isnull=True):
         module.generate_update_periodic_task()
 
-    for task in PeriodicTask.objects.filter(
-        enabled=True, task=f"{update.__module__}.{update.__name__}"
-    ):
+    for task in PeriodicTask.objects.filter(enabled=True, task=f"{update.__module__}.{update.__name__}"):
         task.enabled &= settings.REPO_DOWNLOADER_ENABLED
         task.save()
 
@@ -165,9 +161,7 @@ def post_delete_parameter(sender, instance: Parameter, *args, **kwargs):
 
 
 @receiver(models.signals.post_save, sender=PythonModule)
-def post_save_python_module_periodic_tasks(
-    sender: Type[PythonModule], instance: PythonModule, *args, **kwargs
-):
+def post_save_python_module_periodic_tasks(sender: Type[PythonModule], instance: PythonModule, *args, **kwargs):
     """
     Signal receiver for the post_save signal of the PythonModule model.
     Generates periodic tasks for updates and health checks based on module configurations.
@@ -184,9 +178,7 @@ def post_save_python_module_periodic_tasks(
 
 
 @receiver(models.signals.post_delete, sender=PythonModule)
-def post_delete_python_module_periodic_tasks(
-    sender: Type[PythonModule], instance: PythonModule, using, origin, *args, **kwargs
-):
+def post_delete_python_module_periodic_tasks(sender: Type[PythonModule], instance: PythonModule, using, origin, *args, **kwargs):
     """
     Signal receiver for the post_delete signal of the PythonModule model.
     Deletes associated update tasks after the module is deleted.
@@ -204,9 +196,7 @@ def post_delete_python_module_periodic_tasks(
 
 
 @receiver(models.signals.post_delete)
-def post_delete_python_config_periodic_tasks(
-    sender: Type[PythonConfig], instance: PythonConfig, using, origin, *args, **kwargs
-):
+def post_delete_python_config_periodic_tasks(sender: Type[PythonConfig], instance: PythonConfig, using, origin, *args, **kwargs):
     """
     Signal receiver for the post_delete signal of the PythonConfig model.
     Deletes associated health check tasks after the PythonConfig instance is deleted.
@@ -219,11 +209,7 @@ def post_delete_python_config_periodic_tasks(
         *args: Additional positional arguments.
         **kwargs: Additional keyword arguments.
     """
-    if (
-        issubclass(sender, PythonConfig)
-        and hasattr(instance, "health_check_task")
-        and instance.health_check_task
-    ):
+    if issubclass(sender, PythonConfig) and hasattr(instance, "health_check_task") and instance.health_check_task:
         instance.health_check_task.delete()
 
 

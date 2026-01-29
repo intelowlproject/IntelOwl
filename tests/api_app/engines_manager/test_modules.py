@@ -12,7 +12,6 @@ from tests import CustomTestCase
 
 
 class EngineModuleTestCase(CustomTestCase):
-
     def setUp(self) -> None:
         super().setUp()
         self.an = Analyzable.objects.create(
@@ -52,9 +51,7 @@ class EngineModuleTestCase(CustomTestCase):
                 },
                 job=self.job,
                 task_id=uuid(),
-                config=AnalyzerConfig.objects.filter(
-                    observable_supported__contains=[Classification.IP.value]
-                )[i],
+                config=AnalyzerConfig.objects.filter(observable_supported__contains=[Classification.IP.value])[i],
             )
             ar.data_model = dm
             ar.save()

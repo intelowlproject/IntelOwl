@@ -78,9 +78,7 @@ class Ja4DB(classes.ObservableAnalyzer):
 
         database_location = self.location()
         if not os.path.exists(database_location):
-            logger.info(
-                f"Database does not exist in {database_location}, initialising..."
-            )
+            logger.info(f"Database does not exist in {database_location}, initialising...")
             self.update()
         with open(database_location, "r") as f:
             db = json.load(f)

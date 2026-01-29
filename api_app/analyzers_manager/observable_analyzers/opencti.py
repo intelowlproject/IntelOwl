@@ -44,17 +44,11 @@ class OpenCTI(classes.ObservableAnalyzer):
         )
 
         # search for observables
-        observables = pycti.StixCyberObservable(opencti_instance, File).list(
-            search=self._job.analyzable.name
-        )
+        observables = pycti.StixCyberObservable(opencti_instance, File).list(search=self._job.analyzable.name)
 
         # Filter exact matches if exact_search is set
         if self.exact_search:
-            observables = [
-                obs
-                for obs in observables
-                if obs["observable_value"] == self._job.analyzable.name
-            ]
+            observables = [obs for obs in observables if obs["observable_value"] == self._job.analyzable.name]
 
         for observable in observables:
             # get reports linked to this observable

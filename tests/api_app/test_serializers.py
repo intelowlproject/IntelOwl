@@ -66,28 +66,20 @@ class PluginConfigSerializerTestCase(CustomTestCase):
             value="https://intelowl.com",
             owner=self.user,
             parameter=param,
-            analyzer_config=AnalyzerConfig.objects.filter(
-                python_module=param.python_module
-            ).first(),
+            analyzer_config=AnalyzerConfig.objects.filter(python_module=param.python_module).first(),
             for_organization=True,
         )
-        data = PluginConfigSerializer(
-            pc, context={"request": MockUpRequest(user=self.user)}
-        ).data
+        data = PluginConfigSerializer(pc, context={"request": MockUpRequest(user=self.user)}).data
         self.assertEqual(org.name, data["organization"])
         pc.delete()
         pc = PluginConfig.objects.create(
             value="https://intelowl.com",
             owner=self.user,
             parameter=param,
-            analyzer_config=AnalyzerConfig.objects.filter(
-                python_module=param.python_module
-            ).first(),
+            analyzer_config=AnalyzerConfig.objects.filter(python_module=param.python_module).first(),
             for_organization=False,
         )
-        data = PluginConfigSerializer(
-            pc, context={"request": MockUpRequest(user=self.user)}
-        ).data
+        data = PluginConfigSerializer(pc, context={"request": MockUpRequest(user=self.user)}).data
         self.assertIsNone(data["organization"])
         m1.delete()
         org.delete()
@@ -125,15 +117,9 @@ class PluginConfigSerializerTestCase(CustomTestCase):
 
     def test_validate(self):
         org = Organization.objects.create(name="test_org")
-        m1 = Membership.objects.create(
-            user=self.superuser, organization=org, is_owner=True
-        )
-        m2 = Membership.objects.create(
-            user=self.admin, organization=org, is_owner=False, is_admin=True
-        )
-        m3 = Membership.objects.create(
-            user=self.user, organization=org, is_owner=False, is_admin=False
-        )
+        m1 = Membership.objects.create(user=self.superuser, organization=org, is_owner=True)
+        m2 = Membership.objects.create(user=self.admin, organization=org, is_owner=False, is_admin=True)
+        m3 = Membership.objects.create(user=self.user, organization=org, is_owner=False, is_admin=False)
         ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
         param = Parameter.objects.create(
             is_secret=True,
@@ -211,9 +197,7 @@ class RestJobSerializerTestCase(CustomTestCase):
 
 class AbstractJobCreateSerializerTestCase(CustomTestCase):
     def setUp(self) -> None:
-        self.ajcs = _AbstractJobCreateSerializer(
-            data={}, context={"request": MockUpRequest(self.user)}
-        )
+        self.ajcs = _AbstractJobCreateSerializer(data={}, context={"request": MockUpRequest(self.user)})
         self.ajcs.Meta.model = Job
 
     def test_check_previous_job(self):
@@ -235,9 +219,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         j1.analyzers_requested.add(a1)
         j1.analyzers_requested.add(a2)
 
-        self.ajcs = _AbstractJobCreateSerializer(
-            data={}, context={"request": MockUpRequest(self.user)}
-        )
+        self.ajcs = _AbstractJobCreateSerializer(data={}, context={"request": MockUpRequest(self.user)})
         self.assertEqual(
             j1,
             self.ajcs.check_previous_jobs(
@@ -334,26 +316,20 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
     def test_filter_connectors_is_runnable(self):
         cc = ConnectorConfig.objects.create(
             name="test",
-            python_module=PythonModule.objects.get(
-                base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP"
-            ),
+            python_module=PythonModule.objects.get(base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP"),
             description="test",
             disabled=True,
             maximum_tlp="CLEAR",
         )
         pc = PluginConfig.objects.create(
-            parameter=Parameter.objects.get(
-                name="api_key_name", python_module=cc.python_module
-            ),
+            parameter=Parameter.objects.get(name="api_key_name", python_module=cc.python_module),
             connector_config=cc,
             value="test",
             owner=None,
             for_organization=False,
         )
         pc2 = PluginConfig.objects.create(
-            parameter=Parameter.objects.get(
-                name="url_key_name", python_module=cc.python_module
-            ),
+            parameter=Parameter.objects.get(name="url_key_name", python_module=cc.python_module),
             connector_config=cc,
             value="test.com",
             owner=None,
@@ -361,15 +337,11 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         )
 
         self.assertFalse(cc.is_runnable(self.user))
-        connectors = _AbstractJobCreateSerializer.set_connectors_to_execute(
-            self.ajcs, [cc], "CLEAR"
-        )
+        connectors = _AbstractJobCreateSerializer.set_connectors_to_execute(self.ajcs, [cc], "CLEAR")
         self.assertEqual(0, len(connectors))
         cc.disabled = False
         cc.save()
-        connectors = _AbstractJobCreateSerializer.set_connectors_to_execute(
-            self.ajcs, [cc], "CLEAR"
-        )
+        connectors = _AbstractJobCreateSerializer.set_connectors_to_execute(self.ajcs, [cc], "CLEAR")
         self.assertCountEqual(connectors, [cc])
         pc.delete()
         pc2.delete()
@@ -378,38 +350,28 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
     def test_filter_connectors_tlp(self):
         cc = ConnectorConfig.objects.create(
             name="test",
-            python_module=PythonModule.objects.get(
-                base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP"
-            ),
+            python_module=PythonModule.objects.get(base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP"),
             description="test",
             disabled=False,
             maximum_tlp="CLEAR",
         )
         pc = PluginConfig.objects.create(
-            parameter=Parameter.objects.get(
-                name="api_key_name", python_module=cc.python_module
-            ),
+            parameter=Parameter.objects.get(name="api_key_name", python_module=cc.python_module),
             connector_config=cc,
             value="test",
             owner=None,
             for_organization=False,
         )
         pc2 = PluginConfig.objects.create(
-            parameter=Parameter.objects.get(
-                name="url_key_name", python_module=cc.python_module
-            ),
+            parameter=Parameter.objects.get(name="url_key_name", python_module=cc.python_module),
             connector_config=cc,
             value="test.com",
             owner=None,
             for_organization=False,
         )
-        connectors = _AbstractJobCreateSerializer.set_connectors_to_execute(
-            self.ajcs, [cc], "GREEN"
-        )
+        connectors = _AbstractJobCreateSerializer.set_connectors_to_execute(self.ajcs, [cc], "GREEN")
         self.assertEqual(0, len(connectors))
-        connectors = _AbstractJobCreateSerializer.set_connectors_to_execute(
-            self.ajcs, [cc], "CLEAR"
-        )
+        connectors = _AbstractJobCreateSerializer.set_connectors_to_execute(self.ajcs, [cc], "CLEAR")
         self.assertCountEqual(connectors, [cc])
         cc.delete()
         pc.delete()
@@ -419,9 +381,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         v = VisualizerConfig.objects.get(name="Yara")
         pc = PlaybookConfig.objects.create(name="test", description="test", type=["ip"])
         v.playbooks.set([pc])
-        visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
-            self.ajcs, tlp="CLEAR", playbook_requested=pc
-        )
+        visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(self.ajcs, tlp="CLEAR", playbook_requested=pc)
         self.assertCountEqual(visualizers, [v])
         pc.delete()
 
@@ -431,15 +391,11 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         v.playbooks.set([pc])
         v.save()
         self.assertTrue(v.is_runnable(self.user))
-        visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
-            self.ajcs, tlp="CLEAR", playbook_requested=pc
-        )
+        visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(self.ajcs, tlp="CLEAR", playbook_requested=pc)
         self.assertCountEqual(visualizers, [v])
         v.disabled = True
         v.save()
-        visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
-            self.ajcs, tlp="CLEAR", playbook_requested=pc
-        )
+        visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(self.ajcs, tlp="CLEAR", playbook_requested=pc)
         self.assertCountEqual(visualizers, [])
         v.disabled = False
         v.save()
@@ -464,9 +420,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
 
 class FileJobCreateSerializerTestCase(CustomTestCase):
     def setUp(self) -> None:
-        self.fas = FileJobSerializer(
-            data={}, context={"request": MockUpRequest(self.user)}
-        )
+        self.fas = FileJobSerializer(data={}, context={"request": MockUpRequest(self.user)})
 
     def test_filter_analyzers_type(self):
         a = AnalyzerConfig.objects.get(name="Tranco")
@@ -475,21 +429,13 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
 
         self.assertCountEqual(
             [],
-            FileJobSerializer.set_analyzers_to_execute(
-                self.fas, [a], tlp="CLEAR", file_mimetype="text/html", file_name=""
-            ),
+            FileJobSerializer.set_analyzers_to_execute(self.fas, [a], tlp="CLEAR", file_mimetype="text/html", file_name=""),
         )
 
         a.type = "file"
         a.save()
-        self.assertTrue(
-            AnalyzerConfig.objects.filter(
-                name="Tranco", supported_filetypes__len=0
-            ).exists()
-        )
-        analyzers = FileJobSerializer.set_analyzers_to_execute(
-            self.fas, [a], tlp="CLEAR", file_mimetype="text/html", file_name=""
-        )
+        self.assertTrue(AnalyzerConfig.objects.filter(name="Tranco", supported_filetypes__len=0).exists())
+        analyzers = FileJobSerializer.set_analyzers_to_execute(self.fas, [a], tlp="CLEAR", file_mimetype="text/html", file_name="")
         self.assertCountEqual(analyzers, [a])
 
     def test_filter_analyzer_mimetype(self):
@@ -508,14 +454,10 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
 
         self.assertCountEqual(
             [],
-            FileJobSerializer.set_analyzers_to_execute(
-                self.fas, [a], tlp="CLEAR", file_mimetype="text/html", file_name=""
-            ),
+            FileJobSerializer.set_analyzers_to_execute(self.fas, [a], tlp="CLEAR", file_mimetype="text/html", file_name=""),
         )
 
-        analyzers = FileJobSerializer.set_analyzers_to_execute(
-            self.fas, [a], tlp="CLEAR", file_mimetype="text/rtf", file_name=""
-        )
+        analyzers = FileJobSerializer.set_analyzers_to_execute(self.fas, [a], tlp="CLEAR", file_mimetype="text/rtf", file_name="")
         self.assertCountEqual(analyzers, [a])
 
         a.supported_filetypes = []
@@ -524,23 +466,17 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
 
         self.assertCountEqual(
             [],
-            FileJobSerializer.set_analyzers_to_execute(
-                self.fas, [a], tlp="CLEAR", file_mimetype="text/html", file_name=""
-            ),
+            FileJobSerializer.set_analyzers_to_execute(self.fas, [a], tlp="CLEAR", file_mimetype="text/html", file_name=""),
         )
 
-        analyzers = FileJobSerializer.set_analyzers_to_execute(
-            self.fas, [a], tlp="CLEAR", file_mimetype="text/rtf", file_name=""
-        )
+        analyzers = FileJobSerializer.set_analyzers_to_execute(self.fas, [a], tlp="CLEAR", file_mimetype="text/rtf", file_name="")
         self.assertCountEqual(analyzers, [a])
         a.delete()
 
 
 class ObservableJobCreateSerializerTestCase(CustomTestCase):
     def setUp(self) -> None:
-        self.oass = ObservableAnalysisSerializer(
-            data={}, context={"request": MockUpRequest(self.user)}
-        )
+        self.oass = ObservableAnalysisSerializer(data={}, context={"request": MockUpRequest(self.user)})
 
     def test_filter_analyzers_type(self):
         a = AnalyzerConfig.objects.get(name="Yara")
@@ -549,15 +485,11 @@ class ObservableJobCreateSerializerTestCase(CustomTestCase):
         a.save()
         self.assertCountEqual(
             [],
-            ObservableAnalysisSerializer.set_analyzers_to_execute(
-                self.oass, [a], tlp="CLEAR", observable_classification="domain"
-            ),
+            ObservableAnalysisSerializer.set_analyzers_to_execute(self.oass, [a], tlp="CLEAR", observable_classification="domain"),
         )
         a.type = "observable"
         a.save()
-        analyzers = ObservableAnalysisSerializer.set_analyzers_to_execute(
-            self.oass, [a], tlp="CLEAR", observable_classification="domain"
-        )
+        analyzers = ObservableAnalysisSerializer.set_analyzers_to_execute(self.oass, [a], tlp="CLEAR", observable_classification="domain")
         self.assertCountEqual(analyzers, [a])
 
     def test_filter_analyzer_observable_supported(self):
@@ -567,25 +499,19 @@ class ObservableJobCreateSerializerTestCase(CustomTestCase):
         a.save()
         self.assertCountEqual(
             [],
-            ObservableAnalysisSerializer.set_analyzers_to_execute(
-                self.oass, [a], tlp="CLEAR", observable_classification="domain"
-            ),
+            ObservableAnalysisSerializer.set_analyzers_to_execute(self.oass, [a], tlp="CLEAR", observable_classification="domain"),
         )
 
         a.observable_supported = ["domain"]
         a.save()
-        analyzers = ObservableAnalysisSerializer.set_analyzers_to_execute(
-            self.oass, [a], tlp="CLEAR", observable_classification="domain"
-        )
+        analyzers = ObservableAnalysisSerializer.set_analyzers_to_execute(self.oass, [a], tlp="CLEAR", observable_classification="domain")
         self.assertCountEqual(analyzers, [a])
 
 
 class CommentSerializerTestCase(CustomTestCase):
     def setUp(self):
         super().setUp()
-        self.an = Analyzable.objects.create(
-            name="test.com", classification=Classification.DOMAIN
-        )
+        self.an = Analyzable.objects.create(name="test.com", classification=Classification.DOMAIN)
         self.job = Job.objects.create(
             analyzable=self.an,
             user=self.user,
@@ -670,9 +596,7 @@ class AbstractListConfigSerializerTestCase(CustomTestCase):
         # this analyzer has 0 missing secrets
         ac = AnalyzerConfig.objects.create(
             name="test",
-            python_module=PythonModule.objects.get(
-                base_path=PythonModuleBasePaths.FileAnalyzer.value, module="apkid.APKiD"
-            ),
+            python_module=PythonModule.objects.get(base_path=PythonModuleBasePaths.FileAnalyzer.value, module="apkid.APKiD"),
             description="test",
             disabled=False,
             maximum_tlp="CLEAR",
@@ -696,9 +620,7 @@ class AbstractListConfigSerializerTestCase(CustomTestCase):
 
         ac = AnalyzerConfig.objects.create(
             name="test",
-            python_module=PythonModule.objects.get(
-                base_path=PythonModuleBasePaths.FileAnalyzer.value, module="apkid.APKiD"
-            ),
+            python_module=PythonModule.objects.get(base_path=PythonModuleBasePaths.FileAnalyzer.value, module="apkid.APKiD"),
             description="test",
             disabled=False,
             maximum_tlp="CLEAR",

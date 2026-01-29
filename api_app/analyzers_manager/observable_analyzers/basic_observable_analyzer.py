@@ -51,10 +51,7 @@ class BasicObservableAnalyzer(ObservableAnalyzer):
         # optional authentication
         if hasattr(self, "_api_key_name") and self._api_key_name:
             api_key = self._api_key_name
-            if (
-                "Authorization" in self.headers.keys()
-                and self.headers["Authorization"].split(" ")[0] == "Basic"
-            ):
+            if "Authorization" in self.headers.keys() and self.headers["Authorization"].split(" ")[0] == "Basic":
                 # the API uses basic auth so we need to base64 encode the auth payload
                 api_key = base64.b64encode(self._api_key_name.encode()).decode()
             # replace <api_key> placeholder
@@ -82,9 +79,7 @@ class BasicObservableAnalyzer(ObservableAnalyzer):
                 )
             else:
                 request_method = getattr(requests, self.http_method)
-                response = request_method(
-                    self.url, headers=self.headers, json=self.params, verify=verify
-                )
+                response = request_method(self.url, headers=self.headers, json=self.params, verify=verify)
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

@@ -46,9 +46,7 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
                 os.makedirs(CACHE_LOCATION, exist_ok=True)
                 logger.info(f"Successfully created cache directory at {CACHE_LOCATION}")
             except OSError as e:
-                logger.warning(
-                    f"Failed to create cache directory at {CACHE_LOCATION}: {e}"
-                )
+                logger.warning(f"Failed to create cache directory at {CACHE_LOCATION}: {e}")
 
     @classmethod
     def _download_signatures(cls) -> None:
@@ -67,7 +65,6 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
             signatures_list = response.json()
 
             for signature in signatures_list:
-
                 filename = signature["name"]
                 download_url = signature["download_url"]
 
@@ -87,9 +84,7 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
     def update(cls, anayzer_module: PythonModule) -> bool:
         try:
             logger.info("Updating capa rules")
-            response = requests.get(
-                "https://api.github.com/repos/mandiant/capa-rules/releases/latest"
-            )
+            response = requests.get("https://api.github.com/repos/mandiant/capa-rules/releases/latest")
             latest_version = response.json()["tag_name"]
             capa_rules_download_url = RULES_URL + latest_version + ".zip"
 
@@ -115,24 +110,19 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
     def run(self):
         try:
             self._ensure_cache_directory()
-            response = requests.get(
-                "https://api.github.com/repos/mandiant/capa-rules/releases/latest"
-            )
+            response = requests.get("https://api.github.com/repos/mandiant/capa-rules/releases/latest")
             latest_version = response.json()["tag_name"]
 
             capa_analyzer_module = self.python_module
 
             update_status = (
-                True
-                if self._check_if_latest_version(latest_version, capa_analyzer_module)
-                else self.update(capa_analyzer_module)
+                True if self._check_if_latest_version(latest_version, capa_analyzer_module) else self.update(capa_analyzer_module)
             )
 
             if self.force_pull_signatures or not os.path.isdir(SIGNATURE_LOCATION):
                 self._download_signatures()
 
             if not (os.path.isdir(RULES_LOCATION)) and not update_status:
-
                 raise AnalyzerRunException("Couldn't update capa rules")
 
             command: list[str] = ["/usr/local/bin/capa", "--quiet", "--json"]
@@ -151,9 +141,7 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
 
             command.append(quote(self.filepath))
 
-            logger.info(
-                f"Starting CAPA analysis for {self.filename} with hash: {self.md5} and command: {command}"
-            )
+            logger.info(f"Starting CAPA analysis for {self.filename} with hash: {self.md5} and command: {command}")
 
             process: subprocess.CompletedProcess = subprocess.run(
                 command,
@@ -167,17 +155,11 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
             result["command_executed"] = command
             result["rules_version"] = latest_version
 
-            logger.info(
-                f"CAPA analysis successfully completed for file: {self.filename} with hash {self.md5}"
-            )
+            logger.info(f"CAPA analysis successfully completed for file: {self.filename} with hash {self.md5}")
 
         except subprocess.CalledProcessError as e:
             stderr = e.stderr
-            logger.info(
-                f"Capa Info failed to run for {self.filename} with hash: {self.md5} with command {e}"
-            )
-            raise AnalyzerRunException(
-                f" Analyzer for {self.filename} with hash: {self.md5} failed with error: {stderr}"
-            )
+            logger.info(f"Capa Info failed to run for {self.filename} with hash: {self.md5} with command {e}")
+            raise AnalyzerRunException(f" Analyzer for {self.filename} with hash: {self.md5} failed with error: {stderr}")
 
         return result

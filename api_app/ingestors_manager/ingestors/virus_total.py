@@ -36,18 +36,14 @@ class VirusTotal(Ingestor, VirusTotalv3BaseMixin):
             delta_hours = timezone.datetime.now() - timezone.timedelta(hours=self.hours)
             self.query = f"fs:{delta_hours.strftime('%Y-%m-%d%H:%M:%S')}+ " + self.query
         data = self._vt_intelligence_search(self.query, 300, "").get("data", {})
-        logger.info(
-            f"VT ingestor: Retrieved {len(data)} items from the query {self.query}"
-        )
+        logger.info(f"VT ingestor: Retrieved {len(data)} items from the query {self.query}")
         samples_hashes = [d["id"] for d in data]
         for sample_hash in samples_hashes:
             if self.extract_IOCs:
                 iocs = self._vt_get_iocs_from_file(sample_hash)
                 if iocs:
                     for category, ioc in iocs.items():
-                        logger.info(
-                            f"Extracted {category} from VT sample {sample_hash}: {ioc}"
-                        )
+                        logger.info(f"Extracted {category} from VT sample {sample_hash}: {ioc}")
                         yield ioc
             else:
                 logger.info(f"Downloading VT sample: {sample_hash}")
@@ -140,8 +136,7 @@ class VirusTotal(Ingestor, VirusTotalv3BaseMixin):
                                             "exiftool": {},
                                             "ssdeep": "1536:CguZCa6S5khUItn3RWa4znOSjhLzVubGa/M1NIpPkUlB7583fjnc"
                                             "FYIISFI:CgugapkhltLaPjpzVw/Ms8ULavLc0",
-                                            "tlsh": "T17C93F06B96303918E0647837D03F5DA26638621D1F02FE8C2D46F1CC7"
-                                            "EEBB47764A898",
+                                            "tlsh": "T17C93F06B96303918E0647837D03F5DA26638621D1F02FE8C2D46F1CC7EEBB47764A898",
                                             "tags": [
                                                 "write-file",
                                                 "auto-open",

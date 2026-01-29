@@ -4,9 +4,7 @@
 """These are the default responses"""
 
 
-def malicious_detector_response(
-    observable: str, malicious: bool, timeout: bool = False, note: str = None
-) -> dict:
+def malicious_detector_response(observable: str, malicious: bool, timeout: bool = False, note: str = None) -> dict:
     """Standard response for malicious detector analyzers
 
     :param observable: observable analyzed
@@ -31,9 +29,7 @@ def malicious_detector_response(
     return report
 
 
-def dns_resolver_response(
-    observable: str, resolutions: list = None, timeout: bool = False
-) -> dict:
+def dns_resolver_response(observable: str, resolutions: list = None, timeout: bool = False) -> dict:
     """Standard response for DNS resolver analyzers
 
     :param observable: observable analyzed

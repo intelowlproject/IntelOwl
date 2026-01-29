@@ -34,9 +34,7 @@ class URLHaus(AbuseCHMixin, ObservableAnalyzer):
             uri = "url/"
             post_data = {"url": self.observable_name}
         else:
-            raise AnalyzerRunException(
-                f"not supported observable type {self.observable_classification}."
-            )
+            raise AnalyzerRunException(f"not supported observable type {self.observable_classification}.")
 
         response = requests.post(
             self.url + uri,
@@ -48,7 +46,4 @@ class URLHaus(AbuseCHMixin, ObservableAnalyzer):
         return response.json()
 
     def _do_create_data_model(self) -> bool:
-        return (
-            super()._do_create_data_model()
-            and self.report.report.get("query_status", "no_results") != "no_results"
-        )
+        return super()._do_create_data_model() and self.report.report.get("query_status", "no_results") != "no_results"

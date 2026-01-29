@@ -104,12 +104,7 @@ class Stratos(classes.ObservableAnalyzer):
         timestamp = os.path.getctime(db_loc0)
         dt_object = datetime.fromtimestamp(timestamp)
 
-        if (
-            dt_object.hour > 3
-            and today.day == dt_object.day
-            and today.month == dt_object.month
-            and today.year == dt_object.year
-        ):
+        if dt_object.hour > 3 and today.day == dt_object.day and today.month == dt_object.month and today.year == dt_object.year:
             logger.info("Dataset is up to date")
         else:
             os.remove(db_loc0)

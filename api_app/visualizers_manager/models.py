@@ -14,9 +14,7 @@ from api_app.visualizers_manager.validators import validate_report
 
 class VisualizerReport(AbstractReport):
     objects = VisualizerReportQuerySet.as_manager()
-    config = models.ForeignKey(
-        "VisualizerConfig", related_name="reports", null=False, on_delete=models.CASCADE
-    )
+    config = models.ForeignKey("VisualizerConfig", related_name="reports", null=False, on_delete=models.CASCADE)
     report = models.JSONField(default=list, validators=[validate_report])
     name = models.CharField(null=True, blank=True, default=None, max_length=50)
 
@@ -40,9 +38,7 @@ class VisualizerConfig(PythonConfig):
             ]
         },
     )
-    orgs_configuration = GenericRelation(
-        "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
-    )
+    orgs_configuration = GenericRelation("api_app.OrganizationPluginConfiguration", related_name="%(class)s")
 
     @classproperty
     def plugin_type(cls) -> str:

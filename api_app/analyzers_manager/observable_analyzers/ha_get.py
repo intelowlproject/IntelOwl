@@ -23,9 +23,7 @@ class HybridAnalysisGet(ObservableAnalyzer):
     def update(cls) -> bool:
         pass
 
-    def _fetch_sample_summary(
-        self, sha256: str, headers: Dict[str, str]
-    ) -> Optional[Dict[str, Any]]:
+    def _fetch_sample_summary(self, sha256: str, headers: Dict[str, str]) -> Optional[Dict[str, Any]]:
         overview_uri = f"overview/{sha256}"
         try:
             res = requests.get(self.api_url + overview_uri, headers=headers)
@@ -82,9 +80,7 @@ class HybridAnalysisGet(ObservableAnalyzer):
     def _process_hash_results(self, result: List[Any], headers: Dict[str, str]):
         detailed = []
         for item in result:
-            if isinstance(item, dict) and (
-                item.get("job_id") or item.get("verdict") or item.get("threat_score")
-            ):
+            if isinstance(item, dict) and (item.get("job_id") or item.get("verdict") or item.get("threat_score")):
                 detailed.append(self._process_full_item(item))
             else:
                 processed = self._process_minimal_item(item, headers)
@@ -118,10 +114,7 @@ class HybridAnalysisGet(ObservableAnalyzer):
         elif obs_cls == Classification.HASH:
             response = self._search_hash(value, headers)
         else:
-            raise AnalyzerRunException(
-                f"not supported observable type {obs_cls}. "
-                "Supported are: hash, ip, domain and url"
-            )
+            raise AnalyzerRunException(f"not supported observable type {obs_cls}. Supported are: hash, ip, domain and url")
 
         response.raise_for_status()
         result = response.json()

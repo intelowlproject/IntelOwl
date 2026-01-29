@@ -6,23 +6,13 @@ logger = logging.getLogger(__name__)
 
 
 class AnalyzableQuerySet(QuerySet):
-
     def visible_for_user(self, user):
-
         from api_app.models import Job
         from api_app.user_events_manager.models import UserAnalyzableEvent
 
-        analyzables_job = (
-            Job.objects.visible_for_user(user)
-            .values("analyzable")
-            .distinct()
-            .values_list("analyzable__pk", flat=True)
-        )
+        analyzables_job = Job.objects.visible_for_user(user).values("analyzable").distinct().values_list("analyzable__pk", flat=True)
         analyzables_ue = (
-            UserAnalyzableEvent.objects.visible_for_user(user)
-            .values("analyzable")
-            .distinct()
-            .values_list("analyzable__pk", flat=True)
+            UserAnalyzableEvent.objects.visible_for_user(user).values("analyzable").distinct().values_list("analyzable__pk", flat=True)
         )
         return self.filter(pk__in=analyzables_job) | self.filter(pk__in=analyzables_ue)
 

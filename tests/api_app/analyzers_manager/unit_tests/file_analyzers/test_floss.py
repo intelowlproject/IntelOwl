@@ -16,7 +16,6 @@ class TestFloss(BaseFileAnalyzerTest):
         }
 
     def get_mocked_response(self):
-
         response_from_command = subprocess.CompletedProcess(
             args=[
                 "floss",

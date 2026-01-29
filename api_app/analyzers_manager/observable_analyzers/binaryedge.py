@@ -26,9 +26,7 @@ class BinaryEdge(classes.ObservableAnalyzer):
         results = {}
         if self.observable_classification == Classification.IP:
             try:
-                response_recent_ip_info = requests.get(
-                    self.url + "ip/" + self.observable_name, headers=self.headers
-                )
+                response_recent_ip_info = requests.get(self.url + "ip/" + self.observable_name, headers=self.headers)
                 response_recent_ip_info.raise_for_status()
 
                 response_query_ip = requests.get(

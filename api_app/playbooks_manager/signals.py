@@ -36,9 +36,7 @@ def post_migrate_playbooks_manager(
 
 
 @receiver(m2m_changed, sender=PlaybookConfig.analyzers.through)
-def m2m_changed_analyzers_playbook_config(
-    sender, instance: PlaybookConfig, action, reverse, model, pk_set, *args, **kwargs
-):
+def m2m_changed_analyzers_playbook_config(sender, instance: PlaybookConfig, action, reverse, model, pk_set, *args, **kwargs):
     if action == "post_add":
         instance.tlp = instance._generate_tlp()
         instance.save()
@@ -46,9 +44,7 @@ def m2m_changed_analyzers_playbook_config(
 
 
 @receiver(m2m_changed, sender=PlaybookConfig.connectors.through)
-def m2m_changed_connectors_playbook_config(
-    sender, instance: PlaybookConfig, action, reverse, model, pk_set, *args, **kwargs
-):
+def m2m_changed_connectors_playbook_config(sender, instance: PlaybookConfig, action, reverse, model, pk_set, *args, **kwargs):
     if action == "post_add":
         instance.tlp = instance._generate_tlp()
         instance.save()
@@ -69,9 +65,7 @@ def m2m_changed_pivots_playbook_config(
 ):
     if action == "pre_add":
         objects = model.objects.filter(pk__in=pk_set)
-        valid_pks = objects.valid(
-            instance.analyzers.all(), instance.connectors.all()
-        ).values_list("pk", flat=True)
+        valid_pks = objects.valid(instance.analyzers.all(), instance.connectors.all()).values_list("pk", flat=True)
         wrong_pivots = objects.exclude(pk__in=valid_pks)
         if wrong_pivots.exists():
             raise ValidationError(

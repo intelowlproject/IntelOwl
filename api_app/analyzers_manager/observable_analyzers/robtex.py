@@ -34,9 +34,7 @@ class Robtex(classes.ObservableAnalyzer):
                 domain = self.observable_name
             uris = [f"pdns/forward/{domain}"]
         else:
-            raise AnalyzerRunException(
-                f"not supported analysis type {self.observable_classification}."
-            )
+            raise AnalyzerRunException(f"not supported analysis type {self.observable_classification}.")
 
         loaded_results = []
         for uri in uris:

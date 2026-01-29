@@ -22,7 +22,5 @@ class OneNoteInfo(FileAnalyzer):
             results["stored_base64"] = []
             for _, f in results["files"].items():
                 if f["extension"] not in (".png", ".jpg"):
-                    results["stored_base64"].append(
-                        base64.b64encode(bytes.fromhex(f["content"])).decode("ascii")
-                    )
+                    results["stored_base64"].append(base64.b64encode(bytes.fromhex(f["content"])).decode("ascii"))
         return results

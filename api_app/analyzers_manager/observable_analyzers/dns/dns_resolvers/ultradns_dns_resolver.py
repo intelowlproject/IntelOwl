@@ -25,7 +25,6 @@ class UltraDNSDNSResolver(classes.ObservableAnalyzer):
         pass
 
     def run(self):
-
         resolutions = []
         observable = self.observable_name
         if self.observable_classification == Classification.URL:
@@ -52,9 +51,6 @@ class UltraDNSDNSResolver(classes.ObservableAnalyzer):
             dns.resolver.NoAnswer,
             dns.resolver.NoNameservers,
         ):
-            logger.info(
-                "No resolution for "
-                f"{self.observable_classification} {self.observable_name}"
-            )
+            logger.info(f"No resolution for {self.observable_classification} {self.observable_name}")
 
         return dns_resolver_response(self.observable_name, resolutions)

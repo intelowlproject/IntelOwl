@@ -55,15 +55,8 @@ class CreateJobsFromPlaybookInterface:
         from api_app.playbooks_manager.models import PlaybookConfig
 
         for playbook in self.playbooks_choice.all():
-            if (
-                not PlaybookConfig.objects.filter(pk=playbook.pk)
-                .visible_for_user(user)
-                .exists()
-            ):
-                raise RuntimeError(
-                    f"User {user.username} do not have visibility to"
-                    f" playbook {playbook.pk}"
-                )
+            if not PlaybookConfig.objects.filter(pk=playbook.pk).visible_for_user(user).exists():
+                raise RuntimeError(f"User {user.username} do not have visibility to playbook {playbook.pk}")
 
     def _get_serializer(
         self,
@@ -88,13 +81,9 @@ class CreateJobsFromPlaybookInterface:
         """
         values = value if isinstance(value, (list, Generator)) else [value]
         if playbook_to_execute.is_sample():
-            return self._get_file_serializer(
-                values, tlp, user, delay=delay, playbook_to_execute=playbook_to_execute
-            )
+            return self._get_file_serializer(values, tlp, user, delay=delay, playbook_to_execute=playbook_to_execute)
         else:
-            return self._get_observable_serializer(
-                values, tlp, user, playbook_to_execute=playbook_to_execute, delay=delay
-            )
+            return self._get_observable_serializer(values, tlp, user, playbook_to_execute=playbook_to_execute, delay=delay)
 
     @staticmethod
     def _get_observable_serializer(
@@ -123,9 +112,7 @@ class CreateJobsFromPlaybookInterface:
         return ObservableAnalysisSerializer(
             data={
                 "playbook_requested": playbook_to_execute.name,
-                "observables": [
-                    (None, value) for value in values
-                ],  # (classification, value)
+                "observables": [(None, value) for value in values],  # (classification, value)
                 # -> the classification=None it's just a placeholder
                 #    because it'll be calculated later
                 "tlp": tlp,
@@ -159,14 +146,7 @@ class CreateJobsFromPlaybookInterface:
         from api_app.serializers.job import FileJobSerializer
         from tests.mock_utils import MockUpRequest
 
-        files = [
-            (
-                data
-                if isinstance(data, File)
-                else File(io.BytesIO(data), name=f"{self.name}.{i}")
-            )
-            for i, data in enumerate(values)
-        ]
+        files = [(data if isinstance(data, File) else File(io.BytesIO(data), name=f"{self.name}.{i}")) for i, data in enumerate(values)]
         query_dict = QueryDict(mutable=True)
         data = {
             "playbook_requested": playbook_to_execute.name,
@@ -210,9 +190,7 @@ class CreateJobsFromPlaybookInterface:
             ValueError: If the serializer is invalid.
         """
         try:
-            serializer = self._get_serializer(
-                value, tlp, user, delay, playbook_to_execute=playbook_to_execute
-            )
+            serializer = self._get_serializer(value, tlp, user, delay, playbook_to_execute=playbook_to_execute)
         except ValueError as e:
             logger.exception(e)
             raise
@@ -258,14 +236,9 @@ class OwnershipAbstractModel(models.Model):
             ValidationError: If `for_organization` is set without an owner, or if the owner does not have an organization.
         """
         if self.for_organization and not self.owner:
-            raise ValidationError(
-                "You can't set `for_organization` and not have an owner"
-            )
+            raise ValidationError("You can't set `for_organization` and not have an owner")
         if self.for_organization and not self.owner.has_membership():
-            raise ValidationError(
-                f"You can't create `for_organization` {self.__class__.__name__}"
-                " if you do not have an organization"
-            )
+            raise ValidationError(f"You can't create `for_organization` {self.__class__.__name__} if you do not have an organization")
 
     @cached_property
     def organization(self) -> Optional[Organization]:

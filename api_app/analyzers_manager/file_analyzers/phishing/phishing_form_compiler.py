@@ -55,17 +55,11 @@ class PhishingFormCompiler(FileAnalyzer):
             # extract target site from parent job
             self.target_site = self._job.pivot_parent.starting_job.analyzable.name
         else:
-            logger.warning(
-                f"Job #{self.job_id}: Analyzer {self.analyzer_name} should be ran from PhishingAnalysis playbook."
-            )
+            logger.warning(f"Job #{self.job_id}: Analyzer {self.analyzer_name} should be ran from PhishingAnalysis playbook.")
         if self.target_site:
-            logger.info(
-                f"Job #{self.job_id}: Extracted {self.target_site} from parent job."
-            )
+            logger.info(f"Job #{self.job_id}: Extracted {self.target_site} from parent job.")
         else:
-            logger.info(
-                f"Job #{self.job_id}: Target site from parent job not found! Proceeding with only source code."
-            )
+            logger.info(f"Job #{self.job_id}: Target site from parent job not found! Proceeding with only source code.")
 
         # generate fake values for each mapping
         fake = Faker()
@@ -82,9 +76,7 @@ class PhishingFormCompiler(FileAnalyzer):
                 date_format="%m/%y",
             ),
         }
-        logger.info(
-            f"Generated name text input mapping {self._name_text_input_mapping}"
-        )
+        logger.info(f"Generated name text input mapping {self._name_text_input_mapping}")
         self.FAKE_EMAIL_INPUT: str = fake.email()
         logger.info(f"Generated fake email input {self.FAKE_EMAIL_INPUT}")
         self.FAKE_PASSWORD_INPUT: str = fake.password(
@@ -105,32 +97,20 @@ class PhishingFormCompiler(FileAnalyzer):
             try:
                 self.html_source_code = self.html_source_code.decode("utf-8")
             except UnicodeDecodeError as e:
-                logger.warning(
-                    f"Job #{self.job_id}: Error during HTML source page decoding: {e}\nTrying to fix the error..."
-                )
-                self.html_source_code = self.html_source_code.decode(
-                    "utf-8", errors="replace"
-                )
+                logger.warning(f"Job #{self.job_id}: Error during HTML source page decoding: {e}\nTrying to fix the error...")
+                self.html_source_code = self.html_source_code.decode("utf-8", errors="replace")
             else:
-                logger.info(
-                    f"Job #{self.job_id}: Extracted html source code from pivot."
-                )
+                logger.info(f"Job #{self.job_id}: Extracted html source code from pivot.")
         else:
             raise ValueError("Failed to extract source code from pivot!")
 
         # recover=True tries to read not well-formed HTML
         html_parser = HTMLParser(recover=True, no_network=True)
-        self.parsed_page = document_fromstring(
-            self.html_source_code, parser=html_parser
-        )
+        self.parsed_page = document_fromstring(self.html_source_code, parser=html_parser)
 
     def search_phishing_forms_xpath(self) -> []:
         # extract using a custom XPath selector if set
-        return (
-            xpath_query_on_page(self.parsed_page, self.xpath_form_selector)
-            if self.xpath_form_selector
-            else []
-        )
+        return xpath_query_on_page(self.parsed_page, self.xpath_form_selector) if self.xpath_form_selector else []
 
     def identify_text_input(self, input_name: str) -> str:
         for names, fake_value in self._name_text_input_mapping.items():
@@ -146,9 +126,7 @@ class PhishingFormCompiler(FileAnalyzer):
             base_site = "https://" + base_site
         form_action: str = form.get("action", None)
         if not form_action:
-            logger.info(
-                f"'action' attribute not found in form. Defaulting to {base_site=}"
-            )
+            logger.info(f"'action' attribute not found in form. Defaulting to {base_site=}")
             return base_site
 
         form_action = urljoin(base_site, form_action)
@@ -168,9 +146,7 @@ class PhishingFormCompiler(FileAnalyzer):
             value_to_set: str = ""
             match input_type.lower():
                 case "hidden":
-                    logger.info(
-                        f"Job #{self.job_id}: Found hidden input tag with {input_name=} and {input_value=}"
-                    )
+                    logger.info(f"Job #{self.job_id}: Found hidden input tag with {input_name=} and {input_value=}")
                     value_to_set = input_value
 
                 case "text":
@@ -182,13 +158,9 @@ class PhishingFormCompiler(FileAnalyzer):
                 case "email":
                     value_to_set = self.FAKE_EMAIL_INPUT
                 case _:
-                    logger.info(
-                        f"Job #{self.job_id}: {input_type.lower()} is not supported yet!"
-                    )
+                    logger.info(f"Job #{self.job_id}: {input_type.lower()} is not supported yet!")
 
-            logger.info(
-                f"Job #{self.job_id}: Sending value {value_to_set} for {input_name=}"
-            )
+            logger.info(f"Job #{self.job_id}: Sending value {value_to_set} for {input_name=}")
             result.setdefault(input_name, value_to_set)
         return result
 
@@ -203,11 +175,7 @@ class PhishingFormCompiler(FileAnalyzer):
             url=dest_url,
             data=params,
             headers=headers,
-            proxies=(
-                {"http": self.proxy_address, "https": self.proxy_address}
-                if self.proxy_address
-                else None
-            ),
+            proxies=({"http": self.proxy_address, "https": self.proxy_address} if self.proxy_address else None),
         )
         logger.info(f"Request headers: {response.request.headers}")
         return response
@@ -217,17 +185,13 @@ class PhishingFormCompiler(FileAnalyzer):
         result: [] = []
         # extract all redirection history
         for history in response.history:
-            logger.info(
-                f"Extracting 3xx {response.status_code} HTTP response with url {history.request.url}"
-            )
+            logger.info(f"Extracting 3xx {response.status_code} HTTP response with url {history.request.url}")
             result.append(history.request.url)
         return result
 
     @staticmethod
     def handle_2xx_response(response: Response) -> str:
-        logger.info(
-            f"Extracting 2xx {response.status_code} response with url {response.request.url}"
-        )
+        logger.info(f"Extracting 2xx {response.status_code} response with url {response.request.url}")
         return response.request.url
 
     def is_js_used_in_page(self) -> bool:
@@ -259,9 +223,7 @@ class PhishingFormCompiler(FileAnalyzer):
 
     def run(self) -> dict:
         result: {} = {}
-        if not (
-            forms := xpath_query_on_page(self.parsed_page, self.xpath_form_selector)
-        ):
+        if not (forms := xpath_query_on_page(self.parsed_page, self.xpath_form_selector)):
             message = (
                 f"Form not found in {self.target_site=} with "
                 f"{self.xpath_form_selector=}! This could mean that the XPath"
@@ -270,9 +232,7 @@ class PhishingFormCompiler(FileAnalyzer):
             logger.warning(f"Job #{self.job_id}: " + message)
             self.report.errors.append(message)
             self.report.save()
-        logger.info(
-            f"Job #{self.job_id}: Found {len(forms)} forms in page {self.target_site}"
-        )
+        logger.info(f"Job #{self.job_id}: Found {len(forms)} forms in page {self.target_site}")
 
         responses: [Response] = []
         for form in forms:

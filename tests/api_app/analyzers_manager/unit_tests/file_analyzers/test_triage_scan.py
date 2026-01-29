@@ -117,7 +117,5 @@ class TestTriageScanFile(BaseFileAnalyzerTest):
             ),
             patch.object(TriageScanFile, "session", mock_session),
             patch.object(TriageScanFile, "url", "https://api.tria.ge/v0/"),
-            patch.object(
-                TriageScanFile, "manage_submission_response", return_value=None
-            ),
+            patch.object(TriageScanFile, "manage_submission_response", return_value=None),
         ]

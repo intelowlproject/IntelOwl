@@ -40,11 +40,7 @@ def get_queue_name(queue: str) -> str:
 
 if settings.AWS_SQS:
     PREDEFINED_QUEUES = {
-        get_queue_name(queue): {
-            "url": f"https://sqs.{settings.AWS_REGION}"
-            f".amazonaws.com/{settings.AWS_USER_NUMBER}/"
-            f"{get_queue_url(queue)}"
-        }
+        get_queue_name(queue): {"url": f"https://sqs.{settings.AWS_REGION}.amazonaws.com/{settings.AWS_USER_NUMBER}/{get_queue_url(queue)}"}
         for queue in settings.CELERY_QUEUES
     }
     # in this way they are printed in the Docker logs
@@ -72,10 +68,7 @@ else:
         "task_default_priority": 7,
     }
 
-task_queues = [
-    Queue(get_queue_name(key), routing_key=key, queue_arguments={"x-max-priority": 10})
-    for key in settings.CELERY_QUEUES
-]
+task_queues = [Queue(get_queue_name(key), routing_key=key, queue_arguments={"x-max-priority": 10}) for key in settings.CELERY_QUEUES]
 if not settings.AWS_SQS:
     task_queues.append(
         Broadcast(

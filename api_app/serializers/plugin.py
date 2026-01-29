@@ -59,8 +59,7 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
                     self.context["request"].user.pk == instance.owner.pk
                     or (
                         self.context["request"].user.has_membership()
-                        and self.context["request"].user.membership.organization.pk
-                        == instance.owner.membership.organization.pk
+                        and self.context["request"].user.membership.organization.pk == instance.owner.membership.organization.pk
                         and self.context["request"].user.membership.is_admin
                     )
                 )
@@ -116,12 +115,7 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
     @staticmethod
     def validate_value_type(value: Any, parameter: Parameter):
         if type(value).__name__ != parameter.type:
-            raise ValidationError(
-                {
-                    "detail": f"Value has type {type(value).__name__}"
-                    f" instead of {parameter.type}"
-                }
-            )
+            raise ValidationError({"detail": f"Value has type {type(value).__name__} instead of {parameter.type}"})
 
     def validate(self, attrs):
         logger.debug(f"{attrs=}")
@@ -138,22 +132,14 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
             user_request = attrs["owner"]
             # if we are setting at organization level
             if attrs["for_organization"]:
-                if (
-                    ingestor.user.has_membership()
-                    and ingestor.user.membership.organization
-                    == user_request.membership.organization
-                ):
+                if ingestor.user.has_membership() and ingestor.user.membership.organization == user_request.membership.organization:
                     attrs["owner"] = ingestor.user
                 else:
-                    raise ValidationError(
-                        "You have a different organization than the ingestor."
-                    )
+                    raise ValidationError("You have a different organization than the ingestor.")
             elif user_request.is_superuser:
                 attrs["owner"] = ingestor.user
             else:
-                raise ValidationError(
-                    "Ingestor configuration can be changed only by admins, or at organization level."
-                )
+                raise ValidationError("Ingestor configuration can be changed only by admins, or at organization level.")
 
         return res
 
@@ -175,9 +161,7 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
 
     def to_representation(self, instance: PluginConfig):
         result = super().to_representation(instance)
-        result["organization"] = (
-            instance.organization.name if instance.organization is not None else None
-        )
+        result["organization"] = instance.organization.name if instance.organization is not None else None
         return result
 
 
@@ -212,9 +196,7 @@ class PythonConfigListSerializer(rfs.ListSerializer):
     plugins = rfs.PrimaryKeyRelatedField(read_only=True)
 
     def to_representation_single_plugin(self, plugin: PythonConfig, user: User):
-        cache_name = (
-            f"serializer_{plugin.__class__.__name__}_{plugin.name}_{user.username}"
-        )
+        cache_name = f"serializer_{plugin.__class__.__name__}_{plugin.name}_{user.username}"
         cache_hit = cache.get(cache_name)
         if not cache_hit:
             plugin_representation = self.child.to_representation(plugin)
@@ -222,9 +204,7 @@ class PythonConfigListSerializer(rfs.ListSerializer):
             plugin_representation["params"] = {}
             total_parameters = 0
             parameter_required_not_configured = []
-            for param in plugin.python_module.parameters.annotate_configured(
-                plugin, user
-            ).annotate_value_for_user(plugin, user):
+            for param in plugin.python_module.parameters.annotate_configured(plugin, user).annotate_value_for_user(plugin, user):
                 total_parameters += 1
                 if param.required and not param.configured:
                     parameter_required_not_configured.append(param.name)
@@ -339,9 +319,7 @@ class PythonConfigSerializerForMigration(AbstractConfigSerializerForMigration):
     parameters = ParameterSerializer(write_only=True, many=True)
 
     class Meta:
-        exclude = AbstractConfigSerializerForMigration.Meta.exclude + [
-            "health_check_task"
-        ]
+        exclude = AbstractConfigSerializerForMigration.Meta.exclude + ["health_check_task"]
 
     def to_representation(self, instance):
         return super().to_representation(instance)

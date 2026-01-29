@@ -40,10 +40,7 @@ class UrlScan(ObservableAnalyzer):
             req_api_token = self.__urlscan_submit()
             result = self.__poll_for_result(req_api_token)
         else:
-            raise AnalyzerRunException(
-                f"not supported analysis_type {self.urlscan_analysis}."
-                " Supported is 'search' and 'submit_result'."
-            )
+            raise AnalyzerRunException(f"not supported analysis_type {self.urlscan_analysis}. Supported is 'search' and 'submit_result'.")
         return result
 
     def __urlscan_submit(self) -> str:

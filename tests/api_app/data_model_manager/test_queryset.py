@@ -30,9 +30,7 @@ class BaseDataModelQuerySetTestCase(CustomTestCase):
         self.assertEqual(ip2.asn, result.asn)
         self.assertEqual(ip3.asn_rank, result.asn_rank)
         self.assertCountEqual(ip2.resolutions + ip3.resolutions, result.resolutions)
-        self.assertCountEqual(
-            result.ietf_report.values_list("pk", flat=True), [report1.pk, report2.pk]
-        )
+        self.assertCountEqual(result.ietf_report.values_list("pk", flat=True), [report1.pk, report2.pk])
         report1.delete()
         report2.delete()
         ip.delete()

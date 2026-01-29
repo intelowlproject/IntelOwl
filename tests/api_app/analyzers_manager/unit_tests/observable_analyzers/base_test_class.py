@@ -91,16 +91,11 @@ class BaseAnalyzerTest(TestCase):
         return mock_job
 
     def _setup_analyzer(self, config, observable_type, observable_value):
-        logger.info(
-            f"Setting up analyzer {self.analyzer_class.__name__} "
-            f"for {observable_type}: {observable_value}"
-        )
+        logger.info(f"Setting up analyzer {self.analyzer_class.__name__} for {observable_type}: {observable_value}")
         analyzer = self.analyzer_class(config)
         analyzer.observable_name = observable_value
         analyzer.observable_classification = observable_type
-        analyzer._job = self._create_mock_analyzer_job(
-            observable_value, observable_type
-        )
+        analyzer._job = self._create_mock_analyzer_job(observable_value, observable_type)
 
         for key, value in self.get_extra_config().items():
             setattr(analyzer, key, value)
@@ -113,9 +108,7 @@ class BaseAnalyzerTest(TestCase):
                 response = json.loads(response)
             except json.JSONDecodeError:
                 logger.error(f"Invalid JSON response for {observable_type}")
-                self.fail(
-                    f"{self.__class__.__name__}: Analyzer response for {observable_type} is a string but not valid JSON"
-                )
+                self.fail(f"{self.__class__.__name__}: Analyzer response for {observable_type} is a string but not valid JSON")
 
         self.assertIsInstance(
             response,
@@ -130,18 +123,12 @@ class BaseAnalyzerTest(TestCase):
 
     def test_analyzer_on_supported_observables(self):
         if self.analyzer_class is None:
-            self.skipTest(
-                f"{self.__class__.__name__}.test_analyzer_on_supported_observables skipped: analyzer_class is not set"
-            )
+            self.skipTest(f"{self.__class__.__name__}.test_analyzer_on_supported_observables skipped: analyzer_class is not set")
 
-        configs = AnalyzerConfig.objects.filter(
-            python_module=self.analyzer_class.python_module
-        )
+        configs = AnalyzerConfig.objects.filter(python_module=self.analyzer_class.python_module)
 
         if not configs.exists():
-            self.skipTest(
-                f"{self.__class__.__name__}: No AnalyzerConfig found for {self.analyzer_class.python_module}"
-            )
+            self.skipTest(f"{self.__class__.__name__}: No AnalyzerConfig found for {self.analyzer_class.python_module}")
 
         config = configs.first()
 
@@ -155,9 +142,7 @@ class BaseAnalyzerTest(TestCase):
                 patches = self.get_mocked_response()
                 with self._apply_patches(patches):
                     observable_value = self.get_sample_observable(observable_type)
-                    analyzer = self._setup_analyzer(
-                        config, observable_type, observable_value
-                    )
+                    analyzer = self._setup_analyzer(config, observable_type, observable_value)
 
                     try:
                         response = analyzer.run()
@@ -165,13 +150,7 @@ class BaseAnalyzerTest(TestCase):
                         logger.info(f"Analyzer run successful for {observable_type}")
                     except AnalyzerRunException as e:
                         logger.error(f"AnalyzerRunException for {observable_type}: {e}")
-                        self.fail(
-                            f"{self.__class__.__name__}: AnalyzerRunException "
-                            f"for {observable_type}: {e}"
-                        )
+                        self.fail(f"{self.__class__.__name__}: AnalyzerRunException for {observable_type}: {e}")
                     except Exception as e:
                         logger.exception(f"Unexpected exception for {observable_type}")
-                        self.fail(
-                            f"{self.__class__.__name__}: Unexpected exception "
-                            f"for {observable_type}: {type(e).__name__}: {e}"
-                        )
+                        self.fail(f"{self.__class__.__name__}: Unexpected exception for {observable_type}: {type(e).__name__}: {e}")

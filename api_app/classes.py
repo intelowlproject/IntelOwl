@@ -146,18 +146,11 @@ class Plugin(metaclass=ABCMeta):
         Args:
             runtime_configuration (dict): Runtime configuration parameters.
         """
-        self.__parameters = self._config.read_configured_params(
-            self._user, runtime_configuration
-        )
+        self.__parameters = self._config.read_configured_params(self._user, runtime_configuration)
         for parameter in self.__parameters:
-            attribute_name = (
-                f"_{parameter.name}" if parameter.is_secret else parameter.name
-            )
+            attribute_name = f"_{parameter.name}" if parameter.is_secret else parameter.name
             setattr(self, attribute_name, parameter.value)
-            logger.debug(
-                f"Adding to {self.__class__.__name__} "
-                f"param {attribute_name} with value {parameter.value} "
-            )
+            logger.debug(f"Adding to {self.__class__.__name__} param {attribute_name} with value {parameter.value} ")
 
     def before_run(self):
         """
@@ -211,9 +204,7 @@ class Plugin(metaclass=ABCMeta):
         Args:
             e (Exception): The exception to log.
         """
-        if isinstance(
-            e, (*self.get_exceptions_to_catch(), SoftTimeLimitExceeded, HTTPError)
-        ):
+        if isinstance(e, (*self.get_exceptions_to_catch(), SoftTimeLimitExceeded, HTTPError)):
             error_message = self.get_error_message(e)
             logger.error(error_message)
         else:
@@ -231,11 +222,7 @@ class Plugin(metaclass=ABCMeta):
         self.report.errors.append(str(e))
         self.report.status = self.report.STATUSES.FAILED
         self.report.save(update_fields=["status", "errors"])
-        if isinstance(e, HTTPError) and (
-            hasattr(e, "response")
-            and hasattr(e.response, "status_code")
-            and e.response.status_code == 429
-        ):
+        if isinstance(e, HTTPError) and (hasattr(e, "response") and hasattr(e.response, "status_code") and e.response.status_code == 429):
             self.disable_for_rate_limit()
         else:
             self.log_error(e)
@@ -274,18 +261,14 @@ class Plugin(metaclass=ABCMeta):
             f" '{err}'"
         )
 
-    def start(
-        self, job_id: int, runtime_configuration: dict, task_id: str, *args, **kwargs
-    ):
+    def start(self, job_id: int, runtime_configuration: dict, task_id: str, *args, **kwargs):
         """
         Entrypoint function to execute the plugin.
         calls `before_run`, `run`, `after_run`
         in that order with exception handling.
         """
         self.job_id = job_id
-        self.report: AbstractReport = self._config.generate_empty_report(
-            self._job, task_id, AbstractReport.STATUSES.RUNNING.value
-        )
+        self.report: AbstractReport = self._config.generate_empty_report(self._job, task_id, AbstractReport.STATUSES.RUNNING.value)
         try:
             self.config(runtime_configuration)
             self.before_run()
@@ -327,9 +310,7 @@ class Plugin(metaclass=ABCMeta):
         valid_module = cls.__module__.replace(str(cls.python_base_path), "")
         # remove the starting dot
         valid_module = valid_module[1:]
-        return PythonModule.objects.get(
-            module=f"{valid_module}.{cls.__name__}", base_path=cls.python_base_path
-        )
+        return PythonModule.objects.get(module=f"{valid_module}.{cls.__name__}", base_path=cls.python_base_path)
 
     @classmethod
     def update(cls) -> bool:
@@ -410,13 +391,9 @@ class Plugin(metaclass=ABCMeta):
         """
         logger.info(f"Trying to disable for rate limit {self}")
         if self._user.has_membership():
-            org_configuration = self._config.get_or_create_org_configuration(
-                self._user.membership.organization
-            )
+            org_configuration = self._config.get_or_create_org_configuration(self._user.membership.organization)
             if org_configuration.rate_limit_timeout is not None:
-                api_key_parameter = self.__parameters.filter(
-                    name__contains="api_key"
-                ).first()
+                api_key_parameter = self.__parameters.filter(name__contains="api_key").first()
                 # if we do not have api keys OR the api key was org based
                 # OR if the api key is not actually required and we do not have it set
                 if (
@@ -426,13 +403,8 @@ class Plugin(metaclass=ABCMeta):
                 ):
                     org_configuration.disable_for_rate_limit()
                 else:
-                    logger.warning(
-                        f"Not disabling {self} because api key used is personal"
-                    )
+                    logger.warning(f"Not disabling {self} because api key used is personal")
             else:
-                logger.warning(
-                    f"You are trying to disable {self}"
-                    " for rate limit without specifying a timeout."
-                )
+                logger.warning(f"You are trying to disable {self} for rate limit without specifying a timeout.")
         else:
             logger.info(f"User {self._user.username} is not in organization.")

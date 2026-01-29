@@ -65,11 +65,7 @@ class DNS(Visualizer):
             name=self.Base(value=f"{printable_analyzer_name}", disable=disable_element),
             value=[
                 self.Base(
-                    value=(
-                        dns_resolution.get("data")
-                        if isinstance(dns_resolution, dict) and "data" in dns_resolution
-                        else dns_resolution
-                    ),
+                    value=(dns_resolution.get("data") if isinstance(dns_resolution, dict) and "data" in dns_resolution else dns_resolution),
                     disable=False,
                 )
                 for dns_resolution in analyzer_report.report["resolutions"]
@@ -94,13 +90,9 @@ class DNS(Visualizer):
 
         for analyzer_report in self.get_analyzer_reports():
             if "dns.dns_resolvers" in analyzer_report.config.python_module:
-                first_level_elements.append(
-                    self._dns_resolution(analyzer_report=analyzer_report)
-                )
+                first_level_elements.append(self._dns_resolution(analyzer_report=analyzer_report))
             else:
-                second_level_elements.append(
-                    self._dns_block(analyzer_report=analyzer_report)
-                )
+                second_level_elements.append(self._dns_block(analyzer_report=analyzer_report))
 
         page = self.Page(name="DNS")
         page.add_level(

@@ -25,20 +25,11 @@ _now = datetime.datetime(2024, 10, 29, 11, tzinfo=datetime.UTC)
 @patch("intel_owl.tasks.now", return_value=_now)
 @override_settings(ELASTICSEARCH_DSL_CLIENT=None)
 class SendElasticTestCase(CustomTestCase):
-
     def setUp(self):
-        self.user, _ = User.objects.get_or_create(
-            username="test_elastic_user", email="elastic@intelowl.com", password="test"
-        )
-        self.organization, _ = Organization.objects.get_or_create(
-            name="test_elastic_org"
-        )
-        self.membership, _ = Membership.objects.get_or_create(
-            user=self.user, organization=self.organization, is_owner=True
-        )
-        self.analyzable = Analyzable.objects.create(
-            name="dns.google.com", classification=Classification.DOMAIN
-        )
+        self.user, _ = User.objects.get_or_create(username="test_elastic_user", email="elastic@intelowl.com", password="test")
+        self.organization, _ = Organization.objects.get_or_create(name="test_elastic_org")
+        self.membership, _ = Membership.objects.get_or_create(user=self.user, organization=self.organization, is_owner=True)
+        self.analyzable = Analyzable.objects.create(name="dns.google.com", classification=Classification.DOMAIN)
         self.job = Job.objects.create(
             tlp="AMBER",
             user=self.user,
@@ -66,12 +57,8 @@ class SendElasticTestCase(CustomTestCase):
         AnalyzerReport.objects.create(  # too old
             config=AnalyzerConfig.objects.get(name="Classic_DNS"),
             job=self.job,
-            start_time=datetime.datetime(
-                2024, 9, 29, 10, 58, 49, tzinfo=datetime.timezone.utc
-            ),
-            end_time=datetime.datetime(
-                2024, 9, 29, 10, 58, 59, tzinfo=datetime.timezone.utc
-            ),
+            start_time=datetime.datetime(2024, 9, 29, 10, 58, 49, tzinfo=datetime.timezone.utc),
+            end_time=datetime.datetime(2024, 9, 29, 10, 58, 59, tzinfo=datetime.timezone.utc),
             status=AnalyzerReport.STATUSES.SUCCESS,
             report={"observable": "dns.google.com", "malicious": False},
             task_id=uuid(),
@@ -175,7 +162,6 @@ class SendElasticTestCase(CustomTestCase):
     @override_settings(ELASTICSEARCH_DSL_ENABLED=True)
     @override_settings(ELASTICSEARCH_DSL_HOST="https://elasticsearch:9200")
     def test_initial(self, *args, **kwargs):
-
         with patch(
             "intel_owl.tasks.bulk",
             return_value=(4, []),
@@ -201,12 +187,8 @@ class SendElasticTestCase(CustomTestCase):
                                 "plugin_name": "analyzer",
                             },
                             "job": {"id": self.job.id},
-                            "start_time": datetime.datetime(
-                                2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
-                            ),
-                            "end_time": datetime.datetime(
-                                2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
-                            ),
+                            "start_time": datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc),
+                            "end_time": datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc),
                             "status": "FAILED",
                             "report": {},
                             "errors": ["error1", "error2"],
@@ -227,12 +209,8 @@ class SendElasticTestCase(CustomTestCase):
                                 "plugin_name": "analyzer",
                             },
                             "job": {"id": self.job.id},
-                            "start_time": datetime.datetime(
-                                2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
-                            ),
-                            "end_time": datetime.datetime(
-                                2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
-                            ),
+                            "start_time": datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc),
+                            "end_time": datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc),
                             "status": "KILLED",
                             "report": {},
                             "errors": [],
@@ -253,12 +231,8 @@ class SendElasticTestCase(CustomTestCase):
                                 "plugin_name": "connector",
                             },
                             "job": {"id": self.job.id},
-                            "start_time": datetime.datetime(
-                                2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
-                            ),
-                            "end_time": datetime.datetime(
-                                2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
-                            ),
+                            "start_time": datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc),
+                            "end_time": datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc),
                             "status": "SUCCESS",
                             "report": {
                                 "to": "receiver@gmail.com",
@@ -286,12 +260,8 @@ class SendElasticTestCase(CustomTestCase):
                                 "plugin_name": "pivot",
                             },
                             "job": {"id": self.job.id},
-                            "start_time": datetime.datetime(
-                                2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
-                            ),
-                            "end_time": datetime.datetime(
-                                2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
-                            ),
+                            "start_time": datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc),
+                            "end_time": datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc),
                             "status": "SUCCESS",
                             "report": {
                                 "job_id": [1],
@@ -331,14 +301,10 @@ class SendElasticTestCase(CustomTestCase):
                                 "name": "DNS4EU_Malicious_Detector",
                                 "plugin_name": "analyzer",
                             },
-                            "end_time": datetime.datetime(
-                                2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
-                            ),
+                            "end_time": datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc),
                             "job": {"id": self.job.id},
                             "report": {},
-                            "start_time": datetime.datetime(
-                                2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
-                            ),
+                            "start_time": datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc),
                             "status": "FAILED",
                             "errors": ["error1", "error2"],
                         },
@@ -357,14 +323,10 @@ class SendElasticTestCase(CustomTestCase):
                                 "name": "Quad9_Malicious_Detector",
                                 "plugin_name": "analyzer",
                             },
-                            "end_time": datetime.datetime(
-                                2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
-                            ),
+                            "end_time": datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc),
                             "job": {"id": self.job.id},
                             "report": {},
-                            "start_time": datetime.datetime(
-                                2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
-                            ),
+                            "start_time": datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc),
                             "status": "KILLED",
                             "errors": [],
                         },
@@ -383,9 +345,7 @@ class SendElasticTestCase(CustomTestCase):
                                 "name": "AbuseSubmitter",
                                 "plugin_name": "connector",
                             },
-                            "end_time": datetime.datetime(
-                                2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
-                            ),
+                            "end_time": datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc),
                             "job": {"id": self.job.id},
                             "report": {
                                 "body": "hello world",
@@ -393,9 +353,7 @@ class SendElasticTestCase(CustomTestCase):
                                 "subject": "Subject",
                                 "to": "receiver@gmail.com",
                             },
-                            "start_time": datetime.datetime(
-                                2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
-                            ),
+                            "start_time": datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc),
                             "status": "SUCCESS",
                             "errors": [],
                         },
@@ -414,18 +372,14 @@ class SendElasticTestCase(CustomTestCase):
                                 "name": "AbuseIpToSubmission",
                                 "plugin_name": "pivot",
                             },
-                            "end_time": datetime.datetime(
-                                2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
-                            ),
+                            "end_time": datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc),
                             "job": {"id": self.job.id},
                             "report": {
                                 "created": True,
                                 "job_id": [1],
                                 "motivation": None,
                             },
-                            "start_time": datetime.datetime(
-                                2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
-                            ),
+                            "start_time": datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc),
                             "status": "SUCCESS",
                             "errors": [],
                         },

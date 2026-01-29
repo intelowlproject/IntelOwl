@@ -6,8 +6,8 @@ from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.analyzers_manager.observable_analyzers.dns.dns_malicious_detectors.cloudflare_malicious_detector import (  # noqa: E501
     CloudFlareMaliciousDetector,
 )
-from api_app.analyzers_manager.observable_analyzers.dns.dns_malicious_detectors.dns0_eu_malicious_detector import (  # noqa: E501
-    DNS0EUMaliciousDetector,
+from api_app.analyzers_manager.observable_analyzers.dns.dns_malicious_detectors.dns4eu_malicious_detector import (  # noqa: E501
+    DNS4EUMaliciousDetector,
 )
 from api_app.analyzers_manager.observable_analyzers.dns.dns_malicious_detectors.quad9_malicious_detector import (  # noqa: E501
     Quad9MaliciousDetector,
@@ -18,8 +18,8 @@ from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers.classic_dn
 from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers.cloudflare_dns_resolver import (  # noqa: E501
     CloudFlareDNSResolver,
 )
-from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers.dns0_eu_resolver import (  # noqa: E501
-    DNS0EUResolver,
+from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers.dns4eu_resolver import (  # noqa: E501
+    DNS4EUResolver,
 )
 from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers.google_dns_resolver import (  # noqa: E501
     GoogleDNSResolver,
@@ -44,7 +44,7 @@ class DNS(Visualizer):
             ClassicDNSResolver.python_module,
             CloudFlareDNSResolver.python_module,
             GoogleDNSResolver.python_module,
-            DNS0EUResolver.python_module,
+            DNS4EUResolver.python_module,
             Quad9DNSResolver.python_module,
         ]
 
@@ -52,7 +52,7 @@ class DNS(Visualizer):
     def second_level_analyzers(cls) -> List[str]:
         return [  # noqa
             CloudFlareMaliciousDetector.python_module,
-            DNS0EUMaliciousDetector.python_module,
+            DNS4EUMaliciousDetector.python_module,
             Quad9MaliciousDetector.python_module,
         ]
 
@@ -182,3 +182,7 @@ class DNS(Visualizer):
 
         patches = []
         return super()._monkeypatch(patches=patches)
+
+    @classmethod
+    def update(cls) -> bool:
+        return True

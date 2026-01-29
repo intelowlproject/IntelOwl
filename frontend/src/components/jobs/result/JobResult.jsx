@@ -88,20 +88,26 @@ export default function JobResult() {
       !jobLoading,
       jobError == null,
     );
-    if (!data.job && jobData && !jobLoading && jobError == null) {
-      axios
-        .get(
-          `${ANALYZABLES_URI}/${jobData.analyzable_id}/related_investigation_number`,
-        )
-        .then((response) => response.data.related_investigation_number)
-        .catch((_) => -1)
-        // use "then" instead of "finally"vecause it doesn't support parameters
-        .then((relatedInvestigationNumber) =>
-          setData({ relatedInvestigationNumber, job: jobData }),
-        );
+    if (jobData && !jobLoading && jobError == null) {
+      // case 1 - fetching investigation number if we dont have it, this'll even sync the job data when the request completes
+      if (data.relatedInvestigationNumber === undefined) {
+        axios
+          .get(
+            `${ANALYZABLES_URI}/${jobData.analyzable_id}/related_investigation_number`,
+          )
+          .then((response) => response.data.related_investigation_number)
+          .catch((_) => -1)
+          .then((relatedVal) =>
+            setData({ relatedInvestigationNumber: relatedVal, job: jobData }),
+          );
+      }
+      // case 2 - if we already have the number
+      else if (data.job !== jobData) {
+        setData((prev) => ({ ...prev, job: jobData }));
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobLoading]);
+  }, [jobLoading, jobData]);
 
   useEffect(() => {
     if (data.job) setDataIsDownloading(false);

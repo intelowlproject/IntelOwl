@@ -29,7 +29,7 @@ import { JobIsRunningAlert } from "./JobIsRunningAlert";
 import { JobFinalStatuses } from "../../../constants/jobConst";
 import { datetimeFormatStr } from "../../../constants/miscConst";
 
-export function JobInfoCard({ job, relatedInvestigationNumber }) {
+export function JobInfoCard({ job, relatedInvestigationNumber = 0 }) {
   // local state
   const [isOpenJobInfoCard, setIsOpenJobInfoCard] = React.useState(false);
   const [isOpenJobWarnings, setIsOpenJobWarnings] = React.useState(false);
@@ -48,9 +48,13 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
     <div id="JobInfoCardSection">
       <ContentSection className="mb-0 bg-darker">
         <Row>
-          <Col sm={12} md={3} className="d-flex justify-content-start">
+          <Col
+            sm={12}
+            md={3}
+            className="d-flex align-items-center justify-content-start"
+          >
             <Button
-              className="bg-darker border-1 lh-sm mx-1"
+              className="bg-darker border-1 d-flex align-items-center mx-1"
               href={`/history/investigations?start_time__gte=${format(
                 startDateRelatedInvestigation,
                 datetimeFormatStr,
@@ -66,7 +70,7 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
               size="xs"
               style={{ fontSize: "0.8rem" }}
             >
-              Similar Investigations: <br /> {relatedInvestigationNumber}
+              Similar Investigations: {relatedInvestigationNumber}
             </Button>
             <UncontrolledTooltip
               placement="top"
@@ -79,7 +83,7 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
             {job.investigation_id && (
               <>
                 <Button
-                  className="bg-darker border-1 lh-sm mx-1"
+                  className="bg-darker border-1 d-flex align-items-center mx-1"
                   href={`/investigation/${job.investigation_id}`}
                   target="_blank"
                   rel="noreferrer"
@@ -87,7 +91,7 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
                   size="xs"
                   style={{ fontSize: "0.8rem" }}
                 >
-                  Investigation: <br /> {job.investigation_name}
+                  Investigation: {job.investigation_name}
                 </Button>
                 <UncontrolledTooltip
                   placement="top"
@@ -287,5 +291,9 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
 
 JobInfoCard.propTypes = {
   job: PropTypes.object.isRequired,
-  relatedInvestigationNumber: PropTypes.number.isRequired,
+  relatedInvestigationNumber: PropTypes.number,
+};
+
+JobInfoCard.defaultProps = {
+  relatedInvestigationNumber: 0,
 };

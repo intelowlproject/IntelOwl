@@ -18,12 +18,13 @@ class PhishStatsTestCase(BaseAnalyzerTest):
                 "url": "http://example.com/phish",
                 "ip": "8.8.8.8",
                 "asn": "AS15169",
-                "country": "US",
+                "countrycode": "US",
+                "countryname": "United States",
                 "date": "2024-01-01",
                 "title": "Fake Login Page",
             }
         ]
         return patch(
             "requests.get",
-            return_value=MockUpResponse({"data": mock_json_response}, 200),
+            return_value=MockUpResponse(mock_json_response, 200),
         )

@@ -5,28 +5,61 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1'
+          cpus: "1"
           memory: 2000M
-          
+
   uwsgi:
     build:
       context: ..
-      dockerfile: docker/Dockerfile
+      dockerfile: docker/Dockerfile.ci
       args:
         REPO_DOWNLOADER_ENABLED: ${REPO_DOWNLOADER_ENABLED}
-    image: intelowlproject/intelowl:ci
-    env_file:
-      - env_file_app_ci
-
-  
-  daphne:
     image: intelowlproject/intelowl:ci
     env_file:
       - env_file_app_ci
     deploy:
       resources:
         limits:
-          cpus: '0.50'
+          cpus: "1"
+          memory: 2000M
+
+  daphne:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ci
+    image: intelowlproject/intelowl:ci
+    env_file:
+      - env_file_app_ci
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 200M
+
+  celery_beat:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ci
+    image: intelowlproject/intelowl:ci
+    env_file:
+      - env_file_app_ci
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 200M
+
+  celery_worker_default:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ci
+    image: intelowlproject/intelowl:ci
+    env_file:
+      - env_file_app_ci
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
           memory: 200M
 
   nginx:
@@ -39,32 +72,12 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.50'
-          memory: 200M
-
-  celery_beat:
-    image: intelowlproject/intelowl:ci
-    env_file:
-      - env_file_app_ci
-    deploy:
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 200M
-
-  celery_worker_default:
-    image: intelowlproject/intelowl:ci
-    env_file:
-      - env_file_app_ci
-    deploy:
-      resources:
-        limits:
-          cpus: '0.50'
+          cpus: "0.50"
           memory: 200M
 
   redis:
     deploy:
       resources:
         limits:
-          cpus: '0.50'
+          cpus: "0.50"
           memory: 200M

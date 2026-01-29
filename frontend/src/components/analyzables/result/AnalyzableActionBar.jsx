@@ -1,9 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { DropdownToggle, DropdownMenu, UncontrolledDropdown } from "reactstrap";
+import { TiThMenu } from "react-icons/ti";
+import { MdOutlineRefresh } from "react-icons/md";
 
-import { IconButton } from "@certego/certego-ui";
+import { IconButton, DropdownNavLink } from "@certego/certego-ui";
 
-import { rescanIcon, addEvaluationIcon } from "../../common/icon/actionIcons";
+import { addEvaluationIcon } from "../../common/icon/actionIcons";
 import { UserEventModal } from "../../userEvents/UserEventModal";
 
 export function AnalyzableActionsBar({ analyzable }) {
@@ -28,18 +31,28 @@ export function AnalyzableActionsBar({ analyzable }) {
           isOpen={showUserEventModal}
         />
       )}
-      <IconButton
-        id="rescanbtn"
-        Icon={rescanIcon}
-        size="sm"
-        color="info"
-        title="Rescan artifact"
-        titlePlacement="top"
-        href={`/scan?observable=${analyzable.name}`}
-        target="_blank"
-        rel="noreferrer"
-        className="text-light"
-      />
+      <UncontrolledDropdown inNavbar>
+        <DropdownToggle nav className="text-center">
+          <IconButton
+            id="artifactActions"
+            Icon={TiThMenu}
+            size="sm"
+            color="light"
+            title="Artifact actions"
+            titlePlacement="top"
+          />
+        </DropdownToggle>
+        <DropdownMenu end className="bg-dark" data-bs-popper>
+          <DropdownNavLink
+            to={`/scan?observable=${analyzable.name}`}
+            target="_blank"
+            className=" d-flex align-items-center text-light"
+          >
+            <MdOutlineRefresh className="text-accent me-1" />
+            Rescan
+          </DropdownNavLink>
+        </DropdownMenu>
+      </UncontrolledDropdown>
     </div>
   );
 }

@@ -1,17 +1,19 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button, UncontrolledTooltip } from "reactstrap";
-import { CiViewTimeline } from "react-icons/ci";
+import { Button, UncontrolledTooltip, Badge } from "reactstrap";
 import { CgListTree } from "react-icons/cg";
-import { FaObjectUngroup } from "react-icons/fa";
 import { fromZonedTime } from "date-fns-tz";
+import { LuCalendarSearch } from "react-icons/lu";
+import { RiBarChartHorizontalFill } from "react-icons/ri";
+
+import { DropdownNavLink } from "@certego/certego-ui";
 
 import { localTimezone } from "../../../../constants/miscConst";
 
 export function InvestigationOverviewButton({ id, name }) {
   return (
     <Button
-      className="bg-body border-1 lh-sm me-1 d-flex align-items-center"
+      className="bg-body border-1 border-primary lh-sm me-1 d-flex align-items-center"
       href={`/investigation/${id}`}
       target="_blank"
       rel="noreferrer"
@@ -20,7 +22,7 @@ export function InvestigationOverviewButton({ id, name }) {
       style={{ fontSize: "0.8rem" }}
     >
       <CgListTree className="me-1" />
-      Investigation overview
+      Investigation
       <UncontrolledTooltip placement="top" target="investigationOverviewBtn">
         This job is part of the investigation: {name}
       </UncontrolledTooltip>
@@ -52,24 +54,15 @@ export function RelatedInvestigationButton({
     fromZonedTime(endDateRelatedInvestigation, localTimezone).toISOString(),
   )}&analyzed_object_name=${name}&ordering=-start_time`;
 
-  console.debug(url);
   return (
-    <Button
-      className="bg-body border-1 lh-sm me-1 d-flex align-items-center"
-      href={url}
+    <DropdownNavLink
+      to={url}
       target="_blank"
-      rel="noreferrer"
-      id="investigationSearchBtn"
-      size="xs"
-      style={{ fontSize: "0.8rem" }}
+      className="d-flex align-items-center text-light"
     >
-      <FaObjectUngroup className="me-1" />
-      Related investigations: {relatedInvestigationNumber}
-      <UncontrolledTooltip placement="top" target="investigationSearchBtn">
-        Search investigations for {name} in the last
-        {` ${investigationTimeRange}`} days.
-      </UncontrolledTooltip>
-    </Button>
+      <LuCalendarSearch className="me-1 text-info" /> Related investigations:{" "}
+      <Badge className="ms-1 bg-info">{relatedInvestigationNumber || 0}</Badge>
+    </DropdownNavLink>
   );
 }
 
@@ -81,7 +74,7 @@ RelatedInvestigationButton.propTypes = {
 export function AnalyzableOverviewButton({ id }) {
   return (
     <Button
-      className="bg-secondary lh-sm me-1 d-flex align-items-center"
+      className="bg-accent-2 border-0 lh-sm me-1 d-flex align-items-center"
       href={`/artifacts/${id}`}
       target="_blank"
       rel="noreferrer"
@@ -89,10 +82,10 @@ export function AnalyzableOverviewButton({ id }) {
       size="xs"
       style={{ fontSize: "0.8rem" }}
     >
-      <CiViewTimeline className="me-1" />
-      Evaluation history
+      <RiBarChartHorizontalFill className="me-1" />
+      Artifact
       <UncontrolledTooltip placement="top" target="analyzableOverviewBtn">
-        Show all evaluations for this artifact
+        Artifact overview
       </UncontrolledTooltip>
     </Button>
   );

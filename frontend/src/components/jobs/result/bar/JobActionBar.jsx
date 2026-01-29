@@ -5,24 +5,21 @@ import {
   DropdownMenu,
   DropdownItem,
   UncontrolledDropdown,
+  Badge,
 } from "reactstrap";
 import { useNavigate } from "react-router-dom";
 import { TiThMenu } from "react-icons/ti";
 import { IoMdSave } from "react-icons/io";
 import { IconButton, addToast } from "@certego/certego-ui";
+import { MdDelete, MdOutlineRefresh, MdFileDownload } from "react-icons/md";
+import { FaFileDownload } from "react-icons/fa";
 
 import { downloadJobSample, deleteJob, rescanJob } from "../jobApi";
 import {
   JobResultSections,
   Classifications,
 } from "../../../../constants/miscConst";
-import {
-  DeleteIcon,
-  CommentIcon,
-  rescanIcon,
-  downloadReportIcon,
-  downloadSampleIcon,
-} from "../../../common/icon/actionIcons";
+import { CommentIcon } from "../../../common/icon/actionIcons";
 import { fileDownload } from "../../../../utils/files";
 import { PluginConfigModal } from "../../../plugins/PluginConfigModal";
 import { PluginsTypes } from "../../../../constants/pluginConst";
@@ -31,15 +28,6 @@ import {
   InvestigationOverviewButton,
   RelatedInvestigationButton,
 } from "../utils/jobButtons";
-
-function SaveAsPlaybookIcon() {
-  return (
-    <span className="d-flex align-items-center text-light">
-      <IoMdSave className="me-1" />
-      Save as playbook
-    </span>
-  );
-}
 
 export function JobActionsBar({ job, relatedInvestigationNumber }) {
   console.debug(job);
@@ -96,21 +84,24 @@ export function JobActionsBar({ job, relatedInvestigationNumber }) {
           name={job.investigation_name}
         />
       )}
-      <RelatedInvestigationButton
-        name={job.is_sample ? job.file_name : job.observable_name}
-        relatedInvestigationNumber={relatedInvestigationNumber}
-      />
       <AnalyzableOverviewButton id={job.analyzable_id} />
-      <IconButton
-        id="commentbtn"
-        Icon={commentIcon}
-        size="sm"
-        color="info"
-        className="me-1 text-light"
-        onClick={() => navigate(`/jobs/${job.id}/comments`)}
-        title="Artifact Comments"
-        titlePlacement="top"
-      />
+      <div>
+        <IconButton
+          id="commentbtn"
+          Icon={commentIcon}
+          size="sm"
+          color="gray"
+          className="me-1 text-light"
+          onClick={() => navigate(`/jobs/${job.id}/comments`)}
+          title="Artifact Comments"
+          titlePlacement="top"
+        />
+        {job.comments.length > 0 && (
+          <Badge color="light" className="badge-top-end-corner text-black">
+            {job.comments.length}
+          </Badge>
+        )}
+      </div>
       <UncontrolledDropdown inNavbar>
         <DropdownToggle nav className="text-center">
           <IconButton
@@ -123,40 +114,33 @@ export function JobActionsBar({ job, relatedInvestigationNumber }) {
           />
         </DropdownToggle>
         <DropdownMenu end className="bg-dark" data-bs-popper>
-          <DropdownItem className="bg-transparent">
-            <IconButton
-              id="downloadreportbtn"
-              Icon={downloadReportIcon}
-              size="sm"
-              color="accent-2"
-              onClick={onDownloadReport}
-              title="Download report in json format"
-              titlePlacement="top"
-            />
+          <RelatedInvestigationButton
+            name={job.is_sample ? job.file_name : job.observable_name}
+            relatedInvestigationNumber={relatedInvestigationNumber}
+          />
+          <DropdownItem divider />
+          <DropdownItem
+            onClick={onDownloadReport}
+            className="d-flex align-items-center text-light"
+          >
+            <MdFileDownload className="me-1 text-advisory" />
+            Download report
           </DropdownItem>
           {job?.is_sample && (
-            <DropdownItem className="bg-transparent">
-              <IconButton
-                id="downloadsamplebtn"
-                Icon={downloadSampleIcon}
-                size="sm"
-                color="accent-2"
-                onClick={onDownloadSampleBtnClick}
-                title="Download sample"
-                titlePlacement="top"
-              />
+            <DropdownItem
+              onClick={onDownloadSampleBtnClick}
+              className=" d-flex align-items-center text-light"
+            >
+              <FaFileDownload className="me-1 text-advisory" />
+              Download sample
             </DropdownItem>
           )}
-          <DropdownItem className="bg-transparent">
-            <IconButton
-              id="saveAsAPlaybook"
-              Icon={SaveAsPlaybookIcon}
-              size="sm"
-              color="info"
-              onClick={() => setShowModalCreatePlaybook(true)}
-              title="Save current analysis configurations as a playbook"
-              titlePlacement="top"
-            />
+          <DropdownItem
+            onClick={() => setShowModalCreatePlaybook(true)}
+            className=" d-flex align-items-center text-light"
+          >
+            <IoMdSave className="me-1 text-advisory" />
+            Save as playbook
             <PluginConfigModal
               pluginConfig={{
                 analyzers: job?.analyzers_to_execute,
@@ -178,29 +162,21 @@ export function JobActionsBar({ job, relatedInvestigationNumber }) {
               isOpen={showModalCreatePlaybook}
             />
           </DropdownItem>
-          <DropdownItem className="bg-transparent">
-            <IconButton
-              id="rescanbtn"
-              Icon={rescanIcon}
-              onClick={handleRetry}
-              color="info"
-              size="sm"
-              title="Force run the same analysis"
-              titlePlacement="top"
-              className="text-light"
-            />
+          <DropdownItem divider />
+          <DropdownItem
+            onClick={handleRetry}
+            className=" d-flex align-items-center text-light"
+          >
+            <MdOutlineRefresh className="me-1 text-accent" />
+            Rescan
           </DropdownItem>
           {job.permissions?.delete && (
-            <DropdownItem className="bg-transparent">
-              <IconButton
-                id="deletejobbtn"
-                Icon={DeleteIcon}
-                size="sm"
-                color="light"
-                onClick={onDeleteBtnClick}
-                title="Delete Job"
-                titlePlacement="top"
-              />
+            <DropdownItem
+              onClick={onDeleteBtnClick}
+              className=" d-flex align-items-center text-light"
+            >
+              <MdDelete className="text-danger me-1" />
+              Delete
             </DropdownItem>
           )}
         </DropdownMenu>

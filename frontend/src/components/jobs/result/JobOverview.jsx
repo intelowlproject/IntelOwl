@@ -422,7 +422,7 @@ export function JobOverview({
               <ButtonGroup className="ms-2">
                 <Button
                   outline={!isSelectedUI}
-                  color={isSelectedUI ? "primary" : "tertiary"}
+                  color={isSelectedUI ? "secondary" : "tertiary"}
                   onClick={() =>
                     navigate(
                       `/jobs/${job.id}/${
@@ -437,7 +437,7 @@ export function JobOverview({
                 </Button>
                 <Button
                   outline={isSelectedUI}
-                  color={!isSelectedUI ? "primary" : "tertiary"}
+                  color={!isSelectedUI ? "secondary" : "tertiary"}
                   onClick={() =>
                     navigate(
                       `/jobs/${job.id}/${JobResultSections.RAW}/${rawElements[0].name}`,

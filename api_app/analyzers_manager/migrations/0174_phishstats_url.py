@@ -6,7 +6,6 @@ from api_app.choices import ParamTypes
 # Logic to apply
 def migrate(apps, schema_editor):
     Parameter = apps.get_model("api_app", "Parameter")
-    PluginConfig = apps.get_model("api_app", "PluginConfig")
     PythonModule = apps.get_model("api_app", "PythonModule")
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
 

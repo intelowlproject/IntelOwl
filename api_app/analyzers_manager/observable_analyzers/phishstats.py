@@ -16,7 +16,7 @@ class PhishStats(ObservableAnalyzer):
     Analyzer that uses PhishStats API to check if the observable is a phishing site.
     """
 
-    url: str = "https://phishstats.info:2096/api"
+    url: str = "https://api.phishstats.info/api"
 
     @classmethod
     def update(cls) -> bool:

@@ -11,7 +11,7 @@ def migrate(apps, schema_editor):
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
 
     try:
-        pm = PythonModule.objects.get(name="PhishStats")
+        pm = PythonModule.objects.get(module="PhishStats")
     except PythonModule.DoesNotExist:
         return
 
@@ -43,7 +43,7 @@ def reverse_migrate(apps, schema_editor):
     PythonModule = apps.get_model("api_app", "PythonModule")
 
     try:
-        pm = PythonModule.objects.get(name="PhishStats")
+        pm = PythonModule.objects.get(module="PhishStats")
     except PythonModule.DoesNotExist:
         return
 

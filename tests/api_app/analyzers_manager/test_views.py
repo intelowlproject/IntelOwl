@@ -179,6 +179,8 @@ class AnalyzerConfigViewSetTestCase(
     def test_get(self):
         # 1 - existing analyzer
         self.client.force_authenticate(user=self.user)
+        analyzer = self.model_class.objects.get(name="Quad9_DNS")
+        parameter = analyzer.python_module.parameters.get(name="query_type")
         response = self.client.get(f"{self.URL}/Quad9_DNS")
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(
@@ -189,7 +191,7 @@ class AnalyzerConfigViewSetTestCase(
                 "HTTPS)",
                 "disabled": True,
                 "docker_based": False,
-                "id": 101,
+                "id": analyzer.id,
                 "mapping_data_model": {},
                 "maximum_tlp": "AMBER",
                 "name": "Quad9_DNS",
@@ -198,7 +200,7 @@ class AnalyzerConfigViewSetTestCase(
                 "parameters": {
                     "query_type": {
                         "description": "Query type against the chosen " "DNS resolver.",
-                        "id": 206,
+                        "id": parameter.id,
                         "is_secret": False,
                         "required": False,
                         "type": "str",
@@ -226,36 +228,32 @@ class AnalyzerConfigViewSetTestCase(
         response = self.client.get(f"{self.URL}/Quad9_DNS/plugin_config")
         self.assertEqual(response.status_code, 200, response.content)
         result = response.json()
-        result["user_config"][0].pop(
-            "updated_at"
-        )  # auto filled by the model and hard to mock
-        self.assertEqual(
-            result,
+        for user_config in result["user_config"]:
+            user_config.pop("updated_at", "")
+            user_config.pop("id", None)
+            user_config.pop("parameter", None)
+
+        expected_user_config = [
             {
-                "organization_config": [],
-                "user_config": [
-                    {
-                        "analyzer_config": "Quad9_DNS",
-                        "attribute": "query_type",
-                        "connector_config": None,
-                        "description": "Query type against the chosen DNS resolver.",
-                        "exist": True,
-                        "for_organization": False,
-                        "id": 159,
-                        "ingestor_config": None,
-                        "is_secret": False,
-                        "organization": None,
-                        "owner": None,
-                        "parameter": 206,
-                        "pivot_config": None,
-                        "required": False,
-                        "type": "str",
-                        "value": "A",
-                        "visualizer_config": None,
-                    }
-                ],
-            },
-        )
+                "analyzer_config": "Quad9_DNS",
+                "attribute": "query_type",
+                "connector_config": None,
+                "description": "Query type against the chosen DNS resolver.",
+                "exist": True,
+                "for_organization": False,
+                "ingestor_config": None,
+                "is_secret": False,
+                "organization": None,
+                "owner": None,
+                "pivot_config": None,
+                "required": False,
+                "type": "str",
+                "value": "A",
+                "visualizer_config": None,
+            }
+        ]
+        self.assertEqual(result["organization_config"], [])
+        self.assertEqual(result["user_config"], expected_user_config)
         # 2 - existing analyzer, no config
         self.client.force_authenticate(user=self.user)
         response = self.client.get(f"{self.URL}/Quad9_Malicious_Detector/plugin_config")

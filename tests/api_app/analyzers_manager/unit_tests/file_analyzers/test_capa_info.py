@@ -1,5 +1,5 @@
 import subprocess
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from api_app.analyzers_manager.file_analyzers.capa_info import CapaInfo
 
@@ -25,9 +25,18 @@ class TestCapaInfoAnalyzer(BaseFileAnalyzerTest):
             stdout='{"meta": {}, "rules": {"contain obfuscated stackstrings": {}, "enumerate PE sections":{}}}',
             stderr="",
         )
+
+        mock_requests_get = MagicMock()
+        mock_requests_get.json.return_value = {"tag_name": "v1.0.0"}
+
         return [
             patch.object(CapaInfo, "update", return_value=True),
             patch("subprocess.run", return_value=response_from_command),
+            patch(
+                "api_app.analyzers_manager.file_analyzers.capa_info.requests.get",
+                return_value=mock_requests_get,
+            ),
+            patch.object(CapaInfo, "_check_if_latest_version", return_value=True),
         ]
 
     def get_extra_config(self):

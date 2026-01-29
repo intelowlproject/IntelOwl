@@ -45,12 +45,7 @@ class SendElasticTestCase(CustomTestCase):
             analyzable=self.analyzable,
         )
         AnalyzerReport.objects.create(  # valid
-            config=AnalyzerConfig.objects.get(
-                python_module=PythonModule.objects.get(
-                    base_path=PythonModuleBasePaths.ObservableAnalyzer.value,
-                    module="dns.dns_malicious_detectors.dns0_eu_malicious_detector.DNS0EUMaliciousDetector",
-                )
-            ),
+            config=AnalyzerConfig.objects.get(name="DNS4EU_Malicious_Detector"),
             job=self.job,
             start_time=datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.UTC),
             end_time=datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.UTC),
@@ -60,12 +55,7 @@ class SendElasticTestCase(CustomTestCase):
             parameters={},
         )
         AnalyzerReport.objects.create(  # valid
-            config=AnalyzerConfig.objects.get(
-                python_module=PythonModule.objects.get(
-                    base_path=PythonModuleBasePaths.ObservableAnalyzer.value,
-                    module="dns.dns_malicious_detectors.quad9_malicious_detector.Quad9MaliciousDetector",
-                )
-            ),
+            config=AnalyzerConfig.objects.get(name="Quad9_Malicious_Detector"),
             job=self.job,
             start_time=datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.UTC),
             end_time=datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.UTC),
@@ -74,12 +64,7 @@ class SendElasticTestCase(CustomTestCase):
             parameters={},
         )
         AnalyzerReport.objects.create(  # too old
-            config=AnalyzerConfig.objects.get(
-                python_module=PythonModule.objects.get(
-                    base_path=PythonModuleBasePaths.ObservableAnalyzer.value,
-                    module="dns.dns_resolvers.classic_dns_resolver.ClassicDNSResolver",
-                )
-            ),
+            config=AnalyzerConfig.objects.get(name="Classic_DNS"),
             job=self.job,
             start_time=datetime.datetime(
                 2024, 9, 29, 10, 58, 49, tzinfo=datetime.timezone.utc
@@ -93,12 +78,7 @@ class SendElasticTestCase(CustomTestCase):
             parameters={},
         )
         AnalyzerReport.objects.create(  # invalid status
-            config=AnalyzerConfig.objects.get(
-                python_module=PythonModule.objects.get(
-                    base_path=PythonModuleBasePaths.ObservableAnalyzer.value,
-                    module="dns.dns_resolvers.cloudflare_dns_resolver.CloudFlareDNSResolver",
-                )
-            ),
+            config=AnalyzerConfig.objects.get(name="CloudFlare_DNS"),
             job=self.job,
             status=AnalyzerReport.STATUSES.RUNNING,
             start_time=datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.UTC),
@@ -217,7 +197,7 @@ class SendElasticTestCase(CustomTestCase):
                                 "organization": {"name": "test_elastic_org"},
                             },
                             "config": {
-                                "name": "DNS0_EU_Malicious_Detector",
+                                "name": "DNS4EU_Malicious_Detector",
                                 "plugin_name": "analyzer",
                             },
                             "job": {"id": self.job.id},
@@ -348,7 +328,7 @@ class SendElasticTestCase(CustomTestCase):
                                 "organization": {"name": "test_elastic_org"},
                             },
                             "config": {
-                                "name": "DNS0_EU_Malicious_Detector",
+                                "name": "DNS4EU_Malicious_Detector",
                                 "plugin_name": "analyzer",
                             },
                             "end_time": datetime.datetime(

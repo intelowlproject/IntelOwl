@@ -26,6 +26,7 @@ class VisualizerConfigViewSetTestCase(
     def test_get(self):
         # 1 - existing visualizer
         self.client.force_authenticate(user=self.user)
+        visualizer = self.model_class.objects.get(name="DNS")
         response = self.client.get(f"{self.URL}/DNS")
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(
@@ -35,10 +36,10 @@ class VisualizerConfigViewSetTestCase(
                 "description": "Visualize information about DNS resolvers and DNS malicious "
                 "detectors",
                 "disabled": True,
-                "id": 1,
+                "id": visualizer.id,
                 "name": "DNS",
                 "playbooks": ["Dns"],
-                "python_module": 128,
+                "python_module": visualizer.python_module.id,
             },
         )
         # 2 - missing visualizer

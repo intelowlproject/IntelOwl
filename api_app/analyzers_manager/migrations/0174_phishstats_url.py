@@ -1,6 +1,7 @@
-from django.db import migrations
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
 
-from api_app.choices import ParamTypes
+from django.db import migrations
 
 
 # Logic to apply
@@ -19,9 +20,10 @@ def migrate(apps, schema_editor):
         name="url",
         python_module=pm,
         defaults={
-            "type": ParamTypes.STR.value,
+            "type": "str",
             "description": "PhishStats API base URL",
             "is_secret": False,
+            "required": False,
             "default_value": "https://api.phishstats.info/api/phishing",
         },
     )

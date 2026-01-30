@@ -35,7 +35,7 @@ jest.mock("../../../../src/components/scan/utils/RecentScans", () =>
   jest.fn((props) => <div {...props} />),
 );
 
-describe("ScanForm adavanced use", () => {
+describe("ScanForm advanced use", () => {
   beforeAll(() => {
     jest.setTimeout(30000);
   });

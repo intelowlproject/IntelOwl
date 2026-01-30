@@ -15,9 +15,7 @@ class Command(BaseCommand):
             success, message = check_for_update()
         except Exception:
             logger.exception("Unexpected error during update check")
-            raise CommandError(
-                "Unexpected error during update check. See logs for details."
-            )
+            raise CommandError("Unexpected error during update check. See logs for details.")
 
         if not success:
             logger.info("Update check failed: %s", message)

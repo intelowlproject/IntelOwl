@@ -39,9 +39,7 @@ def fetch_latest_version() -> Tuple[Optional[str], Optional[str]]:
         return None, "UPDATE_CHECK_URL not configured"
 
     try:
-        resp = requests.get(
-            url, headers={"User-Agent": "IntelOwl-Update-Checker"}, timeout=5
-        )
+        resp = requests.get(url, headers={"User-Agent": "IntelOwl-Update-Checker"}, timeout=5)
     except requests.RequestException as exc:
         logger.error("Update check HTTP request failed: %s", exc)
         return None, "Failed to fetch release information"
@@ -69,9 +67,7 @@ def fetch_latest_version() -> Tuple[Optional[str], Optional[str]]:
 def _notify_admins(title: str, message: str) -> None:
     try:
         if UserEventQuerySet is not None:
-            UserEventQuerySet.notify_admins(
-                title=title, message=message, persistent=True, severity="warning"
-            )
+            UserEventQuerySet.notify_admins(title=title, message=message, persistent=True, severity="warning")
             return
         if Notification is not None:
             Notification.objects.create(
@@ -105,9 +101,7 @@ def check_for_update() -> Tuple[bool, str]:
     try:
         with transaction.atomic():
             try:
-                state, _ = UpdateCheckStatus.objects.select_for_update().get_or_create(
-                    pk=1
-                )
+                state, _ = UpdateCheckStatus.objects.select_for_update().get_or_create(pk=1)
             except IntegrityError:
                 state = UpdateCheckStatus.objects.select_for_update().get(pk=1)
 
@@ -115,9 +109,7 @@ def check_for_update() -> Tuple[bool, str]:
 
             if not current_v or not latest_v:
                 if latest_full != current_str:
-                    message = (
-                        f"Update available: {latest_full} (current: {current_str})"
-                    )
+                    message = f"Update available: {latest_full} (current: {current_str})"
                 else:
                     message = f"IntelOwl version up to date ({current_str})"
 
@@ -127,15 +119,11 @@ def check_for_update() -> Tuple[bool, str]:
             if latest_v > current_v:
                 message = f"New IntelOwl version available: {latest_full} (current: {current_str})"
 
-                should_notify = (state.latest_version != stored_latest) or (
-                    not state.notified
-                )
+                should_notify = (state.latest_version != stored_latest) or (not state.notified)
                 if should_notify:
                     state.latest_version = stored_latest
                     state.notified = True
-                    state.save(
-                        update_fields=["latest_version", "notified", "last_checked_at"]
-                    )
+                    state.save(update_fields=["latest_version", "notified", "last_checked_at"])
 
                     def _send_notification():
                         _notify_admins(

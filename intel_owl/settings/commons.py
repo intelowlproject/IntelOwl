@@ -41,7 +41,9 @@ BASE_ANALYZER_OBSERVABLE_PYTHON_PATH = PosixPath(
     )
 )
 BASE_ANALYZER_FILE_PYTHON_PATH = PosixPath(
-    get_secret("BASE_ANALYZER_FILE_PYTHON_PATH", "api_app.analyzers_manager.file_analyzers")
+    get_secret(
+        "BASE_ANALYZER_FILE_PYTHON_PATH", "api_app.analyzers_manager.file_analyzers"
+    )
 )
 BASE_ENGINE_MODULES_PYTHON_PATH = PosixPath(
     get_secret("BASE_ENGINE_MODULES_PYTHON_PATH", "api_app.engines_manager.engines")

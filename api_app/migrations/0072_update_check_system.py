@@ -30,7 +30,6 @@ def remove_weekly_update_task(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api_app", "0071_delete_last_elastic_report"),
         ("django_celery_beat", "__latest__"),

@@ -27,7 +27,7 @@ class CIRCL_PDNS(classes.ObservableAnalyzer):
         self.split_credentials = self._pdns_credentials.split("|")
         if len(self.split_credentials) != 2:
             raise AnalyzerRunException(
-                "CIRCL credentials not properly configured.Template to use: '<user>|<pwd>'"
+                "CIRCL credentials not properly configured. Template to use: '<user>|<pwd>'"
             )
 
     def run(self):

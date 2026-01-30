@@ -18,9 +18,7 @@ class TestUserAuth(CustomOAuthTestCase):
     def test_get_token_unauthorized(self):
         response = self.client.get(api_uri)
         self.assertEqual(response.status_code, 401)
-        self.assertEqual(
-            response.json(), {"detail": "Authentication credentials were not provided."}
-        )
+        self.assertEqual(response.json(), {"detail": "Authentication credentials were not provided."})
 
     def test_get_token_no_token_available(self):
         self.assertEqual(Token.objects.count(), 0)
@@ -35,16 +33,12 @@ class TestUserAuth(CustomOAuthTestCase):
         self.assertEqual(response.status_code, 200)
         response_data = response.json()
         self.assertEqual(response_data["key"], token.key)
-        self.assertEqual(
-            response_data["created"], token.created.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-        )
+        self.assertEqual(response_data["created"], token.created.strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
 
     def test_create_token_unauthorized(self):
         response = self.client.post(api_uri)
         self.assertEqual(response.status_code, 401)
-        self.assertEqual(
-            response.json(), {"detail": "Authentication credentials were not provided."}
-        )
+        self.assertEqual(response.json(), {"detail": "Authentication credentials were not provided."})
 
     def test_create_token_already_exist(self):
         Token.objects.get_or_create(user=self.user)
@@ -52,9 +46,7 @@ class TestUserAuth(CustomOAuthTestCase):
         response = self.client.post(api_uri)
         self.assertEqual(response.status_code, 400)
         response_data = response.json()
-        self.assertCountEqual(
-            response_data, {"errors": ["An API token was already issued to you."]}
-        )
+        self.assertCountEqual(response_data, {"errors": ["An API token was already issued to you."]})
 
     def test_create_token(self):
         self.client.force_authenticate(self.user)
@@ -63,17 +55,13 @@ class TestUserAuth(CustomOAuthTestCase):
         response_data = response.json()
         token = Token.objects.get(user=self.user)
         self.assertEqual(response_data["key"], token.key)
-        self.assertEqual(
-            response_data["created"], token.created.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-        )
+        self.assertEqual(response_data["created"], token.created.strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
 
     def test_delete_token_unauthorized(self):
         Token.objects.get_or_create(user=self.user)
         response = self.client.delete(api_uri)
         self.assertEqual(response.status_code, 401)
-        self.assertEqual(
-            response.json(), {"detail": "Authentication credentials were not provided."}
-        )
+        self.assertEqual(response.json(), {"detail": "Authentication credentials were not provided."})
         self.assertEqual(Token.objects.count(), 1)
 
     def test_delete_token_unavailable(self):

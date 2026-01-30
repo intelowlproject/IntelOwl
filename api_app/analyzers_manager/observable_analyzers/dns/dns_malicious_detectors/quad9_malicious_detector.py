@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 """Check if the domains is reported as malicious in Quad9 database"""
+
 import logging
 
 import requests
@@ -30,10 +31,7 @@ class Quad9MaliciousDetector(Quad9Base, classes.ObservableAnalyzer):
         pass
 
     def run(self):
-
-        observable = self.convert_to_domain(
-            self.observable_name, self.observable_classification
-        )
+        observable = self.convert_to_domain(self.observable_name, self.observable_classification)
 
         resolutions = self.quad9_dns_query(observable)
         quad9_answer = bool(resolutions)
@@ -44,9 +42,7 @@ class Quad9MaliciousDetector(Quad9Base, classes.ObservableAnalyzer):
             # To handle DNS server internal error
             # inconclusive result
             if google_answer is None:
-                logger.warning(
-                    f"Inconclusive result for {observable}: Google DNS SERVFAIL (Status 2)"
-                )
+                logger.warning(f"Inconclusive result for {observable}: Google DNS SERVFAIL (Status 2)")
                 self.report.errors.append("inconclusive (google dns servfail)")
                 return malicious_detector_response(
                     self.observable_name,

@@ -56,9 +56,7 @@ class FileScanUpload(FileAnalyzer):
 
         for chance in range(self.max_tries):
             logger.info(f"[POLLING] {obj_repr} -> #{chance + 1}/{self.max_tries}")
-            response = requests.get(
-                url, params=params, headers={"X-Api-Key": self._api_key}
-            )
+            response = requests.get(url, params=params, headers={"X-Api-Key": self._api_key})
             report = response.json()
             if report["allFinished"]:
                 break

@@ -308,9 +308,7 @@ class AbstractConfigTestCase(CustomTestCase):
         )
         job.visualizers_to_execute.set([muc])
         gen_signature = (
-            VisualizerConfig.objects.filter(pk=muc.pk)
-            .annotate_runnable(self.user)
-            .get_signatures(job)
+            VisualizerConfig.objects.filter(pk=muc.pk).annotate_runnable(self.user).get_signatures(job)
         )
         with self.assertRaises(RuntimeWarning):
             try:
@@ -335,9 +333,7 @@ class AbstractConfigTestCase(CustomTestCase):
         )
         job.visualizers_to_execute.set([muc])
         gen_signature = (
-            VisualizerConfig.objects.filter(pk=muc.pk)
-            .annotate_runnable(self.user)
-            .get_signatures(job)
+            VisualizerConfig.objects.filter(pk=muc.pk).annotate_runnable(self.user).get_signatures(job)
         )
         try:
             signature = next(gen_signature)
@@ -469,7 +465,6 @@ class PluginConfigTestCase(CustomTestCase):
 
 
 class JobTestCase(CustomTestCase):
-
     def test_get_analyzers_data_models(self):
         an1 = Analyzable.objects.create(
             name="test.com",
@@ -531,9 +526,7 @@ class JobTestCase(CustomTestCase):
 
         del j1.pivots_to_execute
         j1.analyzers_to_execute.set([ac])
-        self.assertCountEqual(
-            j1.pivots_to_execute.filter(name="test").values_list("pk", flat=True), []
-        )
+        self.assertCountEqual(j1.pivots_to_execute.filter(name="test").values_list("pk", flat=True), [])
 
         del j1.pivots_to_execute
         j1.analyzers_to_execute.set([ac, ac2, ac3])
@@ -544,9 +537,7 @@ class JobTestCase(CustomTestCase):
 
         del j1.pivots_to_execute
         j1.analyzers_to_execute.set([ac, ac3])
-        self.assertCountEqual(
-            j1.pivots_to_execute.filter(name="test").values_list("pk", flat=True), []
-        )
+        self.assertCountEqual(j1.pivots_to_execute.filter(name="test").values_list("pk", flat=True), [])
 
     def test_get_root_returns_self_when_is_root(self):
         """Test that get_root() returns self when the job is already a root node."""
@@ -601,9 +592,7 @@ class JobTestCase(CustomTestCase):
         )
         # Call get_root multiple times and verify consistent results
         results = [root_job.get_root().pk for _ in range(10)]
-        self.assertEqual(
-            len(set(results)), 1, "get_root() should return consistent results"
-        )
+        self.assertEqual(len(set(results)), 1, "get_root() should return consistent results")
         root_job.delete()
         an.delete()
 

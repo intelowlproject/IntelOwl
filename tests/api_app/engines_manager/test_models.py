@@ -13,7 +13,6 @@ from tests import CustomTestCase
 
 
 class EngineConfigTestCase(CustomTestCase):
-
     def test_create_multiple_config(self):
         with self.assertRaises(Exception), transaction.atomic():
             EngineConfig.objects.create()
@@ -126,12 +125,8 @@ class EngineConfigTestCase(CustomTestCase):
         job.refresh_from_db()
         self.assertEqual(2, job.get_analyzers_data_models().count())
         config.run(job)
-        self.assertEqual(
-            job.data_model.evaluation, job.data_model.EVALUATIONS.MALICIOUS.value
-        )
-        self.assertCountEqual(
-            job.data_model.resolutions, ip1.resolutions + ip2.resolutions
-        )
+        self.assertEqual(job.data_model.evaluation, job.data_model.EVALUATIONS.MALICIOUS.value)
+        self.assertCountEqual(job.data_model.resolutions, ip1.resolutions + ip2.resolutions)
         ar.delete()
         ar2.delete()
         job.delete()

@@ -17,9 +17,7 @@ class UltraDNSDNSResolverTestCase(BaseAnalyzerTest):
         fake_dns_answer.qname.to_text.return_value = "example.com."
         fake_dns_answer.rdtype = 1
         fake_dns_answer.rrset.ttl = 300
-        fake_dns_answer.__iter__.return_value = [
-            MagicMock(to_text=lambda: "93.184.216.34")
-        ]
+        fake_dns_answer.__iter__.return_value = [MagicMock(to_text=lambda: "93.184.216.34")]
 
         return [
             patch(

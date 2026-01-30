@@ -25,9 +25,7 @@ class MockUpResponse:
         def __init__(self):
             self.url = None
 
-    def __init__(
-        self, json_data, status_code, text="", content=b"", url="", headers=None
-    ):
+    def __init__(self, json_data, status_code, text="", content=b"", url="", headers=None):
         self.json_data = json_data
         self.status_code = status_code
         self.text = text

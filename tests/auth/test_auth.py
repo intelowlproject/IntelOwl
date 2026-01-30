@@ -91,17 +91,13 @@ class TestUserAuth(CustomOAuthTestCase):
             msg=msg,
         )
         # db assertions
-        self.assertEqual(
-            User.objects.count(), current_users, msg="no new user was created"
-        )
+        self.assertEqual(User.objects.count(), current_users, msg="no new user was created")
 
     def test_register_no_email_leak_201(self):
         current_users = User.objects.count()
 
         # base check
-        with self.assertRaises(
-            User.DoesNotExist, msg="testregisteruser doesn't exist right now"
-        ):
+        with self.assertRaises(User.DoesNotExist, msg="testregisteruser doesn't exist right now"):
             User.objects.get(username=self.testregisteruser["username"])
 
         # register new user
@@ -121,16 +117,12 @@ class TestUserAuth(CustomOAuthTestCase):
         self.__register_user(body=body)
 
         # db assertions
-        self.assertEqual(
-            User.objects.count(), current_users + 1, msg="no new user was created"
-        )
+        self.assertEqual(User.objects.count(), current_users + 1, msg="no new user was created")
 
     def test_register_201(self):
         current_users = User.objects.count()
 
-        with self.assertRaises(
-            User.DoesNotExist, msg="testregisteruser doesn't exist right now"
-        ):
+        with self.assertRaises(User.DoesNotExist, msg="testregisteruser doesn't exist right now"):
             User.objects.get(username=self.testregisteruser["username"])
 
         # test
@@ -139,9 +131,7 @@ class TestUserAuth(CustomOAuthTestCase):
         # db assertions
         user = User.objects.get(username=self.testregisteruser["username"])
         self.assertEqual(User.objects.count(), current_users + 1)
-        self.assertFalse(
-            user.is_active, msg="newly registered user must have is_active=False"
-        )
+        self.assertFalse(user.is_active, msg="newly registered user must have is_active=False")
         self.assertEqual(user.profile.company_name, "companytest")
         user.delete()
 
@@ -151,28 +141,20 @@ class TestUserAuth(CustomOAuthTestCase):
 
         # db assertions
         user = User.objects.get(username=self.testregisteruser["username"])
-        self.assertFalse(
-            user.is_active, msg="newly registered user must have is_active=False"
-        )
+        self.assertFalse(user.is_active, msg="newly registered user must have is_active=False")
 
         # get EmailConfirmation instance that was created after registration
-        email_confirmation_obj = EmailConfirmation.objects.get(
-            email=user.email_addresses.first()
-        )
+        email_confirmation_obj = EmailConfirmation.objects.get(email=user.email_addresses.first())
 
         # send verify email request
-        response = self.client.post(
-            verify_email_uri, {"key": email_confirmation_obj.key}
-        )
+        response = self.client.post(verify_email_uri, {"key": email_confirmation_obj.key})
 
         content = response.json()
         msg = (response, content, "User should now be verified")
 
         # email assertions
         self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(
-            mail.outbox[0].subject, "IntelOwl - Please Verify Your Email Address"
-        )
+        self.assertEqual(mail.outbox[0].subject, "IntelOwl - Please Verify Your Email Address")
         self.assertEqual(mail.outbox[0].to[0], "testregisteruser@test.com")
 
         # response assertions
@@ -180,9 +162,7 @@ class TestUserAuth(CustomOAuthTestCase):
 
         # db assertions
         user.refresh_from_db()
-        self.assertFalse(
-            user.is_active, msg="even after verification is_active must be False"
-        )
+        self.assertFalse(user.is_active, msg="even after verification is_active must be False")
 
     def test_resend_verification_email_200(self):
         # register new user
@@ -201,13 +181,9 @@ class TestUserAuth(CustomOAuthTestCase):
 
         # email assertions
         self.assertEqual(len(mail.outbox), 2)
-        self.assertEqual(
-            mail.outbox[0].subject, "IntelOwl - Please Verify Your Email Address"
-        )
+        self.assertEqual(mail.outbox[0].subject, "IntelOwl - Please Verify Your Email Address")
         self.assertEqual(mail.outbox[0].to[0], "testregisteruser@test.com")
-        self.assertEqual(
-            mail.outbox[1].subject, "IntelOwl - Please Verify Your Email Address"
-        )
+        self.assertEqual(mail.outbox[1].subject, "IntelOwl - Please Verify Your Email Address")
         self.assertEqual(mail.outbox[1].to[0], "testregisteruser@test.com")
 
         self.assertEqual(200, response.status_code, msg=msg)
@@ -276,9 +252,7 @@ class TestUserAuth(CustomOAuthTestCase):
         )
 
         # db assertions
-        self.assertEqual(
-            User.objects.count(), current_users, msg="no new user was created"
-        )
+        self.assertEqual(User.objects.count(), current_users, msg="no new user was created")
 
     def test_special_characters_password_400(self):
         current_users = User.objects.count()
@@ -304,9 +278,7 @@ class TestUserAuth(CustomOAuthTestCase):
         )
 
         # db assertions
-        self.assertEqual(
-            User.objects.count(), current_users, msg="no new user was created"
-        )
+        self.assertEqual(User.objects.count(), current_users, msg="no new user was created")
 
     # utils
     def __register_user(self, body: dict):
@@ -318,9 +290,7 @@ class TestUserAuth(CustomOAuthTestCase):
         self.assertEqual(201, response.status_code, msg=msg)
         self.assertEqual(content["username"], body["username"], msg=msg)
         self.assertEqual(content["email"], body["email"], msg=msg)
-        self.assertFalse(
-            content["is_active"], msg="newly registered user must have is_active=False"
-        )
+        self.assertFalse(content["is_active"], msg="newly registered user must have is_active=False")
 
 
 class CheckConfigurationTestCase(CustomOAuthTestCase):

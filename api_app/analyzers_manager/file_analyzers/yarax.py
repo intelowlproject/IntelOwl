@@ -66,14 +66,11 @@ class YaraX(FileAnalyzer, RulesUtiliyMixin):
 
         except Exception as e:
             logger.exception(f"Failed to update yara-forge rules. Error: {e}")
-            raise AnalyzerRunException(
-                f"Failed to update yara-forge ruleset. Error: {e}"
-            )
+            raise AnalyzerRunException(f"Failed to update yara-forge ruleset. Error: {e}")
 
         return False
 
     def run(self):
-
         if self.rule_set not in ("core", "extended", "full"):
             raise AnalyzerRunException(
                 "Please select the correct ruleset pack from available options."

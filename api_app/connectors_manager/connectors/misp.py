@@ -68,10 +68,8 @@ class MISP(Connector):
                 _type = INTELOWL_MISP_TYPE_MAP[_type]
 
         obj = create_misp_attribute(_type, value)
-        analyzers_names = self._job.analyzers_to_execute.all().values_list(
-            "name", flat=True
-        )
-        obj.comment = "Analyzers Executed:" f" {', '.join(analyzers_names)}"
+        analyzers_names = self._job.analyzers_to_execute.all().values_list("name", flat=True)
+        obj.comment = f"Analyzers Executed: {', '.join(analyzers_names)}"
         return obj
 
     @property
@@ -79,9 +77,7 @@ class MISP(Connector):
         obj_list = []
         if self._job.is_sample:
             # mime-type
-            obj_list.append(
-                create_misp_attribute("mime-type", self._job.analyzable.mimetype)
-            )
+            obj_list.append(create_misp_attribute("mime-type", self._job.analyzable.mimetype))
         return obj_list
 
     @property

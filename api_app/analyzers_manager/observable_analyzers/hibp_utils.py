@@ -58,9 +58,7 @@ def make_hibp_request(
             raise RuntimeError("Forbidden: Check API key or User-Agent.")  # noqa: E501
         elif response.status_code == 429:
             retry_after = response.headers.get("Retry-After", "unknown")
-            raise RuntimeError(
-                "Rate limit hit. Retry after " f"{retry_after} seconds."
-            )  # noqa: E501
+            raise RuntimeError(f"Rate limit hit. Retry after {retry_after} seconds.")  # noqa: E501
         else:
             response.raise_for_status()
 

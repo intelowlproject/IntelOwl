@@ -51,8 +51,7 @@ class Phoneinfoga(classes.ObservableAnalyzer, classes.DockerBasedAnalyzer):
             for scanner in self.scanners:
                 if scanner not in SCANNER_NAMES.values():
                     raise AnalyzerConfigurationException(
-                        f"Scanner {scanner} not supported."
-                        f" Choices are {', '.join(SCANNER_NAMES.values())}"
+                        f"Scanner {scanner} not supported. Choices are {', '.join(SCANNER_NAMES.values())}"
                     )
 
     def run(self):

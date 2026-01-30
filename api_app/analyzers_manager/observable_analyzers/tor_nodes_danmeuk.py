@@ -23,9 +23,7 @@ class TorNodesDanMeUK(classes.ObservableAnalyzer):
             raise AnalyzerRunException("Failed extraction of tor db")
 
         if not os.path.exists(database_location):
-            raise AnalyzerRunException(
-                f"database location {database_location} does not exist"
-            )
+            raise AnalyzerRunException(f"database location {database_location} does not exist")
 
         with open(database_location, "r", encoding="utf-8") as f:
             db = f.read()

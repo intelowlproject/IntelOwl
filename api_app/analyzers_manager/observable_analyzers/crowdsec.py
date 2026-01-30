@@ -35,9 +35,7 @@ class Crowdsec(ObservableAnalyzer):
         return result
 
     def _do_create_data_model(self):
-        return super()._do_create_data_model() and not self.report.report.get(
-            "not_found", False
-        )
+        return super()._do_create_data_model() and not self.report.report.get("not_found", False)
 
     def _update_data_model(self, data_model):
         from api_app.analyzers_manager.models import AnalyzerReport
@@ -45,9 +43,7 @@ class Crowdsec(ObservableAnalyzer):
         self.report: AnalyzerReport
         super()._update_data_model(data_model)
 
-        classifications = self.report.report.get("classifications", {}).get(
-            "classifications", []
-        )
+        classifications = self.report.report.get("classifications", {}).get("classifications", [])
         for classification in classifications:
             label = classification.get("label", "")
             if label in ["Legit scanner", "Known Security Company", "Known CERT"]:
@@ -70,10 +66,7 @@ class Crowdsec(ObservableAnalyzer):
                 data_model.reliability = 2
 
         highest_total_score = max(
-            (
-                values["total"]
-                for key, values in self.report.report.get("scores", {}).items()
-            ),
+            (values["total"] for key, values in self.report.report.get("scores", {}).items()),
             default=0,
         )
         if data_model.evaluation != self.EVALUATIONS.TRUSTED.value:
@@ -81,7 +74,6 @@ class Crowdsec(ObservableAnalyzer):
                 data_model.reliability = 8
             else:
                 highest_trust_score = max(
-                    values["trust"]
-                    for key, values in self.report.report.get("scores", {}).items()
+                    values["trust"] for key, values in self.report.report.get("scores", {}).items()
                 )
                 data_model.reliability = min(highest_trust_score, 10)

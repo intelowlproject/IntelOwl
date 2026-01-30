@@ -54,9 +54,7 @@ def dump_seleniumwire_requests(request: Request) -> dict:
 # at the moment this method is not used. it can be used
 # to decode data encoded with the previous function
 def load_seleniumwire_requests(to_load: dict) -> Request:
-    logger.info(
-        f"Starting to deserialize seleniumwire request for url {to_load['url']}"
-    )
+    logger.info(f"Starting to deserialize seleniumwire request for url {to_load['url']}")
     response_to_load = to_load["response"]
     response = (
         Response(
@@ -93,9 +91,7 @@ def load_seleniumwire_requests(to_load: dict) -> Request:
     request.cert = to_load["cert"]
 
     if response:
-        response.date = datetime.strptime(
-            response_to_load["date"], "%Y-%m-%d, %H:%M:%S.%f"
-        )
+        response.date = datetime.strptime(response_to_load["date"], "%Y-%m-%d, %H:%M:%S.%f")
         if response_to_load["cert"]:
             response.cert = response_to_load["cert"]
         request.response = response

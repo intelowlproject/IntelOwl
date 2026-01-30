@@ -61,9 +61,7 @@ class Threatstream(classes.ObservableAnalyzer):
                 "Currently supported are: intelligence, confidence,passive_dns."
             )
         try:
-            api_header = {
-                "Authorization": f"apikey {self._api_user_name}:{self._api_key_name}"
-            }
+            api_header = {"Authorization": f"apikey {self._api_user_name}:{self._api_key_name}"}
             response = requests.get(self.url + uri, params=params, headers=api_header)
             response.raise_for_status()
         except requests.RequestException as e:

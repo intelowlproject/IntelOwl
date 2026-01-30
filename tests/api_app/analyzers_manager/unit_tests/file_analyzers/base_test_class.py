@@ -117,20 +117,14 @@ class BaseFileAnalyzerTest(TestCase):
         logger.info(f"Starting file analyzer test for: {self.analyzer_class.__name__}")
 
         try:
-            configs = AnalyzerConfig.objects.filter(
-                python_module=self.analyzer_class.python_module
-            )
+            configs = AnalyzerConfig.objects.filter(python_module=self.analyzer_class.python_module)
             config = configs.first()
         except AnalyzerConfig.DoesNotExist:
-            self.fail(
-                f"No AnalyzerConfig found for {self.analyzer_class.python_module}"
-            )
+            self.fail(f"No AnalyzerConfig found for {self.analyzer_class.python_module}")
 
         logger.debug(f"Loaded analyzer config: {config}")
 
-        supported_types = (
-            config.supported_filetypes or self.get_all_supported_mimetypes()
-        )
+        supported_types = config.supported_filetypes or self.get_all_supported_mimetypes()
 
         for mimetype in supported_types:
             with self.subTest(mimetype=mimetype):
@@ -157,9 +151,7 @@ class BaseFileAnalyzerTest(TestCase):
                     analyzer._job.analyzable = SimpleNamespace()
                     analyzer._job.analyzable.name = analyzer.filename
                     analyzer._job.analyzable.mimetype = mimetype
-                    analyzer._job.analyzable.sha256 = hashlib.sha256(
-                        file_bytes
-                    ).hexdigest()
+                    analyzer._job.analyzable.sha256 = hashlib.sha256(file_bytes).hexdigest()
                     analyzer._job_id = ""
                     analyzer._job.tlp = "clear"
                     analyzer.report = MagicMock()
@@ -172,9 +164,7 @@ class BaseFileAnalyzerTest(TestCase):
                     analyzer.report.STATUSES = MagicMock()
                     analyzer.report.STATUSES.FAILED = "failed"
                     analyzer.report.STATUSES.SUCCESS = "success"
-                    analyzer._FileAnalyzer__filepath = self.get_sample_file_path(
-                        mimetype
-                    )
+                    analyzer._FileAnalyzer__filepath = self.get_sample_file_path(mimetype)
 
                     for key, value in self.get_extra_config().items():
                         setattr(analyzer, key, value)
@@ -188,9 +178,7 @@ class BaseFileAnalyzerTest(TestCase):
                             f"Analyzer run failed for {mimetype}: {type(e).__name__}: {e}"
                         )
                         logger.exception(f"Analyzer raised an exception for {mimetype}")
-                        self.fail(
-                            f"Analyzer run failed for {mimetype}: {type(e).__name__}: {e}"
-                        )
+                        self.fail(f"Analyzer run failed for {mimetype}: {type(e).__name__}: {e}")
                     self.assertTrue(
                         analyzer.report,
                         f"Analyzer response for {mimetype} should not be empty",

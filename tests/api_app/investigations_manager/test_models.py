@@ -7,7 +7,6 @@ from tests import CustomTestCase
 
 
 class InvestigationTestCase(CustomTestCase):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -137,12 +136,8 @@ class InvestigationTestCase(CustomTestCase):
             user=self.user,
         )
 
-        tag1, _ = Tag.objects.get_or_create(
-            label="test1", defaults={"color": gen_random_colorhex()}
-        )
-        tag2, _ = Tag.objects.get_or_create(
-            label="test2", defaults={"color": gen_random_colorhex()}
-        )
+        tag1, _ = Tag.objects.get_or_create(label="test1", defaults={"color": gen_random_colorhex()})
+        tag2, _ = Tag.objects.get_or_create(label="test2", defaults={"color": gen_random_colorhex()})
         job.tags.add(tag1)
         job2.tags.add(tag2)
         an: Investigation = Investigation.objects.create(name="Test", owner=self.user)

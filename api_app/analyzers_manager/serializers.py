@@ -14,7 +14,6 @@ from .models import AnalyzerConfig, AnalyzerReport
 
 
 class AnalyzerReportSerializer(AbstractReportSerializer):
-
     data_model = DataModelRelatedField(read_only=True)
 
     class Meta:
@@ -31,9 +30,7 @@ class AnalyzerReportBISerializer(AbstractReportBISerializer):
 
 
 class AnalyzerConfigSerializer(PythonConfigSerializer):
-    python_module = rfs.SlugRelatedField(
-        queryset=PythonModule.objects.all(), slug_field="module"
-    )
+    python_module = rfs.SlugRelatedField(queryset=PythonModule.objects.all(), slug_field="module")
 
     class Meta:
         model = AnalyzerConfig

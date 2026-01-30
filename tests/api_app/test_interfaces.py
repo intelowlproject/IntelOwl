@@ -15,9 +15,7 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.c = CreateJobsFromPlaybookInterface()
-        self.c.playbooks_choice = PlaybookConfig.objects.filter(
-            name="FREE_TO_USE_ANALYZERS"
-        )
+        self.c.playbooks_choice = PlaybookConfig.objects.filter(name="FREE_TO_USE_ANALYZERS")
         self.c.name = "test"
 
     def test__get_file_serializer(self):
@@ -151,9 +149,7 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         # number of investigation should not change
         self.assertEqual(investigation_count, Investigation.objects.count())
         # same children
-        self.assertCountEqual(
-            list(investigation.jobs.values_list("pk", flat=True)), [parent_job.pk]
-        )
+        self.assertCountEqual(list(investigation.jobs.values_list("pk", flat=True)), [parent_job.pk])
         self.assertCountEqual(
             list(parent_job.get_children().values_list("pk", flat=True)),
             [job1.pk, job2.pk],

@@ -53,9 +53,7 @@ class BBOT(ObservableAnalyzer, DockerBasedAnalyzer):
         logger.info(f"Sending {self.name} scan request: {req_data} to {self.url}")
 
         try:
-            report = self._docker_run(
-                req_data, analyzer_name=self.name, avoid_polling=True
-            )
+            report = self._docker_run(req_data, analyzer_name=self.name, avoid_polling=True)
             logger.info(f"BBOT scan completed successfully with report: {report}")
             return report
         except requests.RequestException as e:

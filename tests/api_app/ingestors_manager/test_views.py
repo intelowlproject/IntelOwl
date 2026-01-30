@@ -8,9 +8,7 @@ from tests import CustomViewSetTestCase
 from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
 
 
-class IngestorConfigViewSetTestCase(
-    AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase
-):
+class IngestorConfigViewSetTestCase(AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase):
     URL = "/api/ingestor"
 
     @classproperty
@@ -19,17 +17,13 @@ class IngestorConfigViewSetTestCase(
 
     def test_organization_disable(self):
         org, _ = Organization.objects.get_or_create(name="test")
-        Membership.objects.get_or_create(
-            user=self.user, organization=org, is_owner=False
-        )
+        Membership.objects.get_or_create(user=self.user, organization=org, is_owner=False)
         response = self.client.post(f"{self.URL}/GreedyBear/organization")
         self.assertEqual(response.status_code, 404)
 
     def test_organization_enable(self):
         org, _ = Organization.objects.get_or_create(name="test")
-        Membership.objects.get_or_create(
-            user=self.user, organization=org, is_owner=False
-        )
+        Membership.objects.get_or_create(user=self.user, organization=org, is_owner=False)
         response = self.client.delete(f"{self.URL}/GreedyBear/organization")
         self.assertEqual(response.status_code, 404)
 
@@ -69,9 +63,7 @@ class IngestorConfigViewSetTestCase(
         response = self.client.get(f"{self.URL}/non_existing")
         self.assertEqual(response.status_code, 404, response.content)
         result = response.json()
-        self.assertEqual(
-            result, {"detail": "No IngestorConfig matches the given query."}
-        )
+        self.assertEqual(result, {"detail": "No IngestorConfig matches the given query."})
 
     def test_get_config(self):
         # 1 - existing ingestor
@@ -125,8 +117,7 @@ class IngestorConfigViewSetTestCase(
                 "analyzer_config": None,
                 "attribute": "feed_type",
                 "connector_config": None,
-                "description": "The available feed types are log4j, cowrie, "
-                "and all.",
+                "description": "The available feed types are log4j, cowrie, and all.",
                 "exist": True,
                 "for_organization": False,
                 "ingestor_config": "GreedyBear",
@@ -143,8 +134,7 @@ class IngestorConfigViewSetTestCase(
                 "analyzer_config": None,
                 "attribute": "attack_type",
                 "connector_config": None,
-                "description": "The available attack_type are scanner, "
-                "payload_request, and all.",
+                "description": "The available attack_type are scanner, payload_request, and all.",
                 "exist": True,
                 "for_organization": False,
                 "ingestor_config": "GreedyBear",

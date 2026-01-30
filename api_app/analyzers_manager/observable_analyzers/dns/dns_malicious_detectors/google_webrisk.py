@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 """Check if the domains is reported as malicious by WebRisk Cloud API"""
+
 import logging
 
 from google.cloud.webrisk_v1.services.web_risk_service import WebRiskServiceClient
@@ -42,18 +43,14 @@ class WebRisk(classes.ObservableAnalyzer):
     _service_account_json: dict
 
     def run(self):
-        if (
-            self.observable_classification == Classification.URL
-            and not self.observable_name.startswith("http")
+        if self.observable_classification == Classification.URL and not self.observable_name.startswith(
+            "http"
         ):
             raise AnalyzerRunException(
-                f"{self.observable_name} not supported "
-                "because it does not start with http"
+                f"{self.observable_name} not supported because it does not start with http"
             )
 
-        credentials = service_account.Credentials.from_service_account_info(
-            self._service_account_json
-        )
+        credentials = service_account.Credentials.from_service_account_info(self._service_account_json)
 
         web_risk_client = WebRiskServiceClient(credentials=credentials)
         # threat types
@@ -62,9 +59,7 @@ class WebRisk(classes.ObservableAnalyzer):
         # THREAT_TYPE_UNSPECIFIED = 0 should not be used
         # UNWANTED_SOFTWARE = 3
         threat_types = [ThreatType(1), ThreatType(2), ThreatType(3)]
-        response = web_risk_client.search_uris(
-            uri=self.observable_name, threat_types=threat_types, timeout=5
-        )
+        response = web_risk_client.search_uris(uri=self.observable_name, threat_types=threat_types, timeout=5)
         threats_found = response.threat
         # ThreatUri object
         logger.debug(f"threat founds {threats_found}")

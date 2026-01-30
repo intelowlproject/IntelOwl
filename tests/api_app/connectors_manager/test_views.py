@@ -11,9 +11,7 @@ from tests import CustomViewSetTestCase, PluginActionViewsetTestCase
 from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
 
 
-class ConnectorConfigViewSetTestCase(
-    AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase
-):
+class ConnectorConfigViewSetTestCase(AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase):
     URL = "/api/connector"
 
     @classproperty
@@ -71,9 +69,7 @@ class ConnectorConfigViewSetTestCase(
         response = self.client.get(f"{self.URL}/non_existing")
         self.assertEqual(response.status_code, 404, response.content)
         result = response.json()
-        self.assertEqual(
-            result, {"detail": "No ConnectorConfig matches the given query."}
-        )
+        self.assertEqual(result, {"detail": "No ConnectorConfig matches the given query."})
 
     def test_get_config(self):
         # 1 - existing connector
@@ -154,9 +150,7 @@ class ConnectorActionViewSetTests(CustomViewSetTestCase, PluginActionViewsetTest
             classification=Classification.IP,
         )
 
-        _job = Job.objects.create(
-            user=user, status=Job.STATUSES.REPORTED_WITHOUT_FAILS, analyzable=an1
-        )
+        _job = Job.objects.create(user=user, status=Job.STATUSES.REPORTED_WITHOUT_FAILS, analyzable=an1)
         _job.connectors_to_execute.set([self.config])
         _report, _ = ConnectorReport.objects.get_or_create(
             **{

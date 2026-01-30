@@ -14,9 +14,7 @@ from tests import CustomViewSetTestCase, PluginActionViewsetTestCase
 from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
 
 
-class AnalyzerConfigViewSetTestCase(
-    AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase
-):
+class AnalyzerConfigViewSetTestCase(AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase):
     fixtures = [
         "api_app/fixtures/0001_user.json",
     ]
@@ -50,9 +48,7 @@ class AnalyzerConfigViewSetTestCase(
         print(result)
         self.assertIn("errors", result)
         self.assertIn("detail", result["errors"])
-        self.assertEqual(
-            result["errors"]["detail"], "This Plugin has no Update implemented"
-        )
+        self.assertEqual(result["errors"]["detail"], "This Plugin has no Update implemented")
 
     def test_health_check(self):
         analyzer = "ClamAV"
@@ -108,9 +104,7 @@ class AnalyzerConfigViewSetTestCase(
 
     def test_update(self):
         org1, _ = Organization.objects.get_or_create(name="test")
-        m_user, _ = Membership.objects.get_or_create(
-            user=self.user, organization=org1, is_owner=False
-        )
+        m_user, _ = Membership.objects.get_or_create(user=self.user, organization=org1, is_owner=False)
 
         # user not in org can't update analyzer
         self.client.force_authenticate(self.guest)
@@ -136,9 +130,7 @@ class AnalyzerConfigViewSetTestCase(
 
     def test_delete(self):
         org1, _ = Organization.objects.get_or_create(name="test")
-        m_user, _ = Membership.objects.get_or_create(
-            user=self.user, organization=org1, is_owner=False
-        )
+        m_user, _ = Membership.objects.get_or_create(user=self.user, organization=org1, is_owner=False)
         ac = AnalyzerConfig(
             name="test",
             description="test delete",
@@ -187,8 +179,7 @@ class AnalyzerConfigViewSetTestCase(
             response.json(),
             {
                 "config": {"queue": "default", "soft_time_limit": 30},
-                "description": "Retrieve current domain resolution with Quad9 DoH (DNS over "
-                "HTTPS)",
+                "description": "Retrieve current domain resolution with Quad9 DoH (DNS over HTTPS)",
                 "disabled": True,
                 "docker_based": False,
                 "id": analyzer.id,
@@ -199,7 +190,7 @@ class AnalyzerConfigViewSetTestCase(
                 "observable_supported": ["domain", "url"],
                 "parameters": {
                     "query_type": {
-                        "description": "Query type against the chosen " "DNS resolver.",
+                        "description": "Query type against the chosen DNS resolver.",
                         "id": parameter.id,
                         "is_secret": False,
                         "required": False,
@@ -218,9 +209,7 @@ class AnalyzerConfigViewSetTestCase(
         response = self.client.get(f"{self.URL}/non_existing")
         self.assertEqual(response.status_code, 404, response.content)
         result = response.json()
-        self.assertEqual(
-            result, {"detail": "No AnalyzerConfig matches the given query."}
-        )
+        self.assertEqual(result, {"detail": "No AnalyzerConfig matches the given query."})
 
     def test_get_config(self):
         # 1 - existing analyzer
@@ -258,9 +247,7 @@ class AnalyzerConfigViewSetTestCase(
         self.client.force_authenticate(user=self.user)
         response = self.client.get(f"{self.URL}/Quad9_Malicious_Detector/plugin_config")
         self.assertEqual(response.status_code, 200, response.content)
-        self.assertEqual(
-            response.json(), {"organization_config": [], "user_config": []}
-        )
+        self.assertEqual(response.json(), {"organization_config": [], "user_config": []})
         # 3 - missing analyzer
         self.client.force_authenticate(user=self.user)
         response = self.client.get(f"{self.URL}/missing_analyzer/plugin_config")

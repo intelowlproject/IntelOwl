@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 
 
 class JoeSandboxAnalyzer(ObservableAnalyzer, JoeSandboxMixin):
-
     sample_at_url: bool = False
 
     @classmethod
@@ -17,9 +16,7 @@ class JoeSandboxAnalyzer(ObservableAnalyzer, JoeSandboxMixin):
         pass
 
     def run(self):
-        sandbox_session = JoeSandbox(
-            apikey=self._api_key, apiurl=self.url, accept_tac=True
-        )
+        sandbox_session = JoeSandbox(apikey=self._api_key, apiurl=self.url, accept_tac=True)
 
         if not self.force_new_analysis:
             # checking if existing analysis is present and returns the results

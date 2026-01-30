@@ -22,11 +22,7 @@ class SpamhausWQS(classes.ObservableAnalyzer):
         headers = {"Authorization": f"Bearer {self._api_key}"}
         response = requests.get(
             url=f"""{self.url}/
-            {
-                "DBL"
-                if self.observable_classification == Classification.DOMAIN.value
-                else "AUTHBL"
-            }
+            {"DBL" if self.observable_classification == Classification.DOMAIN.value else "AUTHBL"}
             /{self.observable_name}""",
             headers=headers,
         )

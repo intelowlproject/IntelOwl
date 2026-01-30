@@ -43,9 +43,7 @@ class MullvadDNSAnalyzer(DoHMixin, ObservableAnalyzer):
           - Parses the DNS response.
           - Depending on the configured mode ("query" or "malicious"), returns either raw data or a flagged result.
         """
-        observable = self.convert_to_domain(
-            self.observable_name, self.observable_classification
-        )
+        observable = self.convert_to_domain(self.observable_name, self.observable_classification)
         complete_url = self.build_query_url(observable)
 
         try:

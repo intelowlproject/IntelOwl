@@ -90,14 +90,10 @@ def post_migrate_api_app(
     for module in PythonModule.objects.filter(health_check_schedule__isnull=False):
         for config in module.configs.filter(health_check_task__isnull=True):
             config.generate_health_check_periodic_task()
-    for module in PythonModule.objects.filter(
-        update_schedule__isnull=False, update_task__isnull=True
-    ):
+    for module in PythonModule.objects.filter(update_schedule__isnull=False, update_task__isnull=True):
         module.generate_update_periodic_task()
 
-    for task in PeriodicTask.objects.filter(
-        enabled=True, task=f"{update.__module__}.{update.__name__}"
-    ):
+    for task in PeriodicTask.objects.filter(enabled=True, task=f"{update.__module__}.{update.__name__}"):
         task.enabled &= settings.REPO_DOWNLOADER_ENABLED
         task.save()
 

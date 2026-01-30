@@ -42,7 +42,7 @@ class AilTypoSquatting(classes.ObservableAnalyzer):
             if len(self.observable_name.split(".")[0]) == 1:
                 logger.info(
                     f"""running dns resolving on {self.observable_name}
-                     excluding {response['algorithms'][0]}"""
+                     excluding {response["algorithms"][0]}"""
                 )
                 response["dnsResolving"] = resolving.dnsResolving(
                     resultList=response["algorithms"][1:],

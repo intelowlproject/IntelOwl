@@ -38,8 +38,6 @@ class GoogleDNSResolver(classes.ObservableAnalyzer):
             data = response.json()
             resolutions = data.get("Answer", None)
         except requests.exceptions.RequestException:
-            raise AnalyzerRunException(
-                "an error occurred during the connection to Google"
-            )
+            raise AnalyzerRunException("an error occurred during the connection to Google")
 
         return dns_resolver_response(self.observable_name, resolutions)

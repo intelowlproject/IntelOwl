@@ -34,9 +34,7 @@ class URLHaus(AbuseCHMixin, ObservableAnalyzer):
             uri = "url/"
             post_data = {"url": self.observable_name}
         else:
-            raise AnalyzerRunException(
-                f"not supported observable type {self.observable_classification}."
-            )
+            raise AnalyzerRunException(f"not supported observable type {self.observable_classification}.")
 
         response = requests.post(
             self.url + uri,

@@ -36,9 +36,7 @@ class HibpPasswords(ObservableAnalyzer):
         # Only first 5 hex chars of SHA-1 are sent — full password/hash
         # never leaves client. Safe & intentional per HIBP design:
         # https://haveibeenpwned.com/API/v3#PwnedPasswords
-        sha1_hash = (
-            hashlib.sha1(password.encode("utf-8")).hexdigest().upper()
-        )  # nosec  # noqa: E501
+        sha1_hash = hashlib.sha1(password.encode("utf-8")).hexdigest().upper()  # nosec  # noqa: E501
 
         prefix = sha1_hash[:5]
         suffix = sha1_hash[5:]

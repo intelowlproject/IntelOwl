@@ -57,27 +57,20 @@ class InQuest(ObservableAnalyzer):
             headers["Authorization"] = self._api_key_name
         else:
             warning = "No API key retrieved"
-            logger.info(
-                f"{warning}. Continuing without API key..." f" <- {self.__repr__()}"
-            )
+            logger.info(f"{warning}. Continuing without API key... <- {self.__repr__()}")
             self.report.errors.append(warning)
 
         if self.inquest_analysis == "dfi_search":
             link = "dfi"
             if self.observable_classification == Classification.HASH:
-                uri = (
-                    f"/api/dfi/search/hash/{self.hash_type}?hash={self.observable_name}"
-                )
+                uri = f"/api/dfi/search/hash/{self.hash_type}?hash={self.observable_name}"
 
             elif self.observable_classification in [
                 Classification.IP,
                 Classification.URL,
                 Classification.DOMAIN,
             ]:
-                uri = (
-                    f"/api/dfi/search/ioc/{self.observable_classification}"
-                    f"?keyword={self.observable_name}"
-                )
+                uri = f"/api/dfi/search/ioc/{self.observable_classification}?keyword={self.observable_name}"
 
             elif self.observable_classification == Classification.GENERIC:
                 try:
@@ -111,10 +104,7 @@ class InQuest(ObservableAnalyzer):
         response = requests.get(self.url + uri, headers=headers, timeout=30)
         response.raise_for_status()
         result = response.json()
-        if (
-            self.inquest_analysis == "dfi_search"
-            and self.observable_classification == Classification.HASH
-        ):
+        if self.inquest_analysis == "dfi_search" and self.observable_classification == Classification.HASH:
             result["hash_type"] = self.hash_type
 
         if self.generic_identifier_mode == "auto":

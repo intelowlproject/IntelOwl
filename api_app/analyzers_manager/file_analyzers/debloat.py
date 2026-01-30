@@ -48,7 +48,6 @@ def log_message(*args, end="\n", flush=False, **kwargs):
 
 
 class Debloat(FileAnalyzer):
-
     def run(self):
         try:
             binary = pefile.PE(self.filepath, fast_load=True)
@@ -69,17 +68,11 @@ class Debloat(FileAnalyzer):
                     beginning_file_size=original_size,
                 )
             except OSError as e:
-                raise AnalyzerRunException(
-                    f"File operation failed during Debloat processing: {e}"
-                )
+                raise AnalyzerRunException(f"File operation failed during Debloat processing: {e}")
             except ValueError as e:
-                raise AnalyzerRunException(
-                    f"Invalid parameter in Debloat processing: {e}"
-                )
+                raise AnalyzerRunException(f"Invalid parameter in Debloat processing: {e}")
             except AttributeError as e:
-                raise AnalyzerRunException(
-                    f"Debloat library error, possibly malformed PE object: {e}"
-                )
+                raise AnalyzerRunException(f"Debloat library error, possibly malformed PE object: {e}")
 
             logger.info(f"Debloat processed {self.filepath} with code {debloat_code}")
 
@@ -90,15 +83,11 @@ class Debloat(FileAnalyzer):
                 }
 
             if not os.path.exists(output_path) or not os.path.isfile(output_path):
-                raise AnalyzerRunException(
-                    "Debloat did not produce a valid output file"
-                )
+                raise AnalyzerRunException("Debloat did not produce a valid output file")
 
             debloated_size = os.path.getsize(output_path)
             size_reduction = (
-                (original_size - debloated_size) / original_size * 100
-                if original_size > 0
-                else 0
+                (original_size - debloated_size) / original_size * 100 if original_size > 0 else 0
             )
 
             with open(output_path, "rb") as f:

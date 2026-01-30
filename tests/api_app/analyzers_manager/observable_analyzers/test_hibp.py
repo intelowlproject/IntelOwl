@@ -17,9 +17,7 @@ class HibpPasswordsTestCase(TestCase):
     """Test cases for HibpPasswords analyzer"""
 
     def setUp(self):
-        self.analyzer = HibpPasswords(
-            config={}, job_id=1, additional_config_params={}
-        )  # noqa: E501
+        self.analyzer = HibpPasswords(config={}, job_id=1, additional_config_params={})  # noqa: E501
         # Use "password" as it's a known pwned one
         self.analyzer.observable_name = "password"
         self.analyzer.observable_classification = "generic"
@@ -31,9 +29,7 @@ class HibpPasswordsTestCase(TestCase):
         # SHA-1("password") upper = 5BAA61E4C9B93F3F0682250B6CF8331B7EE68FD8
         # prefix = 5BAA6
         # suffix = 1E4C9B93F3F0682250B6CF8331B7EE68FD8
-        mock_make_request.return_value = (
-            "1E4C9B93F3F0682250B6CF8331B7EE68FD8:42\n" "OTHER:1\n"
-        )
+        mock_make_request.return_value = "1E4C9B93F3F0682250B6CF8331B7EE68FD8:42\nOTHER:1\n"
 
         result = self.analyzer.run()
 
@@ -53,9 +49,7 @@ class HibpPasswordsTestCase(TestCase):
 
         self.assertTrue(result["success"])
         self.assertEqual(result["exposure_count"], 0)
-        self.assertEqual(
-            result["summary"], "Password not found in known breaches."
-        )  # noqa: E501
+        self.assertEqual(result["summary"], "Password not found in known breaches.")  # noqa: E501
 
     def test_unsupported_type(self):
         self.analyzer.observable_classification = "ip"
@@ -69,9 +63,7 @@ class HibpBreachesTestCase(TestCase):
     """Test cases for HibpBreaches analyzer"""
 
     def setUp(self):
-        self.analyzer = HibpBreaches(
-            config={}, job_id=1, additional_config_params={}
-        )  # noqa: E501
+        self.analyzer = HibpBreaches(config={}, job_id=1, additional_config_params={})  # noqa: E501
         self.analyzer.observable_name = "test@example.com"
         self.analyzer.observable_classification = "generic"
         # Set _api_key_name directly (bypasses config lookup)
@@ -81,9 +73,7 @@ class HibpBreachesTestCase(TestCase):
         "api_app.analyzers_manager.observable_analyzers.hibp_breaches.make_hibp_request"  # noqa: E501
     )
     def test_email_found(self, mock_make_request):
-        mock_make_request.return_value = [
-            {"Name": "TestBreach", "PwnCount": 100}
-        ]  # noqa: E501
+        mock_make_request.return_value = [{"Name": "TestBreach", "PwnCount": 100}]  # noqa: E501
 
         result = self.analyzer.run()
         self.assertTrue(result["success"])

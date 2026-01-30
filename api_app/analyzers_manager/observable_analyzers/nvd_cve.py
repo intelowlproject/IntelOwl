@@ -21,9 +21,7 @@ class NVDDetails(ObservableAnalyzer):
 
         try:
             # Validate if CVE format is correct E.g CVE-2014-1234 or cve-2022-1234567
-            if not re.match(
-                self.cve_pattern, self.observable_name, flags=re.IGNORECASE
-            ):
+            if not re.match(self.cve_pattern, self.observable_name, flags=re.IGNORECASE):
                 raise ValueError(f"Invalid CVE format: {self.observable_name}")
 
             params = {"cveId": self.observable_name.upper()}

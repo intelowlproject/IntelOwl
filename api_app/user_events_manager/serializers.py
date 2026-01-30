@@ -25,9 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 class UserEventSerializer(serializers.ModelSerializer):
-    user = serializers.CharField(
-        source="user.username", allow_null=False, read_only=True
-    )
+    user = serializers.CharField(source="user.username", allow_null=False, read_only=True)
 
     date = serializers.DateTimeField(read_only=True)
 
@@ -45,7 +43,6 @@ class UserEventSerializer(serializers.ModelSerializer):
 
 
 class UserAnalyzableEventSerializer(UserEventSerializer):
-
     analyzable = AnalyzableSerializer(required=True)
     data_model_content = serializers.JSONField(write_only=True, source="data_model")
     data_model = DataModelRelatedField(read_only=True)
@@ -56,9 +53,7 @@ class UserAnalyzableEventSerializer(UserEventSerializer):
 
     def is_valid(self, *, raise_exception=False):
         res = super().is_valid(raise_exception=raise_exception)
-        classification = Classification.calculate_observable(
-            self._validated_data["analyzable"]["name"]
-        )
+        classification = Classification.calculate_observable(self._validated_data["analyzable"]["name"])
         if classification == Classification.GENERIC:
             raise ValidationError("Cannot create an user event for a generic")
         serializer_class = Classification.get_data_model_class(
@@ -94,9 +89,7 @@ class UserDomainWildCardEventSerializer(UserEventSerializer):
 
     def save(self, **kwargs):
         with transaction.atomic():
-            data_model = DomainDataModel.objects.create(
-                **self.validated_data.pop("data_model")
-            )
+            data_model = DomainDataModel.objects.create(**self.validated_data.pop("data_model"))
             return super().save(**kwargs, data_model=data_model)
 
 
@@ -121,7 +114,5 @@ class UserIPWildCardEventSerializer(UserEventSerializer):
 
     def save(self, **kwargs):
         with transaction.atomic():
-            data_model = IPDataModel.objects.create(
-                **self.validated_data.pop("data_model")
-            )
+            data_model = IPDataModel.objects.create(**self.validated_data.pop("data_model"))
             return super().save(**kwargs, data_model=data_model)

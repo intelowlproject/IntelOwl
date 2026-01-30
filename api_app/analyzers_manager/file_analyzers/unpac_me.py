@@ -36,18 +36,11 @@ class UnpacMe(FileAnalyzer):
         logger.info(f"md5 {self.md5} job {self.job_id} uploaded id {unpac_id}")
         for chance in range(self.max_tries):
             time.sleep(self.poll_distance)
-            logger.info(
-                f"unpacme polling, try n.{chance + 1}."
-                f" job_id {self.job_id}. starting the query"
-            )
+            logger.info(f"unpacme polling, try n.{chance + 1}. job_id {self.job_id}. starting the query")
             status = self._get_status(unpac_id)
-            logger.info(
-                f"md5 {self.md5} job {self.job_id} id {unpac_id} status {status}"
-            )
+            logger.info(f"md5 {self.md5} job {self.job_id} id {unpac_id} status {status}")
             if status == "fail":
-                raise AnalyzerRunException(
-                    f"failed analysis for {self.md5} job {self.job_id}"
-                )
+                raise AnalyzerRunException(f"failed analysis for {self.md5} job {self.job_id}")
             if status == "complete":
                 report = self._get_report(unpac_id)
                 break
@@ -65,21 +58,15 @@ class UnpacMe(FileAnalyzer):
                 r = requests.get(self.url + url, files=files, headers=headers)
             r.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            logger.error(
-                f"md5 {self.md5} job {self.job_id} url {url} has http error {str(e)}"
-            )
+            logger.error(f"md5 {self.md5} job {self.job_id} url {url} has http error {str(e)}")
             if post:
                 raise AnalyzerRunException("Monthly quota exceeded!")
             raise AnalyzerRunException(e)
         except requests.exceptions.Timeout as e:
-            logger.error(
-                f"md5 {self.md5} job {self.job_id} url {url} has timeout error {str(e)}"
-            )
+            logger.error(f"md5 {self.md5} job {self.job_id} url {url} has timeout error {str(e)}")
             raise AnalyzerRunException(e)
         except requests.exceptions.RequestException as e:
-            logger.error(
-                f"md5 {self.md5} job {self.job_id} url {url} failed with error {str(e)}"
-            )
+            logger.error(f"md5 {self.md5} job {self.job_id} url {url} failed with error {str(e)}")
             raise AnalyzerRunException(e)
         return r
 
@@ -90,9 +77,7 @@ class UnpacMe(FileAnalyzer):
         r = self._req_with_checks("private/upload", files=files, post=True)
         response = r.json()
         if "id" not in response:
-            raise AnalyzerRunException(
-                f"md5 {self.md5} job {self.job_id} function upload id not in response"
-            )
+            raise AnalyzerRunException(f"md5 {self.md5} job {self.job_id} function upload id not in response")
         return response["id"]
 
     def _get_status(self, unpac_me_id) -> str:

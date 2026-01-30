@@ -32,8 +32,7 @@ class Onyphe(classes.ObservableAnalyzer):
             uri = f"hostname/{self.observable_name}"
         else:
             raise AnalyzerRunException(
-                f"not supported observable type {obs_clsfn}."
-                " Supported are: ip, domain and url."
+                f"not supported observable type {obs_clsfn}. Supported are: ip, domain and url."
             )
 
         try:

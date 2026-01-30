@@ -78,8 +78,7 @@ class PlaybookConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer
             # or by an admin of the same organization
             if instance.owner == self.context["request"].user or (
                 self.context["request"].user.membership.is_admin
-                and self.context["request"].user.membership.organization
-                == instance.organization
+                and self.context["request"].user.membership.organization == instance.organization
             ):
                 return True
         return False
@@ -87,9 +86,7 @@ class PlaybookConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer
     @staticmethod
     def validate_tags_labels(tags_labels):
         for label in tags_labels:
-            yield Tag.objects.get_or_create(
-                label=label, defaults={"color": gen_random_colorhex()}
-            )[0]
+            yield Tag.objects.get_or_create(label=label, defaults={"color": gen_random_colorhex()})[0]
 
     def validate(self, attrs):
         attrs = super().validate(attrs)

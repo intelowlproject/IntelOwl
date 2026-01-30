@@ -19,9 +19,7 @@ class SelfAnalyzable(Pivot):
             # the configs that the playbook execute that could match
             playbook_configs = set(
                 related_config_class.objects.filter(
-                    playbooks__in=self._config.playbooks_choice.all().values_list(
-                        "pk", flat=True
-                    )
+                    playbooks__in=self._config.playbooks_choice.all().values_list("pk", flat=True)
                 ).values_list("pk", flat=True)
             )
             if related_configs_pk.issubset(playbook_configs):

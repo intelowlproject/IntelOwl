@@ -4,6 +4,7 @@ This module defines custom query sets for various models used in the IntelOwl pr
 Each query set provides additional methods for filtering, annotating, and manipulating
 query results specific to the needs of the IntelOwl application.
 """
+
 import datetime
 import json
 import uuid
@@ -69,17 +70,13 @@ class SendToBiQuerySet(models.QuerySet):
         """
         Creates an index template in Elasticsearch for BI data.
         """
-        with open(
-            settings.CONFIG_ROOT / "elastic_search_mappings" / "intel_owl_bi.json"
-        ) as f:
+        with open(settings.CONFIG_ROOT / "elastic_search_mappings" / "intel_owl_bi.json") as f:
             body = json.load(f)
             body["index_patterns"] = [f"{settings.ELASTICSEARCH_BI_INDEX}-*"]
             settings.ELASTICSEARCH_BI_CLIENT.indices.put_template(
                 name=settings.ELASTICSEARCH_BI_INDEX, body=body
             )
-            logger.info(
-                f"created template for Elastic named {settings.ELASTICSEARCH_BI_INDEX}"
-            )
+            logger.info(f"created template for Elastic named {settings.ELASTICSEARCH_BI_INDEX}")
 
     def send_to_elastic_as_bi(self, max_timeout: int = 60) -> bool:
         """
@@ -110,16 +107,11 @@ class SendToBiQuerySet(models.QuerySet):
                 request_timeout=max_timeout,
             )
             if errors:
-                logger.error(
-                    f"Errors on sending to elastic: {errors}."
-                    " We are not marking objects as sent."
-                )
+                logger.error(f"Errors on sending to elastic: {errors}. We are not marking objects as sent.")
                 found_errors |= errors
             else:
                 logger.info("BI sent")
-                self.model.objects.filter(
-                    pk__in=objects.values_list("pk", flat=True)
-                ).update(sent_to_bi=True)
+                self.model.objects.filter(pk__in=objects.values_list("pk", flat=True)).update(sent_to_bi=True)
         return found_errors
 
 
@@ -194,9 +186,7 @@ class OrganizationPluginConfigurationQuerySet(models.QuerySet):
         Returns:
             The filtered queryset.
         """
-        return self.filter(
-            content_type=config_class.get_content_type(), object_id=config_pk
-        )
+        return self.filter(content_type=config_class.get_content_type(), object_id=config_pk)
 
 
 class AbstractConfigQuerySet(CleanOnCreateQuerySet):
@@ -224,9 +214,7 @@ class AbstractConfigQuerySet(CleanOnCreateQuerySet):
 
         return self.alias(
             disabled_in_organization=Exists(
-                opc.filter_for_config(
-                    config_class=self.model, config_pk=OuterRef("pk")
-                ).filter(disabled=True)
+                opc.filter_for_config(config_class=self.model, config_pk=OuterRef("pk")).filter(disabled=True)
             )
         )
 
@@ -286,9 +274,7 @@ class JobQuerySet(MP_NodeQuerySet, CleanOnCreateQuerySet, SendToBiQuerySet):
             try:
                 return self.model.add_root(**kwargs)
             except IntegrityError:
-                logger.warning(
-                    f"Found race condition for {kwargs['name']}. Trying again to calculate path."
-                )
+                logger.warning(f"Found race condition for {kwargs['name']}. Trying again to calculate path.")
                 if attempt == total_attempt_number - 1:
                     raise
 
@@ -333,17 +319,13 @@ class JobQuerySet(MP_NodeQuerySet, CleanOnCreateQuerySet, SendToBiQuerySet):
         created by a member of their organization.
         """
         if user.has_membership():
-            user_query = Q(user=user) | Q(
-                user__membership__organization_id=user.membership.organization_id
-            )
+            user_query = Q(user=user) | Q(user__membership__organization_id=user.membership.organization_id)
         else:
             user_query = Q(user=user)
         if user.is_superuser:
             user_query |= Q(user__ingestors__isnull=False)
 
-        query = Q(tlp__in=[TLP.CLEAR, TLP.GREEN]) | (
-            Q(tlp__in=[TLP.AMBER, TLP.RED]) & user_query
-        )
+        query = Q(tlp__in=[TLP.CLEAR, TLP.GREEN]) | (Q(tlp__in=[TLP.AMBER, TLP.RED]) & user_query)
         return self.filter(query)
 
     def _annotate_importance_date(self) -> "JobQuerySet":
@@ -409,18 +391,14 @@ class JobQuerySet(MP_NodeQuerySet, CleanOnCreateQuerySet, SendToBiQuerySet):
             .annotate(importance=F("date_weight") + F("user_weight"))
         )
 
-    def running(
-        self, check_pending: bool = False, minutes_ago: int = 25
-    ) -> "JobQuerySet":
+    def running(self, check_pending: bool = False, minutes_ago: int = 25) -> "JobQuerySet":
         """
         Filters jobs that are currently running.
 
         Returns:
             The filtered queryset.
         """
-        qs = self.exclude(
-            status__in=[status.value for status in self.model.STATUSES.final_statuses()]
-        )
+        qs = self.exclude(status__in=[status.value for status in self.model.STATUSES.final_statuses()])
         if not check_pending:
             qs = qs.exclude(status=self.model.STATUSES.PENDING.value)
         difference = now() - datetime.timedelta(minutes=minutes_ago)
@@ -441,9 +419,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
     - annotate_value_for_user: Annotates the final value for a user, considering runtime, owner, organization, default, and test values.
     """
 
-    def annotate_configured(
-        self, config: "PythonConfig", user: User = None
-    ) -> "ParameterQuerySet":
+    def annotate_configured(self, config: "PythonConfig", user: User = None) -> "ParameterQuerySet":
         """
         Annotates parameters indicating if they are configured for a specific user.
 
@@ -467,9 +443,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
             )
         )
 
-    def _alias_owner_value_for_user(
-        self, config: "PythonConfig", user: User = None
-    ) -> "ParameterQuerySet":
+    def _alias_owner_value_for_user(self, config: "PythonConfig", user: User = None) -> "ParameterQuerySet":
         """
         Aliases the owner value for a user.
 
@@ -494,9 +468,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
             )
         )
 
-    def _alias_org_value_for_user(
-        self, config: "PythonConfig", user: User = None
-    ) -> "ParameterQuerySet":
+    def _alias_org_value_for_user(self, config: "PythonConfig", user: User = None) -> "ParameterQuerySet":
         """
         Aliases the organization value for a user.
 
@@ -563,9 +535,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
             When(name=para, then=Value(value, output_field=JSONField()))
             for para, value in runtime_config.items()
         ]
-        return self.annotate(
-            runtime_value=Case(*whens, default=None, output_field=JSONField())
-        )
+        return self.annotate(runtime_value=Case(*whens, default=None, output_field=JSONField()))
 
     def _alias_for_test(self):
         """
@@ -591,9 +561,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                     then=Value("user|pwd", output_field=JSONField()),
                 ),
                 When(name__contains="test", then=Value(None, output_field=JSONField())),
-                When(
-                    type=ParamTypes.INT.value, then=Value(10, output_field=JSONField())
-                ),
+                When(type=ParamTypes.INT.value, then=Value(10, output_field=JSONField())),
                 When(
                     type=ParamTypes.LIST.value,
                     then=Value(["test"], output_field=JSONField()),
@@ -706,9 +674,7 @@ class AbstractReportQuerySet(SendToBiQuerySet):
         Returns:
             AbstractConfigQuerySet: The queryset of configurations.
         """
-        return self.model.config.field.related_model.objects.filter(
-            pk__in=self.values("config_id")
-        )
+        return self.model.config.field.related_model.objects.filter(pk__in=self.values("config_id"))
 
 
 class ModelWithOwnershipQuerySet:
@@ -837,13 +803,10 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
             self.alias(
                 required_params=Coalesce(
                     Subquery(
-                        Parameter.objects.filter(
-                            python_module=OuterRef("python_module"), required=True
-                        )
+                        Parameter.objects.filter(python_module=OuterRef("python_module"), required=True)
                         # count them
-                        .annotate(count=Func(F("pk"), function="Count")).values(
-                            "count"
-                        ),
+                        .annotate(count=Func(F("pk"), function="Count"))
+                        .values("count"),
                         output_field=IntegerField(),
                     ),
                     0,
@@ -860,11 +823,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
                             pk__in=Subquery(
                                 # we get all values that the user can see
                                 PluginConfig.objects.filter(
-                                    **{
-                                        self.model.snake_case_name: OuterRef(
-                                            OuterRef("pk")
-                                        )
-                                    },
+                                    **{self.model.snake_case_name: OuterRef(OuterRef("pk"))},
                                     parameter__required=True,
                                 )
                                 .visible_for_user(user)
@@ -879,11 +838,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
                 )
             )
             # and we save the difference
-            .annotate(
-                configured=Exact(
-                    F("required_params") - F("required_configured_params"), 0
-                )
-            )
+            .annotate(configured=Exact(F("required_params") - F("required_configured_params"), 0))
         )
 
     def annotate_runnable(self, user: User = None) -> "PythonConfigQuerySet":
@@ -913,8 +868,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
                     # I have no idea how to do the compare
                     # of two boolean field in a subquery.
                     # this is the same as runnable =`configured` AND `runnable`
-                    Cast(F("configured"), IntegerField())
-                    * Cast(F("runnable"), IntegerField()),
+                    Cast(F("configured"), IntegerField()) * Cast(F("runnable"), IntegerField()),
                     1,
                 )
             )
@@ -938,19 +892,14 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
             config: PythonConfig
             if not hasattr(config, "runnable"):
                 raise RuntimeError(
-                    "You have to call `annotate_runnable`"
-                    " before being able to call `get_signature`"
+                    "You have to call `annotate_runnable` before being able to call `get_signature`"
                 )
             # gen new task_id
             if not config.runnable:
-                raise RuntimeWarning(
-                    "You are trying to get the signature of a not runnable plugin"
-                )
+                raise RuntimeWarning("You are trying to get the signature of a not runnable plugin")
 
             task_id = str(uuid.uuid4())
-            config.generate_empty_report(
-                job, task_id, AbstractReport.STATUSES.PENDING.value
-            )
+            config.generate_empty_report(job, task_id, AbstractReport.STATUSES.PENDING.value)
             args = [
                 job.pk,
                 config.python_module_id,
@@ -971,16 +920,13 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
 
 
 class CommentQuerySet(QuerySet):
-
     def visible_for_user(self, user):
         from api_app.analyzables_manager.models import Analyzable
 
         analyzables = Analyzable.objects.visible_for_user(user)
         qs = self.filter(analyzable__in=analyzables.values_list("pk", flat=True))
         if user.has_membership():
-            qs = qs.filter(
-                user__membership__organization__pk=user.membership.organization.pk
-            )
+            qs = qs.filter(user__membership__organization__pk=user.membership.organization.pk)
         else:
             qs = qs.filter(user=user)
         return qs

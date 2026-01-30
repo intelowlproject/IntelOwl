@@ -42,9 +42,7 @@ class GreyNoiseIntelErrorFormattingTestCase(BaseAnalyzerTest):
 
     def test_format_greynoise_error_builds_details_when_empty(self):
         exc = _CustomAttrException()
-        result = GreyNoiseAnalyzer._format_greynoise_error(
-            exc, "Request failure from GreyNoise API"
-        )
+        result = GreyNoiseAnalyzer._format_greynoise_error(exc, "Request failure from GreyNoise API")
         expected_prefix = "Request failure from GreyNoise API (_CustomAttrException):"
         self.assertTrue(result.startswith(expected_prefix))
         self.assertIn("status_code", result)
@@ -53,9 +51,5 @@ class GreyNoiseIntelErrorFormattingTestCase(BaseAnalyzerTest):
 
     def test_format_greynoise_error_fallback_when_no_details(self):
         exc = _CustomEmptyException()
-        result = GreyNoiseAnalyzer._format_greynoise_error(
-            exc, "Rate limit error from GreyNoise API"
-        )
-        self.assertEqual(
-            "Rate limit error from GreyNoise API (_CustomEmptyException)", result
-        )
+        result = GreyNoiseAnalyzer._format_greynoise_error(exc, "Rate limit error from GreyNoise API")
+        self.assertEqual("Rate limit error from GreyNoise API (_CustomEmptyException)", result)

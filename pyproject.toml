@@ -1,5 +1,5 @@
 [tool.ruff]
-line-length = 140
+line-length = 110
 target-version = "py311"
 
 exclude = [
@@ -18,15 +18,54 @@ select = [
     "W",   # pycodestyle warnings
     "F",   # pyflakes
     "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "DJ",  # flake8-django
 ]
 
 ignore = [
     "E231",  # missing whitespace after ','
+    "E501",  # line too long - handled by formatter, remaining are strings/comments
     "W605",  # invalid escape sequence
+    "N805",  # first argument of a method should be named 'self' - ignored for @classproperty
+    "UP006", # Use `list` instead of `List` for type annotation
+    "UP035", # deprecated imports from typing module
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]  # unused imports in __init__ files
+"api_app/decorators.py" = ["N801"]  # classproperty names are intentionally lowercase
+"api_app/analyzers_manager/exceptions.py" = ["N818"]
+"api_app/ingestors_manager/exceptions.py" = ["N818"]
+"api_app/pivots_manager/exceptions.py" = ["N818"]
+"api_app/visualizers_manager/exceptions.py" = ["N818"]
+"api_app/connectors_manager/exceptions.py" = ["N818"]
+"intel_owl/secrets.py" = ["N818", "B904"]
+"intel_owl/celery.py" = ["N806"]
+"intel_owl/test_runner.py" = ["N802"]
+"tests/**" = ["N801", "N806", "N818", "B017"]
+"api_app/views.py" = ["B904", "DJ012"]
+"api_app/models.py" = ["B904", "DJ012"]
+"api_app/data_model_manager/models.py" = ["DJ008", "DJ012"]
+"api_app/serializers/**" = ["N806"]
+"api_app/playbooks_manager/**" = ["N806", "C417"]
+"api_app/management/commands/**" = ["B018"]
+"api_app/permissions.py" = ["N801"]
+"api_app/classes.py" = ["B027"]
+"api_app/visualizers_manager/classes.py" = ["B008"]
+"api_app/visualizers_manager/serializers.py" = ["N815"]
+"api_app/user_events_manager/**" = ["B904", "DJ012", "DJ001"]
+"api_app/analyzers_manager/file_analyzers/**" = ["N801", "N802", "N806", "N818", "B904"]
+"api_app/analyzers_manager/observable_analyzers/**" = ["N801", "N818", "B904", "N802", "N806"]
+"api_app/connectors_manager/connectors/**" = ["B904"]
+"api_app/analyzers_manager/views.py" = ["B904"]
+"api_app/investigations_manager/views.py" = ["B904"]
+"api_app/pivots_manager/views.py" = ["B904"]
+"api_app/ingestors_manager/ingestors/**" = ["N815", "B904"]
+"authentication/**" = ["N802", "B904", "DJ012"]
+"integrations/**" = ["N812", "B904"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["certego_saas"]

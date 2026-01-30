@@ -37,13 +37,8 @@ class HoneyDB(classes.ObservableAnalyzer):
             "internet_scanner",
             "ip_info",
         ]
-        if (
-            self.honeydb_analysis not in self.endpoints
-            and self.honeydb_analysis != "all"
-        ):
-            raise AnalyzerConfigurationException(
-                f"analysis_type is not valid: {self.honeydb_analysis}"
-            )
+        if self.honeydb_analysis not in self.endpoints and self.honeydb_analysis != "all":
+            raise AnalyzerConfigurationException(f"analysis_type is not valid: {self.honeydb_analysis}")
 
     def run(self):
         if self.honeydb_analysis == "all":

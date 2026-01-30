@@ -21,9 +21,7 @@ class ConnectorTestCase(CustomTestCase):
     ]
 
     def test_health_check(self):
-        pm = PythonModule.objects.get(
-            base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP"
-        )
+        pm = PythonModule.objects.get(base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP")
         cc = ConnectorConfig.objects.create(
             name="test",
             python_module=pm,
@@ -119,24 +117,15 @@ class ConnectorTestCase(CustomTestCase):
 
         subclasses = Connector.all_subclasses()
         for subclass in subclasses:
-            print("\n" f"Testing Connector {subclass.__name__}")
-            configs = ConnectorConfig.objects.filter(
-                python_module=subclass.python_module
-            )
+            print(f"\nTesting Connector {subclass.__name__}")
+            configs = ConnectorConfig.objects.filter(python_module=subclass.python_module)
             if not configs.exists():
-                self.fail(
-                    f"There is a python module {subclass.python_module}"
-                    " without any configuration"
-                )
+                self.fail(f"There is a python module {subclass.python_module} without any configuration")
             for config in configs:
                 job.connectors_to_execute.set([config])
                 timeout_seconds = config.soft_time_limit
                 timeout_seconds = min(timeout_seconds, 20)
-                print(
-                    "\t"
-                    f"Testing with config {config.name}"
-                    f" for {timeout_seconds} seconds"
-                )
+                print(f"\tTesting with config {config.name} for {timeout_seconds} seconds")
                 sub = subclass(
                     config,
                 )
@@ -144,11 +133,7 @@ class ConnectorTestCase(CustomTestCase):
                 try:
                     sub.start(job.pk, {}, uuid())
                 except Exception as e:
-                    self.fail(
-                        f"Connector {subclass.__name__}"
-                        f" with config {config.name} "
-                        f"failed {e}"
-                    )
+                    self.fail(f"Connector {subclass.__name__} with config {config.name} failed {e}")
                 finally:
                     signal.alarm(0)
         job.delete()

@@ -66,9 +66,7 @@ class DehashedSearch(ObservableAnalyzer):
             if re.match(r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$", self.observable_name):
                 self.operator = "email"
             # order matters! it's important "address" is placed before "phone"
-            elif " " in self.observable_name and re.match(
-                r"\d.*[a-zA-Z]|[a-zA-Z].*\d", self.observable_name
-            ):
+            elif " " in self.observable_name and re.match(r"\d.*[a-zA-Z]|[a-zA-Z].*\d", self.observable_name):
                 self.operator = "address"
             elif re.match(r"\+?\d+", self.observable_name):
                 self.operator = "phone"
@@ -90,9 +88,7 @@ class DehashedSearch(ObservableAnalyzer):
 
         total_entries = []
         for page_no in range(1, self.pages + 1):
-            logger.info(
-                f"{self.__repr__()} -> fetching search results for page #{page_no}"
-            )
+            logger.info(f"{self.__repr__()} -> fetching search results for page #{page_no}")
             resp = requests.get(f"{url}&page={page_no}", headers=headers)
             resp.raise_for_status()
             entries_fetched = resp.json().get("entries", None)

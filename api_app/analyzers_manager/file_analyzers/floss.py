@@ -57,9 +57,7 @@ class Floss(FileAnalyzer, DockerBasedAnalyzer):
         except subprocess.CalledProcessError as e:
             stderr = e.stderr
             logger.info(f"Floss failed to run for {self.filename} with command {e}")
-            raise AnalyzerRunException(
-                f" Analyzer for {self.filename} failed with error: {stderr}"
-            )
+            raise AnalyzerRunException(f" Analyzer for {self.filename} failed with error: {stderr}")
 
         result["exceeded_max_number_of_strings"] = {}
 
@@ -78,10 +76,7 @@ class Floss(FileAnalyzer, DockerBasedAnalyzer):
                 req_data = {"args": args, "timeout": self.timeout}
                 result["strings"][key] = self._docker_run(req_data)
             else:
-                if (
-                    len(result.get("strings", {}).get(key, []))
-                    > self.max_no_of_strings[key]
-                ):
+                if len(result.get("strings", {}).get(key, [])) > self.max_no_of_strings[key]:
                     result["strings"][key] = list(result["strings"][key])
                     result["exceeded_max_number_of_strings"][key] = True
         return result

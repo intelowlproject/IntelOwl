@@ -17,7 +17,7 @@ class FireHolIPListTestCase(BaseAnalyzerTest):
     @staticmethod
     def get_mocked_response():
         # Simulates downloading an IP list with the target IP inside
-        text_data = "# comment line\n" "0.0.0.0/8\n" "3.90.198.217\n" "5.0.0.0/8\n"
+        text_data = "# comment line\n0.0.0.0/8\n3.90.198.217\n5.0.0.0/8\n"
         return patch(
             "requests.get",
             return_value=MockUpResponse(

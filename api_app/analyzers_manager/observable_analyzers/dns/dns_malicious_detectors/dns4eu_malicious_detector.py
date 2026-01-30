@@ -27,9 +27,7 @@ class DNS4EUMaliciousDetector(DNS4EUBase):
         timeout = False
         observable = self._get_observable_domain()
 
-        logger.info(
-            f"Checking malicious status for {observable} via DNS4EU (binary DoH)"
-        )
+        logger.info(f"Checking malicious status for {observable} via DNS4EU (binary DoH)")
 
         # Create DNS query for A record
         query = dns.message.make_query(observable, "A")

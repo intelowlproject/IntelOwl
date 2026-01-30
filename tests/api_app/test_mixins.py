@@ -31,9 +31,7 @@ possible_responses = {
                             {
                                 "type": "url",
                                 "id": "e1deefc8a4613fe9c16014d5cce4de4a6e12f3caccf80838a04c82faa4b42434",
-                                "context_attributes": {
-                                    "url": "http://pki.goog/gsr1/gsr1.crt"
-                                },
+                                "context_attributes": {"url": "http://pki.goog/gsr1/gsr1.crt"},
                             },
                         ],
                         "links": {"self": "redacted", "related": "redacted"},
@@ -91,9 +89,7 @@ class VirusTotalv3Analyzer(VirusTotalv3AnalyzerMixin):
 class VirusTotalMixinTestCase(CustomTestCase):
     def setUp(self) -> None:
         self.base = VirusTotalv3Base()
-        self.analyzer_file = VirusTotalv3Analyzer(
-            AnalyzerConfig.objects.get(name="VirusTotal_v3_Get_File")
-        )
+        self.analyzer_file = VirusTotalv3Analyzer(AnalyzerConfig.objects.get(name="VirusTotal_v3_Get_File"))
         self.analyzer_observable = VirusTotalv3Analyzer(
             AnalyzerConfig.objects.get(name="VirusTotal_v3_Get_Observable")
         )

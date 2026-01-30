@@ -51,14 +51,10 @@ class IntelX(ObservableAnalyzer):
     def _poll_for_results(self, search_id):
         json_data = {}
         for chance in range(self.max_tries):
-            logger.info(
-                f"Result Polling. Try #{chance + 1}. Starting the query..."
-                f"<-- {self.__repr__()}"
-            )
+            logger.info(f"Result Polling. Try #{chance + 1}. Starting the query...<-- {self.__repr__()}")
             try:
                 r = self._session.get(
-                    f"{self.search_url}/result?id={search_id}"
-                    f"&limit={self.rows_limit}&offset=-1"
+                    f"{self.search_url}/result?id={search_id}&limit={self.rows_limit}&offset=-1"
                 )
                 r.raise_for_status()
             except requests.RequestException as e:
@@ -71,8 +67,7 @@ class IntelX(ObservableAnalyzer):
 
         if not json_data:
             raise AnalyzerRunException(
-                "reached max tries for IntelX analysis,"
-                f" observable {self.observable_name}"
+                f"reached max tries for IntelX analysis, observable {self.observable_name}"
             )
 
         if self.query_type == "phonebook":
@@ -100,16 +95,12 @@ class IntelX(ObservableAnalyzer):
             params["datefrom"] = self.datefrom
             params["dateto"] = self.dateto
         # POST the search term --> Fetch the 'id' --> GET the results using the 'id'
-        logger.info(
-            f"starting {self.query_type} request for observable {self.observable_name}"
-        )
+        logger.info(f"starting {self.query_type} request for observable {self.observable_name}")
         r = self._session.post(self.search_url, json=params)
         r.raise_for_status()
         search_id = r.json().get("id", None)
         if not search_id:
-            raise AnalyzerRunException(
-                f"Failed to request search. Status code: {r.status_code}."
-            )
+            raise AnalyzerRunException(f"Failed to request search. Status code: {r.status_code}.")
         result = self._poll_for_results(search_id)
 
         return result

@@ -28,9 +28,7 @@ class PolyswarmObs(ObservableAnalyzer, PolyswarmBase):
     def get_results(self, results):
         for result in results:  # should run only once
             if result.failed:
-                raise AnalyzerRunException(
-                    f"Failed to get results from Polyswarm for {self.observable_name}"
-                )
+                raise AnalyzerRunException(f"Failed to get results from Polyswarm for {self.observable_name}")
             if not result.assertions:
                 raise AnalyzerRunException(
                     f"Failed to get assertions from Polyswarm for {self.observable_name}"

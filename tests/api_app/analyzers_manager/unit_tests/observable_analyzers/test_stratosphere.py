@@ -13,7 +13,7 @@ class StratosTestCase(BaseAnalyzerTest):
     @staticmethod
     def get_mocked_response():
         # Simulated file content with valid CSV headers and an IP entry
-        fake_csv_content = "S.No,IP,Rating\n" "1,8.8.8.8,High\n"
+        fake_csv_content = "S.No,IP,Rating\n1,8.8.8.8,High\n"
 
         # Patch open() to return fake CSV for all three datasets
         mock_files = {

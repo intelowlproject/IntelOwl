@@ -23,11 +23,7 @@ class GuardDogGenericTestCase(BaseAnalyzerTest):
             stderr="",
         )
 
-        patches = [
-            if_mock_connections(
-                patch("subprocess.run", return_value=response_from_command)
-            )
-        ]
+        patches = [if_mock_connections(patch("subprocess.run", return_value=response_from_command))]
 
         return patches
 

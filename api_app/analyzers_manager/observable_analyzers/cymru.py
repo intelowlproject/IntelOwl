@@ -15,9 +15,7 @@ class Cymru(ObservableAnalyzer):
     def run(self):
         results = {}
         if self.observable_classification != Classification.HASH:
-            raise AnalyzerRunException(
-                f"observable type {self.observable_classification} not supported"
-            )
+            raise AnalyzerRunException(f"observable type {self.observable_classification} not supported")
 
         hash_length = len(self.observable_name)
         if hash_length == 64:

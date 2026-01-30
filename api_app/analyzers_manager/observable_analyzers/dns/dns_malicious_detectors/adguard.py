@@ -21,9 +21,7 @@ class AdGuard(DoHMixin, classes.ObservableAnalyzer):
         pass
 
     def filter_query(self, observable: str) -> list[RRset]:
-        logger.info(
-            f"Sending filtered request to AdGuard DNS API for query: {observable}"
-        )
+        logger.info(f"Sending filtered request to AdGuard DNS API for query: {observable}")
         r_filtered = requests.get(
             url=self.build_query_url(observable),
             headers=self.headers,
@@ -41,22 +39,16 @@ class AdGuard(DoHMixin, classes.ObservableAnalyzer):
         # we can safely say the domain is not malicious
         for ans in a_filtered:
             if str(ans.name) == "ad-block.dns.adguard.com.":
-                return malicious_detector_response(
-                    observable=observable, malicious=True
-                )
+                return malicious_detector_response(observable=observable, malicious=True)
 
             if any(str(data) == "0.0.0.0" for data in ans):  # nosec B104
-                return malicious_detector_response(
-                    observable=observable, malicious=True
-                )
+                return malicious_detector_response(observable=observable, malicious=True)
 
         return malicious_detector_response(observable=observable, malicious=False)
 
     def run(self):
         logger.info(f"Running AdGuard DNS analyzer for {self.observable_name}")
-        observable = self.convert_to_domain(
-            self.observable_name, self.observable_classification
-        )
+        observable = self.convert_to_domain(self.observable_name, self.observable_classification)
         a_filtered = self.filter_query(observable)
 
         if not a_filtered:

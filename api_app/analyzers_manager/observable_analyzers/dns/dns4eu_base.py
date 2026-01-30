@@ -41,9 +41,7 @@ class DNS4EUBase(classes.ObservableAnalyzer):
             except AddressValueError:
                 pass
             else:
-                raise AnalyzerRunException(
-                    f"{observable} is an IP address, not a domain."
-                )
+                raise AnalyzerRunException(f"{observable} is an IP address, not a domain.")
         return observable
 
     def _perform_dns_query(self, query, url, timeout=30):

@@ -31,9 +31,7 @@ class Pivot(Plugin, metaclass=abc.ABCMeta):
     @property
     def related_reports(self) -> QuerySet:
         report_class: Type[AbstractReport] = self.related_configs.model.report_class
-        return report_class.objects.filter(
-            config__in=self.related_configs, job=self._job
-        )
+        return report_class.objects.filter(config__in=self.related_configs, job=self._job)
 
     @classproperty
     def report_model(cls) -> Type[PivotReport]:
@@ -45,9 +43,7 @@ class Pivot(Plugin, metaclass=abc.ABCMeta):
 
     def should_run(self) -> Tuple[bool, Optional[str]]:
         # by default, the pivot run IF every report attached to it was success
-        result = not self.related_reports.exclude(
-            status=self.report_model.STATUSES.SUCCESS.value
-        ).exists()
+        result = not self.related_reports.exclude(status=self.report_model.STATUSES.SUCCESS.value).exists()
         return (
             result,
             f"All necessary reports{'' if result else ' do not'} have success status",
@@ -80,9 +76,7 @@ class Pivot(Plugin, metaclass=abc.ABCMeta):
                 playbook_to_execute=self.get_playbook_to_execute(),
             ):
                 report["jobs_id"].append(job.pk)
-                PivotMap.objects.create(
-                    starting_job=self._job, ending_job=job, pivot_config=self._config
-                )
+                PivotMap.objects.create(starting_job=self._job, ending_job=job, pivot_config=self._config)
         else:
             logger.info(f"Skipping job creation for {self._config.name}")
         return report

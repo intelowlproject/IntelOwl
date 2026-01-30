@@ -15,7 +15,6 @@ logger = logging.getLogger(__name__)
 
 
 class SpamhausDropV4(classes.ObservableAnalyzer):
-
     url = "https://www.spamhaus.org/drop"
     ipv4_url = url + "/drop_v4.json"
     ipv6_url = url + "/drop_v6.json"
@@ -37,27 +36,18 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
         if self.observable_classification == Classification.IP:
             ip = ipaddress.ip_address(self.observable_name)
             data_type = "ipv4" if ip.version == 4 else "ipv6"
-            logger.info(
-                f"The given observable ({self.observable_name}) is an {data_type} address."
-            )
-        elif (
-            self.observable_classification == Classification.GENERIC
-            and self.observable_name.isdigit()
-        ):
+            logger.info(f"The given observable ({self.observable_name}) is an {data_type} address.")
+        elif self.observable_classification == Classification.GENERIC and self.observable_name.isdigit():
             data_type = "asn"
             asn = int(self.observable_name)  # Convert to integer
-            logger.info(
-                f"The given observable ({self.observable_name}) is an ASN: {asn}"
-            )
+            logger.info(f"The given observable ({self.observable_name}) is an ASN: {asn}")
         else:
             raise AnalyzerRunException(f"Invalid observable: {self.observable_name}")
 
         database_location = self.location(data_type)
 
         if not os.path.exists(database_location):
-            logger.info(
-                f"Database does not exist in {database_location}, initialising..."
-            )
+            logger.info(f"Database does not exist in {database_location}, initialising...")
             self.update()
         with open(database_location, "r") as f:
             db = json.load(f)
@@ -103,9 +93,7 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
                 logger.info(f"Updating database from {cls.asn_url}")
                 db_url = cls.asn_url
             else:
-                raise AnalyzerRunException(
-                    f"Invalid data_type provided to update: {data_type}"
-                )
+                raise AnalyzerRunException(f"Invalid data_type provided to update: {data_type}")
             response = requests.get(url=db_url)
             response.raise_for_status()
             data = cls.convert_to_json(response.text)
@@ -126,8 +114,6 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
                 json_obj = json.loads(line)
                 json_objects.append(json_obj)
             except json.JSONDecodeError:
-                raise AnalyzerRunException(
-                    "Invalid JSON format in the response while updating the database"
-                )
+                raise AnalyzerRunException("Invalid JSON format in the response while updating the database")
 
         return json_objects

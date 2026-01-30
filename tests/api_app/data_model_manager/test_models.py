@@ -5,7 +5,6 @@ from tests import CustomTestCase
 
 
 class BaseDataModelTestCase(CustomTestCase):
-
     def test_serialize(self):
         ip = IPDataModel.objects.create()
         results = IPDataModel.objects.filter(pk=ip.pk).serialize()
@@ -36,9 +35,7 @@ class BaseDataModelTestCase(CustomTestCase):
         self.assertEqual(ip2.asn, ip.asn)
         self.assertEqual(ip3.asn_rank, ip.asn_rank)
         self.assertCountEqual(ip2.resolutions + ip3.resolutions, ip.resolutions)
-        self.assertCountEqual(
-            ip.ietf_report.values_list("pk", flat=True), [report1.pk, report2.pk]
-        )
+        self.assertCountEqual(ip.ietf_report.values_list("pk", flat=True), [report1.pk, report2.pk])
 
         report1.delete()
         report2.delete()

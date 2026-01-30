@@ -40,9 +40,7 @@ class VisualizerConfig(PythonConfig):
             ]
         },
     )
-    orgs_configuration = GenericRelation(
-        "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
-    )
+    orgs_configuration = GenericRelation("api_app.OrganizationPluginConfiguration", related_name="%(class)s")
 
     @classproperty
     def plugin_type(cls) -> str:

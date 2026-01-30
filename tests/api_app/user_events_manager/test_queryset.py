@@ -18,7 +18,6 @@ from tests.mock_utils import MockUpRequest
 
 
 class TestUserAnalyzableEventQuerySet(CustomTestCase):
-
     def test_decay_linear(self):
         an = Analyzable.objects.create(
             name="test.com",
@@ -46,7 +45,6 @@ class TestUserAnalyzableEventQuerySet(CustomTestCase):
 
 
 class TestUserDomainWildCardEventQuerySet(CustomTestCase):
-
     def test_matches(self):
         an = Analyzable.objects.create(
             name="a.test.com",
@@ -72,7 +70,6 @@ class TestUserDomainWildCardEventQuerySet(CustomTestCase):
 
 
 class TestUserIPWildCardEventQuerySet(CustomTestCase):
-
     def test_matches(self):
         an = Analyzable.objects.create(
             name="1.2.3.5",

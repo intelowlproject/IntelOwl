@@ -48,6 +48,4 @@ class AbstractReportSerializer(AbstractReportSerializerInterface):
             "errors",
             "start_time",
         ]
-        list_serializer_class = (
-            AbstractReportSerializerInterface.Meta.list_serializer_class
-        )
+        list_serializer_class = AbstractReportSerializerInterface.Meta.list_serializer_class

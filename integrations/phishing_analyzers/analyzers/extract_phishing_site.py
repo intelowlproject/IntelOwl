@@ -31,13 +31,10 @@ logger.setLevel(log_level)
 def extract_driver_result(driver_wrapper: DriverWrapper) -> dict:
     logger.info("Extracting driver result...")
     driver_result: {} = {
-        "page_source": base64.b64encode(
-            driver_wrapper.get_page_source().encode("utf-8")
-        ).decode("utf-8"),
+        "page_source": base64.b64encode(driver_wrapper.get_page_source().encode("utf-8")).decode("utf-8"),
         "page_screenshot_base64": driver_wrapper.get_base64_screenshot(),
         "page_http_traffic": [
-            dump_seleniumwire_requests(request)
-            for request in driver_wrapper.iter_requests()
+            dump_seleniumwire_requests(request) for request in driver_wrapper.iter_requests()
         ],
         "page_http_har": driver_wrapper.get_har(),
     }
@@ -69,9 +66,7 @@ def analyze_target(
         # this print returns the result of the analysis, do not remove
         print(result)
     except Exception as e:
-        logger.exception(
-            f"Exception during analysis of target website {target_url}: {e}"
-        )
+        logger.exception(f"Exception during analysis of target website {target_url}: {e}")
     finally:
         # if anything goes wrong make sure to free the slot
         if driver_wrapper:

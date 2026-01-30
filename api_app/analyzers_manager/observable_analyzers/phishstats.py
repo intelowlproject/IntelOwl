@@ -16,7 +16,7 @@ class PhishStats(ObservableAnalyzer):
     Analyzer that uses PhishStats API to check if the observable is a phishing site.
     """
 
-    url: str = "https://phishstats.info:2096/api"
+    url: str = "https://api.phishstats.info/api"
 
     @classmethod
     def update(cls) -> bool:
@@ -35,22 +35,13 @@ class PhishStats(ObservableAnalyzer):
                 to_analyze_observable_classification = Classification.IP
 
         if to_analyze_observable_classification == Classification.IP:
-            endpoint = (
-                f"phishing?_where=(ip,eq,{to_analyze_observable_name})&_sort=-date"
-            )
+            endpoint = f"phishing?_where=(ip,eq,{to_analyze_observable_name})&_sort=-date"
         elif to_analyze_observable_classification == Classification.DOMAIN:
-            endpoint = (
-                f"phishing?_where=(url,like,~{to_analyze_observable_name}~)&_sort=-date"
-            )
+            endpoint = f"phishing?_where=(url,like,~{to_analyze_observable_name}~)&_sort=-date"
         elif to_analyze_observable_classification == Classification.GENERIC:
-            endpoint = (
-                "phishing?_where=(title,like,"
-                f"~{to_analyze_observable_name}~)&_sort=-date"
-            )
+            endpoint = f"phishing?_where=(title,like,~{to_analyze_observable_name}~)&_sort=-date"
         else:
-            raise AnalyzerRunException(
-                "Phishstats require either of IP, URL, Domain or Generic"
-            )
+            raise AnalyzerRunException("Phishstats require either of IP, URL, Domain or Generic")
         return f"{self.url}/{endpoint}"
 
     def run(self):

@@ -32,9 +32,7 @@ try:
 except Exception as e:
     logger.exception(e)
 
-XML_H_SCHEMA = (
-    "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink"
-)
+XML_H_SCHEMA = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink"
 SCHEMA_DOMAINS = [
     "schemas.openxmlformats.org",
     "schemas-microsoft-com",
@@ -117,9 +115,7 @@ class DocInfo(FileAnalyzer):
                 macro_raptor = mraptor.MacroRaptor(vba_code_all_modules)
                 if macro_raptor:
                     macro_raptor.scan()
-                    results["mraptor"] = (
-                        "suspicious" if macro_raptor.suspicious else "ok"
-                    )
+                    results["mraptor"] = "suspicious" if macro_raptor.suspicious else "ok"
 
                 # analyze macros
                 analyzer_results = self.vbaparser.analyze_macros(True, True)
@@ -144,9 +140,7 @@ class DocInfo(FileAnalyzer):
         except CannotDecryptException as e:
             logger.info(e)
         except Exception as e:
-            error_message = (
-                f"job_id {self.job_id} doc info extraction failed. Error: {e}"
-            )
+            error_message = f"job_id {self.job_id} doc info extraction failed. Error: {e}"
             logger.warning(error_message, stack_info=True)
             self.report.errors.append(error_message)
             self.report.save()
@@ -169,9 +163,7 @@ class DocInfo(FileAnalyzer):
             results["uris"].extend(self.extract_urls_from_IOCs())
             results["uris"] = list(set(results["uris"]))  # make it uniq
         except Exception as e:
-            error_message = (
-                f"job_id {self.job_id} special extractions failed. Error: {e}"
-            )
+            error_message = f"job_id {self.job_id} special extractions failed. Error: {e}"
             logger.warning(error_message, stack_info=True)
             self.report.errors.append(error_message)
             self.report.save()
@@ -200,10 +192,7 @@ class DocInfo(FileAnalyzer):
             # case docx
             zipped = zipfile.ZipFile(self.filepath)
         except zipfile.BadZipFile:
-            logger.info(
-                f"file {self.filename} is not a zip file so we"
-                "cant' do custom Follina Extraction"
-            )
+            logger.info(f"file {self.filename} is not a zip file so wecant' do custom Follina Extraction")
         else:
             try:
                 template = zipped.read("word/_rels/document.xml.rels")
@@ -258,9 +247,7 @@ class DocInfo(FileAnalyzer):
         else:
             if sum(i.value for i in oid.check() if i.id == "ext_rels") > 1:
                 xml_parser = XmlParser(self.filepath)
-                for relationship, target in oleobj.find_external_relationships(
-                    xml_parser
-                ):
+                for relationship, target in oleobj.find_external_relationships(xml_parser):
                     external_relationships.append(
                         {
                             "relationship": relationship,
@@ -282,12 +269,7 @@ class DocInfo(FileAnalyzer):
         else:
             try:
                 dxml = document.read("docProps/app.xml")
-                pages_count = int(
-                    parseString(dxml)
-                    .getElementsByTagName("Pages")[0]
-                    .childNodes[0]
-                    .nodeValue
-                )
+                pages_count = int(parseString(dxml).getElementsByTagName("Pages")[0].childNodes[0].nodeValue)
             except KeyError:
                 logger.info(
                     "number of pages not found, maybe the file is malformed, "
@@ -300,16 +282,13 @@ class DocInfo(FileAnalyzer):
                     doc = docxpy.DOCReader(self.filepath)
                     doc.process()
                 except Exception as e:
-                    error_message = (
-                        f"job_id {self.job_id} docxpy url extraction failed. Error: {e}"
-                    )
+                    error_message = f"job_id {self.job_id} docxpy url extraction failed. Error: {e}"
                     logger.warning(error_message, stack_info=True)
                     self.report.errors.append(error_message)
                 else:
                     # decode bytes like links
                     links = [
-                        link.decode() if isinstance(link, bytes) else link
-                        for link in doc.data["links"][0]
+                        link.decode() if isinstance(link, bytes) else link for link in doc.data["links"][0]
                     ]
                     # remove empty strings
                     links = [link for link in links if link != ""]
@@ -317,35 +296,26 @@ class DocInfo(FileAnalyzer):
 
                 # also parse xml in case docxpy missed some links
                 try:
-                    for relationship in list(
-                        fromstring(document.read("word/_rels/document.xml.rels"))
-                    ):
+                    for relationship in list(fromstring(document.read("word/_rels/document.xml.rels"))):
                         # exclude xml schema urls
                         if relationship.attrib["Type"] == XML_H_SCHEMA and any(
-                            domain in relationship.attrib["Target"]
-                            for domain in SCHEMA_DOMAINS
+                            domain in relationship.attrib["Target"] for domain in SCHEMA_DOMAINS
                         ):
                             urls.append(relationship.attrib["Target"])
                 except KeyError as e:
-                    error_message = (
-                        f"job_id {self.job_id} no xml rels found. Error: {e}"
-                    )
+                    error_message = f"job_id {self.job_id} no xml rels found. Error: {e}"
                     logger.warning(error_message, stack_info=True)
                     self.report.errors.append(error_message)
         return urls
 
     def analyze_msodde(self):
         try:
-            msodde_result = msodde_process_maybe_encrypted(
-                self.filepath, self.passwords_to_check
-            )
+            msodde_result = msodde_process_maybe_encrypted(self.filepath, self.passwords_to_check)
         except Exception as e:
             error_message = f"job_id {self.job_id} msodde parser failed. Error: {e}"
             # This may happen for text/plain samples types
             # and should not be treated as an engine error
-            if "Could not determine delimiter" in str(e) or self.filename.endswith(
-                ".exe"
-            ):
+            if "Could not determine delimiter" in str(e) or self.filename.endswith(".exe"):
                 logger.info(error_message, stack_info=True)
             else:
                 logger.warning(error_message, stack_info=True)
@@ -370,29 +340,21 @@ class DocInfo(FileAnalyzer):
                 for num in range(10):
                     common_pwd_to_check.append(f"{num}{num}{num}{num}")
                 # https://twitter.com/JohnLaTwC/status/1265377724522131457
-                filename_without_spaces_and_numbers = sub(
-                    r"[-_\d\s]", "", self.filename
-                )
-                filename_without_extension = sub(
-                    r"(\..+)", "", filename_without_spaces_and_numbers
-                )
+                filename_without_spaces_and_numbers = sub(r"[-_\d\s]", "", self.filename)
+                filename_without_extension = sub(r"(\..+)", "", filename_without_spaces_and_numbers)
                 common_pwd_to_check.append(filename_without_extension)
                 self.passwords_to_check.extend(common_pwd_to_check)
                 decrypted_file_name, correct_password = self.vbaparser.decrypt_file(
                     self.passwords_to_check,
                 )
-                self.olevba_results["additional_passwords_tried"] = (
-                    self.passwords_to_check
-                )
+                self.olevba_results["additional_passwords_tried"] = self.passwords_to_check
                 if correct_password:
                     self.olevba_results["correct_password"] = correct_password
                 if decrypted_file_name:
                     self.vbaparser = VBA_Parser(decrypted_file_name)
                 else:
                     self.olevba_results["cannot_decrypt"] = True
-                    raise CannotDecryptException(
-                        "cannot decrypt the file with the default password"
-                    )
+                    raise CannotDecryptException("cannot decrypt the file with the default password")
 
     def manage_xlm_macros(self):
         # this would overwrite classic XLM parsing
@@ -431,9 +393,6 @@ class DocInfo(FileAnalyzer):
             except Exception as e:
                 logger.info(f"experimental XLM macro analysis failed. Exception: {e}")
             else:
-                logger.debug(
-                    f"experimental XLM macro analysis succeeded. "
-                    f"Binary to analyze: {parsed_file}"
-                )
+                logger.debug(f"experimental XLM macro analysis succeeded. Binary to analyze: {parsed_file}")
                 if parsed_file:
                     self.vbaparser = VBA_Parser(self.filename, data=parsed_file)

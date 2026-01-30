@@ -35,9 +35,7 @@ class Phishtank(ObservableAnalyzer):
         else:
             data["app_key"] = self._api_key_name
         try:
-            resp = requests.post(
-                "https://checkurl.phishtank.com/checkurl/", data=data, headers=headers
-            )
+            resp = requests.post("https://checkurl.phishtank.com/checkurl/", data=data, headers=headers)
             resp.raise_for_status()
             result = resp.json()
         except requests.RequestException as e:

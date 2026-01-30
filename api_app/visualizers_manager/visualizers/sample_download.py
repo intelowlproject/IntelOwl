@@ -23,7 +23,6 @@ logger = getLogger(__name__)
 
 
 class SampleDownload(Visualizer):
-
     @classmethod
     def update(cls) -> bool:
         pass

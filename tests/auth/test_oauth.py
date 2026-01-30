@@ -30,9 +30,7 @@ class TestOAuth(CustomOAuthTestCase):
         try:
             response = self.client.get(self.google_auth_uri)
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-            self.assertEqual(
-                response.json(), {"detail": "Google OAuth is not configured."}
-            )
+            self.assertEqual(response.json(), {"detail": "Google OAuth is not configured."})
         finally:
             oauth._registry = prev_registry
 

@@ -40,12 +40,15 @@ describe("test TimePicker component", () => {
     expect(firstDateInput).toBeInTheDocument();
     const secondDateInput = container.querySelector("#DatePicker__lte");
     expect(secondDateInput).toBeInTheDocument();
-    // datetime saves also milliseconds
-    expect(firstDateInput).toHaveValue(
-      `${format(fromDate, datetimeFormatStr)}.000`,
+    // datetime saves also milliseconds, but browsers may include them in the value
+    // Check that the value starts with the formatted date (with or without .000)
+    const expectedFrom = format(fromDate, datetimeFormatStr);
+    const expectedTo = format(toDate, datetimeFormatStr);
+    expect(firstDateInput.value).toMatch(
+      new RegExp(`^${expectedFrom}(\\.000)?$`),
     );
-    expect(secondDateInput).toHaveValue(
-      `${format(toDate, datetimeFormatStr)}.000`,
+    expect(secondDateInput.value).toMatch(
+      new RegExp(`^${expectedTo}(\\.000)?$`),
     );
 
     /* datetime-local input is editable only with fireEvent, user.type doesn't work:

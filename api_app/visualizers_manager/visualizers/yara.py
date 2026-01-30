@@ -43,10 +43,7 @@ class Yara(Visualizer):
         disable_signatures = not signatures
         return self.VList(
             name=self.Base(value="Signatures", disable=disable_signatures),
-            value=[
-                self.Base(value=value, disable=disable_signatures)
-                for value in signatures
-            ],
+            value=[self.Base(value=value, disable=disable_signatures) for value in signatures],
             disable=disable_signatures,
         )
 
@@ -61,18 +58,14 @@ class Yara(Visualizer):
         ]
         page1 = self.Page(name="Yara first page")
         h1 = self.HList(value=[self._yara_analyzer()])
-        page1.add_level(
-            self.Level(position=1, size=self.LevelSize.S_3, horizontal_list=h1)
-        )
+        page1.add_level(self.Level(position=1, size=self.LevelSize.S_3, horizontal_list=h1))
         h2 = self.HList(
             value=[
                 self._yara_match_number(yara_num_matches),
                 self._yara_signatures(signatures),
             ]
         )
-        page1.add_level(
-            self.Level(position=2, size=self.LevelSize.S_5, horizontal_list=h2)
-        )
+        page1.add_level(self.Level(position=2, size=self.LevelSize.S_5, horizontal_list=h2))
         logger.debug(page1)
         return [page1.to_dict()]
 
@@ -80,9 +73,7 @@ class Yara(Visualizer):
     def _monkeypatch(cls):
         from kombu import uuid
 
-        if not AnalyzerReport.objects.filter(
-            config=AnalyzerConfig.objects.get(name="Yara")
-        ).exists():
+        if not AnalyzerReport.objects.filter(config=AnalyzerConfig.objects.get(name="Yara")).exists():
             report = AnalyzerReport(
                 config=AnalyzerConfig.objects.get(name="Yara"),
                 job=Job.objects.first(),
@@ -98,13 +89,11 @@ class Yara(Visualizer):
                                 " without relying on easily stripped/modified "
                                 "header strings.",
                             },
-                            "path": "/opt/deploy/files_required/"
-                            "yara/inquest_yara-rules/PE.rule",
+                            "path": "/opt/deploy/files_required/yara/inquest_yara-rules/PE.rule",
                             "tags": [],
                             "match": "PE_File",
                             "strings": "[(0, '$mz', b'MZ')]",
-                            "rule_url": "https://github.com/InQuest/"
-                            "yara-rules/blob/master/PE.rule",
+                            "rule_url": "https://github.com/InQuest/yara-rules/blob/master/PE.rule",
                         }
                     ]
                 },

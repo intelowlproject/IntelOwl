@@ -16,9 +16,7 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig.objects.create(
             name="test",
             description="test",
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
+            python_module=PythonModule.objects.filter(base_path="api_app.pivots_manager.pivots").first(),
         )
         pc.playbooks_choice.add(PlaybookConfig.objects.first())
         ac = AnalyzerConfig.objects.first()
@@ -33,9 +31,7 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             name="test",
             description="test",
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
+            python_module=PythonModule.objects.filter(base_path="api_app.pivots_manager.pivots").first(),
         )
         try:
             pc.full_clean()
@@ -54,9 +50,7 @@ class PivotConfigTestCase(CustomTestCase):
         ).first()
         playbook.analyzers.set([ac2])
         pc = PivotConfig(
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
+            python_module=PythonModule.objects.filter(base_path="api_app.pivots_manager.pivots").first(),
         )
 
         jobs = list(
@@ -80,9 +74,7 @@ class PivotConfigTestCase(CustomTestCase):
         job = Job(tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
             name="PivotOnTest",
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
+            python_module=PythonModule.objects.filter(base_path="api_app.pivots_manager.pivots").first(),
         )
         with open("test_files/file.exe", "rb") as f:
             content = f.read()
@@ -107,9 +99,7 @@ class PivotConfigTestCase(CustomTestCase):
     def test_create_job(self):
         job = Job(tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
+            python_module=PythonModule.objects.filter(base_path="api_app.pivots_manager.pivots").first(),
         )
         jobs = list(
             pc.create_jobs(
@@ -117,9 +107,7 @@ class PivotConfigTestCase(CustomTestCase):
                 job.tlp,
                 job.user,
                 send_task=False,
-                playbook_to_execute=PlaybookConfig.objects.filter(
-                    type=["domain"]
-                ).first(),
+                playbook_to_execute=PlaybookConfig.objects.filter(type=["domain"]).first(),
             )
         )
         self.assertEqual(1, len(jobs))

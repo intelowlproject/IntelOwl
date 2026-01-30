@@ -23,9 +23,7 @@ class HybridAnalysisGet(ObservableAnalyzer):
     def update(cls) -> bool:
         pass
 
-    def _fetch_sample_summary(
-        self, sha256: str, headers: Dict[str, str]
-    ) -> Optional[Dict[str, Any]]:
+    def _fetch_sample_summary(self, sha256: str, headers: Dict[str, str]) -> Optional[Dict[str, Any]]:
         overview_uri = f"overview/{sha256}"
         try:
             res = requests.get(self.api_url + overview_uri, headers=headers)
@@ -119,8 +117,7 @@ class HybridAnalysisGet(ObservableAnalyzer):
             response = self._search_hash(value, headers)
         else:
             raise AnalyzerRunException(
-                f"not supported observable type {obs_cls}. "
-                "Supported are: hash, ip, domain and url"
+                f"not supported observable type {obs_cls}. Supported are: hash, ip, domain and url"
             )
 
         response.raise_for_status()

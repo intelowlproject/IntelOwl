@@ -49,9 +49,7 @@ class Sublime(FileAnalyzer):
                     internal_attachment: Message
                     internal_attachment_content = internal_attachment.get_content_type()
                     internal_attachment_name = internal_attachment.get_filename()
-                    logger.debug(
-                        f"{internal_attachment_name=} {internal_attachment_content=} "
-                    )
+                    logger.debug(f"{internal_attachment_name=} {internal_attachment_content=} ")
                     if (
                         internal_attachment_content == MimeTypes.EML.value
                         and internal_attachment_name == "postacert.eml"
@@ -59,15 +57,11 @@ class Sublime(FileAnalyzer):
                         self._real_email = attachment.get_payload(0).as_bytes()
                         found_eml = True
                     elif (
-                        internal_attachment_content
-                        in [MimeTypes.XML1.value, MimeTypes.XML2.value]
+                        internal_attachment_content in [MimeTypes.XML1.value, MimeTypes.XML2.value]
                         and internal_attachment_name == "daticert.xml"
                     ):
                         found_xml = True
-            elif (
-                content_type in [MimeTypes.PKCS7.value, MimeTypes.XPKCS7.value]
-                and filename == "smime.p7s"
-            ):
+            elif content_type in [MimeTypes.PKCS7.value, MimeTypes.XPKCS7.value] and filename == "smime.p7s":
                 found_signature = True
         logger.debug(f"{found_xml=} {found_eml=} {found_signature=}")
         return found_eml and found_signature and found_xml
@@ -142,10 +136,7 @@ class Sublime(FileAnalyzer):
                         for rule in result_analysis["flagged_rules"]
                     ],
                     "gui_url": f"{self._url}:{self.gui_port}/messages/{canonical_id}",
-                    **{
-                        key: result_message[key]
-                        for key in ["subject", "sender", "recipients", "created_at"]
-                    },
+                    **{key: result_message[key] for key in ["subject", "sender", "recipients", "created_at"]},
                 }
 
     def run(self) -> Dict:
@@ -153,14 +144,8 @@ class Sublime(FileAnalyzer):
         session = requests.Session()
         session.headers = self.headers
         report = self._analysis(session, self.raw_message)
-        if (
-            self.analyze_internal_eml_on_pec
-            and self.file_mimetype == MimeTypes.EML.value
-            and self.is_pec()
-        ):
+        if self.analyze_internal_eml_on_pec and self.file_mimetype == MimeTypes.EML.value and self.is_pec():
             logger.info("Email is a pec")
-            report_pec = self._analysis(
-                session, base64.b64encode(self._real_email).decode("utf-8")
-            )
+            report_pec = self._analysis(session, base64.b64encode(self._real_email).decode("utf-8"))
             report["pec"] = report_pec
         return report

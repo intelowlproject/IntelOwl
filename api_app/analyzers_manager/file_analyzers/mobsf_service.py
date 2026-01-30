@@ -54,9 +54,7 @@ class MobSF_Service(FileAnalyzer):
         logger.info(
             f"Static analysis for scan hash:{scan_hash} completed successfully, now generating JSON Report"
         )
-        report_response = self.query_mobsf(
-            self.GENERATE_STATIC_ANALYSIS_REPORT, headers, data
-        )
+        report_response = self.query_mobsf(self.GENERATE_STATIC_ANALYSIS_REPORT, headers, data)
 
         return report_response.json()
 
@@ -87,9 +85,7 @@ class MobSF_Service(FileAnalyzer):
         logger.info(
             f"Starting frida instrumentation with user provided hooks and code for scan with hash: {scan_hash}"
         )
-        self.query_mobsf(
-            self.FRIDA_INSTRUMENT_ENDPOINT, headers, payload["frida_instrumentation"]
-        )
+        self.query_mobsf(self.FRIDA_INSTRUMENT_ENDPOINT, headers, payload["frida_instrumentation"])
 
         logger.info(f"Collecting runtime dependencies for scan hash: {scan_hash}")
         self.query_mobsf(self.GET_DEPENDENCIES_ENDPOINT, headers, payload["general"])
@@ -100,26 +96,20 @@ class MobSF_Service(FileAnalyzer):
         # pausing current run execution to provide enough time for mobsf to collect sufficient information before stopping
         time.sleep(self.activity_duration)
 
-        logger.info(
-            f"Stopping dynamic analysis for scan hash: {scan_hash} and generating JSON Report"
-        )
+        logger.info(f"Stopping dynamic analysis for scan hash: {scan_hash} and generating JSON Report")
         self.query_mobsf(self.STOP_DYNAMIC_ANALYSIS, headers, payload["general"])
 
         dynamic_analysis_report = self.query_mobsf(
             self.GENERATE_DYNAMIC_ANALYSIS_REPORT, headers, payload["general"]
         )
-        logger.info(
-            f"JSON report for dynamic analysis with scan hash: {scan_hash} generated successfully"
-        )
+        logger.info(f"JSON report for dynamic analysis with scan hash: {scan_hash} generated successfully")
 
         return dynamic_analysis_report.json()
 
     def run(self):
         headers = {"X-Mobsf-Api-Key": self._mobsf_api_key}
         binary = self.read_file_bytes()
-        logger.info(
-            f"File bytes for file:{self.filename} read successfully. Initiating upload request"
-        )
+        logger.info(f"File bytes for file:{self.filename} read successfully. Initiating upload request")
 
         upload_url = self.mobsf_host + self.UPLOAD_ENDPOINT
         upload_response = requests.post(
@@ -130,15 +120,11 @@ class MobSF_Service(FileAnalyzer):
         )
         upload_response.raise_for_status()
         scan_hash = upload_response.json()["hash"]
-        logger.info(
-            f"File {self.filename} uploaded successfully and the scan hash is: {scan_hash}"
-        )
+        logger.info(f"File {self.filename} uploaded successfully and the scan hash is: {scan_hash}")
 
         static_analysis_json = self.static_analysis(scan_hash, headers)
         dynamic_analysis_json = (
-            self.dynamic_analysis(scan_hash, headers)
-            if self.enable_dynamic_analysis
-            else {}
+            self.dynamic_analysis(scan_hash, headers) if self.enable_dynamic_analysis else {}
         )
         results = {
             "static_analysis_results": static_analysis_json,

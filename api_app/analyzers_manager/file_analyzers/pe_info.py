@@ -149,9 +149,9 @@ class PEInfo(FileAnalyzer):
             results["imagebase"] = hex(pe.OPTIONAL_HEADER.ImageBase)
 
             timestamp = pe.FILE_HEADER.TimeDateStamp
-            results["compilation_timestamp"] = datetime.utcfromtimestamp(
-                timestamp
-            ).strftime("%Y-%m-%d %H:%M:%S")
+            results["compilation_timestamp"] = datetime.utcfromtimestamp(timestamp).strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
 
             results["import_table"] = self._extract_import_table(pe)
             results["export_table"] = self._extract_export_table(full_dump)
@@ -195,9 +195,7 @@ class PEInfo(FileAnalyzer):
             ico[0].save(icon_path)
             # resize
             exe_icon = Image.open(icon_path)
-            exe_icon = exe_icon.convert("L").resize(
-                (hash_size + 1, hash_size), Image.ANTIALIAS
-            )
+            exe_icon = exe_icon.convert("L").resize((hash_size + 1, hash_size), Image.ANTIALIAS)
             diff = []
             for row in range(hash_size):
                 for col in range(hash_size):

@@ -13,9 +13,7 @@ class TorNodesDanMeUKTestCase(BaseAnalyzerTest):
 
     @staticmethod
     def get_mocked_response():
-        mock_db_content = (
-            "100.10.37.131\n" "100.14.156.183\n" "8.8.8.8\n" "100.16.153.149\n"
-        )
+        mock_db_content = "100.10.37.131\n100.14.156.183\n8.8.8.8\n100.16.153.149\n"
 
         return [
             patch(

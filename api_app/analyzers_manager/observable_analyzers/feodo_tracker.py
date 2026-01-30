@@ -42,11 +42,7 @@ class Feodo_Tracker(AbuseCHMixin, classes.ObservableAnalyzer):
 
     def run(self):
         result = {"found": False}
-        db_location, _ = (
-            self.recommend_locations
-            if self.use_recommended_url
-            else self.default_locations
-        )
+        db_location, _ = self.recommend_locations if self.use_recommended_url else self.default_locations
         if self.update_on_run or not os.path.exists(db_location) and not self.update():
             raise AnalyzerRunException("Unable to update database")
         try:

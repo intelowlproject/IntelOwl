@@ -7,9 +7,7 @@ from django.core.validators import RegexValidator
 
 from api_app.choices import ParamTypes
 
-plugin_name_validator = RegexValidator(
-    r"^\w+$", "Your name should match the [A-Za-z0-9_] characters"
-)
+plugin_name_validator = RegexValidator(r"^\w+$", "Your name should match the [A-Za-z0-9_] characters")
 
 
 def validate_schema(value, schema):
@@ -30,9 +28,7 @@ def validate_secrets(value):
                     "description": {"type": "string"},
                     "required": {"type": "boolean"},
                     "type": {"enum": ParamTypes.values},
-                    "default": {
-                        "type": ["string", "boolean", "array", "number", "object"]
-                    },
+                    "default": {"type": ["string", "boolean", "array", "number", "object"]},
                 },
                 "additionalProperties": False,
                 "required": ["description", "required", "type"],

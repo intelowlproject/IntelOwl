@@ -10,11 +10,8 @@ from tests import CustomTestCase
 
 
 class TestDomainDataModelSerializer(CustomTestCase):
-
     def test_to_representation(self):
-        analyzable = Analyzable.objects.create(
-            name="test.com", classification=Classification.DOMAIN
-        )
+        analyzable = Analyzable.objects.create(name="test.com", classification=Classification.DOMAIN)
         job = Job.objects.create(
             status=Job.STATUSES.ANALYZERS_RUNNING.value,
             analyzable=analyzable,

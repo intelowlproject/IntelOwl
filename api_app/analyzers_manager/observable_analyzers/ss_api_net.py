@@ -28,13 +28,9 @@ class SSAPINet(classes.ObservableAnalyzer):
 
     def run(self):
         if self.use_proxy and not self.proxy:
-            raise AnalyzerConfigurationException(
-                "No proxy retrieved when use_proxy is true."
-            )
+            raise AnalyzerConfigurationException("No proxy retrieved when use_proxy is true.")
         if self.output not in ["image", "json"]:
-            raise AnalyzerConfigurationException(
-                "output param can only be 'image' or 'json'"
-            )
+            raise AnalyzerConfigurationException("output param can only be 'image' or 'json'")
 
         try:
             if isinstance(self.extra_api_params, dict):

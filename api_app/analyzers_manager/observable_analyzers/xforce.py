@@ -36,9 +36,7 @@ class XForce(classes.ObservableAnalyzer):
             else:
                 observable_to_check = self.observable_name
             url = f"{self.url}/{endpoint}/{observable_to_check}"
-            response = requests.get(
-                url, auth=auth, headers=headers, timeout=self.timeout
-            )
+            response = requests.get(url, auth=auth, headers=headers, timeout=self.timeout)
             if response.status_code == 404:
                 result["found"] = False
             else:
@@ -74,8 +72,6 @@ class XForce(classes.ObservableAnalyzer):
                 endpoints.extend(["url", "url/history"])
             endpoints.append("url/malware")
         else:
-            raise AnalyzerRunException(
-                f"{self.observable_classification} not supported"
-            )
+            raise AnalyzerRunException(f"{self.observable_classification} not supported")
 
         return endpoints

@@ -26,6 +26,10 @@ services:
       - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certificates/elastic_instance/elasticsearch.key
       - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/elastic_ca/ca.crt
       - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certificates/elastic_instance/elasticsearch.crt
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.key=/usr/share/elasticsearch/config/certificates/elastic_instance/elasticsearch.key
+      - xpack.security.transport.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/elastic_ca/ca.crt
+      - xpack.security.transport.ssl.certificate=/usr/share/elasticsearch/config/certificates/elastic_instance/elasticsearch.crt
 
 volumes:
   elastic_data:

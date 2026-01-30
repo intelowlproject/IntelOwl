@@ -33,9 +33,7 @@ class CheckPhish(classes.ObservableAnalyzer):
 
         job_id = response.json().get("jobID")
         if job_id is None:
-            raise AnalyzerRunException(
-                "Job creation confirmation not received from CheckPhish."
-            )
+            raise AnalyzerRunException("Job creation confirmation not received from CheckPhish.")
 
         return self.__poll_analysis_status(job_id)
 

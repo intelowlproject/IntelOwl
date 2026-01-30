@@ -77,9 +77,7 @@ class UserAdminView(AbstractUserAdmin):
         # 1. user email should be verified
         # 2. we can accept previously declined users
         acceptable = (
-            Q(email_address__is_verified=True)
-            & Q(is_active=False)
-            & (Q(approved=False) | Q(approved=None))
+            Q(email_address__is_verified=True) & Q(is_active=False) & (Q(approved=False) | Q(approved=None))
         )
         users = queryset.filter(acceptable).all()
         for user in users:

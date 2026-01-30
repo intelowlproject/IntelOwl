@@ -97,9 +97,7 @@ class OTX(classes.ObservableAnalyzer):
             else:
                 raise AnalyzerRunException(f"hash {matched_type} not supported")
         else:
-            raise AnalyzerRunException(
-                f"not supported observable classification {observable_classification}"
-            )
+            raise AnalyzerRunException(f"not supported observable classification {observable_classification}")
         return otx_type
 
     def _extract_pulses(self, general_data: dict) -> List[dict]:
@@ -143,9 +141,7 @@ class OTX(classes.ObservableAnalyzer):
         return analysis_result
 
     def run(self):
-        otx = OTXv2Extended(
-            timeout=self.timeout, api_key=self._api_key_name, user_agent="IntelOwl"
-        )
+        otx = OTXv2Extended(timeout=self.timeout, api_key=self._api_key_name, user_agent="IntelOwl")
 
         to_analyze_observable = self.observable_name
         otx_type = self._extract_indicator_type()
@@ -171,10 +167,7 @@ class OTX(classes.ObservableAnalyzer):
 
         result = {}
         for section in self.sections:
-            logger.info(
-                "requesting OTX info for indicator "
-                f"{to_analyze_observable} and section {section}"
-            )
+            logger.info(f"requesting OTX info for indicator {to_analyze_observable} and section {section}")
             try:
                 details = otx.get_indicator_details_by_section(
                     indicator_type=otx_type,
@@ -204,8 +197,7 @@ class OTX(classes.ObservableAnalyzer):
                 data = selected_section_config[0](details)
                 field_name = selected_section_config[1]
                 logger.debug(
-                    f"observable {to_analyze_observable} extracted data: {data},"
-                    f" field name: {field_name}"
+                    f"observable {to_analyze_observable} extracted data: {data}, field name: {field_name}"
                 )
                 result[field_name] = data
                 logger.debug(f"result: {result}")

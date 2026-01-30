@@ -29,12 +29,9 @@ class YETI(classes.Connector):
             "report": f"{settings.WEB_CLIENT_URL}/jobs/{self.job_id}",
             "status": "analyzed",
             "date": str(self._job.finished_analysis_time),
-            "description": "IntelOwl's analysis report for Job: "
-            f"{self.job_id} | {obs_value} | {obs_type}",
+            "description": f"IntelOwl's analysis report for Job: {self.job_id} | {obs_value} | {obs_type}",
             "analyzers executed": ", ".join(
-                list(
-                    self._job.analyzers_to_execute.all().values_list("name", flat=True)
-                )
+                list(self._job.analyzers_to_execute.all().values_list("name", flat=True))
             ),
         }
 

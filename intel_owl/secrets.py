@@ -22,9 +22,7 @@ def aws_get_secret(secret_name):
 
     # Create a Secrets Manager client
     session = boto3.session.Session()
-    client = session.client(
-        service_name="secretsmanager", region_name=settings.AWS_REGION
-    )
+    client = session.client(service_name="secretsmanager", region_name=settings.AWS_REGION)
 
     # In this sample we only handle the specific exceptions..
     # ... for the 'GetSecretValue' API. See:
@@ -86,9 +84,7 @@ def get_secret(secret_name, default=""):
                 f"Failed retrieving of secret {secret_name}. Error: {e}."
             )  # lgtm [py/clear-text-logging-sensitive-data]
         except NoCredentialsError as e:
-            logging.error(
-                f"Error: {e}. Secret: {secret_name}"
-            )  # lgtm [py/clear-text-logging-sensitive-data]
+            logging.error(f"Error: {e}. Secret: {secret_name}")  # lgtm [py/clear-text-logging-sensitive-data]
         except Exception as e:
             logging.exception(
                 f"Error: {e}. Secret: {secret_name}"

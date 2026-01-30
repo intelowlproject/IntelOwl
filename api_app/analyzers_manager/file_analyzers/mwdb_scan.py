@@ -95,14 +95,10 @@ class MWDB_Scan(FileAnalyzer):
 
         if self.upload_file:
             logger.info(f"mwdb_scan uploading sample: {self.md5}")
-            file_object = self.mwdb.upload_file(
-                query, binary, private=self.private, public=self.public
-            )
+            file_object = self.mwdb.upload_file(query, binary, private=self.private, public=self.public)
             file_object.flush()
             for _try in range(self.max_tries):
-                logger.info(
-                    f"mwdb_scan sample: {self.md5} polling for result try #{_try + 1}"
-                )
+                logger.info(f"mwdb_scan sample: {self.md5} polling for result try #{_try + 1}")
                 file_info = self.mwdb.query_file(file_object.data["id"])
                 if "karton" in file_info.attributes.keys():
                     break

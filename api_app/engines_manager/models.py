@@ -16,9 +16,7 @@ from intel_owl.celery import get_queue_name
 
 class EngineConfig(SingletonModel):
     modules = ArrayField(
-        models.CharField(
-            max_length=255, null=False, blank=False, validators=[validate_engine_module]
-        ),
+        models.CharField(max_length=255, null=False, blank=False, validators=[validate_engine_module]),
         blank=True,
         default=list,
         help_text="List of modules used by the engine. Each module has syntax `name_file.name_class`",
@@ -42,9 +40,7 @@ class EngineConfig(SingletonModel):
         if job.analyzable.classification == Classification.GENERIC:
             # at the moment, since there are no datamodels for the generic, we are completely skipping an evaluation
             return
-        data_model_result: BaseDataModel = job.get_analyzers_data_models().merge(
-            append=True
-        )
+        data_model_result: BaseDataModel = job.get_analyzers_data_models().merge(append=True)
         if job.data_model:
             job.data_model.delete()
         job.data_model = data_model_result

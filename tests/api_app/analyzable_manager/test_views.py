@@ -34,9 +34,7 @@ class TestAnalyzablesViewSet(CustomViewSetTestCase):
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS.value,
             data_model=self.domain_data_model,
             playbook_to_execute=PlaybookConfig.objects.first(),
-            finished_analysis_time=datetime.datetime(
-                2025, 1, 1, tzinfo=datetime.timezone.utc
-            ),
+            finished_analysis_time=datetime.datetime(2025, 1, 1, tzinfo=datetime.timezone.utc),
             user=self.user,
         )
         self.an2 = Analyzable.objects.create(
@@ -49,9 +47,7 @@ class TestAnalyzablesViewSet(CustomViewSetTestCase):
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS.value,
             data_model=self.domain_data_model2,
             playbook_to_execute=PlaybookConfig.objects.first(),
-            finished_analysis_time=datetime.datetime(
-                2025, 1, 1, tzinfo=datetime.timezone.utc
-            ),
+            finished_analysis_time=datetime.datetime(2025, 1, 1, tzinfo=datetime.timezone.utc),
             user=self.user,
         )
 
@@ -59,31 +55,23 @@ class TestAnalyzablesViewSet(CustomViewSetTestCase):
             name="1.1.1.1:443",
             classification=Classification.GENERIC,
         )
-        self.domain_data_model3 = DomainDataModel.objects.create(
-            evaluation="malicious", reliability=10
-        )
+        self.domain_data_model3 = DomainDataModel.objects.create(evaluation="malicious", reliability=10)
         self.job3 = Job.objects.create(
             analyzable=self.an3,
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS.value,
             data_model=self.domain_data_model3,
             playbook_to_execute=PlaybookConfig.objects.first(),
-            finished_analysis_time=datetime.datetime(
-                2025, 1, 1, tzinfo=datetime.timezone.utc
-            ),
+            finished_analysis_time=datetime.datetime(2025, 1, 1, tzinfo=datetime.timezone.utc),
             user=self.user,
         )
         self.job3.add_child(
             user=self.user,
             analyzable=self.an,
             playbook_to_execute=PlaybookConfig.objects.get(name="Dns"),
-            finished_analysis_time=datetime.datetime(
-                2025, 1, 1, tzinfo=datetime.timezone.utc
-            ),
+            finished_analysis_time=datetime.datetime(2025, 1, 1, tzinfo=datetime.timezone.utc),
             tlp=Job.TLP.AMBER.value,
         )  # check similar investigation works with children
-        self.domain_data_model31 = DomainDataModel.objects.create(
-            evaluation="malicious", reliability=10
-        )
+        self.domain_data_model31 = DomainDataModel.objects.create(evaluation="malicious", reliability=10)
         self.uae3 = UserAnalyzableEvent.objects.create(
             analyzable=self.an3, data_model=self.domain_data_model31, user=self.user
         )
@@ -139,16 +127,12 @@ class TestAnalyzablesViewSet(CustomViewSetTestCase):
         self.assertEqual(result["results"][0]["name"], "test.com")
 
         self.client.force_authenticate(user=self.user)
-        response = self.client.get(
-            f"{self.URL}?name=test.com&name=f9bc35a57b22f82c94dbcc420f71b903"
-        )
+        response = self.client.get(f"{self.URL}?name=test.com&name=f9bc35a57b22f82c94dbcc420f71b903")
         self.assertEqual(response.status_code, 200, response.content)
         result = response.json()
         self.assertIn("count", result)
         self.assertEqual(result["count"], 2)
-        self.assertEqual(
-            result["results"][1]["name"], "f9bc35a57b22f82c94dbcc420f71b903"
-        )
+        self.assertEqual(result["results"][1]["name"], "f9bc35a57b22f82c94dbcc420f71b903")
         self.assertEqual(result["results"][0]["name"], "test.com")
 
     def test_get(self, *args, **kwargs):
@@ -162,9 +146,7 @@ class TestAnalyzablesViewSet(CustomViewSetTestCase):
 
     def test_related_investigation_number(self, *args, **kwargs):
         self.client.force_authenticate(user=self.user)
-        response = self.client.get(
-            f"{self.URL}/{self.an.pk}/related_investigation_number"
-        )
+        response = self.client.get(f"{self.URL}/{self.an.pk}/related_investigation_number")
         self.assertEqual(response.status_code, 200, response.content)
         result = response.json()
         self.assertEqual(result["related_investigation_number"], 1)

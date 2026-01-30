@@ -84,9 +84,7 @@ class ApiViewTests(CustomViewSetTestCase):
         floc = f"{settings.PROJECT_LOCATION}/test_files/{fname}"
         with open(floc, "rb") as f:
             binary = f.read()
-        uploaded_file = SimpleUploadedFile(
-            fname, binary, content_type="multipart/form-data"
-        )
+        uploaded_file = SimpleUploadedFile(fname, binary, content_type="multipart/form-data")
         md5 = hashlib.md5(binary).hexdigest()  # nosec
         return uploaded_file, md5
 
@@ -94,17 +92,13 @@ class ApiViewTests(CustomViewSetTestCase):
         md5 = os.environ.get("TEST_MD5", "446c5fbb11b9ce058450555c1c27153c")
         analyzers_needed = ["Classic_DNS", "CIRCLPassiveDNS"]
         data = {"md5": md5, "analyzers": analyzers_needed, "minutes_ago": 1}
-        response = self.client.post(
-            "/api/ask_analysis_availability", data, format="json"
-        )
+        response = self.client.post("/api/ask_analysis_availability", data, format="json")
         self.assertEqual(response.status_code, 200)
 
     def test_ask_analysis_availability__run_all_analyzers(self):
         md5 = os.environ.get("TEST_MD5", "446c5fbb11b9ce058450555c1c27153c")
         data = {"md5": md5, "analyzers": []}
-        response = self.client.post(
-            "/api/ask_analysis_availability", data, format="json"
-        )
+        response = self.client.post("/api/ask_analysis_availability", data, format="json")
         self.assertEqual(response.status_code, 200)
 
     def test_analyze_file__pcap(self):
@@ -123,9 +117,7 @@ class ApiViewTests(CustomViewSetTestCase):
         )
 
         # with noone, only the PCAP analyzers should be executed
-        analyzers_requested = AnalyzerConfig.objects.all().values_list(
-            "name", flat=True
-        )
+        analyzers_requested = AnalyzerConfig.objects.all().values_list("name", flat=True)
         file_name = "example.pcap"
         uploaded_file, md5 = self.__get_test_file(file_name)
         file_mimetype = "application/vnd.tcpdump.pcap"
@@ -219,9 +211,7 @@ class ApiViewTests(CustomViewSetTestCase):
             analyzers_requested,
             list(job.analyzers_requested.all().values_list("name", flat=True)),
         )
-        self.assertCountEqual(
-            data["tags_labels"], list(job.tags.values_list("label", flat=True))
-        )
+        self.assertCountEqual(data["tags_labels"], list(job.tags.values_list("label", flat=True)))
 
     def test_analyze_observable__ip(self):
         data = self.analyze_observable_ip_data.copy()
@@ -239,16 +229,12 @@ class ApiViewTests(CustomViewSetTestCase):
             list(job.analyzers_requested.all().values_list("name", flat=True)),
             msg=msg,
         )
-        self.assertEqual(
-            data["observable_classification"], job.analyzable.classification, msg=msg
-        )
+        self.assertEqual(data["observable_classification"], job.analyzable.classification, msg=msg)
         self.assertEqual(self.observable_md5, job.analyzable.md5, msg=msg)
 
     def test_analyze_observable__guess_optional(self):
         data = self.analyze_observable_ip_data.copy()
-        observable_classification = data.pop(
-            "observable_classification"
-        )  # let the server calc it
+        observable_classification = data.pop("observable_classification")  # let the server calc it
 
         response = self.client.post("/api/analyze_observable", data, format="json")
         content = response.json()
@@ -263,17 +249,13 @@ class ApiViewTests(CustomViewSetTestCase):
             list(job.analyzers_requested.all().values_list("name", flat=True)),
             msg=msg,
         )
-        self.assertEqual(
-            observable_classification, job.analyzable.classification, msg=msg
-        )
+        self.assertEqual(observable_classification, job.analyzable.classification, msg=msg)
         self.assertEqual(self.observable_md5, job.analyzable.md5, msg=msg)
 
     def test_analyze_multiple_observables(self):
         data = self.mixed_observable_data.copy()
 
-        response = self.client.post(
-            "/api/analyze_multiple_observables", data, format="json"
-        )
+        response = self.client.post("/api/analyze_multiple_observables", data, format="json")
         contents = response.json()
         msg = (response.status_code, contents)
         self.assertEqual(response.status_code, 200, msg=msg)
@@ -311,9 +293,7 @@ class ApiViewTests(CustomViewSetTestCase):
             value="test subject",
             parameter=models.Parameter.objects.get(
                 name="subject",
-                python_module=models.PythonModule.objects.get(
-                    module="email_sender.EmailSender"
-                ),
+                python_module=models.PythonModule.objects.get(module="email_sender.EmailSender"),
             ),
             connector_config=ConnectorConfig.objects.get(name="EmailSender"),
         )
@@ -321,9 +301,7 @@ class ApiViewTests(CustomViewSetTestCase):
             value="test body",
             parameter=models.Parameter.objects.get(
                 name="body",
-                python_module=models.PythonModule.objects.get(
-                    module="email_sender.EmailSender"
-                ),
+                python_module=models.PythonModule.objects.get(module="email_sender.EmailSender"),
             ),
             connector_config=ConnectorConfig.objects.get(name="EmailSender"),
         )
@@ -335,9 +313,7 @@ class ApiViewTests(CustomViewSetTestCase):
             "connectors_requested": ["EmailSender"],
             "tlp": "CLEAR",
         }
-        response = self.client.post(
-            "/api/analyze_multiple_observables", data, format="json"
-        )
+        response = self.client.post("/api/analyze_multiple_observables", data, format="json")
         contents = response.json()
         msg = (response.status_code, contents)
         self.assertEqual(response.status_code, 200, msg=msg)
@@ -381,9 +357,7 @@ class ApiViewTests(CustomViewSetTestCase):
 
     def test_download_sample_400(self):
         # requesting for job where is_sample=False
-        analyzable = Analyzable.objects.create(
-            name="test.com", classification=Classification.DOMAIN
-        )
+        analyzable = Analyzable.objects.create(name="test.com", classification=Classification.DOMAIN)
         job = models.Job.objects.create(analyzable=analyzable)
         response = self.client.get(f"/api/jobs/{job.id}/download_sample")
         content = response.json()
@@ -400,9 +374,7 @@ class ApiViewTests(CustomViewSetTestCase):
     def test_no_analyzers(self):
         data = self.mixed_observable_data.copy()
         data["analyzers_requested"] = data["analyzers_requested"][1:]
-        response = self.client.post(
-            "/api/analyze_multiple_observables", data, format="json"
-        )
+        response = self.client.post("/api/analyze_multiple_observables", data, format="json")
         contents = response.json()
         msg = (response.status_code, contents)
         self.assertEqual(response.status_code, 400, msg=msg)
@@ -410,9 +382,7 @@ class ApiViewTests(CustomViewSetTestCase):
     def test_incorrect_tlp(self):
         data = self.mixed_observable_data.copy()
         data["tlp"] = "incorrect"
-        response = self.client.post(
-            "/api/analyze_multiple_observables", data, format="json"
-        )
+        response = self.client.post("/api/analyze_multiple_observables", data, format="json")
         contents = response.json()
         msg = (response.status_code, contents)
         self.assertEqual(response.status_code, 400, msg=msg)
@@ -425,16 +395,12 @@ class ApiViewTests(CustomViewSetTestCase):
         md5 = os.environ.get("TEST_MD5", "446c5fbb11b9ce058450555c1c27153c")
         analyzers_needed = ["Classic_DNS", "CIRCLPassiveDNS"]
         data = [{"md5": md5, "analyzers": analyzers_needed, "minutes_ago": 1}]
-        response = self.client.post(
-            "/api/ask_multi_analysis_availability", data, format="json"
-        )
+        response = self.client.post("/api/ask_multi_analysis_availability", data, format="json")
         self.assertEqual(response.status_code, 200)
 
     def test_analyze_multiple_files__exe(self):
         data = self.analyze_multiple_files_data.copy()
-        response = self.client.post(
-            "/api/analyze_multiple_files", data, format="multipart"
-        )
+        response = self.client.post("/api/analyze_multiple_files", data, format="multipart")
         contents = response.json()
         msg = (response.status_code, contents)
         self.assertEqual(response.status_code, 200, msg=msg)
@@ -454,16 +420,12 @@ class ApiViewTests(CustomViewSetTestCase):
                 msg=msg,
             )
             self.assertEqual(self.file_md5, job.analyzable.md5, msg=msg)
-            self.assertEqual(
-                data["file_mimetypes"][index], job.analyzable.mimetype, msg=msg
-            )
+            self.assertEqual(data["file_mimetypes"][index], job.analyzable.mimetype, msg=msg)
 
     def test_analyze_multiple_files__guess_optional(self):
         data = self.analyze_multiple_files_data.copy()
         file_mimetypes = data.pop("file_mimetypes")
-        response = self.client.post(
-            "/api/analyze_multiple_files", data, format="multipart"
-        )
+        response = self.client.post("/api/analyze_multiple_files", data, format="multipart")
         contents = response.json()
         msg = (response.status_code, contents)
         self.assertEqual(response.status_code, 200, msg=msg)
@@ -515,9 +477,7 @@ class ApiViewTests(CustomViewSetTestCase):
             user=self.user,
             analyzable=an,
             status="reported_without_fails",
-            finished_analysis_time=datetime.datetime(
-                2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc
-            )
+            finished_analysis_time=datetime.datetime(2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc)
             - datetime.timedelta(days=5),
             runtime_configuration={
                 "analyzers": {"Classic_DNS": {"query_type": "TXT"}},
@@ -558,9 +518,7 @@ class ApiViewTests(CustomViewSetTestCase):
             user=self.user,
             analyzable=an,
             status="reported_without_fails",
-            finished_analysis_time=datetime.datetime(
-                2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc
-            )
+            finished_analysis_time=datetime.datetime(2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc)
             - datetime.timedelta(days=5),
             playbook_requested=PlaybookConfig.objects.get(name="Dns"),
             runtime_configuration={
@@ -576,9 +534,7 @@ class ApiViewTests(CustomViewSetTestCase):
         new_job = models.Job.objects.get(pk=new_job_id)
         self.assertEqual(new_job.analyzable.name, "test.com")
         self.assertEqual(new_job.tlp, "CLEAR")
-        self.assertEqual(
-            new_job.playbook_requested, PlaybookConfig.objects.get(name="Dns")
-        )
+        self.assertEqual(new_job.playbook_requested, PlaybookConfig.objects.get(name="Dns"))
         self.assertEqual(
             new_job.runtime_configuration,
             {
@@ -590,17 +546,13 @@ class ApiViewTests(CustomViewSetTestCase):
         an.delete()
 
     def test_job_rescan__sample_analyzers(self):
-        an = Analyzable.objects.create(
-            file=self.uploaded_file, name="file.exe", classification="file"
-        )
+        an = Analyzable.objects.create(file=self.uploaded_file, name="file.exe", classification="file")
         job = models.Job.objects.create(
             tlp="CLEAR",
             user=self.user,
             analyzable=an,
             status="reported_without_fails",
-            finished_analysis_time=datetime.datetime(
-                2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc
-            )
+            finished_analysis_time=datetime.datetime(2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc)
             - datetime.timedelta(days=5),
             runtime_configuration={
                 "analyzers": {
@@ -644,18 +596,14 @@ class ApiViewTests(CustomViewSetTestCase):
         an.delete()
 
     def test_job_rescan__sample_playbook(self):
-        an = Analyzable.objects.create(
-            file=self.uploaded_file, name="file.exe", classification="file"
-        )
+        an = Analyzable.objects.create(file=self.uploaded_file, name="file.exe", classification="file")
         job = models.Job.objects.create(
             tlp="CLEAR",
             user=self.user,
             analyzable=an,
             status="reported_without_fails",
             playbook_requested=PlaybookConfig.objects.get(name="FREE_TO_USE_ANALYZERS"),
-            finished_analysis_time=datetime.datetime(
-                2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc
-            )
+            finished_analysis_time=datetime.datetime(2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc)
             - datetime.timedelta(days=5),
             runtime_configuration={
                 "analyzers": {
@@ -708,9 +656,7 @@ class ApiViewTests(CustomViewSetTestCase):
             user=self.user,
             analyzable=an,
             status="reported_without_fails",
-            finished_analysis_time=datetime.datetime(
-                2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc
-            )
+            finished_analysis_time=datetime.datetime(2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc)
             - datetime.timedelta(days=5),
             playbook_requested=PlaybookConfig.objects.get(name="Dns"),
             runtime_configuration={

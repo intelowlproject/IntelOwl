@@ -13,9 +13,11 @@ class EmailSender(Connector):
     header: str
     body: str
     footer: str
-    CCs: List[str] = []
+    CCs: List[str] = None
 
     def run(self) -> dict:
+        if self.CCs is None:
+            self.CCs = []
         if hasattr(self, "sender") and self.sender:
             sender = self.sender
         else:

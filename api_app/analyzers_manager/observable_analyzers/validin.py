@@ -51,7 +51,7 @@ class Validin(classes.ObservableAnalyzer):
                 return response.json()
             except KeyError:
                 raise AnalyzerRunException(
-                    f"Nothing in {self.scan_choice} for{self.observable_classification}"
+                    f"Nothing in {self.scan_choice} for {self.observable_classification}"
                 )
             except requests.RequestException as e:
                 raise AnalyzerRunException(e)

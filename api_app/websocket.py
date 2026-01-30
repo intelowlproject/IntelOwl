@@ -136,7 +136,7 @@ class JobConsumer(JsonWebsocketConsumer):
         except Job.DoesNotExist:
             logger.warning(
                 f"close ws by the user: {user} for a non-existing job "
-                "This happens in case used tried to open a conn to a non existing job"
+                "This happens in case user tried to open a conn to a non existing job"
             )
             subscribed_group = ""
         else:

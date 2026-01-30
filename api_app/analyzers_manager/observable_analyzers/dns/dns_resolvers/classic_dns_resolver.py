@@ -71,7 +71,7 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
                 logger.info(f"No resolution for {self.observable_classification} {self.observable_name}")
             except dns.resolver.LifetimeTimeout as e:
                 logger.warning(
-                    f"No resolution for {self.observable_classification} {self.observable_name}.Reason {e}",
+                    f"No resolution for {self.observable_classification} {self.observable_name}. Reason {e}",
                     stack_info=True,
                 )
                 self.report.errors.append(str(e))

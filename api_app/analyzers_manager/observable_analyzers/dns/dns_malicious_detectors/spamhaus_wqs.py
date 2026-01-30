@@ -20,10 +20,9 @@ class SpamhausWQS(classes.ObservableAnalyzer):
 
     def run(self):
         headers = {"Authorization": f"Bearer {self._api_key}"}
+        dataset_type = "DBL" if self.observable_classification == Classification.DOMAIN.value else "AUTHBL"
         response = requests.get(
-            url=f"""{self.url}/
-            {"DBL" if self.observable_classification == Classification.DOMAIN.value else "AUTHBL"}
-            /{self.observable_name}""",
+            url=f"{self.url}/{dataset_type}/{self.observable_name}",
             headers=headers,
         )
         # refer to the link for status code info

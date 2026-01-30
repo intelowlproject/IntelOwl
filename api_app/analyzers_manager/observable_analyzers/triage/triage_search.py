@@ -27,7 +27,7 @@ class TriageSearch(ObservableAnalyzer, TriageMixin):
             self.__triage_submit()
         else:
             raise AnalyzerConfigurationException(
-                f"analysis type '{self.analysis_type}' not supported.Supported are: 'search', 'submit'."
+                f"analysis type '{self.analysis_type}' not supported. Supported are: 'search', 'submit'."
             )
 
         return self.final_report

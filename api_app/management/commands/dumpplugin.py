@@ -203,9 +203,7 @@ class Migration(migrations.Migration):
         return MigrationRecorder.Migration.objects.filter(app=app).latest("id").name
 
     def _migration_file(self, obj: PythonConfig, serializer_class, app):
-        obj_data, param_data, values_data = self._get_serialization(
-            obj, serializer_class
-        )
+        obj_data, param_data, values_data = self._get_serialization(obj, serializer_class)
         return """{0}
 plugin = {1}
 
@@ -229,12 +227,9 @@ values = {3}
     def _name_file(self, obj, app):
         from django.db.migrations.autodetector import MigrationAutodetector
 
-        last_migration_number = MigrationAutodetector.parse_number(
-            self._get_last_migration(app)
-        )
+        last_migration_number = MigrationAutodetector.parse_number(self._get_last_migration(app))
         return (
-            f"{str(int(last_migration_number) + 1).rjust(4, '0')}"
-            f"_{obj.snake_case_name}_{obj.name.lower()}.py"
+            f"{str(int(last_migration_number) + 1).rjust(4, '0')}_{obj.snake_case_name}_{obj.name.lower()}.py"
         )
 
     @staticmethod
@@ -242,8 +237,7 @@ values = {3}
         path = "api_app" / PosixPath(app) / "migrations" / name_file
         if path.exists():
             raise RuntimeError(
-                f"Migration {path} already exists."
-                f" Please apply migration before create a new one"
+                f"Migration {path} already exists. Please apply migration before create a new one"
             )
         with open(path, "w", encoding="utf-8") as f:
             f.write(content)
@@ -284,6 +278,4 @@ values = {3}
         content = self._migration_file(obj, serializer_class, app)
         self.name_file = self._name_file(obj, app)
         self._save_file(self.name_file, content, app)
-        self.stdout.write(
-            self.style.SUCCESS(f"Migration {self.name_file} created with success")
-        )
+        self.stdout.write(self.style.SUCCESS(f"Migration {self.name_file} created with success"))

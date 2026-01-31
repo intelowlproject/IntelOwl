@@ -20,9 +20,7 @@ from api_app.views import AbstractConfigViewSet, ModelWithOwnershipViewSet
 logger = logging.getLogger(__name__)
 
 
-class PlaybookConfigViewSet(
-    ModelWithOwnershipViewSet, AbstractConfigViewSet, mixins.CreateModelMixin
-):
+class PlaybookConfigViewSet(ModelWithOwnershipViewSet, AbstractConfigViewSet, mixins.CreateModelMixin):
     serializer_class = PlaybookConfigSerializer
     ordering = ["-weight", "-executed_by_pivots", "name"]
     permission_classes = [IsAuthenticated]
@@ -48,9 +46,7 @@ class PlaybookConfigViewSet(
         This endpoint allows to start a Job related to an observable with a Playbook
         """
         logger.debug(f"{request.data=}")
-        oas = ObservableAnalysisSerializer(
-            data=request.data, many=True, context={"request": request}
-        )
+        oas = ObservableAnalysisSerializer(data=request.data, many=True, context={"request": request})
         oas.is_valid(raise_exception=True)
         parent_job = oas.validated_data[0].get("parent_job", None)
         jobs = oas.save(send_task=True, parent=parent_job)
@@ -65,9 +61,7 @@ class PlaybookConfigViewSet(
         This endpoint allows to start a Job related to a file with a Playbook
         """
         logger.debug(f"{request.data=}")
-        oas = FileJobSerializer(
-            data=request.data, many=True, context={"request": request}
-        )
+        oas = FileJobSerializer(data=request.data, many=True, context={"request": request})
         oas.is_valid(raise_exception=True)
         parent_job = oas.validated_data[0].get("parent_job", None)
         jobs = oas.save(send_task=True, parent=parent_job)

@@ -12,7 +12,6 @@ class PhishingArmyTestCase(BaseAnalyzerTest):
 
     @staticmethod
     def get_mocked_response():
-
         mock_db_content = "91.192.100.61\nexample.com"
 
         return [

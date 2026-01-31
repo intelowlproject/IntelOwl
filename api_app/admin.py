@@ -33,9 +33,7 @@ class CustomAdminView(admin.ModelAdmin):
         JSONField: {"widget": PrettyJSONWidget(attrs={"initial": "parsed"})},
     }
 
-    def formfield_for_manytomany(
-        self, db_field: ManyToManyField, request: HttpRequest, **kwargs: Any
-    ):
+    def formfield_for_manytomany(self, db_field: ManyToManyField, request: HttpRequest, **kwargs: Any):
         vertical = False
         kwargs["widget"] = widgets.FilteredSelectMultiple(
             verbose_name=db_field.verbose_name, is_stacked=vertical
@@ -202,9 +200,7 @@ class AbstractConfigAdminView(CustomAdminView):
     @admin.display(description="Disabled in orgs")
     def disabled_in_orgs(self, instance: AbstractConfig):
         return list(
-            instance.orgs_configuration.filter(disabled=True).values_list(
-                "organization__name", flat=True
-            )
+            instance.orgs_configuration.filter(disabled=True).values_list("organization__name", flat=True)
         )
 
     def disable(self, request, queryset):

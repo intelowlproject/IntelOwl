@@ -49,17 +49,14 @@ class ZoomEye(classes.ObservableAnalyzer):
             self.final_url += f"ip={self.observable_name}"
         else:
             raise AnalyzerConfigurationException(
-                f"search type: '{self.search_type}' not supported."
-                "Supported are: 'host', 'web', 'both'"
+                f"search type: '{self.search_type}' not supported. Supported are: 'host', 'web', 'both'"
             )
 
     def run(self):
         self.__build_zoomeye_url()
 
         try:
-            response = requests.get(
-                self.final_url, headers={"API-KEY": self._api_key_name}
-            )
+            response = requests.get(self.final_url, headers={"API-KEY": self._api_key_name})
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

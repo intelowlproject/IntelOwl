@@ -15,9 +15,7 @@ class UrlScanTestCase(BaseAnalyzerTest):
         return [
             patch(
                 "requests.Session.post",
-                return_value=MockUpResponse(
-                    {"api": "https://urlscan.io/result/abc"}, 200
-                ),
+                return_value=MockUpResponse({"api": "https://urlscan.io/result/abc"}, 200),
             ),
             patch(
                 "requests.Session.get",

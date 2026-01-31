@@ -37,9 +37,7 @@ def get_output_json(scan_name):
                         event = json.loads(line)
                         events.append(event)
                     except json.JSONDecodeError as e:
-                        logger.error(
-                            f"Failed to parse JSON line: {line[:100]}... - Error: {e}"
-                        )
+                        logger.error(f"Failed to parse JSON line: {line[:100]}... - Error: {e}")
     except OSError as e:
         logger.error(f"Failed to read output.json: {e}")
         return []

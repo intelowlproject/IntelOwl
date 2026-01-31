@@ -36,9 +36,7 @@ class WebRiskAnalyzerTestCase(BaseAnalyzerTest):
                 "api_app.analyzers_manager.observable_analyzers.dns.dns_malicious_detectors.google_webrisk.WebRiskServiceClient",
                 return_value=mock_webrisk_client,
             ),
-            patch.object(
-                mock_webrisk_client, "search_uris", return_value=threat_response
-            ),
+            patch.object(mock_webrisk_client, "search_uris", return_value=threat_response),
         ]
 
     @classmethod

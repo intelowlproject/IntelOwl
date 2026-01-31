@@ -17,9 +17,7 @@ class AbstractBIInterface(BISerializer):
     application = rfs.CharField(read_only=True, default="IntelOwl")
     environment = rfs.SerializerMethodField(method_name="get_environment")
     username: Field
-    class_instance = rfs.SerializerMethodField(
-        read_only=True, method_name="get_class_instance"
-    )
+    class_instance = rfs.SerializerMethodField(read_only=True, method_name="get_class_instance")
     process_time: Field
     status: Field
     end_time: Field
@@ -79,9 +77,7 @@ class ModelWithOwnershipSerializer(rfs.ModelSerializer):
             ):
                 attrs["for_organization"] = True
             else:
-                raise ValidationError(
-                    {"detail": "You are not owner or admin of the organization"}
-                )
+                raise ValidationError({"detail": "You are not owner or admin of the organization"})
         logger.debug(f"{attrs=}")
         return super().validate(attrs)
 

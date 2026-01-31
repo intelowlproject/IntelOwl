@@ -86,16 +86,10 @@ class JobConsumer(JsonWebsocketConsumer):
                 str: The name of the group the user should join.
             """
             try:
-                is_member = self._job.user.membership.organization.user_has_membership(
-                    user
-                )
+                is_member = self._job.user.membership.organization.user_has_membership(user)
             except Membership.DoesNotExist:
                 is_member = False
-            return (
-                self.job_group_perm_name
-                if self._job.user == user or is_member
-                else self.job_group_name
-            )
+            return self.job_group_perm_name if self._job.user == user or is_member else self.job_group_name
 
     def connect(self) -> None:
         """
@@ -142,7 +136,7 @@ class JobConsumer(JsonWebsocketConsumer):
         except Job.DoesNotExist:
             logger.warning(
                 f"close ws by the user: {user} for a non-existing job "
-                "This happens in case used tried to open a conn to a non existing job"
+                "This happens in case user tried to open a conn to a non existing job"
             )
             subscribed_group = ""
         else:
@@ -152,8 +146,7 @@ class JobConsumer(JsonWebsocketConsumer):
                 self.channel_name,
             )
         logger.debug(
-            f"user: {user} disconnected from the group: {subscribed_group}. "
-            f"Close code: {close_code}"
+            f"user: {user} disconnected from the group: {subscribed_group}. Close code: {close_code}"
         )
         self.close(code=close_code)
 
@@ -190,14 +183,10 @@ class JobConsumer(JsonWebsocketConsumer):
         groups = cls.JobChannelGroups(job)
         groups_list = groups.group_list
         channel_layer = get_channel_layer()
-        logger.debug(
-            f"send data for the job: {job.id} " f"to the groups: {groups_list}"
-        )
+        logger.debug(f"send data for the job: {job.id} to the groups: {groups_list}")
         for group in groups_list:
             logger.debug(f"send data to the group: {group}")
-            job_serializer = WsJobSerializer(
-                job, context={"permissions": "perm" in group}
-            )
+            job_serializer = WsJobSerializer(job, context={"permissions": "perm" in group})
             job_data = job_serializer.data
             async_to_sync(channel_layer.group_send)(
                 group,

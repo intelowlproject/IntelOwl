@@ -197,18 +197,14 @@ class ParameterQuerySetTestCase(CustomTestCase):
         )
 
         self.assertFalse(
-            Parameter.objects.annotate_configured(ac, self.user)
-            .get(name="testparameter")
-            .configured
+            Parameter.objects.annotate_configured(ac, self.user).get(name="testparameter").configured
         )
 
         pc.owner = self.user
         pc.save()
 
         self.assertTrue(
-            Parameter.objects.annotate_configured(ac, self.user)
-            .get(name="testparameter")
-            .configured
+            Parameter.objects.annotate_configured(ac, self.user).get(name="testparameter").configured
         )
 
         pc.delete()
@@ -233,17 +229,13 @@ class ParameterQuerySetTestCase(CustomTestCase):
         )
         org = Organization.objects.create(name="test_org")
 
-        m1 = Membership.objects.create(
-            user=self.superuser, organization=org, is_owner=True
-        )
+        m1 = Membership.objects.create(user=self.superuser, organization=org, is_owner=True)
         m2 = Membership.objects.create(
             user=self.user,
             organization=org,
         )
 
-        param = Parameter.objects.annotate_value_for_user(ac, self.user).get(
-            pk=param.pk
-        )
+        param = Parameter.objects.annotate_value_for_user(ac, self.user).get(pk=param.pk)
         self.assertFalse(hasattr(param, "owner_value"))
         self.assertFalse(hasattr(param, "org_value"))
         self.assertFalse(hasattr(param, "default_value"))
@@ -258,9 +250,7 @@ class ParameterQuerySetTestCase(CustomTestCase):
             parameter=param,
             analyzer_config=ac,
         )
-        param = Parameter.objects.annotate_value_for_user(ac, self.user).get(
-            pk=param.pk
-        )
+        param = Parameter.objects.annotate_value_for_user(ac, self.user).get(pk=param.pk)
         # org value
         self.assertEqual(param.value, "myperfecttest3")
 
@@ -271,15 +261,13 @@ class ParameterQuerySetTestCase(CustomTestCase):
             parameter=param,
             analyzer_config=ac,
         )
-        param = Parameter.objects.annotate_value_for_user(ac, self.user).get(
-            pk=param.pk
-        )
+        param = Parameter.objects.annotate_value_for_user(ac, self.user).get(pk=param.pk)
 
         # user value
         self.assertEqual(param.value, "myperfecttest1")
-        param = Parameter.objects.annotate_value_for_user(
-            ac, self.user, {param.name: "runtime_test"}
-        ).get(pk=param.pk)
+        param = Parameter.objects.annotate_value_for_user(ac, self.user, {param.name: "runtime_test"}).get(
+            pk=param.pk
+        )
         self.assertEqual(param.value, "runtime_test")
 
         pc.delete()
@@ -302,21 +290,15 @@ class PluginConfigQuerySetTestCase(CustomTestCase):
             for_organization=False,
             owner=self.superuser,
             parameter=param,
-            analyzer_config=AnalyzerConfig.objects.filter(
-                python_module=param.python_module
-            ).first(),
+            analyzer_config=AnalyzerConfig.objects.filter(python_module=param.python_module).first(),
         )
         self.assertEqual(
             0,
-            PluginConfig.objects.filter(value="myperfecttest")
-            .visible_for_user(self.user)
-            .count(),
+            PluginConfig.objects.filter(value="myperfecttest").visible_for_user(self.user).count(),
         )
         self.assertEqual(
             1,
-            PluginConfig.objects.filter(value="myperfecttest")
-            .visible_for_user(self.superuser)
-            .count(),
+            PluginConfig.objects.filter(value="myperfecttest").visible_for_user(self.superuser).count(),
         )
         pc.delete()
 
@@ -329,9 +311,7 @@ class PluginConfigQuerySetTestCase(CustomTestCase):
             for_organization=False,
             owner=None,
             parameter=param,
-            analyzer_config=AnalyzerConfig.objects.filter(
-                python_module=param.python_module
-            ).first(),
+            analyzer_config=AnalyzerConfig.objects.filter(python_module=param.python_module).first(),
             defaults={"value": "myperfecttest"},
         )[0]
         self.assertEqual(
@@ -353,27 +333,19 @@ class PluginConfigQuerySetTestCase(CustomTestCase):
             for_organization=False,
             owner=self.superuser,
             parameter=param,
-            analyzer_config=AnalyzerConfig.objects.filter(
-                python_module=param.python_module
-            ).first(),
+            analyzer_config=AnalyzerConfig.objects.filter(python_module=param.python_module).first(),
         )
         self.assertEqual(
             0,
-            PluginConfig.objects.filter(value="myperfecttest")
-            .visible_for_user(self.user)
-            .count(),
+            PluginConfig.objects.filter(value="myperfecttest").visible_for_user(self.user).count(),
         )
         self.assertEqual(
             1,
-            PluginConfig.objects.filter(value="myperfecttest")
-            .visible_for_user(self.superuser)
-            .count(),
+            PluginConfig.objects.filter(value="myperfecttest").visible_for_user(self.superuser).count(),
         )
         org = Organization.objects.create(name="test_org")
 
-        m1 = Membership.objects.create(
-            user=self.superuser, organization=org, is_owner=True
-        )
+        m1 = Membership.objects.create(user=self.superuser, organization=org, is_owner=True)
         m2 = Membership.objects.create(
             user=self.user,
             organization=org,
@@ -382,15 +354,11 @@ class PluginConfigQuerySetTestCase(CustomTestCase):
         pc.save()
         self.assertEqual(
             1,
-            PluginConfig.objects.filter(value="myperfecttest")
-            .visible_for_user(self.user)
-            .count(),
+            PluginConfig.objects.filter(value="myperfecttest").visible_for_user(self.user).count(),
         )
         self.assertEqual(
             1,
-            PluginConfig.objects.filter(value="myperfecttest")
-            .visible_for_user(self.superuser)
-            .count(),
+            PluginConfig.objects.filter(value="myperfecttest").visible_for_user(self.superuser).count(),
         )
 
         m1.delete()
@@ -402,15 +370,9 @@ class PluginConfigQuerySetTestCase(CustomTestCase):
         org0 = Organization.objects.create(name="test_org_0")
         org1 = Organization.objects.create(name="test_org_1")
 
-        m0 = Membership.objects.create(
-            user=self.superuser, organization=org0, is_owner=True
-        )
-        m1 = Membership.objects.create(
-            user=self.admin, organization=org1, is_owner=True, is_admin=True
-        )
-        m2 = Membership.objects.create(
-            user=self.user, organization=org1, is_owner=False, is_admin=False
-        )
+        m0 = Membership.objects.create(user=self.superuser, organization=org0, is_owner=True)
+        m1 = Membership.objects.create(user=self.admin, organization=org1, is_owner=True, is_admin=True)
+        m2 = Membership.objects.create(user=self.user, organization=org1, is_owner=False, is_admin=False)
         param = Parameter.objects.filter(
             python_module__base_path=PythonModuleBasePaths.FileAnalyzer.value,
             type="str",
@@ -421,18 +383,14 @@ class PluginConfigQuerySetTestCase(CustomTestCase):
             for_organization=True,
             owner=self.superuser,
             parameter=param,
-            analyzer_config=AnalyzerConfig.objects.filter(
-                python_module=param.python_module
-            ).first(),
+            analyzer_config=AnalyzerConfig.objects.filter(python_module=param.python_module).first(),
         )
         pc1 = PluginConfig.objects.create(
             value="test_admin_visibility_1",
             for_organization=True,
             owner=self.user,
             parameter=param,
-            analyzer_config=AnalyzerConfig.objects.filter(
-                python_module=param.python_module
-            ).first(),
+            analyzer_config=AnalyzerConfig.objects.filter(python_module=param.python_module).first(),
         )
 
         self.assertEqual(
@@ -443,21 +401,15 @@ class PluginConfigQuerySetTestCase(CustomTestCase):
         )
         self.assertEqual(
             0,
-            PluginConfig.objects.filter(value="test_admin_visibility_0")
-            .visible_for_user(self.admin)
-            .count(),
+            PluginConfig.objects.filter(value="test_admin_visibility_0").visible_for_user(self.admin).count(),
         )
         self.assertEqual(
             0,
-            PluginConfig.objects.filter(value="test_admin_visibility_0")
-            .visible_for_user(self.user)
-            .count(),
+            PluginConfig.objects.filter(value="test_admin_visibility_0").visible_for_user(self.user).count(),
         )
         self.assertEqual(
             0,
-            PluginConfig.objects.filter(value="test_admin_visibility_0")
-            .visible_for_user(self.guest)
-            .count(),
+            PluginConfig.objects.filter(value="test_admin_visibility_0").visible_for_user(self.guest).count(),
         )
 
         self.assertEqual(
@@ -468,21 +420,15 @@ class PluginConfigQuerySetTestCase(CustomTestCase):
         )
         self.assertEqual(
             1,
-            PluginConfig.objects.filter(value="test_admin_visibility_1")
-            .visible_for_user(self.admin)
-            .count(),
+            PluginConfig.objects.filter(value="test_admin_visibility_1").visible_for_user(self.admin).count(),
         )
         self.assertEqual(
             1,
-            PluginConfig.objects.filter(value="test_admin_visibility_1")
-            .visible_for_user(self.user)
-            .count(),
+            PluginConfig.objects.filter(value="test_admin_visibility_1").visible_for_user(self.user).count(),
         )
         self.assertEqual(
             0,
-            PluginConfig.objects.filter(value="test_admin_visibility_1")
-            .visible_for_user(self.guest)
-            .count(),
+            PluginConfig.objects.filter(value="test_admin_visibility_1").visible_for_user(self.guest).count(),
         )
 
         m0.delete()
@@ -534,11 +480,7 @@ class JobQuerySetTestCase(CustomTestCase):
             status="reported_without_fails",
             finished_analysis_time=now() - datetime.timedelta(days=5),
         )
-        j = (
-            Job.objects.filter(analyzable__name="test.com")
-            ._annotate_importance_date()
-            .first()
-        )
+        j = Job.objects.filter(analyzable__name="test.com")._annotate_importance_date().first()
         self.assertEqual(2, j.date_weight)
         j.delete()
         an.delete()
@@ -556,11 +498,7 @@ class JobQuerySetTestCase(CustomTestCase):
             status="reported_without_fails",
             finished_analysis_time=now() - datetime.timedelta(days=30),
         )
-        j = (
-            Job.objects.filter(analyzable__name="test.com")
-            ._annotate_importance_date()
-            .first()
-        )
+        j = Job.objects.filter(analyzable__name="test.com")._annotate_importance_date().first()
         self.assertEqual(0, j.date_weight)
         j.delete()
         an.delete()
@@ -579,18 +517,12 @@ class JobQuerySetTestCase(CustomTestCase):
         )
         org = Organization.objects.create(name="test_org")
 
-        m1 = Membership.objects.create(
-            user=self.superuser, organization=org, is_owner=True
-        )
+        m1 = Membership.objects.create(user=self.superuser, organization=org, is_owner=True)
         m2 = Membership.objects.create(
             user=self.user,
             organization=org,
         )
-        j = (
-            Job.objects.filter(analyzable__name="test.com")
-            ._annotate_importance_user(self.user)
-            .first()
-        )
+        j = Job.objects.filter(analyzable__name="test.com")._annotate_importance_user(self.user).first()
         self.assertEqual(3, j.user_weight)
         j.delete()
         m1.delete()
@@ -612,18 +544,12 @@ class JobQuerySetTestCase(CustomTestCase):
         )
         org = Organization.objects.create(name="test_org")
 
-        m1 = Membership.objects.create(
-            user=self.superuser, organization=org, is_owner=True
-        )
+        m1 = Membership.objects.create(user=self.superuser, organization=org, is_owner=True)
         m2 = Membership.objects.create(
             user=self.user,
             organization=org,
         )
-        j = (
-            Job.objects.filter(analyzable__name="test.com")
-            ._annotate_importance_user(self.user)
-            .first()
-        )
+        j = Job.objects.filter(analyzable__name="test.com")._annotate_importance_user(self.user).first()
         self.assertEqual(2, j.user_weight)
         j.delete()
         m1.delete()
@@ -643,11 +569,7 @@ class JobQuerySetTestCase(CustomTestCase):
             analyzable=an,
             status="reported_without_fails",
         )
-        j = (
-            Job.objects.filter(analyzable__name="test.com")
-            ._annotate_importance_user(self.user)
-            .first()
-        )
+        j = Job.objects.filter(analyzable__name="test.com")._annotate_importance_user(self.user).first()
         self.assertEqual(3, j.user_weight)
         j.delete()
         an.delete()
@@ -664,11 +586,7 @@ class JobQuerySetTestCase(CustomTestCase):
             analyzable=an,
             status="reported_without_fails",
         )
-        j = (
-            Job.objects.filter(analyzable__name="test.com")
-            ._annotate_importance_user(self.user)
-            .first()
-        )
+        j = Job.objects.filter(analyzable__name="test.com")._annotate_importance_user(self.user).first()
         self.assertEqual(0, j.user_weight)
         j.delete()
 

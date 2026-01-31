@@ -16,9 +16,7 @@ from intel_owl.celery import get_queue_name
 
 class EngineConfig(SingletonModel):
     modules = ArrayField(
-        models.CharField(
-            max_length=255, null=False, blank=False, validators=[validate_engine_module]
-        ),
+        models.CharField(max_length=255, null=False, blank=False, validators=[validate_engine_module]),
         blank=True,
         default=list,
         help_text="List of modules used by the engine. Each module has syntax `name_file.name_class`",

@@ -3,7 +3,7 @@
 Flask-Shell2HTTP-fork==1.9.2
 # Flask most recent versions require most recent versions of blinker
 flask==3.0.3
-gunicorn==23.0.0
+gunicorn==24.1.1
 selenium==4.25.0
 selenium-wire==5.1.0
 blinker==1.7.0 # selenium-wire depends on this library version <1.8

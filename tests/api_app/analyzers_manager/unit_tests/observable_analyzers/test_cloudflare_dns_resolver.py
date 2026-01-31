@@ -16,14 +16,10 @@ class CloudFlareDNSResolverTestCase(BaseAnalyzerTest):
     def get_mocked_response():
         # Simulated response from Cloudflare DoH
         mock_dns_response = {
-            "Answer": [
-                {"name": "example.com.", "type": 1, "TTL": 300, "data": "93.184.216.34"}
-            ]
+            "Answer": [{"name": "example.com.", "type": 1, "TTL": 300, "data": "93.184.216.34"}]
         }
 
-        return [
-            patch("requests.get", return_value=MockUpResponse(mock_dns_response, 200))
-        ]
+        return [patch("requests.get", return_value=MockUpResponse(mock_dns_response, 200))]
 
     @classmethod
     def get_extra_config(cls):

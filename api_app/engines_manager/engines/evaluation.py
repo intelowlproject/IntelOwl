@@ -19,11 +19,8 @@ def comparison(item1: BaseDataModel, item2: BaseDataModel):
 
 
 class EvaluationEngineModule(EngineModule):
-
     def run(self):
-        analyzer_evaluations = self.job.get_analyzers_data_models().order_by(
-            "-reliability"
-        )
+        analyzer_evaluations = self.job.get_analyzers_data_models().order_by("-reliability")
         user_evaluations = self.job.get_user_events_data_model()
         if not analyzer_evaluations.exists() and not user_evaluations.exists():
             return {
@@ -33,9 +30,7 @@ class EvaluationEngineModule(EngineModule):
         # if we have a user evaluation, the one with most reliability wins.
         # if more then 1 has same reliability, we follow the evaluations_order
         if user_evaluations.exists():
-            result = sorted(user_evaluations, key=cmp_to_key(comparison), reverse=True)[
-                0
-            ]
+            result = sorted(user_evaluations, key=cmp_to_key(comparison), reverse=True)[0]
             return {
                 "evaluation": result.evaluation,
                 "reliability": result.reliability,

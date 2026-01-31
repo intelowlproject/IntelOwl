@@ -20,9 +20,7 @@ class DNSdbTestCase(BaseAnalyzerTest):
         )
         return patch(
             "requests.get",
-            return_value=MockUpResponse(
-                json_data={}, status_code=200, text=mock_response
-            ),
+            return_value=MockUpResponse(json_data={}, status_code=200, text=mock_response),
         )
 
     @classmethod

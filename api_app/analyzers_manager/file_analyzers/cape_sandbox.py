@@ -82,7 +82,7 @@ class CAPEsandbox(FileAnalyzer):
     def run(self):
         api_url: str = self._url_key_name + "/apiv2/tasks/create/file/"
         to_respond = {}
-        logger.info(f"Job: {self.job_id} -> " "Starting file upload.")
+        logger.info(f"Job: {self.job_id} -> Starting file upload.")
 
         cape_params_name = [
             "options",
@@ -98,9 +98,7 @@ class CAPEsandbox(FileAnalyzer):
             "route",
         ]
         data = {
-            name: getattr(self, name)
-            for name in cape_params_name
-            if getattr(self, name, None) is not None
+            name: getattr(self, name) for name in cape_params_name if getattr(self, name, None) is not None
         }
 
         try:
@@ -125,20 +123,13 @@ class CAPEsandbox(FileAnalyzer):
             result = self.__poll_for_result(task_id=task_id)
             to_respond["result_url"] = self._url_key_name + f"/submit/status/{task_id}/"
             to_respond["response"] = result
-            logger.info(
-                f"Job: {self.job_id} -> "
-                "File uploaded successfully without any errors."
-            )
+            logger.info(f"Job: {self.job_id} -> File uploaded successfully without any errors.")
 
         else:
             response_errors = response_json.get("errors", [])
             if response_errors:
                 values = list(response_errors[0].values())
-                if (
-                    values
-                    and values[0]
-                    == "Not unique, as unique option set on submit or in conf/web.conf"
-                ):
+                if values and values[0] == "Not unique, as unique option set on submit or in conf/web.conf":
                     #    The above response is only returned when
                     #    a sample that has been already
                     #    uploaded once is uploaded again.
@@ -169,18 +160,11 @@ class CAPEsandbox(FileAnalyzer):
 
                     status_id = self.__search_by_md5()
                     gui_report_url = self._url_key_name + "/submit/status/" + status_id
-                    report_url = (
-                        self._url_key_name
-                        + "/apiv2/tasks/get/report/"
-                        + status_id
-                        + "/litereport"
-                    )
+                    report_url = self._url_key_name + "/apiv2/tasks/get/report/" + status_id + "/litereport"
                     to_respond["result_url"] = gui_report_url
 
                     try:
-                        final_request = self.__session.get(
-                            report_url, timeout=self.requests_timeout
-                        )
+                        final_request = self.__session.get(report_url, timeout=self.requests_timeout)
                     except requests.RequestException as e:
                         raise AnalyzerRunException(e)
 
@@ -245,8 +229,7 @@ class CAPEsandbox(FileAnalyzer):
                     attempt = try_ + 1
                     try:
                         logger.info(
-                            f" Job: {self.job_id} -> "
-                            f"Starting poll number #{attempt}/{len(timeout_attempts)}"
+                            f" Job: {self.job_id} -> Starting poll number #{attempt}/{len(timeout_attempts)}"
                         )
 
                         request = self.__single_poll(status_api)
@@ -256,10 +239,7 @@ class CAPEsandbox(FileAnalyzer):
                         error = responded_json.get("error")
                         data = responded_json.get("data")
 
-                        logger.info(
-                            f"Job: {self.job_id} -> "
-                            f"Status of the CAPESandbox task: {data}"
-                        )
+                        logger.info(f"Job: {self.job_id} -> Status of the CAPESandbox task: {data}")
 
                         if error:
                             raise AnalyzerRunException(error)
@@ -279,22 +259,16 @@ class CAPEsandbox(FileAnalyzer):
 
                         if data in ("reported", "completed"):
                             report_url = (
-                                self._url_key_name
-                                + "/apiv2/tasks/get/report/"
-                                + str(task_id)
-                                + "/litereport"
+                                self._url_key_name + "/apiv2/tasks/get/report/" + str(task_id) + "/litereport"
                             )
 
-                            results = self.__single_poll(
-                                report_url, polling=False
-                            ).json()
+                            results = self.__single_poll(report_url, polling=False).json()
 
                             # the task was being processed
                             if (
                                 "error" in results
                                 and results["error"]
-                                and results["error_value"]
-                                == "Task is still being analyzed"
+                                and results["error_value"] == "Task is still being analyzed"
                             ):
                                 raise self.ContinuePolling("Task still processing")
 
@@ -309,9 +283,7 @@ class CAPEsandbox(FileAnalyzer):
                             break
 
                         else:
-                            raise AnalyzerRunException(
-                                f"status {data} was unexpected. Check the code"
-                            )
+                            raise AnalyzerRunException(f"status {data} was unexpected. Check the code")
 
                     except self.ContinuePolling as e:
                         logger.info(
@@ -328,8 +300,7 @@ class CAPEsandbox(FileAnalyzer):
 
         except SoftTimeLimitExceeded:
             self._handle_exception(
-                "Soft Time Limit Exceeded: "
-                f"{self._url_key_name + '/analysis/' + str(task_id)}",
+                f"Soft Time Limit Exceeded: {self._url_key_name + '/analysis/' + str(task_id)}",
                 is_base_err=True,
             )
 

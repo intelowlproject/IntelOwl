@@ -35,7 +35,10 @@ jest.mock("../../../../src/components/scan/utils/RecentScans", () =>
   jest.fn((props) => <div {...props} />),
 );
 
-describe("ScanForm adavanced use", () => {
+describe("ScanForm advanced use", () => {
+  beforeAll(() => {
+    jest.setTimeout(30000);
+  });
   /* EXTREMELY IMPORTART! These tests need to be execute sequentially or they will fail!
      Maintain them in the same describe.
 

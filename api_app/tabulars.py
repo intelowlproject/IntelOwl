@@ -67,9 +67,7 @@ class PluginConfigInlineForPythonConfig(admin.TabularInline):
             if parent_model is None:
                 return field
             # the user should add the default for parameters, not secrets
-            field.queryset = field.queryset.filter(
-                python_module=parent_model.python_module, is_secret=False
-            )
+            field.queryset = field.queryset.filter(python_module=parent_model.python_module, is_secret=False)
         return field
 
     def get_extra(self, request, obj: PluginConfig = None, **kwargs):
@@ -80,14 +78,10 @@ class PluginConfigInlineForPythonConfig(admin.TabularInline):
                     is_secret=False,
                 ).count()
                 - PluginConfig.objects.filter(
-                    **{
-                        self.get_parent(
-                            request
-                        ).snake_case_name.lower(): self.get_parent_pk(request)
-                    },
+                    **{self.get_parent(request).snake_case_name.lower(): self.get_parent_pk(request)},
                     owner=None,
                     for_organization=False,
-                    parameter__is_secret=False
+                    parameter__is_secret=False,
                 ).count()
             )
         return 0

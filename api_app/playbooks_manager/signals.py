@@ -69,9 +69,9 @@ def m2m_changed_pivots_playbook_config(
 ):
     if action == "pre_add":
         objects = model.objects.filter(pk__in=pk_set)
-        valid_pks = objects.valid(
-            instance.analyzers.all(), instance.connectors.all()
-        ).values_list("pk", flat=True)
+        valid_pks = objects.valid(instance.analyzers.all(), instance.connectors.all()).values_list(
+            "pk", flat=True
+        )
         wrong_pivots = objects.exclude(pk__in=valid_pks)
         if wrong_pivots.exists():
             raise ValidationError(

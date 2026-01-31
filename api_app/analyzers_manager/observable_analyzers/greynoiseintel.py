@@ -44,9 +44,7 @@ class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
                 offering="Community",
             )
         else:
-            raise AnalyzerRunException(
-                "Invalid API Version. Supported are: v2 (paid), v3 (community)"
-            )
+            raise AnalyzerRunException("Invalid API Version. Supported are: v2 (paid), v3 (community)")
         try:
             response = session.ip(self.observable_name)
             if self.greynoise_api_version == "v2":
@@ -54,24 +52,50 @@ class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
         # greynoise library does provide empty messages in case of these errors...
         # so it's better to catch them and create custom management
         except RateLimitError as e:
+            error_message = self._format_greynoise_error(e, "Rate limit error from GreyNoise API")
             self.disable_for_rate_limit()
-            self.report.errors.append(e)
+            self.report.errors.append(error_message)
             self.report.save()
-            raise AnalyzerRunException(f"Rate limit error: {e}")
+            raise AnalyzerRunException(error_message)
         except RequestFailure as e:
-            self.report.errors.append(e)
+            error_message = self._format_greynoise_error(e, "Request failure from GreyNoise API")
+            self.report.errors.append(error_message)
             self.report.save()
-            raise AnalyzerRunException(f"Request failure error: {e}")
+            raise AnalyzerRunException(error_message)
         except NotFound as e:
             logger.info(f"not found error for {self.observable_name} :{e}")
             response["not_found"] = True
 
         return response
 
+    @staticmethod
+    def _format_greynoise_error(exc: Exception, fallback_prefix: str) -> str:
+        message = str(exc).strip()
+        if message:
+            return message
+
+        details = {}
+        for attr in (
+            "status_code",
+            "status",
+            "code",
+            "error",
+            "errors",
+            "message",
+            "detail",
+            "response",
+        ):
+            value = getattr(exc, attr, None)
+            if value:
+                details[attr] = value
+
+        if details:
+            return f"{fallback_prefix} ({type(exc).__name__}): {details}"
+        return f"{fallback_prefix} ({type(exc).__name__})"
+
     def _do_create_data_model(self):
         return super()._do_create_data_model() and (
-            self.report.report.get("riot", False)
-            or self.report.report.get("noise", False)
+            self.report.report.get("riot", False) or self.report.report.get("noise", False)
         )
 
     def _update_data_model(self, data_model):

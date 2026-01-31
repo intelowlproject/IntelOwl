@@ -38,8 +38,8 @@ class LLMSummarizer(Connector):
             return
         runtime_config = getattr(job, "runtime_configuration", None) if job else None  # noqa: E501
 
-        config = self.config(runtime_configuration=runtime_config)
-        params = getattr(config, "parameters", {}) or {}
+        self.config(runtime_configuration=runtime_config)
+        params = getattr(self, "parameters", {}) or {}
 
         required = ["ollama_url", "model"]
         missing = [p for p in required if p not in params]
@@ -51,71 +51,107 @@ class LLMSummarizer(Connector):
 
     def run(self):
         try:
-            job = getattr(self, "job", None) or getattr(self, "_job", None)
-            if job is None:
-                job = getattr(self, "analyzable", None)
-            if job is None:
-                raise ConnectorRunException(
-                    "Job/Analyzable instance not available in connector context"  # noqa: E501
-                )
-
+            job = self._get_job()
             runtime_config = getattr(job, "runtime_configuration", None) if job else None  # noqa: E501
 
-            config = self.config(runtime_configuration=runtime_config)
-            params = getattr(config, "parameters", {}) or {}
+            self.config(runtime_configuration=runtime_config)
+            params = getattr(self, "parameters", {}) or {}
             logger.info(f"[LLM_Summarizer] Config parameters: {params}")
 
             analyzers = self._prepare_analyzers(job)
-
             logger.info(f"[LLM_Summarizer] Found {len(analyzers)} analyzers")
 
-            observable = getattr(job, "observable_name", None) or getattr(job, "file_name", None)  # noqa: E501
-
-            if (
-                not observable and hasattr(job, "data_model") and job.data_model  # noqa: E501
-            ):
-                observable = getattr(job.data_model, "observable_name", None)
-
-            if not observable or observable == "unknown":
-                full_report_text = json.dumps({a["name"]: a["report_summary"] for a in analyzers})  # noqa: E501
-                for pattern in [
-                    r"\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b",
-                    r"\b[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b",
-                    r"[a-fA-F0-9]{32}|[a-fA-F0-9]{40}|[a-fA-F0-9]{64}",
-                ]:
-                    match = re.search(pattern, full_report_text)
-                    if match:
-                        observable = match.group(0)
-                        break
-
-            if not observable:
-                observable = "unknown"
-                logger.warning("Could not detect observable from any source")
-
+            observable = self._resolve_observable(job, analyzers)
             logger.info(f"[LLM_Summarizer] Observable resolved: {observable}")
 
-            report = {
-                "id": getattr(job, "id", "unknown"),
-                "observable": observable,
-                "observable_type": getattr(job, "observable_classification", "unknown"),  # noqa: E501
-                "status": getattr(job, "status", "unknown"),
-                "analyzers": analyzers,
-                "tags": (list(job.tags.values_list("label", flat=True)) if hasattr(job, "tags") else []),  # noqa: E501
-            }
+            report = self._build_report(job, observable, analyzers)
+            report_text = self._truncate_report_text(report)
 
-            report_text = json.dumps(report, indent=2)
-            max_length = 12000
-            if len(report_text) > max_length:
-                report_text = report_text[:max_length] + (
-                    "\n\n[TRUNCATED REPORT - ONLY PARTIAL DATA AVAILABLE. "
-                    "Focus on what is visible. Do not assume missing content. "
-                    "Still try to produce a meaningful summary of visible analyzers.]\n"  # noqa: E501
-                )
-                logger.warning(
-                    f"[LLM_Summarizer] Report truncated to {len(report_text)} chars"  # noqa: E501
-                )
+            system_prompt = self._get_system_prompt()
+            full_prompt = f"{system_prompt}\n\nReport:\n{report_text}"
 
-            system_prompt = """
+            llm_response = self._call_ollama_api(full_prompt, params)
+
+            if not llm_response or llm_response.isspace():
+                logger.warning("Empty LLM response — using fallback")
+                return self._get_fallback_response()
+
+            parsed_output = self._parse_and_clean_response(llm_response, report_text, analyzers, report)  # noqa: E501
+            self._apply_auto_tags(parsed_output, job)
+            logger.info("LLM summarization complete")
+            return parsed_output
+
+        except requests.RequestException as e:
+            logger.error(f"Ollama API request failed: {str(e)}")
+            raise ConnectorRunException(f"Ollama connection/API error: {str(e)}")  # noqa: E501
+        except Exception as e:
+            logger.exception("Unexpected error in LLM_Summarizer")
+            raise ConnectorRunException(f"Unexpected error: {str(e)}")
+
+    def _get_job(self):
+        job = getattr(self, "job", None) or getattr(self, "_job", None)
+        if job is None:
+            job = getattr(self, "analyzable", None)
+        if job is None:
+            raise ConnectorRunException(
+                "Job/Analyzable instance not available in connector context"  # noqa: E501
+            )
+        return job
+
+    def _resolve_observable(self, job, analyzers):
+        observable = getattr(job, "observable_name", None) or getattr(job, "file_name", None)  # noqa: E501
+
+        if not observable and hasattr(job, "data_model") and job.data_model:  # noqa: E501
+            observable = getattr(job.data_model, "observable_name", None)
+
+        if not observable or observable == "unknown":
+            full_report_text = json.dumps({a["name"]: a["report_summary"] for a in analyzers})  # noqa: E501
+            observable = self._extract_observable_from_text(full_report_text)
+
+        if not observable:
+            observable = "unknown"
+            logger.warning("Could not detect observable from any source")
+
+        return observable
+
+    def _extract_observable_from_text(self, full_report_text):
+        patterns = [
+            r"\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b",
+            r"\b[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b",
+            r"[a-fA-F0-9]{32}|[a-fA-F0-9]{40}|[a-fA-F0-9]{64}",
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, full_report_text)
+            if match:
+                return match.group(0)
+        return None
+
+    def _build_report(self, job, observable, analyzers):
+        return {
+            "id": getattr(job, "id", "unknown"),
+            "observable": observable,
+            "observable_type": getattr(job, "observable_classification", "unknown"),  # noqa: E501
+            "status": getattr(job, "status", "unknown"),
+            "analyzers": analyzers,
+            "tags": (list(job.tags.values_list("label", flat=True)) if hasattr(job, "tags") else []),  # noqa: E501
+        }
+
+    def _truncate_report_text(self, report):
+        report_text = json.dumps(report, indent=2)
+        max_length = 12000
+        if len(report_text) > max_length:
+            report_text = report_text[:max_length] + (
+                "\n\n[TRUNCATED REPORT - ONLY PARTIAL DATA AVAILABLE. "
+                "Focus on what is visible. Do not assume missing content. "
+                "Still try to produce a meaningful summary of visible analyzers.]\n"  # noqa: E501
+            )
+            logger.warning(
+                f"[LLM_Summarizer] Report truncated to {len(report_text)} chars"  # noqa: E501
+            )
+        return report_text
+
+    def _get_system_prompt(self):
+        return """
 You are a precise, evidence-based threat intelligence analyst. Analyze ONLY the IntelOwl job report provided below. Stay factual and grounded in the data — but you ARE allowed and expected to interpret patterns, group similar findings, and draw reasonable conclusions that a skilled analyst would make (e.g. TOR exit nodes, open resolvers, historical abuse patterns).
 
 Output rules (strict):
@@ -163,281 +199,286 @@ JSON STRUCTURE ONLY:
 }
 """  # noqa: E501
 
-            full_prompt = f"{system_prompt}\n\nReport:\n{report_text}"
+    def _call_ollama_api(self, full_prompt, params):
+        ollama_url = params.get("ollama_url", "http://host.docker.internal:11434")  # noqa: E501
+        model = params.get("model", "llama3")
 
-            ollama_url = params.get("ollama_url", "http://host.docker.internal:11434")  # noqa: E501
-            model = params.get("model", "llama3")
+        if not ollama_url.startswith(("http://", "https://")):
+            raise ConnectorConfigurationException(f"Invalid ollama_url: {ollama_url}")  # noqa: E501
 
-            if not ollama_url.startswith(("http://", "https://")):
-                raise ConnectorConfigurationException(f"Invalid ollama_url: {ollama_url}")  # noqa: E501
+        logger.info(
+            f"[LLM_Summarizer] Calling Ollama → {ollama_url} / model: {model}"  # noqa: E501
+        )
 
-            logger.info(
-                f"[LLM_Summarizer] Calling Ollama → {ollama_url} / model: {model}"  # noqa: E501
+        api_endpoint = f"{ollama_url}/api/generate"
+        payload = {
+            "model": model,
+            "prompt": full_prompt,
+            "stream": False,
+            "format": "json",
+            "options": {
+                "temperature": 0.0,
+                "num_predict": -1,
+                "top_p": 0.7,
+                "top_k": 20,
+                "repeat_penalty": 1.2,
+            },
+        }
+
+        response = requests.post(api_endpoint, json=payload, timeout=180)
+        response.raise_for_status()
+
+        llm_response = response.json().get("response", "").strip()
+        logger.info(
+            f"[LLM_Summarizer] Raw LLM response length: {len(llm_response)}"  # noqa: E501
+        )
+        logger.info(
+            f"[LLM_Summarizer] Raw LLM response preview: {llm_response[:300]}..."  # noqa: E501
+        )
+
+        logger.debug(
+            f"[LLM_SUMMARIZER_DEBUG] Full raw response:\n{llm_response[:2000]}"  # noqa: E501
+        )
+        if len(llm_response) > 2000:
+            logger.debug("... [response truncated in log]")
+        return llm_response
+
+    def _get_fallback_response(self):
+        return {
+            "summary": "Report analysis unavailable (empty LLM response).",  # noqa: E501
+            "threat_categories": [],
+            "risk_score": 0,
+            "confidence": "low",
+            "extracted_iocs": [],
+            "suggested_pivots": ["Review analyzer reports manually"],
+        }
+
+    def _parse_and_clean_response(self, llm_response, report_text, analyzers, report):  # noqa: E501
+        try:
+            text = self._clean_llm_text(llm_response)
+            parsed_output = json.loads(text)
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON parse still failed after strong cleanup: {str(e)}")  # noqa: E501
+            logger.debug(f"Cleaned text that failed:\n{text[:600]}...")
+            parsed_output = self._handle_parse_error(llm_response, text)
+
+        parsed_output = self._validate_and_enrich_output(parsed_output, report_text, analyzers, report)  # noqa: E501
+        return parsed_output
+
+    def _clean_llm_text(self, llm_response):
+        text = llm_response.strip()
+
+        # Remove common markdown / code block garbage
+        text = re.sub(r"^```json\s*", "", text, flags=re.IGNORECASE)
+        text = re.sub(r"\s*```$", "", text, flags=re.IGNORECASE)
+        text = re.sub(r"^```$", "", text, flags=re.MULTILINE)
+
+        # Remove any text before first { and after last }
+        start = text.find("{")
+        end = text.rfind("}") + 1
+        if start >= 0 < end:
+            text = text[start:end]
+        else:
+            text = "{}"
+
+        # Replace single quotes with double quotes (very common mistake)
+        # But only in places that look like keys/values (naive but effective)
+        text = re.sub(r"(\w+)'s\b", r"\1's", text)  # protect possessives
+        text = text.replace("'", '"')
+
+        # Remove trailing commas more aggressively (repeat 2–3×)
+        for _ in range(3):
+            text = re.sub(r",\s*([}\]])", r"\1", text)
+
+        # Remove // and # style comments (sometimes models still do it)
+        text = re.sub(r"\s*(//|#).*?(?=\n|$)", "", text, flags=re.MULTILINE)
+
+        return text
+
+    def _handle_parse_error(self, llm_response, text):
+        partial = {}
+        try:
+            # Try to find key pieces even if structure is broken
+            if m := re.search(r'"summary"\s*:\s*"([^"]*?)"', text, re.DOTALL):
+                partial["summary"] = m.group(1).strip()
+            if m := re.search(r'"risk_score"\s*:\s*(\d+)', text):
+                partial["risk_score"] = int(m.group(1))
+            if m := re.search(r'"confidence"\s*:\s*"([^"]*)"', text):
+                partial["confidence"] = m.group(1).strip()
+        except (AttributeError, IndexError, ValueError, re.error):
+            pass
+
+        # Fill defaults for missing parts
+        parsed_output = {
+            "summary": partial.get("summary") or "Could not parse LLM summary — see raw analyzer reports.",  # noqa: E501
+            "threat_categories": [],
+            "risk_score": partial.get("risk_score", 10),
+            "confidence": partial.get("confidence", "low"),
+            "extracted_iocs": [],
+            "suggested_pivots": ["Manual review recommended"],
+        }
+        logger.warning("Used partial / default output after unrecoverable JSON error")  # noqa: E501
+        return parsed_output
+
+    def _validate_and_enrich_output(self, parsed_output, report_text, analyzers, report):  # noqa: E501
+        # Validate IOCs
+        extracted_iocs = parsed_output.get("extracted_iocs", [])
+        valid_iocs = [ioc for ioc in extracted_iocs if ioc in report_text]
+        if len(valid_iocs) < len(extracted_iocs):
+            logger.warning(f"Filtered hallucinated IOCs: {set(extracted_iocs) - set(valid_iocs)}")  # noqa: E501
+        parsed_output["extracted_iocs"] = valid_iocs
+
+        # Fallback summary if empty
+        summary = parsed_output.get("summary", "").strip()
+        if not summary:
+            self._set_fallback_summary(parsed_output, analyzers, report)
+
+        # Ensure required keys
+        required_keys = [
+            "summary",
+            "threat_categories",
+            "risk_score",
+            "confidence",
+            "extracted_iocs",
+            "suggested_pivots",
+        ]
+        missing_keys = [k for k in required_keys if k not in parsed_output]
+        if missing_keys:
+            logger.warning(f"Missing keys in LLM output: {missing_keys} — using defaults")  # noqa: E501
+            self._ensure_required_keys(parsed_output, missing_keys)
+
+        # Type conversions
+        parsed_output["risk_score"] = int(parsed_output.get("risk_score", 0))
+        parsed_output["threat_categories"] = list(parsed_output.get("threat_categories", []))  # noqa: E501
+        parsed_output["extracted_iocs"] = list(parsed_output.get("extracted_iocs", []))  # noqa: E501
+        parsed_output["suggested_pivots"] = list(parsed_output.get("suggested_pivots", []))  # noqa: E501
+
+        return parsed_output
+
+    def _set_fallback_summary(self, parsed_output, analyzers, report):
+        analyzer_count = len(analyzers)
+        obs_type = report.get("observable_type", "unknown")
+        obs_name = report.get("observable", "unknown")
+
+        if analyzer_count == 0:
+            auto_summary = (
+                f"Analysis failed or no analyzers produced usable output for observable "  # noqa: E501
+                f"'{obs_name}' ({obs_type}). Manual review of raw reports recommended."  # noqa: E501
+            )
+        else:
+            auto_summary = (
+                f"The observable '{obs_name}' ({obs_type}) was processed by {analyzer_count} "  # noqa: E501
+                f"analyzer(s), but LLM summarization failed. Key analyzers present: "  # noqa: E501
+                f"{', '.join(a.get('name', '?') for a in analyzers)}. "
+                f"Please check raw reports for details."
             )
 
-            api_endpoint = f"{ollama_url}/api/generate"
-            payload = {
-                "model": model,
-                "prompt": full_prompt,
-                "stream": False,
-                "format": "json",
-                "options": {
-                    "temperature": 0.0,
-                    "num_predict": -1,
-                    "top_p": 0.7,
-                    "top_k": 20,
-                    "repeat_penalty": 1.2,
-                },
-            }
+        parsed_output["summary"] = auto_summary
+        logger.warning("LLM summary empty — using improved auto-generated fallback summary")  # noqa: E501
 
-            response = requests.post(api_endpoint, json=payload, timeout=180)
-            response.raise_for_status()
-
-            llm_response = response.json().get("response", "").strip()
-            logger.info(
-                f"[LLM_Summarizer] Raw LLM response length: {len(llm_response)}"  # noqa: E501
-            )
-            logger.info(
-                f"[LLM_Summarizer] Raw LLM response preview: {llm_response[:300]}..."  # noqa: E501
+    def _ensure_required_keys(self, parsed_output, missing_keys):
+        for k in missing_keys:
+            parsed_output[k] = (
+                [] if "iocs" in k or "pivots" in k or "categories" in k else 0 if "risk" in k else "low"  # noqa: E501
             )
 
-            logger.debug(
-                f"[LLM_SUMMARIZER_DEBUG] Full raw response:\n{llm_response[:2000]}"  # noqa: E501
-            )
-            if len(llm_response) > 2000:
-                logger.debug("... [response truncated in log]")
-
-            if not llm_response or llm_response.isspace():
-                logger.warning("Empty LLM response — using fallback")
-                return {
-                    "summary": "Report analysis unavailable (empty LLM response).",  # noqa: E501
-                    "threat_categories": [],
-                    "risk_score": 0,
-                    "confidence": "low",
-                    "extracted_iocs": [],
-                    "suggested_pivots": ["Review analyzer reports manually"],
-                }
-
-            try:
-                text = llm_response.strip()
-
-                # Remove common markdown / code block garbage
-                text = re.sub(r"^```json\s*", "", text, flags=re.IGNORECASE)
-                text = re.sub(r"\s*```$", "", text, flags=re.IGNORECASE)
-                text = re.sub(r"^```$", "", text, flags=re.MULTILINE)
-
-                # Remove any text before first {  and after last }
-                start = text.find("{")
-                end = text.rfind("}") + 1
-                if start >= 0 < end:
-                    text = text[start:end]
-                else:
-                    text = "{}"
-
-                # Replace single quotes with double quotes (very common mistake)  # noqa: E501
-                # But only in places that look like keys/values (naive but effective)  # noqa: E501
-                text = re.sub(r"(\w+)'s\b", r"\1's", text)  # protect possessives  # noqa: E501
-                text = text.replace("'", '"')
-
-                # Remove trailing commas more aggressively (repeat 2–3×)
-                for _ in range(3):
-                    text = re.sub(r",\s*([}\]])", r"\1", text)
-
-                # Remove // and # style comments (sometimes models still do it)
-                text = re.sub(r"\s*(//|#).*?(?=\n|$)", "", text, flags=re.MULTILINE)  # noqa: E501
-
-                parsed_output = json.loads(text)
-
-            except json.JSONDecodeError as e:
-                logger.error(f"JSON parse still failed after strong cleanup: {str(e)}")  # noqa: E501
-                logger.debug(f"Cleaned text that failed:\n{text[:600]}...")
-
-                partial = {}
-                try:
-                    # Try to find key pieces even if structure is broken
-                    if m := re.search(r'"summary"\s*:\s*"([^"]*?)"', text, re.DOTALL):  # noqa: E501
-                        partial["summary"] = m.group(1).strip()
-                    if m := re.search(r'"risk_score"\s*:\s*(\d+)', text):
-                        partial["risk_score"] = int(m.group(1))
-                    if m := re.search(r'"confidence"\s*:\s*"([^"]*)"', text):
-                        partial["confidence"] = m.group(1).strip()
-                except (AttributeError, IndexError, ValueError, re.error):
-                    pass
-
-                # Fill defaults for missing parts
-                parsed_output = {
-                    "summary": partial.get("summary")
-                    or "Could not parse LLM summary — see raw analyzer reports.",  # noqa: E501
-                    "threat_categories": [],
-                    "risk_score": partial.get("risk_score", 10),
-                    "confidence": partial.get("confidence", "low"),
-                    "extracted_iocs": [],
-                    "suggested_pivots": ["Manual review recommended"],
-                }
-                logger.warning(
-                    "Used partial / default output after unrecoverable JSON error"  # noqa: E501
-                )
-
-            extracted_iocs = parsed_output.get("extracted_iocs", [])
-            valid_iocs = [ioc for ioc in extracted_iocs if ioc in report_text]
-            if len(valid_iocs) < len(extracted_iocs):
-                logger.warning(
-                    f"Filtered hallucinated IOCs: {set(extracted_iocs) - set(valid_iocs)}"  # noqa: E501
-                )
-            parsed_output["extracted_iocs"] = valid_iocs
-
-            summary = parsed_output.get("summary", "").strip()
-            if not summary:
-                analyzer_count = len(analyzers)
-                obs_type = report.get("observable_type", "unknown")
-                obs_name = report.get("observable", "unknown")
-
-                if analyzer_count == 0:
-                    auto_summary = (
-                        f"Analysis failed or no analyzers produced usable output for observable "  # noqa: E501
-                        f"'{obs_name}' ({obs_type}). Manual review of raw reports recommended."  # noqa: E501
-                    )
-                else:
-                    auto_summary = (
-                        f"The observable '{obs_name}' ({obs_type}) was processed by {analyzer_count} "  # noqa: E501
-                        f"analyzer(s), but LLM summarization failed. Key analyzers present: "  # noqa: E501
-                        f"{', '.join(a.get('name', '?') for a in analyzers)}. "  # noqa: E501
-                        f"Please check raw reports for details."
-                    )
-
-                parsed_output["summary"] = auto_summary
-                logger.warning(
-                    "LLM summary empty — using improved auto-generated fallback summary"  # noqa: E501
-                )
-
-            required_keys = [
-                "summary",
-                "threat_categories",
-                "risk_score",
-                "confidence",
-                "extracted_iocs",
-                "suggested_pivots",
-            ]
-            missing_keys = [k for k in required_keys if k not in parsed_output]
-            if missing_keys:
-                logger.warning(
-                    f"Missing keys in LLM output: {missing_keys} — using defaults"  # noqa: E501
-                )
-                for k in missing_keys:
-                    parsed_output[k] = (
-                        []
-                        if "iocs" in k or "pivots" in k or "categories" in k
-                        else 0
-                        if "risk" in k
-                        else "low"
-                    )
-
-            parsed_output["risk_score"] = int(parsed_output.get("risk_score", 0))  # noqa: E501
-            parsed_output["threat_categories"] = list(parsed_output.get("threat_categories", []))  # noqa: E501
-            parsed_output["extracted_iocs"] = list(parsed_output.get("extracted_iocs", []))  # noqa: E501
-            parsed_output["suggested_pivots"] = list(parsed_output.get("suggested_pivots", []))  # noqa: E501
-
-            for category in parsed_output["threat_categories"]:
-                tag_label = f"ai:{category.lower().replace(' ', '-')}"
-                tag, created = Tag.objects.get_or_create(label=tag_label)
-                if created:
-                    logger.info(f"Created new tag: {tag_label}")
-                job.tags.add(tag)
-
-            logger.info("LLM summarization complete")
-            return parsed_output
-
-        except requests.RequestException as e:
-            logger.error(f"Ollama API request failed: {str(e)}")
-            raise ConnectorRunException(f"Ollama connection/API error: {str(e)}")  # noqa: E501
-        except Exception as e:
-            logger.exception("Unexpected error in LLM_Summarizer")
-            raise ConnectorRunException(f"Unexpected error: {str(e)}")
+    def _apply_auto_tags(self, parsed_output, job):
+        for category in parsed_output["threat_categories"]:
+            tag_label = f"ai:{category.lower().replace(' ', '-')}"
+            tag, created = Tag.objects.get_or_create(label=tag_label)
+            if created:
+                logger.info(f"Created new tag: {tag_label}")
+            job.tags.add(tag)
 
     def _prepare_analyzers(self, job):
-        analyzers = []
-        if hasattr(job, "analyzerreports"):
-            analyzers = [
-                {
-                    "name": ar.config.name,
-                    "status": ar.status,
-                    "report_summary": (
-                        (
-                            {k: self.smart_truncate(v, k) for k, v in ar.report.items()}  # noqa: E501
-                            if isinstance(ar.report, dict)
-                            else {
-                                "report_list": (
-                                    str(ar.report)[:2500] + "..."  # noqa: E501
-                                    if len(str(ar.report)) > 2500
-                                    else ar.report
-                                )
-                            }
-                        )
-                        if ar.report
-                        else {}
-                    ),
-                    "errors": ar.errors[:3] if ar.errors else [],
-                }
-                for ar in job.analyzerreports.all()
-            ]
+        if not hasattr(job, "analyzerreports"):
+            return []
 
-            # Sort analyzers so short & important ones come first (helps truncation preserve them)  # noqa: E501
-            analyzers.sort(
-                key=lambda a: len(json.dumps(a["report_summary"])),
-                reverse=False,  # noqa: E501
-            )
-
-            # Pre-summarize long reports for specific analyzers
-            for analyzer in analyzers:
-                name = analyzer["name"]
-                report = analyzer["report_summary"]
-
-                if name == "Mnemonic_PassiveDNS" and isinstance(report, list):  # noqa: E501
-                    domains = set()
-                    ntp_count = 0
-                    tor_count = 0
-                    google_count = 0
-                    suspicious_count = 0
-                    for entry in report:
-                        rrname = entry.get("rrname", "").lower()
-                        if "tor-exit" in rrname:
-                            tor_count += 1
-                        elif any(
-                            p in rrname
-                            for p in ["ntp.org", "pool.ntp.org", ".pool."]  # noqa: E501
-                        ):
-                            ntp_count += 1
-                        elif "google" in rrname or "dns.google" in rrname:  # noqa: E501
-                            google_count += 1
-                        elif re.match(r"[0-9a-f]{8,}", rrname) or re.match(  # noqa: E501
-                            r"\d+\.\d+\.[a-z0-9]+\.[a-z]+", rrname
-                        ):
-                            suspicious_count += 1
-                        else:
-                            domains.add(rrname)
-                    summary_str = f"{len(report)} resolutions. "
-                    if google_count:
-                        summary_str += f"{google_count} Google-related. "
-                    if tor_count:
-                        summary_str += f"{tor_count} TOR exit related. "
-                    if ntp_count:
-                        summary_str += f"{ntp_count} NTP pool resolutions (mostly historical). "  # noqa: E501
-                    if suspicious_count:
-                        summary_str += f"{suspicious_count} suspicious/random patterns. "  # noqa: E501
-                    if domains:
-                        summary_str += f"Other domains: {', '.join(list(domains)[:5])} ..."  # noqa: E501
-                    analyzer["report_summary"] = {"pre_summary": summary_str}  # noqa: E501
-
-                elif name == "DShield":
-                    if "ip_details" in report:
-                        count = len(report.get("ip_details", []))
-                        threat_feeds = ", ".join(
-                            report.get("ip_info", {}).get("threatfeeds", {}).keys()  # noqa: E501
-                        )
-                        asn_info = report.get("ip_info", {}).get("comment", "no comment")  # noqa: E501
-                        summary_str = f"{count} port 53 connections observed. Comment: {asn_info}. Threat feeds: {threat_feeds or 'none'}."  # noqa: E501
-                        analyzer["report_summary"] = {"pre_summary": summary_str}  # noqa: E501
+        analyzers = self._build_analyzer_list(job.analyzerreports.all())
+        analyzers = self._sort_analyzers_by_size(analyzers)
+        self._presummarize_specific_analyzers(analyzers)
         return analyzers
+
+    def _build_analyzer_list(self, analyzer_reports):
+        return [
+            {
+                "name": ar.config.name,
+                "status": ar.status,
+                "report_summary": (
+                    (
+                        {k: self.smart_truncate(v, k) for k, v in ar.report.items()}  # noqa: E501
+                        if isinstance(ar.report, dict)
+                        else {
+                            "report_list": (
+                                str(ar.report)[:2500] + "..." if len(str(ar.report)) > 2500 else ar.report  # noqa: E501
+                            )
+                        }
+                    )
+                    if ar.report
+                    else {}
+                ),
+                "errors": ar.errors[:3] if ar.errors else [],
+            }
+            for ar in analyzer_reports
+        ]
+
+    def _sort_analyzers_by_size(self, analyzers):
+        analyzers.sort(
+            key=lambda a: len(json.dumps(a["report_summary"])),
+            reverse=False,
+        )
+        return analyzers
+
+    def _presummarize_specific_analyzers(self, analyzers):
+        for analyzer in analyzers:
+            name = analyzer["name"]
+            report = analyzer["report_summary"]
+
+            if name == "Mnemonic_PassiveDNS" and isinstance(report, list):
+                analyzer["report_summary"] = self._summarize_mnemonic_passivedns(report)  # noqa: E501
+
+            elif name == "DShield":
+                analyzer["report_summary"] = self._summarize_dshield(report)
+
+    def _summarize_mnemonic_passivedns(self, report):
+        domains = set()
+        ntp_count = 0
+        tor_count = 0
+        google_count = 0
+        suspicious_count = 0
+        for entry in report:
+            rrname = entry.get("rrname", "").lower()
+            if "tor-exit" in rrname:
+                tor_count += 1
+            elif any(p in rrname for p in ["ntp.org", "pool.ntp.org", ".pool."]):  # noqa: E501
+                ntp_count += 1
+            elif "google" in rrname or "dns.google" in rrname:
+                google_count += 1
+            elif re.match(r"[0-9a-f]{8,}", rrname) or re.match(r"\d+\.\d+\.[a-z0-9]+\.[a-z]+", rrname):  # noqa: E501
+                suspicious_count += 1
+            else:
+                domains.add(rrname)
+        summary_str = f"{len(report)} resolutions. "
+        if google_count:
+            summary_str += f"{google_count} Google-related. "
+        if tor_count:
+            summary_str += f"{tor_count} TOR exit related. "
+        if ntp_count:
+            summary_str += f"{ntp_count} NTP pool resolutions (mostly historical). "  # noqa: E501
+        if suspicious_count:
+            summary_str += f"{suspicious_count} suspicious/random patterns. "
+        if domains:
+            summary_str += f"Other domains: {', '.join(list(domains)[:5])} ..."
+        return {"pre_summary": summary_str}
+
+    def _summarize_dshield(self, report):
+        if "ip_details" not in report:
+            return report
+        count = len(report.get("ip_details", []))
+        threat_feeds = ", ".join(report.get("ip_info", {}).get("threatfeeds", {}).keys())  # noqa: E501
+        asn_info = report.get("ip_info", {}).get("comment", "no comment")
+        summary_str = f"{count} port 53 connections observed. Comment: {asn_info}. Threat feeds: {threat_feeds or 'none'}."  # noqa: E501
+        return {"pre_summary": summary_str}
 
     @staticmethod
     def smart_truncate(v, key):

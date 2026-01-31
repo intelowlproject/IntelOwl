@@ -66,7 +66,7 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
               size="xs"
               style={{ fontSize: "0.8rem" }}
             >
-              Similar Investigations: <br /> {relatedInvestigationNumber}
+              Similar Investigations: <br /> {relatedInvestigationNumber ?? 0}
             </Button>
             <UncontrolledTooltip
               placement="top"

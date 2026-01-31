@@ -21,6 +21,10 @@ class LLMSummarizer(Connector):
     Privacy-first: no external AI provider calls.
     """
 
+    def update(self):
+        """Required abstract method from base class, not used in this connector."""  # noqa: E501
+        pass
+
     def check(self):
         """
         Validate required configuration parameters before execution.
@@ -32,9 +36,7 @@ class LLMSummarizer(Connector):
                 "[LLM_Summarizer] No job context in check() - skipping validation"  # noqa: E501
             )
             return
-        runtime_config = (
-            getattr(job, "runtime_configuration", None) if job else None
-        )  # noqa: E501
+        runtime_config = getattr(job, "runtime_configuration", None) if job else None  # noqa: E501
 
         config = self.config(runtime_configuration=runtime_config)
         params = getattr(config, "parameters", {}) or {}
@@ -57,129 +59,25 @@ class LLMSummarizer(Connector):
                     "Job/Analyzable instance not available in connector context"  # noqa: E501
                 )
 
-            runtime_config = getattr(job, "runtime_configuration", None)
+            runtime_config = getattr(job, "runtime_configuration", None) if job else None  # noqa: E501
 
             config = self.config(runtime_configuration=runtime_config)
             params = getattr(config, "parameters", {}) or {}
             logger.info(f"[LLM_Summarizer] Config parameters: {params}")
 
-            analyzers = []
-            if hasattr(job, "analyzerreports"):
-                analyzers = [
-                    {
-                        "name": ar.config.name,
-                        "status": ar.status,
-                        "report_summary": (
-                            (
-                                {
-                                    k: self.smart_truncate(v, k)
-                                    for k, v in ar.report.items()
-                                }
-                                if isinstance(ar.report, dict)
-                                else {
-                                    "report_list": (
-                                        str(ar.report)[:2500] + "..."  # noqa: E501
-                                        if len(str(ar.report)) > 2500
-                                        else ar.report
-                                    )
-                                }
-                            )
-                            if ar.report
-                            else {}
-                        ),
-                        "errors": ar.errors[:3] if ar.errors else [],
-                    }
-                    for ar in job.analyzerreports.all()
-                ]
-
-                # Sort analyzers so short & important ones come first (helps truncation preserve them)  # noqa: E501
-                analyzers.sort(
-                    key=lambda a: len(json.dumps(a["report_summary"])),
-                    reverse=False,  # noqa: E501
-                )
-
-                # Pre-summarize long reports for specific analyzers
-                for analyzer in analyzers:
-                    name = analyzer["name"]
-                    report = analyzer["report_summary"]
-
-                    if name == "Mnemonic_PassiveDNS" and isinstance(
-                        report, list
-                    ):  # noqa: E501
-                        domains = set()
-                        ntp_count = 0
-                        tor_count = 0
-                        google_count = 0
-                        suspicious_count = 0
-                        for entry in report:
-                            rrname = entry.get("rrname", "").lower()
-                            if "tor-exit" in rrname:
-                                tor_count += 1
-                            elif any(
-                                p in rrname
-                                for p in ["ntp.org", "pool.ntp.org", ".pool."]
-                            ):
-                                ntp_count += 1
-                            elif (
-                                "google" in rrname or "dns.google" in rrname
-                            ):  # noqa: E501
-                                google_count += 1
-                            elif re.match(
-                                r"[0-9a-f]{8,}", rrname
-                            ) or re.match(  # noqa: E501
-                                r"\d+\.\d+\.[a-z0-9]+\.[a-z]+", rrname
-                            ):
-                                suspicious_count += 1
-                            else:
-                                domains.add(rrname)
-                        summary_str = f"{len(report)} resolutions. "
-                        if google_count:
-                            summary_str += f"{google_count} Google-related. "
-                        if tor_count:
-                            summary_str += f"{tor_count} TOR exit related. "
-                        if ntp_count:
-                            summary_str += f"{ntp_count} NTP pool resolutions (mostly historical). "  # noqa: E501
-                        if suspicious_count:
-                            summary_str += f"{suspicious_count} suspicious/random patterns. "  # noqa: E501
-                        if domains:
-                            summary_str += f"Other domains: {', '.join(list(domains)[:5])} ..."  # noqa: E501
-                        analyzer["report_summary"] = {
-                            "pre_summary": summary_str
-                        }  # noqa: E501
-
-                    elif name == "DShield":
-                        if "ip_details" in report:
-                            count = len(report.get("ip_details", []))
-                            threat_feeds = ", ".join(
-                                report.get("ip_info", {})
-                                .get("threatfeeds", {})
-                                .keys()  # noqa: E501
-                            )
-                            asn_info = report.get("ip_info", {}).get(
-                                "comment", "no comment"
-                            )
-                            summary_str = f"{count} port 53 connections observed. Comment: {asn_info}. Threat feeds: {threat_feeds or 'none'}."  # noqa: E501
-                            analyzer["report_summary"] = {
-                                "pre_summary": summary_str
-                            }  # noqa: E501
+            analyzers = self._prepare_analyzers(job)
 
             logger.info(f"[LLM_Summarizer] Found {len(analyzers)} analyzers")
 
-            observable = getattr(job, "observable_name", None) or getattr(
-                job, "file_name", None
-            )
+            observable = getattr(job, "observable_name", None) or getattr(job, "file_name", None)  # noqa: E501
 
             if (
-                not observable
-                and hasattr(job, "data_model")
-                and job.data_model  # noqa: E501
+                not observable and hasattr(job, "data_model") and job.data_model  # noqa: E501
             ):
                 observable = getattr(job.data_model, "observable_name", None)
 
             if not observable or observable == "unknown":
-                full_report_text = json.dumps(
-                    {a["name"]: a["report_summary"] for a in analyzers}
-                )
+                full_report_text = json.dumps({a["name"]: a["report_summary"] for a in analyzers})  # noqa: E501
                 for pattern in [
                     r"\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b",
                     r"\b[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b",
@@ -199,16 +97,10 @@ class LLMSummarizer(Connector):
             report = {
                 "id": getattr(job, "id", "unknown"),
                 "observable": observable,
-                "observable_type": getattr(
-                    job, "observable_classification", "unknown"
-                ),  # noqa: E501
+                "observable_type": getattr(job, "observable_classification", "unknown"),  # noqa: E501
                 "status": getattr(job, "status", "unknown"),
                 "analyzers": analyzers,
-                "tags": (
-                    list(job.tags.values_list("label", flat=True))
-                    if hasattr(job, "tags")
-                    else []
-                ),
+                "tags": (list(job.tags.values_list("label", flat=True)) if hasattr(job, "tags") else []),  # noqa: E501
             }
 
             report_text = json.dumps(report, indent=2)
@@ -273,15 +165,11 @@ JSON STRUCTURE ONLY:
 
             full_prompt = f"{system_prompt}\n\nReport:\n{report_text}"
 
-            ollama_url = params.get(
-                "ollama_url", "http://host.docker.internal:11434"
-            )  # noqa: E501
+            ollama_url = params.get("ollama_url", "http://host.docker.internal:11434")  # noqa: E501
             model = params.get("model", "llama3")
 
             if not ollama_url.startswith(("http://", "https://")):
-                raise ConnectorConfigurationException(
-                    f"Invalid ollama_url: {ollama_url}"
-                )
+                raise ConnectorConfigurationException(f"Invalid ollama_url: {ollama_url}")  # noqa: E501
 
             logger.info(
                 f"[LLM_Summarizer] Calling Ollama → {ollama_url} / model: {model}"  # noqa: E501
@@ -341,16 +229,14 @@ JSON STRUCTURE ONLY:
                 # Remove any text before first {  and after last }
                 start = text.find("{")
                 end = text.rfind("}") + 1
-                if start >= 0 and end > start:
+                if start >= 0 < end:
                     text = text[start:end]
                 else:
                     text = "{}"
 
                 # Replace single quotes with double quotes (very common mistake)  # noqa: E501
                 # But only in places that look like keys/values (naive but effective)  # noqa: E501
-                text = re.sub(
-                    r"(\w+)'s\b", r"\1's", text
-                )  # protect possessives  # noqa: E501
+                text = re.sub(r"(\w+)'s\b", r"\1's", text)  # protect possessives  # noqa: E501
                 text = text.replace("'", '"')
 
                 # Remove trailing commas more aggressively (repeat 2–3×)
@@ -358,24 +244,18 @@ JSON STRUCTURE ONLY:
                     text = re.sub(r",\s*([}\]])", r"\1", text)
 
                 # Remove // and # style comments (sometimes models still do it)
-                text = re.sub(
-                    r"\s*(//|#).*?(?=\n|$)", "", text, flags=re.MULTILINE
-                )  # noqa: E501
+                text = re.sub(r"\s*(//|#).*?(?=\n|$)", "", text, flags=re.MULTILINE)  # noqa: E501
 
                 parsed_output = json.loads(text)
 
             except json.JSONDecodeError as e:
-                logger.error(
-                    f"JSON parse still failed after strong cleanup: {str(e)}"
-                )  # noqa: E501
+                logger.error(f"JSON parse still failed after strong cleanup: {str(e)}")  # noqa: E501
                 logger.debug(f"Cleaned text that failed:\n{text[:600]}...")
 
                 partial = {}
                 try:
                     # Try to find key pieces even if structure is broken
-                    if m := re.search(
-                        r'"summary"\s*:\s*"([^"]*?)"', text, re.DOTALL
-                    ):  # noqa: E501
+                    if m := re.search(r'"summary"\s*:\s*"([^"]*?)"', text, re.DOTALL):  # noqa: E501
                         partial["summary"] = m.group(1).strip()
                     if m := re.search(r'"risk_score"\s*:\s*(\d+)', text):
                         partial["risk_score"] = int(m.group(1))
@@ -447,21 +327,15 @@ JSON STRUCTURE ONLY:
                     parsed_output[k] = (
                         []
                         if "iocs" in k or "pivots" in k or "categories" in k
-                        else 0 if "risk" in k else "low"
+                        else 0
+                        if "risk" in k
+                        else "low"
                     )
 
-            parsed_output["risk_score"] = int(
-                parsed_output.get("risk_score", 0)
-            )  # noqa: E501
-            parsed_output["threat_categories"] = list(
-                parsed_output.get("threat_categories", [])
-            )
-            parsed_output["extracted_iocs"] = list(
-                parsed_output.get("extracted_iocs", [])
-            )
-            parsed_output["suggested_pivots"] = list(
-                parsed_output.get("suggested_pivots", [])
-            )
+            parsed_output["risk_score"] = int(parsed_output.get("risk_score", 0))  # noqa: E501
+            parsed_output["threat_categories"] = list(parsed_output.get("threat_categories", []))  # noqa: E501
+            parsed_output["extracted_iocs"] = list(parsed_output.get("extracted_iocs", []))  # noqa: E501
+            parsed_output["suggested_pivots"] = list(parsed_output.get("suggested_pivots", []))  # noqa: E501
 
             for category in parsed_output["threat_categories"]:
                 tag_label = f"ai:{category.lower().replace(' ', '-')}"
@@ -475,14 +349,98 @@ JSON STRUCTURE ONLY:
 
         except requests.RequestException as e:
             logger.error(f"Ollama API request failed: {str(e)}")
-            raise ConnectorRunException(
-                f"Ollama connection/API error: {str(e)}"
-            )  # noqa: E501
+            raise ConnectorRunException(f"Ollama connection/API error: {str(e)}")  # noqa: E501
         except Exception as e:
             logger.exception("Unexpected error in LLM_Summarizer")
             raise ConnectorRunException(f"Unexpected error: {str(e)}")
 
-    def smart_truncate(self, v, key):
+    def _prepare_analyzers(self, job):
+        analyzers = []
+        if hasattr(job, "analyzerreports"):
+            analyzers = [
+                {
+                    "name": ar.config.name,
+                    "status": ar.status,
+                    "report_summary": (
+                        (
+                            {k: self.smart_truncate(v, k) for k, v in ar.report.items()}  # noqa: E501
+                            if isinstance(ar.report, dict)
+                            else {
+                                "report_list": (
+                                    str(ar.report)[:2500] + "..."  # noqa: E501
+                                    if len(str(ar.report)) > 2500
+                                    else ar.report
+                                )
+                            }
+                        )
+                        if ar.report
+                        else {}
+                    ),
+                    "errors": ar.errors[:3] if ar.errors else [],
+                }
+                for ar in job.analyzerreports.all()
+            ]
+
+            # Sort analyzers so short & important ones come first (helps truncation preserve them)  # noqa: E501
+            analyzers.sort(
+                key=lambda a: len(json.dumps(a["report_summary"])),
+                reverse=False,  # noqa: E501
+            )
+
+            # Pre-summarize long reports for specific analyzers
+            for analyzer in analyzers:
+                name = analyzer["name"]
+                report = analyzer["report_summary"]
+
+                if name == "Mnemonic_PassiveDNS" and isinstance(report, list):  # noqa: E501
+                    domains = set()
+                    ntp_count = 0
+                    tor_count = 0
+                    google_count = 0
+                    suspicious_count = 0
+                    for entry in report:
+                        rrname = entry.get("rrname", "").lower()
+                        if "tor-exit" in rrname:
+                            tor_count += 1
+                        elif any(
+                            p in rrname
+                            for p in ["ntp.org", "pool.ntp.org", ".pool."]  # noqa: E501
+                        ):
+                            ntp_count += 1
+                        elif "google" in rrname or "dns.google" in rrname:  # noqa: E501
+                            google_count += 1
+                        elif re.match(r"[0-9a-f]{8,}", rrname) or re.match(  # noqa: E501
+                            r"\d+\.\d+\.[a-z0-9]+\.[a-z]+", rrname
+                        ):
+                            suspicious_count += 1
+                        else:
+                            domains.add(rrname)
+                    summary_str = f"{len(report)} resolutions. "
+                    if google_count:
+                        summary_str += f"{google_count} Google-related. "
+                    if tor_count:
+                        summary_str += f"{tor_count} TOR exit related. "
+                    if ntp_count:
+                        summary_str += f"{ntp_count} NTP pool resolutions (mostly historical). "  # noqa: E501
+                    if suspicious_count:
+                        summary_str += f"{suspicious_count} suspicious/random patterns. "  # noqa: E501
+                    if domains:
+                        summary_str += f"Other domains: {', '.join(list(domains)[:5])} ..."  # noqa: E501
+                    analyzer["report_summary"] = {"pre_summary": summary_str}  # noqa: E501
+
+                elif name == "DShield":
+                    if "ip_details" in report:
+                        count = len(report.get("ip_details", []))
+                        threat_feeds = ", ".join(
+                            report.get("ip_info", {}).get("threatfeeds", {}).keys()  # noqa: E501
+                        )
+                        asn_info = report.get("ip_info", {}).get("comment", "no comment")  # noqa: E501
+                        summary_str = f"{count} port 53 connections observed. Comment: {asn_info}. Threat feeds: {threat_feeds or 'none'}."  # noqa: E501
+                        analyzer["report_summary"] = {"pre_summary": summary_str}  # noqa: E501
+        return analyzers
+
+    @staticmethod
+    def smart_truncate(v, key):
         """
         Smart truncation for report fields, giving more space to important keys.  # noqa: E501
         """

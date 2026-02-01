@@ -102,9 +102,7 @@ def ask_analysis_availability(request):
     Returns:
     - 200: JSON response with the analysis status, job ID, and analyzers to be executed.
     """
-    serializer = JobAvailabilitySerializer(
-        data=request.data, context={"request": request}
-    )
+    serializer = JobAvailabilitySerializer(data=request.data, context={"request": request})
     serializer.is_valid(raise_exception=True)
     try:
         job = serializer.save()
@@ -134,9 +132,7 @@ def ask_multi_analysis_availability(request):
     - 200: JSON response with the analysis status, job IDs, and analyzers to be executed for each MD5 hash.
     """
     logger.info(f"received ask_multi_analysis_availability from user {request.user}")
-    serializer = JobAvailabilitySerializer(
-        data=request.data, context={"request": request}, many=True
-    )
+    serializer = JobAvailabilitySerializer(data=request.data, context={"request": request}, many=True)
     serializer.is_valid(raise_exception=True)
     try:
         jobs = serializer.save()
@@ -254,9 +250,7 @@ def analyze_multiple_observables(request):
     """
     logger.info(f"received analyze_multiple_observables from user {request.user}")
     logger.debug(f"{request.data=}")
-    oas = ObservableAnalysisSerializer(
-        data=request.data, many=True, context={"request": request}
-    )
+    oas = ObservableAnalysisSerializer(data=request.data, many=True, context={"request": request})
     oas.is_valid(raise_exception=True)
     logger.debug(f"{oas.validated_data=}")
     parent_job = oas.validated_data[0].get("parent_job", None)
@@ -359,9 +353,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     - Prefetches related tags and orders jobs by request time, filtered to include only jobs visible to the authenticated user.
     """
 
-    queryset = (
-        Job.objects.prefetch_related("tags").order_by("-received_request_time").all()
-    )
+    queryset = Job.objects.prefetch_related("tags").order_by("-received_request_time").all()
     serializer_class = RestJobSerializer
     serializer_action_classes = {
         "retrieve": RestJobSerializer,
@@ -399,9 +391,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         - Filtered queryset of jobs.
         """
         user = self.request.user
-        logger.info(
-            f"user: {user} request the jobs with params: {self.request.query_params}"
-        )
+        logger.info(f"user: {user} request the jobs with params: {self.request.query_params}")
         return Job.objects.visible_for_user(user).order_by("-received_request_time")
 
     @action(detail=False, methods=["post"])
@@ -422,16 +412,11 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         jobs = (
             Job.objects.filter(analyzable__md5=request.data["md5"])
             .visible_for_user(self.request.user)
-            .filter(
-                finished_analysis_time__gte=now()
-                - datetime.timedelta(days=max_temporal_distance)
-            )
+            .filter(finished_analysis_time__gte=now() - datetime.timedelta(days=max_temporal_distance))
             .annotate_importance(request.user)
             .order_by("-importance", "-finished_analysis_time")
         )
-        return Response(
-            JobRecentScanSerializer(jobs, many=True).data, status=status.HTTP_200_OK
-        )
+        return Response(JobRecentScanSerializer(jobs, many=True).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["post"])
     def recent_scans_user(self, request):
@@ -454,12 +439,10 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             jobs = jobs.filter(analyzable__classification=Classification.FILE)
         else:
             jobs = jobs.exclude(analyzable__classification=Classification.FILE)
-        jobs = jobs.annotate_importance(request.user).order_by(
-            "-importance", "-finished_analysis_time"
-        )[:limit]
-        return Response(
-            JobRecentScanSerializer(jobs, many=True).data, status=status.HTTP_200_OK
-        )
+        jobs = jobs.annotate_importance(request.user).order_by("-importance", "-finished_analysis_time")[
+            :limit
+        ]
+        return Response(JobRecentScanSerializer(jobs, many=True).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["patch"])
     def retry(self, request, pk=None):
@@ -499,9 +482,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         else:
             data["observable_classification"] = existing_job.analyzable.classification
             data["observable_name"] = existing_job.analyzable.name
-            job_serializer = ObservableAnalysisSerializer(
-                data=data, context={"request": request}
-            )
+            job_serializer = ObservableAnalysisSerializer(data=data, context={"request": request})
         job_serializer.is_valid(raise_exception=True)
         new_job = job_serializer.save(send_task=True)
         logger.info(f"rescan request for job: {pk} generated job: {new_job.pk}")
@@ -545,9 +526,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
 
         # make sure it is a sample
         if not job.is_sample:
-            raise ValidationError(
-                {"detail": "Requested job does not have a sample associated with it."}
-            )
+            raise ValidationError({"detail": "Requested job does not have a sample associated with it."})
         return FileResponse(
             job.analyzable.file,
             filename=job.analyzable.name,
@@ -555,9 +534,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             as_attachment=True,
         )
 
-    @action(
-        detail=True, methods=["post"]
-    )  # , url_path="pivot-(?P<pivot_config_pk>\d+)")
+    @action(detail=True, methods=["post"])  # , url_path="pivot-(?P<pivot_config_pk>\d+)")
     def pivot(self, request, pk=None, pivot_config_pk=None):
         """
         Perform a pivot operation from a job's reports based on a specified pivot configuration.
@@ -582,9 +559,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
                 raise ValidationError({"detail": msg})
             except Exception as e:
                 logger.exception(e)
-                raise ValidationError(
-                    {"detail": f"Unable to start pivot from job {starting_job.pk}"}
-                )
+                raise ValidationError({"detail": f"Unable to start pivot from job {starting_job.pk}"})
             else:
                 return Response(
                     [pivot.ending_job.pk for pivot in pivots],
@@ -615,9 +590,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
                 Job.STATUSES.REPORTED_WITHOUT_FAILS,
             ]
         }
-        return self.__aggregation_response_static(
-            annotations, users=self.get_org_members(request)
-        )
+        return self.__aggregation_response_static(annotations, users=self.get_org_members(request))
 
     @action(
         url_path="aggregate/type",
@@ -633,16 +606,10 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         - Aggregated count of jobs for each type.
         """
         annotations = {
-            "file": Count(
-                "pk", filter=Q(analyzable__classification=Classification.FILE.value)
-            ),
-            "observable": Count(
-                "pk", filter=~Q(analyzable__classification=Classification.FILE.value)
-            ),
+            "file": Count("pk", filter=Q(analyzable__classification=Classification.FILE.value)),
+            "observable": Count("pk", filter=~Q(analyzable__classification=Classification.FILE.value)),
         }
-        return self.__aggregation_response_static(
-            annotations, users=self.get_org_members(request)
-        )
+        return self.__aggregation_response_static(annotations, users=self.get_org_members(request))
 
     @action(
         url_path="aggregate/observable_classification",
@@ -658,9 +625,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         - Aggregated count of jobs for each observable classification.
         """
         annotations = {
-            oc.lower(): Count(
-                "analyzable__classification", filter=Q(analyzable__classification=oc)
-            )
+            oc.lower(): Count("analyzable__classification", filter=Q(analyzable__classification=oc))
             for oc in [
                 Classification.DOMAIN,
                 Classification.IP,
@@ -669,9 +634,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
                 Classification.GENERIC,
             ]
         }
-        return self.__aggregation_response_static(
-            annotations, users=self.get_org_members(request)
-        )
+        return self.__aggregation_response_static(annotations, users=self.get_org_members(request))
 
     @action(
         url_path="aggregate/file_mimetype",
@@ -720,9 +683,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         Returns:
         - Aggregated count of users for each one.
         """
-        return self.__aggregation_response_dynamic(
-            "user__username", users=self.get_org_members(request)
-        )
+        return self.__aggregation_response_dynamic("user__username", users=self.get_org_members(request))
 
     @action(
         url_path="aggregate/top_tlp",
@@ -737,9 +698,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         Returns:
         - Aggregated count of TLPs for each one.
         """
-        return self.__aggregation_response_dynamic(
-            "tlp", users=self.get_org_members(request)
-        )
+        return self.__aggregation_response_dynamic("tlp", users=self.get_org_members(request))
 
     @staticmethod
     def get_org_members(request):
@@ -761,9 +720,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         users_of_organization = None
         if org_param:
             organization = user.membership.organization
-            users_of_organization = [
-                membership.user for membership in organization.members.all()
-            ]
+            users_of_organization = [membership.user for membership in organization.members.all()]
         return users_of_organization
 
     def __aggregation_response_static(self, annotations: dict, users=None) -> Response:
@@ -841,15 +798,13 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             .values_list(field_name, flat=True)
         )
 
-        logger.info(
-            f"request: {field_name} found most_frequent_values: {most_frequent_values}"
-        )
+        logger.info(f"request: {field_name} found most_frequent_values: {most_frequent_values}")
 
         if len(most_frequent_values):
             annotations = {
-                val.replace(" ", "")
-                .replace("?", "")
-                .replace(";", ""): Count(field_name, filter=Q(**{field_name: val}))
+                val.replace(" ", "").replace("?", "").replace(";", ""): Count(
+                    field_name, filter=Q(**{field_name: val})
+                )
                 for val in most_frequent_values
             }
             logger.debug(f"request: {field_name} annotations: {annotations}")
@@ -861,9 +816,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
                     .annotate(**annotations)
                 )
             else:
-                aggregation = Job.objects.filter(**filter_kwargs).aggregate(
-                    **annotations
-                )
+                aggregation = Job.objects.filter(**filter_kwargs).aggregate(**annotations)
         else:
             aggregation = {}
 
@@ -1171,9 +1124,7 @@ class PythonReportActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         Raises:
             ValidationError: If the report is not in a valid state for killing.
         """
-        logger.info(
-            f"kill request from user {request.user} for job_id {job_id}, pk {report_id}"
-        )
+        logger.info(f"kill request from user {request.user} for job_id {job_id}, pk {report_id}")
         # get report object or raise 404
         report = self.get_object(job_id, report_id)
         if report.status not in [
@@ -1199,18 +1150,14 @@ class PythonReportActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         Raises:
             RuntimeError: If unable to find a valid task signature for the report.
         """
-        logger.info(
-            f"retry request from user {request.user} for job_id {job_id}, report_id {report_id}"
-        )
+        logger.info(f"retry request from user {request.user} for job_id {job_id}, report_id {report_id}")
         # get report object or raise 404
         report = self.get_object(job_id, report_id)
         if report.status not in [
             AbstractReport.STATUSES.FAILED,
             AbstractReport.STATUSES.KILLED,
         ]:
-            raise ValidationError(
-                {"detail": "Plugin status should be failed or killed"}
-            )
+            raise ValidationError({"detail": "Plugin status should be failed or killed"})
 
         # retry with the same arguments
         try:
@@ -1222,9 +1169,7 @@ class PythonReportActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class AbstractConfigViewSet(
-    PaginationMixin, viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta
-):
+class AbstractConfigViewSet(PaginationMixin, viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
     """
     A base view set for handling plugin configuration actions.
 
@@ -1339,9 +1284,7 @@ class PythonConfigViewSet(AbstractConfigViewSet):
         Returns:
             QuerySet: A queryset of PythonConfig instances.
         """
-        return self.serializer_class.Meta.model.objects.all().prefetch_related(
-            "python_module__parameters"
-        )
+        return self.serializer_class.Meta.model.objects.all().prefetch_related("python_module__parameters")
 
     @action(
         methods=["get"],
@@ -1377,9 +1320,7 @@ class PythonConfigViewSet(AbstractConfigViewSet):
             raise ValidationError({"detail": "No healthcheck implemented"})
         except Exception as e:
             logger.exception(e)
-            raise ValidationError(
-                {"detail": "Unexpected exception raised. Check the code."}
-            )
+            raise ValidationError({"detail": "Unexpected exception raised. Check the code."})
         else:
             return Response(data={"status": health_status}, status=status.HTTP_200_OK)
 
@@ -1416,14 +1357,10 @@ class PythonConfigViewSet(AbstractConfigViewSet):
             raise ValidationError({"detail": str(e)})
         except Exception as e:
             logger.exception(e)
-            raise ValidationError(
-                {"detail": "Unexpected exception raised. Check the code."}
-            )
+            raise ValidationError({"detail": "Unexpected exception raised. Check the code."})
         else:
             if update_status is None:
-                raise ValidationError(
-                    {"detail": "This Plugin has no Update implemented"}
-                )
+                raise ValidationError({"detail": "This Plugin has no Update implemented"})
             return Response(data={"status": update_status}, status=status.HTTP_200_OK)
 
 
@@ -1467,15 +1404,11 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
         except ObjectDoesNotExist:
             raise NotFound("Requested plugin does not exist.")
         try:
-            plugin_configs: PluginConfig = PluginConfig.objects.filter(
-                **{obj.snake_case_name: obj.pk}
-            )
+            plugin_configs: PluginConfig = PluginConfig.objects.filter(**{obj.snake_case_name: obj.pk})
         except PluginConfig.DoesNotExist:
             raise NotFound("Requested plugin config does not exist.")
         else:
-            pc = PluginConfigSerializer(
-                plugin_configs, context={"request": request}, many=True
-            )
+            pc = PluginConfigSerializer(plugin_configs, context={"request": request}, many=True)
             pp = ParameterSerializer(obj.parameters, many=True)
             org_config = []
             user_config = []
@@ -1498,8 +1431,7 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
                     for config in [
                         config
                         for config in pc.data
-                        if config["organization"] == org
-                        and config["attribute"] == attribute
+                        if config["organization"] == org and config["attribute"] == attribute
                     ]:
                         param_obj.update(config)
                         param_obj["exist"] = True
@@ -1553,9 +1485,7 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
     @plugin_config.mapping.post
     def create(self, request, name=None):
         logger.info(f"post plugin_config from user {request.user}, name {name}")
-        serializer = self.get_serializer(
-            data=request.data, context={"request": request}, many=True
-        )
+        serializer = self.get_serializer(data=request.data, context={"request": request}, many=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -1598,43 +1528,23 @@ class ElasticSearchView(GenericAPIView):
 
         # additional filters based on request params
         if elastic_request_params.plugin_name:
-            filter_list.append(
-                QElastic("term", config__plugin_name=elastic_request_params.plugin_name)
-            )
+            filter_list.append(QElastic("term", config__plugin_name=elastic_request_params.plugin_name))
         if elastic_request_params.name:
-            filter_list.append(
-                QElastic("term", config__name=elastic_request_params.name)
-            )
+            filter_list.append(QElastic("term", config__name=elastic_request_params.name))
         if elastic_request_params.status:
             filter_list.append(QElastic("term", status=elastic_request_params.status))
         if elastic_request_params.errors is True:
             filter_list.append(QElastic("exists", field="errors"))
         elif elastic_request_params.errors is False:
-            filter_list.append(
-                QElastic("bool", must_not=[QElastic("exists", field="errors")])
-            )
+            filter_list.append(QElastic("bool", must_not=[QElastic("exists", field="errors")]))
         if elastic_request_params.start_start_time:
-            filter_list.append(
-                QElastic(
-                    "range", start_time={"gte": elastic_request_params.start_start_time}
-                )
-            )
+            filter_list.append(QElastic("range", start_time={"gte": elastic_request_params.start_start_time}))
         if elastic_request_params.end_start_time:
-            filter_list.append(
-                QElastic(
-                    "range", start_time={"lte": elastic_request_params.end_start_time}
-                )
-            )
+            filter_list.append(QElastic("range", start_time={"lte": elastic_request_params.end_start_time}))
         if elastic_request_params.start_end_time:
-            filter_list.append(
-                QElastic(
-                    "range", end_time={"gte": elastic_request_params.start_end_time}
-                )
-            )
+            filter_list.append(QElastic("range", end_time={"gte": elastic_request_params.start_end_time}))
         if elastic_request_params.end_end_time:
-            filter_list.append(
-                QElastic("range", end_time={"lte": elastic_request_params.end_end_time})
-            )
+            filter_list.append(QElastic("range", end_time={"lte": elastic_request_params.end_end_time}))
         if elastic_request_params.report:
             filter_list.append(QElastic("term", report=elastic_request_params.report))
 
@@ -1650,15 +1560,11 @@ class ElasticSearchView(GenericAPIView):
         )
         logger.info(f"filters: {filter_list}, total hits: {len(elastic_response)}")
         serialize_response = ElasticResponseSerializer(
-            data=self.paginate_queryset(
-                queryset=[hit.to_dict() for hit in elastic_response]
-            ),
+            data=self.paginate_queryset(queryset=[hit.to_dict() for hit in elastic_response]),
             many=True,
         )
         serialize_response.is_valid(raise_exception=True)
         serialized_data_response = serialize_response.data
         logger.debug(f"{serialized_data_response=}")
-        logger.debug(
-            f"{[str(e['job']['id']) + '-' + e['config']['name'] for e in serialized_data_response]}"
-        )
+        logger.debug(f"{[str(e['job']['id']) + '-' + e['config']['name'] for e in serialized_data_response]}")
         return self.get_paginated_response(serialized_data_response)

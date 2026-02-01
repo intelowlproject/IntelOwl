@@ -667,6 +667,10 @@ class AbstractReportQuerySet(SendToBiQuerySet):
             ]
         )
 
+    def _get_bi_serializer_class(self):
+        # Implementation here (look at SendToBiQuerySet for reference)
+        pass
+
     def get_configurations(self) -> AbstractConfigQuerySet:
         """
         Retrieves configurations associated with the reports.

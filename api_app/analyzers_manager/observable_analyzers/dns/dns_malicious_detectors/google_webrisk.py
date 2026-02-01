@@ -19,6 +19,11 @@ from api_app.choices import Classification
 logger = logging.getLogger(__name__)
 
 
+def update(self):
+        """
+        Satisfies the abstract requirement for Plugin/ObservableAnalyzer.
+        """
+        pass
 class WebRisk(classes.ObservableAnalyzer):
     """Check if observable analyzed is marked as malicious by Google WebRisk API
 

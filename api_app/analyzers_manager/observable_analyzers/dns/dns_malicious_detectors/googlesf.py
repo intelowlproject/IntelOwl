@@ -27,6 +27,12 @@ class MockUpSafeBrowsing:
         }
 
 
+    def update(self):
+        """
+        Satisfies the abstract requirement for Plugin/ObservableAnalyzer.
+        """
+        pass
+    
 class GoogleSF(classes.ObservableAnalyzer):
     """Check if observable analyzed is marked as malicious for Google SafeBrowsing"""
 

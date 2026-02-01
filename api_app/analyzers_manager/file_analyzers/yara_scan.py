@@ -192,11 +192,7 @@ class YaraRepo:
                     continue
 
                 safe_name = (
-                    rule_name.lower()
-                    .replace(" ", "_")
-                    .replace("/", "_")
-                    .replace("\\", "_")
-                    .replace(":", "_")
+                    rule_name.lower().replace(" ", "_").replace("/", "_").replace("\\", "_").replace(":", "_")
                 )
 
                 file_path = base_dir / f"{safe_name}.yar"

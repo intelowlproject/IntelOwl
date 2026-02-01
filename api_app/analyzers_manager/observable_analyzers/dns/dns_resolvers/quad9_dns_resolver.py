@@ -25,9 +25,7 @@ class Quad9DNSResolver(DoHMixin, classes.ObservableAnalyzer):
         pass
 
     def run(self):
-        observable = self.convert_to_domain(
-            self.observable_name, self.observable_classification
-        )
+        observable = self.convert_to_domain(self.observable_name, self.observable_classification)
         complete_url = self.build_query_url(observable)
 
         # sometimes it can respond with 503, I suppose to avoid DoS.
@@ -37,9 +35,7 @@ class Quad9DNSResolver(DoHMixin, classes.ObservableAnalyzer):
         quad9_response = None
         for attempt in range(attempt_number):
             try:
-                quad9_response = httpx.Client(http2=True).get(
-                    complete_url, headers=self.headers, timeout=10
-                )
+                quad9_response = httpx.Client(http2=True).get(complete_url, headers=self.headers, timeout=10)
             except httpx.ConnectError as exception:
                 if attempt == attempt_number - 1:
                     raise exception

@@ -18,6 +18,4 @@ class TestYaraAnalyzer(TestCase):
         self.ys.update()
 
     def test_unprotect_url_in_config(self):
-        self.assertIn(
-            "https://yaraify.abuse.ch/yarahub/yaraify-rules.zip", self.pc.value
-        )
+        self.assertIn("https://yaraify.abuse.ch/yarahub/yaraify-rules.zip", self.pc.value)

@@ -162,6 +162,7 @@ class PlaybookConfigViewSetTestCase(AbstractConfigViewSetTestCaseMixin, CustomVi
                 "analyzers": [
                     "AdGuard",
                     "Classic_DNS",
+                    "CleanBrowsing_Malicious_Detector",
                     "CloudFlare_DNS",
                     "CloudFlare_Malicious_Detector",
                     "DNS4EU",

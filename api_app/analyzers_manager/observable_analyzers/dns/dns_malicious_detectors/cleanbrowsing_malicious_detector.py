@@ -1,7 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-"""Check if the domains is reported as malicious in CleanBrowsing database"""
+"""Check if the domain is reported as malicious in CleanBrowsing database"""
 
 from urllib.parse import urlparse
 
@@ -53,6 +53,8 @@ class CleanBrowsingMaliciousDetector(classes.ObservableAnalyzer):
                     if hasattr(rdata, "mname") and str(rdata.mname) == "cleanbrowsing.rpz.noc.org.":
                         is_malicious = True
                         break
+                if is_malicious:
+                    break
 
         return malicious_detector_response(self.observable_name, is_malicious)
 

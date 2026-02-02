@@ -1,0 +1,78 @@
+{{- if and .Values.networking.gateway.create (eq .Values.networking.type "gateway") }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ include "intelowl.gatewayName" . }}
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: gateway
+  {{- with .Values.networking.gateway.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  gatewayClassName: {{ .Values.networking.gateway.gatewayClass.name | default "nginx" }}
+  listeners:
+    {{- range .Values.networking.gateway.listeners }}
+    - name: {{ .name }}
+      port: {{ .port }}
+      protocol: {{ .protocol }}
+      {{- if .hostname }}
+      hostname: {{ .hostname | quote }}
+      {{- end }}
+      {{- if .allowedRoutes }}
+      allowedRoutes:
+        {{- if .allowedRoutes.namespaces }}
+        namespaces:
+          from: {{ .allowedRoutes.namespaces.from | default "Same" }}
+          {{- if .allowedRoutes.namespaces.selector }}
+          selector:
+            {{- toYaml .allowedRoutes.namespaces.selector | nindent 12 }}
+          {{- end }}
+        {{- end }}
+        {{- if .allowedRoutes.kinds }}
+        kinds:
+          {{- toYaml .allowedRoutes.kinds | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      {{- if .tls }}
+      tls:
+        mode: {{ .tls.mode | default "Terminate" }}
+        {{- if .tls.certificateRefs }}
+        certificateRefs:
+          {{- range .tls.certificateRefs }}
+          - name: {{ .name }}
+            {{- if .kind }}
+            kind: {{ .kind }}
+            {{- end }}
+            {{- if .namespace }}
+            namespace: {{ .namespace }}
+            {{- end }}
+          {{- end }}
+        {{- end }}
+        {{- if .tls.options }}
+        options:
+          {{- toYaml .tls.options | nindent 10 }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- if .Values.networking.gateway.addresses }}
+  addresses:
+    {{- toYaml .Values.networking.gateway.addresses | nindent 4 }}
+  {{- end }}
+{{- end }}
+---
+{{- if and .Values.networking.gateway.gatewayClass.create (eq .Values.networking.type "gateway") }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: {{ .Values.networking.gateway.gatewayClass.name | default "nginx" }}
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+spec:
+  controllerName: {{ include "intelowl.gatewayControllerName" . }}
+  {{- if .Values.networking.gateway.gatewayClass.parametersRef }}
+  parametersRef:
+    {{- toYaml .Values.networking.gateway.gatewayClass.parametersRef | nindent 4 }}
+  {{- end }}
+{{- end }}

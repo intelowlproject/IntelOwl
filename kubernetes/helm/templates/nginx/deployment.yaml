@@ -1,0 +1,138 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "intelowl.fullname" . }}-nginx
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: nginx
+spec:
+  replicas: {{ .Values.nginx.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "intelowl.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: nginx
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmaps/nginx-config.yaml") . | sha256sum }}
+      labels:
+        {{- include "intelowl.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: nginx
+    spec:
+      {{- include "intelowl.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ include "intelowl.serviceAccountName" . }}
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 0
+        fsGroup: 0
+      initContainers:
+        {{- include "intelowl.waitForUwsgiInitContainer" . | nindent 8 }}
+        {{- if .Values.daphne.enabled }}
+        - name: wait-for-daphne
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z {{ include "intelowl.fullname" . }}-daphne {{ .Values.daphne.service.port }}; do
+                echo "Waiting for Daphne..."
+                sleep 2
+              done
+              echo "Daphne is ready!"
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "10m"
+            limits:
+              memory: "64Mi"
+              cpu: "50m"
+        {{- end }}
+      containers:
+        - name: nginx
+          image: {{ include "intelowl.nginxImage" . }}
+          imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - NET_BIND_SERVICE
+                - CHOWN
+                - SETGID
+                - SETUID
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          env:
+            {{- with .Values.nginx.extraEnvVars }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+            - name: static-content
+              mountPath: /var/www/static
+              readOnly: true
+            {{- with .Values.nginx.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- if .Values.nginx.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: /hc
+              port: http
+            initialDelaySeconds: {{ .Values.nginx.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.nginx.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.nginx.startupProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.nginx.startupProbe.failureThreshold }}
+            successThreshold: {{ .Values.nginx.startupProbe.successThreshold }}
+          {{- end }}
+          {{- if .Values.nginx.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /hc
+              port: http
+            initialDelaySeconds: {{ .Values.nginx.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.nginx.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.nginx.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.nginx.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.nginx.livenessProbe.successThreshold }}
+          {{- end }}
+          {{- if .Values.nginx.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /hc
+              port: http
+            initialDelaySeconds: {{ .Values.nginx.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.nginx.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.nginx.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.nginx.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.nginx.readinessProbe.successThreshold }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.nginx.resources | nindent 12 }}
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: {{ include "intelowl.fullname" . }}-nginx-config
+        - name: static-content
+          persistentVolumeClaim:
+            claimName: {{ include "intelowl.fullname" . }}-static-content
+        {{- with .Values.nginx.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nginx.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nginx.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nginx.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

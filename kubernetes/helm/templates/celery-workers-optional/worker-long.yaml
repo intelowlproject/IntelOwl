@@ -1,0 +1,84 @@
+{{- if and .Values.multiQueue.enabled .Values.multiQueue.workerLong.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "intelowl.fullname" . }}-celery-worker-long
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: celery-worker-long
+spec:
+  replicas: {{ .Values.multiQueue.workerLong.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "intelowl.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: celery-worker-long
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/secrets/app-secrets.yaml") . | sha256sum }}
+      labels:
+        {{- include "intelowl.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: celery-worker-long
+    spec:
+      {{- include "intelowl.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ include "intelowl.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.multiQueue.workerLong.terminationGracePeriodSeconds }}
+      initContainers:
+        {{- include "intelowl.waitForDbInitContainer" . | nindent 8 }}
+        {{- include "intelowl.waitForRedisInitContainer" . | nindent 8 }}
+        {{- include "intelowl.waitForUwsgiInitContainer" . | nindent 8 }}
+      containers:
+        - name: celery-worker
+          image: {{ include "intelowl.image" (dict "imageRoot" .Values.celeryWorkerDefault.image "Chart" .Chart "Values" .Values) }}
+          imagePullPolicy: {{ .Values.celeryWorkerDefault.image.pullPolicy }}
+          {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          command:
+            - celery
+            - -A
+            - intel_owl.celery
+            - worker
+            - --loglevel={{ .Values.app.logLevel }}
+            - --concurrency={{ .Values.multiQueue.workerLong.concurrency }}
+            - -Q
+            - long
+            - --without-heartbeat
+            - --without-gossip
+            - --without-mingle
+          env:
+            {{- include "intelowl.commonEnvVars" . | nindent 12 }}
+          volumeMounts:
+            {{- include "intelowl.commonVolumeMounts" . | nindent 12 }}
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - celery -A intel_owl.celery inspect ping -d celery@$HOSTNAME
+            initialDelaySeconds: 60
+            periodSeconds: 120
+            timeoutSeconds: 60
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.multiQueue.workerLong.resources | nindent 12 }}
+      volumes:
+        {{- include "intelowl.commonVolumes" . | nindent 8 }}
+      {{- with .Values.multiQueue.workerLong.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.multiQueue.workerLong.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.multiQueue.workerLong.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

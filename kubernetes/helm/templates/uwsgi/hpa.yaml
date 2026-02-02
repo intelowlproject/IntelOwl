@@ -1,0 +1,33 @@
+{{- if .Values.uwsgi.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "intelowl.fullname" . }}-uwsgi
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: uwsgi
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "intelowl.fullname" . }}-uwsgi
+  minReplicas: {{ .Values.uwsgi.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.uwsgi.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.uwsgi.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.uwsgi.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.uwsgi.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.uwsgi.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}

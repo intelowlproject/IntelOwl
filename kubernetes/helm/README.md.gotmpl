@@ -1,0 +1,548 @@
+{{ template "chart.header" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.versionBadge" . }}{{ template "chart.typeBadge" . }}{{ template "chart.appVersionBadge" . }}
+
+## Prerequisites
+
+- Kubernetes 1.23+
+- Helm 3.8+
+- PV provisioner support (for persistent volumes)
+- StorageClass with ReadWriteMany access mode (for shared volumes)
+
+### CloudNative-PG Operator (Required for internal PostgreSQL)
+
+The chart uses CloudNative-PG for PostgreSQL. Install the operator before deploying:
+
+```bash
+# Add the CNPG Helm repository
+helm repo add cnpg https://cloudnative-pg.github.io/charts
+helm repo update
+
+# Install the operator
+helm install cnpg cnpg/cloudnative-pg -n cnpg-system --create-namespace
+```
+
+Alternatively, enable operator installation via the chart:
+
+```bash
+helm install intelowl ./intelowl-helm --set postgresql.operator.enabled=true
+```
+
+### Gateway API (Required for Gateway networking type)
+
+If using Gateway API (default), install the CRDs and a Gateway provider:
+
+```bash
+# Install Gateway API CRDs
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.0/standard-install.yaml
+
+# Install NGINX Gateway Fabric (default provider)
+helm install ngf oci://ghcr.io/nginx/charts/nginx-gateway-fabric \
+  -n nginx-gateway --create-namespace
+```
+
+Supported Gateway providers:
+
+- `nginx-gateway-fabric` (default)
+- `envoy-gateway`
+- `istio`
+- `kong`
+- `traefik`
+
+## Installation
+
+### Install from source
+
+```bash
+cd intelowl-helm
+helm install intelowl . -f examples/minimal.yaml -n intelowl --create-namespace
+```
+
+### Generate Django Secret Key
+
+```bash
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+### Example installations
+
+```bash
+# Basic installation with Gateway API (default)
+helm install intelowl . \
+  --namespace intelowl \
+  --create-namespace \
+  --set app.django.secretKey="your-secret-key"
+
+# With traditional Ingress
+helm install intelowl . \
+  --namespace intelowl \
+  --create-namespace \
+  --set app.django.secretKey="your-secret-key" \
+  --set networking.type=ingress \
+  --set networking.ingress.enabled=true \
+  --set networking.ingress.hosts[0].host=intelowl.example.com
+
+# Production with HA PostgreSQL (3 instances)
+helm install intelowl . \
+  --namespace intelowl \
+  --create-namespace \
+  --set app.django.secretKey="your-secret-key" \
+  --set postgresql.instances=3 \
+  --set postgresql.synchronous.enabled=true \
+  --set multiQueue.enabled=true \
+  --set uwsgi.autoscaling.enabled=true
+
+# With RabbitMQ as message broker (instead of Redis)
+helm install intelowl . \
+  --namespace intelowl \
+  --create-namespace \
+  --set app.django.secretKey="your-secret-key" \
+  --set broker.type=rabbitmq \
+  --set broker.rabbitmq.internal=true \
+  --set rabbitmq.enabled=true
+```
+
+## Getting Started
+
+After installation, follow these steps to get IntelOwl up and running:
+
+### 1. Wait for all pods to be ready
+
+```bash
+kubectl get pods -n intelowl -w
+```
+
+### 2. Create an admin superuser
+
+This step is **required** to access IntelOwl. Create your first admin account:
+
+```bash
+kubectl exec -it deploy/intelowl-uwsgi -n intelowl -- python manage.py createsuperuser
+```
+
+You will be prompted to enter:
+
+- **Username**: Choose a username for the admin account
+- **Email address**: Your email (optional but recommended)
+- **Password**: A strong password (min 8 characters, mixed case, numbers)
+
+Example:
+
+```
+Username: admin
+Email address: admin@example.com
+Password: ********
+Password (again): ********
+Superuser created successfully.
+```
+
+### 3. Access IntelOwl
+
+**Using port-forward (development/testing):**
+
+```bash
+kubectl port-forward svc/intelowl-nginx 8080:80 -n intelowl
+```
+
+Then open http://localhost:8080 in your browser.
+
+**Using Gateway API or Ingress (production):**
+
+Configure your DNS or `/etc/hosts` to point to the Gateway/Ingress IP address.
+
+### 4. Login
+
+Navigate to the login page and use the superuser credentials you created in step 2.
+
+### 5. Configure analyzers
+
+After logging in, go to the admin panel (`/admin`) to configure:
+
+- API keys for external services (VirusTotal, OTX, etc.)
+- Enable/disable specific analyzers
+- Create additional user accounts
+
+## Architecture
+
+```
+                                ┌─────────────┐
+                                │   Gateway/  │
+                                │   Ingress   │
+                                └──────┬──────┘
+                                       │
+                                ┌──────▼──────┐
+                                │    Nginx    │
+                                └──────┬──────┘
+                       ┌───────────────┼───────────────┐
+                       │               │               │
+                ┌──────▼──────┐ ┌──────▼──────┐        │
+                │   uWSGI     │ │   Daphne    │        │
+                │  (Django)   │ │ (WebSocket) │        │
+                └──────┬──────┘ └──────┬──────┘        │
+                       │               │               │
+     ┌─────────────────┼───────────────┼───────────────┤
+     │                 │               │               │
+┌──────▼──────┐   ┌──────▼──────┐ ┌──────▼──────┐ ┌──────▼──────┐
+│ PostgreSQL  │   │    Redis/   │ │ Celery Beat │ │   Celery    │
+│   (CNPG)    │   │   RabbitMQ  │ │ (Scheduler) │ │   Workers   │
+└─────────────┘   └─────────────┘ └─────────────┘ └─────────────┘
+```
+
+## Persistence
+
+The chart provisions three PVCs by default:
+
+| PVC              | Purpose                   | Default Size |
+| ---------------- | ------------------------- | ------------ |
+| `generic-logs`   | Application logs          | 10Gi         |
+| `shared-files`   | Analyzer results, uploads | 20Gi         |
+| `static-content` | Django static files       | 5Gi          |
+
+All PVCs require `ReadWriteMany` access mode for multi-replica deployments.
+
+## Upgrading
+
+```bash
+helm upgrade intelowl . \
+  --namespace intelowl \
+  --reuse-values
+```
+
+## Uninstalling
+
+```bash
+helm uninstall intelowl --namespace intelowl
+```
+
+**Note:** PVCs are not deleted by default. To remove them:
+
+```bash
+kubectl delete pvc -l app.kubernetes.io/instance=intelowl -n intelowl
+```
+
+## Troubleshooting
+
+### Check pod status
+
+```bash
+kubectl get pods -n intelowl -l app.kubernetes.io/instance=intelowl
+```
+
+### View logs
+
+```bash
+# uWSGI logs
+kubectl logs -f deploy/intelowl-uwsgi -n intelowl
+
+# Celery worker logs
+kubectl logs -f deploy/intelowl-celery-worker-default -n intelowl
+
+# Migration job logs
+kubectl logs -l app.kubernetes.io/component=migration -n intelowl
+```
+
+### Run Django management commands
+
+```bash
+kubectl exec -it deploy/intelowl-uwsgi -n intelowl -- python manage.py <command>
+```
+
+### Create superuser
+
+```bash
+kubectl exec -it deploy/intelowl-uwsgi -n intelowl -- python manage.py createsuperuser
+```
+
+### Common issues
+
+**Pods stuck in Pending:**
+
+- Check if PVCs are bound: `kubectl get pvc -n intelowl`
+- Verify StorageClass supports ReadWriteMany
+
+**Database connection errors:**
+
+- Ensure CloudNative-PG operator is installed
+- Check PostgreSQL cluster status: `kubectl get cluster -n intelowl`
+
+**Gateway/Ingress not working:**
+
+- Verify Gateway API CRDs are installed (for Gateway type)
+- Check Gateway controller is running
+- Verify GatewayClass exists: `kubectl get gatewayclass`
+
+**Cannot create superuser:**
+
+- Ensure all pods are running: `kubectl get pods -n intelowl`
+- Check uWSGI pod logs for errors
+
+{{ template "chart.requirementsSection" . }}
+
+## Values
+
+### Global parameters
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if hasPrefix "global." .Key }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### Common parameters
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if or (eq .Key "nameOverride") (eq .Key "fullnameOverride") }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### Application parameters
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if hasPrefix "app." .Key }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### Database parameters
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if hasPrefix "database." .Key }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### Broker parameters
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if hasPrefix "broker." .Key }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### Storage parameters
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if hasPrefix "storage." .Key }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### uWSGI parameters
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if hasPrefix "uwsgi." .Key }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### Daphne parameters
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if hasPrefix "daphne." .Key }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### Nginx parameters
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if hasPrefix "nginx." .Key }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### Celery Beat parameters
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if hasPrefix "celeryBeat." .Key }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### Celery Worker parameters
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if hasPrefix "celeryWorkerDefault." .Key }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### Multi-queue workers parameters
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if hasPrefix "multiQueue." .Key }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### Flower parameters
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if hasPrefix "flower." .Key }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### Integrations parameters
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if hasPrefix "integrations." .Key }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### Networking parameters
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if hasPrefix "networking." .Key }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### Network Policy parameters
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if hasPrefix "networkPolicy." .Key }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### RBAC parameters
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if hasPrefix "rbac." .Key }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### Security Context parameters
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if or (hasPrefix "podSecurityContext" .Key) (hasPrefix "containerSecurityContext" .Key) }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### Migration parameters
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if hasPrefix "migration." .Key }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### External Secrets parameters
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if hasPrefix "externalSecrets." .Key }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### Metrics parameters
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if hasPrefix "metrics." .Key }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### PostgreSQL parameters (CloudNative-PG)
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if hasPrefix "postgresql." .Key }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### Redis parameters (CloudPirates)
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if hasPrefix "redis." .Key }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+### RabbitMQ parameters (CloudPirates)
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range .Values }}
+{{- if hasPrefix "rabbitmq." .Key }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
+
+## Examples
+
+Example value files are provided in the `examples/` directory:
+
+| File                     | Description                                      |
+| ------------------------ | ------------------------------------------------ |
+| `minimal.yaml`           | Minimal deployment for testing                   |
+| `development.yaml`       | Development environment with debug enabled       |
+| `production.yaml`        | Production-ready HA configuration                |
+| `with-ingress.yaml`      | Using traditional Ingress instead of Gateway API |
+| `with-rabbitmq.yaml`     | Using RabbitMQ instead of Redis as broker        |
+| `with-integrations.yaml` | Enabling optional analyzer integrations          |
+
+## License
+
+This Helm chart is licensed under the AGPL-3.0 license, consistent with IntelOwl.
+
+## Links
+
+- [IntelOwl Documentation](https://intelowl.readthedocs.io/)
+- [IntelOwl GitHub](https://github.com/intelowlproject/IntelOwl)
+- [Helm Documentation](https://helm.sh/docs/)
+- [CloudNative-PG Documentation](https://cloudnative-pg.io/documentation/)
+- [Gateway API Documentation](https://gateway-api.sigs.k8s.io/)

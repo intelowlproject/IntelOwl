@@ -1,0 +1,107 @@
+{{- if and .Values.postgresql.enabled .Values.database.internal }}
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ include "intelowl.fullname" . }}-postgres
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: database
+  {{- if .Values.migration.enabled }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-10"
+  {{- end }}
+spec:
+  instances: {{ .Values.postgresql.instances | default 1 }}
+
+  imageName: {{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag | default "16" }}
+  imagePullPolicy: {{ .Values.postgresql.image.pullPolicy | default "IfNotPresent" }}
+
+  bootstrap:
+    initdb:
+      database: {{ .Values.postgresql.database | default "intel_owl_db" }}
+      owner: {{ .Values.postgresql.username | default "intelowl" }}
+      secret:
+        name: {{ include "intelowl.fullname" . }}-postgres-credentials
+      {{- if .Values.postgresql.initdb.postInitSQL }}
+      postInitSQL:
+        {{- toYaml .Values.postgresql.initdb.postInitSQL | nindent 8 }}
+      {{- end }}
+
+  storage:
+    size: {{ .Values.postgresql.storage.size | default "10Gi" }}
+    {{- if or .Values.postgresql.storage.storageClass .Values.global.storageClass }}
+    storageClass: {{ .Values.postgresql.storage.storageClass | default .Values.global.storageClass }}
+    {{- end }}
+
+  {{- if .Values.postgresql.walStorage.enabled }}
+  walStorage:
+    size: {{ .Values.postgresql.walStorage.size | default "2Gi" }}
+    {{- if or .Values.postgresql.walStorage.storageClass .Values.global.storageClass }}
+    storageClass: {{ .Values.postgresql.walStorage.storageClass | default .Values.global.storageClass }}
+    {{- end }}
+  {{- end }}
+
+  postgresql:
+    parameters:
+      {{- if .Values.postgresql.parameters }}
+      {{- toYaml .Values.postgresql.parameters | nindent 6 }}
+      {{- else }}
+      max_connections: "200"
+      shared_buffers: "256MB"
+      {{- end }}
+    pg_hba:
+      - host all all 0.0.0.0/0 scram-sha-256
+      - host all all ::0/0 scram-sha-256
+
+  {{- if and .Values.postgresql.synchronous.enabled (gt (int .Values.postgresql.instances) 1) }}
+  minSyncReplicas: {{ .Values.postgresql.synchronous.minSyncReplicas | default 1 }}
+  maxSyncReplicas: {{ .Values.postgresql.synchronous.maxSyncReplicas | default 2 }}
+  {{- end }}
+
+  {{- if .Values.postgresql.backup.enabled }}
+  backup:
+    barmanObjectStore:
+      destinationPath: {{ .Values.postgresql.backup.destinationPath }}
+      {{- if .Values.postgresql.backup.endpointURL }}
+      endpointURL: {{ .Values.postgresql.backup.endpointURL }}
+      {{- end }}
+      {{- if .Values.postgresql.backup.s3Credentials }}
+      s3Credentials:
+        accessKeyId:
+          name: {{ .Values.postgresql.backup.s3Credentials.secretName }}
+          key: {{ .Values.postgresql.backup.s3Credentials.accessKeyIdKey | default "ACCESS_KEY_ID" }}
+        secretAccessKey:
+          name: {{ .Values.postgresql.backup.s3Credentials.secretName }}
+          key: {{ .Values.postgresql.backup.s3Credentials.secretAccessKeyKey | default "ACCESS_SECRET_KEY" }}
+      {{- end }}
+      wal:
+        compression: gzip
+    retentionPolicy: {{ .Values.postgresql.backup.retentionPolicy | default "30d" }}
+  {{- end }}
+
+  {{- if .Values.postgresql.resources }}
+  resources:
+    {{- toYaml .Values.postgresql.resources | nindent 4 }}
+  {{- end }}
+
+  {{- if .Values.postgresql.affinity }}
+  affinity:
+    {{- toYaml .Values.postgresql.affinity | nindent 4 }}
+  {{- end }}
+
+  {{- if .Values.postgresql.tolerations }}
+  tolerations:
+    {{- toYaml .Values.postgresql.tolerations | nindent 4 }}
+  {{- end }}
+
+  {{- if .Values.postgresql.nodeSelector }}
+  nodeSelector:
+    {{- toYaml .Values.postgresql.nodeSelector | nindent 4 }}
+  {{- end }}
+
+  {{- if .Values.postgresql.monitoring.enabled }}
+  monitoring:
+    enablePodMonitor: {{ .Values.postgresql.monitoring.podMonitor | default false }}
+  {{- end }}
+{{- end }}

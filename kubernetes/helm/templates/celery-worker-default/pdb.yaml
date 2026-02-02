@@ -1,0 +1,15 @@
+{{- if .Values.celeryWorkerDefault.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "intelowl.fullname" . }}-celery-worker-default
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: celery-worker-default
+spec:
+  minAvailable: {{ .Values.celeryWorkerDefault.pdb.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "intelowl.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: celery-worker-default
+{{- end }}

@@ -1,0 +1,19 @@
+{{- if .Values.daphne.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "intelowl.fullname" . }}-daphne
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: daphne
+spec:
+  type: {{ .Values.daphne.service.type }}
+  ports:
+    - port: {{ .Values.daphne.service.port }}
+      targetPort: daphne
+      protocol: TCP
+      name: daphne
+  selector:
+    {{- include "intelowl.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: daphne
+{{- end }}

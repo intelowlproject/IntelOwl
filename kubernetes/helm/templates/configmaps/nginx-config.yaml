@@ -1,0 +1,121 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "intelowl.fullname" . }}-nginx-config
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: nginx
+data:
+  nginx.conf: |
+    user nginx;
+    worker_processes auto;
+    error_log /var/log/nginx/error.log warn;
+    pid /var/run/nginx.pid;
+
+    events {
+        worker_connections 1024;
+        use epoll;
+        multi_accept on;
+    }
+
+    http {
+        include /etc/nginx/mime.types;
+        default_type application/octet-stream;
+
+        log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                        '$status $body_bytes_sent "$http_referer" '
+                        '"$http_user_agent" "$http_x_forwarded_for"';
+
+        access_log /var/log/nginx/access.log main;
+
+        sendfile on;
+        tcp_nopush on;
+        tcp_nodelay on;
+        keepalive_timeout 65;
+        types_hash_max_size 2048;
+        client_max_body_size 100M;
+
+        # Gzip compression
+        gzip on;
+        gzip_disable "msie6";
+        gzip_vary on;
+        gzip_proxied any;
+        gzip_comp_level 6;
+        gzip_types text/plain text/css text/xml application/json application/javascript application/xml+rss application/atom+xml image/svg+xml;
+
+        # Upstream servers
+        upstream uwsgi_server {
+            server {{ include "intelowl.fullname" . }}-uwsgi:{{ .Values.uwsgi.service.port }};
+            keepalive 32;
+        }
+
+        {{- if .Values.daphne.enabled }}
+        upstream daphne_server {
+            server {{ include "intelowl.fullname" . }}-daphne:{{ .Values.daphne.service.port }};
+            keepalive 32;
+        }
+        {{- end }}
+
+        server {
+            listen 80;
+            server_name _;
+
+            # Health check endpoint
+            location /hc {
+                access_log off;
+                return 200 "OK";
+                add_header Content-Type text/plain;
+            }
+
+            # Static files
+            location /static/ {
+                alias /var/www/static/;
+                expires 30d;
+                add_header Cache-Control "public, immutable";
+            }
+
+            # Media files
+            location /media/ {
+                alias /var/www/media/;
+                expires 7d;
+                add_header Cache-Control "public";
+            }
+
+            {{- if .Values.daphne.enabled }}
+            # WebSocket endpoint
+            location /ws/ {
+                proxy_pass http://daphne_server;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection "upgrade";
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_read_timeout 86400;
+                proxy_send_timeout 86400;
+            }
+            {{- end }}
+
+            # Django application
+            location / {
+                proxy_pass http://uwsgi_server;
+                proxy_http_version 1.1;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_set_header Connection "";
+                proxy_read_timeout 300;
+                proxy_send_timeout 300;
+                proxy_connect_timeout 60;
+                proxy_buffering off;
+            }
+
+            # Error pages
+            error_page 500 502 503 504 /50x.html;
+            location = /50x.html {
+                root /usr/share/nginx/html;
+            }
+        }
+    }

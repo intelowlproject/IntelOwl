@@ -1,0 +1,91 @@
+{{- if and .Values.networking.gateway.httpRoute.create (eq .Values.networking.type "gateway") }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "intelowl.fullname" . }}
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: httproute
+  {{- with .Values.networking.gateway.httpRoute.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+    - name: {{ include "intelowl.gatewayName" . }}
+      {{- if .Values.networking.gateway.httpRoute.parentRef }}
+      {{- if .Values.networking.gateway.httpRoute.parentRef.namespace }}
+      namespace: {{ .Values.networking.gateway.httpRoute.parentRef.namespace }}
+      {{- end }}
+      {{- if .Values.networking.gateway.httpRoute.parentRef.sectionName }}
+      sectionName: {{ .Values.networking.gateway.httpRoute.parentRef.sectionName }}
+      {{- end }}
+      {{- end }}
+  {{- if .Values.networking.gateway.httpRoute.hostnames }}
+  hostnames:
+    {{- toYaml .Values.networking.gateway.httpRoute.hostnames | nindent 4 }}
+  {{- end }}
+  rules:
+    {{- if and .Values.daphne.enabled .Values.networking.gateway.httpRoute.websocket.enabled }}
+    # WebSocket route for Daphne - must be before the main route for specificity
+    - matches:
+        - path:
+            type: PathPrefix
+            value: {{ .Values.networking.gateway.httpRoute.websocket.path | default "/ws" }}
+      backendRefs:
+        - name: {{ include "intelowl.fullname" . }}-daphne
+          port: {{ .Values.daphne.service.port }}
+          {{- if .Values.networking.gateway.httpRoute.websocket.weight }}
+          weight: {{ .Values.networking.gateway.httpRoute.websocket.weight }}
+          {{- end }}
+      {{- if .Values.networking.gateway.httpRoute.websocket.timeouts }}
+      timeouts:
+        {{- toYaml .Values.networking.gateway.httpRoute.websocket.timeouts | nindent 8 }}
+      {{- end }}
+    {{- end }}
+    # Main route to Nginx reverse proxy
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: {{ include "intelowl.fullname" . }}-nginx
+          port: {{ .Values.nginx.service.port }}
+      {{- if .Values.networking.gateway.httpRoute.timeouts }}
+      timeouts:
+        {{- toYaml .Values.networking.gateway.httpRoute.timeouts | nindent 8 }}
+      {{- end }}
+      {{- if .Values.networking.gateway.httpRoute.filters }}
+      filters:
+        {{- toYaml .Values.networking.gateway.httpRoute.filters | nindent 8 }}
+      {{- end }}
+{{- end }}
+---
+{{- if and .Values.flower.enabled .Values.networking.gateway.httpRoute.create (eq .Values.networking.type "gateway") }}
+{{- if .Values.flower.gateway }}
+{{- if .Values.flower.gateway.enabled }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "intelowl.fullname" . }}-flower
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: flower-httproute
+spec:
+  parentRefs:
+    - name: {{ include "intelowl.gatewayName" . }}
+  {{- if .Values.flower.gateway.hostnames }}
+  hostnames:
+    {{- toYaml .Values.flower.gateway.hostnames | nindent 4 }}
+  {{- end }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: {{ .Values.flower.gateway.path | default "/" }}
+      backendRefs:
+        - name: {{ include "intelowl.fullname" . }}-flower
+          port: {{ .Values.flower.service.port }}
+{{- end }}
+{{- end }}
+{{- end }}

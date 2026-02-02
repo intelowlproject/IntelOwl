@@ -1,0 +1,15 @@
+{{- if .Values.nginx.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "intelowl.fullname" . }}-nginx
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: nginx
+spec:
+  minAvailable: {{ .Values.nginx.pdb.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "intelowl.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: nginx
+{{- end }}

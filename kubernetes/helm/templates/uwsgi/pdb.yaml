@@ -1,0 +1,15 @@
+{{- if .Values.uwsgi.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "intelowl.fullname" . }}-uwsgi
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: uwsgi
+spec:
+  minAvailable: {{ .Values.uwsgi.pdb.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "intelowl.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: uwsgi
+{{- end }}

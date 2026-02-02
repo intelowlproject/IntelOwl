@@ -1,0 +1,15 @@
+{{- if and .Values.daphne.enabled .Values.daphne.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "intelowl.fullname" . }}-daphne
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: daphne
+spec:
+  minAvailable: {{ .Values.daphne.pdb.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "intelowl.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: daphne
+{{- end }}

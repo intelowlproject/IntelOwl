@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "intelowl.fullname" . }}-celery-beat
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: celery-beat
+spec:
+  # Celery beat must always be a singleton (only 1 replica)
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "intelowl.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: celery-beat
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/secrets/app-secrets.yaml") . | sha256sum }}
+      labels:
+        {{- include "intelowl.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: celery-beat
+    spec:
+      {{- include "intelowl.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ include "intelowl.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        {{- include "intelowl.waitForDbInitContainer" . | nindent 8 }}
+        {{- include "intelowl.waitForRedisInitContainer" . | nindent 8 }}
+        {{- include "intelowl.waitForUwsgiInitContainer" . | nindent 8 }}
+        {{- if .Values.storage.localStorage }}
+        {{- include "intelowl.initDirectoriesContainer" . | nindent 8 }}
+        {{- end }}
+      containers:
+        - name: celery-beat
+          image: {{ include "intelowl.image" (dict "imageRoot" .Values.celeryBeat.image "Chart" .Chart "Values" .Values) }}
+          imagePullPolicy: {{ .Values.celeryBeat.image.pullPolicy }}
+          {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          command:
+            - celery
+            - -A
+            - intel_owl.celery
+            - beat
+            - --loglevel={{ .Values.app.logLevel }}
+            - --scheduler
+            - django_celery_beat.schedulers:DatabaseScheduler
+          env:
+            {{- include "intelowl.commonEnvVars" . | nindent 12 }}
+            {{- with .Values.celeryBeat.extraEnvVars }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            {{- include "intelowl.commonVolumeMounts" . | nindent 12 }}
+            {{- with .Values.celeryBeat.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.celeryBeat.resources | nindent 12 }}
+      volumes:
+        {{- include "intelowl.commonVolumes" . | nindent 8 }}
+        {{- with .Values.celeryBeat.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.celeryBeat.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.celeryBeat.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.celeryBeat.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

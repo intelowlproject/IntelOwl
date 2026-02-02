@@ -32,13 +32,9 @@ function SystemUpdatePanel() {
       </div>
 
       {data.update_available ? (
-        <div style={styles.updateBox}>
-          A new system update is available!
-        </div>
+        <div style={styles.updateBox}>A new system update is available!</div>
       ) : (
-        <div style={styles.okBox}>
-          Your system is up to date
-        </div>
+        <div style={styles.okBox}>Your system is up to date</div>
       )}
     </div>
   );

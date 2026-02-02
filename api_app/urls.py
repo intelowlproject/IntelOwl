@@ -34,9 +34,7 @@ urlpatterns = [
     path("system/update-check/", system_update_check_view, name="system-update-check"),
     path("ask_multi_analysis_availability", ask_multi_analysis_availability),
     path("analyze_file", analyze_file),
-    path(
-        "analyze_multiple_files", analyze_multiple_files, name="analyze_multiple_files"
-    ),
+    path("analyze_multiple_files", analyze_multiple_files, name="analyze_multiple_files"),
     path("analyze_observable", analyze_observable),
     path(
         "analyze_multiple_observables",

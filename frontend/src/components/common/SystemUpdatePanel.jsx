@@ -1,7 +1,7 @@
 import React from "react";
 import useSystemUpdateStatus from "../../hooks/useSystemUpdateStatus";
 
-const SystemUpdatePanel = () => {
+function SystemUpdatePanel() {
   const { data, loading, error } = useSystemUpdateStatus();
 
   if (loading) return <div style={styles.info}>Checking for updates...</div>;
@@ -42,7 +42,7 @@ const SystemUpdatePanel = () => {
       )}
     </div>
   );
-};
+}
 
 const styles = {
   card: {

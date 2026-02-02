@@ -21,9 +21,8 @@ class SystemUpdateStatusSerializer(serializers.Serializer):
         notified = state.notified if state else False
 
         update_available = False
-        if latest_version:
-            if normalize_version(latest_version) > normalize_version(current_version):
-                update_available = True
+        if latest_version and normalize_version(latest_version) > normalize_version(current_version):
+            update_available = True
 
         return {
             "current_version": current_version,

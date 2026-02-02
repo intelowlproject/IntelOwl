@@ -52,6 +52,8 @@ class CleanBrowsingMaliciousDetector(classes.ObservableAnalyzer):
                         if hasattr(rdata, "mname") and str(rdata.mname) == "cleanbrowsing.rpz.noc.org.":
                             is_malicious = True
                             break
+                    if is_malicious:
+                        break
 
         except requests.exceptions.RequestException:
             raise AnalyzerRunException("Connection to CleanBrowsing failed")

@@ -21,7 +21,6 @@ def _safe_decode(value: Any) -> str:
     return str(value)
 
 
-
 class MachoInfo(FileAnalyzer):
     """
     Analyzer for Mach-O binary files (macOS/iOS executables).
@@ -40,7 +39,6 @@ class MachoInfo(FileAnalyzer):
     def update(cls) -> bool:
         return False
 
-
     def _parse_macho(self):
         """Attempts to parse the file as Single or Universal Mach-O."""
         try:
@@ -56,19 +54,23 @@ class MachoInfo(FileAnalyzer):
                 return macho
             except Exception as universal_error:
                 error_msg = (
-                    f"Failed to parse as both single and universal binary. "
-                    f"Single: {e}, Universal: {universal_error}"
+                    "Failed to parse as both single and universal binary. Single: {}, Universal: {}".format(
+                        e, universal_error
+                    )
                 )
                 logger.warning(
-                    f"job_id:{self.job_id} analyzer:{self.analyzer_name} "
-                    f"md5:{self.md5} {error_msg}"
+                    "job_id:{} analyzer:{} md5:{} {}".format(
+                        self.job_id, self.analyzer_name, self.md5, error_msg
+                    )
                 )
                 raise Exception(error_msg)
 
-    def _extract_basic_info(self, macho, results: Dict[str, Any]):
+    @staticmethod
+    def _extract_basic_info(macho, results: Dict[str, Any]):
         """Extracts basic info like header, architectures, uuid, etc."""
         if hasattr(macho, "get_general_info"):
             results["general_info"] = macho.get_general_info(formatted=True)
+
         elif hasattr(macho, "general_info"):
             results["general_info"] = macho.general_info
 
@@ -93,7 +95,8 @@ class MachoInfo(FileAnalyzer):
         if hasattr(macho, "version_info"):
             results["version_info"] = str(macho.version_info)
 
-    def _extract_lists(self, macho, results: Dict[str, Any]):
+    @staticmethod
+    def _extract_lists(macho, results: Dict[str, Any]):
         """Extracts list-based info like segments, dylibs, imports, exports."""
         if hasattr(macho, "load_commands"):
             results["load_commands"] = [str(lc) for lc in macho.load_commands]
@@ -108,18 +111,14 @@ class MachoInfo(FileAnalyzer):
             results["imports"] = macho.get_imported_functions()
         elif hasattr(macho, "imported_functions"):
             results["imports"] = (
-                [_safe_decode(f) for f in macho.imported_functions]
-                if macho.imported_functions
-                else []
+                [_safe_decode(f) for f in macho.imported_functions] if macho.imported_functions else []
             )
 
         if hasattr(macho, "get_exported_symbols"):
             results["exports"] = macho.get_exported_symbols()
         elif hasattr(macho, "exported_symbols"):
             results["exports"] = (
-                [_safe_decode(s) for s in macho.exported_symbols]
-                if macho.exported_symbols
-                else []
+                [_safe_decode(s) for s in macho.exported_symbols] if macho.exported_symbols else []
             )
 
     def run(self) -> Dict[str, Any]:
@@ -148,9 +147,8 @@ class MachoInfo(FileAnalyzer):
                 results["hashes"] = macho.get_similarity_hashes(formatted=True)
 
         except Exception as e:
-            warning_message = (
-                f"job_id:{self.job_id} analyzer:{self.analyzer_name} "
-                f"md5:{self.md5} filename:{self.filename} MachoFile parsing error: {e}"
+            warning_message = "job_id:{} analyzer:{} md5:{} filename:{} MachoFile parsing error: {}".format(
+                self.job_id, self.analyzer_name, self.md5, self.filename, e
             )
             logger.warning(warning_message, exc_info=True)
             self.report.errors.append(warning_message)

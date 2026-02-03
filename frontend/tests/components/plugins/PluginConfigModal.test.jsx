@@ -81,27 +81,30 @@ describe("test PluginConfigModal component", () => {
         tlp: "CLEAR",
       },
     },
-  ])("plugins config modal - Create $pluginType", ({pluginType, pluginConfig}) => {
-    render(
-      <BrowserRouter>
-        <PluginConfigModal
-          pluginConfig={pluginConfig}
-          pluginType={pluginType}
-          toggle={() => jest.fn()}
-          isOpen
-        />
-      </BrowserRouter>,
-    );
-    // modal
-    const pluginConfigModal = document.querySelector("#plugin-config-modal");
-    expect(pluginConfigModal).toBeInTheDocument();
-    // modal title
-    const title = `Create a new ${pluginType}`
-    expect(screen.getByText(title)).toBeInTheDocument();
-    // expect correct form is called
-    const configForm = document.querySelector(`#${pluginType}-config-form`);
-    expect(configForm).toBeInTheDocument();
-  });
+  ])(
+    "plugins config modal - Create $pluginType",
+    ({ pluginType, pluginConfig }) => {
+      render(
+        <BrowserRouter>
+          <PluginConfigModal
+            pluginConfig={pluginConfig}
+            pluginType={pluginType}
+            toggle={() => jest.fn()}
+            isOpen
+          />
+        </BrowserRouter>,
+      );
+      // modal
+      const pluginConfigModal = document.querySelector("#plugin-config-modal");
+      expect(pluginConfigModal).toBeInTheDocument();
+      // modal title
+      const title = `Create a new ${pluginType}`;
+      expect(screen.getByText(title)).toBeInTheDocument();
+      // expect correct form is called
+      const configForm = document.querySelector(`#${pluginType}-config-form`);
+      expect(configForm).toBeInTheDocument();
+    },
+  );
 
   test.each([
     // case C: edit basic analyzer
@@ -119,31 +122,34 @@ describe("test PluginConfigModal component", () => {
       pluginType: "playbook",
       pluginConfig: mockedPlaybooks.TEST_PLAYBOOK_DOMAIN,
     },
-  ])("plugins config modal - Edit $pluginType", ({pluginType, pluginConfig}) => {
-    const config = pluginConfig;
-    if (pluginType === "analyzer"){
-      config.python_module =
-        "basic_observable_analyzer.BasicObservableAnalyzer";
-    }
+  ])(
+    "plugins config modal - Edit $pluginType",
+    ({ pluginType, pluginConfig }) => {
+      const config = pluginConfig;
+      if (pluginType === "analyzer") {
+        config.python_module =
+          "basic_observable_analyzer.BasicObservableAnalyzer";
+      }
 
-    render(
-      <BrowserRouter>
-        <PluginConfigModal
-          pluginConfig={config}
-          pluginType={pluginType}
-          toggle={() => jest.fn()}
-          isOpen
-        />
-      </BrowserRouter>,
-    );
-    // modal
-    const pluginConfigModal = document.querySelector("#plugin-config-modal");
-    expect(pluginConfigModal).toBeInTheDocument();
-    // modal title
-    const title = `Edit ${pluginType} config`
-    expect(screen.getByText(title)).toBeInTheDocument();
-    // expect correct form is called
-    const configForm = document.querySelector(`#${pluginType}-config-form`);
-    expect(configForm).toBeInTheDocument();
-  });
+      render(
+        <BrowserRouter>
+          <PluginConfigModal
+            pluginConfig={config}
+            pluginType={pluginType}
+            toggle={() => jest.fn()}
+            isOpen
+          />
+        </BrowserRouter>,
+      );
+      // modal
+      const pluginConfigModal = document.querySelector("#plugin-config-modal");
+      expect(pluginConfigModal).toBeInTheDocument();
+      // modal title
+      const title = `Edit ${pluginType} config`;
+      expect(screen.getByText(title)).toBeInTheDocument();
+      // expect correct form is called
+      const configForm = document.querySelector(`#${pluginType}-config-form`);
+      expect(configForm).toBeInTheDocument();
+    },
+  );
 });

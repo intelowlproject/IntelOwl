@@ -132,9 +132,7 @@ describe("test JobOverview (job report)", () => {
     expect(
       within(utilitiesRow).getByRole("button", { name: "Comments" }),
     ).toBeInTheDocument();
-    expect(
-      within(utilitiesRow).getByText("Artifact"),
-    ).toBeInTheDocument();
+    expect(within(utilitiesRow).getByText("Artifact")).toBeInTheDocument();
     // info card
     const JobInfoCardSection = container.querySelector("#JobInfoCardSection");
     expect(JobInfoCardSection).toBeInTheDocument();

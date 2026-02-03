@@ -96,8 +96,8 @@ def reverse_migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("api_app", "0001_2_initial_squashed"),
-        ("analyzers_manager", "0174_phishstats_url"),
+        ("api_app", "0071_delete_last_elastic_report"),
+        ("analyzers_manager", "0175_analyzer_config_cleanbrowsing_malicious_detector"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

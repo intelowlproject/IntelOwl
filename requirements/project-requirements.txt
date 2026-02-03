@@ -81,7 +81,7 @@ permhash==0.1.4
 ail_typo_squatting==2.7.4
 iocextract==1.16.1
 ioc-finder==7.0.0
-polyswarm-api==3.14.1
+polyswarm-api==3.16.0
 knock-subdomains==8.0.0
 dotnetfile==0.2.4
 docxpy==0.8.5

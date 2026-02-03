@@ -105,9 +105,7 @@ class ValidateSecretsTestCase(CustomTestCase):
 
 class ValidateParamsTestCase(CustomTestCase):
     def test_validate_params_good(self):
-        data = {
-            "param": {"type": "str", "description": "description", "default": "value"}
-        }
+        data = {"param": {"type": "str", "description": "description", "default": "value"}}
         try:
             validate_params(data)
         except ValidationError as e:

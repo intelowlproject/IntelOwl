@@ -35,9 +35,7 @@ class PDNSReport:
     source_description: str
 
 
-def _extract_analyzer(
-    analyzer_reports: QuerySet, module: PythonModule, job: Job
-) -> AnalyzerReport:
+def _extract_analyzer(analyzer_reports: QuerySet, module: PythonModule, job: Job) -> AnalyzerReport:
     try:
         analyzer_report = analyzer_reports.get(config__python_module=module)
         printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
@@ -68,12 +66,8 @@ def extract_otxquery_reports(analyzer_reports: QuerySet, job: Job) -> List[PDNSR
     return []
 
 
-def extract_threatminer_reports(
-    analyzer_reports: QuerySet, job: Job
-) -> List[PDNSReport]:
-    threatminer_analyzer = _extract_analyzer(
-        analyzer_reports, Threatminer.python_module, job
-    )
+def extract_threatminer_reports(analyzer_reports: QuerySet, job: Job) -> List[PDNSReport]:
+    threatminer_analyzer = _extract_analyzer(analyzer_reports, Threatminer.python_module, job)
     if threatminer_analyzer:
         threatminer_reports = threatminer_analyzer.report.get("results", [])
         pdns_reports = []
@@ -105,12 +99,8 @@ def extract_validin_reports(analyzer_reports: QuerySet, job: Job) -> List[PDNSRe
         pdns_reports = []
         for report in validin_reports:
             pdns_report = PDNSReport(
-                datetime.datetime.fromtimestamp(report.get("last_seen")).strftime(
-                    "%Y-%m-%d"
-                ),
-                datetime.datetime.fromtimestamp(report.get("first_seen")).strftime(
-                    "%Y-%m-%d"
-                ),
+                datetime.datetime.fromtimestamp(report.get("last_seen")).strftime("%Y-%m-%d"),
+                datetime.datetime.fromtimestamp(report.get("first_seen")).strftime("%Y-%m-%d"),
                 report.get("type"),
                 report.get("value"),
                 report.get("key"),
@@ -129,12 +119,8 @@ def extract_dnsdb_reports(analyzer_reports: QuerySet, job: Job) -> List[PDNSRepo
         pdns_reports = []
         for report in dnsdb_reports:
             pdns_report = PDNSReport(
-                datetime.datetime.fromtimestamp(report.get("time_last")).strftime(
-                    "%Y-%m-%d"
-                ),
-                datetime.datetime.fromtimestamp(report.get("time_first")).strftime(
-                    "%Y-%m-%d"
-                ),
+                datetime.datetime.fromtimestamp(report.get("time_last")).strftime("%Y-%m-%d"),
+                datetime.datetime.fromtimestamp(report.get("time_first")).strftime("%Y-%m-%d"),
                 report.get("rrtype"),
                 report.get("rdata"),
                 report.get("rrname"),
@@ -147,20 +133,14 @@ def extract_dnsdb_reports(analyzer_reports: QuerySet, job: Job) -> List[PDNSRepo
 
 
 def extract_circlpdns_reports(analyzer_reports: QuerySet, job: Job) -> List[PDNSReport]:
-    circlpdns_analyzer = _extract_analyzer(
-        analyzer_reports, CIRCL_PDNS.python_module, job
-    )
+    circlpdns_analyzer = _extract_analyzer(analyzer_reports, CIRCL_PDNS.python_module, job)
     if circlpdns_analyzer:
         circlpdns_reports = circlpdns_analyzer.report
         pdns_reports = []
         for report in circlpdns_reports:
             pdns_report = PDNSReport(
-                datetime.datetime.fromtimestamp(report.get("time_last")).strftime(
-                    "%Y-%m-%d"
-                ),
-                datetime.datetime.fromtimestamp(report.get("time_first")).strftime(
-                    "%Y-%m-%d"
-                ),
+                datetime.datetime.fromtimestamp(report.get("time_last")).strftime("%Y-%m-%d"),
+                datetime.datetime.fromtimestamp(report.get("time_first")).strftime("%Y-%m-%d"),
                 report.get("rrtype"),
                 report.get("rdata"),
                 report.get("rrname"),
@@ -180,12 +160,8 @@ def extract_robtex_reports(analyzer_reports: QuerySet, job: Job) -> List[PDNSRep
         for report in robtex_reports:
             if "rrdata" in report.keys():
                 pdns_report = PDNSReport(
-                    datetime.datetime.fromtimestamp(report.get("time_last")).strftime(
-                        "%Y-%m-%d"
-                    ),
-                    datetime.datetime.fromtimestamp(report.get("time_first")).strftime(
-                        "%Y-%m-%d"
-                    ),
+                    datetime.datetime.fromtimestamp(report.get("time_last")).strftime("%Y-%m-%d"),
+                    datetime.datetime.fromtimestamp(report.get("time_first")).strftime("%Y-%m-%d"),
                     report.get("rrtype"),
                     report.get("rrdata"),
                     report.get("rrname"),
@@ -197,23 +173,15 @@ def extract_robtex_reports(analyzer_reports: QuerySet, job: Job) -> List[PDNSRep
     return []
 
 
-def extract_mnemonicpdns_reports(
-    analyzer_reports: QuerySet, job: Job
-) -> List[PDNSReport]:
-    mnemonicpdns_analyzer = _extract_analyzer(
-        analyzer_reports, MnemonicPassiveDNS.python_module, job
-    )
+def extract_mnemonicpdns_reports(analyzer_reports: QuerySet, job: Job) -> List[PDNSReport]:
+    mnemonicpdns_analyzer = _extract_analyzer(analyzer_reports, MnemonicPassiveDNS.python_module, job)
     if mnemonicpdns_analyzer:
         mnemonicpdns_reports = mnemonicpdns_analyzer.report
         pdns_reports = []
         for report in mnemonicpdns_reports:
             pdns_report = PDNSReport(
-                datetime.datetime.fromtimestamp(report.get("time_last")).strftime(
-                    "%Y-%m-%d"
-                ),
-                datetime.datetime.fromtimestamp(report.get("time_first")).strftime(
-                    "%Y-%m-%d"
-                ),
+                datetime.datetime.fromtimestamp(report.get("time_last")).strftime("%Y-%m-%d"),
+                datetime.datetime.fromtimestamp(report.get("time_first")).strftime("%Y-%m-%d"),
                 report.get("rrtype"),
                 report.get("rdata"),
                 report.get("rrname"),

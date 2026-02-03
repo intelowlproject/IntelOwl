@@ -24,7 +24,6 @@ logger = logging.getLogger(__name__)
 
 
 class AnalyzableViewSet(viewsets.ReadOnlyModelViewSet):
-
     serializer_class = AnalyzableSerializer
     permission_classes = [IsAuthenticated]
     queryset = Analyzable.objects.all()
@@ -61,25 +60,17 @@ class AnalyzableViewSet(viewsets.ReadOnlyModelViewSet):
         except Analyzable.DoesNotExist:
             raise ValidationError({"detail": "Requested analyzable does not exist."})
 
-        jobs_queryset = analyzable.jobs.visible_for_user(user).order_by(
-            "-finished_analysis_time"
-        )
-        user_events_queryset = analyzable.user_events.visible_for_user(user).order_by(
+        jobs_queryset = analyzable.jobs.visible_for_user(user).order_by("-finished_analysis_time")
+        user_events_queryset = analyzable.user_events.visible_for_user(user).order_by("-date")
+        user_domain_wildcard_events_queryset = analyzable.user_domain_wildcard_events.visible_for_user(
+            user
+        ).order_by("-date")
+        user_ip_wildcard_events_queryset = analyzable.user_ip_wildcard_events.visible_for_user(user).order_by(
             "-date"
-        )
-        user_domain_wildcard_events_queryset = (
-            analyzable.user_domain_wildcard_events.visible_for_user(user).order_by(
-                "-date"
-            )
-        )
-        user_ip_wildcard_events_queryset = (
-            analyzable.user_ip_wildcard_events.visible_for_user(user).order_by("-date")
         )
 
         jobs = JobAnalyzableHistorySerializer(jobs_queryset, many=True).data
-        user_events = UserAnalyzableEventSerializer(
-            user_events_queryset, many=True
-        ).data
+        user_events = UserAnalyzableEventSerializer(user_events_queryset, many=True).data
         user_domain_wildcard_events = UserDomainWildCardEventSerializer(
             user_domain_wildcard_events_queryset, many=True
         ).data

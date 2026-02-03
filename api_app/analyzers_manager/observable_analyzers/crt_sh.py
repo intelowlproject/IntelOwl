@@ -19,9 +19,7 @@ class Crt_sh(classes.ObservableAnalyzer):
 
     def run(self):
         headers = {"accept": "application/json"}
-        response = requests.get(
-            f"{self.url}/?q={self.observable_name}", headers=headers
-        )
+        response = requests.get(f"{self.url}/?q={self.observable_name}", headers=headers)
         response.raise_for_status()
         response = response.json()
         return response

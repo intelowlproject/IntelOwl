@@ -24,9 +24,7 @@ class DNS4EUResolverTestCase(BaseAnalyzerTest):
         # Create a mock DNS message
         mock_msg = dns.message.make_response(dns.message.make_query("example.com", "A"))
         # Add an answer
-        rrset = dns.rrset.from_text(
-            "example.com.", 300, dns.rdataclass.IN, dns.rdatatype.A, "93.184.216.34"
-        )
+        rrset = dns.rrset.from_text("example.com.", 300, dns.rdataclass.IN, dns.rdatatype.A, "93.184.216.34")
         mock_msg.answer.append(rrset)
 
         return patch("dns.query.https", return_value=mock_msg)

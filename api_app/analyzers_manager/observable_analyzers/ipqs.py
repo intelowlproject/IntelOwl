@@ -9,10 +9,7 @@ from api_app.analyzers_manager.exceptions import AnalyzerRunException
 logger = logging.getLogger(__name__)
 
 
-IP_REG = (
-    "^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}"
-    "(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$"
-)
+IP_REG = "^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$"
 IPv6_REG = (
     r"\b(?:(?:[0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|"
     r"(?:[0-9a-fA-F]{1,4}:){1,7}:|"
@@ -40,8 +37,7 @@ DOMAIN_REG = re.compile(
 )
 PHONE_REG = "^\+?[1-9]\d{1,14}$"
 URL_REG = (
-    "((http|https)://)(www.)?[a-zA-Z0-9@:%._\\+~#?&//=]{2,256}\\.[a-z]{2,6}\\b"
-    "([-a-zA-Z0-9@:%._\\+~#?&//=]*)"
+    "((http|https)://)(www.)?[a-zA-Z0-9@:%._\\+~#?&//=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%._\\+~#?&//=]*)"
 )
 
 
@@ -114,13 +110,9 @@ class IPQualityScore(classes.ObservableAnalyzer):
         }
 
     def _get_calling_endpoint(self):
-        if re.match(IP_REG, self.observable_name) or re.match(
-            IPv6_REG, self.observable_name
-        ):
+        if re.match(IP_REG, self.observable_name) or re.match(IPv6_REG, self.observable_name):
             return self.IP_ENDPOINT, self._get_ip_payload()
-        elif re.match(DOMAIN_REG, self.observable_name) or re.match(
-            URL_REG, self.observable_name
-        ):
+        elif re.match(DOMAIN_REG, self.observable_name) or re.match(URL_REG, self.observable_name):
             return self.URL_ENDPOINT, self._get_url_payload()
         elif re.match(EMAIL_REG, self.observable_name):
             return self.EMAIL_ENDPOINT, self._get_email_payload()

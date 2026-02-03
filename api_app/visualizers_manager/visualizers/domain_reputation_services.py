@@ -22,9 +22,7 @@ class DomainReputationServices(Visualizer):
     @visualizable_error_handler_with_params("VirusTotal")
     def _vt3(self):
         try:
-            analyzer_report = self.get_analyzer_reports().get(
-                config__name="VirusTotal_v3_Get_Observable"
-            )
+            analyzer_report = self.get_analyzer_reports().get(config__name="VirusTotal_v3_Get_Observable")
         except AnalyzerReport.DoesNotExist:
             logger.warning("VirusTotal_v3_Get_Observable report does not exist")
             virustotal_report = self.Title(
@@ -73,11 +71,7 @@ class DomainReputationServices(Visualizer):
                     icon=VisualizableIcon.URLHAUS,
                 ),
                 self.Base(
-                    value=(
-                        ""
-                        if disabled
-                        else f'found {analyzer_report.report.get("urlhaus_status", "")}'
-                    )
+                    value=("" if disabled else f"found {analyzer_report.report.get('urlhaus_status', '')}")
                 ),
                 disable=disabled,
             )
@@ -155,9 +149,7 @@ class DomainReputationServices(Visualizer):
     @visualizable_error_handler_with_params("PhishingArmy")
     def _phishing_army(self):
         try:
-            analyzer_report = self.get_analyzer_reports().get(
-                config__name="PhishingArmy"
-            )
+            analyzer_report = self.get_analyzer_reports().get(config__name="PhishingArmy")
         except AnalyzerReport.DoesNotExist:
             logger.warning("PhishingArmy report does not exist")
         else:
@@ -177,19 +169,13 @@ class DomainReputationServices(Visualizer):
     @visualizable_error_handler_with_params("InQuest")
     def _inquest_repdb(self):
         try:
-            analyzer_report = self.get_analyzer_reports().get(
-                config__name="InQuest_REPdb"
-            )
+            analyzer_report = self.get_analyzer_reports().get(config__name="InQuest_REPdb")
         except AnalyzerReport.DoesNotExist:
             logger.warning("InQuest_REPdb report does not exist")
         else:
             success = analyzer_report.report.get("success", False)
             data = analyzer_report.report.get("data", [])
-            disabled = (
-                analyzer_report.status != ReportStatus.SUCCESS
-                or not success
-                or not data
-            )
+            disabled = analyzer_report.status != ReportStatus.SUCCESS or not success or not data
             inquest_report = self.Title(
                 self.Base(
                     value="InQuest",
@@ -211,9 +197,7 @@ class DomainReputationServices(Visualizer):
             pulses = analyzer_report.report.get("pulses", [])
             disabled = analyzer_report.status != ReportStatus.SUCCESS or not pulses
             otx_report = self.VList(
-                name=self.Base(
-                    value="OTX Alienvault", icon=VisualizableIcon.OTX, disable=disabled
-                ),
+                name=self.Base(value="OTX Alienvault", icon=VisualizableIcon.OTX, disable=disabled),
                 value=[
                     self.Base(
                         value=p.get("name", ""),
@@ -235,8 +219,7 @@ class DomainReputationServices(Visualizer):
         third_level_elements = []
 
         for analyzer_report in self.get_analyzer_reports().filter(
-            Q(config__name__endswith="Malicious_Detector")
-            | Q(config__name="GoogleSafebrowsing")
+            Q(config__name__endswith="Malicious_Detector") | Q(config__name="GoogleSafebrowsing")
         ):
             printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
             third_level_elements.append(

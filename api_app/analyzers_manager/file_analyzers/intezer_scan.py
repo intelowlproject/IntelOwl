@@ -42,9 +42,7 @@ class IntezerScan(FileAnalyzer):
             result.update(hash_found=False)
             if self.upload_file:
                 # run analysis by file
-                file_result = self.__intezer_analysis(
-                    file_stream=self.read_file_bytes()
-                )
+                file_result = self.__intezer_analysis(file_stream=self.read_file_bytes())
                 result.update(file_result, hash_found=False)
         except intezer_errors.IntezerError as e:
             raise AnalyzerRunException(e)

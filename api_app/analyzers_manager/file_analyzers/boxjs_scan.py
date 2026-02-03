@@ -49,9 +49,7 @@ class BoxJS(FileAnalyzer, DockerBasedAnalyzer):
         report["uris"] = []
         if "urls.json" in report and isinstance(report["urls.json"], List):
             report["uris"].extend(report["urls.json"])
-        if "active_urls.json" in report and isinstance(
-            report["active_urls.json"], List
-        ):
+        if "active_urls.json" in report and isinstance(report["active_urls.json"], List):
             report["uris"].extend(report["active_urls.json"])
         if "IOC.json" in report and isinstance(report["IOC.json"], List):
             for ioc in report["IOC.json"]:
@@ -59,9 +57,7 @@ class BoxJS(FileAnalyzer, DockerBasedAnalyzer):
                     if "url" in ioc["type"].lower():
                         report["uris"].append(ioc["value"]["url"])
                 except KeyError:
-                    error_message = (
-                        f"job_id {self.job_id} JSON structure changed in BoxJS report"
-                    )
+                    error_message = f"job_id {self.job_id} JSON structure changed in BoxJS report"
                     logger.warning(error_message, stack_info=True)
                     self.report.errors.append(error_message)
         report["uris"] = list(set(report["uris"]))  # uniq

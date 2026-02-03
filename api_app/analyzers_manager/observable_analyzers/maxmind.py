@@ -40,9 +40,7 @@ class MaxmindDBManager:
         maxmind_final_result: {} = {}
         maxmind_errors: [] = []
         for db in self._supported_dbs:
-            maxmind_result, maxmind_error = self._query_single_db(
-                observable_query, db, api_key
-            )
+            maxmind_result, maxmind_error = self._query_single_db(observable_query, db, api_key)
 
             if maxmind_error:
                 maxmind_errors.append(maxmind_error["error"])
@@ -58,9 +56,7 @@ class MaxmindDBManager:
     def _get_physical_location(cls, db: str) -> str:
         return f"{settings.MEDIA_ROOT}/{db}{cls._default_db_extension}"
 
-    def _query_single_db(
-        self, query_ip: str, db_name: str, api_key: str
-    ) -> (dict, dict):
+    def _query_single_db(self, query_ip: str, db_name: str, api_key: str) -> (dict, dict):
         result: ASN | City | Country
         db_path: str = self._get_physical_location(db_name)
         self._check_and_update_db(api_key, db_name)
@@ -76,10 +72,7 @@ class MaxmindDBManager:
                     result = reader.city(query_ip)
             except AddressNotFoundError:
                 reader.close()
-                logger.info(
-                    f"Query for observable '{query_ip}' "
-                    "didn't produce any results in any db."
-                )
+                logger.info(f"Query for observable '{query_ip}' didn't produce any results in any db.")
                 return {}, {}
             except (GeoIP2Error, maxminddb.InvalidDatabaseError) as e:
                 error_message = f"GeoIP2 database error: {e}"
@@ -93,20 +86,15 @@ class MaxmindDBManager:
         db_path = self._get_physical_location(db_name)
         if not os.path.isfile(db_path) and not self._update_db(db_name, api_key):
             raise AnalyzerRunException(
-                f"failed extraction of maxmind db {db_name},"
-                " reached max number of attempts"
+                f"failed extraction of maxmind db {db_name}, reached max number of attempts"
             )
         if not os.path.exists(db_path):
-            raise maxminddb.InvalidDatabaseError(
-                f"database location '{db_path}' does not exist"
-            )
+            raise maxminddb.InvalidDatabaseError(f"database location '{db_path}' does not exist")
 
     @classmethod
     def _update_db(cls, db: str, api_key: str) -> bool:
         if not api_key:
-            raise AnalyzerConfigurationException(
-                f"Unable to find api key for {cls.__name__}"
-            )
+            raise AnalyzerConfigurationException(f"Unable to find api key for {cls.__name__}")
 
         try:
             logger.info(f"starting download of {db=} from maxmind")
@@ -144,9 +132,7 @@ class MaxmindDBManager:
     @classmethod
     def _write_db_to_filesystem(cls, db_name: str, content: bytes) -> str:
         tar_db_path = f"/tmp/{db_name}.tar.gz"
-        logger.info(
-            f"starting writing db {db_name} downloaded from maxmind to {tar_db_path}"
-        )
+        logger.info(f"starting writing db {db_name} downloaded from maxmind to {tar_db_path}")
         with open(tar_db_path, "wb") as f:
             f.write(content)
 
@@ -167,12 +153,9 @@ class MaxmindDBManager:
         directory_found = False
         # this is because we do not know the exact date of the db we downloaded
         while counter < 10 or not directory_found:
-            formatted_date = (today - datetime.timedelta(days=counter)).strftime(
-                "%Y%m%d"
-            )
+            formatted_date = (today - datetime.timedelta(days=counter)).strftime("%Y%m%d")
             downloaded_db_path = (
-                f"{settings.MEDIA_ROOT}/"
-                f"{db}_{formatted_date}/{db}{cls._default_db_extension}"
+                f"{settings.MEDIA_ROOT}/{db}_{formatted_date}/{db}{cls._default_db_extension}"
             )
             try:
                 os.rename(downloaded_db_path, physical_db_location)
@@ -181,7 +164,7 @@ class MaxmindDBManager:
                 counter += 1
             else:
                 directory_found = True
-                shutil.rmtree(f"{settings.MEDIA_ROOT}/" f"{db}_{formatted_date}")
+                shutil.rmtree(f"{settings.MEDIA_ROOT}/{db}_{formatted_date}")
                 logger.info(f"maxmind directory found {downloaded_db_path}")
         return directory_found
 

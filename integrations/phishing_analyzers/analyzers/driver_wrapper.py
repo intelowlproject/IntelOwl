@@ -69,22 +69,16 @@ class DriverWrapper:
         self.last_url: str = ""
         self.base_port = 17000
         self.port_pool_size = 100
-        self._driver: Remote = self._init_driver(
-            self.window_width, self.window_height, self.user_agent
-        )
+        self._driver: Remote = self._init_driver(self.window_width, self.window_height, self.user_agent)
 
-    def _pick_free_port_from_pool(
-        self, sw_options: {}, options: ChromiumOptions
-    ) -> Remote:
+    def _pick_free_port_from_pool(self, sw_options: {}, options: ChromiumOptions) -> Remote:
         tries: int = 0
         while tries < self.port_pool_size:
             picked_port = randint(self.base_port, self.base_port + self.port_pool_size)
             sw_options.update({"port": picked_port})
 
             # traffic must go back to host running selenium-wire
-            options.add_argument(
-                f"--proxy-server=http://phishing_analyzers:{picked_port}"
-            )
+            options.add_argument(f"--proxy-server=http://phishing_analyzers:{picked_port}")
             try:
                 driver = Remote(
                     command_executor="http://selenium-hub:4444/wd/hub",
@@ -92,20 +86,14 @@ class DriverWrapper:
                     seleniumwire_options=sw_options,
                 )
             except ServerException:
-                logger.info(
-                    f"Failed to create driver with {picked_port=}. Trying with another one..."
-                )
+                logger.info(f"Failed to create driver with {picked_port=}. Trying with another one...")
                 tries += 1
             else:
                 logger.info(f"Found free port {picked_port}. Creating driver...")
                 return driver
-        raise RuntimeError(
-            "Failed to retrieve a free port for MitM proxy! Try restarting the job"
-        )
+        raise RuntimeError("Failed to retrieve a free port for MitM proxy! Try restarting the job")
 
-    def _init_driver(
-        self, window_width: int, window_height: int, user_agent: str
-    ) -> Remote:
+    def _init_driver(self, window_width: int, window_height: int, user_agent: str) -> Remote:
         logger.info(f"Adding proxy with option: {self.proxy}")
         logger.info("Creating Chromium driver...")
         sw_options: {} = {
@@ -169,9 +157,7 @@ class DriverWrapper:
 
     @driver_exception_handler
     def get_page_source(self) -> str:
-        logger.info(
-            f"{self._driver.session_id}: Extracting page source for url {self.last_url}"
-        )
+        logger.info(f"{self._driver.session_id}: Extracting page source for url {self.last_url}")
         return self._driver.page_source
 
     @driver_exception_handler

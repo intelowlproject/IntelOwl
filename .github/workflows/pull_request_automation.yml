@@ -50,10 +50,10 @@ jobs:
         run: |
           ruff check . --output-format=github
 
-      - name: Check formatting with Black
+      - name: Check formatting with Ruff
         run: |
-          black . --check --diff --exclude "migrations|venv"
-      
+          ruff format . --check --diff
+
       - name: Perform ShellCheck Analysis
         run: bash <(curl -s https://raw.githubusercontent.com/CICDToolbox/shellcheck/master/pipeline.sh)
 

@@ -41,10 +41,8 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
             return False
         if (
             not self._config.mapping_data_model
-            and self.__class__._create_data_model_mtm
-            == BaseAnalyzerMixin._create_data_model_mtm
-            and self.__class__._update_data_model
-            == BaseAnalyzerMixin._update_data_model
+            and self.__class__._create_data_model_mtm == BaseAnalyzerMixin._create_data_model_mtm
+            and self.__class__._update_data_model == BaseAnalyzerMixin._update_data_model
         ):
             return False
         return True
@@ -117,14 +115,10 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
             return None
         if isinstance(result, dict):
             for key, values in result.items():
-                result[key] = self._validate_result(
-                    values, level=level + 1, max_recursion=max_recursion
-                )
+                result[key] = self._validate_result(values, level=level + 1, max_recursion=max_recursion)
         elif isinstance(result, list):
             for i, _ in enumerate(result):
-                result[i] = self._validate_result(
-                    result[i], level=level + 1, max_recursion=max_recursion
-                )
+                result[i] = self._validate_result(result[i], level=level + 1, max_recursion=max_recursion)
         elif isinstance(result, str):
             return result.replace("\u0000", "")
         elif isinstance(result, int) and result > 9223372036854775807:  # max int 8bytes
@@ -143,9 +137,7 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
             self.create_data_model()
         except Exception as e:
             logger.exception(e)
-            self._job.errors.append(
-                f"Data model creation failed for {self._config.name}"
-            )
+            self._job.errors.append(f"Data model creation failed for {self._config.name}")
 
 
 class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
@@ -187,17 +179,11 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
 
     def before_run(self):
         super().before_run()
-        logger.info(
-            f"STARTED analyzer: {self.__repr__()} -> "
-            f"Observable: {self.observable_name}."
-        )
+        logger.info(f"STARTED analyzer: {self.__repr__()} -> Observable: {self.observable_name}.")
 
     def after_run(self):
         super().after_run()
-        logger.info(
-            f"FINISHED analyzer: {self.__repr__()} -> "
-            f"Observable: {self.observable_name}."
-        )
+        logger.info(f"FINISHED analyzer: {self.__repr__()} -> Observable: {self.observable_name}.")
 
 
 class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
@@ -251,10 +237,7 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
 
     def before_run(self):
         super().before_run()
-        logger.info(
-            f"STARTED analyzer: {self.__repr__()} -> "
-            f"File: ({self.filename}, md5: {self.md5})"
-        )
+        logger.info(f"STARTED analyzer: {self.__repr__()} -> File: ({self.filename}, md5: {self.md5})")
 
     def after_run(self):
         super().after_run()
@@ -269,10 +252,7 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             except OSError:
                 logger.warning(f"Filepath {self.filepath} does not exists")
 
-        logger.info(
-            f"FINISHED analyzer: {self.__repr__()} -> "
-            f"File: ({self.filename}, md5: {self.md5})"
-        )
+        logger.info(f"FINISHED analyzer: {self.__repr__()} -> File: ({self.filename}, md5: {self.md5})")
 
 
 class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
@@ -308,23 +288,18 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             params_to_check = ["key"]
         # different error messages for different cases
         if resp.status_code == 404:
-            raise AnalyzerConfigurationException(
-                f"{name} docker container is not running."
-            )
+            raise AnalyzerConfigurationException(f"{name} docker container is not running.")
         if resp.status_code == 400:
             err = resp.json().get("error", "")
             raise AnalyzerRunException(err)
         if resp.status_code == 500:
-            raise AnalyzerRunException(
-                f"Internal Server Error in {name} docker container"
-            )
+            raise AnalyzerRunException(f"Internal Server Error in {name} docker container")
         # check to make sure there was a valid params in response
         for param in params_to_check:
             param_value = resp.json().get(param, None)
             if not param_value:
                 raise AnalyzerRunException(
-                    "Unexpected Error. "
-                    f"Please check log files under /var/log/intel_owl/{name.lower()}/"
+                    f"Unexpected Error. Please check log files under /var/log/intel_owl/{name.lower()}/"
                 )
         # just in case couldn't catch the error manually
         resp.raise_for_status()
@@ -354,17 +329,12 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
                 f"<-- {self.__repr__()}"
             )
             if self.key_not_found_max_retries == re_poll_try:
-                raise AnalyzerRunException(
-                    f"not found key {req_key} in any server after maximum retries"
-                )
+                raise AnalyzerRunException(f"not found key {req_key} in any server after maximum retries")
             return self.__polling(req_key, chance, re_poll_try=re_poll_try + 1)
         else:
             status = json_data.get("status", None)
             if status and status == self._job.STATUSES.RUNNING.value:
-                logger.info(
-                    f"Poll number #{chance + 1}, "
-                    f"status: 'running' <-- {self.__repr__()}"
-                )
+                logger.info(f"Poll number #{chance + 1}, status: 'running' <-- {self.__repr__()}")
             else:
                 return True, json_data
         return False, json_data
@@ -374,10 +344,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         json_data = {}
         for chance in range(self.max_tries):
             time.sleep(self.poll_distance)
-            logger.info(
-                f"Result Polling. Try #{chance + 1}. Starting the query..."
-                f"<-- {self.__repr__()}"
-            )
+            logger.info(f"Result Polling. Try #{chance + 1}. Starting the query...<-- {self.__repr__()}")
             got_result, json_data = self.__polling(req_key, chance)
             if got_result:
                 break

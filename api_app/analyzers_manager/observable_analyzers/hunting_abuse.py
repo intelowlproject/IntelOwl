@@ -25,9 +25,7 @@ class HuntingAbuseAPI(AbuseCHMixin, ObservableAnalyzer):
     url: str = "https://hunting-api.abuse.ch/api/v1/"
 
     def _do_create_data_model(self) -> bool:
-        return super()._do_create_data_model() and self.report.report.get(
-            "fp_status", False
-        )
+        return super()._do_create_data_model() and self.report.report.get("fp_status", False)
 
     @classmethod
     def get_auth_key(cls) -> str:
@@ -53,9 +51,7 @@ class HuntingAbuseAPI(AbuseCHMixin, ObservableAnalyzer):
                 json.dump(response.json(), f)
 
             if not os.path.exists(database_location):
-                raise FileNotFoundError(
-                    f"Failed to create the database file at {database_location}"
-                )
+                raise FileNotFoundError(f"Failed to create the database file at {database_location}")
             return True
 
         except requests.RequestException as e:

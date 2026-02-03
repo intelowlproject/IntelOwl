@@ -52,18 +52,16 @@ class Threatstream(classes.ObservableAnalyzer):
                 uri = f"v1/pdns/domain/{self.observable_name}"
             else:
                 raise AnalyzerConfigurationException(
-                    f"Observable {self.observable_classification} not supported."
+                    f"Observable {self.observable_classification} not supported. "
                     "Currently supported are: ip, domain."
                 )
         else:
             raise AnalyzerConfigurationException(
-                f"Analysis type: {self.threatstream_analysis} not supported."
-                "Currently supported are: intelligence, confidence,passive_dns."
+                f"Analysis type: {self.threatstream_analysis} not supported. "
+                "Currently supported are: intelligence, confidence, passive_dns."
             )
         try:
-            api_header = {
-                "Authorization": f"apikey {self._api_user_name}:{self._api_key_name}"
-            }
+            api_header = {"Authorization": f"apikey {self._api_user_name}:{self._api_key_name}"}
             response = requests.get(self.url + uri, params=params, headers=api_header)
             response.raise_for_status()
         except requests.RequestException as e:

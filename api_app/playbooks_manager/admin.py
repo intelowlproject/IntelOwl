@@ -24,9 +24,7 @@ class PlaybookConfigAdminView(AbstractConfigAdminView, ModelWithOwnershipAdminVi
         "starting",
     ) + ModelWithOwnershipAdminView.list_display
     list_filter = (
-        AbstractConfigAdminView.list_filter
-        + ("starting",)
-        + ModelWithOwnershipAdminView.list_filter
+        AbstractConfigAdminView.list_filter + ("starting",) + ModelWithOwnershipAdminView.list_filter
     )
 
     @staticmethod

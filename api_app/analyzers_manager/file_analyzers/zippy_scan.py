@@ -27,11 +27,7 @@ class ZippyAnalyser(FileAnalyzer):
         pass
 
     def run(self):
-        z = (
-            Zippy(engine=self.ENGINES[self.engine])
-            if self.engine in self.ENGINES
-            else EnsembledZippy()
-        )
+        z = Zippy(engine=self.ENGINES[self.engine]) if self.engine in self.ENGINES else EnsembledZippy()
 
         logger.info(f"Running Zippy on file {self.filepath} using {self.engine}")
         binary_data = self.read_file_bytes()
@@ -42,9 +38,7 @@ class ZippyAnalyser(FileAnalyzer):
             logger.exception(f"Cannot decode file {self.filepath}")
             raise AnalyzerRunException("Cannot decode file")
         except Exception as e:
-            logger.exception(
-                f"%{self.engine}.run_on_text_chunked(text_data) failed: {e}"
-            )
+            logger.exception(f"%{self.engine}.run_on_text_chunked(text_data) failed: {e}")
             raise AnalyzerRunException(f"{self.engine} failed")
         response = response + (text_data, "engine used: " + self.engine)
         # returning a response tuple with the text checked and AI or HUMAN

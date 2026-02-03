@@ -13,9 +13,7 @@ from .models import VisualizerConfig, VisualizerReport
 
 
 class VisualizerConfigSerializer(PythonConfigSerializer):
-    playbooks = rfs.SlugRelatedField(
-        many=True, queryset=PlaybookConfig.objects.all(), slug_field="name"
-    )
+    playbooks = rfs.SlugRelatedField(many=True, queryset=PlaybookConfig.objects.all(), slug_field="name")
 
     class Meta:
         model = VisualizerConfig
@@ -24,9 +22,7 @@ class VisualizerConfigSerializer(PythonConfigSerializer):
 
 
 class VisualizerConfigSerializerForMigration(PythonConfigSerializerForMigration):
-    playbooks = rfs.SlugRelatedField(
-        queryset=PlaybookConfig.objects.all(), slug_field="name", many=True
-    )
+    playbooks = rfs.SlugRelatedField(queryset=PlaybookConfig.objects.all(), slug_field="name", many=True)
 
     class Meta:
         model = VisualizerConfig
@@ -36,9 +32,7 @@ class VisualizerConfigSerializerForMigration(PythonConfigSerializerForMigration)
 class VisualizerReportSerializer(AbstractReportSerializer):
     name = rfs.SerializerMethodField()
 
-    config = rfs.SlugRelatedField(
-        queryset=VisualizerConfig.objects.all(), slug_field="name"
-    )
+    config = rfs.SlugRelatedField(queryset=VisualizerConfig.objects.all(), slug_field="name")
 
     @classmethod
     def get_name(cls, instance: VisualizerReport):

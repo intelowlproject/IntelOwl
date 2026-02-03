@@ -29,15 +29,9 @@ class AnalyzableSerializer(rfs.ModelSerializer):
     def to_representation(self, instance):
         logger.debug(f"{instance=}")
         analyzable = super().to_representation(instance)
-        job = (
-            Job.objects.filter(id__in=analyzable["jobs"])
-            .order_by("-finished_analysis_time")
-            .first()
-        )
+        job = Job.objects.filter(id__in=analyzable["jobs"]).order_by("-finished_analysis_time").first()
         try:
-            user_event_data_model = (
-                instance.get_all_user_events_data_model().order_by("-date").first()
-            )
+            user_event_data_model = instance.get_all_user_events_data_model().order_by("-date").first()
         except NotImplementedError:
             user_event_data_model = None
         logger.debug(f"{job=}, {user_event_data_model=}")
@@ -51,9 +45,7 @@ class AnalyzableSerializer(rfs.ModelSerializer):
             elif not user_event_data_model:
                 last_data_model = job.data_model
             else:
-                if (job and job.data_model) and (
-                    job.data_model.date > user_event_data_model.date
-                ):
+                if (job and job.data_model) and (job.data_model.date > user_event_data_model.date):
                     last_data_model = job.data_model
                 else:
                     last_data_model = user_event_data_model

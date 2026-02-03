@@ -28,9 +28,7 @@ class IocExtract(FileAnalyzer):
         text_data = binary_data.decode("utf-8")
         result = {}
         if self.extract_iocs:
-            all_iocs = list(
-                i.extract_iocs(text_data, refang=self.refang, strip=self.strip)
-            )
+            all_iocs = list(i.extract_iocs(text_data, refang=self.refang, strip=self.strip))
             result["all_iocs"] = all_iocs
 
         else:

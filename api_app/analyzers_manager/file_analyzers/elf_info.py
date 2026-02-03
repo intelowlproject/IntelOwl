@@ -16,9 +16,7 @@ class ELFInfo(FileAnalyzer):
     @staticmethod
     def _convert_to_dict(element):
         if type(element) is Container:
-            return {
-                key: ELFInfo._convert_to_dict(value) for key, value in element.items()
-            }
+            return {key: ELFInfo._convert_to_dict(value) for key, value in element.items()}
         else:
             return element
 

@@ -98,9 +98,7 @@ class JobConsumerTestCase(WebsocketTestCase):
             job_report = await communicator.receive_json_from()
             self.assertEqual(job_report["id"], 1027)
             self.assertEqual(job_report["observable_name"], "8.8.8.8")
-            self.assertEqual(
-                job_report["status"], Job.STATUSES.REPORTED_WITHOUT_FAILS.value
-            )
+            self.assertEqual(job_report["status"], Job.STATUSES.REPORTED_WITHOUT_FAILS.value)
 
     async def test_job_running(self, *args, **kwargs):
         # Note: Sometimes reading from ws (receive_json_from) is too fast:
@@ -119,15 +117,11 @@ class JobConsumerTestCase(WebsocketTestCase):
             status=Job.STATUSES.PENDING.value,
             analyzable=analyzable,
         )
-        class_dns_python_module, _ = await sync_to_async(
-            PythonModule.objects.get_or_create
-        )(
+        class_dns_python_module, _ = await sync_to_async(PythonModule.objects.get_or_create)(
             base_path="api_app.analyzers_manager.observable_analyzers",
             module="dns.dns_resolvers.classic_dns_resolver.ClassicDNSResolver",
         )
-        classic_dns_analyzer_config, _ = await sync_to_async(
-            AnalyzerConfig.objects.get_or_create
-        )(
+        classic_dns_analyzer_config, _ = await sync_to_async(AnalyzerConfig.objects.get_or_create)(
             name="Classic_DNS",
             python_module=class_dns_python_module,
             type=TypeChoices.OBSERVABLE.value,
@@ -194,9 +188,7 @@ class JobConsumerTestCase(WebsocketTestCase):
             time.sleep(1)
             self.assertEqual(job_analyzer_terminated["id"], 1029)
             self.assertEqual(job_analyzer_terminated["observable_name"], "test.com")
-            self.assertEqual(
-                job_analyzer_terminated["status"], Job.STATUSES.PENDING.value
-            )
+            self.assertEqual(job_analyzer_terminated["status"], Job.STATUSES.PENDING.value)
             self.assertIsNotNone(job_analyzer_terminated["analyzer_reports"])
             self.assertIsNone(job_analyzer_terminated["finished_analysis_time"])
             # terminate job (force status)

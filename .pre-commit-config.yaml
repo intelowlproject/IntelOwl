@@ -4,11 +4,10 @@ repos:
     hooks:
       # Run the linter (replaces flake8 + isort)
       - id: ruff
+        name: ruff lint
         args: [--fix]
-  - repo: https://github.com/psf/black
-    rev: 24.10.0
-    hooks:
-      - id: black
+      # Run the formatter (replaces black)
+      - id: ruff-format
   - repo: https://github.com/pre-commit/mirrors-eslint
     rev: v8.16.0
     hooks:

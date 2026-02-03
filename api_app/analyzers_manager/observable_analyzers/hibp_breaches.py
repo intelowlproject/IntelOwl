@@ -46,15 +46,11 @@ class HibpBreaches(ObservableAnalyzer):
             resolved_type = "email"
 
         else:
-            raise RuntimeError(
-                "Unsupported observable. Use a valid domain or email."
-            )  # noqa: E501
+            raise RuntimeError("Unsupported observable. Use a valid domain or email.")  # noqa: E501
 
         api_key = self._api_key_name
         if not api_key:
-            raise RuntimeError(
-                "API key required for breach checks (email or domain)."
-            )  # noqa: E501
+            raise RuntimeError("API key required for breach checks (email or domain).")  # noqa: E501
 
         if resolved_type == "email":
             endpoint = f"{BASE_URL}breachedaccount/{observable}"
@@ -71,8 +67,7 @@ class HibpBreaches(ObservableAnalyzer):
         normalized_breaches = normalize_breach_data(breaches)
         breach_count = len(normalized_breaches)
         summary = (
-            f"{resolved_type.capitalize()} found in "
-            f"{breach_count} breaches."  # noqa: E501
+            f"{resolved_type.capitalize()} found in {breach_count} breaches."  # noqa: E501
             if breach_count > 0
             else "No breaches found."
         )

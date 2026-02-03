@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 class Malshare(Ingestor):
-
     url: str
     _api_key_name: str
     limit: int
@@ -41,15 +40,11 @@ class Malshare(Ingestor):
 
         except ValueError as val_err:
             logger.error(f"Invalid file format for {sample_hash}: {val_err}")
-            raise IngestorRunException(
-                f"Invalid file format for {sample_hash}: {val_err}"
-            )
+            raise IngestorRunException(f"Invalid file format for {sample_hash}: {val_err}")
 
         except Exception as e:
             logger.error(f"Unexpected error while downloading {sample_hash}: {e}")
-            raise IngestorRunException(
-                f"Unexpected error while downloading {sample_hash}: {e}"
-            )
+            raise IngestorRunException(f"Unexpected error while downloading {sample_hash}: {e}")
 
         return response.content
 

@@ -51,8 +51,7 @@ class UrlDNA(ObservableAnalyzer):
             result = self.__poll_for_result(scan_id)
         else:
             raise AnalyzerRunException(
-                f"Not supported analysis_type {self.urldna_analysis}. "
-                "Supported are 'SEARCH' and 'NEW_SCAN'."
+                f"Not supported analysis_type {self.urldna_analysis}. Supported are 'SEARCH' and 'NEW_SCAN'."
             )
         return result
 

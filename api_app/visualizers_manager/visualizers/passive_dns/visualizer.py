@@ -26,36 +26,20 @@ class PassiveDNS(Visualizer):
 
     def run(self) -> List[Dict]:
         raw_pdns_data = []
-        raw_pdns_data.extend(
-            extract_otxquery_reports(self.get_analyzer_reports(), self._job)
-        )
-        raw_pdns_data.extend(
-            extract_threatminer_reports(self.get_analyzer_reports(), self._job)
-        )
-        raw_pdns_data.extend(
-            extract_validin_reports(self.get_analyzer_reports(), self._job)
-        )
-        raw_pdns_data.extend(
-            extract_dnsdb_reports(self.get_analyzer_reports(), self._job)
-        )
-        raw_pdns_data.extend(
-            extract_circlpdns_reports(self.get_analyzer_reports(), self._job)
-        )
-        raw_pdns_data.extend(
-            extract_robtex_reports(self.get_analyzer_reports(), self._job)
-        )
-        raw_pdns_data.extend(
-            extract_mnemonicpdns_reports(self.get_analyzer_reports(), self._job)
-        )
+        raw_pdns_data.extend(extract_otxquery_reports(self.get_analyzer_reports(), self._job))
+        raw_pdns_data.extend(extract_threatminer_reports(self.get_analyzer_reports(), self._job))
+        raw_pdns_data.extend(extract_validin_reports(self.get_analyzer_reports(), self._job))
+        raw_pdns_data.extend(extract_dnsdb_reports(self.get_analyzer_reports(), self._job))
+        raw_pdns_data.extend(extract_circlpdns_reports(self.get_analyzer_reports(), self._job))
+        raw_pdns_data.extend(extract_robtex_reports(self.get_analyzer_reports(), self._job))
+        raw_pdns_data.extend(extract_mnemonicpdns_reports(self.get_analyzer_reports(), self._job))
 
         page = self.Page(name="Passive DNS")
         page.add_level(
             self.Level(
                 position=1,
                 size=self.LevelSize.S_6,
-                horizontal_list=self.HList(
-                    value=pdns_table(raw_pdns_data, standard_table_columns())
-                ),
+                horizontal_list=self.HList(value=pdns_table(raw_pdns_data, standard_table_columns())),
             )
         )
         logger.debug(f"levels: {page.to_dict()}")

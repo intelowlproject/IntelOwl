@@ -25,26 +25,20 @@ class CyberChef(ObservableAnalyzer, DockerBasedAnalyzer):
             try:
                 try:
                     with open(
-                        f"{settings.PROJECT_LOCATION}/configuration/"
-                        f"{self.config_filename}",
+                        f"{settings.PROJECT_LOCATION}/configuration/{self.config_filename}",
                         "r",
                     ) as recipes:
                         parsed_recipes = json.load(recipes)
                         self.recipe = parsed_recipes[self.recipe_name]
                 except FileNotFoundError:
-                    raise AnalyzerRunException(
-                        f"Could not open configuration file {self.config_filename}"
-                    )
+                    raise AnalyzerRunException(f"Could not open configuration file {self.config_filename}")
                 except json.JSONDecodeError:
                     raise AnalyzerRunException(
-                        f"Could not parse the configuration file. Please check "
-                        f"{self.config_filename}"
+                        f"Could not parse the configuration file. Please check {self.config_filename}"
                     )
 
             except KeyError:
-                raise AnalyzerRunException(
-                    f"Unknown predefined recipe: {self.recipe_name}"
-                )
+                raise AnalyzerRunException(f"Unknown predefined recipe: {self.recipe_name}")
         else:
             self.recipe = self.recipe_code
 

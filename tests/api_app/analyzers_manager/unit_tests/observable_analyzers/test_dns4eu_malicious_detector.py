@@ -22,12 +22,8 @@ class DNS4EUMaliciousDetectorTestCase(BaseAnalyzerTest):
     @staticmethod
     def get_mocked_response():
         # Create a mock DNS message with sinkhole IP (0.0.0.0)
-        mock_msg = dns.message.make_response(
-            dns.message.make_query("malicious.com", "A")
-        )
-        rrset = dns.rrset.from_text(
-            "malicious.com.", 300, dns.rdataclass.IN, dns.rdatatype.A, "0.0.0.0"
-        )
+        mock_msg = dns.message.make_response(dns.message.make_query("malicious.com", "A"))
+        rrset = dns.rrset.from_text("malicious.com.", 300, dns.rdataclass.IN, dns.rdatatype.A, "0.0.0.0")
         mock_msg.answer.append(rrset)
 
         return patch("dns.query.https", return_value=mock_msg)

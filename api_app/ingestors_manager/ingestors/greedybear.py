@@ -16,7 +16,6 @@ logger = logging.getLogger(__name__)
 
 
 class GreedyBear(Ingestor):
-
     url: str
     feed_type: str
     attack_type: str
@@ -40,13 +39,9 @@ class GreedyBear(Ingestor):
                 f"Invalid attack_type: {self.attack_type}. Must be one of {self.VALID_ATTACK_TYPES}"
             )
         if self.age not in self.VALID_AGE:
-            raise IngestorConfigurationException(
-                f"Invalid age: {self.age}. Must be one of {self.VALID_AGE}"
-            )
+            raise IngestorConfigurationException(f"Invalid age: {self.age}. Must be one of {self.VALID_AGE}")
 
-        req_url = (
-            f"{self.url}/api/feeds/{self.feed_type}/{self.attack_type}/{self.age}.json"
-        )
+        req_url = f"{self.url}/api/feeds/{self.feed_type}/{self.attack_type}/{self.age}.json"
         result = requests.get(req_url)
         result.raise_for_status()
         content = result.json()

@@ -28,8 +28,7 @@ class Censys(classes.ObservableAnalyzer):
             uri = f"/hosts/{self.observable_name}"
         else:
             raise AnalyzerRunException(
-                f"not supported observable type {self.observable_classification}."
-                "Supported is IP"
+                f"not supported observable type {self.observable_classification}. Supported is IP."
             )
         response = requests.get(
             self.url + uri,

@@ -196,9 +196,11 @@ class EngineConfigTestCase(CustomTestCase):
         original_data_model_pk = existing_data_model.pk
         original_data_model_count = IPDataModel.objects.count()
 
-        with patch.object(Job, "save", side_effect=IntegrityError("Simulated save failure")):
-            with self.assertRaises(IntegrityError):
-                config.run(job)
+        with (
+            patch.object(Job, "save", side_effect=IntegrityError("Simulated save failure")),
+            self.assertRaises(IntegrityError),
+        ):
+            config.run(job)
 
         job.refresh_from_db()
 

@@ -37,9 +37,7 @@ class MachoInfoTest(BaseFileAnalyzerTest):
         mock_macho.version_info = "1.0.0"
         mock_macho.code_signature_info = {"signed": True}
 
-        mock_macho.get_imported_functions.return_value = {
-            "/usr/lib/libSystem.B.dylib": ["_printf"]
-        }
+        mock_macho.get_imported_functions.return_value = {"/usr/lib/libSystem.B.dylib": ["_printf"]}
         mock_macho.get_exported_symbols.return_value = {"<export_trie>": ["_main"]}
 
         mock_macho.get_similarity_hashes.return_value = {

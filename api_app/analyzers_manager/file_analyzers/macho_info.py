@@ -58,13 +58,9 @@ class MachoInfo(FileAnalyzer):
                 except Exception as universal_error:
                     # Both parsers failed
                     parse_error = (
-                        f"Failed to parse as both single and universal binary. "
-                        f"Single: {str(e)}, Universal: {str(universal_error)}"
+                        f"Failed to parse as both single and universal binary. Single: {str(e)}, Universal: {str(universal_error)}"
                     )
-                    logger.warning(
-                        f"job_id:{self.job_id} analyzer:{self.analyzer_name} "
-                        f"md5:{self.md5} {parse_error}"
-                    )
+                    logger.warning(f"job_id:{self.job_id} analyzer:{self.analyzer_name} md5:{self.md5} {parse_error}")
                     # After both parsing attempts fail, fail the analyzer cleanly instead of retrying construction without parsing.
                     raise Exception(parse_error)
 
@@ -95,10 +91,7 @@ class MachoInfo(FileAnalyzer):
                 results["segments"] = [str(s) for s in macho.segments]
 
             if hasattr(macho, "dylib_names"):
-                results["dylib_names"] = [
-                    d.decode("utf-8", "ignore") if isinstance(d, bytes) else str(d)
-                    for d in macho.dylib_names
-                ]
+                results["dylib_names"] = [d.decode("utf-8", "ignore") if isinstance(d, bytes) else str(d) for d in macho.dylib_names]
 
             if hasattr(macho, "uuid"):
                 results["uuid"] = str(macho.uuid)
@@ -117,10 +110,7 @@ class MachoInfo(FileAnalyzer):
             elif hasattr(macho, "imported_functions"):
                 import_funcs = macho.imported_functions
                 if import_funcs:
-                    results["imports"] = [
-                        f.decode("utf-8", "ignore") if isinstance(f, bytes) else str(f)
-                        for f in import_funcs
-                    ]
+                    results["imports"] = [f.decode("utf-8", "ignore") if isinstance(f, bytes) else str(f) for f in import_funcs]
                 else:
                     results["imports"] = []
 
@@ -128,10 +118,7 @@ class MachoInfo(FileAnalyzer):
                 results["exports"] = macho.get_exported_symbols()
             elif hasattr(macho, "exported_symbols"):
                 if macho.exported_symbols:
-                    results["exports"] = [
-                        s.decode("utf-8", "ignore") if isinstance(s, bytes) else str(s)
-                        for s in macho.exported_symbols
-                    ]
+                    results["exports"] = [s.decode("utf-8", "ignore") if isinstance(s, bytes) else str(s) for s in macho.exported_symbols]
                 else:
                     results["exports"] = []
 
@@ -140,9 +127,7 @@ class MachoInfo(FileAnalyzer):
 
         except Exception as e:
             warning_message = (
-                f"job_id:{self.job_id} analyzer:{self.analyzer_name} "
-                f"md5:{self.md5} filename:{self.filename} "
-                f"MachoFile parsing error: {e}"
+                f"job_id:{self.job_id} analyzer:{self.analyzer_name} md5:{self.md5} filename:{self.filename} MachoFile parsing error: {e}"
             )
             logger.warning(warning_message, exc_info=True)
             self.report.errors.append(warning_message)

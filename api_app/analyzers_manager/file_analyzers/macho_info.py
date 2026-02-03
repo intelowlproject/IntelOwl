@@ -57,10 +57,10 @@ class MachoInfo(FileAnalyzer):
                         macho.parse()
                 except Exception as universal_error:
                     # Both parsers failed
-                    parse_error = f"Failed to parse as both single and universal binary. Single: {str(e)}, Universal: {str(universal_error)}"
-                    logger.warning(
-                        f"job_id:{self.job_id} analyzer:{self.analyzer_name} md5:{self.md5} {parse_error}"
+                    parse_error = (
+                        f"Failed to parse as both single and universal binary. Single: {str(e)}, Universal: {str(universal_error)}"
                     )
+                    logger.warning(f"job_id:{self.job_id} analyzer:{self.analyzer_name} md5:{self.md5} {parse_error}")
                     # After both parsing attempts fail, fail the analyzer cleanly instead of retrying construction without parsing.
                     raise Exception(parse_error)
 
@@ -126,7 +126,9 @@ class MachoInfo(FileAnalyzer):
                 results["hashes"] = macho.get_similarity_hashes(formatted=True)
 
         except Exception as e:
-            warning_message = f"job_id:{self.job_id} analyzer:{self.analyzer_name} md5:{self.md5} filename:{self.filename} MachoFile parsing error: {e}"
+            warning_message = (
+                f"job_id:{self.job_id} analyzer:{self.analyzer_name} md5:{self.md5} filename:{self.filename} MachoFile parsing error: {e}"
+            )
             logger.warning(warning_message, exc_info=True)
             self.report.errors.append(warning_message)
             self.report.status = self.report.STATUSES.FAILED

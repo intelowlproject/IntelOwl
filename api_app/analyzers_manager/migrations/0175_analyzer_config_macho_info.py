@@ -62,7 +62,7 @@ def _create_object(Model, data):
             value = _get_real_obj(Model, field, value)
             no_mtm[field] = value
     try:
-        o = Model.objects.get(**no_mtm)
+        Model.objects.get(**no_mtm)
     except Model.DoesNotExist:
         o = Model(**no_mtm)
         o.full_clean()

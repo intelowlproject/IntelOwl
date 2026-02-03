@@ -28,7 +28,7 @@ class MachoInfoTestCase(CustomTestCase):
 
         # Check segments
         self.assertIn("segments", report)
-        self.assertTrue(len(report["segments"]) > 0)
+        self.assertGreater(len(report["segments"]), 0)
 
         # Check dylibs (should have at least libSystem)
         self.assertIn("dylib_names", report)

@@ -23,11 +23,9 @@ class MachoInfo(FileAnalyzer):
     This analyzer uses defensive programming with hasattr() checks because:
     - The machofile library API varies between single-arch and Universal (FAT) binaries
     - Different Mach-O file types may expose different methods/properties
-    - This ensures robustness across various binary formats
-    - All API assumptions have been validated through testing (see library_choice.md)
+    - The behavior is validated through tests and internal documentation
 
-    Library: https://github.com/pstirparo/machofile
-    Version: 2025.8.5 (installed from GitHub)
+    Library reference: https://github.com/pstirparo/machofile
     """
 
     def run(self) -> Dict[str, Any]:
@@ -67,10 +65,8 @@ class MachoInfo(FileAnalyzer):
                         f"job_id:{self.job_id} analyzer:{self.analyzer_name} "
                         f"md5:{self.md5} {parse_error}"
                     )
-                    try:
-                        macho = machofile.MachO(self.filepath)
-                    except Exception:
-                        raise Exception(parse_error)
+                    # After both parsing attempts fail, fail the analyzer cleanly instead of retrying construction without parsing.
+                    raise Exception(parse_error)
 
             if macho is None:
                 raise Exception("Failed to create MachO object")
@@ -149,7 +145,7 @@ class MachoInfo(FileAnalyzer):
                 f"MachoFile parsing error: {e}"
             )
             logger.warning(warning_message, exc_info=True)
-            self.report.errors.append(str(e))
+            self.report.errors.append(warning_message)
             self.report.status = self.report.STATUSES.FAILED
             self.report.save()
 

@@ -85,7 +85,7 @@ export function PluginConfigModal({
   } else if (pluginType === PluginsTypes.PLAYBOOK) {
     title = "Edit playbook config";
     // save as a playbook button -> create new playbook
-    if (isEditing && !Object.keys(pluginConfig).includes(["name"])) {
+    if (isEditing && !Object.keys(pluginConfig).includes("name")) {
       isEditing = false;
     }
     // case F-G: create/edit playbook

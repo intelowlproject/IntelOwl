@@ -127,20 +127,13 @@ describe("test JobOverview (job report)", () => {
     // actions bar
     const utilitiesRow = container.querySelector("#utilitiesRow");
     expect(within(utilitiesRow).getByText("Job #1")).toBeInTheDocument();
+    const actionMenuButton = container.querySelector("#jobActions");
+    expect(actionMenuButton).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Comments (1)" }),
+      within(utilitiesRow).getByRole("button", { name: "Comments" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Delete" }),
-    ).toBeInTheDocument();
-    expect(
-      within(utilitiesRow).getByRole("button", { name: "Rescan" }),
-    ).toBeInTheDocument();
-    expect(
-      within(utilitiesRow).getByRole("button", { name: "Save As Playbook" }),
-    ).toBeInTheDocument();
-    expect(
-      within(utilitiesRow).getByRole("button", { name: "Report" }),
+      within(utilitiesRow).getByText("Artifact"),
     ).toBeInTheDocument();
     // info card
     const JobInfoCardSection = container.querySelector("#JobInfoCardSection");
@@ -215,7 +208,7 @@ describe("test JobOverview (job report)", () => {
       expect(visualizerButton.className).toContain("btn-outline-tertiary"); // not selected
       const rawButton = screen.getByRole("button", { name: "Raw" });
       expect(rawButton).toBeInTheDocument();
-      expect(rawButton.className).toContain("btn-primary"); // selected
+      expect(rawButton.className).toContain("btn-secondary"); // selected
       // check subsections available
       const analyzerReport = screen.getByText("Analyzers Report");
       expect(analyzerReport).toBeInTheDocument();
@@ -270,7 +263,7 @@ describe("test JobOverview (job report)", () => {
     expect(visualizerButton.className).toContain("btn-outline-tertiary"); // not selected
     const rawButton = screen.getByRole("button", { name: "Raw" });
     expect(rawButton).toBeInTheDocument();
-    expect(rawButton.className).toContain("btn-primary"); // selected
+    expect(rawButton.className).toContain("btn-secondary"); // selected
     // check subsections available
     const analyzerReport = screen.getByText("Analyzers Report");
     expect(analyzerReport).toBeInTheDocument();
@@ -317,7 +310,7 @@ describe("test JobOverview (job report)", () => {
     // check sections visualizer/raw
     const visualizerButton = screen.getByRole("button", { name: "Visualizer" });
     expect(visualizerButton).toBeInTheDocument();
-    expect(visualizerButton.className).toContain("btn-primary"); // selected
+    expect(visualizerButton.className).toContain("btn-secondary"); // selected
     const rawButton = screen.getByRole("button", { name: "Raw" });
     expect(rawButton).toBeInTheDocument();
     expect(rawButton.className).toContain("btn-outline-tertiary"); // not selected
@@ -400,7 +393,7 @@ describe("test JobOverview (job report)", () => {
     // check sections visualizer/raw
     const visualizerButton = screen.getByRole("button", { name: "Visualizer" });
     expect(visualizerButton).toBeInTheDocument();
-    expect(visualizerButton.className).toContain("btn-primary"); // selected
+    expect(visualizerButton.className).toContain("btn-secondary"); // selected
     const rawButton = screen.getByRole("button", { name: "Raw" });
     expect(rawButton).toBeInTheDocument();
     expect(rawButton.className).toContain("btn-outline-tertiary"); // not selected

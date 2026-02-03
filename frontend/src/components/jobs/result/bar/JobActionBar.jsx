@@ -93,8 +93,6 @@ export function JobActionsBar({ job, relatedInvestigationNumber }) {
           color="gray"
           className="me-1 text-light"
           onClick={() => navigate(`/jobs/${job.id}/comments`)}
-          title="Artifact Comments"
-          titlePlacement="top"
         />
         {job.comments.length > 0 && (
           <Badge color="light" className="badge-top-end-corner text-black">

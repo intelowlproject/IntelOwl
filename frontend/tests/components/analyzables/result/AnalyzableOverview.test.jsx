@@ -126,13 +126,16 @@ describe("test AnalyzableOverview", () => {
       screen.getByRole("heading", { name: "Artifact #1" }),
     ).toBeInTheDocument();
     // buttons
-    const rescanButton = screen.getByRole("link", { name: "Rescan" });
-    expect(rescanButton).toBeInTheDocument();
-    expect(rescanButton.href).toContain("/scan?observable=google.com");
     const createEvaluationButton = screen.getByRole("button", {
       name: /Your evaluation/i,
     });
     expect(createEvaluationButton).toBeInTheDocument();
+    const actionMenuButton = container.querySelector("#artifactActions");
+    expect(actionMenuButton).toBeInTheDocument();
+    await user.click(actionMenuButton);
+    const rescanButton = screen.getByRole("menuitem", { name: "Rescan" });
+    expect(rescanButton).toBeInTheDocument();
+    expect(rescanButton.href).toContain("/scan?observable=google.com");
     // name
     expect(
       screen.getByRole("heading", { name: "google.com" }),
@@ -253,13 +256,16 @@ describe("test AnalyzableOverview", () => {
       screen.getByRole("heading", { name: "Artifact #1" }),
     ).toBeInTheDocument();
     // buttons
-    const rescanButton = screen.getByRole("link", { name: "Rescan" });
-    expect(rescanButton).toBeInTheDocument();
-    expect(rescanButton.href).toContain("/scan?observable=1.1.1.1:443");
     const createEvaluationButton = screen.getByRole("button", {
       name: /Your evaluation/i,
     });
     expect(createEvaluationButton).toBeInTheDocument();
+    const actionMenuButton = container.querySelector("#artifactActions");
+    expect(actionMenuButton).toBeInTheDocument();
+    await user.click(actionMenuButton);
+    const rescanButton = screen.getByRole("menuitem", { name: "Rescan" });
+    expect(rescanButton).toBeInTheDocument();
+    expect(rescanButton.href).toContain("/scan?observable=1.1.1.1:443");
     // name
     expect(
       screen.getByRole("heading", { name: "1.1.1.1:443" }),

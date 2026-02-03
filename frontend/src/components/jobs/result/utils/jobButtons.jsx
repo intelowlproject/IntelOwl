@@ -24,7 +24,7 @@ export function InvestigationOverviewButton({ id, name }) {
       <CgListTree className="me-1" />
       Investigation
       <UncontrolledTooltip placement="top" target="investigationOverviewBtn">
-        This job is part of the investigation: {name}
+        Go to investigation: {name}
       </UncontrolledTooltip>
     </Button>
   );

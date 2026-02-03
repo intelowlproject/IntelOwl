@@ -21,9 +21,7 @@ class FileScanSearch(ObservableAnalyzer):
 
     def run(self):
         """Runs the FileScan_Search analyzer"""
-        observable_name_base64 = base64.b64encode(
-            self.observable_name.encode()
-        ).decode()
+        observable_name_base64 = base64.b64encode(self.observable_name.encode()).decode()
         endpoint = "?query={input}"
         url = f"{self.url}/{endpoint.format(input=observable_name_base64)}"
         try:

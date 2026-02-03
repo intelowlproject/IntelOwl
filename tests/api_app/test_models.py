@@ -308,9 +308,7 @@ class AbstractConfigTestCase(CustomTestCase):
         )
         job.visualizers_to_execute.set([muc])
         gen_signature = (
-            VisualizerConfig.objects.filter(pk=muc.pk)
-            .annotate_runnable(self.user)
-            .get_signatures(job)
+            VisualizerConfig.objects.filter(pk=muc.pk).annotate_runnable(self.user).get_signatures(job)
         )
         with self.assertRaises(RuntimeWarning):
             try:
@@ -335,9 +333,7 @@ class AbstractConfigTestCase(CustomTestCase):
         )
         job.visualizers_to_execute.set([muc])
         gen_signature = (
-            VisualizerConfig.objects.filter(pk=muc.pk)
-            .annotate_runnable(self.user)
-            .get_signatures(job)
+            VisualizerConfig.objects.filter(pk=muc.pk).annotate_runnable(self.user).get_signatures(job)
         )
         try:
             signature = next(gen_signature)
@@ -469,7 +465,6 @@ class PluginConfigTestCase(CustomTestCase):
 
 
 class JobTestCase(CustomTestCase):
-
     def test_get_analyzers_data_models(self):
         an1 = Analyzable.objects.create(
             name="test.com",
@@ -531,9 +526,7 @@ class JobTestCase(CustomTestCase):
 
         del j1.pivots_to_execute
         j1.analyzers_to_execute.set([ac])
-        self.assertCountEqual(
-            j1.pivots_to_execute.filter(name="test").values_list("pk", flat=True), []
-        )
+        self.assertCountEqual(j1.pivots_to_execute.filter(name="test").values_list("pk", flat=True), [])
 
         del j1.pivots_to_execute
         j1.analyzers_to_execute.set([ac, ac2, ac3])
@@ -544,6 +537,122 @@ class JobTestCase(CustomTestCase):
 
         del j1.pivots_to_execute
         j1.analyzers_to_execute.set([ac, ac3])
-        self.assertCountEqual(
-            j1.pivots_to_execute.filter(name="test").values_list("pk", flat=True), []
+        self.assertCountEqual(j1.pivots_to_execute.filter(name="test").values_list("pk", flat=True), [])
+
+    def test_get_root_returns_self_when_is_root(self):
+        """Test that get_root() returns self when the job is already a root node."""
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
         )
+        root_job = Job.objects.create(
+            user=self.user,
+            analyzable=an,
+            status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
+        )
+        # A newly created job should be a root
+        self.assertTrue(root_job.is_root())
+        self.assertEqual(root_job.get_root(), root_job)
+        root_job.delete()
+        an.delete()
+
+    def test_get_root_returns_parent_for_child_job(self):
+        """Test that get_root() returns the root job for a child job."""
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+        root_job = Job.add_root(
+            user=self.user,
+            analyzable=an,
+            status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
+        )
+        child_job = root_job.add_child(
+            user=self.user,
+            analyzable=an,
+            status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
+        )
+        # Child job should return the root job
+        self.assertFalse(child_job.is_root())
+        self.assertEqual(child_job.get_root().pk, root_job.pk)
+        child_job.delete()
+        root_job.delete()
+        an.delete()
+
+    def test_get_root_deterministic_ordering(self):
+        """Test that get_root() returns deterministic results using order_by('pk')."""
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+        root_job = Job.add_root(
+            user=self.user,
+            analyzable=an,
+            status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
+        )
+        # Call get_root multiple times and verify consistent results
+        results = [root_job.get_root().pk for _ in range(10)]
+        self.assertEqual(len(set(results)), 1, "get_root() should return consistent results")
+        root_job.delete()
+        an.delete()
+
+    def test_get_root_handles_multiple_roots_deterministically(self):
+        """
+        Test that get_root() handles MultipleObjectsReturned exception
+        by returning a deterministic result based on PK ordering.
+
+        This simulates the race condition that can occur with django-treebeard
+        under high concurrency. We use mocking because the path field has a
+        UNIQUE constraint in the database, preventing real duplicates.
+        """
+        from unittest.mock import patch
+
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+        # Create a root job and child job
+        root_job = Job.add_root(
+            user=self.user,
+            analyzable=an,
+            status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
+        )
+        child_job = root_job.add_child(
+            user=self.user,
+            analyzable=an,
+            status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
+        )
+
+        # Verify child_job is not a root (needed for the test to work)
+        self.assertFalse(child_job.is_root())
+
+        # Import MP_Node to patch its get_root method
+        from treebeard.mp_tree import MP_Node
+
+        # Patch treebeard's MP_Node.get_root to raise MultipleObjectsReturned
+        # and also patch the logger to verify it was called
+        with (
+            patch.object(
+                MP_Node,
+                "get_root",
+                side_effect=Job.MultipleObjectsReturned("Multiple roots found"),
+            ),
+            patch("api_app.models.logger") as mock_logger,
+        ):
+            result = child_job.get_root()
+
+        # Verify we got a result (the fallback query should work)
+        self.assertIsNotNone(result)
+        # The fallback query finds root_job (the only actual root)
+        self.assertEqual(result.pk, root_job.pk)
+
+        # Verify warning was logged (using mock to avoid CI logging disable issues)
+        mock_logger.warning.assert_called_once()
+        call_args = mock_logger.warning.call_args[0][0]
+        self.assertIn("Tree Integrity Error", call_args)
+        self.assertIn("Multiple roots found", call_args)
+
+        # Cleanup
+        child_job.delete()
+        root_job.delete()
+        an.delete()

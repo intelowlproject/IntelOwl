@@ -5,6 +5,7 @@ from pathlib import PosixPath
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import Classification
+from api_app.decorators import classproperty
 from api_app.mixins import VirusTotalv3AnalyzerMixin, VirusTotalv3BaseMixin
 from tests import CustomTestCase
 from tests.mock_utils import MockUpResponse
@@ -30,9 +31,7 @@ possible_responses = {
                             {
                                 "type": "url",
                                 "id": "e1deefc8a4613fe9c16014d5cce4de4a6e12f3caccf80838a04c82faa4b42434",
-                                "context_attributes": {
-                                    "url": "http://pki.goog/gsr1/gsr1.crt"
-                                },
+                                "context_attributes": {"url": "http://pki.goog/gsr1/gsr1.crt"},
                             },
                         ],
                         "links": {"self": "redacted", "related": "redacted"},
@@ -62,8 +61,7 @@ possible_responses = {
 
 
 class VirusTotalv3Base(VirusTotalv3BaseMixin):
-    @classmethod
-    @property
+    @classproperty
     def python_base_path(cls) -> PosixPath:
         return pathlib.PosixPath(r"/")
 
@@ -76,8 +74,7 @@ class VirusTotalv3Base(VirusTotalv3BaseMixin):
 
 
 class VirusTotalv3Analyzer(VirusTotalv3AnalyzerMixin):
-    @classmethod
-    @property
+    @classproperty
     def python_base_path(cls) -> PosixPath:
         return pathlib.PosixPath(r"/")
 
@@ -92,9 +89,7 @@ class VirusTotalv3Analyzer(VirusTotalv3AnalyzerMixin):
 class VirusTotalMixinTestCase(CustomTestCase):
     def setUp(self) -> None:
         self.base = VirusTotalv3Base()
-        self.analyzer_file = VirusTotalv3Analyzer(
-            AnalyzerConfig.objects.get(name="VirusTotal_v3_Get_File")
-        )
+        self.analyzer_file = VirusTotalv3Analyzer(AnalyzerConfig.objects.get(name="VirusTotal_v3_Get_File"))
         self.analyzer_observable = VirusTotalv3Analyzer(
             AnalyzerConfig.objects.get(name="VirusTotal_v3_Get_Observable")
         )

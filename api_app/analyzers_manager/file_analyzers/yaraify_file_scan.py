@@ -39,9 +39,7 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
 
         self.send_file = self._job.tlp == self._job.TLP.CLEAR.value
         if self.send_file and not hasattr(self, "_api_key_identifier"):
-            raise AnalyzerConfigurationException(
-                "Unable to send file without having api_key_identifier set"
-            )
+            raise AnalyzerConfigurationException("Unable to send file without having api_key_identifier set")
 
     def run(self):
         name_to_send = self.filename if self.filename else self.md5
@@ -74,9 +72,7 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
                 "file": (name_to_send, file),
             }
             logger.info(f"yara file scan md5 {self.md5} sending sample for analysis")
-            response = requests.post(
-                self.url, files=files_, headers=self.authentication_header
-            )
+            response = requests.post(self.url, files=files_, headers=self.authentication_header)
             response.raise_for_status()
             scan_response = response.json()
             scan_query_status = scan_response.get("query_status")
@@ -84,8 +80,7 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
                 task_id = scan_response.get("data", {}).get("task_id", "")
                 if not task_id:
                     raise AnalyzerRunException(
-                        f"task_id value is unexpected: {task_id}."
-                        f"Analysis was requested for md5 {self.md5}"
+                        f"task_id value is unexpected: {task_id}.Analysis was requested for md5 {self.md5}"
                     )
                 for _try in range(self.max_tries):
                     try:
@@ -95,9 +90,7 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
                             f"task_id: {task_id}"
                         )
                         data = {"query": "get_results", "task_id": task_id}
-                        response = requests.post(
-                            self.url, json=data, headers=self.authentication_header
-                        )
+                        response = requests.post(self.url, json=data, headers=self.authentication_header)
                         response.raise_for_status()
                         task_response = response.json()
                         logger.debug(task_response)

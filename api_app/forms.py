@@ -149,16 +149,11 @@ class OrganizationPluginConfigurationForm(forms.ModelForm):
         Raises:
             ValidationError: If not exactly one configuration is selected.
         """
-        number_plugins = sum(
-            bool(self.cleaned_data.get(val, False)) for val in self._plugins
-        )
+        number_plugins = sum(bool(self.cleaned_data.get(val, False)) for val in self._plugins)
         if number_plugins != 1 and not self.instance.pk:
             self.add_error(
                 field=None,
-                error={
-                    field: "You must select exactly one configuration"
-                    for field in self._plugins
-                },
+                error={field: "You must select exactly one configuration" for field in self._plugins},
             )
         return super().validate_unique()
 

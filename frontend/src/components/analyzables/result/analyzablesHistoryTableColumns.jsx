@@ -15,6 +15,7 @@ import { LastEvaluationComponent } from "../../common/engineBadges";
 import {
   JobResultSections,
   AnalyzableHistoryTypes,
+  HistoryPages,
   datetimeFormatStr,
 } from "../../../constants/miscConst";
 
@@ -34,10 +35,14 @@ export const analyzablesHistoryTableColumns = [
               href={
                 original.type === AnalyzableHistoryTypes.JOB
                   ? `/jobs/${id}/${JobResultSections.VISUALIZER}`
-                  : `/history/${original.type.replaceAll(
-                      "_",
-                      "-",
-                    )}s?event_date__gte=${encodeURIComponent(
+                  : `/history/${
+                      HistoryPages[
+                        Object.keys(AnalyzableHistoryTypes).find(
+                          (key) =>
+                            AnalyzableHistoryTypes[key] === original.type,
+                        )
+                      ]
+                    }?event_date__gte=${encodeURIComponent(
                       format(fromDate, datetimeFormatStr),
                     )}&event_date__lte=${encodeURIComponent(
                       format(new Date(), datetimeFormatStr),

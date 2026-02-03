@@ -12,9 +12,7 @@ class BBOTTestCase(BaseAnalyzerTest):
 
     def setUp(self):
         # Suppress logging for cleaner test output
-        logging.getLogger(
-            "api_app.analyzers_manager.observable_analyzers.bbot"
-        ).setLevel(logging.CRITICAL)
+        logging.getLogger("api_app.analyzers_manager.observable_analyzers.bbot").setLevel(logging.CRITICAL)
 
     @staticmethod
     def get_mocked_response():

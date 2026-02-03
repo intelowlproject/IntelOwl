@@ -28,9 +28,7 @@ class Validin(classes.ObservableAnalyzer):
     def _run_all_queries(self, endpoints, headers):
         final_response = {}
         if self.observable_classification in endpoints:
-            for query_name, query_url in (
-                endpoints.get(self.observable_classification)
-            ).items():
+            for query_name, query_url in (endpoints.get(self.observable_classification)).items():
                 logger.info(f"Executing query {query_name}")
                 try:
                     response = requests.get(self.url + query_url, headers=headers)
@@ -53,8 +51,7 @@ class Validin(classes.ObservableAnalyzer):
                 return response.json()
             except KeyError:
                 raise AnalyzerRunException(
-                    f"Nothing in {self.scan_choice} for"
-                    f"{self.observable_classification}"
+                    f"Nothing in {self.scan_choice} for {self.observable_classification}"
                 )
             except requests.RequestException as e:
                 raise AnalyzerRunException(e)

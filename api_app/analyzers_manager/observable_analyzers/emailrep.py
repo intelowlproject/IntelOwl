@@ -32,8 +32,7 @@ class EmailRep(classes.ObservableAnalyzer):
 
         if self.observable_classification not in [Classification.GENERIC]:
             raise AnalyzerRunException(
-                f"not supported observable type {self.observable_classification}."
-                f" Supported: generic"
+                f"not supported observable type {self.observable_classification}. Supported: generic"
             )
 
         url = self.url.format(self.observable_name)

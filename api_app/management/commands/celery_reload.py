@@ -12,9 +12,7 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     @staticmethod
     def add_arguments(parser):
-        parser.add_argument(
-            "-c", "--command", type=str, help="Celery command", required=True
-        )
+        parser.add_argument("-c", "--command", type=str, help="Celery command", required=True)
 
     def handle(self, *args, **options):
         if not settings.DEBUG:

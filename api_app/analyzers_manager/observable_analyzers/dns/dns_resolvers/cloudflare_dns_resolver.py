@@ -34,16 +34,12 @@ class CloudFlareDNSResolver(classes.ObservableAnalyzer):
                 "type": self.query_type,
             }
             headers = {"accept": "application/dns-json"}
-            response = requests.get(
-                "https://cloudflare-dns.com/dns-query", params=params, headers=headers
-            )
+            response = requests.get("https://cloudflare-dns.com/dns-query", params=params, headers=headers)
             response.raise_for_status()
             response_dict = response.json()
 
             resolutions = response_dict.get("Answer", None)
 
         except requests.exceptions.RequestException as error:
-            raise AnalyzerRunException(
-                f"An error occurred during the connection to CloudFlare: {error}"
-            )
+            raise AnalyzerRunException(f"An error occurred during the connection to CloudFlare: {error}")
         return dns_resolver_response(self.observable_name, resolutions)

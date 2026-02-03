@@ -6,6 +6,7 @@ from unittest.mock import patch
 from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.choices import Classification, PythonModuleBasePaths
+from api_app.decorators import classproperty
 from api_app.models import Job, PythonModule
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
@@ -13,17 +14,14 @@ from tests import CustomViewSetTestCase, PluginActionViewsetTestCase
 from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
 
 
-class AnalyzerConfigViewSetTestCase(
-    AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase
-):
+class AnalyzerConfigViewSetTestCase(AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase):
     fixtures = [
         "api_app/fixtures/0001_user.json",
     ]
 
     URL = "/api/analyzer"
 
-    @classmethod
-    @property
+    @classproperty
     def model_class(cls) -> Type[AnalyzerConfig]:
         return AnalyzerConfig
 
@@ -50,9 +48,7 @@ class AnalyzerConfigViewSetTestCase(
         print(result)
         self.assertIn("errors", result)
         self.assertIn("detail", result["errors"])
-        self.assertEqual(
-            result["errors"]["detail"], "This Plugin has no Update implemented"
-        )
+        self.assertEqual(result["errors"]["detail"], "This Plugin has no Update implemented")
 
     def test_health_check(self):
         analyzer = "ClamAV"
@@ -108,9 +104,7 @@ class AnalyzerConfigViewSetTestCase(
 
     def test_update(self):
         org1, _ = Organization.objects.get_or_create(name="test")
-        m_user, _ = Membership.objects.get_or_create(
-            user=self.user, organization=org1, is_owner=False
-        )
+        m_user, _ = Membership.objects.get_or_create(user=self.user, organization=org1, is_owner=False)
 
         # user not in org can't update analyzer
         self.client.force_authenticate(self.guest)
@@ -136,9 +130,7 @@ class AnalyzerConfigViewSetTestCase(
 
     def test_delete(self):
         org1, _ = Organization.objects.get_or_create(name="test")
-        m_user, _ = Membership.objects.get_or_create(
-            user=self.user, organization=org1, is_owner=False
-        )
+        m_user, _ = Membership.objects.get_or_create(user=self.user, organization=org1, is_owner=False)
         ac = AnalyzerConfig(
             name="test",
             description="test delete",
@@ -179,17 +171,18 @@ class AnalyzerConfigViewSetTestCase(
     def test_get(self):
         # 1 - existing analyzer
         self.client.force_authenticate(user=self.user)
+        analyzer = self.model_class.objects.get(name="Quad9_DNS")
+        parameter = analyzer.python_module.parameters.get(name="query_type")
         response = self.client.get(f"{self.URL}/Quad9_DNS")
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(
             response.json(),
             {
                 "config": {"queue": "default", "soft_time_limit": 30},
-                "description": "Retrieve current domain resolution with Quad9 DoH (DNS over "
-                "HTTPS)",
+                "description": "Retrieve current domain resolution with Quad9 DoH (DNS over HTTPS)",
                 "disabled": True,
                 "docker_based": False,
-                "id": 101,
+                "id": analyzer.id,
                 "mapping_data_model": {},
                 "maximum_tlp": "AMBER",
                 "name": "Quad9_DNS",
@@ -197,8 +190,8 @@ class AnalyzerConfigViewSetTestCase(
                 "observable_supported": ["domain", "url"],
                 "parameters": {
                     "query_type": {
-                        "description": "Query type against the chosen " "DNS resolver.",
-                        "id": 206,
+                        "description": "Query type against the chosen DNS resolver.",
+                        "id": parameter.id,
                         "is_secret": False,
                         "required": False,
                         "type": "str",
@@ -216,9 +209,7 @@ class AnalyzerConfigViewSetTestCase(
         response = self.client.get(f"{self.URL}/non_existing")
         self.assertEqual(response.status_code, 404, response.content)
         result = response.json()
-        self.assertEqual(
-            result, {"detail": "No AnalyzerConfig matches the given query."}
-        )
+        self.assertEqual(result, {"detail": "No AnalyzerConfig matches the given query."})
 
     def test_get_config(self):
         # 1 - existing analyzer
@@ -226,43 +217,37 @@ class AnalyzerConfigViewSetTestCase(
         response = self.client.get(f"{self.URL}/Quad9_DNS/plugin_config")
         self.assertEqual(response.status_code, 200, response.content)
         result = response.json()
-        result["user_config"][0].pop(
-            "updated_at"
-        )  # auto filled by the model and hard to mock
-        self.assertEqual(
-            result,
+        for user_config in result["user_config"]:
+            user_config.pop("updated_at", "")
+            user_config.pop("id", None)
+            user_config.pop("parameter", None)
+
+        expected_user_config = [
             {
-                "organization_config": [],
-                "user_config": [
-                    {
-                        "analyzer_config": "Quad9_DNS",
-                        "attribute": "query_type",
-                        "connector_config": None,
-                        "description": "Query type against the chosen DNS resolver.",
-                        "exist": True,
-                        "for_organization": False,
-                        "id": 159,
-                        "ingestor_config": None,
-                        "is_secret": False,
-                        "organization": None,
-                        "owner": None,
-                        "parameter": 206,
-                        "pivot_config": None,
-                        "required": False,
-                        "type": "str",
-                        "value": "A",
-                        "visualizer_config": None,
-                    }
-                ],
-            },
-        )
+                "analyzer_config": "Quad9_DNS",
+                "attribute": "query_type",
+                "connector_config": None,
+                "description": "Query type against the chosen DNS resolver.",
+                "exist": True,
+                "for_organization": False,
+                "ingestor_config": None,
+                "is_secret": False,
+                "organization": None,
+                "owner": None,
+                "pivot_config": None,
+                "required": False,
+                "type": "str",
+                "value": "A",
+                "visualizer_config": None,
+            }
+        ]
+        self.assertEqual(result["organization_config"], [])
+        self.assertEqual(result["user_config"], expected_user_config)
         # 2 - existing analyzer, no config
         self.client.force_authenticate(user=self.user)
         response = self.client.get(f"{self.URL}/Quad9_Malicious_Detector/plugin_config")
         self.assertEqual(response.status_code, 200, response.content)
-        self.assertEqual(
-            response.json(), {"organization_config": [], "user_config": []}
-        )
+        self.assertEqual(response.json(), {"organization_config": [], "user_config": []})
         # 3 - missing analyzer
         self.client.force_authenticate(user=self.user)
         response = self.client.get(f"{self.URL}/missing_analyzer/plugin_config")

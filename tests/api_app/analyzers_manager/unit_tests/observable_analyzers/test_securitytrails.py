@@ -12,9 +12,7 @@ class SecurityTrailsTestCase(BaseAnalyzerTest):
 
     @staticmethod
     def get_mocked_response():
-        return patch(
-            "requests.get", return_value=MockUpResponse({"test": "value"}, 200)
-        )
+        return patch("requests.get", return_value=MockUpResponse({"test": "value"}, 200))
 
     @classmethod
     def get_extra_config(cls) -> dict:

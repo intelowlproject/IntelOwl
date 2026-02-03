@@ -14,9 +14,7 @@ class XForceTestCase(BaseAnalyzerTest):
     def get_mocked_response():
         mock_response = {
             "score": 5,
-            "categoryDescriptions": {
-                "Search Engines": "Sites that provide a way to search the internet."
-            },
+            "categoryDescriptions": {"Search Engines": "Sites that provide a way to search the internet."},
         }
         return patch("requests.get", return_value=MockUpResponse(mock_response, 200))
 

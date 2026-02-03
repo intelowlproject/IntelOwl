@@ -89,29 +89,17 @@ class CronTests(CustomTestCase):
         for db in maxmind.Maxmind.get_db_names():
             self.assertTrue(os.path.exists(db))
 
-    @if_mock_connections(
-        patch(
-            "requests.get", return_value=MockUpResponse({}, 200, text="91.192.100.61")
-        )
-    )
+    @if_mock_connections(patch("requests.get", return_value=MockUpResponse({}, 200, text="91.192.100.61")))
     def test_talos_updater(self, mock_get=None):
         db_file_path = talos.Talos.update()
         self.assertTrue(os.path.exists(db_file_path))
 
-    @if_mock_connections(
-        patch(
-            "requests.get", return_value=MockUpResponse({}, 200, text="91.192.100.61")
-        )
-    )
+    @if_mock_connections(patch("requests.get", return_value=MockUpResponse({}, 200, text="91.192.100.61")))
     def test_phishing_army_updater(self, mock_get=None):
         db_file_path = phishing_army.PhishingArmy.update()
         self.assertTrue(os.path.exists(db_file_path))
 
-    @if_mock_connections(
-        patch(
-            "requests.get", return_value=MockUpResponse({}, 200, text="93.95.230.253")
-        )
-    )
+    @if_mock_connections(patch("requests.get", return_value=MockUpResponse({}, 200, text="93.95.230.253")))
     def test_tor_updater(self, mock_get=None):
         db_file_path = tor.Tor.update()
         self.assertTrue(os.path.exists(db_file_path))
@@ -152,9 +140,7 @@ class CronTests(CustomTestCase):
     )
     def test_feodo_tracker_updater(self, mock_get=None):
         feodo_tracker.Feodo_Tracker.update()
-        self.assertTrue(
-            os.path.exists(f"{settings.MEDIA_ROOT}/feodotracker_abuse_ipblocklist.json")
-        )
+        self.assertTrue(os.path.exists(f"{settings.MEDIA_ROOT}/feodotracker_abuse_ipblocklist.json"))
 
     @if_mock_connections(
         patch(
@@ -307,13 +293,9 @@ class CronTests(CustomTestCase):
         )
         PluginConfig.objects.create(
             value="test",
-            parameter=Parameter.objects.get(
-                python_module=python_module, is_secret=True, name="auth_token"
-            ),
+            parameter=Parameter.objects.get(python_module=python_module, is_secret=True, name="auth_token"),
             for_organization=False,
             owner=None,
-            analyzer_config=AnalyzerConfig.objects.filter(
-                python_module=python_module
-            ).first(),
+            analyzer_config=AnalyzerConfig.objects.filter(python_module=python_module).first(),
         )
         self.assertTrue(greynoise_labs.GreynoiseLabs.update())

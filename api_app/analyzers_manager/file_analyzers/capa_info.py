@@ -24,6 +24,7 @@ RULES_LOCATION = f"{BASE_LOCATION}/capa-rules"
 SIGNATURE_LOCATION = f"{BASE_LOCATION}/sigs"
 RULES_FILE = f"{RULES_LOCATION}/capa_rules.zip"
 RULES_URL = "https://github.com/mandiant/capa-rules/archive/refs/tags/"
+CACHE_LOCATION = os.environ.get("XDG_CACHE_HOME", f"{settings.MEDIA_ROOT}/.cache")
 
 
 class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
@@ -31,6 +32,21 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
     arch: str
     timeout: float = 15
     force_pull_signatures: bool = False
+
+    @classmethod
+    def _ensure_cache_directory(cls) -> None:
+        """
+        Ensure the cache directory exists with proper permissions.
+        This handles incremental updates where the Dockerfile layer
+        may not have created the directory.
+        """
+        if not os.path.isdir(CACHE_LOCATION):
+            logger.info(f"Creating cache directory at {CACHE_LOCATION}")
+            try:
+                os.makedirs(CACHE_LOCATION, exist_ok=True)
+                logger.info(f"Successfully created cache directory at {CACHE_LOCATION}")
+            except OSError as e:
+                logger.warning(f"Failed to create cache directory at {CACHE_LOCATION}: {e}")
 
     @classmethod
     def _download_signatures(cls) -> None:
@@ -49,7 +65,6 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
             signatures_list = response.json()
 
             for signature in signatures_list:
-
                 filename = signature["name"]
                 download_url = signature["download_url"]
 
@@ -69,9 +84,7 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
     def update(cls, anayzer_module: PythonModule) -> bool:
         try:
             logger.info("Updating capa rules")
-            response = requests.get(
-                "https://api.github.com/repos/mandiant/capa-rules/releases/latest"
-            )
+            response = requests.get("https://api.github.com/repos/mandiant/capa-rules/releases/latest")
             latest_version = response.json()["tag_name"]
             capa_rules_download_url = RULES_URL + latest_version + ".zip"
 
@@ -96,10 +109,8 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
 
     def run(self):
         try:
-
-            response = requests.get(
-                "https://api.github.com/repos/mandiant/capa-rules/releases/latest"
-            )
+            self._ensure_cache_directory()
+            response = requests.get("https://api.github.com/repos/mandiant/capa-rules/releases/latest")
             latest_version = response.json()["tag_name"]
 
             capa_analyzer_module = self.python_module
@@ -114,7 +125,6 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
                 self._download_signatures()
 
             if not (os.path.isdir(RULES_LOCATION)) and not update_status:
-
                 raise AnalyzerRunException("Couldn't update capa rules")
 
             command: list[str] = ["/usr/local/bin/capa", "--quiet", "--json"]
@@ -155,9 +165,7 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
 
         except subprocess.CalledProcessError as e:
             stderr = e.stderr
-            logger.info(
-                f"Capa Info failed to run for {self.filename} with hash: {self.md5} with command {e}"
-            )
+            logger.info(f"Capa Info failed to run for {self.filename} with hash: {self.md5} with command {e}")
             raise AnalyzerRunException(
                 f" Analyzer for {self.filename} with hash: {self.md5} failed with error: {stderr}"
             )

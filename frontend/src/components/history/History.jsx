@@ -27,10 +27,10 @@ export default function History() {
   let startTimeString = "event_date__gte";
   let endTimeString = "event_date__lte";
 
-  if (pageType === HistoryPages.JOBS) {
+  if (pageType === HistoryPages.JOB) {
     startTimeString = "received_request_time__gte";
     endTimeString = "received_request_time__lte";
-  } else if (pageType === HistoryPages.INVESTIGAITONS) {
+  } else if (pageType === HistoryPages.INVESTIGAITON) {
     startTimeString = "start_time__gte";
     endTimeString = "start_time__lte";
   }

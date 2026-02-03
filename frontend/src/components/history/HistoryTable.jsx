@@ -66,7 +66,7 @@ export function HistoryTable({ pageType, startTimeParam, endTimeParam }) {
       const newParams = { ...currentParams };
       newParams[startTimeParam] = searchFromDateValue;
       newParams[endTimeParam] = searchToDateValue;
-      if (pageType === HistoryPages.INVESTIGAITONS) {
+      if (pageType === HistoryPages.INVESTIGAITON) {
         newParams.analyzed_object_name = searchNameRequest;
       }
       setSearchParams(newParams);
@@ -81,7 +81,7 @@ export function HistoryTable({ pageType, startTimeParam, endTimeParam }) {
 
   let tableComponent;
   switch (pageType) {
-    case HistoryPages.INVESTIGAITONS:
+    case HistoryPages.INVESTIGAITON:
       tableComponent = (
         <InvestigationTable
           searchFromDateValue={searchFromDateValue}
@@ -90,7 +90,7 @@ export function HistoryTable({ pageType, startTimeParam, endTimeParam }) {
         />
       );
       break;
-    case HistoryPages.USER_EVENTS:
+    case HistoryPages.USER_EVENT:
       tableComponent = (
         <UserEventsTable
           title="Artifacts evaluations"
@@ -102,7 +102,7 @@ export function HistoryTable({ pageType, startTimeParam, endTimeParam }) {
         />
       );
       break;
-    case HistoryPages.USER_DOMAIN_WILDCARD_EVENTS:
+    case HistoryPages.USER_DOMAIN_WILDCARD_EVENT:
       tableComponent = (
         <UserEventsTable
           title="Domain wildcard evaluations"
@@ -114,7 +114,7 @@ export function HistoryTable({ pageType, startTimeParam, endTimeParam }) {
         />
       );
       break;
-    case HistoryPages.USER_IP_WILDCARD_EVENTS:
+    case HistoryPages.USER_IP_WILDCARD_EVENT:
       tableComponent = (
         <UserEventsTable
           title="Ip wildcard evaluations"

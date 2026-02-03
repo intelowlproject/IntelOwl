@@ -2,6 +2,7 @@ from rest_framework import mixins, viewsets
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 
+from api_app.decorators import classproperty
 from api_app.models import PluginConfig
 from api_app.pivots_manager.models import PivotConfig, PivotMap, PivotReport
 from api_app.pivots_manager.permissions import (
@@ -50,8 +51,7 @@ class PivotConfigViewSet(
 
 
 class PivotActionViewSet(PythonReportActionViewSet):
-    @classmethod
-    @property
+    @classproperty
     def report_model(cls):
         return PivotReport
 

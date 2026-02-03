@@ -10,6 +10,7 @@ from django.db.models import QuerySet
 from api_app.analyzers_manager.models import MimeTypes
 from api_app.choices import PythonModuleBasePaths
 from api_app.classes import Plugin
+from api_app.decorators import classproperty
 from api_app.models import AbstractReport
 from api_app.visualizers_manager.enums import (
     VisualizableAlignment,
@@ -130,8 +131,7 @@ class VisualizableTitle(VisualizableObject):
         self.value = value
         if self.disable != self.title.disable or self.disable != self.value.disable:
             logger.warning(
-                "Each part of the title should be disabled. "
-                f"Forcing all to disable={self.disable}"
+                f"Each part of the title should be disabled. Forcing all to disable={self.disable}"
             )
             self.title.disable = self.disable
             self.value.disable = self.disable
@@ -167,9 +167,7 @@ class VisualizableDownload(VisualizableObject):
         self.add_metadata_in_description = add_metadata_in_description
         self.link = link
         # logic
-        self.mimetype = MimeTypes.calculate(
-            self.payload, self.value
-        )  # needed as field from the frontend
+        self.mimetype = MimeTypes.calculate(self.payload, self.value)  # needed as field from the frontend
 
     @property
     def type(self) -> str:
@@ -255,9 +253,7 @@ class VisualizableBool(VisualizableBase):
         color: VisualizableColor = VisualizableColor.DANGER,
         **kwargs,
     ):
-        super().__init__(
-            *args, value=value, size=size, color=color, disable=disable, **kwargs
-        )
+        super().__init__(*args, value=value, size=size, color=color, disable=disable, **kwargs)
 
     def __bool__(self):
         return bool(self.value)
@@ -309,9 +305,7 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
             name.value += f" ({len(value)})"
         for v in value:
             if isinstance(v, str):
-                raise TypeError(
-                    f"value {v} should be a VisualizableObject and not a string"
-                )
+                raise TypeError(f"value {v} should be a VisualizableObject and not a string")
         if fill_empty and not value:
             value = [VisualizableBase(value="no data available", disable=True)]
         if not name:
@@ -441,19 +435,13 @@ class VisualizableTable(VisualizableObject):
             new_data = []
             for element in data:
                 new_data.append(
-                    {
-                        key: value.to_dict()
-                        for [key, value] in element.items()
-                        if value is not None
-                    }
+                    {key: value.to_dict() for [key, value] in element.items() if value is not None}
                 )
             result["data"] = new_data
         else:
             result["data"] = []
         if any(x for x in columns):
-            result["columns"] = [
-                column.to_dict() for column in columns if column is not None
-            ]
+            result["columns"] = [column.to_dict() for column in columns if column is not None]
         else:
             result["columns"] = []
         result.pop("disable")
@@ -490,9 +478,7 @@ class VisualizableLevel:
         self,
         position: int,
         size: VisualizableLevelSize = VisualizableLevelSize.S_6,
-        horizontal_list: VisualizableHorizontalList = VisualizableHorizontalList(
-            value=[]
-        ),
+        horizontal_list: VisualizableHorizontalList = VisualizableHorizontalList(value=[]),
     ):
         self._position = position
         self._size = size
@@ -538,18 +524,15 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
     Page = VisualizablePage
     Level = VisualizableLevel
 
-    @classmethod
-    @property
+    @classproperty
     def python_base_path(cls):
         return PythonModuleBasePaths.Visualizer.value
 
-    @classmethod
-    @property
+    @classproperty
     def report_model(cls):
         return VisualizerReport
 
-    @classmethod
-    @property
+    @classproperty
     def config_model(cls) -> Type[VisualizerConfig]:
         return VisualizerConfig
 
@@ -565,14 +548,10 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
 
     def after_run_success(self, content):
         if not isinstance(content, list):
-            raise VisualizerRunException(
-                f"Report has not correct type: {type(self.report.report)}"
-            )
+            raise VisualizerRunException(f"Report has not correct type: {type(self.report.report)}")
         for elem in content:
             if not isinstance(elem, tuple) or not isinstance(elem[1], list):
-                raise VisualizerRunException(
-                    f"Report Page has not correct type: {type(elem)}"
-                )
+                raise VisualizerRunException(f"Report Page has not correct type: {type(elem)}")
         super().after_run_success(content)
         for i, page in enumerate(content):
             if i == 0:

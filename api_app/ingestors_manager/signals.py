@@ -52,9 +52,7 @@ def pre_save_ingestor_config(sender, instance: IngestorConfig, *args, **kwargs):
 
 
 @receiver(post_delete, sender=IngestorConfig)
-def post_delete_ingestor_config(
-    sender, instance: IngestorConfig, using, origin, *args, **kwargs
-):
+def post_delete_ingestor_config(sender, instance: IngestorConfig, using, origin, *args, **kwargs):
     instance.periodic_task.delete()
     instance.user.delete()
 

@@ -17,6 +17,7 @@ from django.db import models
 from django.utils.functional import cached_property
 
 from api_app.choices import PythonModuleBasePaths
+from api_app.decorators import classproperty
 from api_app.interfaces import CreateJobsFromPlaybookInterface  # skipcq: PYL-R0401
 from api_app.models import AbstractReport, Job, PythonConfig, PythonModule
 
@@ -25,9 +26,7 @@ logger = logging.getLogger(__name__)
 
 class PivotReport(AbstractReport):
     objects = PivotReportQuerySet.as_manager()
-    config = models.ForeignKey(
-        "PivotConfig", related_name="reports", null=False, on_delete=models.CASCADE
-    )
+    config = models.ForeignKey("PivotConfig", related_name="reports", null=False, on_delete=models.CASCADE)
 
     class Meta:
         unique_together = [("config", "job")]
@@ -94,43 +93,28 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         "playbooks_manager.PlaybookConfig",
         related_name="executed_by_pivots",
     )
-    orgs_configuration = GenericRelation(
-        "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
-    )
-    delay = models.DurationField(
-        default=timedelta, help_text="Expects data in the format 'DD HH:MM:SS'"
-    )
+    orgs_configuration = GenericRelation("api_app.OrganizationPluginConfiguration", related_name="%(class)s")
+    delay = models.DurationField(default=timedelta, help_text="Expects data in the format 'DD HH:MM:SS'")
 
     def _generate_full_description(self) -> str:
-        plugins_name = ", ".join(
-            self.related_configs.all().values_list("name", flat=True)
-        )
-        return (
-            f"Pivot for plugins {plugins_name}"
-            " that executes"
-            f" playbooks {self.playbooks_names}"
-        )
+        plugins_name = ", ".join(self.related_configs.all().values_list("name", flat=True))
+        return f"Pivot for plugins {plugins_name} that executes playbooks {self.playbooks_names}"
 
     @property
     def related_configs(self) -> PythonConfigQuerySet:
-        return (
-            self.related_analyzer_configs.all() or self.related_connector_configs.all()
-        )
+        return self.related_analyzer_configs.all() or self.related_connector_configs.all()
 
-    @classmethod
-    @property
+    @classproperty
     def plugin_type(cls) -> str:
         return "5"
 
-    @classmethod
-    @property
+    @classproperty
     def serializer_class(cls) -> Type["PythonConfigSerializer"]:
         from api_app.pivots_manager.serializers import PivotConfigSerializer
 
         return PivotConfigSerializer
 
-    @classmethod
-    @property
+    @classproperty
     def config_exception(cls):
         return PivotConfigurationException
 

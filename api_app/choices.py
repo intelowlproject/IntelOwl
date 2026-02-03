@@ -1,5 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import _operator
 import enum
 import ipaddress
 import logging
@@ -7,7 +8,6 @@ import re
 import typing
 from pathlib import PosixPath
 
-import _operator
 from django.db import models
 
 logger = logging.getLogger(__name__)
@@ -79,9 +79,7 @@ class Status(models.TextChoices):
     FAILED = "failed", "failed"
 
     @classmethod
-    def get_enums_with_suffix(
-        cls, suffix: str
-    ) -> typing.Generator[enum.Enum, None, None]:
+    def get_enums_with_suffix(cls, suffix: str) -> typing.Generator[enum.Enum, None, None]:
         for key in cls:
             if key.name.endswith(suffix):
                 yield key
@@ -151,10 +149,7 @@ class Classification(models.TextChoices):
                 classification = cls.HASH
             else:
                 classification = cls.GENERIC
-                logger.info(
-                    "Couldn't detect observable classification"
-                    f" for {value}, setting as 'generic'"
-                )
+                logger.info(f"Couldn't detect observable classification for {value}, setting as 'generic'")
         else:
             # it's a simple IP
             classification = cls.IP

@@ -56,9 +56,7 @@ class Polyswarm(FileAnalyzer, PolyswarmBase):
         instance = api.submit(self.filepath)
         result = api.wait_for(instance, timeout=self.timeout)
         if result.failed:
-            raise AnalyzerRunException(
-                f"Failed to get results from Polyswarm for {self.md5}"
-            )
+            raise AnalyzerRunException(f"Failed to get results from Polyswarm for {self.md5}")
         result = self.construct_result(result)
 
         return result

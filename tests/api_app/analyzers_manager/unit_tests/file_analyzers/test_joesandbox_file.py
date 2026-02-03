@@ -20,9 +20,7 @@ class TestJoeSandboxFile(BaseFileAnalyzerTest):
                 "JobMock",
                 (),
                 {
-                    "analyzable": type(
-                        "AnalyzableMock", (), {"file": b"sample file bytes"}
-                    )(),
+                    "analyzable": type("AnalyzableMock", (), {"file": b"sample file bytes"})(),
                     "TLP": 0,
                 },
             )(),
@@ -76,7 +74,5 @@ class TestJoeSandboxFile(BaseFileAnalyzerTest):
                 return_value=analysis_info_response,
             ),
             patch.object(JoeSandboxFile, "create_new_analysis", return_value="1008"),
-            patch.object(
-                JoeSandboxFile, "fetch_results", return_value=analysis_info_response
-            ),
+            patch.object(JoeSandboxFile, "fetch_results", return_value=analysis_info_response),
         ]

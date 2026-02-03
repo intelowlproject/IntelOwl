@@ -21,9 +21,7 @@ class MnemonicPassiveDNS(classes.ObservableAnalyzer):
     def run(self):
         if self.cof_format:
             self.url += "cof/"
-        response = requests.get(
-            self.url + self.observable_name, data={"limit": self.limit}
-        )
+        response = requests.get(self.url + self.observable_name, data={"limit": self.limit})
         response.raise_for_status()
 
         if self.cof_format:

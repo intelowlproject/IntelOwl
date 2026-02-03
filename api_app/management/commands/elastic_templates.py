@@ -24,15 +24,11 @@ class Command(BaseCommand):
                     settings.ELASTICSEARCH_DSL_CLIENT.indices.put_template(
                         name="plugin-report", body=json.load(file_content)
                     )
-                    success_msg = (
-                        "created/updated Elasticsearch's template for plugin-report"
-                    )
+                    success_msg = "created/updated Elasticsearch's template for plugin-report"
                     self.stdout.write(self.style.SUCCESS(success_msg))
                     logger.info(success_msg)
                 except ApiError as error:
                     self.stdout.write(self.style.ERROR(error))
                     logger.critical(error)
         else:
-            self.stdout.write(
-                self.style.WARNING("Elasticsearch not active, templates not updated")
-            )
+            self.stdout.write(self.style.WARNING("Elasticsearch not active, templates not updated"))

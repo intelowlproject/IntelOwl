@@ -104,20 +104,12 @@ class DataModel(Visualizer):
     @visualizable_error_handler_with_params("get_pdns")
     def get_pdns(self, data_models):
         columns = [
-            self.TableColumn(
-                name="rrname", max_width=VisualizableTableColumnSize.S_300
-            ),
+            self.TableColumn(name="rrname", max_width=VisualizableTableColumnSize.S_300),
             self.TableColumn(name="rrtype", max_width=VisualizableTableColumnSize.S_50),
             self.TableColumn(name="rdata", max_width=VisualizableTableColumnSize.S_300),
-            self.TableColumn(
-                name="time_first", max_width=VisualizableTableColumnSize.S_100
-            ),
-            self.TableColumn(
-                name="time_last", max_width=VisualizableTableColumnSize.S_100
-            ),
-            self.TableColumn(
-                name="analyzer", max_width=VisualizableTableColumnSize.S_200
-            ),
+            self.TableColumn(name="time_first", max_width=VisualizableTableColumnSize.S_100),
+            self.TableColumn(name="time_last", max_width=VisualizableTableColumnSize.S_100),
+            self.TableColumn(name="analyzer", max_width=VisualizableTableColumnSize.S_200),
         ]
 
         data = []
@@ -177,14 +169,10 @@ class DataModel(Visualizer):
     @visualizable_error_handler_with_params("get_signatures")
     def get_signatures(self, data_models):
         columns = [
-            self.TableColumn(
-                name="provider", max_width=VisualizableTableColumnSize.S_100
-            ),
+            self.TableColumn(name="provider", max_width=VisualizableTableColumnSize.S_100),
             self.TableColumn(name="url", max_width=VisualizableTableColumnSize.S_300),
             self.TableColumn(name="score", max_width=VisualizableTableColumnSize.S_50),
-            self.TableColumn(
-                name="analyzer", max_width=VisualizableTableColumnSize.S_100
-            ),
+            self.TableColumn(name="analyzer", max_width=VisualizableTableColumnSize.S_100),
         ]
 
         data = []
@@ -199,9 +187,7 @@ class DataModel(Visualizer):
                             disable=False,
                         ),
                         "url": self.Base(
-                            value=(
-                                signature.url if signature.url else "No url available"
-                            ),
+                            value=(signature.url if signature.url else "No url available"),
                             link=signature.url,
                             color=self.Color.TRANSPARENT,
                             disable=not signature.url,
@@ -307,9 +293,7 @@ class DataModel(Visualizer):
         data_models = self.get_data_models()
 
         for data_model in data_models:
-            printable_analyzer_name = (
-                data_model.analyzers_report.all().first().config.name.replace("_", " ")
-            )
+            printable_analyzer_name = data_model.analyzers_report.all().first().config.name.replace("_", " ")
             logger.debug(f"{printable_analyzer_name}, {data_model}")
 
             evaluation = data_model.evaluation or ""
@@ -361,9 +345,7 @@ class DataModel(Visualizer):
                 malicious_data_models,
             ),
         ]:
-            evals_vlists.append(
-                self.get_eval_list(evaluation, color, icon, eval_data_models)
-            )
+            evals_vlists.append(self.get_eval_list(evaluation, color, icon, eval_data_models))
 
         related_threats = []
         external_references = []

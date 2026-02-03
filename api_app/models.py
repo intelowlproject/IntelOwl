@@ -1,5 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+# pylint: disable=cyclic-import
+# Reason: Harmless in Django due to bidirectional model relationships; resolved lazily at runtime via app registry
 import datetime
 import json
 import logging
@@ -46,6 +48,7 @@ from api_app.choices import (
 if typing.TYPE_CHECKING:
     from api_app.classes import Plugin
 
+from api_app.decorators import classproperty
 from api_app.defaults import default_runtime
 from api_app.helpers import deprecated, get_now
 from api_app.queryset import (
@@ -80,9 +83,7 @@ class PythonModule(models.Model):
     """
 
     module = models.CharField(max_length=120, db_index=True)
-    base_path = models.CharField(
-        max_length=120, db_index=True, choices=PythonModuleBasePaths.choices
-    )
+    base_path = models.CharField(max_length=120, db_index=True, choices=PythonModuleBasePaths.choices)
     update_schedule = models.ForeignKey(
         CrontabSchedule,
         on_delete=models.SET_NULL,
@@ -206,8 +207,7 @@ class PythonModule(models.Model):
             _ = self.python_class
         except ImportError as exc:
             raise ValidationError(
-                "`python_module` incorrect, "
-                f"{self.python_complete_path} couldn't be imported"
+                f"`python_module` incorrect, {self.python_complete_path} couldn't be imported"
             ) from exc
 
     def clean(self) -> None:
@@ -338,9 +338,7 @@ class Job(MP_Node):
                 fields=["playbook_to_execute", "finished_analysis_time", "user"],
                 name="PlaybookConfigOrdering",
             ),
-            models.Index(
-                fields=["sent_to_bi", "-received_request_time"], name="JobBISearch"
-            ),
+            models.Index(fields=["sent_to_bi", "-received_request_time"], name="JobBISearch"),
             # SELECT COUNT(*) AS "__count" FROM "api_app_job"
             # WHERE ("api_app_job"."depth" >= ? AND "api_app_job"."path"::text LIKE ? AND NOT ("api_app_job"."id" = ?))
             models.Index(fields=["depth", "path", "id"], name="MPNodeSearch"),
@@ -363,13 +361,9 @@ class Job(MP_Node):
         null=True,  # for backwards compatibility
     )
 
-    analyzable = models.ForeignKey(
-        Analyzable, related_name="jobs", on_delete=models.CASCADE
-    )
+    analyzable = models.ForeignKey(Analyzable, related_name="jobs", on_delete=models.CASCADE)
 
-    status = models.CharField(
-        max_length=32, blank=False, choices=STATUSES.choices, default="pending"
-    )
+    status = models.CharField(max_length=32, blank=False, choices=STATUSES.choices, default="pending")
 
     analyzers_requested = models.ManyToManyField(
         "analyzers_manager.AnalyzerConfig", related_name="requested_in_jobs", blank=True
@@ -417,12 +411,8 @@ class Job(MP_Node):
     finished_analysis_time = models.DateTimeField(blank=True, null=True)
     process_time = models.FloatField(blank=True, null=True)
     tlp = models.CharField(max_length=8, choices=TLP.choices, default=TLP.CLEAR)
-    errors = pg_fields.ArrayField(
-        models.CharField(max_length=900), blank=True, default=list, null=True
-    )
-    warnings = pg_fields.ArrayField(
-        models.TextField(), blank=True, default=list, null=True
-    )
+    errors = pg_fields.ArrayField(models.CharField(max_length=900), blank=True, default=list, null=True)
+    warnings = pg_fields.ArrayField(models.TextField(), blank=True, default=list, null=True)
     tags = models.ManyToManyField(Tag, related_name="jobs", blank=True)
 
     scan_mode = models.IntegerField(
@@ -431,9 +421,7 @@ class Job(MP_Node):
         blank=False,
         default=ScanMode.CHECK_PREVIOUS_ANALYSIS.value,
     )
-    scan_check_time = models.DurationField(
-        null=True, blank=True, default=datetime.timedelta(hours=24)
-    )
+    scan_check_time = models.DurationField(null=True, blank=True, default=datetime.timedelta(hours=24))
     sent_to_bi = models.BooleanField(editable=False, default=False)
     data_model_content_type = models.ForeignKey(
         ContentType,
@@ -457,9 +445,22 @@ class Job(MP_Node):
         try:
             return super().get_root()
         except self.MultipleObjectsReturned:
-            # django treebeard is not thread safe
-            # this is not a really valid solution, but it will work for now
-            return self.objects.filter(path=self.path[0 : self.steplen]).first()  # noqa
+            # django-treebeard is not thread safe - this indicates a data
+            # integrity issue. We intentionally avoid select_for_update() to
+            # prevent potential database deadlocks in high-concurrency
+            # environments (e.g., multiple Celery workers).
+            # Using order_by('pk').first() ensures all concurrent requests
+            # get the same deterministic root node, even if multiple roots
+            # exist due to a race condition.
+            # Note: The root cause is in django-treebeard's tree modification
+            # operations, not in this read operation.
+            root_node = type(self).objects.filter(path=self.path[: self.steplen]).order_by("pk").first()
+            logger.warning(
+                f"Tree Integrity Error: Multiple roots found for Job {self.pk} "
+                f"(path: {self.path}). Returning deterministic root "
+                f"(PK: {root_node.pk if root_node else 'None'}) as fallback."
+            )
+            return root_node
 
     @cached_property
     def is_sample(self) -> bool:
@@ -516,9 +517,7 @@ class Job(MP_Node):
         logger.info(f"[STARTING] set_final_status for <-- {self}.")
 
         if self.status == self.STATUSES.FAILED:
-            logger.error(
-                f"[REPORT] {self}, status: failed. " "Do not process the report"
-            )
+            logger.error(f"[REPORT] {self}, status: failed. Do not process the report")
         else:
             stats = self._get_config_reports_stats()
             logger.info(f"[REPORT] {self}, status:{self.status}, reports:{stats}")
@@ -553,16 +552,10 @@ class Job(MP_Node):
     def __get_config_reports(self, config: typing.Type["AbstractConfig"]) -> QuerySet:
         return getattr(self, f"{config.__name__.split('Config')[0].lower()}reports")
 
-    def __get_config_to_execute(
-        self, config: typing.Type["AbstractConfig"]
-    ) -> QuerySet:
-        return getattr(
-            self, f"{config.__name__.split('Config')[0].lower()}s_to_execute"
-        )
+    def __get_config_to_execute(self, config: typing.Type["AbstractConfig"]) -> QuerySet:
+        return getattr(self, f"{config.__name__.split('Config')[0].lower()}s_to_execute")
 
-    def __get_single_config_reports_stats(
-        self, config: typing.Type["AbstractConfig"]
-    ) -> typing.Dict:
+    def __get_single_config_reports_stats(self, config: typing.Type["AbstractConfig"]) -> typing.Dict:
         reports = self.__get_config_reports(config)
         aggregators = {
             s.lower(): models.Count("status", filter=models.Q(status=s))
@@ -583,8 +576,7 @@ class Job(MP_Node):
             partial_result = self.__get_single_config_reports_stats(config)
             # merge them
             result = {
-                k: result.get(k, 0) + partial_result.get(k, 0)
-                for k in set(result) | set(partial_result)
+                k: result.get(k, 0) + partial_result.get(k, 0) for k in set(result) | set(partial_result)
             }
         return result
 
@@ -616,11 +608,7 @@ class Job(MP_Node):
 
     def _get_signatures(self, queryset: PythonConfigQuerySet) -> Signature:
         config_class: PythonConfig = queryset.model
-        signatures = list(
-            queryset.annotate_runnable(self.user)
-            .filter(runnable=True)
-            .get_signatures(self)
-        )
+        signatures = list(queryset.annotate_runnable(self.user).filter(runnable=True).get_signatures(self))
         logger.info(f"{config_class} signatures are {signatures}")
 
         return (
@@ -676,17 +664,13 @@ class Job(MP_Node):
         visualizers: PythonConfigQuerySet,
     ) -> Signature:
         runner = self._get_signatures(analyzers.distinct())
-        pivots_analyzers = pivots.filter(
-            related_analyzer_configs__isnull=False
-        ).distinct()
+        pivots_analyzers = pivots.filter(related_analyzer_configs__isnull=False).distinct()
         if pivots_analyzers.exists():
             runner |= self._get_signatures(pivots_analyzers)
         runner |= self._get_engine_signature()
         if connectors.exists():
             runner |= self._get_signatures(connectors)
-            pivots_connectors = pivots.filter(
-                related_connector_configs__isnull=False
-            ).distinct()
+            pivots_connectors = pivots.filter(related_connector_configs__isnull=False).distinct()
             if pivots_connectors.exists():
                 runner |= self._get_signatures(pivots_connectors)
         if visualizers.exists():
@@ -719,12 +703,9 @@ class Job(MP_Node):
             self.__get_config_to_execute(config.__class__).get(name=config.name)
         except config.DoesNotExist:
             raise TypeError(
-                f"{config.__class__.__name__} {config.name} "
-                f"is not configured inside job {self.pk}"
+                f"{config.__class__.__name__} {config.name} is not configured inside job {self.pk}"
             )
-        return self.runtime_configuration.get(config.runtime_configuration_key, {}).get(
-            config.name, {}
-        )
+        return self.runtime_configuration.get(config.runtime_configuration_key, {}).get(config.name, {})
 
     # user methods
 
@@ -752,18 +733,12 @@ class Job(MP_Node):
         self.clean_scan()
 
     def clean_scan(self):
-        if (
-            self.scan_mode == ScanMode.FORCE_NEW_ANALYSIS.value
-            and self.scan_check_time is not None
-        ):
+        if self.scan_mode == ScanMode.FORCE_NEW_ANALYSIS.value and self.scan_check_time is not None:
             raise ValidationError(
                 f"You can't have set mode to {ScanMode.FORCE_NEW_ANALYSIS.name}"
                 f" and have check_time set to {self.scan_check_time}"
             )
-        elif (
-            self.scan_mode == ScanMode.CHECK_PREVIOUS_ANALYSIS.value
-            and self.scan_check_time is None
-        ):
+        elif self.scan_mode == ScanMode.CHECK_PREVIOUS_ANALYSIS.value and self.scan_check_time is None:
             raise ValidationError(
                 f"You can't have set mode to {ScanMode.CHECK_PREVIOUS_ANALYSIS.name}"
                 " and not have check_time set"
@@ -786,15 +761,11 @@ class Parameter(models.Model):
     objects = ParameterQuerySet.as_manager()
 
     name = models.CharField(null=False, blank=False, max_length=50)
-    type = models.CharField(
-        choices=ParamTypes.choices, max_length=10, null=False, blank=False
-    )
+    type = models.CharField(choices=ParamTypes.choices, max_length=10, null=False, blank=False)
     description = models.TextField(blank=True, default="")
     is_secret = models.BooleanField(db_index=True)
     required = models.BooleanField(null=False)
-    python_module = models.ForeignKey(
-        PythonModule, related_name="parameters", on_delete=models.CASCADE
-    )
+    python_module = models.ForeignKey(PythonModule, related_name="parameters", on_delete=models.CASCADE)
 
     class Meta:
         unique_together = [["name", "python_module"]]
@@ -808,9 +779,7 @@ class Parameter(models.Model):
         Refreshes the cache keys associated with the parameter's configuration class.
         """
         self.config_class.delete_class_cache_keys()
-        for config in self.config_class.objects.filter(
-            python_module=self.python_module
-        ):
+        for config in self.config_class.objects.filter(python_module=self.python_module):
             config: PythonConfig
             config.refresh_cache_keys()
 
@@ -843,9 +812,7 @@ class PluginConfig(OwnershipAbstractModel):
     objects = PluginConfigQuerySet.as_manager()
     value = models.JSONField(blank=True, null=True)
 
-    parameter = models.ForeignKey(
-        Parameter, on_delete=models.CASCADE, null=False, related_name="values"
-    )
+    parameter = models.ForeignKey(Parameter, on_delete=models.CASCADE, null=False, related_name="values")
     updated_at = models.DateTimeField(auto_now=True)
     analyzer_config = models.ForeignKey(
         "analyzers_manager.AnalyzerConfig",
@@ -940,9 +907,7 @@ class PluginConfig(OwnershipAbstractModel):
             return
         if self.owner:
             if self.owner.has_membership() and self.owner.membership.is_admin:
-                for user in User.objects.filter(
-                    membership__organization=self.owner.membership.organization
-                ):
+                for user in User.objects.filter(membership__organization=self.owner.membership.organization):
                     self.config.delete_class_cache_keys(user)
                     self.config.refresh_cache_keys(user)
             else:
@@ -974,9 +939,7 @@ class PluginConfig(OwnershipAbstractModel):
         Ensures that exactly one configuration type is set for this PluginConfig.
         """
         if len(list(filter(None, self._possible_configs()))) != 1:
-            configs = ", ".join(
-                [config.name for config in self._possible_configs() if config]
-            )
+            configs = ", ".join([config.name for config in self._possible_configs() if config])
             if not configs:
                 raise ValidationError("You must select a plugin configuration")
             raise ValidationError(f"You must have exactly one between {configs}")
@@ -991,8 +954,7 @@ class PluginConfig(OwnershipAbstractModel):
             self.value = str(self.value)
         if type(self.value).__name__ != self.parameter.type:
             raise ValidationError(
-                f"Type {type(self.value).__name__} is wrong:"
-                f" should be {self.parameter.type}"
+                f"Type {type(self.value).__name__} is wrong: should be {self.parameter.type}"
             )
 
     def clean_parameter(self):
@@ -1089,16 +1051,12 @@ class OrganizationPluginConfiguration(models.Model):
             "Will be enabled back at "
             f"{enabled_to.strftime('%d %m %Y: %H %M %S')}"
         )
-        clock_schedule = ClockedSchedule.objects.get_or_create(clocked_time=enabled_to)[
-            0
-        ]
+        clock_schedule = ClockedSchedule.objects.get_or_create(clocked_time=enabled_to)[0]
         if not self.rate_limit_enable_task:
             from intel_owl.tasks import enable_configuration_for_org_for_rate_limit
 
             self.rate_limit_enable_task = PeriodicTask.objects.create(
-                name=f"{self.config.name}"
-                f"-{self.organization.name}"
-                "RateLimitCleaner",
+                name=f"{self.config.name}-{self.organization.name}RateLimitCleaner",
                 clocked=clock_schedule,
                 one_off=True,
                 enabled=True,
@@ -1124,10 +1082,7 @@ class OrganizationPluginConfiguration(models.Model):
             user (User): The user who disabled the configuration.
         """
         self.disabled = True
-        self.disabled_comment = (
-            f"Disabled by user {user.username}"
-            f" at {now().strftime('%Y-%m-%d %H:%M:%S')}"
-        )
+        self.disabled_comment = f"Disabled by user {user.username} at {now().strftime('%Y-%m-%d %H:%M:%S')}"
         if self.rate_limit_enable_task:
             self.rate_limit_enable_task.delete()
         self.save()
@@ -1139,10 +1094,7 @@ class OrganizationPluginConfiguration(models.Model):
         Args:
             user (User): The user who enabled the configuration.
         """
-        self.disabled_comment += (
-            f"\nEnabled back by {user.username}"
-            f" at {now().strftime('%Y-%m-%d %H:%M:%S')}"
-        )
+        self.disabled_comment += f"\nEnabled back by {user.username} at {now().strftime('%Y-%m-%d %H:%M:%S')}"
         self.enable()
 
     def enable(self):
@@ -1182,8 +1134,7 @@ class ListCachable(models.Model):
             logger.debug(f"Deleting cache key {key}")
             cache.delete(key)
 
-    @classmethod
-    @property
+    @classproperty
     def python_path(cls) -> str:
         """
         Returns the Python path of the class.
@@ -1225,9 +1176,7 @@ class AbstractConfig(ListCachable):
         """Returns the name of the configuration."""
         return self.name
 
-    def get_or_create_org_configuration(
-        self, organization: Organization
-    ) -> OrganizationPluginConfiguration:
+    def get_or_create_org_configuration(self, organization: Organization) -> OrganizationPluginConfiguration:
         """
         Retrieves or creates the organization-specific configuration.
 
@@ -1253,9 +1202,7 @@ class AbstractConfig(ListCachable):
         Returns:
             ContentType: The content type.
         """
-        return ContentType.objects.get(
-            model=cls._meta.model_name, app_label=cls._meta.app_label
-        )
+        return ContentType.objects.get(model=cls._meta.model_name, app_label=cls._meta.app_label)
 
     @property
     def disabled_in_organizations(self) -> QuerySet:
@@ -1267,8 +1214,7 @@ class AbstractConfig(ListCachable):
         """
         return self.orgs_configuration.filter(disabled=True)
 
-    @classmethod
-    @property
+    @classproperty
     def runtime_configuration_key(cls) -> str:
         """
         Returns the runtime configuration key for the configuration.
@@ -1278,8 +1224,7 @@ class AbstractConfig(ListCachable):
         """
         return f"{cls.__name__.split('Config')[0].lower()}s"
 
-    @classmethod
-    @property
+    @classproperty
     def snake_case_name(cls) -> str:
         """
         Returns the snake_case name of the configuration.
@@ -1293,12 +1238,7 @@ class AbstractConfig(ListCachable):
 
     @deprecated("Please use `runnable` method on queryset")
     def is_runnable(self, user: User = None) -> bool:
-        return (
-            self.__class__.objects.filter(pk=self.pk)
-            .annotate_runnable(user)
-            .first()
-            .runnable
-        )
+        return self.__class__.objects.filter(pk=self.pk).annotate_runnable(user).first().runnable
 
     def enabled_for_user(self, user: User) -> bool:
         """
@@ -1343,33 +1283,24 @@ class AbstractReport(models.Model):
     # fields
     status = models.CharField(max_length=50, choices=STATUSES.choices)
     report = models.JSONField(default=dict)
-    errors = pg_fields.ArrayField(
-        models.CharField(max_length=512), default=list, blank=True
-    )
+    errors = pg_fields.ArrayField(models.CharField(max_length=512), default=list, blank=True)
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(default=timezone.now)
     task_id = models.UUIDField()  # tracks celery task id
 
-    job = models.ForeignKey(
-        "api_app.Job", related_name="%(class)ss", on_delete=models.CASCADE
-    )
+    job = models.ForeignKey("api_app.Job", related_name="%(class)ss", on_delete=models.CASCADE)
     parameters = models.JSONField(blank=False, null=False, editable=False)
     sent_to_bi = models.BooleanField(default=False, editable=False)
 
     class Meta:
         abstract = True
-        indexes = [
-            models.Index(
-                fields=["sent_to_bi", "-start_time"], name="%(class)ssBISearch"
-            )
-        ]
+        indexes = [models.Index(fields=["sent_to_bi", "-start_time"], name="%(class)ssBISearch")]
 
     def __str__(self):
         """Returns a string representation of the report."""
         return f"{self.__class__.__name__}(job:#{self.job_id}, {self.config.name})"
 
-    @classmethod
-    @property
+    @classproperty
     def config(cls) -> "AbstractConfig":
         """
         Returns the configuration associated with the report.
@@ -1411,9 +1342,7 @@ class AbstractReport(models.Model):
         secs = (self.end_time - self.start_time).total_seconds()
         return round(secs, 2)
 
-    def get_value(
-        self, search_from: typing.Any, fields: typing.List[str]
-    ) -> typing.Any:
+    def get_value(self, search_from: typing.Any, fields: typing.List[str]) -> typing.Any:
         if not fields:
             return search_from
         search_keyword = fields.pop(0)
@@ -1432,9 +1361,7 @@ class AbstractReport(models.Model):
                         else:
                             result.append(res)
                     except KeyError:
-                        errors.append(
-                            f"Field {search_keyword} not available at position {i}"
-                        )
+                        errors.append(f"Field {search_keyword} not available at position {i}")
                 if result:
                     self.errors.extend(errors)
                 else:
@@ -1462,9 +1389,7 @@ class PythonConfig(AbstractConfig):
     objects = PythonConfigQuerySet.as_manager()
     soft_time_limit = models.IntegerField(default=60, validators=[MinValueValidator(0)])
     routing_key = models.CharField(max_length=50, default="default")
-    python_module = models.ForeignKey(
-        PythonModule, on_delete=models.PROTECT, related_name="%(class)ss"
-    )
+    python_module = models.ForeignKey(PythonModule, on_delete=models.PROTECT, related_name="%(class)ss")
 
     health_check_task = models.OneToOneField(
         PeriodicTask,
@@ -1508,8 +1433,7 @@ class PythonConfig(AbstractConfig):
         """
         return Parameter.objects.filter(python_module=self.python_module)
 
-    @classmethod
-    @property
+    @classproperty
     def report_class(cls) -> Type[AbstractReport]:
         """
         Returns the report class associated with the plugin configuration.
@@ -1534,8 +1458,7 @@ class PythonConfig(AbstractConfig):
             if (model is not None and issubclass(model, cls) and model is not cls)
         ]
 
-    @classmethod
-    @property
+    @classproperty
     def plugin_type(cls) -> str:
         """
         Returns the type of the plugin.
@@ -1584,9 +1507,7 @@ class PythonConfig(AbstractConfig):
                 "task_id": task_id,
                 "start_time": now(),
                 "end_time": now(),
-                "parameters": self._get_params(
-                    job.user, job.get_config_runtime_configuration(self)
-                ),
+                "parameters": self._get_params(job.user, job.get_config_runtime_configuration(self)),
             },
         )[0]
 
@@ -1599,24 +1520,21 @@ class PythonConfig(AbstractConfig):
         """
         from api_app.serializers.plugin import PythonConfigListSerializer
 
-        base_key = (
-            f"{self.__class__.__name__}_{self.name}_{user.username if user else ''}"
-        )
+        base_key = f"{self.__class__.__name__}_{self.name}_{user.username if user else ''}"
         for key in cache.get_where(f"serializer_{base_key}").keys():
             logger.debug(f"Deleting cache key {key}")
             cache.delete(key)
         if user:
-            PythonConfigListSerializer(
-                child=self.serializer_class()
-            ).to_representation_single_plugin(self, user)
+            PythonConfigListSerializer(child=self.serializer_class()).to_representation_single_plugin(
+                self, user
+            )
         else:
             for generic_user in User.objects.exclude(email=""):
-                PythonConfigListSerializer(
-                    child=self.serializer_class()
-                ).to_representation_single_plugin(self, generic_user)
+                PythonConfigListSerializer(child=self.serializer_class()).to_representation_single_plugin(
+                    self, generic_user
+                )
 
-    @classmethod
-    @property
+    @classproperty
     def serializer_class(cls) -> Type["PythonConfigSerializer"]:
         """
         Returns the serializer class associated with the plugin configuration.
@@ -1626,8 +1544,7 @@ class PythonConfig(AbstractConfig):
         """
         raise NotImplementedError()
 
-    @classmethod
-    @property
+    @classproperty
     def plugin_name(cls) -> str:
         """
         Returns the name of the plugin.
@@ -1742,8 +1659,7 @@ class PythonConfig(AbstractConfig):
         pc = self.__class__.objects.filter(pk=self.pk).annotate_configured(user).first()
         return pc.configured
 
-    @classmethod
-    @property
+    @classproperty
     def config_exception(cls):
         """
         Returns the exception class for configuration errors.
@@ -1753,9 +1669,7 @@ class PythonConfig(AbstractConfig):
         """
         raise NotImplementedError()
 
-    def read_configured_params(
-        self, user: User = None, config_runtime: Dict = None
-    ) -> ParameterQuerySet:
+    def read_configured_params(self, user: User = None, config_runtime: Dict = None) -> ParameterQuerySet:
         """
         Reads the configured parameters for the plugin.
 
@@ -1766,9 +1680,9 @@ class PythonConfig(AbstractConfig):
         Returns:
             ParameterQuerySet: The queryset of configured parameters.
         """
-        params = self.parameters.annotate_configured(
-            self, user
-        ).annotate_value_for_user(self, user, config_runtime)
+        params = self.parameters.annotate_configured(self, user).annotate_value_for_user(
+            self, user, config_runtime
+        )
         not_configured_params = params.filter(required=True, configured=False)
         # TODO to optimize
         if not_configured_params.exists():
@@ -1792,10 +1706,7 @@ class PythonConfig(AbstractConfig):
         """
         from intel_owl.tasks import health_check
 
-        if (
-            hasattr(self.python_module, "health_check_schedule")
-            and self.python_module.health_check_schedule
-        ):
+        if hasattr(self.python_module, "health_check_schedule") and self.python_module.health_check_schedule:
             periodic_task = PeriodicTask.objects.update_or_create(
                 name__iexact=f"{self.name}HealthCheck{self.__class__.__name__}",
                 task=f"{health_check.__module__}.{health_check.__name__}",

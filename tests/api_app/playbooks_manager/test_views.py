@@ -4,6 +4,7 @@ from typing import Type
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import PythonModuleBasePaths, ScanMode
+from api_app.decorators import classproperty
 from api_app.models import PythonModule, Tag
 from api_app.playbooks_manager.models import PlaybookConfig
 from certego_saas.apps.organization.membership import Membership
@@ -12,13 +13,10 @@ from tests import CustomViewSetTestCase
 from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
 
 
-class PlaybookConfigViewSetTestCase(
-    AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase
-):
+class PlaybookConfigViewSetTestCase(AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase):
     URL = "/api/playbook"
 
-    @classmethod
-    @property
+    @classproperty
     def model_class(cls) -> Type[PlaybookConfig]:
         return PlaybookConfig
 
@@ -26,9 +24,7 @@ class PlaybookConfigViewSetTestCase(
         super().test_list()
 
         self.client.force_authenticate(self.user)
-        p = PlaybookConfig.objects.create(
-            name="test", type=["ip"], tlp="CLEAR", owner=self.superuser
-        )
+        p = PlaybookConfig.objects.create(name="test", type=["ip"], tlp="CLEAR", owner=self.superuser)
         response = self.client.get(self.URL)
         result = response.json()
         self.assertEqual(response.status_code, 200, result)
@@ -46,15 +42,9 @@ class PlaybookConfigViewSetTestCase(
 
     def test_delete(self):
         org1, _ = Organization.objects.get_or_create(name="test")
-        m_user, _ = Membership.objects.get_or_create(
-            user=self.user, organization=org1, is_owner=False
-        )
-        m_owner, _ = Membership.objects.get_or_create(
-            user=self.superuser, organization=org1, is_owner=True
-        )
-        p_default = PlaybookConfig.objects.create(
-            name="test1", type=["ip"], tlp="CLEAR", owner=None
-        )
+        m_user, _ = Membership.objects.get_or_create(user=self.user, organization=org1, is_owner=False)
+        m_owner, _ = Membership.objects.get_or_create(user=self.superuser, organization=org1, is_owner=True)
+        p_default = PlaybookConfig.objects.create(name="test1", type=["ip"], tlp="CLEAR", owner=None)
         p_custom_user = PlaybookConfig.objects.create(
             name="test2", type=["ip"], tlp="CLEAR", owner=m_user.user
         )
@@ -69,9 +59,7 @@ class PlaybookConfigViewSetTestCase(
         self.client.force_authenticate(m_owner.user)
         # 1. owner/admin can't delete a playbook created by an user
         response = self.client.delete(f"{self.URL}/{p_custom_user.pk}")
-        self.assertEqual(
-            response.status_code, 404
-        )  # can't see this playbook in his queryset
+        self.assertEqual(response.status_code, 404)  # can't see this playbook in his queryset
 
         self.client.force_authenticate(m_user.user)
         # 2. user can't delete default playbook
@@ -94,9 +82,7 @@ class PlaybookConfigViewSetTestCase(
         self.assertEqual(response.status_code, 204)
         # 7. user can't delete a playbook created by an user of another organization
         org2, _ = Organization.objects.get_or_create(name="test2")
-        m_user_org2, _ = Membership.objects.get_or_create(
-            user=self.admin, organization=org2, is_owner=False
-        )
+        m_user_org2, _ = Membership.objects.get_or_create(user=self.admin, organization=org2, is_owner=False)
         p_custom_org1 = PlaybookConfig.objects.create(
             name="test4", type=["ip"], tlp="CLEAR", owner=m_user.user
         )
@@ -176,10 +162,11 @@ class PlaybookConfigViewSetTestCase(
                 "analyzers": [
                     "AdGuard",
                     "Classic_DNS",
+                    "CleanBrowsing_Malicious_Detector",
                     "CloudFlare_DNS",
                     "CloudFlare_Malicious_Detector",
-                    "DNS0_EU",
-                    "DNS0_EU_Malicious_Detector",
+                    "DNS4EU",
+                    "DNS4EU_Malicious_Detector",
                     "Google_DNS",
                     "Quad9_DNS",
                     "Quad9_Malicious_Detector",
@@ -215,9 +202,7 @@ class PlaybookConfigViewSetTestCase(
         response = self.client.get(f"{self.URL}/non_existing")
         self.assertEqual(response.status_code, 404, response.content)
         result = response.json()
-        self.assertEqual(
-            result, {"detail": "No PlaybookConfig matches the given query."}
-        )
+        self.assertEqual(result, {"detail": "No PlaybookConfig matches the given query."})
 
     def test_get_config(self):
         # 1 - existing playbook

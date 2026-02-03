@@ -15,9 +15,7 @@ from tests import CustomTestCase
 
 class PlaybookConfigQuerySetTestCase(CustomTestCase):
     def setUp(self) -> None:
-        self.pc = PlaybookConfig.objects.create(
-            name="testplaybook", type=["ip"], description="test"
-        )
+        self.pc = PlaybookConfig.objects.create(name="testplaybook", type=["ip"], description="test")
         self.an1 = Analyzable.objects.create(
             name="test3.com",
             classification=Classification.DOMAIN,
@@ -91,9 +89,7 @@ class PlaybookConfigQuerySetTestCase(CustomTestCase):
         try:
             robot = User.objects.get(is_superuser=False, username="robot")
         except User.DoesNotExist:
-            robot = User.objects.create(
-                username="robot", email="robot@intelowl.com", password="test"
-            )
+            robot = User.objects.create(username="robot", email="robot@intelowl.com", password="test")
         robot_profile = UserProfile.objects.get(user=robot)
         robot_profile.is_robot = True
         robot_profile.save()
@@ -102,15 +98,9 @@ class PlaybookConfigQuerySetTestCase(CustomTestCase):
         Membership.objects.create(user=self.user, organization=org, is_owner=True)
         Membership.objects.create(user=robot, organization=org)
 
-        pc2 = PlaybookConfig.objects.create(
-            name="second", type=["ip"], description="test"
-        )
-        pc3 = PlaybookConfig.objects.create(
-            name="third", type=["ip"], description="test"
-        )
-        pc4 = PlaybookConfig.objects.create(
-            name="fourth", type=["ip"], description="test"
-        )
+        pc2 = PlaybookConfig.objects.create(name="second", type=["ip"], description="test")
+        pc3 = PlaybookConfig.objects.create(name="third", type=["ip"], description="test")
+        pc4 = PlaybookConfig.objects.create(name="fourth", type=["ip"], description="test")
 
         Job.objects.create(
             user=self.user,

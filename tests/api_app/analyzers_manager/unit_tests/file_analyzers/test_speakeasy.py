@@ -9,7 +9,6 @@ class TestSpeakEasyAnalyzer(BaseFileAnalyzerTest):
     analyzer_class = SpeakEasy
 
     def get_mocked_response(self):
-
         mock_speakeasy = MagicMock()
         mock_speakeasy.load_shellcode.return_value = 0x1000
         mock_speakeasy.load_module.return_value = "mock_module"

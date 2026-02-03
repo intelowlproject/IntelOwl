@@ -15,6 +15,7 @@ from api_app.analyzers_manager.queryset import AnalyzerReportQuerySet
 from api_app.choices import TLP, Classification, PythonModuleBasePaths
 from api_app.data_model_manager.fields import SetField
 from api_app.data_model_manager.models import BaseDataModel
+from api_app.decorators import classproperty
 from api_app.fields import ChoiceArrayField
 from api_app.models import AbstractReport, PythonConfig, PythonModule
 
@@ -23,9 +24,7 @@ logger = getLogger(__name__)
 
 class AnalyzerReport(AbstractReport):
     objects = AnalyzerReportQuerySet.as_manager()
-    config = models.ForeignKey(
-        "AnalyzerConfig", related_name="reports", null=False, on_delete=models.CASCADE
-    )
+    config = models.ForeignKey("AnalyzerConfig", related_name="reports", null=False, on_delete=models.CASCADE)
     data_model_content_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE,
@@ -48,8 +47,7 @@ class AnalyzerReport(AbstractReport):
     def clean(self):
         if (
             self.data_model_content_type
-            and ContentType.objects.get_for_model(model=self.data_model_class)
-            != self.data_model_content_type
+            and ContentType.objects.get_for_model(model=self.data_model_class) != self.data_model_content_type
         ):
             raise ValidationError("Wrong data model for this report")
 
@@ -232,17 +230,12 @@ class MimeTypes(models.TextChoices):
             mimetype = cls._calculate_from_filename(file_name)
 
         if mimetype is None:
-            mimetype = magic_from_buffer(
-                buffer.encode() if isinstance(buffer, str) else buffer, mime=True
-            )
+            mimetype = magic_from_buffer(buffer.encode() if isinstance(buffer, str) else buffer, mime=True)
             logger.debug(f"mimetype is {mimetype}")
             try:
                 mimetype = cls(mimetype)
             except ValueError:
-                logger.info(
-                    f"Unable to valid a {cls.__name__} for mimetype {mimetype}"
-                    f" for file {file_name}"
-                )
+                logger.info(f"Unable to valid a {cls.__name__} for mimetype {mimetype} for file {file_name}")
             else:
                 mimetype = mimetype.value
 
@@ -253,9 +246,7 @@ class AnalyzerConfig(PythonConfig):
     # generic
     type = models.CharField(choices=TypeChoices.choices, null=False, max_length=50)
     docker_based = models.BooleanField(null=False, default=False)
-    maximum_tlp = models.CharField(
-        null=False, default=TLP.RED, choices=TLP.choices, max_length=50
-    )
+    maximum_tlp = models.CharField(null=False, default=TLP.RED, choices=TLP.choices, max_length=50)
     python_module = models.ForeignKey(
         PythonModule,
         on_delete=models.PROTECT,
@@ -269,9 +260,7 @@ class AnalyzerConfig(PythonConfig):
     )
     # obs
     observable_supported = ChoiceArrayField(
-        models.CharField(
-            null=False, choices=Classification.choices[:-1], max_length=30
-        ),
+        models.CharField(null=False, choices=Classification.choices[:-1], max_length=30),
         default=list,
         blank=True,
     )
@@ -283,25 +272,20 @@ class AnalyzerConfig(PythonConfig):
         blank=True,
     )
     run_hash = models.BooleanField(default=False)
-    run_hash_type = models.CharField(
-        blank=True, choices=HashChoices.choices, max_length=10
-    )
+    run_hash_type = models.CharField(blank=True, choices=HashChoices.choices, max_length=10)
     not_supported_filetypes = ChoiceArrayField(
         models.CharField(null=False, max_length=90, choices=MimeTypes.choices),
         default=list,
         blank=True,
     )
-    orgs_configuration = GenericRelation(
-        "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
-    )
+    orgs_configuration = GenericRelation("api_app.OrganizationPluginConfiguration", related_name="%(class)s")
     mapping_data_model = models.JSONField(
         default=dict,
         help_text="Mapping analyzer_report_key: data_model_key. Keys preceded by the symbol $ will be considered as constants.",
         blank=True,
     )
 
-    @classmethod
-    @property
+    @classproperty
     def serializer_class(cls):
         from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 
@@ -309,20 +293,15 @@ class AnalyzerConfig(PythonConfig):
 
     def clean_observable_supported(self):
         if self.type == TypeChoices.OBSERVABLE and not self.observable_supported:
-            raise ValidationError(
-                "You have to specify at least one type of observable supported"
-            )
+            raise ValidationError("You have to specify at least one type of observable supported")
         if self.type != TypeChoices.OBSERVABLE and self.observable_supported:
-            raise ValidationError(
-                "You can't specify an observable type if you do not support observable"
-            )
+            raise ValidationError("You can't specify an observable type if you do not support observable")
 
     def clean_filetypes(self):
         if self.type == TypeChoices.FILE:
             if self.supported_filetypes and self.not_supported_filetypes:
                 raise ValidationError(
-                    "Please specify only one between "
-                    "supported_filetypes and not_supported_filetypes"
+                    "Please specify only one between supported_filetypes and not_supported_filetypes"
                 )
         else:
             if self.supported_filetypes or self.not_supported_filetypes:
@@ -341,13 +320,11 @@ class AnalyzerConfig(PythonConfig):
         self.clean_observable_supported()
         self.clean_filetypes()
 
-    @classmethod
-    @property
+    @classproperty
     def plugin_type(cls) -> str:
         return "1"
 
-    @classmethod
-    @property
+    @classproperty
     def config_exception(cls):
         return AnalyzerConfigurationException
 
@@ -357,6 +334,4 @@ class AnalyzerRulesFileVersion(models.Model):
     download_url = models.URLField(max_length=200, blank=True, default="")
     downloaded_at = models.DateTimeField(auto_now_add=True)
 
-    python_module = models.ForeignKey(
-        PythonModule, on_delete=models.PROTECT, related_name="rules_version"
-    )
+    python_module = models.ForeignKey(PythonModule, on_delete=models.PROTECT, related_name="rules_version")

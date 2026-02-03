@@ -6,6 +6,7 @@ from django.db import models
 from api_app.choices import TLP, PythonModuleBasePaths
 from api_app.connectors_manager.exceptions import ConnectorConfigurationException
 from api_app.connectors_manager.queryset import ConnectorReportQuerySet
+from api_app.decorators import classproperty
 from api_app.models import AbstractReport, PythonConfig, PythonModule
 
 
@@ -21,9 +22,7 @@ class ConnectorReport(AbstractReport):
 
 
 class ConnectorConfig(PythonConfig):
-    maximum_tlp = models.CharField(
-        null=False, default=TLP.CLEAR, choices=TLP.choices, max_length=50
-    )
+    maximum_tlp = models.CharField(null=False, default=TLP.CLEAR, choices=TLP.choices, max_length=50)
     run_on_failure = models.BooleanField(null=False, default=True)
     python_module = models.ForeignKey(
         PythonModule,
@@ -31,22 +30,17 @@ class ConnectorConfig(PythonConfig):
         related_name="%(class)ss",
         limit_choices_to={"base_path": PythonModuleBasePaths.Connector.value},
     )
-    orgs_configuration = GenericRelation(
-        "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
-    )
+    orgs_configuration = GenericRelation("api_app.OrganizationPluginConfiguration", related_name="%(class)s")
 
-    @classmethod
-    @property
+    @classproperty
     def plugin_type(cls) -> str:
         return "2"
 
-    @classmethod
-    @property
+    @classproperty
     def config_exception(cls):
         return ConnectorConfigurationException
 
-    @classmethod
-    @property
+    @classproperty
     def serializer_class(cls):
         from api_app.connectors_manager.serializers import ConnectorConfigSerializer
 

@@ -39,9 +39,7 @@ class CommentViewSetTestCase(CustomViewSetTestCase):
 
         self.job = Job.objects.create(user=self.superuser, analyzable=self.an1)
         self.job2 = Job.objects.create(user=self.user, analyzable=self.an1)
-        self.comment = Comment.objects.create(
-            analyzable=self.an1, user=self.user, content="test"
-        )
+        self.comment = Comment.objects.create(analyzable=self.an1, user=self.user, content="test")
 
     def tearDown(self) -> None:
         super().tearDown()
@@ -96,9 +94,7 @@ class JobViewSetTests(CustomViewSetTestCase):
     jobs_recent_scans_user_uri = reverse("jobs-recent-scans-user")
     agg_status_uri = reverse("jobs-aggregate-status")
     agg_type_uri = reverse("jobs-aggregate-type")
-    agg_observable_classification_uri = reverse(
-        "jobs-aggregate-observable-classification"
-    )
+    agg_observable_classification_uri = reverse("jobs-aggregate-observable-classification")
     agg_file_mimetype_uri = reverse("jobs-aggregate-file-mimetype")
     agg_top_playbook = reverse("jobs-aggregate-top-playbook")
     agg_top_user = reverse("jobs-aggregate-top-user")
@@ -110,9 +106,7 @@ class JobViewSetTests(CustomViewSetTestCase):
             "django.utils.timezone.now",
             return_value=datetime.datetime(2024, 11, 28, tzinfo=datetime.timezone.utc),
         ):
-            self.analyzable = Analyzable.objects.create(
-                name="1.2.3.4", classification=Classification.IP
-            )
+            self.analyzable = Analyzable.objects.create(name="1.2.3.4", classification=Classification.IP)
             with open("test_files/file.exe", "rb") as f:
                 self.analyzable2 = Analyzable.objects.create(
                     name="test.file",
@@ -142,9 +136,7 @@ class JobViewSetTests(CustomViewSetTestCase):
                 **{
                     "user": self.superuser,
                     "analyzable": self.analyzable2,
-                    "playbook_to_execute": PlaybookConfig.objects.get(
-                        name="FREE_TO_USE_ANALYZERS"
-                    ),
+                    "playbook_to_execute": PlaybookConfig.objects.get(name="FREE_TO_USE_ANALYZERS"),
                     "tlp": Job.TLP.GREEN.value,
                 }
             )
@@ -160,9 +152,7 @@ class JobViewSetTests(CustomViewSetTestCase):
                 **{
                     "user": self.superuser,
                     "analyzable": self.analyzable4,
-                    "playbook_to_execute": PlaybookConfig.objects.get(
-                        name="FREE_TO_USE_ANALYZERS"
-                    ),
+                    "playbook_to_execute": PlaybookConfig.objects.get(name="FREE_TO_USE_ANALYZERS"),
                     "tlp": Job.TLP.GREEN.value,
                 }
             )
@@ -201,9 +191,7 @@ class JobViewSetTests(CustomViewSetTestCase):
                 "finished_analysis_time": now() - datetime.timedelta(hours=2),
             }
         )
-        response = self.client.post(
-            self.jobs_recent_scans_uri, data={"md5": j1.analyzable.md5}
-        )
+        response = self.client.post(self.jobs_recent_scans_uri, data={"md5": j1.analyzable.md5})
         content = response.json()
         msg = (response, content)
         self.assertEqual(200, response.status_code, msg=msg)
@@ -220,23 +208,17 @@ class JobViewSetTests(CustomViewSetTestCase):
             **{
                 "user": self.user,
                 "analyzable": self.analyzable,
-                "finished_analysis_time": datetime.datetime(
-                    2024, 11, 28, tzinfo=datetime.timezone.utc
-                ),
+                "finished_analysis_time": datetime.datetime(2024, 11, 28, tzinfo=datetime.timezone.utc),
             }
         )
         j2 = Job.objects.create(
             **{
                 "user": self.superuser,
                 "analyzable": self.analyzable,
-                "finished_analysis_time": datetime.datetime(
-                    2024, 11, 28, tzinfo=datetime.timezone.utc
-                ),
+                "finished_analysis_time": datetime.datetime(2024, 11, 28, tzinfo=datetime.timezone.utc),
             }
         )
-        response = self.client.post(
-            self.jobs_recent_scans_user_uri, data={"is_sample": False}
-        )
+        response = self.client.post(self.jobs_recent_scans_user_uri, data={"is_sample": False})
         content = response.json()
         msg = (response, content)
         self.assertEqual(200, response.status_code, msg=msg)
@@ -354,9 +336,7 @@ class JobViewSetTests(CustomViewSetTestCase):
         content = response.json()
         msg = (response, content)
         self.assertEqual(response.status_code, 400, msg=msg)
-        self.assertDictEqual(
-            content["errors"], {"detail": "Job is not running"}, msg=msg
-        )
+        self.assertDictEqual(content["errors"], {"detail": "Job is not running"}, msg=msg)
 
     # aggregation endpoints
     def test_agg_status_200(self):
@@ -445,7 +425,6 @@ class JobViewSetTests(CustomViewSetTestCase):
             "django.utils.timezone.now",
             return_value=datetime.datetime(2024, 11, 28, tzinfo=datetime.timezone.utc),
         ):
-
             job, _ = Job.objects.get_or_create(
                 **{
                     "user": u,
@@ -479,9 +458,7 @@ class JobViewSetTests(CustomViewSetTestCase):
             resp.json(),
             {
                 "values": ["AMBER", "CLEAR", "GREEN"],
-                "aggregation": [
-                    {"date": "2024-11-28T00:00:00Z", "CLEAR": 1, "GREEN": 3, "AMBER": 1}
-                ],
+                "aggregation": [{"date": "2024-11-28T00:00:00Z", "CLEAR": 1, "GREEN": 3, "AMBER": 1}],
             },
         )
 
@@ -555,67 +532,41 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
         self.assertEqual(response.status_code, 403, response.json())
         result = response.json()
         self.assertIn("detail", result)
-        self.assertEqual(
-            result["detail"], "You do not have permission to perform this action."
-        )
+        self.assertEqual(result["detail"], "You do not have permission to perform this action.")
 
         # a member cannot disable plugin config at org level
-        m, _ = Membership.objects.get_or_create(
-            user=self.user, organization=org, is_owner=False
-        )
+        m, _ = Membership.objects.get_or_create(user=self.user, organization=org, is_owner=False)
         response = self.client.post(f"{self.URL}/{plugin_name}/organization")
         self.assertEqual(response.status_code, 403, response.json())
         result = response.json()
         self.assertIn("detail", result)
-        self.assertEqual(
-            result["detail"], "You do not have permission to perform this action."
-        )
+        self.assertEqual(result["detail"], "You do not have permission to perform this action.")
 
         # an admin can disable plugin config at org level
         m.is_admin = True
         m.save()
         plugin = self.model_class.objects.get(name=plugin_name)
-        self.assertFalse(
-            plugin.disabled_in_organizations.all().exists()
-        )  # isn't it disabled?
-        response = self.client.post(
-            f"{self.URL}/{plugin_name}/organization"
-        )  # disabling it
+        self.assertFalse(plugin.disabled_in_organizations.all().exists())  # isn't it disabled?
+        response = self.client.post(f"{self.URL}/{plugin_name}/organization")  # disabling it
         self.assertEqual(response.status_code, 201)
-        self.assertTrue(
-            plugin.disabled_in_organizations.all().exists()
-        )  # now it's disabled
-        response = self.client.post(
-            f"{self.URL}/{plugin_name}/organization"
-        )  # try to disable it again
+        self.assertTrue(plugin.disabled_in_organizations.all().exists())  # now it's disabled
+        response = self.client.post(f"{self.URL}/{plugin_name}/organization")  # try to disable it again
         self.assertEqual(response.status_code, 400, response.json())
-        self.assertEqual(
-            1, plugin.disabled_in_organizations.all().count()
-        )  # still 1 disabled
+        self.assertEqual(1, plugin.disabled_in_organizations.all().count())  # still 1 disabled
         result = response.json()
         self.assertIn("errors", result)
         self.assertIn("detail", result["errors"])
-        self.assertEqual(
-            result["errors"]["detail"], f"Plugin {plugin.name} already disabled"
-        )
+        self.assertEqual(result["errors"]["detail"], f"Plugin {plugin.name} already disabled")
 
         # an owner can disable plugin config at org level
         m.is_admin = True  # and owner is also and admin
         m.is_owner = True
         m.save()
-        plugin.disabled_in_organizations.update(
-            disabled=False
-        )  # reset the disabled plugins
-        self.assertFalse(
-            plugin.disabled_in_organizations.all().exists()
-        )  # isn't it disabled?
-        response = self.client.post(
-            f"{self.URL}/{plugin_name}/organization"
-        )  # disabling it
+        plugin.disabled_in_organizations.update(disabled=False)  # reset the disabled plugins
+        self.assertFalse(plugin.disabled_in_organizations.all().exists())  # isn't it disabled?
+        response = self.client.post(f"{self.URL}/{plugin_name}/organization")  # disabling it
         self.assertEqual(response.status_code, 201)
-        self.assertTrue(
-            plugin.disabled_in_organizations.all().exists()
-        )  # now it's disabled
+        self.assertTrue(plugin.disabled_in_organizations.all().exists())  # now it's disabled
 
         plugin.disabled_in_organizations.delete()
         m.delete()
@@ -630,101 +581,66 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
         self.assertEqual(response.status_code, 403, response.json())
         result = response.json()
         self.assertIn("detail", result)
-        self.assertEqual(
-            result["detail"], "You do not have permission to perform this action."
-        )
+        self.assertEqual(result["detail"], "You do not have permission to perform this action.")
 
         # a member cannot enable plugin config at org level
-        m, _ = Membership.objects.get_or_create(
-            user=self.user, organization=org, is_owner=False
-        )
+        m, _ = Membership.objects.get_or_create(user=self.user, organization=org, is_owner=False)
         response = self.client.delete(f"{self.URL}/{plugin_name}/organization")
         result = response.json()
         self.assertEqual(response.status_code, 403, result)
         self.assertIn("detail", result)
-        self.assertEqual(
-            result["detail"], "You do not have permission to perform this action."
-        )
+        self.assertEqual(result["detail"], "You do not have permission to perform this action.")
 
         # an admin can enable plugin config at org level
-        m, _ = Membership.objects.get_or_create(
-            user=self.superuser, organization=org, is_owner=False
-        )
+        m, _ = Membership.objects.get_or_create(user=self.superuser, organization=org, is_owner=False)
         m.is_admin = True
         m.save()
         self.client.force_authenticate(m.user)
         plugin = self.model_class.objects.get(name=plugin_name)
-        self.assertFalse(
-            plugin.disabled_in_organizations.all().exists()
-        )  # isn't it disabled?
-        response = self.client.delete(
-            f"{self.URL}/{plugin_name}/organization"
-        )  # enabling it
+        self.assertFalse(plugin.disabled_in_organizations.all().exists())  # isn't it disabled?
+        response = self.client.delete(f"{self.URL}/{plugin_name}/organization")  # enabling it
         result = response.json()
         self.assertEqual(response.status_code, 400, result)  # validation error
-        self.assertFalse(
-            plugin.disabled_in_organizations.all().exists()
-        )  # isn't it disabled?
+        self.assertFalse(plugin.disabled_in_organizations.all().exists())  # isn't it disabled?
         self.assertIn("errors", result)
         self.assertIn("detail", result["errors"])
         # I can enable it but is already enabled
-        self.assertEqual(
-            result["errors"]["detail"], f"Plugin {plugin.name} already enabled"
-        )
+        self.assertEqual(result["errors"]["detail"], f"Plugin {plugin.name} already enabled")
         plugin.orgs_configuration.update(disabled=True)  # disabling it
-        response = self.client.delete(
-            f"{self.URL}/{plugin_name}/organization"
-        )  # disable it
+        response = self.client.delete(f"{self.URL}/{plugin_name}/organization")  # disable it
         self.assertEqual(response.status_code, 202)
-        self.assertFalse(
-            plugin.disabled_in_organizations.all().exists()
-        )  # is it enabled?
+        self.assertFalse(plugin.disabled_in_organizations.all().exists())  # is it enabled?
 
         # an owner can disable plugin config at org level
         m.is_owner = True
         m.is_admin = True  # an owner is also an admin
         m.save()
         plugin.disabled_in_organizations.update(disabled=False)
-        self.assertFalse(
-            plugin.disabled_in_organizations.all().exists()
-        )  # isn't it disabled?
-        response = self.client.delete(
-            f"{self.URL}/{plugin_name}/organization"
-        )  # enabling it
+        self.assertFalse(plugin.disabled_in_organizations.all().exists())  # isn't it disabled?
+        response = self.client.delete(f"{self.URL}/{plugin_name}/organization")  # enabling it
         result = response.json()
         self.assertEqual(response.status_code, 400, result)  # validation error
-        self.assertFalse(
-            plugin.disabled_in_organizations.all().exists()
-        )  # isn't it disabled?
+        self.assertFalse(plugin.disabled_in_organizations.all().exists())  # isn't it disabled?
         self.assertIn("errors", result)
         self.assertIn("detail", result["errors"])
         # I can enable it but is already enabled
-        self.assertEqual(
-            result["errors"]["detail"], f"Plugin {plugin.name} already enabled"
-        )
+        self.assertEqual(result["errors"]["detail"], f"Plugin {plugin.name} already enabled")
         plugin.orgs_configuration.update(disabled=True)  # disabling it
-        response = self.client.delete(
-            f"{self.URL}/{plugin_name}/organization"
-        )  # enabling it
+        response = self.client.delete(f"{self.URL}/{plugin_name}/organization")  # enabling it
         self.assertEqual(response.status_code, 202)
-        self.assertFalse(
-            plugin.disabled_in_organizations.all().exists()
-        )  # is it enabled?
+        self.assertFalse(plugin.disabled_in_organizations.all().exists())  # is it enabled?
 
         m.delete()
         org.delete()
 
 
 class PluginConfigViewSetTestCase(CustomViewSetTestCase):
-
     def setUp(self):
         super().setUp()
 
     def test_plugin_config(self):
         org = Organization.create("test_org", self.user)
-        Membership.objects.create(
-            user=self.admin, organization=org, is_owner=False, is_admin=True
-        )
+        Membership.objects.create(user=self.admin, organization=org, is_owner=False, is_admin=True)
         ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
         uri = f"/api/analyzer/{ac.name}/plugin_config"
 
@@ -839,9 +755,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
 
         # if a standard user tries to get the secret of his org,
         # he should have a "redacted" value
-        Membership(
-            user=self.standard_user, organization=org, is_owner=False, is_admin=False
-        ).save()
+        Membership(user=self.standard_user, organization=org, is_owner=False, is_admin=False).save()
         response = self.standard_user_client.get(uri, {}, format="json")
         self.assertEqual(response.status_code, 200)
         content = response.json()
@@ -899,18 +813,10 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
             password="test",
         )
         another_owner.save()
-        m0 = Membership.objects.create(
-            organization=org0, user=self.superuser, is_owner=True
-        )
-        m1 = Membership.objects.create(
-            organization=org0, user=self.admin, is_owner=False, is_admin=True
-        )
-        m2 = Membership.objects.create(
-            organization=org1, user=self.user, is_owner=False, is_admin=False
-        )
-        m3 = Membership.objects.create(
-            organization=org1, user=another_owner, is_owner=True
-        )
+        m0 = Membership.objects.create(organization=org0, user=self.superuser, is_owner=True)
+        m1 = Membership.objects.create(organization=org0, user=self.admin, is_owner=False, is_admin=True)
+        m2 = Membership.objects.create(organization=org1, user=self.user, is_owner=False, is_admin=False)
+        m3 = Membership.objects.create(organization=org1, user=another_owner, is_owner=True)
         pc0 = PluginConfig.objects.create(
             parameter=param,
             analyzer_config=ac,
@@ -1029,12 +935,8 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
 
     def test_update(self):
         org = Organization.create("test_org", self.superuser)
-        Membership.objects.create(
-            user=self.admin, organization=org, is_owner=False, is_admin=True
-        )
-        Membership.objects.create(
-            user=self.user, organization=org, is_owner=False, is_admin=False
-        )
+        Membership.objects.create(user=self.admin, organization=org, is_owner=False, is_admin=True)
+        Membership.objects.create(user=self.user, organization=org, is_owner=False, is_admin=False)
         ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
         uri = f"/api/analyzer/{ac.name}/plugin_config"
 
@@ -1172,12 +1074,8 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
 
     def test_create(self):
         org = Organization.create("test_org", self.superuser)
-        Membership.objects.create(
-            user=self.admin, organization=org, is_owner=False, is_admin=True
-        )
-        Membership.objects.create(
-            user=self.user, organization=org, is_owner=False, is_admin=False
-        )
+        Membership.objects.create(user=self.admin, organization=org, is_owner=False, is_admin=True)
+        Membership.objects.create(user=self.user, organization=org, is_owner=False, is_admin=False)
         ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
         uri = f"/api/analyzer/{ac.name}/plugin_config"
 
@@ -1358,12 +1256,8 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
 
     def test_delete(self):
         org = Organization.create("test_org", self.superuser)
-        Membership.objects.create(
-            user=self.admin, organization=org, is_owner=False, is_admin=True
-        )
-        Membership.objects.create(
-            user=self.user, organization=org, is_owner=False, is_admin=False
-        )
+        Membership.objects.create(user=self.admin, organization=org, is_owner=False, is_admin=True)
+        Membership.objects.create(user=self.user, organization=org, is_owner=False, is_admin=False)
         ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
         uri = "/api/plugin-config"
 
@@ -1448,14 +1342,10 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
             for_organization=False,
         )
         self.client.force_authenticate(different_user)
-        response = self.client.get(
-            reverse("plugin-config-detail", kwargs={"pk": pc.pk})
-        )
+        response = self.client.get(reverse("plugin-config-detail", kwargs={"pk": pc.pk}))
         self.assertEqual(200, response.status_code)
         self.client.force_authenticate(self.user)
-        response = self.client.get(
-            reverse("plugin-config-detail", kwargs={"pk": pc.pk})
-        )
+        response = self.client.get(reverse("plugin-config-detail", kwargs={"pk": pc.pk}))
         self.assertEqual(403, response.status_code)
         pc.delete()
         different_user.delete()
@@ -1467,7 +1357,6 @@ class ElasticTestCase(CustomViewSetTestCase):
     uri = reverse("plugin-report-queries")
 
     class ElasticObject:
-
         def __init__(self, response):
             self.response = response
 
@@ -1477,13 +1366,9 @@ class ElasticTestCase(CustomViewSetTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.org_user, _ = User.objects.get_or_create(
-            is_superuser=False, username="elastic_test_user"
-        )
+        cls.org_user, _ = User.objects.get_or_create(is_superuser=False, username="elastic_test_user")
         cls.org = Organization.objects.create(name="test_elastic_org")
-        cls.membership = Membership.objects.create(
-            user=cls.org_user, organization=cls.org, is_owner=True
-        )
+        cls.membership = Membership.objects.create(user=cls.org_user, organization=cls.org, is_owner=True)
 
     @classmethod
     def tearDownClass(cls):
@@ -1499,18 +1384,14 @@ class ElasticTestCase(CustomViewSetTestCase):
 
     def test_validatior_errors(self):
         # invalid plugin type
-        response_invalid_plugin_type = self.client.get(
-            self.uri, data={"plugin_name": "not valid"}
-        )
+        response_invalid_plugin_type = self.client.get(self.uri, data={"plugin_name": "not valid"})
         self.assertEqual(response_invalid_plugin_type.status_code, 400)
         self.assertEqual(
             response_invalid_plugin_type.json(),
             {"errors": {"plugin_name": ['"not valid" is not a valid choice.']}},
         )
         # invalid status
-        response_invalid_status = self.client.get(
-            self.uri, data={"status": "not valid"}
-        )
+        response_invalid_status = self.client.get(self.uri, data={"status": "not valid"})
         self.assertEqual(response_invalid_status.status_code, 400)
         self.assertEqual(
             response_invalid_status.json(),
@@ -1527,13 +1408,7 @@ class ElasticTestCase(CustomViewSetTestCase):
         self.assertEqual(response_invalid_start_time.status_code, 400)
         self.assertEqual(
             response_invalid_start_time.json(),
-            {
-                "errors": {
-                    "non_field_errors": [
-                        "start date must be equal or lower than end date"
-                    ]
-                }
-            },
+            {"errors": {"non_field_errors": ["start date must be equal or lower than end date"]}},
         )
         # end time
         response_invalid_end_time = self.client.get(
@@ -1546,13 +1421,7 @@ class ElasticTestCase(CustomViewSetTestCase):
         self.assertEqual(response_invalid_end_time.status_code, 400)
         self.assertEqual(
             response_invalid_end_time.json(),
-            {
-                "errors": {
-                    "non_field_errors": [
-                        "start date must be equal or lower than end date"
-                    ]
-                }
-            },
+            {"errors": {"non_field_errors": ["start date must be equal or lower than end date"]}},
         )
 
     @patch(
@@ -1724,32 +1593,16 @@ class ElasticTestCase(CustomViewSetTestCase):
                     Term(status=ReportStatus.SUCCESS),
                     Bool(must_not=[Exists(field="errors")]),
                     Range(
-                        start_time={
-                            "gte": datetime.datetime(
-                                2024, 11, 27, 0, 0, tzinfo=ZoneInfo(key="UTC")
-                            )
-                        }
+                        start_time={"gte": datetime.datetime(2024, 11, 27, 0, 0, tzinfo=ZoneInfo(key="UTC"))}
                     ),
                     Range(
-                        start_time={
-                            "lte": datetime.datetime(
-                                2024, 11, 28, 0, 0, tzinfo=ZoneInfo(key="UTC")
-                            )
-                        }
+                        start_time={"lte": datetime.datetime(2024, 11, 28, 0, 0, tzinfo=ZoneInfo(key="UTC"))}
                     ),
                     Range(
-                        end_time={
-                            "gte": datetime.datetime(
-                                2024, 11, 27, 0, 0, tzinfo=ZoneInfo(key="UTC")
-                            )
-                        }
+                        end_time={"gte": datetime.datetime(2024, 11, 27, 0, 0, tzinfo=ZoneInfo(key="UTC"))}
                     ),
                     Range(
-                        end_time={
-                            "lte": datetime.datetime(
-                                2024, 11, 28, 0, 0, tzinfo=ZoneInfo(key="UTC")
-                            )
-                        }
+                        end_time={"lte": datetime.datetime(2024, 11, 28, 0, 0, tzinfo=ZoneInfo(key="UTC"))}
                     ),
                     Term(report="8.8.8.8"),
                 ]

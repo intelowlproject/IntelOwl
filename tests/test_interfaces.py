@@ -12,9 +12,7 @@ class CreateJobsFromPlaybookInterfaceTestCase(CustomTestCase):
             self.name = "Test"
 
     def test_validate_playbook_to_execute(self):
-        default_pc = PlaybookConfig.objects.create(
-            name="Playbook", type=["ip"], description="test"
-        )
+        default_pc = PlaybookConfig.objects.create(name="Playbook", type=["ip"], description="test")
         a = self.Test(PlaybookConfig.objects.filter(pk=default_pc.pk))
         try:
             a.validate_playbooks(self.user)

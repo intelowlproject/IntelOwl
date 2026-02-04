@@ -45,10 +45,11 @@ class EngineConfig(SingletonModel):
 
         with transaction.atomic():
             data_model_result: BaseDataModel = job.get_analyzers_data_models().merge(append=True)
-            if job.data_model:
-                job.data_model.delete()
+            previous_data_model = job.data_model
             job.data_model = data_model_result
             job.save()
+            if previous_data_model:
+                previous_data_model.delete()
 
         runner = group(list(self.get_modules_signatures(job)))
         runner.apply_async(

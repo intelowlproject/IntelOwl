@@ -173,7 +173,7 @@ class EngineConfigTestCase(CustomTestCase):
         )
 
         existing_data_model = IPDataModel.objects.create(
-            evaluation=IPDataModel.EVALUATIONS.BENIGN.value,
+            evaluation=IPDataModel.EVALUATIONS.TRUSTED.value,
             resolutions=["original.resolution.com"],
         )
         job.data_model = existing_data_model
@@ -223,7 +223,7 @@ class EngineConfigTestCase(CustomTestCase):
         existing_data_model.refresh_from_db()
         self.assertEqual(
             existing_data_model.evaluation,
-            IPDataModel.EVALUATIONS.BENIGN.value,
+            IPDataModel.EVALUATIONS.TRUSTED.value,
             "Original data model should remain unchanged",
         )
         self.assertEqual(

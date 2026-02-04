@@ -14,7 +14,6 @@ from .views import (
     analyze_multiple_files,
     analyze_multiple_observables,
     analyze_observable,
-    ask_analysis_availability,
     ask_multi_analysis_availability,
     plugin_state_viewer,
 )
@@ -29,7 +28,6 @@ router.register(r"plugin-config", PluginConfigViewSet, basename="plugin-config")
 # These come after /api/..
 urlpatterns = [
     # standalone endpoints
-    path("ask_analysis_availability", ask_analysis_availability),
     path("ask_multi_analysis_availability", ask_multi_analysis_availability),
     path("analyze_file", analyze_file),
     path(

@@ -38,7 +38,6 @@ from intel_owl import tasks
 from intel_owl.celery import app as celery_app
 from intel_owl.settings._util import get_environment
 
-from .decorators import deprecated_endpoint
 from .filters import JobFilter
 from .mixins import PaginationMixin
 from .models import (
@@ -81,46 +80,12 @@ logger = logging.getLogger(__name__)
 # REST API endpoints
 
 
-@deprecated_endpoint(deprecation_date="01-07-2023")
-@api_view(["POST"])
-def ask_analysis_availability(request):
-    """
-    API endpoint to check for existing analysis based on an MD5 hash.
-
-    This endpoint helps avoid redundant analysis by checking if there is already an analysis
-    in progress or completed with status "running" or "reported_without_fails" for the provided MD5 hash.
-    The analyzers that need to be executed should be specified to ensure expected results.
-
-    Deprecated: This endpoint will be deprecated after 01-07-2023.
-
-    Parameters:
-    - request (POST): Contains the MD5 hash and analyzer details.
-
-    Returns:
-    - 200: JSON response with the analysis status, job ID, and analyzers to be executed.
-    """
-    serializer = JobAvailabilitySerializer(
-        data=request.data, context={"request": request}
-    )
-    serializer.is_valid(raise_exception=True)
-    try:
-        job = serializer.save()
-    except Job.DoesNotExist:
-        result = None
-    else:
-        result = job
-    return Response(
-        JobResponseSerializer(result).data,
-        status=status.HTTP_200_OK,
-    )
-
-
 @api_view(["POST"])
 def ask_multi_analysis_availability(request):
     """
     API endpoint to check for existing analysis for multiple MD5 hashes.
 
-    Similar to `ask_analysis_availability`, this endpoint checks for existing analysis for multiple MD5 hashes.
+    This endpoint checks for existing analysis for multiple MD5 hashes.
     It prevents redundant analysis by verifying if there are any jobs in progress or completed with status
     "running" or "reported_without_fails". The analyzers required should be specified to ensure accurate results.
 

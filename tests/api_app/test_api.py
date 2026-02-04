@@ -90,23 +90,6 @@ class ApiViewTests(CustomViewSetTestCase):
         md5 = hashlib.md5(binary).hexdigest()  # nosec
         return uploaded_file, md5
 
-    def test_ask_analysis_availability(self):
-        md5 = os.environ.get("TEST_MD5", "446c5fbb11b9ce058450555c1c27153c")
-        analyzers_needed = ["Classic_DNS", "CIRCLPassiveDNS"]
-        data = {"md5": md5, "analyzers": analyzers_needed, "minutes_ago": 1}
-        response = self.client.post(
-            "/api/ask_analysis_availability", data, format="json"
-        )
-        self.assertEqual(response.status_code, 200)
-
-    def test_ask_analysis_availability__run_all_analyzers(self):
-        md5 = os.environ.get("TEST_MD5", "446c5fbb11b9ce058450555c1c27153c")
-        data = {"md5": md5, "analyzers": []}
-        response = self.client.post(
-            "/api/ask_analysis_availability", data, format="json"
-        )
-        self.assertEqual(response.status_code, 200)
-
     def test_analyze_file__pcap(self):
         # set a fake API key or YARAify_File_Scan will be skipped as not configured
         models.PluginConfig.objects.create(

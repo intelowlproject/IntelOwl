@@ -1168,7 +1168,8 @@ class JobResponseSerializer(rfs.ModelSerializer):
 
 class JobAvailabilitySerializer(rfs.ModelSerializer):
     """
-    Serializer for ask_analysis_availability
+    Serializer for ask_multi_analysis_availability endpoint.
+    Checks for existing analysis based on MD5 hash(es) to avoid redundant analysis.
     """
 
     class Meta:

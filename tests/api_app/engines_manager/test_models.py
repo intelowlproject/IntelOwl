@@ -196,8 +196,12 @@ class EngineConfigTestCase(CustomTestCase):
         original_data_model_pk = existing_data_model.pk
         original_data_model_count = IPDataModel.objects.count()
 
+        def mock_save_with_rollback(self, *args, **kwargs):
+            transaction.set_rollback(True)
+            raise IntegrityError("Simulated save failure")
+
         with (
-            patch.object(Job, "save", side_effect=IntegrityError("Simulated save failure")),
+            patch.object(Job, "save", mock_save_with_rollback),
             self.assertRaises(IntegrityError),
         ):
             config.run(job)

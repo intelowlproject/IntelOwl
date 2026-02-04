@@ -26,7 +26,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("playbooks_manager", "0061_replace_dns0_playbooks"),
-        ("analyzers_manager", "0175_analyzer_config_macho_info"),
+        ("analyzers_manager", "0176_analyzer_config_macho_info"),
     ]
 
     operations = [

@@ -3,6 +3,8 @@ from django.db.models.fields.related_descriptors import (
     ForwardManyToOneDescriptor,
     ForwardOneToOneDescriptor,
     ManyToManyDescriptor,
+    ReverseManyToOneDescriptor,
+    ReverseOneToOneDescriptor,
 )
 
 plugin = {
@@ -56,6 +58,8 @@ def _get_real_obj(Model, field, value):
         type(getattr(Model, field))
         in [
             ForwardManyToOneDescriptor,
+            ReverseManyToOneDescriptor,
+            ReverseOneToOneDescriptor,
             ForwardOneToOneDescriptor,
         ]
         and value

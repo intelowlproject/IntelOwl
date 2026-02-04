@@ -25,7 +25,7 @@ def reverse_migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("playbooks_manager", "0061_replace_dns0_playbooks"),
+        ("playbooks_manager", "0062_add_cleanbrowsing_to_free_to_use"),
         ("analyzers_manager", "0176_analyzer_config_macho_info"),
     ]
 

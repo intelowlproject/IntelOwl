@@ -10,6 +10,12 @@ export function TLPTag(props) {
   const badgeId = `tlptag-badge__${value}`;
   const color = TLPColors?.[value] || "#dfe1e2";
   const tooltipText = TLPDescriptions?.[value] || "invalid";
+  const textColorMap = {
+    CLEAR: "#000000",
+    GREEN: "#000000",
+    AMBER: "#000000",
+  };
+  const textColor = textColorMap[value] || "#FFFFFF";
 
   return value ? (
     <Badge
@@ -18,7 +24,9 @@ export function TLPTag(props) {
       style={{
         borderRadius: 5,
         userSelect: "none",
+        backgroundColor: color,
         border: `1px solid ${color}`,
+        color: textColor,
       }}
       {...rest}
     >

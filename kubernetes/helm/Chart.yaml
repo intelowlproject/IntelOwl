@@ -30,24 +30,24 @@ kubeVersion: ">=1.25.0-0"
 dependencies:
   # CloudNative-PG Operator
   - name: cloudnative-pg
-    version: "0.23.*"
+    version: "0.27.*"
     repository: "https://cloudnative-pg.github.io/charts"
     condition: postgresql.operator.enabled
     alias: cnpg
 
-  # CloudPirates Redis
-  - name: redis
-    version: "0.21.*"
-    repository: "oci://registry-1.docker.io/cloudpirates"
-    condition: redis.enabled
-    alias: redis
+  # OT-CONTAINER-KIT Redis Operator
+  - name: redis-operator
+    version: "0.23.*"
+    repository: "https://ot-container-kit.github.io/helm-charts/"
+    condition: redis.operator.enabled
+    alias: redis-operator
 
-  # CloudPirates RabbitMQ
-  - name: rabbitmq
-    version: "0.15.*"
-    repository: "oci://registry-1.docker.io/cloudpirates"
-    condition: rabbitmq.enabled
-    alias: rabbitmq
+  # Bitnami RabbitMQ Cluster Operator
+  - name: rabbitmq-cluster-operator
+    version: "4.4.*"
+    repository: "oci://registry-1.docker.io/bitnamicharts"
+    condition: rabbitmq.operator.enabled
+    alias: rabbitmq-operator
 
 annotations:
   artifacthub.io/license: AGPL-3.0

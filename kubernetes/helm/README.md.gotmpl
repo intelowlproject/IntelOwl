@@ -30,6 +30,38 @@ Alternatively, enable operator installation via the chart:
 helm install intelowl ./intelowl-helm --set postgresql.operator.enabled=true
 ```
 
+### Redis Operator (Required for internal Redis)
+
+The chart uses [OT-CONTAINER-KIT redis-operator](https://github.com/OT-CONTAINER-KIT/redis-operator) for Redis. Install the operator before deploying:
+
+```bash
+helm repo add ot-helm https://ot-container-kit.github.io/helm-charts/
+helm repo update
+
+helm install redis-operator ot-helm/redis-operator -n redis-operator --create-namespace
+```
+
+Alternatively, enable operator installation via the chart:
+
+```bash
+helm install intelowl ./intelowl-helm --set redis.operator.enabled=true
+```
+
+### RabbitMQ Cluster Operator (Required if using RabbitMQ)
+
+If using RabbitMQ as the message broker (`broker.type=rabbitmq`), install the [rabbitmq-cluster-operator](https://github.com/rabbitmq/cluster-operator) first:
+
+```bash
+helm install rabbitmq-operator oci://registry-1.docker.io/bitnamicharts/rabbitmq-cluster-operator \
+  -n rabbitmq-system --create-namespace
+```
+
+Alternatively, enable operator installation via the chart:
+
+```bash
+helm install intelowl ./intelowl-helm --set rabbitmq.operator.enabled=true
+```
+
 ### Gateway API (Required for Gateway networking type)
 
 If using Gateway API (default), install the CRDs and a Gateway provider:
@@ -502,7 +534,7 @@ kubectl exec -it deploy/intelowl-uwsgi -n intelowl -- python manage.py createsup
 {{- end }}
 {{- end }}
 
-### Redis parameters (CloudPirates)
+### Redis parameters (redis-operator)
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
@@ -512,7 +544,7 @@ kubectl exec -it deploy/intelowl-uwsgi -n intelowl -- python manage.py createsup
 {{- end }}
 {{- end }}
 
-### RabbitMQ parameters (CloudPirates)
+### RabbitMQ parameters (rabbitmq-cluster-operator)
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|

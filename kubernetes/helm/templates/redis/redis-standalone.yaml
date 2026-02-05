@@ -1,0 +1,45 @@
+{{- if and .Values.redis.enabled (eq .Values.redis.architecture "standalone") }}
+apiVersion: redis.redis.opstreelabs.in/v1beta2
+kind: Redis
+metadata:
+  name: {{ include "intelowl.fullname" . }}-redis
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: redis
+spec:
+  kubernetesConfig:
+    image: {{ .Values.redis.image | quote }}
+    resources:
+      {{- toYaml .Values.redis.resources | nindent 6 }}
+    {{- with .Values.redis.nodeSelector }}
+    nodeSelector:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.redis.tolerations }}
+    tolerations:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.redis.affinity }}
+    affinity:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+  {{- if .Values.redis.auth.enabled }}
+  redisExporter:
+    enabled: {{ .Values.redis.exporter.enabled }}
+  redisSecret:
+    name: {{ include "intelowl.redisSecretName" . }}
+    key: {{ include "intelowl.redisPasswordKey" . }}
+  {{- end }}
+  storage:
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.redis.storage.size }}
+        {{- if .Values.redis.storage.storageClass }}
+        storageClassName: {{ .Values.redis.storage.storageClass | quote }}
+        {{- end }}
+{{- end }}

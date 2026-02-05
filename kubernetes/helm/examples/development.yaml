@@ -9,6 +9,7 @@
 #
 # Prerequisites:
 # - CloudNative-PG operator installed
+# - redis-operator installed (or set redis.operator.enabled=true)
 # - Gateway API CRDs installed
 #
 # Install (from helm directory):
@@ -79,13 +80,13 @@ postgresql:
   storage:
     size: "10Gi"
 
-# Standalone Redis
+# Standalone Redis (via redis-operator)
 redis:
   enabled: true
   architecture: standalone
   auth:
     enabled: true
-  persistence:
+  storage:
     size: "5Gi"
 
 # Standard storage sizes

@@ -1338,38 +1338,52 @@ postgresql:
   # -- Affinity rules for PostgreSQL pods
   affinity: {}
 
-# @section Redis parameters (CloudPirates)
-# See: https://github.com/cloudpirates/helm-charts
+# @section Redis parameters (OT-CONTAINER-KIT redis-operator)
+# See: https://github.com/OT-CONTAINER-KIT/redis-operator
 
 redis:
-  # -- Enable Redis subchart
+  # -- Enable Redis deployment via redis-operator CRDs
   enabled: true
-  # -- Redis architecture: standalone or replication
+  operator:
+    # -- Install redis-operator via this chart (set false if already installed)
+    enabled: false
+  # -- Redis mode: standalone or replication
   architecture: standalone
+  # -- Redis version
+  version: "7.2"
+  # -- Redis image
+  image: redis:7.2-alpine
 
   auth:
     # -- Enable Redis authentication
     enabled: true
     # -- Redis password (auto-generated if empty)
     password: ""
-    # -- Use existing secret for password
+    # -- Use existing secret for Redis password
     existingSecret: ""
     # -- Key in existingSecret containing the password
-    existingSecretPasswordKey: "redis-password"
+    existingSecretKey: "password"
 
-  persistence:
-    # -- Enable Redis persistence
-    enabled: true
+  storage:
     # -- Persistence storage size
     size: "5Gi"
     # -- Storage class
     storageClass: ""
 
+  # -- Replication settings (when architecture=replication)
+  replication:
+    # -- Total replicas (1 leader + N-1 followers)
+    size: 3
+
   sentinel:
     # -- Enable Sentinel for HA (requires architecture: replication)
     enabled: false
-    # -- Sentinel quorum
-    quorum: 2
+    # -- Number of Sentinel instances
+    size: 3
+
+  exporter:
+    # -- Enable Redis metrics exporter sidecar
+    enabled: false
 
   resources:
     requests:
@@ -1390,34 +1404,31 @@ redis:
   # -- Affinity rules for Redis pods
   affinity: {}
 
-# @section RabbitMQ parameters (CloudPirates)
+# @section RabbitMQ parameters (rabbitmq/cluster-operator)
 # Enable when broker.type=rabbitmq and broker.rabbitmq.internal=true
-# See: https://github.com/cloudpirates/helm-charts
+# Requires rabbitmq-cluster-operator to be pre-installed:
+#   kubectl apply -f https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml
+# See: https://www.rabbitmq.com/kubernetes/operator/operator-overview
 
 rabbitmq:
-  # -- Enable RabbitMQ subchart
+  # -- Enable RabbitMQ deployment via RabbitmqCluster CRD
   enabled: false
-
-  auth:
-    # -- RabbitMQ username
-    username: "intelowl"
-    # -- RabbitMQ password (auto-generated if empty)
-    password: ""
-    # -- Use existing secret for credentials
-    existingSecret: ""
-    # -- Key in existingSecret containing the password (CloudPirates chart uses "password")
-    existingSecretPasswordKey: "password"
-
-  # -- RabbitMQ virtual host
-  vhost: "/"
+  operator:
+    # -- Install rabbitmq-cluster-operator via this chart (set false if already installed)
+    enabled: false
+  # -- Number of RabbitMQ replicas (use odd numbers: 1, 3, 5)
+  replicas: 1
+  # -- RabbitMQ image
+  image: rabbitmq:4.1.3-management
 
   persistence:
-    # -- Enable RabbitMQ persistence
-    enabled: true
     # -- Persistence storage size
     size: "5Gi"
     # -- Storage class
     storageClass: ""
+
+  # -- Additional RabbitMQ configuration (rabbitmq.conf format)
+  rabbitmqConfig: ""
 
   resources:
     requests:
@@ -1431,13 +1442,6 @@ rabbitmq:
       # -- CPU limit for RabbitMQ
       cpu: "500m"
 
-  management:
-    # -- Enable RabbitMQ management plugin
-    enabled: true
-
-  # -- Node selector for RabbitMQ pods
-  nodeSelector: {}
-  # -- Tolerations for RabbitMQ pods
-  tolerations: []
-  # -- Affinity rules for RabbitMQ pods
-  affinity: {}
+  service:
+    # -- RabbitMQ service type
+    type: ClusterIP

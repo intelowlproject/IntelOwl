@@ -75,13 +75,18 @@ Database:
 Message Broker:
 {{- if eq .Values.broker.type "redis" }}
 {{- if .Values.broker.redis.internal }}
-  - Redis (CloudPirates): {{ .Values.redis.architecture | default "standalone" }}
+  - Redis (redis-operator): {{ .Values.redis.architecture | default "standalone" }}
     Service: {{ include "intelowl.redisHost" . }}
 {{- else }}
   - Redis (External): {{ .Values.broker.redis.external.host }}:{{ .Values.broker.redis.external.port }}
 {{- end }}
 {{- else if eq .Values.broker.type "rabbitmq" }}
-  - RabbitMQ: {{ .Values.broker.rabbitmq.host }}:{{ .Values.broker.rabbitmq.port }}
+{{- if .Values.broker.rabbitmq.internal }}
+  - RabbitMQ (cluster-operator): {{ .Values.rabbitmq.replicas }} replica(s)
+    Service: {{ include "intelowl.rabbitmqHost" . }}
+{{- else }}
+  - RabbitMQ (External): {{ .Values.broker.rabbitmq.external.host }}:{{ .Values.broker.rabbitmq.external.port }}
+{{- end }}
 {{- else if eq .Values.broker.type "sqs" }}
   - AWS SQS: {{ .Values.broker.sqs.region }}
 {{- end }}
@@ -173,6 +178,27 @@ CloudNative-PG Operator:
   Make sure CloudNative-PG operator is installed:
     helm repo add cnpg https://cloudnative-pg.github.io/charts
     helm install cnpg cnpg/cloudnative-pg -n cnpg-system --create-namespace
+  {{- end }}
+{{- end }}
+
+{{- if .Values.redis.enabled }}
+Redis Operator (OT-CONTAINER-KIT):
+  {{- if .Values.redis.operator.enabled }}
+  The redis-operator is being installed by this chart.
+  {{- else }}
+  Make sure redis-operator is installed:
+    helm repo add ot-helm https://ot-container-kit.github.io/helm-charts/
+    helm install redis-operator ot-helm/redis-operator -n redis-operator --create-namespace
+  {{- end }}
+{{- end }}
+
+{{- if .Values.rabbitmq.enabled }}
+RabbitMQ Cluster Operator:
+  {{- if .Values.rabbitmq.operator.enabled }}
+  The rabbitmq-cluster-operator is being installed by this chart.
+  {{- else }}
+  Make sure rabbitmq-cluster-operator is installed:
+    helm install rabbitmq-operator oci://registry-1.docker.io/bitnamicharts/rabbitmq-cluster-operator -n rabbitmq-system --create-namespace
   {{- end }}
 {{- end }}
 

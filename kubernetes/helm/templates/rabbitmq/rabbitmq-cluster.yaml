@@ -1,0 +1,33 @@
+{{- if .Values.rabbitmq.enabled }}
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: {{ include "intelowl.fullname" . }}-rabbitmq
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: rabbitmq
+spec:
+  replicas: {{ .Values.rabbitmq.replicas }}
+  image: {{ .Values.rabbitmq.image | quote }}
+  resources:
+    {{- toYaml .Values.rabbitmq.resources | nindent 4 }}
+  persistence:
+    storage: {{ .Values.rabbitmq.persistence.size }}
+    {{- if .Values.rabbitmq.persistence.storageClass }}
+    storageClassName: {{ .Values.rabbitmq.persistence.storageClass | quote }}
+    {{- end }}
+  {{- if .Values.rabbitmq.rabbitmqConfig }}
+  rabbitmq:
+    additionalConfig: |
+      {{- .Values.rabbitmq.rabbitmqConfig | nindent 6 }}
+  {{- end }}
+  service:
+    type: {{ .Values.rabbitmq.service.type }}
+  override:
+    statefulSet:
+      spec:
+        template:
+          spec:
+            containers: []
+{{- end }}

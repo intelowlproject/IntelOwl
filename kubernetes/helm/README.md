@@ -30,6 +30,38 @@ Alternatively, enable operator installation via the chart:
 helm install intelowl ./intelowl-helm --set postgresql.operator.enabled=true
 ```
 
+### Redis Operator (Required for internal Redis)
+
+The chart uses [OT-CONTAINER-KIT redis-operator](https://github.com/OT-CONTAINER-KIT/redis-operator) for Redis. Install the operator before deploying:
+
+```bash
+helm repo add ot-helm https://ot-container-kit.github.io/helm-charts/
+helm repo update
+
+helm install redis-operator ot-helm/redis-operator -n redis-operator --create-namespace
+```
+
+Alternatively, enable operator installation via the chart:
+
+```bash
+helm install intelowl ./intelowl-helm --set redis.operator.enabled=true
+```
+
+### RabbitMQ Cluster Operator (Required if using RabbitMQ)
+
+If using RabbitMQ as the message broker (`broker.type=rabbitmq`), install the [rabbitmq-cluster-operator](https://github.com/rabbitmq/cluster-operator) first:
+
+```bash
+helm install rabbitmq-operator oci://registry-1.docker.io/bitnamicharts/rabbitmq-cluster-operator \
+  -n rabbitmq-system --create-namespace
+```
+
+Alternatively, enable operator installation via the chart:
+
+```bash
+helm install intelowl ./intelowl-helm --set rabbitmq.operator.enabled=true
+```
+
 ### Gateway API (Required for Gateway networking type)
 
 If using Gateway API (default), install the CRDs and a Gateway provider:
@@ -855,50 +887,49 @@ Kubernetes: `>=1.23.0-0`
 | postgresql.walStorage.size                         | string | `"2Gi"`                               | WAL storage size                                                                           |
 | postgresql.walStorage.storageClass                 | string | `""`                                  | WAL storage class                                                                          |
 
-### Redis parameters (CloudPirates)
+### Redis parameters (redis-operator)
 
-| Key                                  | Type   | Default            | Description                                                 |
-| ------------------------------------ | ------ | ------------------ | ----------------------------------------------------------- |
-| redis.affinity                       | object | `{}`               | Affinity rules for Redis pods                               |
-| redis.architecture                   | string | `"standalone"`     | Redis architecture: standalone or replication               |
-| redis.auth.enabled                   | bool   | `true`             | Enable Redis authentication                                 |
-| redis.auth.existingSecret            | string | `""`               | Use existing secret for password                            |
-| redis.auth.existingSecretPasswordKey | string | `"redis-password"` | Key in existingSecret containing the password               |
-| redis.auth.password                  | string | `""`               | Redis password (auto-generated if empty)                    |
-| redis.enabled                        | bool   | `true`             | Enable Redis subchart                                       |
-| redis.nodeSelector                   | object | `{}`               | Node selector for Redis pods                                |
-| redis.persistence.enabled            | bool   | `true`             | Enable Redis persistence                                    |
-| redis.persistence.size               | string | `"5Gi"`            | Persistence storage size                                    |
-| redis.persistence.storageClass       | string | `""`               | Storage class                                               |
-| redis.resources.limits.cpu           | string | `"500m"`           | CPU limit for Redis                                         |
-| redis.resources.limits.memory        | string | `"512Mi"`          | Memory limit for Redis                                      |
-| redis.resources.requests.cpu         | string | `"100m"`           | CPU request for Redis                                       |
-| redis.resources.requests.memory      | string | `"128Mi"`          | Memory request for Redis                                    |
-| redis.sentinel.enabled               | bool   | `false`            | Enable Sentinel for HA (requires architecture: replication) |
-| redis.sentinel.quorum                | int    | `2`                | Sentinel quorum                                             |
-| redis.tolerations                    | list   | `[]`               | Tolerations for Redis pods                                  |
+| Key                          | Type   | Default            | Description                                                      |
+| ---------------------------- | ------ | ------------------ | ---------------------------------------------------------------- |
+| redis.enabled                | bool   | `true`             | Enable Redis deployment via redis-operator CRDs                  |
+| redis.operator.enabled       | bool   | `false`            | Install redis-operator via this chart (set false if already installed) |
+| redis.architecture           | string | `"standalone"`     | Redis mode: standalone or replication                            |
+| redis.version                | string | `"7.2"`            | Redis version                                                    |
+| redis.image                  | string | `"redis:7.2-alpine"` | Redis image                                                   |
+| redis.auth.enabled           | bool   | `true`             | Enable Redis authentication                                      |
+| redis.auth.password          | string | `""`               | Redis password (auto-generated if empty)                         |
+| redis.auth.existingSecret    | string | `""`               | Use existing secret for Redis password                           |
+| redis.auth.existingSecretKey | string | `"password"`       | Key in existingSecret containing the password                    |
+| redis.storage.size           | string | `"5Gi"`            | Persistence storage size                                         |
+| redis.storage.storageClass   | string | `""`               | Storage class                                                    |
+| redis.replication.size       | int    | `3`                | Total replicas for replication mode (1 leader + N-1 followers)   |
+| redis.sentinel.enabled       | bool   | `false`            | Enable Sentinel for HA (requires architecture: replication)      |
+| redis.sentinel.size          | int    | `3`                | Number of Sentinel instances                                     |
+| redis.exporter.enabled       | bool   | `false`            | Enable Redis metrics exporter sidecar                            |
+| redis.resources.limits.cpu   | string | `"500m"`           | CPU limit for Redis                                              |
+| redis.resources.limits.memory | string | `"512Mi"`         | Memory limit for Redis                                           |
+| redis.resources.requests.cpu | string | `"100m"`           | CPU request for Redis                                            |
+| redis.resources.requests.memory | string | `"128Mi"`       | Memory request for Redis                                         |
+| redis.nodeSelector           | object | `{}`               | Node selector for Redis pods                                     |
+| redis.tolerations            | list   | `[]`               | Tolerations for Redis pods                                       |
+| redis.affinity               | object | `{}`               | Affinity rules for Redis pods                                    |
 
-### RabbitMQ parameters (CloudPirates)
+### RabbitMQ parameters (rabbitmq-cluster-operator)
 
-| Key                                     | Type   | Default      | Description                                                                        |
-| --------------------------------------- | ------ | ------------ | ---------------------------------------------------------------------------------- |
-| rabbitmq.affinity                       | object | `{}`         | Affinity rules for RabbitMQ pods                                                   |
-| rabbitmq.auth.existingSecret            | string | `""`         | Use existing secret for credentials                                                |
-| rabbitmq.auth.existingSecretPasswordKey | string | `"password"` | Key in existingSecret containing the password (CloudPirates chart uses "password") |
-| rabbitmq.auth.password                  | string | `""`         | RabbitMQ password (auto-generated if empty)                                        |
-| rabbitmq.auth.username                  | string | `"intelowl"` | RabbitMQ username                                                                  |
-| rabbitmq.enabled                        | bool   | `false`      | Enable RabbitMQ subchart                                                           |
-| rabbitmq.management.enabled             | bool   | `true`       | Enable RabbitMQ management plugin                                                  |
-| rabbitmq.nodeSelector                   | object | `{}`         | Node selector for RabbitMQ pods                                                    |
-| rabbitmq.persistence.enabled            | bool   | `true`       | Enable RabbitMQ persistence                                                        |
-| rabbitmq.persistence.size               | string | `"5Gi"`      | Persistence storage size                                                           |
-| rabbitmq.persistence.storageClass       | string | `""`         | Storage class                                                                      |
-| rabbitmq.resources.limits.cpu           | string | `"500m"`     | CPU limit for RabbitMQ                                                             |
-| rabbitmq.resources.limits.memory        | string | `"1Gi"`      | Memory limit for RabbitMQ                                                          |
-| rabbitmq.resources.requests.cpu         | string | `"100m"`     | CPU request for RabbitMQ                                                           |
-| rabbitmq.resources.requests.memory      | string | `"256Mi"`    | Memory request for RabbitMQ                                                        |
-| rabbitmq.tolerations                    | list   | `[]`         | Tolerations for RabbitMQ pods                                                      |
-| rabbitmq.vhost                          | string | `"/"`        | RabbitMQ virtual host                                                              |
+| Key                              | Type   | Default                       | Description                                       |
+| -------------------------------- | ------ | ----------------------------- | ------------------------------------------------- |
+| rabbitmq.enabled                 | bool   | `false`                       | Enable RabbitMQ deployment via RabbitmqCluster CRD |
+| rabbitmq.operator.enabled        | bool   | `false`                       | Install rabbitmq-cluster-operator via this chart (set false if already installed) |
+| rabbitmq.replicas                | int    | `1`                           | Number of RabbitMQ replicas (use odd numbers)      |
+| rabbitmq.image                   | string | `"rabbitmq:4.1.3-management"` | RabbitMQ image                                    |
+| rabbitmq.persistence.size        | string | `"5Gi"`                       | Persistence storage size                           |
+| rabbitmq.persistence.storageClass | string | `""`                         | Storage class                                      |
+| rabbitmq.rabbitmqConfig          | string | `""`                          | Additional RabbitMQ configuration (rabbitmq.conf)  |
+| rabbitmq.resources.limits.cpu    | string | `"500m"`                      | CPU limit for RabbitMQ                             |
+| rabbitmq.resources.limits.memory | string | `"1Gi"`                       | Memory limit for RabbitMQ                          |
+| rabbitmq.resources.requests.cpu  | string | `"100m"`                      | CPU request for RabbitMQ                           |
+| rabbitmq.resources.requests.memory | string | `"256Mi"`                   | Memory request for RabbitMQ                        |
+| rabbitmq.service.type            | string | `"ClusterIP"`                 | RabbitMQ service type                              |
 
 ## Examples
 

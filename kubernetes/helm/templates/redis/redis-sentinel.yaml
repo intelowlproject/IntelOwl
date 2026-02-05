@@ -1,0 +1,23 @@
+{{- if and .Values.redis.enabled (eq .Values.redis.architecture "replication") .Values.redis.sentinel.enabled }}
+apiVersion: redis.redis.opstreelabs.in/v1beta2
+kind: RedisSentinel
+metadata:
+  name: {{ include "intelowl.fullname" . }}-redis-sentinel
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: redis-sentinel
+spec:
+  clusterSize: {{ .Values.redis.sentinel.size }}
+  kubernetesConfig:
+    image: {{ .Values.redis.image | quote }}
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "50m"
+      limits:
+        memory: "128Mi"
+        cpu: "100m"
+  redisSentinelConfig:
+    redisReplicationName: {{ include "intelowl.fullname" . }}-redis
+{{- end }}

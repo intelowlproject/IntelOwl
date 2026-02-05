@@ -12,6 +12,7 @@
 #
 # Prerequisites:
 # - CloudNative-PG operator installed
+# - redis-operator installed (or set redis.operator.enabled=true)
 # - Gateway API CRDs installed
 # - Gateway controller (nginx-gateway-fabric) installed
 # - StorageClass with ReadWriteMany support
@@ -154,17 +155,19 @@ postgresql:
       memory: "8Gi"
       cpu: "4"
 
-# Redis with replication
+# Redis with replication (via redis-operator)
 redis:
   enabled: true
   architecture: replication
   auth:
     enabled: true
-  persistence:
+  storage:
     size: "10Gi"
+  replication:
+    size: 3
   sentinel:
     enabled: true
-    quorum: 2
+    size: 3
 
 # Production storage sizes
 storage:

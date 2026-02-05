@@ -3,6 +3,9 @@
 #
 # Prerequisites:
 # - CloudNative-PG operator installed
+# - redis-operator installed (or set redis.operator.enabled=true)
+# - rabbitmq-cluster-operator installed (or set rabbitmq.operator.enabled=true):
+#     helm install rabbitmq-operator oci://registry-1.docker.io/bitnamicharts/rabbitmq-cluster-operator -n rabbitmq-system --create-namespace
 # - Gateway API CRDs installed
 #
 # Install (from helm directory):
@@ -50,27 +53,22 @@ broker:
   rabbitmq:
     internal: true
 
-# Redis (still needed for result backend and websockets)
+# Redis (still needed for result backend and websockets, via redis-operator)
 redis:
   enabled: true
   architecture: standalone
   auth:
     enabled: true
-  persistence:
+  storage:
     size: "5Gi"
 
-# RabbitMQ configuration
+# RabbitMQ configuration (via rabbitmq-cluster-operator CRD)
 rabbitmq:
   enabled: true
-  auth:
-    username: "intelowl"
-    # Password will be auto-generated if not provided
-    password: ""
-  vhost: "/"
+  replicas: 1
+  image: rabbitmq:4.1.3-management
   persistence:
     size: "5Gi"
-  management:
-    enabled: true
   resources:
     requests:
       memory: "256Mi"

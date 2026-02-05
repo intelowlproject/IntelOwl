@@ -219,7 +219,8 @@ Return the Gateway controller name based on provider
 
 {{/*
 Return the Redis host
-For CloudPirates Redis, the service is named <release>-redis
+For redis-operator standalone: service is <name>-redis
+For redis-operator replication: service is <name>-redis
 */}}
 {{- define "intelowl.redisHost" -}}
 {{- if .Values.broker.redis.internal }}
@@ -242,13 +243,14 @@ Return the Redis port
 
 {{/*
 Return the Redis secret name
+For redis-operator: uses the manually created secret <fullname>-redis-secret
 */}}
 {{- define "intelowl.redisSecretName" -}}
 {{- if .Values.broker.redis.internal }}
 {{- if .Values.redis.auth.existingSecret }}
 {{- .Values.redis.auth.existingSecret }}
 {{- else }}
-{{- printf "%s-redis" (include "intelowl.fullname" .) }}
+{{- printf "%s-redis-secret" (include "intelowl.fullname" .) }}
 {{- end }}
 {{- else }}
 {{- if .Values.broker.redis.external.existingSecret }}
@@ -261,10 +263,11 @@ Return the Redis secret name
 
 {{/*
 Return the Redis password key in secret
+For redis-operator: key is "password"
 */}}
 {{- define "intelowl.redisPasswordKey" -}}
 {{- if .Values.broker.redis.internal }}
-{{- print "redis-password" }}
+{{- .Values.redis.auth.existingSecretKey | default "password" }}
 {{- else }}
 {{- print "redis-password" }}
 {{- end }}
@@ -272,7 +275,7 @@ Return the Redis password key in secret
 
 {{/*
 Return the RabbitMQ host
-For CloudPirates RabbitMQ, the service is named <release>-rabbitmq
+For rabbitmq-cluster-operator: service is <name>-rabbitmq
 */}}
 {{- define "intelowl.rabbitmqHost" -}}
 {{- if .Values.broker.rabbitmq.internal }}
@@ -295,10 +298,11 @@ Return the RabbitMQ port
 
 {{/*
 Return the RabbitMQ user
+For rabbitmq-cluster-operator: credentials are in <name>-rabbitmq-default-user secret, key "username"
 */}}
 {{- define "intelowl.rabbitmqUser" -}}
 {{- if .Values.broker.rabbitmq.internal }}
-{{- .Values.rabbitmq.auth.username | default "intelowl" }}
+{{- print "$(RABBITMQ_USER)" }}
 {{- else }}
 {{- .Values.broker.rabbitmq.external.user | default "guest" }}
 {{- end }}
@@ -306,10 +310,11 @@ Return the RabbitMQ user
 
 {{/*
 Return the RabbitMQ vhost
+For rabbitmq-cluster-operator: default vhost is "/"
 */}}
 {{- define "intelowl.rabbitmqVhost" -}}
 {{- if .Values.broker.rabbitmq.internal }}
-{{- .Values.rabbitmq.vhost | default "/" }}
+{{- print "/" }}
 {{- else }}
 {{- .Values.broker.rabbitmq.external.vhost | default "/" }}
 {{- end }}
@@ -317,14 +322,11 @@ Return the RabbitMQ vhost
 
 {{/*
 Return the RabbitMQ secret name
+For rabbitmq-cluster-operator: auto-created secret is <name>-rabbitmq-default-user
 */}}
 {{- define "intelowl.rabbitmqSecretName" -}}
 {{- if .Values.broker.rabbitmq.internal }}
-{{- if .Values.rabbitmq.auth.existingSecret }}
-{{- .Values.rabbitmq.auth.existingSecret }}
-{{- else }}
-{{- printf "%s-rabbitmq" (include "intelowl.fullname" .) }}
-{{- end }}
+{{- printf "%s-rabbitmq-default-user" (include "intelowl.fullname" .) }}
 {{- else }}
 {{- if .Values.broker.rabbitmq.external.existingSecret }}
 {{- .Values.broker.rabbitmq.external.existingSecret }}
@@ -336,10 +338,11 @@ Return the RabbitMQ secret name
 
 {{/*
 Return the RabbitMQ password key in secret
+For rabbitmq-cluster-operator: key is "password"
 */}}
 {{- define "intelowl.rabbitmqPasswordKey" -}}
 {{- if .Values.broker.rabbitmq.internal }}
-{{- .Values.rabbitmq.auth.existingSecretPasswordKey | default "password" }}
+{{- print "password" }}
 {{- else }}
 {{- print "rabbitmq-password" }}
 {{- end }}
@@ -415,6 +418,13 @@ Common environment variables for all IntelOwl services
       name: {{ include "intelowl.redisSecretName" . }}
       key: {{ include "intelowl.redisPasswordKey" . }}
 {{- if eq .Values.broker.type "rabbitmq" }}
+{{- if .Values.broker.rabbitmq.internal }}
+- name: RABBITMQ_USER
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "intelowl.rabbitmqSecretName" . }}
+      key: username
+{{- end }}
 - name: RABBITMQ_PASSWORD
   valueFrom:
     secretKeyRef:

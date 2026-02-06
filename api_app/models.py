@@ -70,9 +70,6 @@ from intel_owl.celery import get_queue_name
 logger = logging.getLogger(__name__)
 
 
-# UpdateCheckStatus (replace the existing class in api_app/models.py)
-
-
 class UpdateCheckStatus(models.Model):
     """
     Stores global state for IntelOwl update checks.

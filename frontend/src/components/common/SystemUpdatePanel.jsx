@@ -1,16 +1,28 @@
 import React from "react";
 import useSystemUpdateStatus from "../../hooks/useSystemUpdateStatus";
 
-function SystemUpdatePanel() {
+function SystemUpdatePanel({ compact = false }) {
   const { data, loading, error } = useSystemUpdateStatus();
 
-  if (loading) return <div style={styles.info}>Checking for updates...</div>;
-  if (error) return <div style={styles.error}>Unable to check updates</div>;
-  if (!data) return null;
+  if (loading || error) return null;
+  if (!data?.update_available) return null;
 
   const lastChecked = data.last_checked_at
     ? new Date(data.last_checked_at).toLocaleString()
     : "Never";
+
+  if (compact) {
+    return (
+      <div className="system-update-compact">
+        <strong>A new system update is available.</strong>
+        <span>
+          {" "}
+          Current: {data.current_version || "Unknown"} → Latest:{" "}
+          {data.latest_version || "Unknown"}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.card}>
@@ -31,11 +43,7 @@ function SystemUpdatePanel() {
         <span>{lastChecked}</span>
       </div>
 
-      {data.update_available ? (
-        <div style={styles.updateBox}>A new system update is available!</div>
-      ) : (
-        <div style={styles.okBox}>Your system is up to date</div>
-      )}
+      <div style={styles.updateBox}>A new system update is available!</div>
     </div>
   );
 }
@@ -61,13 +69,6 @@ const styles = {
     marginTop: "12px",
     padding: "10px",
     background: "#ff9800",
-    borderRadius: "6px",
-    fontWeight: "bold",
-  },
-  okBox: {
-    marginTop: "12px",
-    padding: "10px",
-    background: "#4caf50",
     borderRadius: "6px",
     fontWeight: "bold",
   },

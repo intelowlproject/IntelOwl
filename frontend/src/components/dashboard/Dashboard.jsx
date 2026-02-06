@@ -19,7 +19,6 @@ import {
 
 import { useGuideContext } from "../../contexts/GuideContext";
 import { useOrganizationStore } from "../../stores/useOrganizationStore";
-import SystemUpdatePanel from "../common/SystemUpdatePanel";
 
 const typeRow = [
   ["JobTypeBarChart", "Job: Type", JobTypeBarChart],
@@ -111,12 +110,6 @@ export default function Dashboard() {
           />
         </div>
       </div>
-
-      <Row className="mb-3">
-        <Col md={12}>
-          <SystemUpdatePanel />
-        </Col>
-      </Row>
 
       <Row className="d-flex flex-wrap flex-lg-nowrap">
         <Col key="JobStatusBarChart" md={12}>

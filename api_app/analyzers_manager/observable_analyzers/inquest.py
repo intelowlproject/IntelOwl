@@ -8,10 +8,7 @@ from typing import Dict
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.analyzers_manager.exceptions import (
-    AnalyzerConfigurationException,
-    AnalyzerRunException,
-)
+from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException, AnalyzerRunException
 from api_app.choices import Classification
 
 logger = logging.getLogger(__name__)
@@ -43,12 +40,40 @@ class InQuest(ObservableAnalyzer):
         return hash_type
 
     def type_of_generic(self):
-        if re.match(r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$", self.observable_name):
-            type_ = "email"
-        else:
-            # TODO: This should be validated more thoroughly
-            type_ = "filename"
-        return type_
+        """
+        Determine the type of a generic observable.
+
+        Supported types: email, filename, registry, xmpid
+        """
+        # Email pattern - comprehensive regex supporting TLDs of any length and subdomains
+        email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+        if re.match(email_pattern, self.observable_name):
+            return "email"
+
+        # Windows Registry key pattern (HKEY_*, HKLM, HKCU, etc.)
+        registry_pattern = r"^(HKEY_|HK[A-Z]{2,})"
+        if re.match(registry_pattern, self.observable_name, re.IGNORECASE):
+            return "registry"
+
+        # XMP ID pattern (UUID format used in Adobe metadata)
+        xmpid_pattern = (
+            r"^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-"
+            r"[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+        )
+        if re.match(xmpid_pattern, self.observable_name):
+            return "xmpid"
+
+        # Filename pattern - must have an extension, no path separators
+        filename_pattern = r"^[\w\-. ]+\.[a-zA-Z0-9]{1,10}$"
+        if re.match(filename_pattern, self.observable_name):
+            return "filename"
+
+        # Default to filename with warning for unrecognized patterns
+        logger.warning(
+            f"Could not determine type of generic observable: "
+            f"'{self.observable_name}'. Defaulting to 'filename'."
+        )
+        return "filename"
 
     def run(self):
         headers = {"Content-Type": "application/json"}

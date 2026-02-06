@@ -48,12 +48,12 @@ class MachoInfoTest(BaseFileAnalyzerTest):
         return [
             # Mock machofile.MachO class
             patch(
-                "api_app.analyzers_manager.file_analyzers.macho_info.machofile.MachO",
+                "machofile.MachO",
                 return_value=mock_macho,
             ),
             # Mock machofile.UniversalMachO class (not used in happy path test but good to mock)
             patch(
-                "api_app.analyzers_manager.file_analyzers.macho_info.machofile.UniversalMachO",
+                "machofile.UniversalMachO",
             ),
         ]
 

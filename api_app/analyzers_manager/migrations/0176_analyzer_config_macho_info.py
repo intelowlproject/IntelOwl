@@ -8,12 +8,12 @@ from django.db.models.fields.related_descriptors import (
 )
 
 plugin = {
-    "name": "MachoFile",
+    "name": "MachoInfo",
     "python_module": {
         "module": "macho_info.MachoInfo",
         "base_path": "api_app.analyzers_manager.file_analyzers",
     },
-    "description": "Parse Mach-O binary files (macOS/iOS executables) using machofile library. Extracts headers, segments, dylibs, imports, exports, hashes, and code signatures.",
+    "description": "Parse Mach-O binary files (macOS/iOS executables) using [machofile](https://github.com/pstirparo/machofile) library. Extracts headers, segments, dylibs, imports, exports, hashes and code signatures.",
     "disabled": False,
     "soft_time_limit": 60,
     "routing_key": "local",
@@ -24,6 +24,9 @@ plugin = {
     "observable_supported": [],
     "supported_filetypes": [
         "application/x-mach-binary",
+        "application/mac-binary",
+        "application/x-binary",
+        "application/x-executable",
     ],
     "run_hash": False,
     "run_hash_type": "",
@@ -81,7 +84,7 @@ def _create_object(Model, data):
         else:
             no_mtm[field] = value
     try:
-        o = Model.objects.get(**no_mtm)
+        Model.objects.get(**no_mtm)
     except Model.DoesNotExist:
         o = Model(**no_mtm)
         o.full_clean()

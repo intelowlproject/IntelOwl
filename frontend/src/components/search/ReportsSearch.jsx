@@ -156,7 +156,9 @@ export default function ReportsSearch() {
               Advanced search in plugin reports of the performed analysis.
             </span>
           </Row>
-          <Row id="search-input-fields-first-row d-flex flex-wrap">
+          <Row 
+            id="search-input-fields-first-row"
+            className="d-flex flex-wrap">
             <Col xxl={4} sm={12} className="d-flex align-items-center mt-4">
               <Label className="col-3 fw-bold mb-0" for="search__type">
                 Type:
@@ -252,7 +254,7 @@ export default function ReportsSearch() {
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                       invalid={formik.errors.startTime}
-                      className="col-6"
+                      className="flex-grow-1 w-100"
                     />
                   </div>
                   <div className="d-flex align-items-center">
@@ -268,7 +270,7 @@ export default function ReportsSearch() {
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                       invalid={formik.errors.startTime}
-                      className="col-6"
+                      className="flex-grow-1 w-100"
                     />
                   </div>
                 </div>
@@ -300,7 +302,7 @@ export default function ReportsSearch() {
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                       invalid={formik.errors.endTime}
-                      className="col-6"
+                      className="flex-grow-1 w-100"
                     />
                   </div>
                   <div className="d-flex align-items-center">
@@ -316,7 +318,7 @@ export default function ReportsSearch() {
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                       invalid={formik.errors.endTime}
-                      className="col-6"
+                      className="flex-grow-1 w-100"
                     />
                   </div>
                 </div>

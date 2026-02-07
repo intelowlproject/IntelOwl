@@ -5,9 +5,12 @@ import { TLPColors } from "../../constants/colorConst";
 import { TLPDescriptions } from "../../constants/miscConst";
 import { TlpChoices } from "../../constants/advancedSettingsConst";
 
+let idCounter = 0;
+
 export function TLPTag(props) {
   const { value, ...rest } = props;
-  const badgeId = `tlptag-badge__${value}`;
+  const uniqueId = React.useRef(idCounter++).current;
+  const badgeId = `tlptag-badge__${value}__${uniqueId}`;
   const color = TLPColors?.[value] || "#dfe1e2";
   const tooltipText = TLPDescriptions?.[value] || "invalid";
   const textColorMap = {

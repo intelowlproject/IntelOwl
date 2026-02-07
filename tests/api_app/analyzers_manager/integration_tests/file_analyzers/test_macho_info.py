@@ -11,7 +11,7 @@ class MachoInfoTestCase(CustomTestCase):
         """Test MachoFile analyzer with a real sample"""
         report = self._analyze_sample(
             "macho_sample",
-            "80cc133a33786ceeacbd3acacd025dfc",
+            "e4292266cfed6154c231f566a4b96c48",
             # not hardcoded, MD5 of tested data
             "application/x-mach-binary",
             "MachoFile",

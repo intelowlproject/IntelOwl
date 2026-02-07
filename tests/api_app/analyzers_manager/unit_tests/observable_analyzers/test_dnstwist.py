@@ -33,3 +33,43 @@ class DNStwistTestCase(BaseAnalyzerTest):
             "user_agent": "IntelOwl-Test",
             "nameservers": "8.8.8.8,8.8.4.4",
         }
+
+    def test_run_with_ssl_error(self):
+        import ssl
+
+        from api_app.analyzers_manager.models import AnalyzerConfig
+        from api_app.choices import Classification
+
+        config = AnalyzerConfig.objects.filter(name="DNStwist").first()
+        analyzer = self._setup_analyzer(config, Classification.DOMAIN, "example.com")
+
+        with patch("dnstwist.run", side_effect=ssl.SSLEOFError("EOF occurred in violation of protocol")):
+            report = analyzer.run()
+            self.assertIn("error", report)
+            self.assertTrue(report["error"].startswith("Network/SSL error"))
+
+    def test_run_with_dns_error(self):
+        import socket
+
+        from api_app.analyzers_manager.models import AnalyzerConfig
+        from api_app.choices import Classification
+
+        config = AnalyzerConfig.objects.filter(name="DNStwist").first()
+        analyzer = self._setup_analyzer(config, Classification.DOMAIN, "example.com")
+
+        with patch("dnstwist.run", side_effect=socket.gaierror(-2, "Name or service not known")):
+            report = analyzer.run()
+            self.assertIn("error", report)
+            self.assertTrue(report["error"].startswith("Network/SSL error"))
+
+    def test_run_with_unexpected_error(self):
+        from api_app.analyzers_manager.models import AnalyzerConfig
+        from api_app.choices import Classification
+
+        config = AnalyzerConfig.objects.filter(name="DNStwist").first()
+        analyzer = self._setup_analyzer(config, Classification.DOMAIN, "example.com")
+
+        with patch("dnstwist.run", side_effect=Exception("Something went wrong")):
+            report = analyzer.run()
+            self.assertIn("error", report)
+            self.assertTrue(report["error"].startswith("Unexpected error"))

@@ -15,6 +15,18 @@ from api_app.analyzers_manager import classes
 from ..dns_responses import dns_resolver_response
 from ..doh_mixin import DoHMixin
 
+<<<<<<< HEAD
+=======
+# Use the official Exception the test runner is designed to catch
+try:
+    from dns.message import ShortHeader
+except ImportError:
+
+    class ShortHeader(Exception):
+        pass
+
+
+>>>>>>> 83324587 (Update api_app/analyzers_manager/observable_analyzers/dns/dns_resolvers/quad9_dns_resolver.py)
 logger = logging.getLogger(__name__)
 
 

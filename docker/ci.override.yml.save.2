@@ -36,27 +36,3 @@ services:
       context: ..
       dockerfile: docker/Dockerfile_nginx
     image: intelowlproject/intelowl_nginx:ci
-services:
-  uwsgi:
-    image: intelowlproject/intelowl:ci
-    env_file:
-      - env_file_app_ci
-
-  daphne:
-    image: intelowlproject/intelowl:ci
-    env_file:
-      - env_file_app_ci
-
-  celery_beat:
-    image: intelowlproject/intelowl:ci
-    env_file:
-      - env_file_app_ci
-
-  celery_worker_default:
-    image: intelowlproject/intelowl:ci
-    env_file:
-      - env_file_app_ci
-
-  nginx:
-    image: intelowlproject/intelowl_nginx:ci
-

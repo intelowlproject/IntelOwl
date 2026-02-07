@@ -35,7 +35,7 @@ class VisualizerConfigViewSetTestCase(AbstractConfigViewSetTestCaseMixin, Custom
                 "disabled": True,
                 "id": visualizer.id,
                 "name": "DNS",
-                "playbooks": ["Dns"],
+                "playbooks": ["DNS"],
                 "python_module": visualizer.python_module.id,
             },
         )

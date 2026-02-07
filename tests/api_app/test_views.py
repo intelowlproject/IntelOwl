@@ -128,7 +128,7 @@ class JobViewSetTests(CustomViewSetTestCase):
                 **{
                     "user": self.superuser,
                     "analyzable": self.analyzable,
-                    "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
+                    "playbook_to_execute": PlaybookConfig.objects.get(name="DNS"),
                     "tlp": Job.TLP.CLEAR.value,
                 }
             )
@@ -144,7 +144,7 @@ class JobViewSetTests(CustomViewSetTestCase):
                 **{
                     "user": self.superuser,
                     "analyzable": self.analyzable3,
-                    "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
+                    "playbook_to_execute": PlaybookConfig.objects.get(name="DNS"),
                     "tlp": Job.TLP.GREEN.value,
                 }
             )
@@ -164,7 +164,7 @@ class JobViewSetTests(CustomViewSetTestCase):
             self.job2.add_child(
                 user=self.superuser,
                 analyzable=self.analyzable,
-                playbook_to_execute=PlaybookConfig.objects.get(name="Dns"),
+                playbook_to_execute=PlaybookConfig.objects.get(name="DNS"),
                 tlp=Job.TLP.AMBER.value,
             )
 
@@ -404,11 +404,11 @@ class JobViewSetTests(CustomViewSetTestCase):
         self.assertEqual(
             resp.json(),
             {
-                "values": ["Dns", "FREE_TO_USE_ANALYZERS"],
+                "values": ["DNS", "FREE_TO_USE_ANALYZERS"],
                 "aggregation": [
                     {
                         "date": "2024-11-28T00:00:00Z",
-                        "Dns": 3,
+                        "DNS": 3,
                         "FREE_TO_USE_ANALYZERS": 2,
                     }
                 ],
@@ -429,7 +429,7 @@ class JobViewSetTests(CustomViewSetTestCase):
                 **{
                     "user": u,
                     "analyzable": self.analyzable,
-                    "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
+                    "playbook_to_execute": PlaybookConfig.objects.get(name="DNS"),
                     "tlp": Job.TLP.CLEAR.value,
                 }
             )

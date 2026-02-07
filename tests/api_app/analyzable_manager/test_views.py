@@ -67,7 +67,7 @@ class TestAnalyzablesViewSet(CustomViewSetTestCase):
         self.job3.add_child(
             user=self.user,
             analyzable=self.an,
-            playbook_to_execute=PlaybookConfig.objects.get(name="Dns"),
+            playbook_to_execute=PlaybookConfig.objects.get(name="DNS"),
             finished_analysis_time=datetime.datetime(2025, 1, 1, tzinfo=datetime.timezone.utc),
             tlp=Job.TLP.AMBER.value,
         )  # check similar investigation works with children

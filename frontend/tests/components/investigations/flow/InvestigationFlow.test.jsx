@@ -5,7 +5,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import { InvestigationFlow } from "../../../../src/components/investigations/flow/InvestigationFlow";
 
-jest.mock("reactflow/dist/style.css", () => {});
+jest.mock("reactflow/dist/style.css", () => { });
 
 describe("test InvestigationFlow", () => {
   // mock needed for testing flow https://reactflow.dev/learn/advanced-use/testing#using-jest
@@ -89,7 +89,7 @@ describe("test InvestigationFlow", () => {
               {
                 pk: 10,
                 analyzed_object_name: "test1.com",
-                playbook: "Dns",
+                playbook: "DNS",
                 status: "reported_without_fails",
                 is_sample: false,
                 children: [],
@@ -124,7 +124,7 @@ describe("test InvestigationFlow", () => {
               {
                 pk: 10,
                 analyzed_object_name: "test1.com",
-                playbook: "Dns",
+                playbook: "DNS",
                 status: "reported_without_fails",
                 is_sample: false,
                 children: [],
@@ -132,7 +132,7 @@ describe("test InvestigationFlow", () => {
               {
                 pk: 20,
                 analyzed_object_name: "test2.com",
-                playbook: "Dns",
+                playbook: "DNS",
                 status: "reported_without_fails",
                 is_sample: false,
                 children: [],
@@ -172,14 +172,14 @@ describe("test InvestigationFlow", () => {
               {
                 pk: 10,
                 analyzed_object_name: "test1.com",
-                playbook: "Dns",
+                playbook: "DNS",
                 status: "reported_without_fails",
                 is_sample: false,
                 children: [
                   {
                     pk: 11,
                     analyzed_object_name: "test11.com",
-                    playbook: "Dns",
+                    playbook: "DNS",
                     status: "reported_without_fails",
                     is_sample: false,
                     children: [],
@@ -257,7 +257,7 @@ describe("test InvestigationFlow", () => {
               {
                 pk: 10,
                 analyzed_object_name: "test1.com",
-                playbook: "Dns",
+                playbook: "DNS",
                 status: "reported_without_fails",
                 received_request_time: "2024-04-03T13:08:45.417245Z",
                 is_sample: false,
@@ -267,7 +267,7 @@ describe("test InvestigationFlow", () => {
                   {
                     pk: 11,
                     analyzed_object_name: "test11.com",
-                    playbook: "Dns",
+                    playbook: "DNS",
                     status: "reported_without_fails",
                     children: [],
                     received_request_time: "2024-04-03T13:09:45.417245Z",
@@ -340,7 +340,7 @@ describe("test InvestigationFlow", () => {
     expect(jobInfo).toBeInTheDocument();
     expect(jobInfo.textContent).toContain("Job:#10");
     expect(jobInfo.textContent).toContain("Name:test1.com");
-    expect(jobInfo.textContent).toContain("Playbook:Dns");
+    expect(jobInfo.textContent).toContain("Playbook:DNS");
     expect(jobInfo.textContent).toContain("Created:");
 
     // observable child node
@@ -381,7 +381,7 @@ describe("test InvestigationFlow", () => {
     expect(secondJobInfo).toBeInTheDocument();
     expect(secondJobInfo.textContent).toContain("Job:#11");
     expect(secondJobInfo.textContent).toContain("Name:test11.com");
-    expect(secondJobInfo.textContent).toContain("Playbook:Dns");
+    expect(secondJobInfo.textContent).toContain("Playbook:DNS");
     expect(jobInfo.textContent).toContain("Created:");
 
     const fileJobNode = container.querySelector("#job-12");

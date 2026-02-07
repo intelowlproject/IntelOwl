@@ -154,7 +154,7 @@ class PlaybookConfigViewSetTestCase(AbstractConfigViewSetTestCaseMixin, CustomVi
     def test_get(self):
         # 1 - existing visualizer
         self.client.force_authenticate(user=self.user)
-        response = self.client.get(f"{self.URL}/Dns")
+        response = self.client.get(f"{self.URL}/DNS")
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(
             response.json(),
@@ -179,7 +179,7 @@ class PlaybookConfigViewSetTestCase(AbstractConfigViewSetTestCaseMixin, CustomVi
                 "for_organization": False,
                 "id": 1,
                 "is_editable": False,
-                "name": "Dns",
+                "name": "DNS",
                 "owner": None,
                 "pivots": [],
                 "runtime_configuration": {
@@ -207,5 +207,5 @@ class PlaybookConfigViewSetTestCase(AbstractConfigViewSetTestCaseMixin, CustomVi
     def test_get_config(self):
         # 1 - existing playbook
         self.client.force_authenticate(user=self.user)
-        response = self.client.get(f"{self.URL}/Dns/plugin_config")
+        response = self.client.get(f"{self.URL}/DNS/plugin_config")
         self.assertEqual(response.status_code, 404, response.content)

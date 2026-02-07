@@ -520,7 +520,7 @@ class ApiViewTests(CustomViewSetTestCase):
             status="reported_without_fails",
             finished_analysis_time=datetime.datetime(2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc)
             - datetime.timedelta(days=5),
-            playbook_requested=PlaybookConfig.objects.get(name="Dns"),
+            playbook_requested=PlaybookConfig.objects.get(name="DNS"),
             runtime_configuration={
                 "analyzers": {"Classic_DNS": {"query_type": "TXT"}},
                 "connectors": {},
@@ -534,7 +534,7 @@ class ApiViewTests(CustomViewSetTestCase):
         new_job = models.Job.objects.get(pk=new_job_id)
         self.assertEqual(new_job.analyzable.name, "test.com")
         self.assertEqual(new_job.tlp, "CLEAR")
-        self.assertEqual(new_job.playbook_requested, PlaybookConfig.objects.get(name="Dns"))
+        self.assertEqual(new_job.playbook_requested, PlaybookConfig.objects.get(name="DNS"))
         self.assertEqual(
             new_job.runtime_configuration,
             {
@@ -658,7 +658,7 @@ class ApiViewTests(CustomViewSetTestCase):
             status="reported_without_fails",
             finished_analysis_time=datetime.datetime(2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc)
             - datetime.timedelta(days=5),
-            playbook_requested=PlaybookConfig.objects.get(name="Dns"),
+            playbook_requested=PlaybookConfig.objects.get(name="DNS"),
             runtime_configuration={
                 "analyzers": {"Classic_DNS": {"query_type": "TXT"}},
                 "connectors": {},

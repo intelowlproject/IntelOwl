@@ -23,11 +23,11 @@ describe("Runtime Configuration Modal test", () => {
         connectors: [],
         playbook: {
           isDisabled: false,
-          value: "Dns",
+          value: "DNS",
           analyzers: ["TEST_ANALYZER"],
           connectors: [],
           label: {},
-          labelDisplay: "Dns",
+          labelDisplay: "DNS",
           tags: [],
           tlp: "AMBER",
           scan_mode: "2",

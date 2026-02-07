@@ -320,23 +320,23 @@ describe("test dashboard's charts", () => {
     useAxios.mockReturnValue([
       {
         data: {
-          values: ["Dns", "FREE_TO_USE_ANALYZERS", "Passive_DNS"],
+          values: ["DNS", "FREE_TO_USE_ANALYZERS", "Passive_DNS"],
           aggregation: [
             {
               date: "2024-11-28T22:00:00Z",
-              Dns: 5,
+              DNS: 5,
               FREE_TO_USE_ANALYZERS: 1,
               Passive_DNS: 3,
             },
             {
               date: "2024-11-29T22:00:00Z",
-              Dns: 1,
+              DNS: 1,
               FREE_TO_USE_ANALYZERS: 0,
               Passive_DNS: 0,
             },
             {
               date: "2024-11-29T23:00:00Z",
-              Dns: 1,
+              DNS: 1,
               FREE_TO_USE_ANALYZERS: 0,
               Passive_DNS: 0,
             },
@@ -367,7 +367,7 @@ describe("test dashboard's charts", () => {
         `${new Date("2024-11-29T23:00:00Z").getDate()}/${new Date("2024-11-29T23:00:00Z").getMonth() + 1}, ${hours}:00`,
       ),
     ).toBeInTheDocument();
-    expect(screen.getByText("Dns")).toBeInTheDocument();
+    expect(screen.getByText("DNS")).toBeInTheDocument();
     expect(screen.getByText("FREE_TO_USE_ANALYZERS")).toBeInTheDocument();
     expect(screen.getByText("Passive_DNS")).toBeInTheDocument();
   });

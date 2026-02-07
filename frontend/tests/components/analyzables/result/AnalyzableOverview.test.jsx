@@ -19,7 +19,7 @@ describe("test AnalyzableOverview", () => {
       data: {
         jobs: [
           {
-            playbook: "Dns",
+            playbook: "DNS",
             id: 13,
             user: "admin",
             date: jobDate,
@@ -216,7 +216,7 @@ describe("test AnalyzableOverview", () => {
     const scannerBadge = container.querySelector("#tag__row0_0");
     expect(scannerBadge).toBeInTheDocument();
     expect(
-      screen.getByRole("cell", { name: "Playbook executed: Dns" }),
+      screen.getByRole("cell", { name: "Playbook executed: DNS" }),
     ).toBeInTheDocument();
     // cell - user event (artifact)
     expect(screen.getByRole("cell", { name: "#6" })).toBeInTheDocument();
@@ -340,7 +340,7 @@ describe("test AnalyzableOverview", () => {
     const scannerBadge = container.querySelector("#tag__row0_0");
     expect(scannerBadge).toBeInTheDocument();
     expect(
-      screen.getByRole("cell", { name: "Playbook executed: Dns" }),
+      screen.getByRole("cell", { name: "Playbook executed: DNS" }),
     ).toBeInTheDocument();
     // cell - user event (artifact)
     expect(screen.getByRole("cell", { name: "#6" })).toBeInTheDocument();

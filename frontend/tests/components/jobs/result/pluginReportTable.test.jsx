@@ -113,7 +113,7 @@ describe("test plugins report table", () => {
             connectors_requested: ["connector1", "connector2"],
             analyzers_to_execute: ["Classic_DNS"],
             connectors_to_execute: ["connector1", "connector2"],
-            visualizers_to_execute: ["IP", "Dns"],
+            visualizers_to_execute: ["IP", "DNS"],
             pivots_to_execute: ["test_pivot"],
           }}
           pluginReports={[

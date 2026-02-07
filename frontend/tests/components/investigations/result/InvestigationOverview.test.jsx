@@ -28,7 +28,7 @@ describe("test InvestigationOverview", () => {
           observable_name: "test10.com",
           file_name: "",
           is_sample: false,
-          playbook: "Dns",
+          playbook: "DNS",
           status: "reported_without_fails",
           children: [],
         },

@@ -21,7 +21,7 @@ describe("Recent Scans test", () => {
       importance: 3,
       observable_name: "test.it",
       pk: 1,
-      playbook: "dns",
+      playbook: "DNS",
       tlp: "AMBER",
       user: "test",
     },
@@ -116,7 +116,7 @@ describe("Recent Scans test", () => {
       expect(firstCardTitle.closest("div").className).toContain("card-header");
       // card body
       const firstCardPlaybook = screen.getByText("Playbook:");
-      expect(firstCardPlaybook.textContent).toBe("Playbook: dns");
+      expect(firstCardPlaybook.textContent).toBe("Playbook: DNS");
       const firstCardTLP = screen.getByText("TLP:");
       expect(firstCardTLP.textContent).toBe("TLP: AMBER");
       const firstCardUser = screen.getByText("User:");
@@ -186,7 +186,7 @@ describe("Recent Scans test", () => {
       expect(secondCardTitle).toBeInTheDocument();
       expect(secondCardTitle.closest("div").className).toContain("card-header");
       const secondCardPlaybook = screen.getAllByText("Playbook:")[1];
-      expect(secondCardPlaybook.textContent).toBe("Playbook: dns");
+      expect(secondCardPlaybook.textContent).toBe("Playbook: DNS");
       const secondCardTLP = screen.getAllByText("TLP:")[1];
       expect(secondCardTLP.textContent).toBe("TLP: AMBER");
       const secondCardUser = screen.getAllByText("User:")[1];
@@ -244,7 +244,7 @@ describe("Recent Scans test", () => {
       expect(firstCardTitle.closest("div").className).toContain("card-header");
       // card body
       const firstCardPlaybook = screen.getByText("Playbook:");
-      expect(firstCardPlaybook.textContent).toBe("Playbook: dns");
+      expect(firstCardPlaybook.textContent).toBe("Playbook: DNS");
       const firstCardTLP = screen.getByText("TLP:");
       expect(firstCardTLP.textContent).toBe("TLP: AMBER");
       const firstCardUser = screen.getByText("User:");

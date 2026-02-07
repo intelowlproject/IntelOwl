@@ -51,10 +51,6 @@ class MachoInfoTest(BaseFileAnalyzerTest):
                 "machofile.MachO",
                 return_value=mock_macho,
             ),
-            # Mock machofile.UniversalMachO class (not used in happy path test but good to mock)
-            patch(
-                "machofile.UniversalMachO",
-            ),
         ]
 
     def get_extra_config(self) -> dict:

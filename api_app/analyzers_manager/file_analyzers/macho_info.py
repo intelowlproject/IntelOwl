@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import machofile
 
@@ -29,30 +29,22 @@ class MachoInfo(FileAnalyzer):
     def update(cls) -> bool:
         return False
 
-    @staticmethod
-    def _get_attr(macho: Any, getter: Optional[str], fallback: Optional[str], formatted: bool = True):
-        """Try getter method first, then fall back to direct attribute."""
-        if getter and hasattr(macho, getter):
-            try:
-                return getattr(macho, getter)(formatted=formatted)
-            except TypeError:
-                return getattr(macho, getter)()
-        if fallback and hasattr(macho, fallback):
-            return getattr(macho, fallback)
-        return None
-
     def _parse_macho(self):
         """Attempts to parse the file as Single or Universal Mach-O."""
         try:
             macho = machofile.MachO(self.filepath)
-            if hasattr(macho, "parse"):
+            try:
                 macho.parse()
+            except AttributeError:
+                pass
             return macho
         except Exception as e:
             try:
                 macho = machofile.UniversalMachO(self.filepath)
-                if hasattr(macho, "parse"):
+                try:
                     macho.parse()
+                except AttributeError:
+                    pass
                 return macho
             except Exception as universal_error:
                 raise AnalyzerRunException(
@@ -62,40 +54,27 @@ class MachoInfo(FileAnalyzer):
 
     def _extract_basic_info(self, macho, results: Dict[str, Any]):
         """Extract basic information like headers and hashes."""
-        if val := self._get_attr(macho, "get_general_info", "general_info"):
-            results["general_info"] = val
-        if val := self._get_attr(macho, "get_macho_header", "header"):
-            results["header"] = val
-        if val := self._get_attr(macho, "get_similarity_hashes", None):
-            results["hashes"] = val
-        if val := self._get_attr(macho, None, "code_signature_info"):
-            results["code_signature"] = val
-
-        if hasattr(macho, "get_architectures"):
+        results["general_info"] = macho.get_general_info()
+        results["header"] = macho.get_macho_header()
+        results["hashes"] = macho.get_similarity_hashes()
+        results["code_signature"] = macho.code_signature_info
+        try:
             results["architectures"] = macho.get_architectures()
-        elif isinstance(results.get("header"), dict):
-            results["architectures"] = list(results["header"].keys())
-        else:
+        except AttributeError:
             results["architectures"] = []
-
-        for key, attr in [
-            ("uuid", "uuid"),
-            ("entrypoint", "entry_point"),
-            ("version_info", "version_info"),
-        ]:
-            if hasattr(macho, attr):
-                val = getattr(macho, attr)
-                results[key] = val
+        results["uuid"] = macho.uuid
+        results["entrypoint"] = macho.entry_point
+        results["version_info"] = macho.version_info
 
     def _extract_lists(self, macho, results: Dict[str, Any]):
         """Extract list-based structures like load commands and segments."""
-        is_universal = hasattr(macho, "architectures") and isinstance(macho.architectures, dict)
+        is_universal = isinstance(macho, machofile.UniversalMachO)
 
         def get_macho_lists(m):
             return {
-                "load_commands": [str(lc) for lc in m.load_commands] if hasattr(m, "load_commands") else [],
-                "segments": [str(s) for s in m.segments] if hasattr(m, "segments") else [],
-                "dylib_names": [_safe_decode(d) for d in m.dylib_names] if hasattr(m, "dylib_names") else [],
+                "load_commands": [str(lc) for lc in m.load_commands],
+                "segments": [str(s) for s in m.segments],
+                "dylib_names": [_safe_decode(d) for d in m.dylib_names],
             }
 
         if is_universal:
@@ -110,15 +89,8 @@ class MachoInfo(FileAnalyzer):
 
     def _extract_symbols(self, macho, results: Dict[str, Any]):
         """Extract imported and exported symbols."""
-        if hasattr(macho, "get_imported_functions"):
-            results["imports"] = macho.get_imported_functions()
-        elif hasattr(macho, "imported_functions") and macho.imported_functions:
-            results["imports"] = [_safe_decode(f) for f in macho.imported_functions]
-
-        if hasattr(macho, "get_exported_symbols"):
-            results["exports"] = macho.get_exported_symbols()
-        elif hasattr(macho, "exported_symbols") and macho.exported_symbols:
-            results["exports"] = [_safe_decode(s) for s in macho.exported_symbols]
+        results["imports"] = macho.get_imported_functions()
+        results["exports"] = macho.get_exported_symbols()
 
     def run(self) -> Dict[str, Any]:
         results: Dict[str, Any] = {}
@@ -129,10 +101,13 @@ class MachoInfo(FileAnalyzer):
             self._extract_lists(macho, results)
             self._extract_symbols(macho, results)
 
-        except AnalyzerRunException:
-            raise
         except Exception as e:
-            error_msg = f"job_id:{self.job_id} analyzer:{self.analyzer_name} md5:{self.md5} filename:{self.filename} MachoInfo parsing error: {e}"
+            error_msg = (
+                f"job_id:{self.job_id} analyzer:{self.analyzer_name} "
+                f"md5:{self.md5} filename:{self.filename} "
+                f"MachoInfo parsing error: {e}"
+            )
+            logger.error(error_msg, exc_info=True)
             self.report.errors.append(error_msg)
             raise AnalyzerRunException(error_msg)
 

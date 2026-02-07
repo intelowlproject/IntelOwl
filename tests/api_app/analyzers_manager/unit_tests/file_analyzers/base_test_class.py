@@ -44,7 +44,7 @@ class BaseFileAnalyzerTest(TestCase):
         "text/xml": "android.xml",
         "application/zip": "test.zip",
         "application/x-dex": "sample.dex",
-        "application/x-mach-binary": "macho.sample",
+        "application/x-mach-binary": "macho_sample",
     }
 
     @classmethod

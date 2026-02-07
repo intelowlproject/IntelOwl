@@ -49,4 +49,12 @@ BASE_ENGINE_MODULES_PYTHON_PATH = PosixPath(
 
 REPO_DOWNLOADER_ENABLED = get_secret("REPO_DOWNLOADER_ENABLED", "True") == "True"
 GIT_KEY_PATH = MEDIA_ROOT / "my_gitpython_key"
+
 GIT_SSH_SCRIPT_PATH = PROJECT_LOCATION / "api_app" / "analyzers_manager" / "ssh_gitpython.sh"
+
+# Update checker settings
+UPDATE_CHECK_URL = get_secret(
+    "UPDATE_CHECK_URL",
+    "https://api.github.com/repos/intelowlproject/IntelOwl/releases/latest",
+)
+INTEL_OWL_VERSION = VERSION

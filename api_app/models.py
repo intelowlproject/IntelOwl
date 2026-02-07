@@ -70,6 +70,39 @@ from intel_owl.celery import get_queue_name
 logger = logging.getLogger(__name__)
 
 
+class UpdateCheckStatus(models.Model):
+    """
+    Stores global state for IntelOwl update checks.
+    This model is intended to be used as a singleton (accessed via get_or_create(pk=1)).
+    Ensures that update notifications are emitted only once per version.
+    """
+
+    latest_version = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True,
+        help_text="Latest version detected during update check",
+    )
+    notified = models.BooleanField(
+        default=False,
+        help_text="Whether a notification has already been sent for this version",
+    )
+    last_checked_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Last time the update check was executed",
+    )
+
+    created_at = models.DateTimeField(default=now, editable=False)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Update check info"
+
+    def __str__(self) -> str:
+        return f"Update check info (latest: {self.latest_version or 'unknown'})"
+
+
 class PythonModule(models.Model):
     """
     Represents a Python module model used in the application.

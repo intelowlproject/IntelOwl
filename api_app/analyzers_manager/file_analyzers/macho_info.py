@@ -30,7 +30,7 @@ class MachoInfo(FileAnalyzer):
         return False
 
     @staticmethod
-    def _get_attr(macho, getter: str, fallback: Optional[str], formatted=True):
+    def _get_attr(macho: Any, getter: Optional[str], fallback: Optional[str], formatted: bool = True):
         """Try getter method first, then fall back to direct attribute."""
         if getter and hasattr(macho, getter):
             try:
@@ -132,7 +132,7 @@ class MachoInfo(FileAnalyzer):
         except AnalyzerRunException:
             raise
         except Exception as e:
-            error_msg = f"job_id:{self.job_id} analyzer:{self.analyzer_name} md5:{self.md5} filename:{self.filename} MachoFile parsing error: {e}"
+            error_msg = f"job_id:{self.job_id} analyzer:{self.analyzer_name} md5:{self.md5} filename:{self.filename} MachoInfo parsing error: {e}"
             self.report.errors.append(error_msg)
             raise AnalyzerRunException(error_msg)
 

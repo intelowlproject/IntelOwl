@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 from api_app.analyzers_manager.file_analyzers.macho_info import MachoInfo
 from tests import CustomTestCase
 
@@ -6,6 +9,12 @@ class MachoInfoTestCase(CustomTestCase):
     fixtures = [
         "api_app/fixtures/0001_user.json",
     ]
+
+    @staticmethod
+    def tearDown() -> None:
+        from api_app.models import Job
+
+        Job.objects.all().delete()
 
     def test_macho_analysis(self):
         """Test MachoInfo analyzer with a real sample"""

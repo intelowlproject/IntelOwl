@@ -64,11 +64,11 @@ export function AnalyzableOverview({ analyzable }) {
     <Container fluid>
       {/* bar with analyzable id and utilities buttons */}
       <Row
-        className="g-0 d-flex-between-end align-items-center"
+        className="g-0 d-flex-between-end align-items-center mb-2"
         id="utilitiesRow"
       >
         <Col>
-          <h2 className="d-flex align-items-center">
+          <h2 className="d-flex align-items-center mb-0">
             <span className="me-2 text-secondary">
               Artifact #{analyzable.id}
             </span>

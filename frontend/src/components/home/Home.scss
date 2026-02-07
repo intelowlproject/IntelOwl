@@ -32,3 +32,26 @@ html {
 #guidebox {
   border-radius: 10px;
 }
+
+.home-update-notice {
+  margin-bottom: 16px;
+}
+
+.system-update-compact {
+  margin: 12px 0 16px 0;
+  padding: 10px 14px;
+  border-left: 4px solid #ff9800;
+  background: rgba(255, 153, 0, 0.093);
+  color: #f5f5f5;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+
+  strong {
+    color: #e7953f;
+    font-weight: 600;
+  }
+}

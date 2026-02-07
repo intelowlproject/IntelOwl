@@ -160,19 +160,12 @@ describe("test JobInfoCard (job report)", () => {
             playbook_requested: "TestPlaybook",
             playbook_to_execute: "TestPlaybook",
           }}
-          relatedInvestigationNumber={10}
         />
       </BrowserRouter>,
     );
 
     // always visible line
     const JobInfoCardSection = container.querySelector("#JobInfoCardSection");
-    expect(
-      within(JobInfoCardSection).getByText("Similar Investigations: 10"),
-    ).toBeInTheDocument();
-    expect(
-      within(JobInfoCardSection).getByText("Investigation: test investigation"),
-    ).toBeInTheDocument();
     expect(
       within(JobInfoCardSection).getByText("dns.google.com"),
     ).toBeInTheDocument();

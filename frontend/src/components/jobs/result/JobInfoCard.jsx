@@ -17,7 +17,6 @@ import {
   CopyToClipboardButton,
   ArrowToggleIcon,
 } from "@certego/certego-ui";
-import { format } from "date-fns";
 import { processTimeMMSS } from "../../../utils/time";
 
 import { JobTag } from "../../common/JobTag";
@@ -27,9 +26,8 @@ import { TLPTag } from "../../common/TLPTag";
 import { JobInfoIcon } from "./JobInfoIcon";
 import { JobIsRunningAlert } from "./JobIsRunningAlert";
 import { JobFinalStatuses } from "../../../constants/jobConst";
-import { datetimeFormatStr } from "../../../constants/miscConst";
 
-export function JobInfoCard({ job, relatedInvestigationNumber }) {
+export function JobInfoCard({ job }) {
   // local state
   const [isOpenJobInfoCard, setIsOpenJobInfoCard] = React.useState(false);
   const [isOpenJobWarnings, setIsOpenJobWarnings] = React.useState(false);
@@ -48,61 +46,10 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
     <div id="JobInfoCardSection">
       <ContentSection className="mb-0 bg-darker">
         <Row>
-          <Col sm={12} md={3} className="d-flex justify-content-start">
-            <Button
-              className="bg-darker border-1 lh-sm mx-1"
-              href={`/history/investigations?start_time__gte=${format(
-                startDateRelatedInvestigation,
-                datetimeFormatStr,
-              )}&start_time__lte=${format(
-                endDateRelatedInvestigation,
-                datetimeFormatStr,
-              )}&analyzed_object_name=${
-                job.is_sample ? job.file_name : job.observable_name
-              }&ordering=-start_time`}
-              target="_blank"
-              rel="noreferrer"
-              id="investigationSearchBtn"
-              size="xs"
-              style={{ fontSize: "0.8rem" }}
-            >
-              Similar Investigations: <br /> {relatedInvestigationNumber}
-            </Button>
-            <UncontrolledTooltip
-              placement="top"
-              target="investigationSearchBtn"
-            >
-              Search investigations for{" "}
-              {job.is_sample ? job.file_name : job.observable_name} in the last
-              {` ${investigationTimeRange}`} days.
-            </UncontrolledTooltip>
-            {job.investigation_id && (
-              <>
-                <Button
-                  className="bg-darker border-1 lh-sm mx-1"
-                  href={`/investigation/${job.investigation_id}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  id="investigationOverviewBtn"
-                  size="xs"
-                  style={{ fontSize: "0.8rem" }}
-                >
-                  Investigation: <br /> {job.investigation_name}
-                </Button>
-                <UncontrolledTooltip
-                  placement="top"
-                  target="investigationOverviewBtn"
-                >
-                  This job is part of the investigation #
-                  {job.invinvestigation_id}
-                </UncontrolledTooltip>
-              </>
-            )}
-          </Col>
           <Col
-            className="d-flex-start-start justify-content-center align-items-center"
+            className="d-flex-start-start justify-content-center align-items-center offset-1"
             sm={12}
-            md={7}
+            md={10}
           >
             <h3 className="d-flex-start text-truncate">
               <JobInfoIcon job={job} />
@@ -132,7 +79,7 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
               </Badge>
             </div>
           </Col>
-          <Col sm={12} md={2} className="d-flex justify-content-end">
+          <Col sm={12} md={1} className="d-flex justify-content-end">
             <Button
               className="bg-darker border-0"
               onClick={() => setIsOpenJobInfoCard(!isOpenJobInfoCard)}
@@ -287,5 +234,4 @@ export function JobInfoCard({ job, relatedInvestigationNumber }) {
 
 JobInfoCard.propTypes = {
   job: PropTypes.object.isRequired,
-  relatedInvestigationNumber: PropTypes.number.isRequired,
 };

@@ -1,7 +1,8 @@
 import React from "react";
 import "@testing-library/jest-dom";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { TLPTag } from "../../../src/components/common/TLPTag";
+import { TLPColors } from "../../../src/constants/colorConst";
 
 describe("TLPTag component", () => {
   test("CLEAR TLP renders with correct background and text color", () => {
@@ -11,9 +12,9 @@ describe("TLPTag component", () => {
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveTextContent("CLEAR");
     
-    // CLEAR should have white background (#ffffff) and black text
+    // CLEAR should have white background and black text
     expect(badge).toHaveStyle({
-      backgroundColor: "#ffffff",
+      backgroundColor: TLPColors.CLEAR,
       color: "#000000",
     });
   });
@@ -25,9 +26,9 @@ describe("TLPTag component", () => {
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveTextContent("RED");
     
-    // RED should have red background (#ff0033) and white text
+    // RED should have red background and white text
     expect(badge).toHaveStyle({
-      backgroundColor: "#ff0033",
+      backgroundColor: TLPColors.RED,
       color: "#FFFFFF",
     });
   });
@@ -39,9 +40,9 @@ describe("TLPTag component", () => {
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveTextContent("GREEN");
     
-    // GREEN should have green background (#33ff00) and black text
+    // GREEN should have green background and black text
     expect(badge).toHaveStyle({
-      backgroundColor: "#33ff00",
+      backgroundColor: TLPColors.GREEN,
       color: "#000000",
     });
   });
@@ -53,9 +54,9 @@ describe("TLPTag component", () => {
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveTextContent("AMBER");
     
-    // AMBER should have amber background (#ffc000) and black text
+    // AMBER should have amber background and black text
     expect(badge).toHaveStyle({
-      backgroundColor: "#ffc000",
+      backgroundColor: TLPColors.AMBER,
       color: "#000000",
     });
   });

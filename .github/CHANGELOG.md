@@ -2,8 +2,11 @@
 
 [**Upgrade Guide**](https://intelowlproject.github.io/docs/IntelOwl/installation/#update-to-the-most-recent-version)
 
+## [v6.5.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.5.1)
+A lot of minor contributions to fix bugs and improve maintenance
+
 ## [v6.5.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.5.0)
-Happy new year! :sparkler: And Happy Birthday IntelOwl! :tada: 
+Happy new year! :sparkler: And Happy Birthday IntelOwl! :tada:
 
 We are celebrating the 6th IntelOwl Birthday! :sunglasses: WOW! Such a Milestone!
 
@@ -33,7 +36,7 @@ We don't mention here all the other adjustments, fixes and dependencies upgrades
 ## [v6.4.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.4.0)
 This release mostly provides important changes in the backend part that will be supported in the UI in the next releases.
 * Analyzable: Representation of an observable or a sample: every job is linked to the scanned analyzable.
-* Data models: A new system to normalize the output of analyzers (already available in the job raw section). It allows analyzers to specify the evaluation, reliability and many others information about the analyzable. 
+* Data models: A new system to normalize the output of analyzers (already available in the job raw section). It allows analyzers to specify the evaluation, reliability and many others information about the analyzable.
 * User Event: Users can create reports for analyzables: indicating additional information or a custom evaluation.
 * Engine: Evaluate user reports and analyzers's data to assign a score to the job.
 
@@ -64,7 +67,7 @@ Minor fixes and dependencies upgrades
 
 ## [v6.2.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.2.0)
 
-Happy new year! :sparkler: And Happy Birthday IntelOwl! :tada: 
+Happy new year! :sparkler: And Happy Birthday IntelOwl! :tada:
 
 We are celebrating the 5th IntelOwl Birthday! :sunglasses: WOW! Such a Milestone!
 
@@ -125,7 +128,7 @@ Little fixes for the major.
 This major release is another important milestone for this project! We have been working hard to transform IntelOwl from a *Data Extraction Platform* to a complete *Investigation Platform*!
 
 One of the most noticeable feature is the addition of the [**Investigation** framework](https://intelowlproject.github.io/docs/IntelOwl/usage/#investigations-framework)!
- 
+
 Thanks to the this new feature, analysts can leverage IntelOwl as the starting point of their "Investigations", register their findings, correlate the information found, and collaborate...all in a single place.
 
 Come and join us at the [Honeynet Workshop](https://denmark2024.honeynet.org/) in the Denmark this May to learn more about this new Major version and to meet the maintainers. :)
@@ -164,7 +167,7 @@ The support for Docker Compose v1 has been dropped. Please upgrade to Docker Com
 The python `start.py` script is being replaced with a more light Bash script called `script` at the next Major version.
 Thanks to this change the installation requirements are a lot less than before and it should be easier to install and execute IntelOwl.
 Please start to use the new `start` script from now to avoid future issues.
-For more information: [Installation docs](https://intelowlproject.github.io/docs/IntelOwl/installation/) 
+For more information: [Installation docs](https://intelowlproject.github.io/docs/IntelOwl/installation/)
 
 ## [v5.2.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.2.2)
 
@@ -190,7 +193,7 @@ This release has been done mainly to adjusts a broken database migration introdu
   * Added the chance to customize the runtime configuration of a Playbook
   * Moved TLP section from hidden in the "Advanced configuration" section to exposed by default
 * Now every plugin can be configured with:
-  * a "healthcheck": this can be useful to verify the status of the service. 
+  * a "healthcheck": this can be useful to verify the status of the service.
   * a "pull": this can be useful to update a database that is used by the plugin, like a rules repository.
 
 
@@ -252,7 +255,7 @@ Feel free to check it out! Official [blog post here](https://intelowlproject.git
 **Important changes**
 * We added a new type of Plugin called [Ingestor](https://intelowlproject.github.io/docs/usage/#ingestors). **Ingestors** allow to automatically insert IOC streams from outside sources to IntelOwl itself.
 * Visualizers are not connected anymore to Analyzers/Connectors. They are connected to a single Playbook instead. This allows the users to create and manage the Visualizers in an easier way.
-* We added the new **Pivot** framework in the backend which allows to connect jobs to each other and to _pivot_ from one indicator to another. This is the first step to give the chance to the users to create more broader and complex investigation in IntelOwl. The next step will be to add the Frontend changes that allows the user to fully leverage the framework 
+* We added the new **Pivot** framework in the backend which allows to connect jobs to each other and to _pivot_ from one indicator to another. This is the first step to give the chance to the users to create more broader and complex investigation in IntelOwl. The next step will be to add the Frontend changes that allows the user to fully leverage the framework
 
 **New/Improved Plugins:**
 * Added new `DNS` playbook that collects the analyzers which performs DNS queries to various providers
@@ -340,7 +343,7 @@ We have done some big refactor changes that could make your application do not w
 * Refactored `Yara` analyzer again to avoid memory leaks and improve performance intensively
 * [Crowdsec](https://www.crowdsec.net/) analyzer no longer fails if the IP address is not found
 * Added new [Hunter_How](https://hunter.how/search-api) analyzer
-* We refactored the `malware_tools_analyzers` container that contains a lot of malware analysis tools. Thanks to that we have fixed `Qiling` and `Capa_Info` analyzer and we have updated all the other ones available (`Floss`, `APKid`, `Thug`, etc) 
+* We refactored the `malware_tools_analyzers` container that contains a lot of malware analysis tools. Thanks to that we have fixed `Qiling` and `Capa_Info` analyzer and we have updated all the other ones available (`Floss`, `APKid`, `Thug`, etc)
 
 **fixes / adjust / minor changes**
 * fixes to support for AWS Services (IAM authentication, AWS regions, AWS SQS)
@@ -558,7 +561,7 @@ While developing the new GUI, our main goal was to at least provide the same fea
 Please refer to the [**Upgrade Guide**](https://intelowlproject.github.io/docs/installation/#update-and-re-build)
 
 **New/Improved Analyzers:**
-- Added an analyzer which supports the new service provided for free by [The Honeynet Project](https://www.honeynet.org/2021/12/27/new-project-available-greedybear/): [GreedyBear](https://github.com/honeynet/GreedyBear) 
+- Added an analyzer which supports the new service provided for free by [The Honeynet Project](https://www.honeynet.org/2021/12/27/new-project-available-greedybear/): [GreedyBear](https://github.com/honeynet/GreedyBear)
 - Added 3 new analyzers for the new service from Abuse.ch: [YARAify](https://yaraify.abuse.ch/)
 - Added support for PCAP files and a new analyzer for [Suricata](https://suricata.io/) which allows to analyze PCAPs with IDS rules very fast and at scale.
 

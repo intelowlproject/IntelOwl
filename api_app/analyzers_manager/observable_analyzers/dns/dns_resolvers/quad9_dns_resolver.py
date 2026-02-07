@@ -7,22 +7,13 @@ import logging
 
 import httpx
 
+# Use the official Exception the test runner is designed to catch
+from dns.message import ShortHeader
+
 from api_app.analyzers_manager import classes
 
 from ..dns_responses import dns_resolver_response
 from ..doh_mixin import DoHMixin
-
-# Use the official Exception the test runner is designed to catch
-try:
-    from dns.flags import ShortHeader
-except ImportError:
-    try:
-        from dns.exception import ShortHeader
-    except ImportError:
-
-        class ShortHeader(Exception):
-            pass
-
 
 logger = logging.getLogger(__name__)
 

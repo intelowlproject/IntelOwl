@@ -1,10 +1,14 @@
 import datetime
+from unittest.mock import patch
 
+from django.db import IntegrityError, connection
+from django.test.utils import CaptureQueriesContext
 from django.utils.timezone import now
 
 from api_app.analyzables_manager.models import Analyzable
 from api_app.choices import Classification
 from api_app.user_events_manager.models import (
+    UserAnalyzableEvent,
     UserDomainWildCardEvent,
     UserIPWildCardEvent,
 )
@@ -40,6 +44,79 @@ class TestUserAnalyzableEventQuerySet(CustomTestCase):
         self.assertEqual(number, 1)
         ua.refresh_from_db()
         self.assertEqual(ua.data_model.reliability, 7)
+        ua.delete()
+        an.delete()
+
+    def test_decay_bulk_queries(self):
+        analyzables = []
+        events = []
+        for i in range(3):
+            an = Analyzable.objects.create(
+                name=f"test{i}.com",
+                classification=Classification.DOMAIN,
+            )
+            analyzables.append(an)
+            ue = UserAnalyzableEventSerializer(
+                data={
+                    "analyzable": {"name": an.name},
+                    "decay_progression": 0,
+                    "decay_timedelta_days": 0,
+                    "data_model_content": {"evaluation": "malicious", "reliability": 8},
+                },
+                context={"request": MockUpRequest(self.user)},
+            )
+            ue.is_valid()
+            ua = ue.save()
+            ua.next_decay = now() - datetime.timedelta(days=1)
+            ua.save()
+            events.append(ua)
+
+        with CaptureQueriesContext(connection) as queries:
+            number = UserAnalyzableEvent.objects.decay()
+
+        self.assertEqual(number, 3)
+        self.assertLessEqual(len(queries), 8)
+
+        for ua in events:
+            ua.refresh_from_db()
+            self.assertEqual(ua.data_model.reliability, 7)
+            ua.delete()
+
+        for an in analyzables:
+            an.delete()
+
+    def test_decay_atomicity_on_bulk_update_failure(self):
+        an = Analyzable.objects.create(
+            name="atomic.test.com",
+            classification=Classification.DOMAIN,
+        )
+        ue = UserAnalyzableEventSerializer(
+            data={
+                "analyzable": {"name": an.name},
+                "decay_progression": 0,
+                "decay_timedelta_days": 0,
+                "data_model_content": {"evaluation": "malicious", "reliability": 3},
+            },
+            context={"request": MockUpRequest(self.user)},
+        )
+        ue.is_valid()
+        ua = ue.save()
+        ua.next_decay = now() - datetime.timedelta(days=1)
+        ua.save()
+
+        original_reliability = ua.data_model.reliability
+        original_next_decay = ua.next_decay
+
+        with (
+            patch.object(UserAnalyzableEvent.objects, "bulk_update", side_effect=IntegrityError("fail")),
+            self.assertRaises(IntegrityError),
+        ):
+            UserAnalyzableEvent.objects.decay()
+
+        ua.refresh_from_db()
+        self.assertEqual(ua.data_model.reliability, original_reliability)
+        self.assertEqual(ua.next_decay, original_next_decay)
+
         ua.delete()
         an.delete()
 

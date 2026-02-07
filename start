@@ -380,21 +380,13 @@ else
   sudo docker compose --project-directory docker "${to_run[@]}" -p "$project_name" "$cmd_argument" "$@"
 fi
 if [[ "$env_argument" == "ci" && "$cmd_argument" == "up" ]]; then
-    extra_args+=(--build)
+  extra_args=(--build)
 else
-    extra_args=()
+  extra_args=()
 fi
 
 if grep "docker" <<< "$(groups)" > /dev/null 2>&1; then
-    docker compose \
-        --project-directory docker \
-        "${to_run[@]}" \
-        -p "$project_name" \
-        "${extra_args[@]}"
+  docker compose --project-directory docker "${to_run[@]}" -p "$project_name" "$cmd_argument" "${extra_args[@]}" "$@"
 else
-    sudo docker compose \
-        --project-directory docker \
-        "${to_run[@]}" \
-        -p "$project_name" \
-        "${extra_args[@]}"
+  sudo docker compose --project-directory docker "${to_run[@]}" -p "$project_name" "$cmd_argument" "${extra_args[@]}" "$@"
 fi

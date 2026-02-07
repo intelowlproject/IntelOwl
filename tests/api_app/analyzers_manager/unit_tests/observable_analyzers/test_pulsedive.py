@@ -23,6 +23,7 @@ class PulsediveTestCase(BaseAnalyzerTest):
                 ],
             ),
             patch("requests.post", return_value=MockUpResponse({"qid": 1}, 200)),
+            patch("time.sleep", return_value=None),
         ]
 
     @classmethod

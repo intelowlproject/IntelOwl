@@ -5,6 +5,7 @@ import datetime
 import hashlib
 import os
 from typing import Tuple
+from unittest.mock import patch
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -101,7 +102,8 @@ class ApiViewTests(CustomViewSetTestCase):
         response = self.client.post("/api/ask_analysis_availability", data, format="json")
         self.assertEqual(response.status_code, 200)
 
-    def test_analyze_file__pcap(self):
+    @patch("intel_owl.tasks.job_pipeline.apply_async")
+    def test_analyze_file__pcap(self, mock_apply_async):
         # set a fake API key or YARAify_File_Scan will be skipped as not configured
         models.PluginConfig.objects.create(
             owner=self.user,
@@ -143,6 +145,9 @@ class ApiViewTests(CustomViewSetTestCase):
             ["Suricata", "YARAify_File_Scan", "Hfinger", "DetectItEasy", "Polyswarm"],
             list(job.analyzers_to_execute.all().values_list("name", flat=True)),
         )
+
+        mock_apply_async.assert_called_once()
+        self.assertEqual(mock_apply_async.call_args.kwargs["args"], [job_id])
 
     def test_analyze_file__exe(self):
         data = self.analyze_file_data.copy()
@@ -232,7 +237,8 @@ class ApiViewTests(CustomViewSetTestCase):
         self.assertEqual(data["observable_classification"], job.analyzable.classification, msg=msg)
         self.assertEqual(self.observable_md5, job.analyzable.md5, msg=msg)
 
-    def test_analyze_observable__guess_optional(self):
+    @patch("intel_owl.tasks.job_pipeline.apply_async")
+    def test_analyze_observable__guess_optional(self, mock_apply_async):
         data = self.analyze_observable_ip_data.copy()
         observable_classification = data.pop("observable_classification")  # let the server calc it
 
@@ -252,16 +258,20 @@ class ApiViewTests(CustomViewSetTestCase):
         self.assertEqual(observable_classification, job.analyzable.classification, msg=msg)
         self.assertEqual(self.observable_md5, job.analyzable.md5, msg=msg)
 
-    def test_analyze_multiple_observables(self):
+        mock_apply_async.assert_called_once()
+        self.assertEqual(mock_apply_async.call_args.kwargs["args"], [job_id])
+
+    @patch("intel_owl.tasks.job_pipeline.apply_async")
+    def test_analyze_multiple_observables(self, mock_apply_async):
         data = self.mixed_observable_data.copy()
 
         response = self.client.post("/api/analyze_multiple_observables", data, format="json")
         contents = response.json()
         msg = (response.status_code, contents)
         self.assertEqual(response.status_code, 200, msg=msg)
+        self.assertEqual(mock_apply_async.call_count, len(data["observables"]))
 
         content = contents["results"][0]
-
         job_id = int(content["job_id"])
         job = models.Job.objects.get(pk=job_id)
         self.assertEqual(data["observables"][0][1], job.analyzable.name, msg=msg)
@@ -275,9 +285,9 @@ class ApiViewTests(CustomViewSetTestCase):
             list(job.analyzers_to_execute.all().values_list("name", flat=True)),
             msg=msg,
         )
+        self.assertEqual(mock_apply_async.call_args_list[0].kwargs["args"], [job_id])
 
         content = contents["results"][1]
-
         job_id = int(content["job_id"])
         job = models.Job.objects.get(pk=job_id)
         self.assertEqual(data["observables"][1][1], job.analyzable.name, msg=msg)
@@ -286,6 +296,7 @@ class ApiViewTests(CustomViewSetTestCase):
             list(job.analyzers_to_execute.all().values_list("name", flat=True)),
             msg=msg,
         )
+        self.assertEqual(mock_apply_async.call_args_list[1].kwargs["args"], [job_id])
         job.delete()
 
     def test_observable_no_analyzers_only_connector(self):
@@ -527,7 +538,9 @@ class ApiViewTests(CustomViewSetTestCase):
                 "visualizers": {},
             },
         )
-        response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
+        # dont actually run the analyzers, they are tested in unit tests
+        with patch("intel_owl.tasks.job_pipeline.apply_async") as mock_apply_async:
+            response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
         contents = response.json()
         self.assertEqual(response.status_code, 202, contents)
         new_job_id = int(contents["id"])
@@ -543,6 +556,8 @@ class ApiViewTests(CustomViewSetTestCase):
                 "visualizers": {},
             },
         )
+        mock_apply_async.assert_called_once()
+        self.assertEqual(mock_apply_async.call_args.kwargs["args"], [new_job_id])
         an.delete()
 
     def test_job_rescan__sample_analyzers(self):
@@ -567,7 +582,8 @@ class ApiViewTests(CustomViewSetTestCase):
         )
         job.analyzers_requested.set([AnalyzerConfig.objects.get(name="Strings_Info")])
 
-        response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
+        with patch("intel_owl.tasks.job_pipeline.apply_async") as mock_apply_async:
+            response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
         contents = response.json()
         self.assertEqual(response.status_code, 202, contents)
         new_job_id = int(contents["id"])
@@ -579,6 +595,8 @@ class ApiViewTests(CustomViewSetTestCase):
             list(new_job.analyzers_requested.all()),
             [AnalyzerConfig.objects.get(name="Strings_Info")],
         )
+        mock_apply_async.assert_called_once()
+        self.assertEqual(mock_apply_async.call_args.kwargs["args"], [new_job_id])
         self.assertEqual(
             new_job.runtime_configuration,
             {
@@ -617,7 +635,8 @@ class ApiViewTests(CustomViewSetTestCase):
             },
         )
 
-        response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
+        with patch("intel_owl.tasks.job_pipeline.apply_async") as mock_apply_async:
+            response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
         contents = response.json()
         self.assertEqual(response.status_code, 202, contents)
         new_job_id = int(contents["id"])
@@ -642,6 +661,8 @@ class ApiViewTests(CustomViewSetTestCase):
                 "visualizers": {},
             },
         )
+        mock_apply_async.assert_called_once()
+        self.assertEqual(mock_apply_async.call_args.kwargs["args"], [new_job_id])
         job.delete()
         an.delete()
 
@@ -665,14 +686,20 @@ class ApiViewTests(CustomViewSetTestCase):
                 "visualizers": {},
             },
         )
-        # same user
-        response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
-        contents = response.json()
-        self.assertEqual(response.status_code, 202, contents)
-        # another user
-        self.client.logout()
-        self.client.force_login(self.guest)
-        response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
-        contents = response.json()
-        self.assertEqual(response.status_code, 403, contents)
+        with patch("intel_owl.tasks.job_pipeline.apply_async") as mock_apply_async:
+            response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
+            contents = response.json()
+            self.assertEqual(response.status_code, 202, contents)
+            new_job_id = int(contents["id"])
+            mock_apply_async.assert_called_once()
+            self.assertEqual(mock_apply_async.call_args.kwargs["args"], [new_job_id])
+
+            mock_apply_async.reset_mock()
+
+            self.client.logout()
+            self.client.force_login(self.guest)
+            response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
+            contents = response.json()
+            self.assertEqual(response.status_code, 403, contents)
+            mock_apply_async.assert_not_called()
         an.delete()

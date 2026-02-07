@@ -242,9 +242,18 @@ class CronTests(CustomTestCase):
         quark_engine.QuarkEngine.update()
         self.assertTrue(os.path.exists(DIR_PATH))
 
-    def test_yara_updater(self):
-        yara_scan.YaraScan.update()
-        self.assertTrue(len(os.listdir(settings.YARA_RULES_PATH)))
+    @if_mock_connections(
+        patch(
+            "git.Repo.clone_from", side_effect=lambda url, path, **kwargs: os.makedirs(path, exist_ok=True)
+        ),
+        patch("git.Repo"),
+        patch("requests.get", return_value=MockUpResponse({}, 200)),
+        patch("zipfile.ZipFile"),
+    )
+    def test_yara_updater(self, mock_zipfile=None, mock_get=None, mock_repo=None, mock_clone=None):
+        mock_zipfile.return_value.extractall.side_effect = lambda path: os.makedirs(path, exist_ok=True)
+        result = yara_scan.YaraScan.update()
+        self.assertTrue(result)
 
     @if_mock_connections(
         patch(

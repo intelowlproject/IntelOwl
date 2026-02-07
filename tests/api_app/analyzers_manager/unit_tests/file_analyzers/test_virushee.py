@@ -34,6 +34,10 @@ class TestVirusheeFileUpload(BaseFileAnalyzerTest):
                 "requests.Session.post",
                 return_value=self.MockUpResponse({"task": "123-456-789"}, 201),
             ),
+            patch(
+                "time.sleep",
+                return_value=None,
+            ),
         ]
 
     class MockUpResponse:

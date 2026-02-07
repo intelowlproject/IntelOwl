@@ -31,6 +31,7 @@ class TestCapaInfoAnalyzer(BaseFileAnalyzerTest):
 
         return [
             patch.object(CapaInfo, "update", return_value=True),
+            patch.object(CapaInfo, "_download_signatures", return_value=None),
             patch("subprocess.run", return_value=response_from_command),
             patch(
                 "api_app.analyzers_manager.file_analyzers.capa_info.requests.get",

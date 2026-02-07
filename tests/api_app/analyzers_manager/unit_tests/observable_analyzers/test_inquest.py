@@ -82,3 +82,12 @@ class TypeOfGenericTestCase(InQuestTestCase):
     def test_type_of_generic_unknown_defaults_to_filename(self):
         self.analyzer.observable_name = "random-text-no-extension"
         self.assertEqual(self.analyzer.type_of_generic(), "filename")
+
+    @patch("api_app.analyzers_manager.observable_analyzers.inquest.logger.warning")
+    def test_type_of_generic_unknown_warning(self, mock_warning):
+        self.analyzer.observable_name = "random-text-no-extension"
+        self.analyzer.type_of_generic()
+        mock_warning.assert_called_once_with(
+            "Could not determine type of generic observable: "
+            "'random-text-no-extension'. Defaulting to 'filename'."
+        )

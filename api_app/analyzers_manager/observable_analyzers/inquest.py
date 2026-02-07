@@ -24,8 +24,14 @@ REGISTRY_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
-# XMP ID pattern (UUID format   )
-XMPID_PATTERN = re.compile(r"^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
+# XMP ID pattern (UUID format)
+XMPID_PATTERN = re.compile(
+    r"^[a-fA-F0-9]{8}-"
+    r"[a-fA-F0-9]{4}-"
+    r"[a-fA-F0-9]{4}-"
+    r"[a-fA-F0-9]{4}-"
+    r"[a-fA-F0-9]{12}$"
+)
 
 # Filename pattern - must have an extension, no path separators
 FILENAME_PATTERN = re.compile(r"^[\w\-. ]+\.[a-zA-Z0-9]{1,10}$")

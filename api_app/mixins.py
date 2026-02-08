@@ -843,6 +843,9 @@ class IPQualityScoreMixin:
     base_url: str = "https://www.ipqualityscore.com/api/json"  # Ensure correct API base
     _ipqs_api_key: str
     polling_interval: int = 10  # Increased for large file stability
+    scan_endpoint: str = "/malware/scan/"
+    lookup_endpoint: str= "/malware/lookup/"
+    postback_endpoint:str= "/postback/"
 
     def _make_request(
         self,
@@ -895,8 +898,6 @@ class IPQualityScoreMixin:
             raise AnalyzerRunException(
                 f"Failed to decode JSON. Raw response: {response.text}"
             )
-        except Exception as e:
-            raise AnalyzerRunException(f"API Request failed: {str(e)}")
 
     def _poll_for_report(self, endpoint: str, _api_key: str, request_id: str) -> Dict:
         """

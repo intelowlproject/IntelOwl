@@ -60,7 +60,5 @@ class DNStwist(classes.ObservableAnalyzer):
             report = dnstwist.run(**params)
         except (OSError, ssl.SSLError) as e:
             return {"error": f"Network/SSL error: {str(e)}"}
-        except Exception as e:
-            return {"error": f"Unexpected error: {str(e)}"}
 
         return report

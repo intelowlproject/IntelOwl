@@ -9,7 +9,8 @@ let idCounter = 0;
 
 export function TLPTag(props) {
   const { value, ...rest } = props;
-  const uniqueId = React.useRef(idCounter++).current;
+  const uniqueId = React.useRef(idCounter).current;
+  idCounter += 1;
   const badgeId = `tlptag-badge__${value}__${uniqueId}`;
   const color = TLPColors?.[value] || "#dfe1e2";
   const tooltipText = TLPDescriptions?.[value] || "invalid";

@@ -1,10 +1,10 @@
 services:
 
   postgres:
-    image: library/postgres:16-alpine
+    image: library/postgres:18-alpine
     container_name: intelowl_postgres
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - postgres_data_v18:/var/lib/postgresql
     env_file:
       - ./env_file_postgres
     healthcheck:
@@ -25,3 +25,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+volumes:
+  postgres_data_v18:

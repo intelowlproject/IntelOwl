@@ -13,7 +13,7 @@ def migrate(apps, schema_editor):
     analyzer_objs = list(AnalyzerConfig.objects.filter(name__in=new_analyzers))
 
     # Playbooks to update
-    playbook_names = ["FREE_TO_USE_ANALYZERS", "Dns"]
+    playbook_names = ["FREE_TO_USE_ANALYZERS", "Dns", "DNS"]
 
     for pb_name in playbook_names:
         pc = PlaybookConfig.objects.filter(name=pb_name).first()
@@ -31,7 +31,7 @@ def reverse_migrate(apps, schema_editor):
     new_analyzers = ["DNS4EU", "DNS4EU_Malicious_Detector"]
     analyzer_objs = list(AnalyzerConfig.objects.filter(name__in=new_analyzers))
 
-    playbook_names = ["FREE_TO_USE_ANALYZERS", "Dns"]
+    playbook_names = ["FREE_TO_USE_ANALYZERS", "Dns", "DNS"]
 
     for pb_name in playbook_names:
         pc = PlaybookConfig.objects.filter(name=pb_name).first()

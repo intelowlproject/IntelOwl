@@ -20,6 +20,11 @@ services:
 
   
   daphne:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        REPO_DOWNLOADER_ENABLED: ${REPO_DOWNLOADER_ENABLED}
     image: intelowlproject/intelowl:ci
     env_file:
       - env_file_app_ci
@@ -43,6 +48,11 @@ services:
           memory: 200M
 
   celery_beat:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        REPO_DOWNLOADER_ENABLED: ${REPO_DOWNLOADER_ENABLED}
     image: intelowlproject/intelowl:ci
     env_file:
       - env_file_app_ci
@@ -53,6 +63,11 @@ services:
           memory: 200M
 
   celery_worker_default:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        REPO_DOWNLOADER_ENABLED: ${REPO_DOWNLOADER_ENABLED}
     image: intelowlproject/intelowl:ci
     env_file:
       - env_file_app_ci

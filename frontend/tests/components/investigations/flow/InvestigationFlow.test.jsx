@@ -5,7 +5,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import { InvestigationFlow } from "../../../../src/components/investigations/flow/InvestigationFlow";
 
-jest.mock("reactflow/dist/style.css", () => { });
+jest.mock("reactflow/dist/style.css", () => {});
 
 describe("test InvestigationFlow", () => {
   // mock needed for testing flow https://reactflow.dev/learn/advanced-use/testing#using-jest

@@ -5,14 +5,14 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
 IP_REG = (
-    "^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}"
-    "(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$"
+    r"^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}"
+    r"(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$"
 )
+
 IPv6_REG = (
     r"\b(?:(?:[0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|"
     r"(?:[0-9a-fA-F]{1,4}:){1,7}:|"
@@ -31,17 +31,24 @@ IPv6_REG = (
     r"((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}"
     r"(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))\b"
 )
-EMAIL_REG = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+
+EMAIL_REG = r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+
 DOMAIN_REG = re.compile(
-    r"^(?:[a-zA-Z0-9]"  # First character of the domain
-    r"(?:[a-zA-Z0-9-_]{0,61}[A-Za-z0-9])?\.)"  # Sub domain + hostname
-    r"+[A-Za-z0-9][A-Za-z0-9-_]{0,61}"  # First 61 characters of the gTLD
-    r"[A-Za-z]$"  # Last character of the gTLD
+    r"^(?:[a-zA-Z0-9]"
+    r"(?:[a-zA-Z0-9-_]{0,61}[A-Za-z0-9])?\.)"
+    r"+[A-Za-z0-9][A-Za-z0-9-_]{0,61}"
+    r"[A-Za-z]$"
 )
-PHONE_REG = "^\+?[1-9]\d{1,14}$"
+
+PHONE_REG = r"^\+?[1-9]\d{1,14}$"
+
 URL_REG = (
-    "((http|https)://)(www.)?[a-zA-Z0-9@:%._\\+~#?&//=]{2,256}\\.[a-z]{2,6}\\b"
-    "([-a-zA-Z0-9@:%._\\+~#?&//=]*)"
+    r"((http|https)://)"
+    r"(www\.)?"
+    r"[a-zA-Z0-9@:%._\\+~#?&//=]{2,256}"
+    r"\.[a-z]{2,6}\b"
+    r"([-a-zA-Z0-9@:%._\\+~#?&//=]*)"
 )
 
 
@@ -77,6 +84,10 @@ class IPQualityScore(classes.ObservableAnalyzer):
     PASSWORD_ENDPOINT = IPQS_BASE_URL + "leaked/password?password="
     LEAKED_EMAILENDPOINT = IPQS_BASE_URL + "leaked/email?email="
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def _get_url_payload(self):
         return {
             "strictness": self.url_strictness,
@@ -87,7 +98,9 @@ class IPQualityScore(classes.ObservableAnalyzer):
     def _get_ip_payload(self):
         payload = {
             "strictness": self.ip_strictness,
-            "allow_public_access_points": str(self.allow_public_access_points).lower(),
+            "allow_public_access_points": str(
+                self.allow_public_access_points
+                ).lower(),
             "fast": str(self.ip_fast).lower(),
             "lighter_penalties": str(self.lighter_penalties).lower(),
             "mobile": str(self.mobile).lower(),
@@ -163,14 +176,14 @@ class IPQualityScore(classes.ObservableAnalyzer):
                 password_endpoint = endpoints.get("password_endpoint")
                 response_username = requests.get(
                     username_endpoint + self.observable_name,
-                    headers=ipqs_headers,
+                    headers=ipqs_headers,timeout=60
                 )
                 response_username.raise_for_status()
                 result_username = response_username.json()
 
                 response_password = requests.get(
                     password_endpoint + self.observable_name,
-                    headers=ipqs_headers,
+                    headers=ipqs_headers,timeout=60
                 )
                 response_password.raise_for_status()
                 result_password = response_password.json()
@@ -189,6 +202,7 @@ class IPQualityScore(classes.ObservableAnalyzer):
                 response_leaked = requests.get(
                     leaked_email_endpoint + self.observable_name,
                     headers=ipqs_headers,
+                    timeout=60
                 )
                 response_leaked.raise_for_status()
                 result_leaked = response_leaked.json()
@@ -197,6 +211,7 @@ class IPQualityScore(classes.ObservableAnalyzer):
                     email_endpoint + self.observable_name,
                     headers=ipqs_headers,
                     params=email_payload,
+                    timeout=60
                 )
                 response_email.raise_for_status()
                 result_email = response_email.json()
@@ -214,12 +229,15 @@ class IPQualityScore(classes.ObservableAnalyzer):
                     calling_endpoint + self.observable_name,
                     headers=ipqs_headers,
                     params=payload,
+                    timeout=60
                 )
                 response.raise_for_status()
                 result = response.json()
                 return result
             else:
                 logger.warning("Invalid or unsupported observable type")
-                raise AnalyzerRunException("Invalid or unsupported observable type")
+                raise AnalyzerRunException(
+                    "Invalid or unsupported observable type"
+                    )
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

@@ -1,6 +1,7 @@
 import logging
 import os
 import shutil
+from unittest.mock import patch
 
 from blint.config import BlintOptions
 from blint.lib.runners import AnalysisRunner
@@ -28,10 +29,12 @@ class BlintAnalyzer(FileAnalyzer):
         set_permissions(reports_dir)
 
         analyzer = AnalysisRunner()
-        findings, reviews, fuzzables = analyzer.start(
-            blint_options=BlintOptions(reports_dir=reports_dir),
-            exe_files=[self.filepath],
-        )
+        # patch export_metadata to avoid RecursionError on Macho files and because we don't need the metadata report anyways
+        with patch("blint.lib.runners.export_metadata"):
+            findings, reviews, fuzzables = analyzer.start(
+                blint_options=BlintOptions(reports_dir=reports_dir),
+                exe_files=[self.filepath],
+            )
         response = {"findings": findings, "reviews": reviews, "fuzzables": fuzzables}
 
         shutil.rmtree(reports_dir)

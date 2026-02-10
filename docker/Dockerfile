@@ -20,7 +20,7 @@ ENV DJANGO_SETTINGS_MODULE=intel_owl.settings
 ENV PYTHONPATH=/opt/deploy/intel_owl
 ENV LOG_PATH=/var/log/intel_owl
 ARG REPO_DOWNLOADER_ENABLED=true
-ARG WATCHMAN=false
+ENV WATCHMAN=false
 ARG TARGETARCH
 ENV watch_logs_cmd="watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
 # This is required to allow compatibility with different OpenCTI instances

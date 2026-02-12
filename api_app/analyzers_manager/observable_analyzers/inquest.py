@@ -8,13 +8,33 @@ from typing import Dict
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.analyzers_manager.exceptions import (
-    AnalyzerConfigurationException,
-    AnalyzerRunException,
-)
+from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException, AnalyzerRunException
 from api_app.choices import Classification
 
 logger = logging.getLogger(__name__)
+
+# Precompiled regex patterns for generic observable type detection
+# Email pattern - comprehensive regex supporting TLDs of any length and subdomains
+EMAIL_PATTERN = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+
+# Windows Registry key pattern (specific hives like HKEY_LOCAL_MACHINE, HKLM, etc.)
+REGISTRY_PATTERN = re.compile(
+    r"^(?:HKEY_(?:LOCAL_MACHINE|CURRENT_USER|CLASSES_ROOT|USERS|CURRENT_CONFIG)"
+    r"|HK(?:LM|CU|CR|U|CC))(?:\\|$)",
+    re.IGNORECASE,
+)
+
+# XMP ID pattern (UUID format)
+XMPID_PATTERN = re.compile(
+    r"^[a-fA-F0-9]{8}-"
+    r"[a-fA-F0-9]{4}-"
+    r"[a-fA-F0-9]{4}-"
+    r"[a-fA-F0-9]{4}-"
+    r"[a-fA-F0-9]{12}$"
+)
+
+# Filename pattern - must have an extension, no path separators
+FILENAME_PATTERN = re.compile(r"^[\w\-. ]+\.[a-zA-Z0-9]{1,10}$")
 
 
 class InQuest(ObservableAnalyzer):
@@ -43,12 +63,29 @@ class InQuest(ObservableAnalyzer):
         return hash_type
 
     def type_of_generic(self):
-        if re.match(r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$", self.observable_name):
-            type_ = "email"
-        else:
-            # TODO: This should be validated more thoroughly
-            type_ = "filename"
-        return type_
+        """
+        Determine the type of a generic observable.
+
+        Supported types: email, filename, registry, xmpid
+        """
+        if EMAIL_PATTERN.match(self.observable_name):
+            return "email"
+
+        if REGISTRY_PATTERN.match(self.observable_name):
+            return "registry"
+
+        if XMPID_PATTERN.match(self.observable_name):
+            return "xmpid"
+
+        if FILENAME_PATTERN.match(self.observable_name):
+            return "filename"
+
+        # Default to filename with warning for unrecognized patterns
+        logger.warning(
+            f"Could not determine type of generic observable: "
+            f"'{self.observable_name}'. Defaulting to 'filename'."
+        )
+        return "filename"
 
     def run(self):
         headers = {"Content-Type": "application/json"}

@@ -2,16 +2,10 @@
 # See the file 'LICENSE' for copying permission.
 
 from logging import getLogger
-from typing import List
 
-from api_app.analyzers_manager.models import AnalyzerReport
 from api_app.choices import ReportStatus
 from api_app.visualizers_manager.classes import Visualizer
-from api_app.visualizers_manager.decorators import (
-    visualizable_error_handler_with_params,
-)
 from api_app.visualizers_manager.enums import (
-    VisualizableColor,
     VisualizableIcon,
     VisualizableTableColumnSize,
 )
@@ -27,25 +21,25 @@ class CrawlResults(Visualizer):
 
     def run(self):
         pages = []
-        
+
         analyzer_reports = self.get_analyzer_reports().filter(
             config__name="UrlScan_Submit_Result"
         )
-        
+
         for analyzer_report in analyzer_reports:
             if analyzer_report.status == ReportStatus.SUCCESS and analyzer_report.report:
                 page = self._create_urlscan_page(analyzer_report.report)
                 pages.append(page.to_dict())
-        
+
         if not pages:
             page = self._create_empty_page()
             pages.append(page.to_dict())
-        
+
         return pages
 
     def _create_empty_page(self):
         page = self.Page(name="Crawl Results")
-        
+
         level = self.Level(
             position=0,
             size=self.LevelSize.S_5,
@@ -61,36 +55,36 @@ class CrawlResults(Visualizer):
         )
         page.add_level(level)
         return page
-    
+
     def _create_urlscan_page(self, report_data):
         page = self.Page(name="URLScan.io Results")
-        
+
         page.add_level(self._create_header_level(report_data))
-        
+
         redirect_level = self._create_redirect_chain_level(report_data)
         if redirect_level:
             page.add_level(redirect_level)
-        
+
         requests_level = self._create_network_requests_level(report_data)
         if requests_level:
             page.add_level(requests_level)
-        
+
         links_level = self._create_links_level(report_data)
         if links_level:
             page.add_level(links_level)
-        
+
         hosting_level = self._create_hosting_level(report_data)
         if hosting_level:
             page.add_level(hosting_level)
-        
+
         return page
 
     def _create_header_level(self, report_data):
         elements = []
-        
+
         result_url = report_data.get("task", {}).get("reportURL", "")
         screenshot_url = report_data.get("task", {}).get("screenshotURL", "")
-        
+
         elements.append(
             self.Title(
                 title=self.Base(
@@ -106,7 +100,7 @@ class CrawlResults(Visualizer):
                 disable=False,
             )
         )
-        
+
         if screenshot_url:
             elements.append(
                 self.Base(
@@ -117,7 +111,7 @@ class CrawlResults(Visualizer):
                     disable=False,
                 )
             )
-        
+
         return self.Level(
             position=0,
             size=self.LevelSize.S_5,
@@ -127,10 +121,10 @@ class CrawlResults(Visualizer):
     def _create_redirect_chain_level(self, report_data):
         data_section = report_data.get("data", {})
         requests = data_section.get("requests", [])
-        
+
         if not requests:
             return None
-        
+
         redirect_chain = []
         for req in requests:
             response = req.get("response", {})
@@ -140,10 +134,10 @@ class CrawlResults(Visualizer):
                     "status": response.get("status", ""),
                     "ip": response.get("response", {}).get("remoteIPAddress", ""),
                 })
-        
+
         if not redirect_chain:
             return None
-        
+
         table_data = []
         for idx, redirect in enumerate(redirect_chain):
             table_data.append({
@@ -161,7 +155,7 @@ class CrawlResults(Visualizer):
                 ),
                 "ip": self.Base(value=redirect["ip"], disable=False),
             })
-        
+
         table = self.Table(
             columns=[
                 self.TableColumn(name="step", max_width=VisualizableTableColumnSize.S_50),
@@ -172,14 +166,14 @@ class CrawlResults(Visualizer):
             data=table_data,
             page_size=10,
         )
-        
+
         vlist = self.VList(
             name=self.Base(value="Redirect Chain", bold=True, disable=False),
             value=[table],
             start_open=True,
             disable=False,
         )
-        
+
         return self.Level(
             position=1,
             size=self.LevelSize.S_5,
@@ -189,29 +183,29 @@ class CrawlResults(Visualizer):
     def _create_network_requests_level(self, report_data):
         data_section = report_data.get("data", {})
         requests = data_section.get("requests", [])
-        
+
         if not requests:
             return None
-        
+
         xhr_requests = []
         ws_requests = []
         js_requests = []
-        
+
         for req in requests:
             request_data = req.get("request", {})
             request_details = request_data.get("request", {})
             request_type = request_data.get("type", "")
             url = request_details.get("url", "")
-            
-            if request_type == "XHR" or request_type == "Fetch":
+
+            if request_type in ("XHR", "Fetch"):
                 xhr_requests.append(url)
             elif request_type == "WebSocket":
                 ws_requests.append(url)
             elif request_type == "Script" or url.endswith(".js"):
                 js_requests.append(url)
-        
+
         elements = []
-        
+
         if xhr_requests:
             xhr_items = [
                 self.Base(value=url, link=url, disable=False, copy_text=url)
@@ -226,7 +220,7 @@ class CrawlResults(Visualizer):
                 max_elements_number=20,
             )
             elements.append(xhr_list)
-        
+
         if ws_requests:
             ws_items = [
                 self.Base(value=url, link=url, disable=False, copy_text=url)
@@ -241,7 +235,7 @@ class CrawlResults(Visualizer):
                 max_elements_number=20,
             )
             elements.append(ws_list)
-        
+
         if js_requests:
             js_items = [
                 self.Base(value=url, link=url, disable=False, copy_text=url)
@@ -256,10 +250,10 @@ class CrawlResults(Visualizer):
                 max_elements_number=20,
             )
             elements.append(js_list)
-        
+
         if not elements:
             return None
-        
+
         return self.Level(
             position=2,
             size=self.LevelSize.S_5,
@@ -269,15 +263,15 @@ class CrawlResults(Visualizer):
     def _create_links_level(self, report_data):
         data_section = report_data.get("data", {})
         links = data_section.get("links", [])
-        
+
         if not links:
             return None
-        
+
         table_data = []
         for link in links[:50]:
             href = link.get("href", "")
             text = link.get("text", "")
-            
+
             table_data.append({
                 "url": self.Base(
                     value=href,
@@ -287,10 +281,10 @@ class CrawlResults(Visualizer):
                 ),
                 "text": self.Base(value=text[:100], disable=False),
             })
-        
+
         if not table_data:
             return None
-        
+
         table = self.Table(
             columns=[
                 self.TableColumn(name="url", max_width=VisualizableTableColumnSize.S_300),
@@ -299,7 +293,7 @@ class CrawlResults(Visualizer):
             data=table_data,
             page_size=10,
         )
-        
+
         vlist = self.VList(
             name=self.Base(
                 value=f"Page Links ({len(links)} total)",
@@ -310,7 +304,7 @@ class CrawlResults(Visualizer):
             start_open=False,
             disable=False,
         )
-        
+
         return self.Level(
             position=3,
             size=self.LevelSize.S_5,
@@ -319,12 +313,12 @@ class CrawlResults(Visualizer):
 
     def _create_hosting_level(self, report_data):
         page_data = report_data.get("page", {})
-        
+
         if not page_data:
             return None
-        
+
         elements = []
-        
+
         ip = page_data.get("ip", "")
         if ip:
             elements.append(
@@ -334,7 +328,7 @@ class CrawlResults(Visualizer):
                     disable=False,
                 )
             )
-        
+
         country = page_data.get("country", "")
         if country:
             elements.append(
@@ -344,7 +338,7 @@ class CrawlResults(Visualizer):
                     disable=False,
                 )
             )
-        
+
         server = page_data.get("server", "")
         if server:
             elements.append(
@@ -354,7 +348,7 @@ class CrawlResults(Visualizer):
                     disable=False,
                 )
             )
-        
+
         asn = page_data.get("asn", "")
         asnname = page_data.get("asnname", "")
         if asn:
@@ -366,17 +360,17 @@ class CrawlResults(Visualizer):
                     disable=False,
                 )
             )
-        
+
         if not elements:
             return None
-        
+
         vlist = self.VList(
             name=self.Base(value="Hosting Information", bold=True, disable=False),
             value=elements,
             start_open=True,
             disable=False,
         )
-        
+
         return self.Level(
             position=4,
             size=self.LevelSize.S_5,

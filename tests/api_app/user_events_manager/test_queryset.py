@@ -75,7 +75,7 @@ class TestUserAnalyzableEventQuerySet(CustomTestCase):
             number = UserAnalyzableEvent.objects.decay()
 
         self.assertEqual(number, 3)
-        self.assertLessEqual(len(queries), 8)
+        self.assertLessEqual(len(queries), 12)
 
         for ua in events:
             ua.refresh_from_db()

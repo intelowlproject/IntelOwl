@@ -51,39 +51,27 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
                 os.makedirs(cache_dir, mode=0o755, exist_ok=True)
             except OSError as e:
                 logger.warning(
-                    f"Failed to create cache directory at {cache_dir}: {e}. "
-                    "Falling back to temporary directory."
+                    f"Failed to create cache directory at {cache_dir}: {e}. Falling back to temporary directory."
                 )
-                fallback = tempfile.mkdtemp(prefix="capa_cache_")
-                logger.info(f"Using fallback cache directory: {fallback}")
-                return fallback
+                return tempfile.mkdtemp(prefix="capa_cache_")
 
         # Step 2: Verify writability
         if not os.access(cache_dir, os.W_OK):
             logger.warning(
-                f"Cache directory {cache_dir} exists but is not writable. "
-                "Attempting to fix permissions."
+                f"Cache directory {cache_dir} exists but is not writable. Attempting to fix permissions."
             )
             try:
-                os.chmod(cache_dir, 0o755)
+                os.chmod(cache_dir, 0o700)  # noqa: S103
             except OSError:
-                logger.warning(
-                    f"Cannot fix permissions on {cache_dir}. "
-                    "Falling back to temporary directory."
-                )
-                fallback = tempfile.mkdtemp(prefix="capa_cache_")
-                logger.info(f"Using fallback cache directory: {fallback}")
-                return fallback
+                logger.warning(f"Cannot fix permissions on {cache_dir}. Falling back to temporary directory.")
+                return tempfile.mkdtemp(prefix="capa_cache_")
 
             # Re-check after chmod attempt
             if not os.access(cache_dir, os.W_OK):
                 logger.warning(
-                    f"Cache directory {cache_dir} still not writable after "
-                    "chmod. Falling back to temporary directory."
+                    f"Cache directory {cache_dir} still not writable after chmod. Falling back to temporary directory."
                 )
-                fallback = tempfile.mkdtemp(prefix="capa_cache_")
-                logger.info(f"Using fallback cache directory: {fallback}")
-                return fallback
+                return tempfile.mkdtemp(prefix="capa_cache_")
 
         logger.debug(f"Cache directory verified as writable: {cache_dir}")
         return cache_dir
@@ -148,8 +136,8 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
         return False
 
     def run(self):
+        cache_dir = self._ensure_cache_directory()
         try:
-            cache_dir = self._ensure_cache_directory()
             response = requests.get("https://api.github.com/repos/mandiant/capa-rules/releases/latest")
             latest_version = response.json()["tag_name"]
 
@@ -214,5 +202,9 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
             raise AnalyzerRunException(
                 f" Analyzer for {self.filename} with hash: {self.md5} failed with error: {stderr}"
             )
+        finally:
+            # Clean up temporary cache directory if a fallback was used
+            if cache_dir != CACHE_LOCATION and os.path.isdir(cache_dir):
+                shutil.rmtree(cache_dir, ignore_errors=True)
 
         return result

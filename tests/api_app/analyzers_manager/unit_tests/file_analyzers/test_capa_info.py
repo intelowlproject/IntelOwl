@@ -66,13 +66,9 @@ class TestCapaInfoCacheDirectory(BaseFileAnalyzerTest):
         "api_app.analyzers_manager.file_analyzers.capa_info.os.path.isdir",
         return_value=False,
     )
-    def test_ensure_cache_creates_directory(
-        self, mock_isdir, mock_makedirs, mock_access
-    ):
+    def test_ensure_cache_creates_directory(self, mock_isdir, mock_makedirs, mock_access):
         result = CapaInfo._ensure_cache_directory()
-        mock_makedirs.assert_called_once_with(
-            CACHE_LOCATION, mode=0o755, exist_ok=True
-        )
+        mock_makedirs.assert_called_once_with(CACHE_LOCATION, mode=0o755, exist_ok=True)
         self.assertEqual(result, CACHE_LOCATION)
 
     @patch(
@@ -98,7 +94,7 @@ class TestCapaInfoCacheDirectory(BaseFileAnalyzerTest):
     )
     def test_ensure_cache_fixes_permissions(self, mock_isdir, mock_chmod, mock_access):
         result = CapaInfo._ensure_cache_directory()
-        mock_chmod.assert_called_once_with(CACHE_LOCATION, 0o755)
+        mock_chmod.assert_called_once_with(CACHE_LOCATION, 0o700)
         self.assertEqual(result, CACHE_LOCATION)
 
     @patch(
@@ -117,9 +113,7 @@ class TestCapaInfoCacheDirectory(BaseFileAnalyzerTest):
         "api_app.analyzers_manager.file_analyzers.capa_info.os.path.isdir",
         return_value=True,
     )
-    def test_ensure_cache_falls_back_to_tempdir(
-        self, mock_isdir, mock_access, mock_chmod, mock_mkdtemp
-    ):
+    def test_ensure_cache_falls_back_to_tempdir(self, mock_isdir, mock_access, mock_chmod, mock_mkdtemp):
         result = CapaInfo._ensure_cache_directory()
         mock_mkdtemp.assert_called_once_with(prefix="capa_cache_")
         self.assertEqual(result, "/tmp/capa_cache_xyz")
@@ -136,9 +130,7 @@ class TestCapaInfoCacheDirectory(BaseFileAnalyzerTest):
         "api_app.analyzers_manager.file_analyzers.capa_info.os.path.isdir",
         return_value=False,
     )
-    def test_ensure_cache_falls_back_on_creation_failure(
-        self, mock_isdir, mock_makedirs, mock_mkdtemp
-    ):
+    def test_ensure_cache_falls_back_on_creation_failure(self, mock_isdir, mock_makedirs, mock_mkdtemp):
         result = CapaInfo._ensure_cache_directory()
         mock_mkdtemp.assert_called_once_with(prefix="capa_cache_")
         self.assertEqual(result, "/tmp/capa_cache_abc")

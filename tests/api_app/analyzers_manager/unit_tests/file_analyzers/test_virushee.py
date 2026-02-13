@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 import requests
+from django.conf import settings
 
 from api_app.analyzers_manager.file_analyzers.virushee import VirusheeFileUpload
 
@@ -18,7 +19,7 @@ class TestVirusheeFileUpload(BaseFileAnalyzerTest):
         }
 
     def get_mocked_response(self):
-        return [
+        patches = [
             patch(
                 "requests.Session.get",
                 side_effect=[
@@ -34,11 +35,11 @@ class TestVirusheeFileUpload(BaseFileAnalyzerTest):
                 "requests.Session.post",
                 return_value=self.MockUpResponse({"task": "123-456-789"}, 201),
             ),
-            patch(
-                "time.sleep",
-                return_value=None,
-            ),
         ]
+
+        if settings.MOCK_CONNECTIONS:
+            patches.append(patch("time.sleep", return_value=None))
+        return patches
 
     class MockUpResponse:
         """Simple mock response class to simulate requests.Response"""

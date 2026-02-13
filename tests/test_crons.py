@@ -248,15 +248,28 @@ class CronTests(CustomTestCase):
         patch("zipfile.ZipFile"),
     )
     def test_yara_updater(self, mock_zipfile=None, mock_get=None, mock_repo=None):
-        # When settings.MOCK_CONNECTIONS is False, @if_mock_connections is a no-op
-        # and no mocks are injected, so all mock parameters will be None. In that
-        # case, skip this test to avoid AttributeError in CI.
         if mock_zipfile is None or mock_get is None or mock_repo is None:
-            self.skipTest("MOCK_CONNECTIONS is disabled; yara updater test requires mocked connections.")
-        mock_repo.clone_from.side_effect = lambda url, path, **kwargs: os.makedirs(path, exist_ok=True)
-        mock_zipfile.return_value.extractall.side_effect = lambda path: os.makedirs(path, exist_ok=True)
-        result = yara_scan.YaraScan.update()
-        self.assertTrue(result)
+            yara_scan.YaraScan.update()
+            self.assertTrue(os.path.isdir(settings.YARA_RULES_PATH))
+        else:
+
+            def create_yara_file(path):
+                os.makedirs(path, exist_ok=True)
+                yara_file = os.path.join(path, "test_rule.yar")
+                with open(yara_file, "w") as f:
+                    f.write(
+                        "rule TestRule {\n"
+                        "    strings:\n"
+                        '        $test = "test"\n'
+                        "    condition:\n"
+                        "        $test\n"
+                        "}\n"
+                    )
+
+            mock_repo.clone_from.side_effect = lambda url, path, **kwargs: create_yara_file(path)
+            mock_zipfile.return_value.extractall.side_effect = create_yara_file
+            result = yara_scan.YaraScan.update()
+            self.assertTrue(result)
 
     @if_mock_connections(
         patch(

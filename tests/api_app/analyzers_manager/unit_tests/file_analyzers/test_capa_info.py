@@ -1,4 +1,5 @@
 import subprocess
+from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from api_app.analyzers_manager.file_analyzers.capa_info import (
@@ -51,12 +52,7 @@ class TestCapaInfoAnalyzer(BaseFileAnalyzerTest):
         }
 
 
-class TestCapaInfoCacheDirectory(BaseFileAnalyzerTest):
-    analyzer_class = CapaInfo
-
-    def get_mocked_response(self):
-        return []
-
+class TestCapaInfoCacheDirectory(TestCase):
     @patch(
         "api_app.analyzers_manager.file_analyzers.capa_info.os.access",
         return_value=True,

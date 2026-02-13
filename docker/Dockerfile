@@ -64,7 +64,7 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && touch ${LOG_PATH}/django/certego_saas.log ${LOG_PATH}/django/certego_saas_errors.log \
     && touch ${LOG_PATH}/django/authentication.log ${LOG_PATH}/django/authentication_errors.log \
     && touch ${LOG_PATH}/asgi/daphne.log \
-    && mkdir -p ${PYTHONPATH}/.cache \
+    && mkdir -p -m 755 ${PYTHONPATH}/.cache \
     && chown -R www-data:www-data ${LOG_PATH} /opt/deploy/ ${PYTHONPATH}/.cache \
     && ${PYTHONPATH}/docker/scripts/watchman_install.sh \
     # download github stuff

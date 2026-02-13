@@ -4,6 +4,11 @@ until cd /opt/deploy/intel_owl
 do
     echo "Waiting for server volume..."
 done
+
+# Ensure capa cache directory exists and is writable by www-data
+mkdir -p /opt/deploy/intel_owl/.cache
+chown -R www-data:www-data /opt/deploy/intel_owl/.cache
+
 if [ "$AWS_SQS" = "True" ]
 then
   queues="long.fifo,config.fifo"

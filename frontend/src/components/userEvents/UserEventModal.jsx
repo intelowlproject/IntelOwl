@@ -104,7 +104,7 @@ const evaluationOptions = [
   },
 ];
 
-export function UserEventModal({ analyzables, toggle, isOpen }) {
+export function UserEventModal({ analyzables, toggle, isOpen, onSuccess }) {
   console.debug("UserEventModal rendered!");
 
   const [user] = useAuthStore((state) => [state.user]);
@@ -240,9 +240,13 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
           }
         });
         if (failed.length === 0) {
+          const successfulArtifacts = [...formik.values.analyzables];
           formik.setSubmitting(false);
           formik.resetForm();
           toggle(false);
+          if (onSuccess) {
+            onSuccess(successfulArtifacts);
+          }
         } else {
           formik.setFieldValue("analyzables", failed, false);
         }
@@ -417,7 +421,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                           formik.values.analyzables.length > 0
                             ? formik.values.analyzables.map((value, index) => (
                                 <div>
-                                  <div
+                                  <Row
                                     className="py-2 d-flex"
                                     key={`analyzables-${index + 0}`}
                                   >
@@ -481,8 +485,8 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                                         <BsFillPlusCircleFill />
                                       </Button>
                                     </Col>
-                                  </div>
-                                  <div className="row">
+                                  </Row>
+                                  <Row>
                                     <Col sm={3}>
                                       <small className="fst-italic">
                                         Type:
@@ -532,7 +536,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                                         </small>
                                       )}
                                     </Col>
-                                  </div>
+                                  </Row>
                                 </div>
                               ))
                             : null}
@@ -1034,8 +1038,10 @@ UserEventModal.propTypes = {
   analyzables: PropTypes.array,
   toggle: PropTypes.func.isRequired,
   isOpen: PropTypes.bool.isRequired,
+  onSuccess: PropTypes.func,
 };
 
 UserEventModal.defaultProps = {
   analyzables: [""],
+  onSuccess: null,
 };

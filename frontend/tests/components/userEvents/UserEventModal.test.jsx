@@ -268,6 +268,7 @@ describe("test UserEventModal component", () => {
     "UserEventModal - $type - $eventType evaluation",
     async ({ type, input, url, getUrl, payload, responseData, eventType }) => {
       const user = userEvent.setup();
+      const onSuccessMock = jest.fn();
       const requestMethod = eventType === "update" ? "patch" : "post";
       axios.put.mockImplementation(() =>
         Promise.resolve({ status: 200, data: [""] }),
@@ -277,7 +278,11 @@ describe("test UserEventModal component", () => {
       );
       render(
         <BrowserRouter>
-          <UserEventModal toggle={() => jest.fn()} isOpen />
+          <UserEventModal
+            toggle={() => jest.fn()}
+            isOpen
+            onSuccess={onSuccessMock}
+          />
         </BrowserRouter>,
       );
 
@@ -359,12 +364,14 @@ describe("test UserEventModal component", () => {
       await waitFor(() => {
         expect(axios.get).toHaveBeenCalledWith(`${getUrl}`);
         expect(axios[requestMethod]).toHaveBeenCalledWith(`${url}`, payload);
+        expect(onSuccessMock).toHaveBeenCalledWith([input]);
       });
     },
   );
 
   test("UserEventModal - advanced fields (killchain, malware family, related threat, external ref, tags and advanced evaluation)", async () => {
     const user = userEvent.setup();
+    const onSuccessMock = jest.fn();
     axios.put.mockImplementation(() =>
       Promise.resolve({ status: 200, data: [""] }),
     );
@@ -373,7 +380,11 @@ describe("test UserEventModal component", () => {
     );
     render(
       <BrowserRouter>
-        <UserEventModal toggle={() => jest.fn()} isOpen />
+        <UserEventModal
+          toggle={() => jest.fn()}
+          isOpen
+          onSuccess={onSuccessMock}
+        />
       </BrowserRouter>,
     );
 
@@ -516,11 +527,13 @@ describe("test UserEventModal component", () => {
         decay_progression: "0",
         decay_timedelta_days: 120,
       });
+      expect(onSuccessMock).toHaveBeenCalledWith(["test.com"]);
     });
   });
 
   test("UserEventModal - advanced --> basic evaluation", async () => {
     const user = userEvent.setup();
+    const onSuccessMock = jest.fn();
     axios.put.mockImplementation(() =>
       Promise.resolve({ status: 200, data: [""] }),
     );
@@ -529,7 +542,11 @@ describe("test UserEventModal component", () => {
     );
     render(
       <BrowserRouter>
-        <UserEventModal toggle={() => jest.fn()} isOpen />
+        <UserEventModal
+          toggle={() => jest.fn()}
+          isOpen
+          onSuccess={onSuccessMock}
+        />
       </BrowserRouter>,
     );
 
@@ -654,6 +671,7 @@ describe("test UserEventModal component", () => {
         decay_progression: "0",
         decay_timedelta_days: 120,
       });
+      expect(onSuccessMock).toHaveBeenCalledWith(["test.com"]);
     });
   });
 });

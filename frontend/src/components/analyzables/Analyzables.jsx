@@ -41,6 +41,8 @@ export default function Analyzables() {
 
   const [showUserEventModal, setShowUserEventModal] = React.useState(false);
   const [selectedRows, setSelectedRows] = React.useState([]);
+  const [pendingSearchArtifacts, setPendingSearchArtifacts] =
+    React.useState(null);
 
   const formik = useFormik({
     initialValues: {
@@ -89,6 +91,29 @@ export default function Analyzables() {
       }
     },
   });
+
+  const handleEvaluationSuccess = React.useCallback(
+    (artifactNames) => {
+      setPendingSearchArtifacts(artifactNames);
+    },
+    [setPendingSearchArtifacts],
+  );
+
+  React.useEffect(() => {
+    if (pendingSearchArtifacts && pendingSearchArtifacts.length > 0) {
+      const triggerSearch = async () => {
+        await formik.setFieldValue(
+          "analyzables",
+          pendingSearchArtifacts,
+          false,
+        );
+        setPendingSearchArtifacts(null);
+        formik.submitForm();
+      };
+      triggerSearch();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingSearchArtifacts]);
 
   return (
     <Container fluid>
@@ -193,6 +218,7 @@ export default function Analyzables() {
           }
           toggle={setShowUserEventModal}
           isOpen={showUserEventModal}
+          onSuccess={handleEvaluationSuccess}
         />
       )}
       <Row className="mt-2 me-2">

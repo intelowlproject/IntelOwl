@@ -8,6 +8,17 @@ import Analyzable from "../../../src/components/analyzables/Analyzables";
 import { ANALYZABLES_URI } from "../../../src/constants/apiURLs";
 
 jest.mock("axios");
+jest.mock("../../../src/components/userEvents/UserEventModal", () => ({
+  UserEventModal: ({ onSuccess, isOpen }) => {
+    return isOpen ? (
+      <div>
+        <button onClick={() => onSuccess(["test-artifact.com"])}>
+          Mock Custom Artifact Submit
+        </button>
+      </div>
+    ) : null;
+  },
+}));
 
 describe("test Analyzable component", () => {
   test("Analyzable page - fields", async () => {
@@ -336,6 +347,39 @@ describe("test Analyzable component", () => {
       // second row
       expect(screen.getByText("NF")).toBeInTheDocument();
       expect(screen.getByText("Not Found")).toBeInTheDocument();
+    });
+  });
+
+  test("Analyzable page - auto search after submission", async () => {
+    const user = userEvent.setup();
+    axios.get.mockImplementation(() =>
+      Promise.resolve({
+        status: 200,
+        data: { count: 0, results: [] },
+      }),
+    );
+
+    const { container } = render(
+      <BrowserRouter>
+        <Analyzable />
+      </BrowserRouter>,
+    );
+
+    // Open modal
+    const newEvalButton = screen.getByRole("button", {
+      name: /New evaluation/i,
+    });
+    await user.click(newEvalButton);
+
+    // Click mock submit
+    const mockSubmit = screen.getByText("Mock Custom Artifact Submit");
+    await user.click(mockSubmit);
+
+    // Verify search triggered
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalledWith(
+        `${ANALYZABLES_URI}?name=test-artifact.com`,
+      );
     });
   });
 });

@@ -203,7 +203,7 @@ class YaraRepo:
                 except Exception:
                     logger.warning(f"Failed to write YARA rule: {rule_name}")
 
-    logger.info("Unprotect.it API update completed")
+            logger.info("Unprotect.it API update completed")
 
     def delete_lock_file(self):
         lock_file_path = self.directory / ".git" / "index.lock"

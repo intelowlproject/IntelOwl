@@ -21,15 +21,10 @@ class CrawlResults(Visualizer):
     def run(self):
         pages = []
 
-        analyzer_reports = self.get_analyzer_reports().filter(
-            config__name="UrlScan_Submit_Result"
-        )
+        analyzer_reports = self.get_analyzer_reports().filter(config__name="UrlScan_Submit_Result")
 
         for analyzer_report in analyzer_reports:
-            if (
-                analyzer_report.status == ReportStatus.SUCCESS
-                and analyzer_report.report
-            ):
+            if analyzer_report.status == ReportStatus.SUCCESS and analyzer_report.report:
                 page = self._create_urlscan_page(analyzer_report.report)
                 pages.append(page.to_dict())
 
@@ -155,11 +150,7 @@ class CrawlResults(Visualizer):
                     ),
                     "status": self.Base(
                         value=str(redirect["status"]),
-                        color=(
-                            self.Color.WARNING
-                            if redirect["status"] >= 300
-                            else self.Color.SUCCESS
-                        ),
+                        color=(self.Color.WARNING if redirect["status"] >= 300 else self.Color.SUCCESS),
                         disable=False,
                     ),
                     "ip": self.Base(value=redirect["ip"], disable=False),
@@ -168,18 +159,10 @@ class CrawlResults(Visualizer):
 
         table = self.Table(
             columns=[
-                self.TableColumn(
-                    name="step", max_width=VisualizableTableColumnSize.S_50
-                ),
-                self.TableColumn(
-                    name="url", max_width=VisualizableTableColumnSize.S_300
-                ),
-                self.TableColumn(
-                    name="status", max_width=VisualizableTableColumnSize.S_100
-                ),
-                self.TableColumn(
-                    name="ip", max_width=VisualizableTableColumnSize.S_200
-                ),
+                self.TableColumn(name="step", max_width=VisualizableTableColumnSize.S_50),
+                self.TableColumn(name="url", max_width=VisualizableTableColumnSize.S_300),
+                self.TableColumn(name="status", max_width=VisualizableTableColumnSize.S_100),
+                self.TableColumn(name="ip", max_width=VisualizableTableColumnSize.S_200),
             ],
             data=table_data,
             page_size=10,
@@ -226,8 +209,7 @@ class CrawlResults(Visualizer):
 
         if xhr_requests:
             xhr_items = [
-                self.Base(value=url, link=url, disable=False, copy_text=url)
-                for url in xhr_requests[:20]
+                self.Base(value=url, link=url, disable=False, copy_text=url) for url in xhr_requests[:20]
             ]
             xhr_list = self.VList(
                 name=self.Base(value="XHR/Fetch Requests", bold=True, disable=False),
@@ -241,8 +223,7 @@ class CrawlResults(Visualizer):
 
         if ws_requests:
             ws_items = [
-                self.Base(value=url, link=url, disable=False, copy_text=url)
-                for url in ws_requests[:20]
+                self.Base(value=url, link=url, disable=False, copy_text=url) for url in ws_requests[:20]
             ]
             ws_list = self.VList(
                 name=self.Base(value="WebSocket Connections", bold=True, disable=False),
@@ -256,8 +237,7 @@ class CrawlResults(Visualizer):
 
         if js_requests:
             js_items = [
-                self.Base(value=url, link=url, disable=False, copy_text=url)
-                for url in js_requests[:20]
+                self.Base(value=url, link=url, disable=False, copy_text=url) for url in js_requests[:20]
             ]
             js_list = self.VList(
                 name=self.Base(value="JavaScript Files", bold=True, disable=False),
@@ -307,12 +287,8 @@ class CrawlResults(Visualizer):
 
         table = self.Table(
             columns=[
-                self.TableColumn(
-                    name="url", max_width=VisualizableTableColumnSize.S_300
-                ),
-                self.TableColumn(
-                    name="text", max_width=VisualizableTableColumnSize.S_250
-                ),
+                self.TableColumn(name="url", max_width=VisualizableTableColumnSize.S_300),
+                self.TableColumn(name="text", max_width=VisualizableTableColumnSize.S_250),
             ],
             data=table_data,
             page_size=10,

@@ -8,7 +8,7 @@ from api_app.choices import TLP
 def migrate(apps, schema_editor):
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
-    
+
     playbook, _ = PlaybookConfig.objects.get_or_create(
         name="URL_Infrastructure_Scan",
         defaults={
@@ -21,9 +21,9 @@ def migrate(apps, schema_editor):
             "scan_check_time": datetime.timedelta(days=1),
             "tlp": TLP.AMBER.value,
             "starting": True,
-        }
+        },
     )
-    
+
     urlscan_submit = AnalyzerConfig.objects.get(name="UrlScan_Submit_Result")
     urlscan_search = AnalyzerConfig.objects.get(name="UrlScan_Search")
     playbook.analyzers.set([urlscan_submit, urlscan_search])

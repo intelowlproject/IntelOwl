@@ -7,15 +7,15 @@ from django.db import migrations
 def link_visualizer(apps, schema_editor):
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
-    
+
     try:
         playbook = PlaybookConfig.objects.get(name="URL_Infrastructure_Scan")
         visualizer = VisualizerConfig.objects.get(name="Crawl_Results")
-        
+
         playbook.visualizers.add(visualizer)
         playbook.full_clean()
         playbook.save()
-        
+
         visualizer.playbooks.add(playbook)
         visualizer.full_clean()
         visualizer.save()
@@ -26,14 +26,14 @@ def link_visualizer(apps, schema_editor):
 def unlink_visualizer(apps, schema_editor):
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
-    
+
     try:
         playbook = PlaybookConfig.objects.get(name="URL_Infrastructure_Scan")
         visualizer = VisualizerConfig.objects.get(name="Crawl_Results")
-        
+
         playbook.visualizers.remove(visualizer)
         playbook.save()
-        
+
         visualizer.playbooks.remove(playbook)
         visualizer.save()
     except (PlaybookConfig.DoesNotExist, VisualizerConfig.DoesNotExist):

@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("api_app", "0001_2_initial_squashed"),
         ("playbooks_manager", "0059_add_ipquery_analyzer_free_to_use"),
-        ("analyzers_manager", "0002_0129_analyzer_config_urlscan_submit_result"),
+        ("analyzers_manager", "0002_0147_update_urlscan_observable_supported"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

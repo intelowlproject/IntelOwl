@@ -14,7 +14,6 @@ logger = getLogger(__name__)
 
 
 class CrawlResults(Visualizer):
-
     @classmethod
     def update(cls) -> bool:
         pass
@@ -27,7 +26,10 @@ class CrawlResults(Visualizer):
         )
 
         for analyzer_report in analyzer_reports:
-            if analyzer_report.status == ReportStatus.SUCCESS and analyzer_report.report:
+            if (
+                analyzer_report.status == ReportStatus.SUCCESS
+                and analyzer_report.report
+            ):
                 page = self._create_urlscan_page(analyzer_report.report)
                 pages.append(page.to_dict())
 
@@ -129,39 +131,53 @@ class CrawlResults(Visualizer):
         for req in requests:
             response = req.get("response", {})
             if response.get("status") in [301, 302, 303, 307, 308]:
-                redirect_chain.append({
-                    "url": req.get("request", {}).get("url", ""),
-                    "status": response.get("status", ""),
-                    "ip": response.get("response", {}).get("remoteIPAddress", ""),
-                })
+                redirect_chain.append(
+                    {
+                        "url": req.get("request", {}).get("url", ""),
+                        "status": response.get("status", ""),
+                        "ip": response.get("response", {}).get("remoteIPAddress", ""),
+                    }
+                )
 
         if not redirect_chain:
             return None
 
         table_data = []
         for idx, redirect in enumerate(redirect_chain):
-            table_data.append({
-                "step": self.Base(value=str(idx + 1), disable=False),
-                "url": self.Base(
-                    value=redirect["url"],
-                    link=redirect["url"],
-                    disable=False,
-                    copy_text=redirect["url"],
-                ),
-                "status": self.Base(
-                    value=str(redirect["status"]),
-                    color=self.Color.WARNING if redirect["status"] >= 300 else self.Color.SUCCESS,
-                    disable=False,
-                ),
-                "ip": self.Base(value=redirect["ip"], disable=False),
-            })
+            table_data.append(
+                {
+                    "step": self.Base(value=str(idx + 1), disable=False),
+                    "url": self.Base(
+                        value=redirect["url"],
+                        link=redirect["url"],
+                        disable=False,
+                        copy_text=redirect["url"],
+                    ),
+                    "status": self.Base(
+                        value=str(redirect["status"]),
+                        color=self.Color.WARNING
+                        if redirect["status"] >= 300
+                        else self.Color.SUCCESS,
+                        disable=False,
+                    ),
+                    "ip": self.Base(value=redirect["ip"], disable=False),
+                }
+            )
 
         table = self.Table(
             columns=[
-                self.TableColumn(name="step", max_width=VisualizableTableColumnSize.S_50),
-                self.TableColumn(name="url", max_width=VisualizableTableColumnSize.S_300),
-                self.TableColumn(name="status", max_width=VisualizableTableColumnSize.S_100),
-                self.TableColumn(name="ip", max_width=VisualizableTableColumnSize.S_200),
+                self.TableColumn(
+                    name="step", max_width=VisualizableTableColumnSize.S_50
+                ),
+                self.TableColumn(
+                    name="url", max_width=VisualizableTableColumnSize.S_300
+                ),
+                self.TableColumn(
+                    name="status", max_width=VisualizableTableColumnSize.S_100
+                ),
+                self.TableColumn(
+                    name="ip", max_width=VisualizableTableColumnSize.S_200
+                ),
             ],
             data=table_data,
             page_size=10,
@@ -272,23 +288,29 @@ class CrawlResults(Visualizer):
             href = link.get("href", "")
             text = link.get("text", "")
 
-            table_data.append({
-                "url": self.Base(
-                    value=href,
-                    link=href,
-                    disable=False,
-                    copy_text=href,
-                ),
-                "text": self.Base(value=text[:100], disable=False),
-            })
+            table_data.append(
+                {
+                    "url": self.Base(
+                        value=href,
+                        link=href,
+                        disable=False,
+                        copy_text=href,
+                    ),
+                    "text": self.Base(value=text[:100], disable=False),
+                }
+            )
 
         if not table_data:
             return None
 
         table = self.Table(
             columns=[
-                self.TableColumn(name="url", max_width=VisualizableTableColumnSize.S_300),
-                self.TableColumn(name="text", max_width=VisualizableTableColumnSize.S_100),
+                self.TableColumn(
+                    name="url", max_width=VisualizableTableColumnSize.S_300
+                ),
+                self.TableColumn(
+                    name="text", max_width=VisualizableTableColumnSize.S_250
+                ),
             ],
             data=table_data,
             page_size=10,

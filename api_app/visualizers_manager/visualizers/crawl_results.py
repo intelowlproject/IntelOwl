@@ -155,9 +155,11 @@ class CrawlResults(Visualizer):
                     ),
                     "status": self.Base(
                         value=str(redirect["status"]),
-                        color=self.Color.WARNING
-                        if redirect["status"] >= 300
-                        else self.Color.SUCCESS,
+                        color=(
+                            self.Color.WARNING
+                            if redirect["status"] >= 300
+                            else self.Color.SUCCESS
+                        ),
                         disable=False,
                     ),
                     "ip": self.Base(value=redirect["ip"], disable=False),

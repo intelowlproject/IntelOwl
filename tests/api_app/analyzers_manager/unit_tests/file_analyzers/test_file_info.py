@@ -30,7 +30,7 @@ class TestFileInfo(BaseFileAnalyzerTest):
                 "api_app.helpers.calculate_sha256",
                 return_value="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
             ),
-            patch("pydeep.hash_file", return_value=b"3:AOn4:An"),
+            patch("ppdeep.hash_from_file", return_value="3:AOn4:An"),
             patch("tlsh.hash", return_value="T1234567890ABCDEF"),
             # Disable exiftool to avoid subprocess issues
             patch.object(FileInfo, "exiftool_path", None),

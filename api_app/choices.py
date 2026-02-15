@@ -6,7 +6,6 @@ import ipaddress
 import logging
 import re
 import typing
-from pathlib import PosixPath
 
 from django.db import models
 
@@ -15,17 +14,17 @@ logger = logging.getLogger(__name__)
 
 class PythonModuleBasePaths(models.TextChoices):
     ObservableAnalyzer = (
-        PosixPath("api_app.analyzers_manager.observable_analyzers"),
+        "api_app.analyzers_manager.observable_analyzers",
         "Observable Analyzer",
     )
     FileAnalyzer = (
-        PosixPath("api_app.analyzers_manager.file_analyzers"),
+        "api_app.analyzers_manager.file_analyzers",
         "File Analyzer",
     )
-    Connector = PosixPath("api_app.connectors_manager.connectors"), "Connector"
-    Ingestor = PosixPath("api_app.ingestors_manager.ingestors"), "Ingestor"
-    Visualizer = PosixPath("api_app.visualizers_manager.visualizers"), "Visualizer"
-    Pivot = PosixPath("api_app.pivots_manager.pivots"), "Pivot"
+    Connector = "api_app.connectors_manager.connectors", "Connector"
+    Ingestor = "api_app.ingestors_manager.ingestors", "Ingestor"
+    Visualizer = "api_app.visualizers_manager.visualizers", "Visualizer"
+    Pivot = "api_app.pivots_manager.pivots", "Pivot"
 
 
 class TLP(models.TextChoices):
@@ -79,7 +78,7 @@ class Status(models.TextChoices):
     FAILED = "failed", "failed"
 
     @classmethod
-    def get_enums_with_suffix(cls, suffix: str) -> typing.Generator[enum.Enum, None, None]:
+    def get_enums_with_suffix(cls, suffix: str) -> typing.Generator[enum.Enum]:
         for key in cls:
             if key.name.endswith(suffix):
                 yield key

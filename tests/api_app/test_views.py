@@ -479,7 +479,8 @@ class TagViewsetTests(CustomViewSetTestCase):
         msg = (response, content)
 
         self.assertEqual(response.status_code, 201, msg=msg)
-        self.assertDictContainsSubset(data, content, msg=msg)
+        for key, value in data.items():
+            self.assertEqual(content[key], value, msg=msg)
         self.assertEqual(Tag.objects.count(), 2)
 
     def test_create_400(self):
@@ -512,7 +513,8 @@ class TagViewsetTests(CustomViewSetTestCase):
         msg = (response, content)
 
         self.assertEqual(response.status_code, 200, msg=msg)
-        self.assertDictContainsSubset(new_data, content, msg=msg)
+        for key, value in new_data.items():
+            self.assertEqual(content[key], value, msg=msg)
 
     def test_delete_204(self):
         self.assertEqual(Tag.objects.count(), 1)

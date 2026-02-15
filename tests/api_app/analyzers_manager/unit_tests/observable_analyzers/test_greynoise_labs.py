@@ -12,7 +12,10 @@ class GreynoiseLabsTestCase(BaseAnalyzerTest):
 
     @classmethod
     def get_extra_config(cls):
-        return {"_auth_token": "demo_token", "report": {"errors": []}}
+        from types import SimpleNamespace
+
+        mock_report = SimpleNamespace(errors=[], save=lambda: None)
+        return {"_auth_token": "demo_token", "report": mock_report}
 
     @staticmethod
     def get_mocked_response():

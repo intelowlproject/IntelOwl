@@ -6,7 +6,7 @@ from pathlib import PosixPath
 from typing import Optional
 
 import magic
-import pydeep
+import ppdeep
 import tlsh
 from django.conf import settings
 from django.utils.functional import cached_property
@@ -40,7 +40,7 @@ class FileInfo(FileAnalyzer):
         results["md5"] = calculate_md5(binary)
         results["sha1"] = calculate_sha1(binary)
         results["sha256"] = calculate_sha256(binary)
-        results["ssdeep"] = pydeep.hash_file(self.filepath).decode()
+        results["ssdeep"] = ppdeep.hash_from_file(self.filepath)
         results["tlsh"] = tlsh.hash(binary)
 
         if self.exiftool_path:

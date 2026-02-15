@@ -45,6 +45,7 @@ class BaseFileAnalyzerTest(TestCase):
         "application/zip": "test.zip",
         "application/x-dex": "sample.dex",
         "application/x-mach-binary": "macho_sample",
+        "application/x-elf": "ping.elf",
     }
 
     @classmethod

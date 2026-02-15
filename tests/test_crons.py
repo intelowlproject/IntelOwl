@@ -23,7 +23,7 @@ from api_app.models import Job, Parameter, PluginConfig, PythonModule
 from intel_owl.tasks import check_stuck_analysis, remove_old_jobs
 
 from . import CustomTestCase, get_logger
-from .mock_utils import MockUpResponse, if_mock_connections, patch, skip
+from .mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = get_logger()
 
@@ -76,18 +76,33 @@ class CronTests(CustomTestCase):
         )
         self.assertEqual(remove_old_jobs(), 0)
 
-        _job.finished_analysis_time = now() - datetime.timedelta(days=10)
+        _job.finished_analysis_time = now() - datetime.timedelta(days=30)
         _job.save()
         self.assertEqual(remove_old_jobs(), 1)
 
         _job.delete()
         an.delete()
 
-    @if_mock_connections(skip("not working without connection"))
-    def test_maxmind_updater(self):
+    @if_mock_connections(
+        patch(
+            "api_app.analyzers_manager.observable_analyzers.maxmind.Maxmind._get_api_key",
+            return_value="test_key",
+        ),
+        patch("api_app.analyzers_manager.observable_analyzers.maxmind.MaxmindDBManager.update_all_dbs"),
+    )
+    def test_maxmind_updater(self, mock_update, mock_key):
+        def create_dummy_dbs(*args, **kwargs):
+            for db_name in maxmind.MaxmindDBManager.get_supported_dbs():
+                path = os.path.join(settings.MEDIA_ROOT, db_name)
+                with open(path, "w") as f:
+                    f.write("dummy")
+            return True
+
+        mock_update.side_effect = create_dummy_dbs
+
         maxmind.Maxmind.update()
         for db in maxmind.Maxmind.get_db_names():
-            self.assertTrue(os.path.exists(db))
+            self.assertTrue(os.path.exists(os.path.join(settings.MEDIA_ROOT, db)))
 
     @if_mock_connections(patch("requests.get", return_value=MockUpResponse({}, 200, text="91.192.100.61")))
     def test_talos_updater(self, mock_get=None):

@@ -363,9 +363,10 @@ class ApiViewTests(CustomViewSetTestCase):
         content = response.json()
         msg = (response, content)
         self.assertEqual(response.status_code, 400, msg=msg)
-        self.assertDictContainsSubset(
-            {"detail": "Requested job does not have a sample associated with it."},
-            content["errors"],
+        self.assertIn("detail", content["errors"], msg=msg)
+        self.assertEqual(
+            content["errors"]["detail"],
+            "Requested job does not have a sample associated with it.",
             msg=msg,
         )
         job.delete()

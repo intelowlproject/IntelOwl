@@ -1,12 +1,12 @@
 # django libs
-Django==4.2.27
-psycopg2-binary==2.9.6
+Django>=5.2,<5.3
+psycopg2-binary>=2.9.11
 django-auth-ldap==5.1.0
 django-radius==1.5.0
 django-filter==25.1
 django-storages==1.14
-django-celery-beat==2.7.0
-django-celery-results==2.5.0
+django-celery-beat>=2.8.1
+django-celery-results>=2.6.0
 django-ses == 4.6.0
 django-iam-dbauth==0.2.1
 django-prettyjson==0.4.1
@@ -17,19 +17,19 @@ django_extensions==3.2.3
 jsonschema==4.25.1
 # django rest framework libs
 Authlib==1.6.5
-djangorestframework==3.15.2
+djangorestframework>=3.16.1
 djangorestframework-filters==1.0.0.dev2
 drf-spectacular==0.28.0
-django-rest-email-auth==4.0.0
+django-rest-email-auth>=5.0.0
 
 # infra
 boto3==1.39.4
-celery[sqs,redis]==5.4.0
+celery[sqs,redis]>=5.6.0
 dataclasses==0.6
 # https://github.com/advisories/GHSA-q4qm-xhf9-4p8f
 # unpatched CVE: noproblem, we just use this for debugging purposes
 flower==2.0.0
-uWSGI==2.0.28
+uWSGI>=2.0.31
 uwsgitop==0.12
 whitenoise==6.9.0
 daphne==4.2.1
@@ -45,7 +45,7 @@ dnstwist[full]==20250130
 google>=3.0.0
 google-cloud-webrisk==1.20.0
 intezer-sdk==1.24.0
-lief==0.15.1
+lief==0.17.3
 maxminddb==2.6.0
 geoip2==4.8.0
 mwdblib==4.6.0
@@ -54,8 +54,8 @@ OTXv2==1.5.12
 peepdf-fork==0.4.3
 pdfid==1.1.0
 pefile==2024.8.26
-Pillow==11.0.0
-pydeep==0.4
+Pillow>=12.0.0
+ppdeep>=20251115
 pyelftools==0.31
 PyExifTool==0.5.0
 pyhashlookup==1.2.0
@@ -67,7 +67,7 @@ pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
 py-tlsh==4.7.2
-quark-engine==25.1.1
+quark-engine==26.1.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8
 yara-python==4.5.1
@@ -76,11 +76,11 @@ XLMMacroDeobfuscator[secure]==0.2.3
 thinkst-zippy==0.1.2
 querycontacts==2.0.0
 hfinger==0.2.2
-blint==2.3.2
+blint>=3.1.1
 permhash==0.1.4
 ail_typo_squatting==2.7.4
 iocextract==1.16.1
-ioc-finder==7.0.0
+ioc-finder>=7.3.0
 polyswarm-api==3.16.0
 knock-subdomains==8.0.0
 dotnetfile==0.2.4

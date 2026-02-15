@@ -78,7 +78,9 @@ class BlintTestCase(BaseFileAnalyzerTest):
         # Return list of patches - focusing on what actually matters for the test
         return [
             # Mock the main Blint analysis engine
-            patch("blint.lib.runners.AnalysisRunner", return_value=mock_runner),
+            patch(
+                "api_app.analyzers_manager.file_analyzers.blint_scan.AnalysisRunner", return_value=mock_runner
+            ),
             # Mock file system operations to avoid actual directory creation/deletion
             patch("api_app.analyzers_manager.file_analyzers.blint_scan.os.mkdir"),
             patch("api_app.analyzers_manager.file_analyzers.blint_scan.shutil.rmtree"),

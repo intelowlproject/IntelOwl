@@ -202,7 +202,7 @@ class Maxmind(classes.ObservableAnalyzer):
     def update(cls) -> bool:
         auth_token = cls._get_api_key()
         if auth_token:
-            return cls._maxmind_db_manager.update_all_dbs(cls._api_key_name)
+            return cls._maxmind_db_manager.update_all_dbs(auth_token)
         return False
 
     def _update_data_model(self, data_model) -> None:

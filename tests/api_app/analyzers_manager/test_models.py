@@ -89,6 +89,67 @@ class AnalyzerReportTestCase(CustomTestCase):
         job.delete()
         an1.delete()
 
+    def test_create_data_model_reuse(self):
+        """Verify that create_data_model reuses an existing identical data model."""
+        an1 = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
+        job1 = Job.objects.create(
+            analyzable=an1,
+            status=Job.STATUSES.ANALYZERS_RUNNING.value,
+        )
+        job2 = Job.objects.create(
+            analyzable=an1,
+            status=Job.STATUSES.ANALYZERS_RUNNING.value,
+        )
+        config = AnalyzerConfig.objects.first()
+        report_data = {
+            "evaluation": "MALICIOUS",
+            "urls": [{"url": "www.intelowl.com"}, {"url": "www.intelowl.com"}],
+        }
+        config.mapping_data_model = {
+            "evaluation": "evaluation",
+            "urls.url": "external_references",
+        }
+        config.save()
+        job1.analyzers_to_execute.set([config])
+        job2.analyzers_to_execute.set([config])
+
+        ar1 = AnalyzerReport.objects.create(
+            report=report_data,
+            job=job1,
+            config=config,
+            status=AnalyzerReport.STATUSES.SUCCESS.value,
+            task_id=str(uuid()),
+            parameters={},
+        )
+        ar2 = AnalyzerReport.objects.create(
+            report=report_data,
+            job=job2,
+            config=config,
+            status=AnalyzerReport.STATUSES.SUCCESS.value,
+            task_id=str(uuid()),
+            parameters={},
+        )
+
+        dm1 = ar1.create_data_model()
+        self.assertIsNotNone(dm1)
+
+        dm2 = ar2.create_data_model()
+        self.assertIsNotNone(dm2)
+
+        # The second call should reuse the first data model, not create a new one
+        self.assertEqual(dm1.pk, dm2.pk)
+
+        dm1.delete()
+        ar1.delete()
+        ar2.delete()
+        job1.delete()
+        job2.delete()
+        an1.delete()
+
     def test_get_value(self):
         an1 = Analyzable.objects.create(
             name="test.com",

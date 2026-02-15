@@ -121,11 +121,18 @@ class AnalyzerReport(AbstractReport):
         return result
 
     def create_data_model(self) -> Optional[BaseDataModel]:
-        # TODO we don't need to actually crate a new object every time.
-        #  if the report is the same of the previous one, we can just link it
         if not self._validation_before_data_model():
             return None
         dictionary = self._create_data_model_dictionary()
+
+        # Optimization: reuse an existing data model if one with identical content exists
+        # instead of creating a new object every time
+        if dictionary:
+            existing_data_model = self.data_model_class.objects.filter(**dictionary).first()
+            if existing_data_model:
+                self.data_model = existing_data_model
+                self.save()
+                return self.data_model
 
         self.data_model: BaseDataModel = self.data_model_class.objects.create()
         self.data_model.merge(dictionary)

@@ -107,7 +107,7 @@ class AnalyzerReportTestCase(CustomTestCase):
         config = AnalyzerConfig.objects.first()
         report_data = {
             "evaluation": "MALICIOUS",
-            "urls": [{"url": "www.intelowl.com"}, {"url": "www.intelowl.com"}],
+            "urls": [{"url": "www.intelowl.com"}, {"url": "www.example.com"}],
         }
         config.mapping_data_model = {
             "evaluation": "evaluation",

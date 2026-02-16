@@ -126,7 +126,9 @@ class AnalyzerReport(AbstractReport):
         dictionary = self._create_data_model_dictionary()
 
         # Optimization: reuse an existing data model if one with identical content exists
-        # instead of creating a new object every time
+        # instead of creating a new object every time.
+        # Skip reuse lookup if dictionary is empty, as filter(**{}) would
+        # incorrectly match any existing data model.
         if dictionary:
             existing_data_model = self.data_model_class.objects.filter(**dictionary).first()
             if existing_data_model:

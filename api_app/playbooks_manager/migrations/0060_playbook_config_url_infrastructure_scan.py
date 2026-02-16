@@ -38,7 +38,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("api_app", "0001_2_initial_squashed"),
-        ("playbooks_manager", "0059_add_ipquery_analyzer_free_to_use"),
+        ("playbooks_manager", "0062_add_cleanbrowsing_to_free_to_use"),
         ("analyzers_manager", "0002_0147_update_urlscan_observable_supported"),
     ]
 

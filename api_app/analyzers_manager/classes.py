@@ -401,6 +401,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         # step #2: raise AnalyzerRunException in case of error
         # Modified to support synchronous analyzers that return results directly in the initial response, avoiding unnecessary polling.
         if avoid_polling:
+            self.__raise_in_case_bad_request(self.name, resp1, params_to_check=[])
             report = resp1.json().get("report", None)
             err = resp1.json().get("error", None)
         else:

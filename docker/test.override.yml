@@ -35,7 +35,6 @@ services:
       - ../:/opt/deploy/intel_owl
     environment:
       - DEBUG=True
-      - CELERY_TASK_SOFT_TIME_LIMIT=60
 
   celery_worker_default:
     image: intelowlproject/intelowl:test
@@ -43,4 +42,3 @@ services:
       - ../:/opt/deploy/intel_owl
     environment:
       - DEBUG=True
-      - CELERY_TASK_SOFT_TIME_LIMIT=60

@@ -76,7 +76,7 @@ class CronTests(CustomTestCase):
         )
         self.assertEqual(remove_old_jobs(), 0)
 
-        _job.finished_analysis_time = now() - datetime.timedelta(days=30)
+        _job.finished_analysis_time = now() - datetime.timedelta(days=15)
         _job.save()
         self.assertEqual(remove_old_jobs(), 1)
 

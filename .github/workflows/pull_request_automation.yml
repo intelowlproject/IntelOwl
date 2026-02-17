@@ -76,6 +76,35 @@ jobs:
           cp docker/env_file_app_template docker/env_file_app
           cp docker/env_file_postgres_template docker/env_file_postgres
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: network=host
+
+      - name: Build main image with cache
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: false
+          load: true
+          tags: intelowlproject/intelowl:ci
+          build-args: |
+            REPO_DOWNLOADER_ENABLED=false
+          cache-from: type=gha,scope=intelowl-main
+          cache-to: type=gha,mode=max,scope=intelowl-main
+
+      - name: Build nginx image with cache
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile_nginx
+          push: false
+          load: true
+          tags: intelowlproject/intelowl_nginx:ci
+          cache-from: type=gha,scope=intelowl-nginx
+          cache-to: type=gha,mode=max,scope=intelowl-nginx
+
       - name: Startup script launch (Slow)
         if: contains(github.base_ref, 'master')
         run: |
@@ -90,12 +119,9 @@ jobs:
       - name: Startup script launch (Fast)
         if: "!contains(github.base_ref, 'master')"
         run: |
-          ./start ci up -- --build -d
+          ./start ci up -- -d
         env:
-          DOCKER_BUILDKIT: 1
-          BUILDKIT_PROGRESS: "plain"
           STAGE: "ci"
-          REPO_DOWNLOADER_ENABLED: false
 
       - name: Docker debug
         if: always()

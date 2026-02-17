@@ -3,14 +3,14 @@
 FROM node:lts-alpine3.21 AS frontend-build
 
 WORKDIR /
+
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm install npm@latest --location=global && npm install
+
+COPY docker/.env .env.local
 # copy react source code
 COPY frontend/ .
-# copy version file as an env file
-COPY docker/.env .env.local
-# install and build
-RUN npm install npm@latest --location=global \
-    && npm install \
-    && PUBLIC_URL=/static/reactapp/ npm run build
+RUN PUBLIC_URL=/static/reactapp/ npm run build
 
 # Stage 2: Backend
 FROM python:3.11.7 AS backend-build
@@ -55,6 +55,14 @@ RUN pip3 install --no-cache-dir --use-pep517 --compile -r project-requirements.t
     && pip3 install --no-cache-dir pycti==${PYCTI_VERSION} \
     && pip3 install --no-cache-dir --compile -r certego-requirements.txt
 
+COPY api_app/analyzers_manager/repo_downloader.sh /tmp/repo_downloader.sh
+COPY docker/scripts/watchman_install.sh /tmp/watchman_install.sh
+RUN /tmp/repo_downloader.sh \
+    && rm /tmp/repo_downloader.sh
+
+RUN /tmp/watchman_install.sh \
+    && rm /tmp/watchman_install.sh
+
 COPY . $PYTHONPATH
 
 RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
@@ -65,10 +73,7 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && touch ${LOG_PATH}/django/authentication.log ${LOG_PATH}/django/authentication_errors.log \
     && touch ${LOG_PATH}/asgi/daphne.log \
     && mkdir -p ${PYTHONPATH}/.cache \
-    && chown -R www-data:www-data ${LOG_PATH} /opt/deploy/ ${PYTHONPATH}/.cache \
-    && ${PYTHONPATH}/docker/scripts/watchman_install.sh \
-    # download github stuff
-    && ${PYTHONPATH}/api_app/analyzers_manager/repo_downloader.sh
+    && chown -R www-data:www-data ${LOG_PATH} /opt/deploy/ ${PYTHONPATH}/.cache
 
 FROM backend-build
 

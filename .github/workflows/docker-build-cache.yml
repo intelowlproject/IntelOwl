@@ -1,0 +1,55 @@
+permissions: read-all
+name: Docker Build Cache
+
+on:
+  push:
+    branches: [develop]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "integrations/**"
+
+jobs:
+  build-main-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout IntelOwl
+        uses: actions/checkout@v6.0.2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: false
+          load: true
+          tags: intelowlproject/intelowl:ci
+          build-args: |
+            REPO_DOWNLOADER_ENABLED=false
+          cache-from: type=gha,scope=intelowl-main
+          cache-to: type=gha,mode=max,scope=intelowl-main
+
+  build-nginx-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout IntelOwl
+        uses: actions/checkout@v6.0.2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile_nginx
+          push: false
+          load: true
+          tags: intelowlproject/intelowl_nginx:ci
+          cache-from: type=gha,scope=intelowl-nginx
+          cache-to: type=gha,mode=max,scope=intelowl-nginx

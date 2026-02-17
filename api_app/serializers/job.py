@@ -259,7 +259,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         self,
         tlp,
         plugins_requested: Union[List[Union[AnalyzerConfig, ConnectorConfig, VisualizerConfig]], QuerySet],
-    ) -> Generator[Union[AnalyzerConfig, ConnectorConfig, VisualizerConfig], None, None]:
+    ) -> Generator[Union[AnalyzerConfig, ConnectorConfig, VisualizerConfig]]:
         if not plugins_requested:
             return
         if isinstance(plugins_requested, QuerySet):

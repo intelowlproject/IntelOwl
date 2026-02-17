@@ -177,7 +177,7 @@ class CreateJobsFromPlaybookInterface:
         delay: datetime.timedelta = datetime.timedelta(),
         send_task: bool = True,
         parent_job=None,
-    ) -> Generator["Job", None, None]:
+    ) -> Generator["Job"]:
         """
         Creates jobs from the given playbook configuration.
 

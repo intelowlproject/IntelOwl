@@ -22,7 +22,7 @@ def add_unprotect_url(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("api_app", "0170_update_yaraify_archive.py"),
+        ("api_app", "0170_update_yaraify_archive"),
     ]
 
     operations = [

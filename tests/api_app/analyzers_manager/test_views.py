@@ -1,7 +1,10 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+from contextlib import nullcontext
 from typing import Type
 from unittest.mock import patch
+
+from django.conf import settings
 
 from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
@@ -29,17 +32,24 @@ class AnalyzerConfigViewSetTestCase(AbstractConfigViewSetTestCaseMixin, CustomVi
         from api_app.analyzers_manager.file_analyzers.yara_scan import YaraScan
 
         analyzer = "Yara"
-        response = self.client.post(f"{self.URL}/{analyzer}/pull")
-        self.assertEqual(response.status_code, 200)
-
-        self.client.force_authenticate(self.superuser)
-
-        with patch.object(YaraScan, "update", return_value=True):
+        ctx = (
+            patch.object(YaraScan, "update", return_value=True)
+            if settings.MOCK_CONNECTIONS
+            else nullcontext()
+        )
+        with ctx as mock_update:
             response = self.client.post(f"{self.URL}/{analyzer}/pull")
-        self.assertEqual(response.status_code, 200, response.json())
-        result = response.json()
-        self.assertIn("status", result)
-        self.assertTrue(result["status"])
+            self.assertEqual(response.status_code, 200)
+
+            self.client.force_authenticate(self.superuser)
+
+            response = self.client.post(f"{self.URL}/{analyzer}/pull")
+            self.assertEqual(response.status_code, 200, response.json())
+            result = response.json()
+            self.assertIn("status", result)
+            self.assertTrue(result["status"])
+            if mock_update is not None:
+                self.assertEqual(mock_update.call_count, 2)
 
         analyzer = "Doc_Info"
         response = self.client.post(f"{self.URL}/{analyzer}/pull")

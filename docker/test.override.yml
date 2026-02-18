@@ -14,8 +14,6 @@ services:
       - DEBUG=True
       - DJANGO_TEST_SERVER=True
       - DJANGO_WATCHMAN_TIMEOUT=60
-      - MOCK_CONNECTIONS=True
-
   daphne:
     image: intelowlproject/intelowl:test
     volumes:

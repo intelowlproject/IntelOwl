@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-from pathlib import PosixPath
+from pathlib import Path
 from typing import Optional
 
 import magic
@@ -19,8 +19,8 @@ logger = logging.getLogger(__name__)
 
 
 class FileInfo(FileAnalyzer):
-    EXIF_TOOL_PATH: PosixPath = settings.BASE_DIR / "exiftool_download"
-    EXIF_TOOL_VERSION_PATH: PosixPath = EXIF_TOOL_PATH / "exiftool_version.txt"
+    EXIF_TOOL_PATH: Path = settings.BASE_DIR / "exiftool_download"
+    EXIF_TOOL_VERSION_PATH: Path = EXIF_TOOL_PATH / "exiftool_version.txt"
 
     @cached_property
     def exiftool_path(self) -> Optional[str]:

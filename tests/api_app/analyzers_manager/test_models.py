@@ -136,12 +136,27 @@ class AnalyzerReportTestCase(CustomTestCase):
 
         dm1 = ar1.create_data_model()
         self.assertIsNotNone(dm1)
+        dm1.refresh_from_db()
+
+        # Verify the first data model has correct content
+        self.assertEqual(dm1.evaluation, "malicious")
+        self.assertCountEqual(
+            dm1.external_references,
+            ["www.intelowl.com", "www.example.com"],
+        )
+
+        # Count data models before second call
+        count_before = DomainDataModel.objects.count()
 
         dm2 = ar2.create_data_model()
         self.assertIsNotNone(dm2)
 
         # The second call should reuse the first data model, not create a new one
         self.assertEqual(dm1.pk, dm2.pk)
+
+        # No new data model should have been created
+        count_after = DomainDataModel.objects.count()
+        self.assertEqual(count_before, count_after)
 
         dm1.delete()
         ar1.delete()

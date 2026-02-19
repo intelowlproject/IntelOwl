@@ -192,9 +192,9 @@ class OpenCTI(classes.Connector):
             )
 
             return {
-                "observable": pycti.StixCyberObservable(
-                    self.opencti_instance, File
-                ).read(id=observable["id"]),
+                "observable": pycti.StixCyberObservable(self.opencti_instance, File).read(
+                    id=observable["id"]
+                ),
                 "report": pycti.Report(self.opencti_instance).read(id=report["id"]),
             }
         except Exception as e:

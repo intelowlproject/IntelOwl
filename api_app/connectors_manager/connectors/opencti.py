@@ -115,64 +115,101 @@ class OpenCTI(classes.Connector):
             ssl_verify=self.ssl_verify,
             proxies=self.proxies,
         )
-
-        # Entities in OpenCTI are created only if they don't exist
-        # create queries will return the existing entity in that case
-        # use update (default: False) to update the entity if exists
-
-        # Create the observable (if not exists with the given type and values)
-        observable_data = self.generate_observable_data()
-        observable = pycti.StixCyberObservable(self.opencti_instance, File).create(
-            observableData=observable_data,
-            createdBy=self.organization_id,
-            objectMarking=self.marking_definition_id,
-        )
-
-        # Create labels from Job tags (if not exists)
-        label_ids = []
-        for tag in self._job.tags.all():
-            label = pycti.Label(self.opencti_instance).create(
-                value=f"intelowl-tag:{tag.label}",
-                color=tag.color,
-            )
-            label_ids.append(label["id"])
-
-        # Create the report
-        report = pycti.Report(self.opencti_instance).create(
-            name=f"IntelOwl Job-{self.job_id}",
-            description=(
-                f"This is IntelOwl's analysis report for Job: {self.job_id}."
-                # comma separate analyzers executed
-                " Analyzers Executed:"
-                f" {', '.join(list(self._job.analyzers_to_execute.all().values_list('name', flat=True)))}"  # noqa
-            ),
-            published=self._job.received_request_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
-            report_types=["internal-report"],
-            createdBy=self.organization_id,
-            objectMarking=self.marking_definition_id,
-            objectLabel=label_ids,
-            x_opencti_report_status=2,  # Analyzed
-        )
-        # Create the external reference
-        external_reference = pycti.ExternalReference(self.opencti_instance, None).create(
-            source_name="IntelOwl Analysis",
-            description="View analysis report on the IntelOwl instance",
-            url=f"{settings.WEB_CLIENT_URL}/jobs/{self.job_id}",
-        )
-        # Add the external reference to the report
-        pycti.StixDomainObject(self.opencti_instance, File).add_external_reference(
-            id=report["id"], external_reference_id=external_reference["id"]
-        )
-
-        # Link Observable and Report
-        pycti.Report(self.opencti_instance).add_stix_object_or_stix_relationship(
-            id=report["id"], stixObjectOrStixRelationshipId=observable["id"]
-        )
-
-        return {
-            "observable": pycti.StixCyberObservable(self.opencti_instance, File).read(id=observable["id"]),
-            "report": pycti.Report(self.opencti_instance).read(id=report["id"]),
+        created = {
+            "observable": None,
+            "report": None,
+            "external_reference": None,
+            "labels": [],
         }
+
+        try:
+            org_id = self.organization_id
+            marking_id = self.marking_definition_id
+
+            # Entities in OpenCTI are created only if they don't exist
+            # create queries will return the existing entity in that case
+            # use update (default: False) to update the entity if exists
+
+            # Create the observable (if not exists with the given type and values)
+            observable_data = self.generate_observable_data()
+            observable = pycti.StixCyberObservable(self.opencti_instance, File).create(
+                observableData=observable_data,
+                createdBy=org_id,
+                objectMarking=marking_id,
+            )
+            created["observable"] = observable.get("id") if isinstance(observable, dict) else None
+
+            # Create labels from Job tags (if not exists)
+            label_ids = []
+            for tag in self._job.tags.all():
+                label = pycti.Label(self.opencti_instance).create(
+                    value=f"intelowl-tag:{tag.label}",
+                    color=tag.color,
+                )
+                if isinstance(label, dict) and "id" in label:
+                    label_id = label["id"]
+                    created["labels"].append(label_id)
+                    label_ids.append(label_id)
+                else:
+                    raise ValueError("Invalid response from OpenCTI Label.create")
+
+            # Create the report
+            report = pycti.Report(self.opencti_instance).create(
+                name=f"IntelOwl Job-{self.job_id}",
+                description=(
+                    f"This is IntelOwl's analysis report for Job: {self.job_id}."
+                    # comma separate analyzers executed
+                    " Analyzers Executed:"
+                    f" {', '.join(list(self._job.analyzers_to_execute.all().values_list('name', flat=True)))}"  # noqa
+                ),
+                published=self._job.received_request_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                report_types=["internal-report"],
+                createdBy=org_id,
+                objectMarking=marking_id,
+                objectLabel=label_ids,
+                x_opencti_report_status=2,  # Analyzed
+            )
+            created["report"] = report.get("id") if isinstance(report, dict) else None
+
+            # Create the external reference
+            external_reference = pycti.ExternalReference(self.opencti_instance, None).create(
+                source_name="IntelOwl Analysis",
+                description="View analysis report on the IntelOwl instance",
+                url=f"{settings.WEB_CLIENT_URL}/jobs/{self.job_id}",
+            )
+            created["external_reference"] = (
+                external_reference.get("id") if isinstance(external_reference, dict) else None
+            )
+
+            # Add the external reference to the report
+            pycti.StixDomainObject(self.opencti_instance, File).add_external_reference(
+                id=report["id"], external_reference_id=external_reference["id"]
+            )
+
+            # Link Observable and Report
+            pycti.Report(self.opencti_instance).add_stix_object_or_stix_relationship(
+                id=report["id"], stixObjectOrStixRelationshipId=observable["id"]
+            )
+
+            return {
+                "observable": pycti.StixCyberObservable(
+                    self.opencti_instance, File
+                ).read(id=observable["id"]),
+                "report": pycti.Report(self.opencti_instance).read(id=report["id"]),
+            }
+        except Exception as e:
+            try:
+                msg = (
+                    f"OpenCTI partial state detected after exception: {type(e).__name__}: {e}. "
+                    f"Created IDs: observable={created['observable']}, "
+                    f"report={created['report']}, "
+                    f"external_reference={created['external_reference']}, "
+                    f"labels={created['labels']}"
+                )
+                self.report.errors.append(msg)
+            except Exception:
+                pass
+            raise
 
     @classmethod
     def _monkeypatch(cls):

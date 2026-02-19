@@ -90,6 +90,15 @@ export default function Analyzables() {
     },
   });
 
+  const onSearchSubmit = React.useCallback(
+    (analyzables) => {
+      formik.setFieldValue("analyzables", analyzables);
+      formik.submitForm();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
   return (
     <Container fluid>
       <FormikProvider value={formik}>
@@ -193,6 +202,7 @@ export default function Analyzables() {
           }
           toggle={setShowUserEventModal}
           isOpen={showUserEventModal}
+          onSearchSubmit={onSearchSubmit}
         />
       )}
       <Row className="mt-2 me-2">

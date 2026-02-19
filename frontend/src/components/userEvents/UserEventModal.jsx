@@ -104,7 +104,7 @@ const evaluationOptions = [
   },
 ];
 
-export function UserEventModal({ analyzables, toggle, isOpen }) {
+export function UserEventModal({ analyzables, toggle, isOpen, onSearchSubmit }) {
   console.debug("UserEventModal rendered!");
 
   const [user] = useAuthStore((state) => [state.user]);
@@ -210,8 +210,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
           if (inputState[analyzable]?.eventId) {
             // edit an existing evaluation
             return axios.patch(
-              `${userEventTypesToApiMapping[inputState[analyzable].type]}/${
-                inputState[analyzable].eventId
+              `${userEventTypesToApiMapping[inputState[analyzable].type]}/${inputState[analyzable].eventId
               }`,
               evaluation,
             );
@@ -240,8 +239,12 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
           }
         });
         if (failed.length === 0) {
+          const submittedAnalyzables = [...formik.values.analyzables];
           formik.setSubmitting(false);
           formik.resetForm();
+          if (onSearchSubmit) {
+            onSearchSubmit(submittedAnalyzables);
+          }
           toggle(false);
         } else {
           formik.setFieldValue("analyzables", failed, false);
@@ -414,127 +417,127 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                       <FormGroup row>
                         <div style={{ maxHeight: "40vh", overflowY: "scroll" }}>
                           {formik.values.analyzables &&
-                          formik.values.analyzables.length > 0
+                            formik.values.analyzables.length > 0
                             ? formik.values.analyzables.map((value, index) => (
-                                <div>
-                                  <div
-                                    className="py-2 d-flex"
-                                    key={`analyzables-${index + 0}`}
+                              <div>
+                                <div
+                                  className="py-2 d-flex"
+                                  key={`analyzables-${index + 0}`}
+                                >
+                                  <Col sm={10} className="pe-3">
+                                    <Input
+                                      type="text"
+                                      id={`analyzables-${index}`}
+                                      name={`analyzables-${index}`}
+                                      placeholder="google.com, 8.8.8.8, https://google.com, 1d5920f4b44b27a802bd77c4f0536f5a, .*\.com"
+                                      className="input-dark"
+                                      value={value}
+                                      onBlur={formik.handleBlur}
+                                      onChange={(event) => {
+                                        const attributevalues =
+                                          formik.values.analyzables;
+                                        attributevalues[index] =
+                                          event.target.value;
+                                        formik.setFieldValue(
+                                          "analyzables",
+                                          attributevalues,
+                                          true,
+                                        );
+                                        setInputValue(event.target.value);
+                                      }}
+                                      invalid={
+                                        formik.touched[
+                                        `analyzables-${index}`
+                                        ] &&
+                                        formik.errors[`analyzables-${index}`]
+                                      }
+                                    />
+                                    <FormFeedback>
+                                      {formik.errors[`analyzables-${index}`]}
+                                    </FormFeedback>
+                                  </Col>
+                                  <Col
+                                    sm={2}
+                                    className="d-flex justify-content-start"
                                   >
-                                    <Col sm={10} className="pe-3">
-                                      <Input
-                                        type="text"
-                                        id={`analyzables-${index}`}
-                                        name={`analyzables-${index}`}
-                                        placeholder="google.com, 8.8.8.8, https://google.com, 1d5920f4b44b27a802bd77c4f0536f5a, .*\.com"
-                                        className="input-dark"
-                                        value={value}
-                                        onBlur={formik.handleBlur}
-                                        onChange={(event) => {
-                                          const attributevalues =
-                                            formik.values.analyzables;
-                                          attributevalues[index] =
-                                            event.target.value;
-                                          formik.setFieldValue(
-                                            "analyzables",
-                                            attributevalues,
-                                            true,
-                                          );
-                                          setInputValue(event.target.value);
-                                        }}
-                                        invalid={
-                                          formik.touched[
-                                            `analyzables-${index}`
-                                          ] &&
-                                          formik.errors[`analyzables-${index}`]
-                                        }
-                                      />
-                                      <FormFeedback>
-                                        {formik.errors[`analyzables-${index}`]}
-                                      </FormFeedback>
-                                    </Col>
-                                    <Col
-                                      sm={2}
-                                      className="d-flex justify-content-start"
+                                    <Button
+                                      color="primary"
+                                      size="sm"
+                                      id={`analyzables-${index}-deletebtn`}
+                                      className="mx-1 rounded-1 d-flex align-items-center px-3"
+                                      onClick={() =>
+                                        arrayHelpers.remove(index)
+                                      }
+                                      disabled={
+                                        formik.values.analyzables.length === 1
+                                      }
                                     >
-                                      <Button
-                                        color="primary"
-                                        size="sm"
-                                        id={`analyzables-${index}-deletebtn`}
-                                        className="mx-1 rounded-1 d-flex align-items-center px-3"
-                                        onClick={() =>
-                                          arrayHelpers.remove(index)
-                                        }
-                                        disabled={
-                                          formik.values.analyzables.length === 1
-                                        }
-                                      >
-                                        <BsFillTrashFill />
-                                      </Button>
-                                      <Button
-                                        color="primary"
-                                        size="sm"
-                                        id={`analyzables-${index}-addbtn`}
-                                        className="mx-1 rounded-1 d-flex align-items-center px-3"
-                                        onClick={() => arrayHelpers.push("")}
-                                      >
-                                        <BsFillPlusCircleFill />
-                                      </Button>
-                                    </Col>
-                                  </div>
-                                  <div className="row">
-                                    <Col sm={3}>
-                                      <small className="fst-italic">
-                                        Type:
-                                      </small>
-                                      <small className="text-info ms-2">
-                                        {inputState[value]?.type?.replace(
-                                          "_",
-                                          " ",
-                                        )}
-                                      </small>
-                                    </Col>
-                                    <Col
-                                      sm={5}
-                                      className="d-flex align-items-center "
+                                      <BsFillTrashFill />
+                                    </Button>
+                                    <Button
+                                      color="primary"
+                                      size="sm"
+                                      id={`analyzables-${index}-addbtn`}
+                                      className="mx-1 rounded-1 d-flex align-items-center px-3"
+                                      onClick={() => arrayHelpers.push("")}
                                     >
-                                      <small className="fst-italic">
-                                        Matches:
-                                      </small>
-                                      {inputState[value]?.type !==
-                                        UserEventTypes.ANALYZABLE &&
-                                      value !== "" ? (
-                                        <div>
-                                          <small className="text-info ms-2">
-                                            {inputState[value]?.matches?.length}{" "}
-                                          </small>
-                                          <MdInfoOutline
-                                            id="matches-infoicon"
-                                            fontSize="15"
-                                            className="text-info"
-                                          />
-                                          <UncontrolledTooltip
-                                            trigger="hover"
-                                            delay={{ show: 0, hide: 200 }}
-                                            target="matches-infoicon"
-                                            placement="right"
-                                            fade={false}
-                                            innerClassName="p-2 text-start text-nowrap md-fit-content"
-                                          >
-                                            {inputState[
-                                              value
-                                            ]?.matches?.toString()}
-                                          </UncontrolledTooltip>
-                                        </div>
-                                      ) : (
-                                        <small className="text-gray ms-2">
-                                          supported only for wildcard
-                                        </small>
-                                      )}
-                                    </Col>
-                                  </div>
+                                      <BsFillPlusCircleFill />
+                                    </Button>
+                                  </Col>
                                 </div>
-                              ))
+                                <div className="row">
+                                  <Col sm={3}>
+                                    <small className="fst-italic">
+                                      Type:
+                                    </small>
+                                    <small className="text-info ms-2">
+                                      {inputState[value]?.type?.replace(
+                                        "_",
+                                        " ",
+                                      )}
+                                    </small>
+                                  </Col>
+                                  <Col
+                                    sm={5}
+                                    className="d-flex align-items-center "
+                                  >
+                                    <small className="fst-italic">
+                                      Matches:
+                                    </small>
+                                    {inputState[value]?.type !==
+                                      UserEventTypes.ANALYZABLE &&
+                                      value !== "" ? (
+                                      <div>
+                                        <small className="text-info ms-2">
+                                          {inputState[value]?.matches?.length}{" "}
+                                        </small>
+                                        <MdInfoOutline
+                                          id="matches-infoicon"
+                                          fontSize="15"
+                                          className="text-info"
+                                        />
+                                        <UncontrolledTooltip
+                                          trigger="hover"
+                                          delay={{ show: 0, hide: 200 }}
+                                          target="matches-infoicon"
+                                          placement="right"
+                                          fade={false}
+                                          innerClassName="p-2 text-start text-nowrap md-fit-content"
+                                        >
+                                          {inputState[
+                                            value
+                                          ]?.matches?.toString()}
+                                        </UncontrolledTooltip>
+                                      </div>
+                                    ) : (
+                                      <small className="text-gray ms-2">
+                                        supported only for wildcard
+                                      </small>
+                                    )}
+                                  </Col>
+                                </div>
+                              </div>
+                            ))
                             : null}
                         </div>
                       </FormGroup>
@@ -653,20 +656,20 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                               RELIABILITY_CURRENTLY_TRUSTED,
                               RELIABILITY_TRUSTED,
                             ].includes(formik.values.reliability))) && (
-                          <small
-                            className="d-flex align-items-center mb-0 px-2 py-1"
-                            style={{
-                              borderColor: "warning",
-                              borderRadius: 7,
-                              border: "1px solid orange",
-                            }}
-                          >
-                            <IoMdWarning className="text-warning me-2" />
-                            Advanced reliability has been set and save
-                            correctly. Selecting a new basic evaluation will
-                            overwrite the previous settings.
-                          </small>
-                        )}
+                            <small
+                              className="d-flex align-items-center mb-0 px-2 py-1"
+                              style={{
+                                borderColor: "warning",
+                                borderRadius: 7,
+                                border: "1px solid orange",
+                              }}
+                            >
+                              <IoMdWarning className="text-warning me-2" />
+                              Advanced reliability has been set and save
+                              correctly. Selecting a new basic evaluation will
+                              overwrite the previous settings.
+                            </small>
+                          )}
                         <small>
                           {
                             evaluationOptions[formik.values.basic_evaluation]
@@ -743,19 +746,18 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                             style={{
                               "--slider-fill-color":
                                 formik.values.evaluation.toString() ===
-                                DataModelEvaluations.MALICIOUS
+                                  DataModelEvaluations.MALICIOUS
                                   ? "#ee4544"
                                   : "#02cc56",
-                              "--fill-percentage": `${
-                                formik.values.reliability * 10
-                              }%`,
+                              "--fill-percentage": `${formik.values.reliability * 10
+                                }%`,
                             }}
                           />
                         </FormGroup>
                       </div>
                       <small>
                         {formik.values.evaluation.toString() ===
-                        DataModelEvaluations.MALICIOUS
+                          DataModelEvaluations.MALICIOUS
                           ? "An artifact associated with malicious behavior. Using the reliability slider, you can adjust the level of confidence that the artifact has that evaluation."
                           : "An artifact with no evidence of malicious activity. Using the reliability slider, you can adjust the level of confidence that the artifact has that evaluation."}
                       </small>
@@ -973,7 +975,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                     <small className="col-8 offset-2 mt-2 fst-italic">
                       {
                         DecayProgressionDescription[
-                          parseInt(formik.values.decay_progression, 10)
+                        parseInt(formik.values.decay_progression, 10)
                         ]
                       }
                     </small>
@@ -1026,7 +1028,7 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
           </Form>
         </FormikProvider>
       </ModalBody>
-    </Modal>
+    </Modal >
   );
 }
 

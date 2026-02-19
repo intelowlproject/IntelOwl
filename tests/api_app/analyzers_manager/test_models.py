@@ -165,6 +165,76 @@ class AnalyzerReportTestCase(CustomTestCase):
         job2.delete()
         an1.delete()
 
+    def test_create_data_model_no_false_reuse(self):
+        """Verify that different report data creates separate data models."""
+        an1 = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
+        job1 = Job.objects.create(
+            analyzable=an1,
+            status=Job.STATUSES.ANALYZERS_RUNNING.value,
+        )
+        job2 = Job.objects.create(
+            analyzable=an1,
+            status=Job.STATUSES.ANALYZERS_RUNNING.value,
+        )
+        config = AnalyzerConfig.objects.first()
+        config.mapping_data_model = {
+            "evaluation": "evaluation",
+            "urls.url": "external_references",
+        }
+        config.save()
+        job1.analyzers_to_execute.set([config])
+        job2.analyzers_to_execute.set([config])
+
+        # First report: MALICIOUS evaluation
+        ar1 = AnalyzerReport.objects.create(
+            report={
+                "evaluation": "MALICIOUS",
+                "urls": [{"url": "www.intelowl.com"}],
+            },
+            job=job1,
+            config=config,
+            status=AnalyzerReport.STATUSES.SUCCESS.value,
+            task_id=str(uuid()),
+            parameters={},
+        )
+        # Second report: CLEAN evaluation (different data)
+        ar2 = AnalyzerReport.objects.create(
+            report={
+                "evaluation": "CLEAN",
+                "urls": [{"url": "www.safe-site.com"}],
+            },
+            job=job2,
+            config=config,
+            status=AnalyzerReport.STATUSES.SUCCESS.value,
+            task_id=str(uuid()),
+            parameters={},
+        )
+
+        dm1 = ar1.create_data_model()
+        self.assertIsNotNone(dm1)
+
+        dm2 = ar2.create_data_model()
+        self.assertIsNotNone(dm2)
+
+        # Different data should create separate data models
+        self.assertNotEqual(dm1.pk, dm2.pk)
+        dm1.refresh_from_db()
+        dm2.refresh_from_db()
+        self.assertEqual(dm1.evaluation, "malicious")
+        self.assertEqual(dm2.evaluation, "clean")
+
+        dm1.delete()
+        dm2.delete()
+        ar1.delete()
+        ar2.delete()
+        job1.delete()
+        job2.delete()
+        an1.delete()
+
     def test_get_value(self):
         an1 = Analyzable.objects.create(
             name="test.com",

@@ -2,13 +2,12 @@ import subprocess
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
+from django.conf import settings
+
 from api_app.analyzers_manager.file_analyzers.capa_info import (
     CACHE_LOCATION,
     CapaInfo,
 )
-from django.conf import settings
-
-from api_app.analyzers_manager.file_analyzers.capa_info import CapaInfo
 
 from .base_test_class import BaseFileAnalyzerTest
 
@@ -137,3 +136,4 @@ class TestCapaInfoCacheDirectory(TestCase):
         result = CapaInfo._ensure_cache_directory()
         mock_mkdtemp.assert_called_once_with(prefix="capa_cache_")
         self.assertEqual(result, "/tmp/capa_cache_abc")
+

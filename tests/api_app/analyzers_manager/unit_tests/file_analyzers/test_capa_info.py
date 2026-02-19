@@ -136,4 +136,3 @@ class TestCapaInfoCacheDirectory(TestCase):
         result = CapaInfo._ensure_cache_directory()
         mock_mkdtemp.assert_called_once_with(prefix="capa_cache_")
         self.assertEqual(result, "/tmp/capa_cache_abc")
-

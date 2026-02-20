@@ -4,9 +4,18 @@
 import datetime
 from collections import defaultdict
 
-from django.contrib.contenttypes.models import ContentType  # noqa: F401 - used by GenericForeignKey resolution
+from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
-from django.db.models import Case, DurationField, ExpressionWrapper, F, Q, QuerySet, Value, When
+from django.db.models import (
+    Case,
+    DurationField,
+    ExpressionWrapper,
+    F,
+    Q,
+    QuerySet,
+    Value,
+    When,
+)
 from django.db.models.functions import Power
 from django.db.models.lookups import IRegex, Range
 from django.utils.timezone import now
@@ -19,19 +28,14 @@ from api_app.user_events_manager.choices import DecayProgressionEnum
 class UserEventQuerySet(QuerySet):
     def decay(self):
         """
-        Bulk-decay all eligible UserEvents.
+        Bulk-decay all eligible UserEvents to eliminate N+1 queries.
 
-        Eligible events:
-          - not FIXED progression
-          - have a next_decay set
-          - next_decay is due (lte now)
-
-        Strategy:
-          1. Load eligible events into memory (with related data_model).
-          2. Mutate decay_times, next_decay on each event.
-          3. Decrement reliability on each related data_model.
-          4. Bulk-write all changes in a single atomic transaction
-             to avoid O(N) queries.
+        Previously, the method looped over each event calling .save()
+        individually — O(N) queries. This refactor:
+          1. Loads eligible events into memory with related data_model.
+          2. Mutates decay_times, next_decay, and data_model.reliability
+             on each event in Python.
+          3. Bulk-writes all changes in a single atomic transaction.
 
         Returns the number of events decayed.
         """
@@ -44,8 +48,8 @@ class UserEventQuerySet(QuerySet):
         if not objects.exists():
             return 0
 
-        # ForeignKey appears in _meta.fields (wildcard models) -> use select_related (JOIN).
-        # GenericForeignKey does not (UserAnalyzableEvent) -> use prefetch_related.
+        # ForeignKey appears in _meta.fields (wildcard models) -> use JOIN.
+        # GenericForeignKey does not (UserAnalyzableEvent) -> use prefetch.
         model_fields = {field.name for field in self.model._meta.fields}
         if "data_model" in model_fields:
             objects = objects.select_related("data_model")
@@ -57,7 +61,7 @@ class UserEventQuerySet(QuerySet):
         if not events:
             return 0
 
-        # Group data_models by their concrete class since
+        # Group data_models by concrete class since
         # bulk_update operates per-table.
         data_models_by_class = defaultdict(list)
 
@@ -68,7 +72,8 @@ class UserEventQuerySet(QuerySet):
             if data_model is not None:
                 data_model.reliability -= 1
 
-            # If no data_model or reliability has hit 0, stop scheduling decay.
+            # If no data_model or reliability has hit 0,
+            # stop scheduling future decay.
             if data_model is None or data_model.reliability <= 0:
                 event.next_decay = None
             else:
@@ -76,16 +81,20 @@ class UserEventQuerySet(QuerySet):
                     event.next_decay += datetime.timedelta(
                         days=event.decay_timedelta_days
                     )
-                elif event.decay_progression == DecayProgressionEnum.INVERSE_EXPONENTIAL.value:
+                elif (
+                    event.decay_progression
+                    == DecayProgressionEnum.INVERSE_EXPONENTIAL.value
+                ):
+                    # decay_times already incremented above,
+                    # so no need for +1 here.
                     event.next_decay += datetime.timedelta(
                         days=event.decay_timedelta_days ** event.decay_times
                     )
-                # FIXED is excluded above; any other unknown progression: leave next_decay as-is.
 
             if data_model is not None:
                 data_models_by_class[data_model.__class__].append(data_model)
 
-        # Bulk-write instead of per-object .save() to avoid O(N) queries.
+        # Bulk-write instead of per-object .save() — avoids O(N) queries.
         # Atomic so partial failures don't leave inconsistent state.
         with transaction.atomic():
             for model_class, models_list in data_models_by_class.items():
@@ -107,7 +116,9 @@ class UserEventQuerySet(QuerySet):
         obj = self.model(**kwargs)
         self._for_write = True
         if obj.data_model.reliability != 0:
-            obj.next_decay = obj.date + datetime.timedelta(days=obj.decay_timedelta_days)
+            obj.next_decay = obj.date + datetime.timedelta(
+                days=obj.decay_timedelta_days
+            )
         obj.save(force_insert=True, using=self.db)
         return obj
 

@@ -13,10 +13,6 @@ from api_app.user_events_manager.choices import DecayProgressionEnum
 
 class UserEventQuerySet(QuerySet):
     def decay(self):
-        from collections import defaultdict
-
-        from django.db import transaction
-
         objects = (
             self.exclude(decay_progression=DecayProgressionEnum.FIXED.value)
             .exclude(next_decay__isnull=True)

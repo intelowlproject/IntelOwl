@@ -156,8 +156,8 @@ export default function ReportsSearch() {
               Advanced search in plugin reports of the performed analysis.
             </span>
           </Row>
-          <Row id="search-input-fields-first-row d-flex flex-wrap">
-            <Col xxl={4} sm={12} className="d-flex align-items-center mt-4">
+          <Row id="search-input-fields-first-row" className="d-flex flex-wrap">
+            <Col xs={12} md={6} lg={4} className="d-flex align-items-center mt-4">
               <Label className="col-3 fw-bold mb-0" for="search__type">
                 Type:
               </Label>
@@ -187,7 +187,7 @@ export default function ReportsSearch() {
                   ))}
               </Input>
             </Col>
-            <Col xxl={4} sm={12} className="d-flex align-items-center mt-4">
+            <Col xs={12} md={6} lg={4} className="d-flex align-items-center mt-4">
               <Label className="col-3 fw-bold mb-0" for="search__name">
                 Name:
               </Label>
@@ -202,9 +202,9 @@ export default function ReportsSearch() {
                 className="col bg-darker border-dark"
               />
             </Col>
-            <Col xxl={3} sm={12} className=" d-flex align-items-center mt-4">
+            <Col xs={12} md={6} lg={4} className="d-flex align-items-center mt-4">
               <Label
-                className="col-xxl-4 col-sm-3 fw-bold mb-0"
+                className="col-3 fw-bold mb-0"
                 for="search__status"
               >
                 Status:
@@ -230,10 +230,11 @@ export default function ReportsSearch() {
               </Input>
             </Col>
           </Row>
-          <Row id="search-input-fields-second-row">
+          <Row id="search-input-fields-second-row" className="d-flex flex-wrap">
             <Col
-              xxl={4}
-              sm={12}
+              xs={12}
+              md={6}
+              xl={4}
               className="d-flex align-items-center flex-wrap mt-3"
             >
               <Label className="col-3 fw-bold mb-0">Start time:</Label>
@@ -252,7 +253,7 @@ export default function ReportsSearch() {
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                       invalid={formik.errors.startTime}
-                      className="col-6"
+                      className="flex-grow-1"
                     />
                   </div>
                   <div className="d-flex align-items-center">
@@ -268,7 +269,7 @@ export default function ReportsSearch() {
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                       invalid={formik.errors.startTime}
-                      className="col-6"
+                      className="flex-grow-1"
                     />
                   </div>
                 </div>
@@ -280,8 +281,9 @@ export default function ReportsSearch() {
               </div>
             </Col>
             <Col
-              xxl={4}
-              sm={12}
+              xs={12}
+              md={6}
+              xl={4}
               className="d-flex align-items-center flex-wrap mt-3"
             >
               <Label className="col-3 fw-bold mb-0">End time:</Label>
@@ -300,7 +302,7 @@ export default function ReportsSearch() {
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                       invalid={formik.errors.endTime}
-                      className="col-6"
+                      className="flex-grow-1"
                     />
                   </div>
                   <div className="d-flex align-items-center">
@@ -316,7 +318,7 @@ export default function ReportsSearch() {
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                       invalid={formik.errors.endTime}
-                      className="col-6"
+                      className="flex-grow-1"
                     />
                   </div>
                 </div>
@@ -325,9 +327,9 @@ export default function ReportsSearch() {
                 )}
               </div>
             </Col>
-            <Col xxl={3} sm={12} className="d-flex align-items-center mt-3">
+            <Col xs={12} md={6} xl={4} className="d-flex align-items-center mt-3">
               <Label
-                className="col-xxl-4 col-sm-3 fw-bold mb-0"
+                className="col-3 fw-bold mb-0"
                 for="search__errors"
               >
                 Errors:
@@ -358,10 +360,10 @@ export default function ReportsSearch() {
               </Input>
             </Col>
           </Row>
-          <Row id="search-input-fields-third-row">
-            <Col xxl={11} sm={12} className="d-flex align-items-center mt-3">
+          <Row id="search-input-fields-third-row" className="d-flex flex-wrap align-items-center">
+            <Col xs={12} sm={9} md={10} className="d-flex align-items-center mt-3">
               <Label
-                className="col-xxl-1 col-sm-3 fw-bold mb-0"
+                className="fw-bold mb-0 flex-shrink-0 me-2"
                 for="search__report"
               >
                 Text search:
@@ -397,9 +399,10 @@ export default function ReportsSearch() {
               />
             </Col>
             <Col
-              xxl={1}
-              sm={12}
-              className="d-flex align-items-center justify-content-end mt-3"
+              xs={12}
+              sm={3}
+              md={2}
+              className="d-flex align-items-center justify-content-start justify-content-sm-end mt-3"
             >
               <Button
                 id="search-button"

@@ -506,7 +506,9 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
                                       value !== "" ? (
                                         <div>
                                           <small className="text-info ms-2">
-                                            {inputState[value]?.matches?.length}{" "}
+                                            {
+                                              inputState[value]?.matches?.length
+                                            }{" "}
                                           </small>
                                           <MdInfoOutline
                                             id="matches-infoicon"

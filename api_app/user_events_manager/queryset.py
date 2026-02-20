@@ -3,8 +3,11 @@
 import datetime
 from collections import defaultdict
 
+from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
-from django.db.models import F, Q, QuerySet, Value
+from django.db.models import Case, ExpressionWrapper, F, Q, QuerySet, Value, When
+from django.db.models import DurationField
+from django.db.models.functions import Power
 from django.db.models.lookups import IRegex, Range
 from django.utils.timezone import now
 
@@ -18,12 +21,12 @@ class UserEventQuerySet(QuerySet):
         """
         Bulk-decay all eligible UserEvents to eliminate N+1 queries.
 
-        Previously, the method looped over each event calling .save()
-        individually — O(N) queries. This refactor:
-          1. Loads eligible events into memory with related data_model.
-          2. Mutates decay_times, next_decay, and data_model.reliability
-             on each event in Python.
-          3. Bulk-writes all changes in a single atomic transaction.
+        For ForeignKey data_model (wildcard events): uses pure SQL update()
+        with F() expressions and Case/When for zero queries per event.
+
+        For GenericForeignKey data_model (analyzable events): uses bulk_update
+        grouped by concrete class — unavoidable due to Django ORM limitations
+        with GenericForeignKey.
 
         Returns the number of events decayed.
         """
@@ -36,12 +39,82 @@ class UserEventQuerySet(QuerySet):
         if not objects.exists():
             return 0
 
+        # Check if data_model is a real ForeignKey (wildcard events)
+        # or a GenericForeignKey (analyzable events)
         model_fields = {field.name for field in self.model._meta.fields}
-        if "data_model" in model_fields:
-            objects = objects.select_related("data_model")
-        else:
-            objects = objects.prefetch_related("data_model")
 
+        if "data_model" in model_fields:
+            # ForeignKey case: pure SQL approach
+            return self._decay_with_fk(objects)
+        else:
+            # GenericForeignKey case: bulk_update approach
+            return self._decay_with_gfk(objects)
+
+    def _decay_with_fk(self, objects):
+        """
+        Pure SQL decay for wildcard events (ForeignKey data_model).
+        Uses update() + F() + Case/When + Power() for minimal queries.
+        """
+        count = objects.count()
+        if not count:
+            return 0
+
+        with transaction.atomic():
+            # Update data_model reliability in a single query
+            objects.filter(
+                data_model__reliability__gt=0
+            ).values("data_model").distinct().update(
+                **{"data_model__reliability": F("data_model__reliability") - 1}
+            )
+
+            # Update event fields using Case/When for conditional logic
+            objects.update(
+                decay_times=F("decay_times") + 1,
+                next_decay=Case(
+                    # reliability hit 0 -> stop decay
+                    When(
+                        data_model__reliability__lte=0,
+                        then=None,
+                    ),
+                    # LINEAR decay
+                    When(
+                        decay_progression=DecayProgressionEnum.LINEAR.value,
+                        then=ExpressionWrapper(
+                            F("next_decay")
+                            + ExpressionWrapper(
+                                F("decay_timedelta_days")
+                                * Value(datetime.timedelta(days=1)),
+                                output_field=DurationField(),
+                            ),
+                            output_field=DurationField(),
+                        ),
+                    ),
+                    # INVERSE_EXPONENTIAL decay
+                    When(
+                        decay_progression=DecayProgressionEnum.INVERSE_EXPONENTIAL.value,
+                        then=ExpressionWrapper(
+                            F("next_decay")
+                            + ExpressionWrapper(
+                                Power(F("decay_timedelta_days"), F("decay_times") + 1)
+                                * Value(datetime.timedelta(days=1)),
+                                output_field=DurationField(),
+                            ),
+                            output_field=DurationField(),
+                        ),
+                    ),
+                    default=None,
+                ),
+            )
+
+        return count
+
+    def _decay_with_gfk(self, objects):
+        """
+        Bulk decay for analyzable events (GenericForeignKey data_model).
+        GenericForeignKey cannot be updated via F() expressions in SQL,
+        so we use bulk_update grouped by concrete class.
+        """
+        objects = objects.prefetch_related("data_model")
         events = list(objects)
         if not events:
             return 0
@@ -61,9 +134,9 @@ class UserEventQuerySet(QuerySet):
                 if event.decay_progression == DecayProgressionEnum.LINEAR.value:
                     event.next_decay += datetime.timedelta(days=event.decay_timedelta_days)
                 elif event.decay_progression == DecayProgressionEnum.INVERSE_EXPONENTIAL.value:
-                    # decay_times already incremented above,
-                    # so no need for +1 here.
-                    event.next_decay += datetime.timedelta(days=event.decay_timedelta_days**event.decay_times)
+                    event.next_decay += datetime.timedelta(
+                        days=event.decay_timedelta_days**event.decay_times
+                    )
 
             if data_model is not None:
                 data_models_by_class[data_model.__class__].append(data_model)

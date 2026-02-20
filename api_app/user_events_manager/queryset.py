@@ -68,7 +68,7 @@ class UserEventQuerySet(QuerySet):
                 if event.decay_progression == DecayProgressionEnum.LINEAR.value:
                     event.next_decay += datetime.timedelta(days=event.decay_timedelta_days)
                 elif event.decay_progression == DecayProgressionEnum.INVERSE_EXPONENTIAL.value:
-                    event.next_decay += datetime.timedelta(days=event.decay_timedelta_days**event.decay_times)
+                    event.next_decay += datetime.timedelta(days=event.decay_timedelta_days ** (event.decay_times + 1))
 
             if data_model is not None:
                 data_models.append(data_model)
@@ -106,7 +106,7 @@ class UserEventQuerySet(QuerySet):
                 if event.decay_progression == DecayProgressionEnum.LINEAR.value:
                     event.next_decay += datetime.timedelta(days=event.decay_timedelta_days)
                 elif event.decay_progression == DecayProgressionEnum.INVERSE_EXPONENTIAL.value:
-                    event.next_decay += datetime.timedelta(days=event.decay_timedelta_days**event.decay_times)
+                    event.next_decay += datetime.timedelta(days=event.decay_timedelta_days ** (event.decay_times + 1))
 
             if data_model is not None:
                 data_models_by_class[data_model.__class__].append(data_model)

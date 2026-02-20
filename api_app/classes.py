@@ -230,8 +230,6 @@ class Plugin(metaclass=ABCMeta):
             self.disable_for_rate_limit()
         else:
             self.log_error(e)
-        if settings.STAGE_CI:
-            raise e
 
     @abstractclassproperty
     def report_model(cls) -> typing.Type[AbstractReport]:

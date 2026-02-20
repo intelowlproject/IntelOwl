@@ -573,7 +573,7 @@ class JobSerializer(_AbstractJobViewSerializer):
             return root_investigation.name
         return instance.investigation
 
-    def get_analyzable_id(self, instance: Job) -> int:
+    def get_analyzable_id(self, instance: Job) -> int:  # skipcq: PYL-R0201
         return instance.analyzable.pk
 
     def get_fields(self):
@@ -594,7 +594,7 @@ class JobSerializer(_AbstractJobViewSerializer):
             )
         return super().get_fields()
 
-    def get_data_model(self, instance: Job):
+    def get_data_model(self, instance: Job):  # skipcq: PYL-R0201
         if instance.data_model:
             return instance.data_model.serialize()
         return {}
@@ -1165,7 +1165,7 @@ class JobAnalyzableHistorySerializer(rfs.ModelSerializer):
         model = Job
         fields = ["playbook", "user", "date", "data_model", "id"]
 
-    def get_data_model(self, instance: Job):
+    def get_data_model(self, instance: Job):  # skipcq: PYL-R0201
         logger.debug(f"{instance=}")
         logger.debug(f"{instance.analyzable=}")
 

@@ -67,9 +67,14 @@ COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
 COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
 WORKDIR $PYTHONPATH
 
-RUN pip3 install --no-cache-dir --use-pep517 --compile -r project-requirements.txt \
-    && pip3 install --no-cache-dir pycti==${PYCTI_VERSION} \
-    && pip3 install --no-cache-dir --compile -r certego-requirements.txt
+# Upgrade pip and build tools first
+RUN pip3 install --upgrade pip setuptools wheel
+
+# Then install your project requirements
+RUN pip3 install --default-timeout=1000 --no-cache-dir --use-pep517 --compile -r project-requirements.txt \
+    && pip3 install --default-timeout=1000 --no-cache-dir pycti==${PYCTI_VERSION} \
+    && pip3 install --default-timeout=1000 --no-cache-dir --compile -r certego-requirements.txt
+
 
 COPY . $PYTHONPATH
 

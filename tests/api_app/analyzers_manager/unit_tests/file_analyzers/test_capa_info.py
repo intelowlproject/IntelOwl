@@ -1,6 +1,8 @@
 import subprocess
 from unittest.mock import MagicMock, patch
 
+from django.conf import settings
+
 from api_app.analyzers_manager.file_analyzers.capa_info import CapaInfo
 
 from .base_test_class import BaseFileAnalyzerTest
@@ -29,7 +31,7 @@ class TestCapaInfoAnalyzer(BaseFileAnalyzerTest):
         mock_requests_get = MagicMock()
         mock_requests_get.json.return_value = {"tag_name": "v1.0.0"}
 
-        return [
+        patches = [
             patch.object(CapaInfo, "update", return_value=True),
             patch("subprocess.run", return_value=response_from_command),
             patch(
@@ -38,6 +40,10 @@ class TestCapaInfoAnalyzer(BaseFileAnalyzerTest):
             ),
             patch.object(CapaInfo, "_check_if_latest_version", return_value=True),
         ]
+
+        if settings.MOCK_CONNECTIONS:
+            patches.insert(1, patch.object(CapaInfo, "_download_signatures", return_value=None))
+        return patches
 
     def get_extra_config(self):
         return {

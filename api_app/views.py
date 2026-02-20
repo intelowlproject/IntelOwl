@@ -25,6 +25,8 @@ from rest_framework.viewsets import ModelViewSet
 from api_app.choices import Classification, ScanMode
 from api_app.decorators import abstractclassproperty
 from api_app.exceptions import NotImplementedException
+from api_app.models import UpdateCheckStatus
+from api_app.serializers.system import SystemUpdateStatusSerializer
 from api_app.websocket import JobConsumer
 from certego_saas.apps.organization.permissions import (
     IsObjectOwnerOrSameOrgPermission as IsObjectUserOrSameOrgPermission,
@@ -951,6 +953,17 @@ def plugin_state_viewer(request):
             "disabled": True,
         }
     return Response(result)
+
+
+@api_view(["GET"])
+def system_update_check_view(request):
+    """
+    Returns current IntelOwl system update status.
+    Read-only endpoint for frontend system panel.
+    """
+    state = UpdateCheckStatus.objects.first()
+    data = SystemUpdateStatusSerializer.from_state(state)
+    return Response(data, status=status.HTTP_200_OK)
 
 
 class PythonReportActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):

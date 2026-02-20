@@ -14,6 +14,10 @@ from api_app.user_events_manager.choices import DecayProgressionEnum
 
 class UserEventQuerySet(QuerySet):
     def decay(self):
+        from collections import defaultdict
+
+        from django.db import transaction
+
         objects = (
             self.exclude(decay_progression=DecayProgressionEnum.FIXED.value)
             .exclude(next_decay__isnull=True)
@@ -52,24 +56,50 @@ class UserEventQuerySet(QuerySet):
                 default=None,
             ),
         )
+        # ForeignKey appears in _meta.fields (wildcard models) -> use JOIN.
+        # GenericForeignKey does not (UserAnalyzableEvent) -> use prefetch.
+        model_fields = {field.name for field in self.model._meta.fields}
+        if "data_model" in model_fields:
+            objects = objects.select_related("data_model")
+        else:
+            objects = objects.prefetch_related("data_model")
 
-        # Step 2: Bulk update reliability on data_model
-        # Group by content_type to handle GenericForeignKey correctly
-        content_type_ids = defaultdict(list)
-        for obj in objects.values("data_model_content_type_id", "data_model_object_id"):
-            content_type_ids[obj["data_model_content_type_id"]].append(
-                obj["data_model_object_id"]
-            )
+        # Load into memory so we can mutate fields and bulk-write back.
+        events = list(objects)
+        if not events:
+            return 0
 
-        for ct_id, obj_ids in content_type_ids.items():
-            ct = ContentType.objects.get_for_id(ct_id)
-            model = ct.model_class()
-            model.objects.filter(
-                pk__in=obj_ids,
-                reliability__gt=0,
-            ).update(reliability=F("reliability") - 1)
+        # Group by concrete class since bulk_update works per-table.
+        data_models_by_class = defaultdict(list)
 
-        return count
+        for obj in events:
+            obj.decay_times += 1
+            data_model = obj.data_model
+
+            if data_model is not None:
+                data_model.reliability -= 1
+
+            if data_model is None or data_model.reliability == 0:
+                obj.next_decay = None
+            else:
+                if obj.decay_progression == DecayProgressionEnum.LINEAR.value:
+                    obj.next_decay += datetime.timedelta(days=obj.decay_timedelta_days)
+                elif obj.decay_progression == DecayProgressionEnum.INVERSE_EXPONENTIAL.value:
+                    obj.next_decay += datetime.timedelta(
+                        days=obj.decay_timedelta_days ** (obj.decay_times + 1)
+                    )
+
+            if data_model is not None:
+                data_models_by_class[data_model.__class__].append(data_model)
+
+        # Bulk-write instead of per-object .save() to avoid O(N) queries.
+        # Atomic so partial failures don't leave inconsistent state.
+        with transaction.atomic():
+            for model_class, models_list in data_models_by_class.items():
+                model_class.objects.bulk_update(models_list, ["reliability"])
+            self.model.objects.bulk_update(events, ["decay_times", "next_decay"])
+
+        return len(events)
 
     def visible_for_user(self, user):
         if user.has_membership():

@@ -47,7 +47,11 @@ class UrlScan(ObservableAnalyzer):
         return result
 
     def __urlscan_submit(self) -> str:
-        data = {"url": self.observable_name, "visibility": self.visibility}
+        observable_value = self.observable_name
+        if self.observable_classification == Classification.DOMAIN:
+            observable_value = f"https://{self.observable_name}"
+
+        data = {"url": observable_value, "visibility": self.visibility}
         uri = "/scan/"
         response = self.session.post(self.url + uri, json=data)
         # catch error description to help users to understand why it did not work

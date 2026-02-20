@@ -157,7 +157,12 @@ export default function ReportsSearch() {
             </span>
           </Row>
           <Row id="search-input-fields-first-row" className="d-flex flex-wrap">
-            <Col xs={12} md={6} lg={4} className="d-flex align-items-center mt-4">
+            <Col
+              xs={12}
+              md={6}
+              lg={4}
+              className="d-flex align-items-center mt-4"
+            >
               <Label className="col-3 fw-bold mb-0" for="search__type">
                 Type:
               </Label>
@@ -187,7 +192,12 @@ export default function ReportsSearch() {
                   ))}
               </Input>
             </Col>
-            <Col xs={12} md={6} lg={4} className="d-flex align-items-center mt-4">
+            <Col
+              xs={12}
+              md={6}
+              lg={4}
+              className="d-flex align-items-center mt-4"
+            >
               <Label className="col-3 fw-bold mb-0" for="search__name">
                 Name:
               </Label>
@@ -202,11 +212,13 @@ export default function ReportsSearch() {
                 className="col bg-darker border-dark"
               />
             </Col>
-            <Col xs={12} md={6} lg={4} className="d-flex align-items-center mt-4">
-              <Label
-                className="col-3 fw-bold mb-0"
-                for="search__status"
-              >
+            <Col
+              xs={12}
+              md={6}
+              lg={4}
+              className="d-flex align-items-center mt-4"
+            >
+              <Label className="col-3 fw-bold mb-0" for="search__status">
                 Status:
               </Label>
               <Input
@@ -327,11 +339,13 @@ export default function ReportsSearch() {
                 )}
               </div>
             </Col>
-            <Col xs={12} md={6} xl={4} className="d-flex align-items-center mt-3">
-              <Label
-                className="col-3 fw-bold mb-0"
-                for="search__errors"
-              >
+            <Col
+              xs={12}
+              md={6}
+              xl={4}
+              className="d-flex align-items-center mt-3"
+            >
+              <Label className="col-3 fw-bold mb-0" for="search__errors">
                 Errors:
               </Label>
               <Input
@@ -360,8 +374,16 @@ export default function ReportsSearch() {
               </Input>
             </Col>
           </Row>
-          <Row id="search-input-fields-third-row" className="d-flex flex-wrap align-items-center">
-            <Col xs={12} sm={9} md={10} className="d-flex align-items-center mt-3">
+          <Row
+            id="search-input-fields-third-row"
+            className="d-flex flex-wrap align-items-center"
+          >
+            <Col
+              xs={12}
+              sm={9}
+              md={10}
+              className="d-flex align-items-center mt-3"
+            >
               <Label
                 className="fw-bold mb-0 flex-shrink-0 me-2"
                 for="search__report"

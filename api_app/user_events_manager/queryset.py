@@ -36,21 +36,16 @@ class UserEventQuerySet(QuerySet):
         if not objects.exists():
             return 0
 
-        # ForeignKey appears in _meta.fields (wildcard models) -> use JOIN.
-        # GenericForeignKey does not (UserAnalyzableEvent) -> use prefetch.
         model_fields = {field.name for field in self.model._meta.fields}
         if "data_model" in model_fields:
             objects = objects.select_related("data_model")
         else:
             objects = objects.prefetch_related("data_model")
 
-        # Load into memory so we can mutate fields and bulk-write back.
         events = list(objects)
         if not events:
             return 0
 
-        # Group data_models by concrete class since
-        # bulk_update operates per-table.
         data_models_by_class = defaultdict(list)
 
         for event in events:
@@ -60,30 +55,19 @@ class UserEventQuerySet(QuerySet):
             if data_model is not None:
                 data_model.reliability -= 1
 
-            # If no data_model or reliability has hit 0,
-            # stop scheduling future decay.
             if data_model is None or data_model.reliability <= 0:
                 event.next_decay = None
             else:
                 if event.decay_progression == DecayProgressionEnum.LINEAR.value:
-                    event.next_decay += datetime.timedelta(
-                        days=event.decay_timedelta_days
-                    )
-                elif (
-                    event.decay_progression
-                    == DecayProgressionEnum.INVERSE_EXPONENTIAL.value
-                ):
+                    event.next_decay += datetime.timedelta(days=event.decay_timedelta_days)
+                elif event.decay_progression == DecayProgressionEnum.INVERSE_EXPONENTIAL.value:
                     # decay_times already incremented above,
                     # so no need for +1 here.
-                    event.next_decay += datetime.timedelta(
-                        days=event.decay_timedelta_days ** event.decay_times
-                    )
+                    event.next_decay += datetime.timedelta(days=event.decay_timedelta_days**event.decay_times)
 
             if data_model is not None:
                 data_models_by_class[data_model.__class__].append(data_model)
 
-        # Bulk-write instead of per-object .save() — avoids O(N) queries.
-        # Atomic so partial failures don't leave inconsistent state.
         with transaction.atomic():
             for model_class, models_list in data_models_by_class.items():
                 model_class.objects.bulk_update(models_list, ["reliability"])
@@ -93,9 +77,7 @@ class UserEventQuerySet(QuerySet):
 
     def visible_for_user(self, user):
         if user.has_membership():
-            user_query = Q(user=user) | Q(
-                user__membership__organization_id=user.membership.organization_id
-            )
+            user_query = Q(user=user) | Q(user__membership__organization_id=user.membership.organization_id)
         else:
             user_query = Q(user=user)
         return self.filter(user_query)
@@ -104,9 +86,7 @@ class UserEventQuerySet(QuerySet):
         obj = self.model(**kwargs)
         self._for_write = True
         if obj.data_model.reliability != 0:
-            obj.next_decay = obj.date + datetime.timedelta(
-                days=obj.decay_timedelta_days
-            )
+            obj.next_decay = obj.date + datetime.timedelta(days=obj.decay_timedelta_days)
         obj.save(force_insert=True, using=self.db)
         return obj
 
@@ -117,9 +97,7 @@ class UserDomainWildCardEventQuerySet(UserEventQuerySet):
             Classification.DOMAIN.value,
             Classification.URL.value,
         ]:
-            return self.annotate(
-                matches=IRegex(Value(analyzable.name), F("query"))
-            ).filter(matches=True)
+            return self.annotate(matches=IRegex(Value(analyzable.name), F("query"))).filter(matches=True)
         return self.none()
 
     def create(self, **kwargs):
@@ -131,9 +109,9 @@ class UserDomainWildCardEventQuerySet(UserEventQuerySet):
 class UserIPWildCardEventQuerySet(UserEventQuerySet):
     def matches(self, analyzable: Analyzable) -> "UserIPWildCardEventQuerySet":
         if analyzable.classification == Classification.IP.value:
-            return self.annotate(
-                matches=Range(Value(analyzable.name), (F("start_ip"), F("end_ip")))
-            ).filter(matches=True)
+            return self.annotate(matches=Range(Value(analyzable.name), (F("start_ip"), F("end_ip")))).filter(
+                matches=True
+            )
         return self.none()
 
     def create(self, **kwargs):

@@ -53,59 +53,46 @@ class UserEventQuerySet(QuerySet):
         else:
             return self._decay_with_gfk(objects)
 
-    def _decay_with_fk(self, objects):
-        """
-        Pure SQL decay for wildcard events (ForeignKey data_model).
-        Uses update() + F() + Case/When + Power() for minimal queries.
-        """
-        count = objects.count()
-        if not count:
-            return 0
+  return count
 
-        one_day = Value(datetime.timedelta(days=1))
+def _decay_with_fk(self, objects):
+    """
+    Decay for wildcard events (ForeignKey data_model).
+    Uses select_related + bulk_update for efficiency.
+    """
+    objects = objects.select_related("data_model")
+    events = list(objects)
+    if not events:
+        return 0
 
-        with transaction.atomic():
-            objects.filter(data_model__reliability__gt=0).update(
-                data_model__reliability=F("data_model__reliability") - 1
-            )
-            objects.update(
-                decay_times=F("decay_times") + 1,
-                next_decay=Case(
-                    When(
-                        data_model__reliability__lte=0,
-                        then=None,
-                    ),
-                    When(
-                        decay_progression=DecayProgressionEnum.LINEAR.value,
-                        then=ExpressionWrapper(
-                            F("next_decay")
-                            + ExpressionWrapper(
-                                F("decay_timedelta_days") * one_day,
-                                output_field=DurationField(),
-                            ),
-                            output_field=DurationField(),
-                        ),
-                    ),
-                    When(
-                        decay_progression=(DecayProgressionEnum.INVERSE_EXPONENTIAL.value),
-                        then=ExpressionWrapper(
-                            F("next_decay")
-                            + ExpressionWrapper(
-                                Power(
-                                    F("decay_timedelta_days"),
-                                    F("decay_times") + 1,
-                                )
-                                * one_day,
-                                output_field=DurationField(),
-                            ),
-                            output_field=DurationField(),
-                        ),
-                    ),
-                    default=None,
-                ),
-            )
+    data_models = []
 
-        return count
+    for event in events:
+        event.decay_times += 1
+        data_model = event.data_model
+
+        if data_model is not None:
+            data_model.reliability -= 1
+
+        if data_model is None or data_model.reliability <= 0:
+            event.next_decay = None
+        else:
+            if event.decay_progression == DecayProgressionEnum.LINEAR.value:
+                event.next_decay += datetime.timedelta(days=event.decay_timedelta_days)
+            elif event.decay_progression == DecayProgressionEnum.INVERSE_EXPONENTIAL.value:
+                event.next_decay += datetime.timedelta(
+                    days=event.decay_timedelta_days**event.decay_times
+                )
+
+        if data_model is not None:
+            data_models.append(data_model)
+
+    with transaction.atomic():
+        if data_models:
+            type(data_models[0]).objects.bulk_update(data_models, ["reliability"])
+        self.model.objects.bulk_update(events, ["decay_times", "next_decay"])
+
+    return len(events)
 
     def _decay_with_gfk(self, objects):
         """

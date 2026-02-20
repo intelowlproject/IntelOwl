@@ -8,9 +8,7 @@ from tests import CustomTestCase
 
 class PreDeleteParameterTestCase(CustomTestCase):
     def test_cache(self):
-        pm = PythonModule.objects.filter(
-            base_path=PythonModuleBasePaths.ObservableAnalyzer.value
-        ).first()
+        pm = PythonModule.objects.filter(base_path=PythonModuleBasePaths.ObservableAnalyzer.value).first()
         ac: AnalyzerConfig = AnalyzerConfig.objects.filter(python_module=pm).first()
 
         new_param = Parameter.objects.create(
@@ -21,12 +19,12 @@ class PreDeleteParameterTestCase(CustomTestCase):
             is_secret=False,
             required=False,
         )
-        data = PythonConfigListSerializer(
-            child=AnalyzerConfigSerializer()
-        ).to_representation_single_plugin(ac, self.user)
+        data = PythonConfigListSerializer(child=AnalyzerConfigSerializer()).to_representation_single_plugin(
+            ac, self.user
+        )
         self.assertIn("test", dict(data)["params"])
         new_param.delete()
-        data = PythonConfigListSerializer(
-            child=AnalyzerConfigSerializer()
-        ).to_representation_single_plugin(ac, self.user)
+        data = PythonConfigListSerializer(child=AnalyzerConfigSerializer()).to_representation_single_plugin(
+            ac, self.user
+        )
         self.assertNotIn("test", dict(data)["params"])

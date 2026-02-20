@@ -12,9 +12,7 @@ class VirusheeCheckHashTestCase(BaseAnalyzerTest):
 
     @staticmethod
     def get_mocked_response():
-        return patch(
-            "requests.Session.get", return_value=MockUpResponse({"success": True}, 200)
-        )
+        return patch("requests.Session.get", return_value=MockUpResponse({"success": True}, 200))
 
     @classmethod
     def get_extra_config(cls):

@@ -16,9 +16,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
@@ -45,9 +43,7 @@ AUTHLIB_OAUTH_CLIENTS = {}
 
 if (
     secrets.get_secret("GOOGLE_CLIENT_ID")
-    and str(secrets.get_secret("GOOGLE_CLIENT_ID")).endswith(
-        ".apps.googleusercontent.com"
-    )
+    and str(secrets.get_secret("GOOGLE_CLIENT_ID")).endswith(".apps.googleusercontent.com")
     and secrets.get_secret("GOOGLE_CLIENT_SECRET")
 ):
     AUTHLIB_OAUTH_CLIENTS["google"] = {

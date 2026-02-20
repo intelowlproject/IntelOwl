@@ -15,7 +15,8 @@ class DShieldTestCase(BaseAnalyzerTest):
         return patch(
             "requests.get",
             return_value=MockUpResponse(
-                json_data={}, status_code=200  # Required even if not used
+                json_data={},
+                status_code=200,  # Required even if not used
             ),
         )
 

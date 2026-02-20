@@ -34,8 +34,7 @@ class Stalkphish(classes.ObservableAnalyzer):
             uri = f"search/ipv4/{self.observable_name}"
         else:
             raise AnalyzerRunException(
-                f"not supported observable type {obs_clsfn}."
-                " Supported are: ip, domain, url or generic."
+                f"not supported observable type {obs_clsfn}. Supported are: ip, domain, url or generic."
             )
 
         try:

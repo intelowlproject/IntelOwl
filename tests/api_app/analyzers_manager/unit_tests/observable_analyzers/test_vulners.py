@@ -14,9 +14,7 @@ class VulnersTestCase(BaseAnalyzerTest):
     def get_mocked_response():
         return patch(
             "requests.post",
-            return_value=MockUpResponse(
-                {"result": "OK", "data": {"score": [6.5, "NONE"]}}, 200
-            ),
+            return_value=MockUpResponse({"result": "OK", "data": {"score": [6.5, "NONE"]}}, 200),
         )
 
     @classmethod

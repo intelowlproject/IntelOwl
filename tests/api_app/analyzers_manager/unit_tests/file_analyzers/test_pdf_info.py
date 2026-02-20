@@ -32,9 +32,7 @@ class PDFInfoTest(BaseFileAnalyzerTest):
         mock_parser.parse.return_value = (0, mock_pdf)  # 0 indicates success
 
         # Mock pdfid - create a realistic result structure
-        mock_pdfid_result = {
-            "reports": [{"/Page": 1, "/Count": 5, "/JS": 2, "/JavaScript": 1}]
-        }
+        mock_pdfid_result = {"reports": [{"/Page": 1, "/Count": 5, "/JS": 2, "/JavaScript": 1}]}
 
         # Create a mock options object that can have json attribute set
         class MockOptions:

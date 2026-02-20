@@ -16,7 +16,6 @@ class TestYaraScan(BaseFileAnalyzerTest):
         }
 
     def get_mocked_response(self):
-
         return [
             patch(
                 "api_app.analyzers_manager.file_analyzers.yara_scan.YaraRepo.analyze",

@@ -16,10 +16,10 @@ jobs:
     outputs:
       frontend: ${{steps.diff_check.outputs.frontend}}
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v6.0.2
         with:
           ref: ${{ github.base_ref }}
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v6.0.2
         with:
           clean: false
       - name: Generate diffs
@@ -34,10 +34,10 @@ jobs:
 
     steps:
       - name: Checkout IntelOwl
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6.0.2
 
       - name: Set up Python
-        uses: actions/setup-python@v5.4.0
+        uses: actions/setup-python@v6.2.0
         with:
           python-version: 3.11
 
@@ -50,10 +50,10 @@ jobs:
         run: |
           ruff check . --output-format=github
 
-      - name: Check formatting with Black
+      - name: Check formatting with Ruff
         run: |
-          black . --check --diff --exclude "migrations|venv"
-      
+          ruff format . --check --diff
+
       - name: Perform ShellCheck Analysis
         run: bash <(curl -s https://raw.githubusercontent.com/CICDToolbox/shellcheck/master/pipeline.sh)
 
@@ -63,12 +63,12 @@ jobs:
 
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.12.0
+        uses: styfle/cancel-workflow-action@0.13.0
         with:
           access_token: ${{ github.token }}
 
       - name: Checkout IntelOwl
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6.0.2
 
       - name: Prepare Launch
         run: |
@@ -121,7 +121,7 @@ jobs:
     if: ${{ needs.detect-changes.outputs.frontend > 0 }}
 
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v6.0.2
       - name: Set up NodeJS
         uses: actions/setup-node@v4
         with:

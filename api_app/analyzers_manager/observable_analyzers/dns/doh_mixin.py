@@ -34,12 +34,8 @@ class DoHMixin(BaseAnalyzerMixin, metaclass=ABCMeta):
         logger.info(f"Encoding DNS query for {observable}")
         query = dns.message.make_query(observable, dns.rdatatype.A)
         wire_query = query.to_wire()
-        encoded_query = (
-            base64.urlsafe_b64encode(wire_query).rstrip(b"=").decode("ascii")
-        )
-        logger.info(
-            f"{self.analyzer_name} encoded query for {observable}: {encoded_query}"
-        )
+        encoded_query = base64.urlsafe_b64encode(wire_query).rstrip(b"=").decode("ascii")
+        logger.info(f"{self.analyzer_name} encoded query for {observable}: {encoded_query}")
         return encoded_query
 
     def build_query_url(self, observable_name: str) -> str:

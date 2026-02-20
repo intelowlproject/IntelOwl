@@ -40,9 +40,7 @@ class FailureLoggedRequest(Request):
             f"Failure detected for task {self.task.name}"
             f" with exception {exc_info} and request {self._request_dict}"
         )
-        return super().on_failure(
-            exc_info, send_failed_event=send_failed_event, return_ok=return_ok
-        )
+        return super().on_failure(exc_info, send_failed_event=send_failed_event, return_ok=return_ok)
 
 
 class FailureLoggedTask(Task):
@@ -96,9 +94,7 @@ def remove_old_jobs():
         try:
             old_job.delete()
         except Job.DoesNotExist as e:
-            logger.warning(
-                f"job {old_job.id} does not exist. Err: {e}", stack_info=True
-            )
+            logger.warning(f"job {old_job.id} does not exist. Err: {e}", stack_info=True)
 
     logger.info("finished remove_old_jobs")
     return num_jobs_to_delete
@@ -131,17 +127,14 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
 
     def fail_job(job):
         logger.error(
-            f"found stuck analysis, job_id:{job.id}."
-            f"Setting the job to status {Job.STATUSES.FAILED.value}'"
+            f"found stuck analysis, job_id:{job.id}.Setting the job to status {Job.STATUSES.FAILED.value}'"
         )
         job.status = Job.STATUSES.FAILED.value
         job.finished_analysis_time = now()
         job.save(update_fields=["status", "finished_analysis_time"])
 
     logger.info("started check_stuck_analysis")
-    running_jobs = Job.objects.running(
-        check_pending=check_pending, minutes_ago=minutes_ago
-    )
+    running_jobs = Job.objects.running(check_pending=check_pending, minutes_ago=minutes_ago)
     logger.info(f"checking if {running_jobs.count()} jobs are stuck")
 
     jobs_id_stuck = []
@@ -157,9 +150,7 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
                 # if it's still pending, we are killing
                 fail_job(running_job)
             # the job is pending for 1 cycle
-            elif running_job.received_request_time < (
-                now() - datetime.timedelta(minutes=minutes_ago)
-            ):
+            elif running_job.received_request_time < (now() - datetime.timedelta(minutes=minutes_ago)):
                 logger.info(f"Running again job {running_job}")
                 # we are trying to execute again all pending
                 # (and technically, but it is not the case here) all failed reports
@@ -193,9 +184,7 @@ def health_check(python_module_pk: int, plugin_config_pk: str):
     from api_app.classes import Plugin
     from api_app.models import PythonConfig, PythonModule
 
-    plugin_class: typing.Type[Plugin] = PythonModule.objects.get(
-        pk=python_module_pk
-    ).python_class
+    plugin_class: typing.Type[Plugin] = PythonModule.objects.get(pk=python_module_pk).python_class
 
     config: PythonConfig = plugin_class.config_model.objects.get(pk=plugin_config_pk)
     plugin = plugin_class(
@@ -210,9 +199,7 @@ def health_check(python_module_pk: int, plugin_config_pk: str):
             config.health_check_status = enabled
             config.save()
     else:
-        logger.info(
-            f"Skipping health_check for configuration {config.name} because disabled"
-        )
+        logger.info(f"Skipping health_check for configuration {config.name} because disabled")
 
 
 @shared_task(base=FailureLoggedTask, soft_time_limit=100)
@@ -284,19 +271,13 @@ def run_plugin(
     from api_app.models import Job, PythonModule
     from api_app.websocket import JobConsumer
 
-    logger.info(
-        f"Configuring plugin {plugin_config_pk} for job {job_id} with task {task_id}"
-    )
-    plugin_class: typing.Type[Plugin] = PythonModule.objects.get(
-        pk=python_module_pk
-    ).python_class
+    logger.info(f"Configuring plugin {plugin_config_pk} for job {job_id} with task {task_id}")
+    plugin_class: typing.Type[Plugin] = PythonModule.objects.get(pk=python_module_pk).python_class
     config = plugin_class.config_model.objects.get(pk=plugin_config_pk)
     plugin = plugin_class(
         config=config,
     )
-    logger.info(
-        f"Starting plugin {plugin_config_pk} for job {job_id} with task {task_id}"
-    )
+    logger.info(f"Starting plugin {plugin_config_pk} for job {job_id} with task {task_id}")
     try:
         plugin.start(
             job_id=job_id,
@@ -305,9 +286,7 @@ def run_plugin(
         )
     except Exception as e:
         logger.exception(e)
-        config.reports.filter(job__pk=job_id).update(
-            status=plugin.report_model.STATUSES.FAILED.value
-        )
+        config.reports.filter(job__pk=job_id).update(status=plugin.report_model.STATUSES.FAILED.value)
     job = Job.objects.get(pk=job_id)
     JobConsumer.serialize_and_send_job(job)
 
@@ -338,9 +317,7 @@ def create_caches(user_pk: int):
         (IngestorConfig, IngestorConfigSerializer),
     ]:
         for plugin in python_config_class.objects.all():
-            PythonConfigListSerializer(
-                child=serializer_class()
-            ).to_representation_single_plugin(plugin, user)
+            PythonConfigListSerializer(child=serializer_class()).to_representation_single_plugin(plugin, user)
 
 
 @signals.beat_init.connect
@@ -349,9 +326,7 @@ def beat_init_connect(*args, sender: Consumer = None, **kwargs):
 
     logger.info("Starting beat_init signal")
     # update of plugins that needs it
-    for task in PeriodicTask.objects.filter(
-        enabled=True, task=f"{update.__module__}.{update.__name__}"
-    ):
+    for task in PeriodicTask.objects.filter(enabled=True, task=f"{update.__module__}.{update.__name__}"):
         python_module_pk = json.loads(task.kwargs)["python_module_pk"]
         logger.info(f"Updating {python_module_pk}")
         update.apply_async(
@@ -388,21 +363,16 @@ def send_bi_to_elastic(max_timeout: int = 60, max_objects: int = 10000):
             VisualizerReport,
         ]:
             report_class: typing.Type[AbstractReport]
-            report_class.objects.filter(sent_to_bi=False).filter_completed().defer(
-                "report"
-            ).order_by("-start_time")[:max_objects].send_to_elastic_as_bi(
-                max_timeout=max_timeout
-            )
-        Job.objects.filter(sent_to_bi=False).filter_completed().order_by(
-            "-received_request_time"
-        )[:max_objects].send_to_elastic_as_bi(max_timeout=max_timeout)
+            report_class.objects.filter(sent_to_bi=False).filter_completed().defer("report").order_by(
+                "-start_time"
+            )[:max_objects].send_to_elastic_as_bi(max_timeout=max_timeout)
+        Job.objects.filter(sent_to_bi=False).filter_completed().order_by("-received_request_time")[
+            :max_objects
+        ].send_to_elastic_as_bi(max_timeout=max_timeout)
 
 
-@shared_task(
-    base=FailureLoggedTask, name="send_plugin_report_to_elastic", soft_time_limit=300
-)
+@shared_task(base=FailureLoggedTask, name="send_plugin_report_to_elastic", soft_time_limit=300)
 def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 10000):
-
     from api_app.analyzers_manager.models import AnalyzerReport
     from api_app.connectors_manager.models import ConnectorReport
     from api_app.models import AbstractReport
@@ -411,9 +381,7 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
     if settings.ELASTICSEARCH_DSL_ENABLED and settings.ELASTICSEARCH_DSL_HOST:
         upper_threshold = now().replace(second=0, microsecond=0)
         lower_threshold = upper_threshold - datetime.timedelta(minutes=1)
-        logger.info(
-            f"add to elastic reports from: {lower_threshold} to {upper_threshold}"
-        )
+        logger.info(f"add to elastic reports from: {lower_threshold} to {upper_threshold}")
 
         def _convert_report_to_elastic_document(
             _class: AbstractReport,
@@ -461,23 +429,15 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
                 }
                 for report in report_list
             ]
-            logger.info(
-                f"{_class.__name__} has {len(report_document_list)} new documents to upload"
-            )
+            logger.info(f"{_class.__name__} has {len(report_document_list)} new documents to upload")
             return report_document_list
 
         # Add document. Remove ingestors and visualizers because they contain data useless in term of search functionality:
         # ingestors contain samples and visualizers data about organizing the info inside the page.
         all_report_document_list = (
-            _convert_report_to_elastic_document(
-                AnalyzerReport, lower_threshold, upper_threshold
-            )
-            + _convert_report_to_elastic_document(
-                ConnectorReport, lower_threshold, upper_threshold
-            )
-            + _convert_report_to_elastic_document(
-                PivotReport, lower_threshold, upper_threshold
-            )
+            _convert_report_to_elastic_document(AnalyzerReport, lower_threshold, upper_threshold)
+            + _convert_report_to_elastic_document(ConnectorReport, lower_threshold, upper_threshold)
+            + _convert_report_to_elastic_document(PivotReport, lower_threshold, upper_threshold)
         )
         logger.info(f"Documents to add to elastic: {len(all_report_document_list)}")
         if all_report_document_list:

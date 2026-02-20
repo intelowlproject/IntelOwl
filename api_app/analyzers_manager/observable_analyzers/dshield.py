@@ -30,9 +30,7 @@ class DShield(ObservableAnalyzer):
                 response.raise_for_status()
             except requests.RequestException as e:
                 logger.warning(e, stack_info=True)
-                self.report.errors.append(
-                    f"{query_type} check failed for {self.observable_name}. Err {e}"
-                )
+                self.report.errors.append(f"{query_type} check failed for {self.observable_name}. Err {e}")
                 self.report.save()
             else:
                 result[query_type] = response.json()

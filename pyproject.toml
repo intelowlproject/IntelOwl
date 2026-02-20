@@ -1,5 +1,5 @@
 [tool.ruff]
-line-length = 140
+line-length = 110
 target-version = "py311"
 
 exclude = [
@@ -18,15 +18,42 @@ select = [
     "W",   # pycodestyle warnings
     "F",   # pyflakes
     "I",   # isort
+    "UP",  # pyupgrade
+    "C4",  # flake8-comprehensions
+    "DJ",  # flake8-django
 ]
 
 ignore = [
     "E231",  # missing whitespace after ','
+    "E501",  # line too long - handled by formatter, remaining are strings/comments
     "W605",  # invalid escape sequence
+    "UP006", # Use `list` instead of `List` for type annotation
+    "UP035", # deprecated imports from typing module
+    "UP007", # Use `X | Y` for type annotations instead of Optional/Union (defer to follow-up)
+    "UP010", # Unnecessary `from __future__ import` (defer to follow-up)
+    "UP015", # Unnecessary mode argument in open() (defer to follow-up)
+    "UP017", # Use `datetime.UTC` alias (defer to follow-up)
+    "UP032", # Use f-string instead of format() (defer to follow-up)
+    "UP034", # Extraneous parentheses (defer to follow-up)
+    "UP037", # Remove quotes from type annotation (defer to follow-up)
+    "UP041", # Replace aliased errors with TimeoutError (defer to follow-up)
+    "UP045", # Use `X | None` instead of Optional[X] (defer to follow-up)
+    "C403",  # Unnecessary list comprehension - set (defer to follow-up)
+    "C408",  # Unnecessary dict() call (defer to follow-up)
+    "C417",  # Unnecessary map() usage (defer to follow-up)
+    "C420",  # Unnecessary dict comprehension (defer to follow-up)
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]  # unused imports in __init__ files
+"api_app/decorators.py" = ["N801"]  # classproperty names are intentionally lowercase
+"api_app/models.py" = ["DJ012", "DJ001", "DJ008"]
+"api_app/analyzables_manager/models.py" = ["DJ001"]
+"api_app/analyzers_manager/models.py" = ["DJ008"]
+"api_app/visualizers_manager/models.py" = ["DJ008", "DJ001"]
+"authentication/models.py" = ["DJ008"]
+"api_app/data_model_manager/models.py" = ["DJ008", "DJ012"]
+"api_app/user_events_manager/**" = ["DJ012", "DJ001", "DJ008"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["certego_saas"]

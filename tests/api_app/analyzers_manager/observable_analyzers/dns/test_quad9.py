@@ -90,9 +90,7 @@ class Quad9MaliciousDetectorTestCase(CustomTestCase):
     @patch("dns.message.from_wire")
     @patch("httpx.Client.get")
     @patch("requests.get")
-    def test_detects_malicious_domain(
-        self, mock_google_get, mock_quad9_get, mock_from_wire
-    ):
+    def test_detects_malicious_domain(self, mock_google_get, mock_quad9_get, mock_from_wire):
         """
         Domain is malicious when:
         - Quad9 returns NO DNS answers

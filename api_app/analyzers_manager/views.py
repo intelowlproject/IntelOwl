@@ -51,10 +51,7 @@ class AnalyzerPluginConfigViewSet(PluginConfigViewSet):
 
     def update(self, request, name=None):
         obj: AnalyzerConfig = self.get_queryset().get(name=name)
-        if (
-            obj.python_module.module
-            == "basic_observable_analyzer.BasicObservableAnalyzer"
-        ):
+        if obj.python_module.module == "basic_observable_analyzer.BasicObservableAnalyzer":
             for data in request.data:
                 try:
                     plugin_config: PluginConfig = PluginConfig.objects.get(

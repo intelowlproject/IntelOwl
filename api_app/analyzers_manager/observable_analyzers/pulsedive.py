@@ -33,8 +33,7 @@ class Pulsedive(ObservableAnalyzer):
         supported_scan_values = ["basic", "passive", "active"]
         if self.scan_mode not in supported_scan_values:
             raise AnalyzerConfigurationException(
-                "scan_mode is not a supported value."
-                f" Supported are {supported_scan_values}"
+                f"scan_mode is not a supported value. Supported are {supported_scan_values}"
             )
         self.probe = 1 if self.scan_mode == "active" else 0  # else is "passive"
 
@@ -44,9 +43,7 @@ class Pulsedive(ObservableAnalyzer):
         # optional API key
         if not hasattr(self, "_api_key_name"):
             warning = "No API key retrieved"
-            logger.info(
-                f"{warning}. Continuing without API key..." f" <- {self.__repr__()}"
-            )
+            logger.info(f"{warning}. Continuing without API key... <- {self.__repr__()}")
             self.report.errors.append(warning)
         else:
             self.default_param = f"&key={self._api_key_name}"
@@ -91,10 +88,7 @@ class Pulsedive(ObservableAnalyzer):
         url = f"{self.url}/analyze.php?{params}"
         obj_repr = self.__repr__()
         for chance in range(self.max_tries):
-            logger.info(
-                f"polling request #{chance + 1} for observable: {self.observable_name}"
-                f" <- {obj_repr}"
-            )
+            logger.info(f"polling request #{chance + 1} for observable: {self.observable_name} <- {obj_repr}")
             time.sleep(self.poll_distance)
             resp = requests.get(url)
             resp.raise_for_status()

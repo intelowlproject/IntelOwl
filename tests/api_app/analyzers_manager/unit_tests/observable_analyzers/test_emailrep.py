@@ -12,9 +12,7 @@ class EmailRepTestCase(BaseAnalyzerTest):
 
     @staticmethod
     def get_mocked_response():
-        return patch(
-            "requests.get", return_value=MockUpResponse(json_data={}, status_code=200)
-        )
+        return patch("requests.get", return_value=MockUpResponse(json_data={}, status_code=200))
 
     @classmethod
     def get_extra_config(cls) -> dict:

@@ -42,9 +42,7 @@ class InvestigationViewSet(ModelWithOwnershipViewSet, ModelViewSet):
 
     def _get_job(self, request):
         if "job" not in request.data:
-            raise ValidationError(
-                {"detail": "You should set the `job` argument in the data"}
-            )
+            raise ValidationError({"detail": "You should set the `job` argument in the data"})
         job_pk = request.data.get("job")
         try:
             job = Job.objects.visible_for_user(self.request.user).get(pk=job_pk)
@@ -57,9 +55,7 @@ class InvestigationViewSet(ModelWithOwnershipViewSet, ModelViewSet):
         investigation: Investigation = self.get_object()
         job: Job = self._get_job(request)
         if not investigation.user_can_edit(job.user):
-            raise PermissionDenied(
-                "You do not have permissions to add this job to the investigation"
-            )
+            raise PermissionDenied("You do not have permissions to add this job to the investigation")
         if not job.is_root():
             raise PermissionDenied("You can add to an investigation only primary jobs")
         if job.investigation is None:
@@ -89,9 +85,7 @@ class InvestigationViewSet(ModelWithOwnershipViewSet, ModelViewSet):
         request: HttpRequest
         job: Job = self._get_job(request)
         if not investigation.user_can_edit(job.user):
-            raise PermissionDenied(
-                "You do not have permissions to edit this investigation with that job"
-            )
+            raise PermissionDenied("You do not have permissions to edit this investigation with that job")
         if job.investigation_id != investigation.pk:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,

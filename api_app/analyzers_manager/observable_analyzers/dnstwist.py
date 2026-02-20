@@ -36,9 +36,7 @@ class DNStwist(classes.ObservableAnalyzer):
             except AddressValueError:
                 pass
             else:
-                raise AnalyzerRunException(
-                    "URL with an IP address instead of a domain cannot be analyzed"
-                )
+                raise AnalyzerRunException("URL with an IP address instead of a domain cannot be analyzed")
 
         params = {"domain": domain, "registered": True, "format": "json"}
 

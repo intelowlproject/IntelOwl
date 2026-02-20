@@ -14,11 +14,7 @@ class GoogleDNSResolverTestCase(BaseAnalyzerTest):
 
     @staticmethod
     def get_mocked_response():
-        mock_response = {
-            "Answer": [
-                {"name": "example.com.", "type": 1, "TTL": 299, "data": "93.184.216.34"}
-            ]
-        }
+        mock_response = {"Answer": [{"name": "example.com.", "type": 1, "TTL": 299, "data": "93.184.216.34"}]}
 
         return [patch("requests.get", return_value=MockUpResponse(mock_response, 200))]
 

@@ -7,7 +7,7 @@ django-filter==25.1
 django-storages==1.14
 django-celery-beat==2.7.0
 django-celery-results==2.5.0
-django-ses == 4.4.0
+django-ses == 4.6.0
 django-iam-dbauth==0.2.1
 django-prettyjson==0.4.1
 django-silk==5.4.3
@@ -32,7 +32,7 @@ flower==2.0.0
 uWSGI==2.0.28
 uwsgitop==0.12
 whitenoise==6.9.0
-daphne==4.1.0
+daphne==4.2.1
 channels==4.1.0
 channels-redis==4.2.0
 elasticsearch-dsl==8.17.0
@@ -43,7 +43,7 @@ checkdmarc==5.13.1
 dnspython==2.8.0
 dnstwist[full]==20250130
 google>=3.0.0
-google-cloud-webrisk==1.19.0
+google-cloud-webrisk==1.20.0
 intezer-sdk==1.24.0
 lief==0.15.1
 maxminddb==2.6.0
@@ -81,7 +81,7 @@ permhash==0.1.4
 ail_typo_squatting==2.7.4
 iocextract==1.16.1
 ioc-finder==7.0.0
-polyswarm-api==3.14.1
+polyswarm-api==3.16.0
 knock-subdomains==8.0.0
 dotnetfile==0.2.4
 docxpy==0.8.5
@@ -95,7 +95,8 @@ die-python==0.4.0
 jbxapi==3.23.0
 yara-x==1.10.0
 flare-floss==3.1.1
-flare-capa==9.2.1
+flare-capa==9.3.1
+machofile==2026.2.4
 
 # httpx required for HTTP/2 support (Mullvad DNS rejects HTTP/1.1 with protocol errors)
 httpx[http2]==0.28.1

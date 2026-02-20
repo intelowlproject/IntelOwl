@@ -7,7 +7,6 @@ from tests.api_app.analyzers_manager.unit_tests.observable_analyzers.base_test_c
 
 
 class AbusixTestCase(BaseAnalyzerTest):
-
     analyzer_class = Abusix
 
     @staticmethod

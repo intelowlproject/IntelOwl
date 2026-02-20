@@ -187,9 +187,7 @@ class ChangePasswordView(APIView):
         if not check_password(old_password, user.password):
             logger.info(f"'{uname}' has inputted invalid old password.")
             # Return an error response if the old password doesn't match
-            return Response(
-                {"error": "Invalid old password"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": "Invalid old password"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Set the new password for the user
         user.set_password(new_password)
@@ -277,9 +275,7 @@ class GoogleLoginCallbackView(LoginView):
             return User.objects.get(email=user_email)
         except User.DoesNotExist:
             logging.info("[Google Oauth] User does not exist. Creating new user.")
-            return User.objects.create_user(
-                email=user_email, username=user_name, password=None
-            )
+            return User.objects.create_user(email=user_email, username=user_name, password=None)
 
     def get(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
@@ -334,9 +330,7 @@ def checkConfiguration(request):
                 errors["SMTP backend"] = "configuration required"
 
     logger.info(f"Configuration errors: {errors}")
-    return Response(
-        status=status.HTTP_200_OK, data={"errors": errors} if errors else {}
-    )
+    return Response(status=status.HTTP_200_OK, data={"errors": errors} if errors else {})
 
 
 class APIAccessTokenView(APIView):

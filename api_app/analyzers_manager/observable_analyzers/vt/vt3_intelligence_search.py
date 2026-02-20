@@ -14,6 +14,4 @@ class VirusTotalv3Intelligence(ObservableAnalyzer, VirusTotalv3AnalyzerMixin):
         pass
 
     def run(self):
-        return self._vt_intelligence_search(
-            self.observable_name, self.limit, self.order_by
-        )
+        return self._vt_intelligence_search(self.observable_name, self.limit, self.order_by)

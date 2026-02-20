@@ -26,9 +26,7 @@ class Hunter_How(classes.ObservableAnalyzer):
         elif self.observable_classification == Classification.DOMAIN:
             self.query = f'domain="{self.observable_name}"'
 
-        self.encoded_query = base64.urlsafe_b64encode(
-            self.query.encode("utf-8")
-        ).decode("ascii")
+        self.encoded_query = base64.urlsafe_b64encode(self.query.encode("utf-8")).decode("ascii")
         self.parameters = {
             "api-key": self._api_key_name,
             "query": self.encoded_query,

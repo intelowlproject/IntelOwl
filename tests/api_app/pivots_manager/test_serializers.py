@@ -33,9 +33,7 @@ class PivotMapSerializerTestCase(CustomTestCase):
         )
         self.pc = PivotConfig.objects.create(
             name="test",
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
+            python_module=PythonModule.objects.filter(base_path="api_app.pivots_manager.pivots").first(),
         )
         self.pc.playbooks_choice.add(PlaybookConfig.objects.first())
 
@@ -48,9 +46,7 @@ class PivotMapSerializerTestCase(CustomTestCase):
         self.pc.delete()
 
     def test_read(self):
-        pivot = PivotMap.objects.create(
-            starting_job=self.j1, ending_job=self.j2, pivot_config=self.pc
-        )
+        pivot = PivotMap.objects.create(starting_job=self.j1, ending_job=self.j2, pivot_config=self.pc)
         ps = PivotMapSerializer(pivot)
         self.assertEqual(ps.data["starting_job"], self.j1.pk)
         self.assertEqual(ps.data["ending_job"], self.j2.pk)
@@ -83,9 +79,7 @@ class PivotConfigSerializerTestCase(CustomTestCase):
         ac = AnalyzerConfig.objects.first()
         pc = PivotConfig.objects.create(
             name="test",
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
+            python_module=PythonModule.objects.filter(base_path="api_app.pivots_manager.pivots").first(),
         )
         pc.playbooks_choice.add(PlaybookConfig.objects.first())
         pc.related_analyzer_configs.set([ac])

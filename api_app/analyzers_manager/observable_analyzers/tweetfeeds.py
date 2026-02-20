@@ -29,14 +29,7 @@ class TweetFeeds(ObservableAnalyzer):
 
     def run_url(self) -> str:
         if self.filter1:
-            url = (
-                self.url
-                + self.time
-                + "/"
-                + self.filter1
-                + "/"
-                + self.observable_classification
-            )
+            url = self.url + self.time + "/" + self.filter1 + "/" + self.observable_classification
         else:
             url = self.url + self.time + "/" + self.observable_classification
         return url
@@ -45,18 +38,14 @@ class TweetFeeds(ObservableAnalyzer):
         # update logic for first time run
         default_db, default_url = self.location()
         if not os.path.exists(default_db) and not self.update():
-            raise AnalyzerRunException(
-                f"Could not find or update db at {default_db} using {default_url}"
-            )
+            raise AnalyzerRunException(f"Could not find or update db at {default_db} using {default_url}")
 
         with open(default_db, "r", encoding="utf-8") as f:
             logger.info(f"TweetFeeds running with {default_db}")
             db = json.load(f)
             for tweet in db:
                 if tweet["value"] == self.observable_name:
-                    if self.filter1 and (
-                        self.filter1 in tweet["tags"] or self.filter1 == tweet["user"]
-                    ):
+                    if self.filter1 and (self.filter1 in tweet["tags"] or self.filter1 == tweet["user"]):
                         # this checks if our user has demanded for a
                         # specific filter and return data based on the
                         # filter in default db

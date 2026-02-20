@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class ExpandURL(ObservableAnalyzer):
-
     def find_redirection_url(self, response: requests.Response) -> str | None:
         logger.info(f"Finding redirect URL in {response.url}")
         try:
@@ -20,19 +19,14 @@ class ExpandURL(ObservableAnalyzer):
 
             # following block checks if the response content contains any meta refresh tags
             # if yes then, capture and return the redirection url
-            if (
-                refresh_meta_tag is not None
-                and "url" in refresh_meta_tag["content"].lower()
-            ):
+            if refresh_meta_tag is not None and "url" in refresh_meta_tag["content"].lower():
                 _, url_text = refresh_meta_tag["content"].split(";")
                 redirect_url = url_text.strip()[4:]
                 logger.info(f"Found redirect URL: {redirect_url}")
                 return redirect_url
 
         except KeyError as e:
-            raise AnalyzerRunException(
-                f'META refresh tag doesn\'t contain "content" key: {e}'
-            )
+            raise AnalyzerRunException(f'META refresh tag doesn\'t contain "content" key: {e}')
 
         except Exception as e:
             raise AnalyzerRunException(f"Unable to find redirection URL: {e}")
@@ -51,9 +45,7 @@ class ExpandURL(ObservableAnalyzer):
         logger.info(f"Expanding {url}")
         try:
             while no_more_redirects is False:
-                final_response = requests.get(
-                    url, headers=headers, allow_redirects=True
-                )
+                final_response = requests.get(url, headers=headers, allow_redirects=True)
                 final_response.raise_for_status()
                 for response in final_response.history:
                     redirection_chain.append(response.url)
@@ -69,19 +61,14 @@ class ExpandURL(ObservableAnalyzer):
 
             # previous loop runs in a way that for some conditions final url is added twice,
             # so removing duplicates
-            if (
-                len(redirection_chain) > 1
-                and redirection_chain[-1] == redirection_chain[-2]
-            ):
+            if len(redirection_chain) > 1 and redirection_chain[-1] == redirection_chain[-2]:
                 redirection_chain.pop()
 
         except requests.HTTPError as e:
             raise AnalyzerRunException(f"Unable to make a request : {e}")
 
         except Exception as e:
-            raise AnalyzerRunException(
-                f"Unable to expand URL for {self.observable_name}: {e}"
-            )
+            raise AnalyzerRunException(f"Unable to expand URL for {self.observable_name}: {e}")
         logger.info("Expanding URL complete, returning with redirection chain")
         return redirection_chain
 

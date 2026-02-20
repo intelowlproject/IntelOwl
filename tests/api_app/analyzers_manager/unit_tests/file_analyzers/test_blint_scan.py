@@ -82,8 +82,6 @@ class BlintTestCase(BaseFileAnalyzerTest):
             # Mock file system operations to avoid actual directory creation/deletion
             patch("api_app.analyzers_manager.file_analyzers.blint_scan.os.mkdir"),
             patch("api_app.analyzers_manager.file_analyzers.blint_scan.shutil.rmtree"),
-            patch(
-                "api_app.analyzers_manager.file_analyzers.blint_scan.set_permissions"
-            ),
+            patch("api_app.analyzers_manager.file_analyzers.blint_scan.set_permissions"),
             patch("api_app.analyzers_manager.file_analyzers.blint_scan.logger"),
         ]

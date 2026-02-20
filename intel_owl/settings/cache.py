@@ -26,8 +26,7 @@ class DatabaseCacheExtended(DatabaseCache):
         with connections[db].cursor() as cursor:
             try:
                 cursor.execute(
-                    f"SELECT cache_key, value, expires FROM {table} "
-                    "WHERE cache_key LIKE %s",
+                    f"SELECT cache_key, value, expires FROM {table} WHERE cache_key LIKE %s",
                     [query],
                 )
             except ProgrammingError:

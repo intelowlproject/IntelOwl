@@ -23,11 +23,7 @@ class IocExtractTestCase(CustomTestCase):
             "IocExtract",
             IocExtract,
         )
-        self.assertIn(
-            "https://evildomain.tld/mauris.get", textfile_txt_report["all_iocs"]
-        )
+        self.assertIn("https://evildomain.tld/mauris.get", textfile_txt_report["all_iocs"])
         self.assertIn("1.1.1.1", textfile_txt_report["all_iocs"])
-        self.assertIn(
-            "5f423b7772a80f77438407c8b78ff305", textfile_txt_report["all_iocs"]
-        )
+        self.assertIn("5f423b7772a80f77438407c8b78ff305", textfile_txt_report["all_iocs"])
         self.assertIn("suscipit-evilmail@gmail.com", textfile_txt_report["all_iocs"])

@@ -17,9 +17,7 @@ class CensysTestCase(BaseAnalyzerTest):
             "status": "OK",
             "result": {
                 "ip": "8.8.8.8",
-                "services": [
-                    {"port": 53, "service_name": "DNS", "transport_protocol": "UDP"}
-                ],
+                "services": [{"port": 53, "service_name": "DNS", "transport_protocol": "UDP"}],
                 "location": {
                     "continent": "North America",
                     "country": "United States",

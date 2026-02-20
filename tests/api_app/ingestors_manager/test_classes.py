@@ -18,32 +18,19 @@ class IngestorTestCase(CustomTestCase):
 
         subclasses = Ingestor.all_subclasses()
         for subclass in subclasses:
-            print("\n" f"Testing Connector {subclass.__name__}")
-            configs = IngestorConfig.objects.filter(
-                python_module=subclass.python_module
-            )
+            print(f"\nTesting Connector {subclass.__name__}")
+            configs = IngestorConfig.objects.filter(python_module=subclass.python_module)
             if not configs.exists():
-                self.fail(
-                    f"There is a python module {subclass.python_module} "
-                    "without any configuration"
-                )
+                self.fail(f"There is a python module {subclass.python_module} without any configuration")
             for config in configs:
                 timeout_seconds = config.soft_time_limit
                 timeout_seconds = min(timeout_seconds, 20)
-                print(
-                    "\t"
-                    f"Testing with config {config.name}"
-                    f" for {timeout_seconds} seconds"
-                )
+                print(f"\tTesting with config {config.name} for {timeout_seconds} seconds")
                 sub = subclass(config)
                 signal.alarm(timeout_seconds)
                 try:
                     sub.start(None, {}, None)
                 except Exception as e:
-                    self.fail(
-                        f"Ingestor {subclass.__name__}"
-                        f" with config {config.name} "
-                        f"failed {e}"
-                    )
+                    self.fail(f"Ingestor {subclass.__name__} with config {config.name} failed {e}")
                 finally:
                     signal.alarm(0)

@@ -58,12 +58,8 @@ class UserProfile(models.Model):
         on_delete=models.CASCADE,
         related_name="profile",
     )
-    company_name = models.CharField(
-        max_length=32, validators=[MinLengthValidator(3)], default="", blank=True
-    )
-    company_role = models.CharField(
-        max_length=32, validators=[MinLengthValidator(3)], default="", blank=True
-    )
+    company_name = models.CharField(max_length=32, validators=[MinLengthValidator(3)], default="", blank=True)
+    company_role = models.CharField(max_length=32, validators=[MinLengthValidator(3)], default="", blank=True)
     twitter_handle = models.CharField(
         max_length=16, default="", blank=True, validators=[MinLengthValidator(3)]
     )
@@ -72,9 +68,7 @@ class UserProfile(models.Model):
         choices=DiscoverFromChoices.choices,
         default=DiscoverFromChoices.OTHER,
     )
-    task_priority = models.IntegerField(
-        default=10, validators=[MaxValueValidator(10), MinValueValidator(1)]
-    )
+    task_priority = models.IntegerField(default=10, validators=[MaxValueValidator(10), MinValueValidator(1)])
     is_robot = models.BooleanField(default=False)
 
     # meta

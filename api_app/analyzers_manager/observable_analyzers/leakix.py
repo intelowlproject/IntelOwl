@@ -20,8 +20,6 @@ class LeakIx(classes.ObservableAnalyzer):
 
     def run(self):
         headers = {"api-key": f"{self._api_key}", "Accept": "application/json"}
-        response = requests.get(
-            url=self.url + f"/{self.observable_name}", headers=headers
-        )
+        response = requests.get(url=self.url + f"/{self.observable_name}", headers=headers)
         response.raise_for_status()
         return response.json()

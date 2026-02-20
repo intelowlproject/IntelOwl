@@ -4,9 +4,7 @@
 import sys
 from pathlib import PosixPath
 
-header0 = (
-    "# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl"
-)
+header0 = "# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl"
 header1 = "# See the file 'LICENSE' for copying permission."
 
 
@@ -33,10 +31,7 @@ if __name__ == "__main__":
             continue
         with open(file, "r+", encoding="utf_8") as f:
             lines = f.readlines()
-            if not (
-                lines[0].strip() != header0.strip()
-                and lines[1].strip() != header1.strip()
-            ):
+            if not (lines[0].strip() != header0.strip() and lines[1].strip() != header1.strip()):
                 print("\tSkipping")
                 continue
             else:

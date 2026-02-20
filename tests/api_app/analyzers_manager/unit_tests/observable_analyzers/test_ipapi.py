@@ -12,9 +12,7 @@ class IPApiTestCase(BaseAnalyzerTest):
 
     @staticmethod
     def get_mocked_response():
-        mock_ip_info = [
-            {"query": "8.8.8.8", "country": "United States", "status": "success"}
-        ]
+        mock_ip_info = [{"query": "8.8.8.8", "country": "United States", "status": "success"}]
         mock_dns_info = {"dns": "mock_dns_data"}
 
         return [

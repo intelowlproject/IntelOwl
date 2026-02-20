@@ -22,16 +22,20 @@ class UserEventQuerySet(QuerySet):
                 next_decay__lte=now(),
             )
         )
+        # ForeignKey appears in _meta.fields (wildcard models) -> use JOIN.
+        # GenericForeignKey does not (UserAnalyzableEvent) -> use prefetch.
         model_fields = {field.name for field in self.model._meta.fields}
         if "data_model" in model_fields:
             objects = objects.select_related("data_model")
         else:
             objects = objects.prefetch_related("data_model")
 
+        # Load into memory so we can mutate fields and bulk-write back.
         events = list(objects)
         if not events:
             return 0
 
+        # Group by concrete class since bulk_update works per-table.
         data_models_by_class = defaultdict(list)
 
         for obj in events:
@@ -54,6 +58,8 @@ class UserEventQuerySet(QuerySet):
             if data_model is not None:
                 data_models_by_class[data_model.__class__].append(data_model)
 
+        # Bulk-write instead of per-object .save() to avoid O(N) queries.
+        # Atomic so partial failures don't leave inconsistent state.
         with transaction.atomic():
             for model_class, models_list in data_models_by_class.items():
                 model_class.objects.bulk_update(models_list, ["reliability"])

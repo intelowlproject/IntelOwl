@@ -1,9 +1,11 @@
 import unittest
 from unittest.mock import patch
 
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.observable_analyzers.misp import MISP
-from tests.api_app.analyzers_manager.unit_tests.observable_analyzers.base_test_class import \
-    BaseAnalyzerTest
+from tests.api_app.analyzers_manager.unit_tests.observable_analyzers.base_test_class import (
+    BaseAnalyzerTest,
+)
 from tests.mock_utils import MockResponseNoOp
 
 
@@ -30,7 +32,7 @@ class MISPTestCase(BaseAnalyzerTest):
             "published": True,
             "metadata": False,
         }
-    
+
     def test_restsearch_get_post_error(self):
         mock_search = unittest.mock.MagicMock()
         mock_search.search.return_value = {
@@ -41,7 +43,7 @@ class MISPTestCase(BaseAnalyzerTest):
             ]
         }
         with patch("pymisp.PyMISP", return_value=mock_search):
-            with self.assertRaises(Exception) as context:
+            with self.assertRaises(AnalyzerRunException) as context:
                 self.analyzer.run()
             self.assertIn("GET/POST mismatch", str(context.exception))
             self.assertIn("https://", str(context.exception))

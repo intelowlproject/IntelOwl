@@ -75,17 +75,8 @@ jobs:
           unzip -P intelowl tests/test_files.zip -d test_files
           cp docker/env_file_app_template docker/env_file_app
           cp docker/env_file_postgres_template docker/env_file_postgres
-          # Debugging: Print environment files
-          echo "=== env_file_app content ==="
-          cat docker/env_file_app
-          echo "=== env_file_postgres content ==="
-          cat docker/env_file_postgres
 
-      - name: Verify Docker Compose Setup
-        run: |
-          ls -la docker/
-          ls -la docker-compose*.yml || echo "No docker-compose files found in root"
-
+      - name: Startup script launch (Slow)
         if: contains(github.base_ref, 'master')
         run: |
           cp docker/env_file_integrations_template docker/env_file_integrations
@@ -100,14 +91,6 @@ jobs:
         if: "!contains(github.base_ref, 'master')"
         run: |
           ./start ci up -- --build -d
-          sleep 15
-          docker ps -a
-          echo "=== intelowl_uwsgi logs ==="
-          docker logs intelowl_uwsgi || true
-          echo "=== intelowl_postgres logs ==="
-          docker logs intelowl_postgres || true
-          echo "=== intelowl_redis logs ==="
-          docker logs intelowl_redis || true
         env:
           DOCKER_BUILDKIT: 1
           BUILDKIT_PROGRESS: "plain"

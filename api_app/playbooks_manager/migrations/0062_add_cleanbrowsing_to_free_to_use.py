@@ -8,12 +8,13 @@ from django.db import migrations
 def migrate(apps, schema_editor):
     playbook_config = apps.get_model("playbooks_manager", "PlaybookConfig")
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
-    pc = playbook_config.objects.get(name="FREE_TO_USE_ANALYZERS")
-    pc.analyzers.add(
-        AnalyzerConfig.objects.get(name="CleanBrowsing_Malicious_Detector").id,
-    )
-    pc.full_clean()
-    pc.save()
+    pc = playbook_config.objects.filter(name="FREE_TO_USE_ANALYZERS").first()
+    if pc:
+        pc.analyzers.add(
+            AnalyzerConfig.objects.get(name="CleanBrowsing_Malicious_Detector").id,
+        )
+        pc.full_clean()
+        pc.save()
 
     pc2 = playbook_config.objects.filter(name="Dns").first() or playbook_config.objects.filter(name="DNS").first()
     if pc2:
@@ -27,12 +28,13 @@ def migrate(apps, schema_editor):
 def reverse_migrate(apps, schema_editor):
     playbook_config = apps.get_model("playbooks_manager", "PlaybookConfig")
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
-    pc = playbook_config.objects.get(name="FREE_TO_USE_ANALYZERS")
-    pc.analyzers.remove(
-        AnalyzerConfig.objects.get(name="CleanBrowsing_Malicious_Detector").id,
-    )
-    pc.full_clean()
-    pc.save()
+    pc = playbook_config.objects.filter(name="FREE_TO_USE_ANALYZERS").first()
+    if pc:
+        pc.analyzers.remove(
+            AnalyzerConfig.objects.get(name="CleanBrowsing_Malicious_Detector").id,
+        )
+        pc.full_clean()
+        pc.save()
 
     pc2 = playbook_config.objects.filter(name="Dns").first() or playbook_config.objects.filter(name="DNS").first()
     if pc2:

@@ -3,10 +3,17 @@
 import datetime
 from collections import defaultdict
 
-from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
-from django.db.models import Case, ExpressionWrapper, F, Q, QuerySet, Value, When
-from django.db.models import DurationField
+from django.db.models import (
+    Case,
+    DurationField,
+    ExpressionWrapper,
+    F,
+    Q,
+    QuerySet,
+    Value,
+    When,
+)
 from django.db.models.functions import Power
 from django.db.models.lookups import IRegex, Range
 from django.utils.timezone import now
@@ -22,7 +29,7 @@ class UserEventQuerySet(QuerySet):
         Bulk-decay all eligible UserEvents to eliminate N+1 queries.
 
         For ForeignKey data_model (wildcard events): uses pure SQL update()
-        with F() expressions and Case/When for zero queries per event.
+        with F() expressions and Case/When for minimal queries.
 
         For GenericForeignKey data_model (analyzable events): uses bulk_update
         grouped by concrete class — unavoidable due to Django ORM limitations
@@ -39,15 +46,11 @@ class UserEventQuerySet(QuerySet):
         if not objects.exists():
             return 0
 
-        # Check if data_model is a real ForeignKey (wildcard events)
-        # or a GenericForeignKey (analyzable events)
         model_fields = {field.name for field in self.model._meta.fields}
 
         if "data_model" in model_fields:
-            # ForeignKey case: pure SQL approach
             return self._decay_with_fk(objects)
         else:
-            # GenericForeignKey case: bulk_update approach
             return self._decay_with_gfk(objects)
 
     def _decay_with_fk(self, objects):
@@ -59,44 +62,42 @@ class UserEventQuerySet(QuerySet):
         if not count:
             return 0
 
-        with transaction.atomic():
-            # Update data_model reliability in a single query
-            objects.filter(
-                data_model__reliability__gt=0
-            ).values("data_model").distinct().update(
-                **{"data_model__reliability": F("data_model__reliability") - 1}
-            )
+        one_day = Value(datetime.timedelta(days=1))
 
-            # Update event fields using Case/When for conditional logic
+        with transaction.atomic():
+            objects.filter(data_model__reliability__gt=0).update(
+                data_model__reliability=F("data_model__reliability") - 1
+            )
             objects.update(
                 decay_times=F("decay_times") + 1,
                 next_decay=Case(
-                    # reliability hit 0 -> stop decay
                     When(
                         data_model__reliability__lte=0,
                         then=None,
                     ),
-                    # LINEAR decay
                     When(
                         decay_progression=DecayProgressionEnum.LINEAR.value,
                         then=ExpressionWrapper(
                             F("next_decay")
                             + ExpressionWrapper(
-                                F("decay_timedelta_days")
-                                * Value(datetime.timedelta(days=1)),
+                                F("decay_timedelta_days") * one_day,
                                 output_field=DurationField(),
                             ),
                             output_field=DurationField(),
                         ),
                     ),
-                    # INVERSE_EXPONENTIAL decay
                     When(
-                        decay_progression=DecayProgressionEnum.INVERSE_EXPONENTIAL.value,
+                        decay_progression=(
+                            DecayProgressionEnum.INVERSE_EXPONENTIAL.value
+                        ),
                         then=ExpressionWrapper(
                             F("next_decay")
                             + ExpressionWrapper(
-                                Power(F("decay_timedelta_days"), F("decay_times") + 1)
-                                * Value(datetime.timedelta(days=1)),
+                                Power(
+                                    F("decay_timedelta_days"),
+                                    F("decay_times") + 1,
+                                )
+                                * one_day,
                                 output_field=DurationField(),
                             ),
                             output_field=DurationField(),
@@ -132,8 +133,13 @@ class UserEventQuerySet(QuerySet):
                 event.next_decay = None
             else:
                 if event.decay_progression == DecayProgressionEnum.LINEAR.value:
-                    event.next_decay += datetime.timedelta(days=event.decay_timedelta_days)
-                elif event.decay_progression == DecayProgressionEnum.INVERSE_EXPONENTIAL.value:
+                    event.next_decay += datetime.timedelta(
+                        days=event.decay_timedelta_days
+                    )
+                elif (
+                    event.decay_progression
+                    == DecayProgressionEnum.INVERSE_EXPONENTIAL.value
+                ):
                     event.next_decay += datetime.timedelta(
                         days=event.decay_timedelta_days**event.decay_times
                     )
@@ -150,7 +156,9 @@ class UserEventQuerySet(QuerySet):
 
     def visible_for_user(self, user):
         if user.has_membership():
-            user_query = Q(user=user) | Q(user__membership__organization_id=user.membership.organization_id)
+            user_query = Q(user=user) | Q(
+                user__membership__organization_id=user.membership.organization_id
+            )
         else:
             user_query = Q(user=user)
         return self.filter(user_query)
@@ -159,7 +167,9 @@ class UserEventQuerySet(QuerySet):
         obj = self.model(**kwargs)
         self._for_write = True
         if obj.data_model.reliability != 0:
-            obj.next_decay = obj.date + datetime.timedelta(days=obj.decay_timedelta_days)
+            obj.next_decay = obj.date + datetime.timedelta(
+                days=obj.decay_timedelta_days
+            )
         obj.save(force_insert=True, using=self.db)
         return obj
 
@@ -170,7 +180,9 @@ class UserDomainWildCardEventQuerySet(UserEventQuerySet):
             Classification.DOMAIN.value,
             Classification.URL.value,
         ]:
-            return self.annotate(matches=IRegex(Value(analyzable.name), F("query"))).filter(matches=True)
+            return self.annotate(
+                matches=IRegex(Value(analyzable.name), F("query"))
+            ).filter(matches=True)
         return self.none()
 
     def create(self, **kwargs):
@@ -182,9 +194,11 @@ class UserDomainWildCardEventQuerySet(UserEventQuerySet):
 class UserIPWildCardEventQuerySet(UserEventQuerySet):
     def matches(self, analyzable: Analyzable) -> "UserIPWildCardEventQuerySet":
         if analyzable.classification == Classification.IP.value:
-            return self.annotate(matches=Range(Value(analyzable.name), (F("start_ip"), F("end_ip")))).filter(
-                matches=True
-            )
+            return self.annotate(
+                matches=Range(
+                    Value(analyzable.name), (F("start_ip"), F("end_ip"))
+                )
+            ).filter(matches=True)
         return self.none()
 
     def create(self, **kwargs):

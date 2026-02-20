@@ -1,20 +1,16 @@
-version: "3.9"
-
 services:
-  # Database for storing threat intel and scan results
   postgres:
     image: postgres:14-alpine
     env_file:
       - ./docker/env_file_app_ci
     environment:
-    - POSTGRES_USER=intelowl
-    - POSTGRES_PASSWORD=intelowl  
-    - POSTGRES_DB=intelowl
+      - POSTGRES_USER=intelowl
+      - POSTGRES_PASSWORD=intelowl  
+      - POSTGRES_DB=intelowl
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always
 
-  # Broker for Celery tasks and Daphne WebSockets
   redis:
     image: redis:6-alpine
     restart: always
@@ -32,7 +28,6 @@ services:
     depends_on:
       - postgres
       - redis
-    # Using runserver for your current CI/Dev context
     command: python manage.py runserver 0.0.0.0:8000
 
   daphne:

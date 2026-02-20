@@ -1,0 +1,76 @@
+version: "3.9"
+
+services:
+  # Database for storing threat intel and scan results
+  postgres:
+    image: postgres:14-alpine
+    env_file:
+      - ./docker/env_file_app_ci
+    environment:
+    - POSTGRES_USER=intelowl
+    - POSTGRES_PASSWORD=intelowl  
+    - POSTGRES_DB=intelowl
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  # Broker for Celery tasks and Daphne WebSockets
+  redis:
+    image: redis:6-alpine
+    restart: always
+
+  uwsgi:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        REPO_DOWNLOADER_ENABLED: ${REPO_DOWNLOADER_ENABLED:-0}
+        PYCTI_VERSION: ${PYCTI_VERSION:-""}
+    image: intelowlproject/intelowl:ci
+    env_file:
+      - ./docker/env_file_app_ci
+    depends_on:
+      - postgres
+      - redis
+    # Using runserver for your current CI/Dev context
+    command: python manage.py runserver 0.0.0.0:8000
+
+  daphne:
+    image: intelowlproject/intelowl:ci
+    env_file:
+      - ./docker/env_file_app_ci
+    depends_on:
+      - redis
+    command: daphne -b 0.0.0.0 -p 8001 intelowl.asgi:application
+
+  celery_beat:
+    image: intelowlproject/intelowl:ci
+    env_file:
+      - ./docker/env_file_app_ci
+    depends_on:
+      - postgres
+      - redis
+    command: celery -A intelowl beat -l info
+
+  celery_worker_default:
+    image: intelowlproject/intelowl:ci
+    env_file:
+      - ./docker/env_file_app_ci
+    depends_on:
+      - postgres
+      - redis
+    command: celery -A intelowl worker -l info -Q default
+
+  nginx:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile_nginx
+    image: intelowlproject/intelowl_nginx:ci
+    ports:
+      - "80:80"
+    depends_on:
+      - uwsgi
+      - daphne
+
+volumes:
+  postgres_data:

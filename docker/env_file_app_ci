@@ -3,9 +3,13 @@ DJANGO_SECRET=supersecret
 # Required Secrets
 DB_HOST=postgres
 DB_PORT=5432
-DB_USER=user
-DB_PASSWORD=password
-DB_NAME=intel_owl_db
+DB_USER=intelowl
+DB_PASSWORD=intelowl
+DB_NAME=intelowl
+
+POSTGRES_USER=intelowl
+POSTGRES_PASSWORD=intelowl
+POSTGRES_DB=intelowl
 
 # Config variables
 OLD_JOBS_RETENTION_DAYS=2

@@ -13,7 +13,7 @@ RUN npm install npm@latest --location=global \
     && PUBLIC_URL=/static/reactapp/ npm run build
 
 # Stage 2: Backend
-FROM python:3.10-slim AS backend-build
+FROM python:3.11-slim AS backend-build
 
 ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE=intel_owl.settings
@@ -60,7 +60,9 @@ RUN apt-get update \
     apache2-utils \
     tshark \
     libemail-outlook-message-perl \
-    libemail-address-perl
+    libemail-address-perl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 
 COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt

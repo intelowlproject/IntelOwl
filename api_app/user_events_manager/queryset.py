@@ -4,17 +4,7 @@ import datetime
 from collections import defaultdict
 
 from django.db import transaction
-from django.db.models import (
-    Case,
-    DurationField,
-    ExpressionWrapper,
-    F,
-    Q,
-    QuerySet,
-    Value,
-    When,
-)
-from django.db.models.functions import Power
+from django.db.models import F, Q, QuerySet, Value
 from django.db.models.lookups import IRegex, Range
 from django.utils.timezone import now
 
@@ -28,8 +18,8 @@ class UserEventQuerySet(QuerySet):
         """
         Bulk-decay all eligible UserEvents to eliminate N+1 queries.
 
-        For ForeignKey data_model (wildcard events): uses pure SQL update()
-        with F() expressions and Case/When for minimal queries.
+        For ForeignKey data_model (wildcard events): uses select_related
+        + bulk_update for efficiency.
 
         For GenericForeignKey data_model (analyzable events): uses bulk_update
         grouped by concrete class — unavoidable due to Django ORM limitations
@@ -53,46 +43,44 @@ class UserEventQuerySet(QuerySet):
         else:
             return self._decay_with_gfk(objects)
 
-  return count
+    def _decay_with_fk(self, objects):
+        """
+        Decay for wildcard events (ForeignKey data_model).
+        Uses select_related + bulk_update for efficiency.
+        """
+        objects = objects.select_related("data_model")
+        events = list(objects)
+        if not events:
+            return 0
 
-def _decay_with_fk(self, objects):
-    """
-    Decay for wildcard events (ForeignKey data_model).
-    Uses select_related + bulk_update for efficiency.
-    """
-    objects = objects.select_related("data_model")
-    events = list(objects)
-    if not events:
-        return 0
+        data_models = []
 
-    data_models = []
+        for event in events:
+            event.decay_times += 1
+            data_model = event.data_model
 
-    for event in events:
-        event.decay_times += 1
-        data_model = event.data_model
+            if data_model is not None:
+                data_model.reliability -= 1
 
-        if data_model is not None:
-            data_model.reliability -= 1
+            if data_model is None or data_model.reliability <= 0:
+                event.next_decay = None
+            else:
+                if event.decay_progression == DecayProgressionEnum.LINEAR.value:
+                    event.next_decay += datetime.timedelta(days=event.decay_timedelta_days)
+                elif event.decay_progression == DecayProgressionEnum.INVERSE_EXPONENTIAL.value:
+                    event.next_decay += datetime.timedelta(
+                        days=event.decay_timedelta_days**event.decay_times
+                    )
 
-        if data_model is None or data_model.reliability <= 0:
-            event.next_decay = None
-        else:
-            if event.decay_progression == DecayProgressionEnum.LINEAR.value:
-                event.next_decay += datetime.timedelta(days=event.decay_timedelta_days)
-            elif event.decay_progression == DecayProgressionEnum.INVERSE_EXPONENTIAL.value:
-                event.next_decay += datetime.timedelta(
-                    days=event.decay_timedelta_days**event.decay_times
-                )
+            if data_model is not None:
+                data_models.append(data_model)
 
-        if data_model is not None:
-            data_models.append(data_model)
+        with transaction.atomic():
+            if data_models:
+                type(data_models[0]).objects.bulk_update(data_models, ["reliability"])
+            self.model.objects.bulk_update(events, ["decay_times", "next_decay"])
 
-    with transaction.atomic():
-        if data_models:
-            type(data_models[0]).objects.bulk_update(data_models, ["reliability"])
-        self.model.objects.bulk_update(events, ["decay_times", "next_decay"])
-
-    return len(events)
+        return len(events)
 
     def _decay_with_gfk(self, objects):
         """
@@ -120,7 +108,9 @@ def _decay_with_fk(self, objects):
                 if event.decay_progression == DecayProgressionEnum.LINEAR.value:
                     event.next_decay += datetime.timedelta(days=event.decay_timedelta_days)
                 elif event.decay_progression == DecayProgressionEnum.INVERSE_EXPONENTIAL.value:
-                    event.next_decay += datetime.timedelta(days=event.decay_timedelta_days**event.decay_times)
+                    event.next_decay += datetime.timedelta(
+                        days=event.decay_timedelta_days**event.decay_times
+                    )
 
             if data_model is not None:
                 data_models_by_class[data_model.__class__].append(data_model)
@@ -134,7 +124,9 @@ def _decay_with_fk(self, objects):
 
     def visible_for_user(self, user):
         if user.has_membership():
-            user_query = Q(user=user) | Q(user__membership__organization_id=user.membership.organization_id)
+            user_query = Q(user=user) | Q(
+                user__membership__organization_id=user.membership.organization_id
+            )
         else:
             user_query = Q(user=user)
         return self.filter(user_query)
@@ -154,7 +146,9 @@ class UserDomainWildCardEventQuerySet(UserEventQuerySet):
             Classification.DOMAIN.value,
             Classification.URL.value,
         ]:
-            return self.annotate(matches=IRegex(Value(analyzable.name), F("query"))).filter(matches=True)
+            return self.annotate(
+                matches=IRegex(Value(analyzable.name), F("query"))
+            ).filter(matches=True)
         return self.none()
 
     def create(self, **kwargs):
@@ -166,9 +160,11 @@ class UserDomainWildCardEventQuerySet(UserEventQuerySet):
 class UserIPWildCardEventQuerySet(UserEventQuerySet):
     def matches(self, analyzable: Analyzable) -> "UserIPWildCardEventQuerySet":
         if analyzable.classification == Classification.IP.value:
-            return self.annotate(matches=Range(Value(analyzable.name), (F("start_ip"), F("end_ip")))).filter(
-                matches=True
-            )
+            return self.annotate(
+                matches=Range(
+                    Value(analyzable.name), (F("start_ip"), F("end_ip"))
+                )
+            ).filter(matches=True)
         return self.none()
 
     def create(self, **kwargs):

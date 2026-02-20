@@ -1,7 +1,11 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 import datetime
 from collections import defaultdict
 
-from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.models import ContentType  # noqa: F401 - used by GenericForeignKey resolution
+from django.db import transaction
 from django.db.models import Case, DurationField, ExpressionWrapper, F, Q, QuerySet, Value, When
 from django.db.models.functions import Power
 from django.db.models.lookups import IRegex, Range
@@ -11,48 +15,37 @@ from api_app.analyzables_manager.models import Analyzable
 from api_app.choices import Classification
 from api_app.user_events_manager.choices import DecayProgressionEnum
 
+
 class UserEventQuerySet(QuerySet):
     def decay(self):
+        """
+        Bulk-decay all eligible UserEvents.
+
+        Eligible events:
+          - not FIXED progression
+          - have a next_decay set
+          - next_decay is due (lte now)
+
+        Strategy:
+          1. Load eligible events into memory (with related data_model).
+          2. Mutate decay_times, next_decay on each event.
+          3. Decrement reliability on each related data_model.
+          4. Bulk-write all changes in a single atomic transaction
+             to avoid O(N) queries.
+
+        Returns the number of events decayed.
+        """
         objects = (
             self.exclude(decay_progression=DecayProgressionEnum.FIXED.value)
             .exclude(next_decay__isnull=True)
             .filter(next_decay__lte=now())
         )
 
-        count = objects.count()
-        if not count:
+        if not objects.exists():
             return 0
 
-        # Step 1: Bulk update decay_times and next_decay on UserEvent
-        objects.update(
-            decay_times=F("decay_times") + 1,
-            next_decay=Case(
-                When(
-                    data_model__reliability=1,
-                    then=None,
-                ),
-                When(
-                    decay_progression=DecayProgressionEnum.LINEAR.value,
-                    then=F("next_decay") + ExpressionWrapper(
-                        F("decay_timedelta_days") * datetime.timedelta(days=1),
-                        output_field=DurationField(),
-                    ),
-                ),
-                When(
-                    decay_progression=DecayProgressionEnum.INVERSE_EXPONENTIAL.value,
-                    then=F("next_decay") + ExpressionWrapper(
-                        Power(
-                            F("decay_timedelta_days"),
-                            F("decay_times") + 1,
-                        ) * datetime.timedelta(days=1),
-                        output_field=DurationField(),
-                    ),
-                ),
-                default=None,
-            ),
-        )
-        # ForeignKey appears in _meta.fields (wildcard models) -> use JOIN.
-        # GenericForeignKey does not (UserAnalyzableEvent) -> use prefetch.
+        # ForeignKey appears in _meta.fields (wildcard models) -> use select_related (JOIN).
+        # GenericForeignKey does not (UserAnalyzableEvent) -> use prefetch_related.
         model_fields = {field.name for field in self.model._meta.fields}
         if "data_model" in model_fields:
             objects = objects.select_related("data_model")
@@ -64,25 +57,30 @@ class UserEventQuerySet(QuerySet):
         if not events:
             return 0
 
-        # Group by concrete class since bulk_update works per-table.
+        # Group data_models by their concrete class since
+        # bulk_update operates per-table.
         data_models_by_class = defaultdict(list)
 
-        for obj in events:
-            obj.decay_times += 1
-            data_model = obj.data_model
+        for event in events:
+            event.decay_times += 1
+            data_model = event.data_model
 
             if data_model is not None:
                 data_model.reliability -= 1
 
-            if data_model is None or data_model.reliability == 0:
-                obj.next_decay = None
+            # If no data_model or reliability has hit 0, stop scheduling decay.
+            if data_model is None or data_model.reliability <= 0:
+                event.next_decay = None
             else:
-                if obj.decay_progression == DecayProgressionEnum.LINEAR.value:
-                    obj.next_decay += datetime.timedelta(days=obj.decay_timedelta_days)
-                elif obj.decay_progression == DecayProgressionEnum.INVERSE_EXPONENTIAL.value:
-                    obj.next_decay += datetime.timedelta(
-                        days=obj.decay_timedelta_days ** (obj.decay_times + 1)
+                if event.decay_progression == DecayProgressionEnum.LINEAR.value:
+                    event.next_decay += datetime.timedelta(
+                        days=event.decay_timedelta_days
                     )
+                elif event.decay_progression == DecayProgressionEnum.INVERSE_EXPONENTIAL.value:
+                    event.next_decay += datetime.timedelta(
+                        days=event.decay_timedelta_days ** event.decay_times
+                    )
+                # FIXED is excluded above; any other unknown progression: leave next_decay as-is.
 
             if data_model is not None:
                 data_models_by_class[data_model.__class__].append(data_model)

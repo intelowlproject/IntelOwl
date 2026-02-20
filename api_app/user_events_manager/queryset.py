@@ -3,19 +3,8 @@
 import datetime
 from collections import defaultdict
 
-from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
-from django.db.models import (
-    Case,
-    DurationField,
-    ExpressionWrapper,
-    F,
-    Q,
-    QuerySet,
-    Value,
-    When,
-)
-from django.db.models.functions import Power
+from django.db.models import F, Q, QuerySet, Value
 from django.db.models.lookups import IRegex, Range
 from django.utils.timezone import now
 

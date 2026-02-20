@@ -45,7 +45,8 @@ class WebsocketTestCase(TransactionTestCase, metaclass=abc.ABCMeta):
         finally:
             await communicator.disconnect()
 
-    def _pre_setup(self):
+    @classmethod
+    def _pre_setup(cls):
         super()._pre_setup()
         # force channel layers backend reset, this may avoid some RuntimeError
         channel_layers.backends = {}

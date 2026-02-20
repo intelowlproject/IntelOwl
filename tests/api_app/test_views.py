@@ -640,7 +640,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
     def setUp(self):
         super().setUp()
 
-    def test_plugin_config(self):
+    def test_plugin_config(self):  # skipcq: PY-R1000
         org = Organization.create("test_org", self.user)
         Membership.objects.create(user=self.admin, organization=org, is_owner=False, is_admin=True)
         ac = AnalyzerConfig.objects.get(name="AbuseIPDB")

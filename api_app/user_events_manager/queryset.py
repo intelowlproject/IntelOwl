@@ -11,7 +11,6 @@ from api_app.analyzables_manager.models import Analyzable
 from api_app.choices import Classification
 from api_app.user_events_manager.choices import DecayProgressionEnum
 
-
 class UserEventQuerySet(QuerySet):
     def decay(self):
         from collections import defaultdict

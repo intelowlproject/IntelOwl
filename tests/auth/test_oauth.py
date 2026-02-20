@@ -37,6 +37,13 @@ class TestOAuth(CustomOAuthTestCase):
     def test_google_enabled(self):
         # IMPORTANT! Without GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET configured
         # this test will fail!
+        if "google" not in oauth._registry:
+            oauth.register(
+                name="google",
+                client_id="test_id",
+                client_secret="test_secret",
+                server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+            )
         response = self.client.get(self.google_auth_uri, follow=False)
         self.assertEqual(response.status_code, 302)
         msg = response.url

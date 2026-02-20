@@ -3,6 +3,7 @@
 import os
 
 from django.conf import settings
+from django.test import override_settings
 from django.utils.timezone import now
 
 from api_app.analyzables_manager.models import Analyzable
@@ -28,6 +29,7 @@ from .mock_utils import MockUpResponse, if_mock_connections, patch
 logger = get_logger()
 
 
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True, CELERY_BROKER_URL="memory://")
 class CronTests(CustomTestCase):
     def test_check_stuck_analysis(self):
         import datetime
@@ -90,7 +92,7 @@ class CronTests(CustomTestCase):
         ),
         patch("api_app.analyzers_manager.observable_analyzers.maxmind.MaxmindDBManager.update_all_dbs"),
     )
-    def test_maxmind_updater(self, mock_update, mock_key):
+    def test_maxmind_updater(self, mock_update=None, mock_key=None):
         def create_dummy_dbs(*args, **kwargs):
             for db_name in maxmind.MaxmindDBManager.get_supported_dbs():
                 path = os.path.join(settings.MEDIA_ROOT, db_name)
@@ -98,7 +100,8 @@ class CronTests(CustomTestCase):
                     f.write("dummy")
             return True
 
-        mock_update.side_effect = create_dummy_dbs
+        if mock_update:
+            mock_update.side_effect = create_dummy_dbs
 
         maxmind.Maxmind.update()
         for db in maxmind.Maxmind.get_db_names():
@@ -261,45 +264,43 @@ class CronTests(CustomTestCase):
         yara_scan.YaraScan.update()
         self.assertTrue(len(os.listdir(settings.YARA_RULES_PATH)))
 
-    @if_mock_connections(
-        patch(
-            "requests.post",
-            return_value=MockUpResponse(
-                {
-                    "data": {
-                        "topC2s": {
-                            "queryInfo": {
-                                "resultsAvailable": 1914,
-                                "resultsLimit": 191,
-                            },
-                            "c2s": [
-                                {
-                                    "source_ip": "91.92.247.12",
-                                    "c2_ips": ["103.245.236.120"],
-                                    "c2_domains": [],
-                                    "hits": 11608,
-                                },
-                                {
-                                    "source_ip": "14.225.208.190",
-                                    "c2_ips": ["14.225.213.142"],
-                                    "c2_domains": [],
-                                    "hits": 2091,
-                                    "pervasiveness": 26,
-                                },
-                                {
-                                    "source_ip": "157.10.53.101",
-                                    "c2_ips": ["14.225.208.190"],
-                                    "c2_domains": [],
-                                    "hits": 1193,
-                                    "pervasiveness": 23,
-                                },
-                            ],
+    @patch(
+        "api_app.analyzers_manager.observable_analyzers.greynoise_labs.requests.post",
+        return_value=MockUpResponse(
+            {
+                "data": {
+                    "topC2s": {
+                        "queryInfo": {
+                            "resultsAvailable": 1914,
+                            "resultsLimit": 191,
                         },
+                        "c2s": [
+                            {
+                                "source_ip": "91.92.247.12",
+                                "c2_ips": ["103.245.236.120"],
+                                "c2_domains": [],
+                                "hits": 11608,
+                            },
+                            {
+                                "source_ip": "14.225.208.190",
+                                "c2_ips": ["14.225.213.142"],
+                                "c2_domains": [],
+                                "hits": 2091,
+                                "pervasiveness": 26,
+                            },
+                            {
+                                "source_ip": "157.10.53.101",
+                                "c2_ips": ["14.225.208.190"],
+                                "c2_domains": [],
+                                "hits": 1193,
+                                "pervasiveness": 23,
+                            },
+                        ],
                     },
                 },
-                200,
-            ),
-        )
+            },
+            200,
+        ),
     )
     def test_greynoise_labs_updater(self, mock_post=None):
         python_module = PythonModule.objects.get(

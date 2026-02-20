@@ -1,16 +1,16 @@
 # Stage 1: Frontend
-# Remove this part if it is conflicting with the frontend you are currently testing
-FROM node:lts-alpine3.21 AS frontend-build
-
-WORKDIR /
-# copy react source code
-COPY frontend/ .
-# copy version file as an env file
-COPY docker/.env .env.local
-# install and build
-RUN npm install npm@latest --location=global \
-    && npm install \
-    && PUBLIC_URL=/static/reactapp/ npm run build
+# # Remove this part if it is conflicting with the frontend you are currently testing
+# FROM node:lts-alpine3.21 AS frontend-build
+# 
+# WORKDIR /
+# # copy react source code
+# COPY frontend/ .
+# # copy version file as an env file
+# COPY docker/.env .env.local
+# # install and build
+# RUN npm install npm@latest --location=global \
+#     && npm install \
+#     && PUBLIC_URL=/static/reactapp/ npm run build
 
 # Stage 2: Backend
 FROM python:3.13.12 AS backend-build
@@ -72,7 +72,7 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
 
 FROM backend-build
 
-COPY --from=frontend-build /build /var/www/reactapp
+# COPY --from=frontend-build /build /var/www/reactapp
 
 # quarkengine calls
 # HOME_DIR = f"{Path.home()}/.quark-engine/"

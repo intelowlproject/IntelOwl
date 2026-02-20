@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 from typing import Type
+from unittest.mock import patch
 
 from api_app.analyzables_manager.models import Analyzable
 from api_app.choices import Classification
@@ -18,7 +19,9 @@ class ConnectorConfigViewSetTestCase(AbstractConfigViewSetTestCaseMixin, CustomV
     def model_class(cls) -> Type[ConnectorConfig]:
         return ConnectorConfig
 
-    def test_health_check(self):
+    @patch("requests.head")
+    def test_health_check(self, mock_head):
+        mock_head.return_value.status_code = 200
         connector: ConnectorConfig = ConnectorConfig.objects.get(name="YETI")
         pc1 = PluginConfig.objects.create(
             parameter=connector.parameters.get(name="api_key_name"),

@@ -578,7 +578,9 @@ export default function ScanForm() {
                                       invalid={
                                         Boolean(
                                           formik.errors.observable_names &&
-                                          formik.errors.observable_names[index],
+                                            formik.errors.observable_names[
+                                              index
+                                            ],
                                         ) &&
                                         formik.touched.observable_names &&
                                         formik.touched.observable_names[index]

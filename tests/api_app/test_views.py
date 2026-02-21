@@ -706,11 +706,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 200)
         content = response.json()
         val_org = next(
-            (
-                c["value"]
-                for c in content["organization_config"]
-                if c["attribute"] == "mynewparameter"
-            ),
+            (c["value"] for c in content["organization_config"] if c["attribute"] == "mynewparameter"),
             None,
         )
         val_user = next(
@@ -787,7 +783,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.assertEqual(val, "redacted")
 
         # 3. user with personal secret
-        secret_low = PluginConfig.objects.create(
+        PluginConfig.objects.create(
             value="supersecret_low_privilege",
             for_organization=False,
             owner=standard_user,
@@ -798,11 +794,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 200)
         content = response.json()
         val_org = next(
-            (
-                c["value"]
-                for c in content["organization_config"]
-                if c["attribute"] == "mynewparameter"
-            ),
+            (c["value"] for c in content["organization_config"] if c["attribute"] == "mynewparameter"),
             None,
         )
         val_user = next(

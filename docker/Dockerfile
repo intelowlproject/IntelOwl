@@ -13,7 +13,7 @@ RUN npm install npm@latest --location=global \
     && PUBLIC_URL=/static/reactapp/ npm run build
 
 # Stage 2: Backend
-FROM python:3.11-slim AS backend-build
+FROM python:3.11.7 AS backend-build
 
 ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE=intel_owl.settings
@@ -40,43 +40,20 @@ RUN mkdir -p ${LOG_PATH} \
 # tshark is required for Hfinger file analyzer
 # libemail-outlook-message-perl and libemail-address-perl are required for msgconvert
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-    apt-utils \
-    build-essential \
-    gcc \
-    libffi-dev \
-    libssl-dev \
-    python3-dev \
-    curl \
-    wget \
-    libsasl2-dev \
-    netcat-traditional \
-    vim \
-    libldap2-dev \
-    libfuzzy-dev \
-    net-tools \
-    python3-psycopg2 \
-    git \
-    apache2-utils \
-    tshark \
-    libemail-outlook-message-perl \
-    libemail-address-perl \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
+    && apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev netcat-traditional \
+    vim libldap2-dev libfuzzy-dev net-tools python3-psycopg2 git apache2-utils tshark  \
+    libemail-outlook-message-perl libemail-address-perl \
+    && apt-get clean && apt-get autoclean && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/* \
+    && pip3 install --no-cache-dir --upgrade pip
 
 COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
 COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
 WORKDIR $PYTHONPATH
 
-# Upgrade pip and build tools first
-RUN pip3 install --upgrade pip setuptools wheel
-
-# Then install your project requirements
-RUN pip3 install --default-timeout=1000 --no-cache-dir --use-pep517 --compile -r project-requirements.txt \
-    && pip3 install --default-timeout=1000 --no-cache-dir pycti==${PYCTI_VERSION} \
-    && pip3 install --default-timeout=1000 --no-cache-dir --compile -r certego-requirements.txt
-
+RUN pip3 install --no-cache-dir --use-pep517 --compile -r project-requirements.txt \
+    && pip3 install --no-cache-dir pycti==${PYCTI_VERSION} \
+    && pip3 install --no-cache-dir --compile -r certego-requirements.txt
 
 COPY . $PYTHONPATH
 

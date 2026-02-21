@@ -374,18 +374,8 @@ for value in "${compose_files[@]}" ; do
   fi
 done
 
-# 1. Determine extra arguments
-extra_args=()
-if [[ "$env_argument" == "ci" && "$cmd_argument" == "up" ]]; then
-    extra_args+=("--build")
-fi
-
-# 2. Build the command array
-DOCKER_CMD=("docker" "compose" "--project-directory" "docker" "${to_run[@]}" "-p" "$project_name" "$cmd_argument" "${extra_args[@]}" "$@")
-
-# 3. Execute exactly once
 if grep "docker" <<< "$(groups)" > /dev/null 2>&1; then
-    "${DOCKER_CMD[@]}"
+  docker compose --project-directory docker "${to_run[@]}" -p "$project_name" "$cmd_argument" "$@"
 else
-    sudo "${DOCKER_CMD[@]}"
+  sudo docker compose --project-directory docker "${to_run[@]}" -p "$project_name" "$cmd_argument" "$@"
 fi

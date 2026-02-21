@@ -673,7 +673,10 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 200)
         content = response.json()
         all_configs = [*content["organization_config"], *content["user_config"]]
-        val = next((c["value"] for c in all_configs if c["attribute"] == "mynewparameter"), None)
+        val = next(
+            (c["value"] for c in all_configs if c["attribute"] == "mynewparameter"),
+            None,
+        )
         self.assertEqual(val, "supersecret")
 
         # 2. admin of an org gets org secret
@@ -682,7 +685,10 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 200)
         content = response.json()
         all_configs = [*content["organization_config"], *content["user_config"]]
-        val = next((c["value"] for c in all_configs if c["attribute"] == "mynewparameter"), None)
+        val = next(
+            (c["value"] for c in all_configs if c["attribute"] == "mynewparameter"),
+            None,
+        )
         self.assertEqual(val, "supersecret")
 
         # 3. separate personal secret
@@ -699,8 +705,18 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         response = self.client.get(uri, {}, format="json")
         self.assertEqual(response.status_code, 200)
         content = response.json()
-        val_org = next((c["value"] for c in content["organization_config"] if c["attribute"] == "mynewparameter"), None)
-        val_user = next((c["value"] for c in content["user_config"] if c["attribute"] == "mynewparameter"), None)
+        val_org = next(
+            (
+                c["value"]
+                for c in content["organization_config"]
+                if c["attribute"] == "mynewparameter"
+            ),
+            None,
+        )
+        val_user = next(
+            (c["value"] for c in content["user_config"] if c["attribute"] == "mynewparameter"),
+            None,
+        )
         self.assertEqual(val_org, "supersecret")
         self.assertEqual(val_user, "supersecret_user_only")
 
@@ -709,7 +725,10 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         response = self.client.get(uri, {}, format="json")
         self.assertEqual(response.status_code, 200)
         content = response.json()
-        val_user = next((c["value"] for c in content["user_config"] if c["attribute"] == "mynewparameter"), None)
+        val_user = next(
+            (c["value"] for c in content["user_config"] if c["attribute"] == "mynewparameter"),
+            None,
+        )
         self.assertEqual(val_user, "supersecret")  # gets fallback to org secret
 
         param.delete()
@@ -749,7 +768,10 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 200)
         content = response.json()
         self.assertEqual(content["organization_config"], [])
-        val = next((c["value"] for c in content["user_config"] if c["attribute"] == "mynewparameter"), None)
+        val = next(
+            (c["value"] for c in content["user_config"] if c["attribute"] == "mynewparameter"),
+            None,
+        )
         self.assertEqual(val, None)
 
         # 2. user in org sees redacted
@@ -758,7 +780,10 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 200)
         content = response.json()
         all_configs = [*content["organization_config"], *content["user_config"]]
-        val = next((c["value"] for c in all_configs if c["attribute"] == "mynewparameter"), None)
+        val = next(
+            (c["value"] for c in all_configs if c["attribute"] == "mynewparameter"),
+            None,
+        )
         self.assertEqual(val, "redacted")
 
         # 3. user with personal secret
@@ -772,8 +797,18 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         response = client.get(uri, {}, format="json")
         self.assertEqual(response.status_code, 200)
         content = response.json()
-        val_org = next((c["value"] for c in content["organization_config"] if c["attribute"] == "mynewparameter"), None)
-        val_user = next((c["value"] for c in content["user_config"] if c["attribute"] == "mynewparameter"), None)
+        val_org = next(
+            (
+                c["value"]
+                for c in content["organization_config"]
+                if c["attribute"] == "mynewparameter"
+            ),
+            None,
+        )
+        val_user = next(
+            (c["value"] for c in content["user_config"] if c["attribute"] == "mynewparameter"),
+            None,
+        )
         self.assertEqual(val_org, "redacted")
         self.assertEqual(val_user, "supersecret_low_privilege")
 

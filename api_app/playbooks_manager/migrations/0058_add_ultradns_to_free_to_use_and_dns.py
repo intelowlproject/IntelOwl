@@ -17,7 +17,10 @@ def migrate(apps, schema_editor):
         pc.full_clean()
         pc.save()
 
-    pc2 = playbook_config.objects.filter(name="Dns").first() or playbook_config.objects.filter(name="DNS").first()
+    pc2 = (
+        playbook_config.objects.filter(name="Dns").first()
+        or playbook_config.objects.filter(name="DNS").first()
+    )
     if pc2:
         pc2.analyzers.add(
             AnalyzerConfig.objects.get(name="UltraDNS_DNS").id,
@@ -39,7 +42,10 @@ def reverse_migrate(apps, schema_editor):
         pc.full_clean()
         pc.save()
 
-    pc2 = playbook_config.objects.filter(name="Dns").first() or playbook_config.objects.filter(name="DNS").first()
+    pc2 = (
+        playbook_config.objects.filter(name="Dns").first()
+        or playbook_config.objects.filter(name="DNS").first()
+    )
     if pc2:
         pc2.analyzers.remove(
             AnalyzerConfig.objects.get(name="UltraDNS_DNS").id,

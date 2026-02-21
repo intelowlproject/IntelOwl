@@ -18,7 +18,7 @@ class Quad9DNSResolver(Quad9Base, classes.ObservableAnalyzer):
 
     @classmethod
     def update(cls) -> bool:
-        return True
+        pass
 
     def run(self):
         observable = self.convert_to_domain(self.observable_name, self.observable_classification)

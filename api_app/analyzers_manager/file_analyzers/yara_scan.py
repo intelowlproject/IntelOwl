@@ -161,12 +161,11 @@ class YaraRepo:
 
         os.makedirs(base_dir, exist_ok=True)
 
-        MAX_PAGES = 20
         page = 1
 
-        while page <= MAX_PAGES:
+        while True:
             logger.info(f"Fetching Unprotect rules: page {page}")
-            response = requests.get(f"{self.url}?page={page}")
+            response = requests.get(f"{self.url}?page={page}", timeout=30)
 
             if response.status_code != 200:
                 break
@@ -188,7 +187,7 @@ class YaraRepo:
 
     def delete_lock_file(self):
         lock_file_path = self.directory / ".git" / "index.lock"
-        lock_file_path.unlink(missing_ok=False)
+        lock_file_path.unlink(missing_ok=True)
 
     @property
     def compiled_file_name(self):

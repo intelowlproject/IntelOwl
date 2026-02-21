@@ -6,11 +6,11 @@ def add_unprotect_url(apps, schema_editor):
     PluginConfig = apps.get_model("api_app", "PluginConfig")
 
     try:
-        # 1. PythonModule uses 'module' to identify the class path
+        
         yara_module = PythonModule.objects.get(module="yara_scan.YaraScan")
         
-        # 2. Parameter uses 'python_module' as the foreign key (FIXED HERE)
-        parameter = Parameter.objects.get(python_module=yara_module, name="repositories")
+        
+        parameter = Parameter.objects.get(python_module=yara_module,name="repositories")
     except (PythonModule.DoesNotExist, Parameter.DoesNotExist):
         return
 
@@ -18,7 +18,7 @@ def add_unprotect_url(apps, schema_editor):
     plugin_configs = PluginConfig.objects.filter(parameter=parameter)
 
     for pc in plugin_configs:
-        # Standard safety check for list types
+
         value = pc.value if isinstance(pc.value, list) else []
         if unprotect_url not in value:
             value.append(unprotect_url)
@@ -27,7 +27,7 @@ def add_unprotect_url(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('analyzers_manager', '0176_analyzer_config_macho_info'),
+        ('analyzers_manager', '0177_update_urlscan_observable_supported'),
     ]
     operations = [
         migrations.RunPython(add_unprotect_url),

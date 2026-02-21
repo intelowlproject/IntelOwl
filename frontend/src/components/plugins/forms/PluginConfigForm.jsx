@@ -31,6 +31,7 @@ import {
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { JsonEditor } from "../../common/JsonEditor";
+import { markdownToHtml } from "../../common/markdownToHtml";
 
 function CustomInput({ formik, config, configType, disabledInputField }) {
   switch (config.type) {
@@ -416,9 +417,17 @@ export function PluginConfigForm({
               </Row>
               <Row>
                 <Col className="offset-2 col-9">
-                  <small className="mt-1 fst-italic">
-                    {config.description}
-                  </small>
+                  <div
+                    className="mt-1 text-muted"
+                    style={{ fontSize: "0.875em" }}
+                  >
+                    {markdownToHtml(
+                      (config.description || "").replace(
+                        /([a-z0-9])\r?\n([a-z0-9])/g,
+                        "$1, $2",
+                      ),
+                    )}
+                  </div>
                 </Col>
               </Row>
               <hr />

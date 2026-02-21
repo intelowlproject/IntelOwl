@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock, patch
+
 from django.test import TestCase
 
 from api_app.analyzers_manager.file_analyzers.yara_scan import YaraScan
@@ -14,8 +16,28 @@ class TestYaraAnalyzer(TestCase):
         self.pc = PluginConfig.objects.filter(parameter=self.param).first()
         self.ys = YaraScan(config=self.pc)
 
-    def test_update_runs(self):
+    @patch('api_app.analyzers_manager.file_analyzers.yara_scan.requests.get')
+    def test_update_runs(self, mock_get):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "results": [
+                {
+                    "name": "TestRule",
+                    "yara_rule": "rule Test { condition: true }",
+                    "id": 1
+                }
+            ],
+            "next": None
+        }
+        mock_get.return_value = mock_response
+
+        self.ys.url = "https://unprotect.it/api/detection_rules/"
+
         self.ys.update()
 
     def test_unprotect_url_in_config(self):
-        self.assertIn("https://yaraify.abuse.ch/yarahub/yaraify-rules.zip", self.pc.value)
+        """
+        Verifies that the Unprotect URL was successfully added via migration.
+        """
+        self.assertIn("https://unprotect.it/api/detection_rules/", self.pc.value)

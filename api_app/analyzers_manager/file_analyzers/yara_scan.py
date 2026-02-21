@@ -157,53 +157,34 @@ class YaraRepo:
 
     # NEW:Unprotect.it API update logic
     def _update_unprotect_api(self):
-        logger.info(f"Fetching rules from Unprotect.it API: {self.url}")
+        base_dir = self.directory
 
-        base_dir = self.directory / "unprotect_api"
         os.makedirs(base_dir, exist_ok=True)
 
         MAX_PAGES = 20
-        page = 0
-        next_url = self.url
+        page = 1
 
-        while next_url and page < MAX_PAGES:
-            try:
-                response = requests.get(next_url, timeout=30)
-                response.raise_for_status()
-                data = response.json()
-            except Exception:
-                logger.exception("Failed to fetch Unprotect.it rules")
+        while page <= MAX_PAGES:
+            logger.info(f"Fetching Unprotect rules: page {page}")
+            response = requests.get(f"{self.url}?page={page}")
+
+            if response.status_code != 200:
                 break
-
+            data = response.json()
             rules = data.get("results", [])
-            next_url = data.get("next")
-            page += 1
-
+            if not rules:
+                break
             for rule in rules:
-                rule_type = rule.get("type", {}).get("name")
+                rule_name = rule.get("name", f"unprotect_{page}_{rule.get('id')}")
 
-                if rule_type != "YARA":
-                    continue
-
-                rule_name = rule.get("name")
-                rule_content = rule.get("rule")
-
-                if not rule_name or not rule_content:
-                    continue
-
-                safe_name = (
-                    rule_name.lower().replace(" ", "_").replace("/", "_").replace("\\", "_").replace(":", "_")
-                )
-
+                safe_name = "".join([c for c in rule_name if c.isalnum() or c in (" ", ".", "_")]).strip()
                 file_path = base_dir / f"{safe_name}.yar"
+                with open(file_path, "w") as f:
+                    f.write(rule.get("yara_rule", ""))
 
-                try:
-                    with open(file_path, "w", encoding="utf-8") as f:
-                        f.write(rule_content)
-                except Exception:
-                    logger.warning(f"Failed to write YARA rule: {rule_name}")
-
-            logger.info("Unprotect.it API update completed")
+            if not data.get("next"):
+                break
+            page += 1
 
     def delete_lock_file(self):
         lock_file_path = self.directory / ".git" / "index.lock"

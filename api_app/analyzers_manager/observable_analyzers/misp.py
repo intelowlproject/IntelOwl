@@ -33,6 +33,26 @@ class MISP(classes.ObservableAnalyzer):
     def update(self):
         pass
 
+    def _handle_search_errors(self, errors):
+        error_str = str(errors)
+        if "restSearch" in error_str and "GET" in error_str:
+            debug_info = (
+                f" [debug: PyMISP version={pymisp.__version__},"
+                f" ssl_check={self.ssl_check},"
+                f" url={self._url_key_name}]"
+                if self.debug
+                else ""
+            )
+            raise AnalyzerRunException(
+                f"MISP restSearch failed with a GET/POST mismatch error: {errors}. "
+                "This is usually caused by an HTTP to HTTPS redirect stripping "
+                "the POST body. Try changing your MISP URL from 'http://' to "
+                "'https://' in the plugin configuration."
+                " Also check that ssl_check matches your URL protocol."
+                f"{debug_info}"
+            )
+        raise AnalyzerRunException(errors)
+
     def run(self):
         # this allows self-signed certificates to be used
         ssl_param = (
@@ -101,23 +121,6 @@ class MISP(classes.ObservableAnalyzer):
         if isinstance(result_search, dict):
             errors = result_search.get("errors", [])
             if errors:
-                error_str = str(errors)
-                if "restSearch" in error_str and "GET" in error_str:
-                    debug_info = (
-                        f" [debug: PyMISP version={pymisp.__version__},"
-                        f" ssl_check={self.ssl_check},"
-                        f" url={self._url_key_name}]"
-                        if self.debug
-                        else ""
-                    )
-                    raise AnalyzerRunException(
-                        f"MISP restSearch failed with a GET/POST mismatch error: {errors}. "
-                        "This is usually caused by an HTTP to HTTPS redirect stripping "
-                        "the POST body. Try changing your MISP URL from 'http://' to "
-                        "'https://' in the plugin configuration."
-                        " Also check that ssl_check matches your URL protocol."
-                        f"{debug_info}"
-                    )
-                raise AnalyzerRunException(errors)
+                self._handle_search_errors(errors)
 
         return {"result_search": result_search, "instance_url": self._url_key_name}

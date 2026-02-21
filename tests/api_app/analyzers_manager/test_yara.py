@@ -1,3 +1,5 @@
+import io
+import zipfile
 from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
@@ -18,12 +20,20 @@ class TestYaraAnalyzer(TestCase):
 
     @patch("api_app.analyzers_manager.file_analyzers.yara_scan.requests.get")
     def test_update_runs(self, mock_get):
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+            zip_file.writestr("dummy.txt", "dummy content")
+        valid_zip_bytes = zip_buffer.getvalue()
+
         mock_response = MagicMock()
         mock_response.status_code = 200
+
         mock_response.json.return_value = {
             "results": [{"name": "TestRule", "yara_rule": "rule Test { condition: true }", "id": 1}],
             "next": None,
         }
+
+        mock_response.content = valid_zip_bytes
         mock_get.return_value = mock_response
 
         self.ys.url = "https://unprotect.it/api/detection_rules/"

@@ -16,19 +16,13 @@ class TestYaraAnalyzer(TestCase):
         self.pc = PluginConfig.objects.filter(parameter=self.param).first()
         self.ys = YaraScan(config=self.pc)
 
-    @patch('api_app.analyzers_manager.file_analyzers.yara_scan.requests.get')
+    @patch("api_app.analyzers_manager.file_analyzers.yara_scan.requests.get")
     def test_update_runs(self, mock_get):
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
-            "results": [
-                {
-                    "name": "TestRule",
-                    "yara_rule": "rule Test { condition: true }",
-                    "id": 1
-                }
-            ],
-            "next": None
+            "results": [{"name": "TestRule", "yara_rule": "rule Test { condition: true }", "id": 1}],
+            "next": None,
         }
         mock_get.return_value = mock_response
 

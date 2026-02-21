@@ -34,6 +34,15 @@ class MISPTestCase(BaseAnalyzerTest):
         }
 
     def test_restsearch_get_post_error(self):
+        from api_app.analyzers_manager.models import AnalyzerConfig
+
+        configs = AnalyzerConfig.objects.filter(
+            python_module=self.analyzer_class.python_module
+        )
+        if not configs.exists():
+            self.skipTest("No AnalyzerConfig found")
+
+        config = configs.first()
         mock_search = unittest.mock.MagicMock()
         mock_search.search.return_value = {
             "errors": [
@@ -43,7 +52,8 @@ class MISPTestCase(BaseAnalyzerTest):
             ]
         }
         with patch("pymisp.PyMISP", return_value=mock_search):
+            analyzer = self._setup_analyzer(config, "ip", "8.8.8.8")
             with self.assertRaises(AnalyzerRunException) as context:
-                self.analyzer.run()
+                analyzer.run()
             self.assertIn("GET/POST mismatch", str(context.exception))
             self.assertIn("https://", str(context.exception))

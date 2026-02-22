@@ -41,17 +41,55 @@ class MISPTestCase(BaseAnalyzerTest):
             self.skipTest("No AnalyzerConfig found")
 
         config = configs.first()
-        mock_search = unittest.mock.MagicMock()
-        mock_search.search.return_value = {
+        mock_pymisp = unittest.mock.MagicMock()
+        mock_pymisp.search.return_value = {
             "errors": [
-                "(400, {'name': 'Restsearch queries using GET and no parameters"
+                "(400, {'name': 'restSearch queries using GET and no parameters"
                 " are not allowed. If you have passed parameters via a JSON body,"
                 " make sure you use POST requests.', 'url': '/events/restSearch'})"
             ]
         }
-        with patch("pymisp.PyMISP", return_value=mock_search):
+        mock_pymisp.servers.getVersion.return_value = {"version": "2.4.180"}
+
+        with patch("pymisp.PyMISP", return_value=mock_pymisp):
             analyzer = self._setup_analyzer(config, "ip", "8.8.8.8")
             with self.assertRaises(AnalyzerRunException) as context:
                 analyzer.run()
             self.assertIn("GET/POST mismatch", str(context.exception))
             self.assertIn("https://", str(context.exception))
+
+    def test_restsearch_get_post_error_debug(self):
+        """Test that debug information is included in error message when debug mode is enabled."""
+        from api_app.analyzers_manager.models import AnalyzerConfig
+
+        configs = AnalyzerConfig.objects.filter(python_module=self.analyzer_class.python_module)
+        if not configs.exists():
+            self.skipTest("No AnalyzerConfig found")
+
+        config = configs.first()
+        mock_pymisp = unittest.mock.MagicMock()
+        mock_pymisp.search.return_value = {
+            "errors": [
+                "(400, {'name': 'restSearch queries using GET and no parameters"
+                " are not allowed. If you have passed parameters via a JSON body,"
+                " make sure you use POST requests.', 'url': '/events/restSearch'})"
+            ]
+        }
+        mock_pymisp.servers.getVersion.return_value = {"version": "2.4.180"}
+
+        with patch("pymisp.PyMISP", return_value=mock_pymisp):
+            with patch.object(
+                self.__class__,
+                "get_extra_config",
+                return_value={**self.get_extra_config(), "debug": True},
+            ):
+                analyzer = self._setup_analyzer(config, "ip", "8.8.8.8")
+                with self.assertRaises(AnalyzerRunException) as context:
+                    analyzer.run()
+
+                error_message = str(context.exception)
+                self.assertIn("GET/POST mismatch", error_message)
+                self.assertIn("https://", error_message)
+                self.assertIn("[debug:", error_message)
+                self.assertIn("PyMISP version=", error_message)
+                self.assertIn("ssl_check=", error_message)

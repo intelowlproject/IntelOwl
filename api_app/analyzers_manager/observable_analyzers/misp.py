@@ -53,12 +53,79 @@ class MISP(classes.ObservableAnalyzer):
             )
         raise AnalyzerRunException(errors)
 
+    def _get_ssl_parameter(self):
+        """Determine the SSL parameter for PyMISP connection."""
+        if self.ssl_check and self.self_signed_certificate:
+            return f"{settings.PROJECT_LOCATION}/configuration/misp_ssl.crt"
+        return self.ssl_check
+
+    def _build_search_params(self):
+        """Build search parameters for MISP API query."""
+        now = datetime.datetime.now()
+        date_from = now - datetime.timedelta(days=self.from_days)
+
+        params = {
+            "limit": self.limit,
+        }
+
+        if self.enforce_warninglist:
+            params["enforce_warninglist"] = self.enforce_warninglist
+
+        # https://pymisp.readthedocs.io/en/latest/modules.html#pymisp.PyMISP
+        # fixme: this should be None as default but is False
+        # so it's not possible to set it as False in this way.
+        #  migration required
+        if self.published:
+            params["published"] = self.published
+
+        if self.metadata:
+            params["metadata"] = self.metadata
+
+        if self.strict_search:
+            params["value"] = self.observable_name
+        else:
+            params["searchall"] = f"%{self.observable_name}%"
+
+        if self.from_days != 0:
+            params["date_from"] = date_from.strftime("%Y-%m-%d %H:%M:%S")
+
+        self._add_type_filters(params)
+
+        return params
+
+    def _add_type_filters(self, params):
+        """Add type-specific attribute filters to search parameters."""
+        if not self.filter_on_type:
+            return
+
+        if self.observable_classification == Classification.HASH:
+            params["type_attribute"] = ["md5", "sha1", "sha256"]
+        elif self.observable_classification == Classification.IP:
+            params["type_attribute"] = [
+                "ip-dst",
+                "ip-src",
+                "ip-src|port",
+                "ip-dst|port",
+                "domain|ip",
+            ]
+        elif self.observable_classification == Classification.DOMAIN:
+            params["type_attribute"] = [
+                self.observable_classification,
+                "domain|ip",
+            ]
+        elif self.observable_classification == Classification.URL:
+            params["type_attribute"] = [self.observable_classification]
+        elif self.observable_classification == Classification.GENERIC:
+            pass
+        else:
+            raise AnalyzerConfigurationException(
+                f"Observable {self.observable_classification} not supported. "
+                "Currently supported are: ip, domain, hash, url, generic."
+            )
+
     def run(self):
-        ssl_param = (
-            f"{settings.PROJECT_LOCATION}/configuration/misp_ssl.crt"
-            if self.ssl_check and self.self_signed_certificate
-            else self.ssl_check
-        )
+        ssl_param = self._get_ssl_parameter()
+
         try:
             misp_instance = pymisp.PyMISP(
                 url=self._url_key_name,
@@ -70,54 +137,7 @@ class MISP(classes.ObservableAnalyzer):
         except Exception as e:
             raise AnalyzerRunException(f"MISP connection failed during initialization: {str(e)}")
 
-        now = datetime.datetime.now()
-        date_from = now - datetime.timedelta(days=self.from_days)
-        params = {
-            "limit": self.limit,
-        }
-        if self.enforce_warninglist:
-            params["enforce_warninglist"] = self.enforce_warninglist
-        # https://pymisp.readthedocs.io/en/latest/modules.html#pymisp.PyMISP
-        # fixme: this should be None as default but is False
-        # so it's not possible to set it as False in this way.
-        #  migration required
-        if self.published:
-            params["published"] = self.published
-        if self.metadata:
-            params["metadata"] = self.metadata
-
-        if self.strict_search:
-            params["value"] = self.observable_name
-        else:
-            params["searchall"] = f"%{self.observable_name}%"
-
-        if self.from_days != 0:
-            params["date_from"] = date_from.strftime("%Y-%m-%d %H:%M:%S")
-        if self.filter_on_type:
-            if self.observable_classification == Classification.HASH:
-                params["type_attribute"] = ["md5", "sha1", "sha256"]
-            elif self.observable_classification == Classification.IP:
-                params["type_attribute"] = [
-                    "ip-dst",
-                    "ip-src",
-                    "ip-src|port",
-                    "ip-dst|port",
-                    "domain|ip",
-                ]
-            elif self.observable_classification == Classification.DOMAIN:
-                params["type_attribute"] = [
-                    self.observable_classification,
-                    "domain|ip",
-                ]
-            elif self.observable_classification == Classification.URL:
-                params["type_attribute"] = [self.observable_classification]
-            elif self.observable_classification == Classification.GENERIC:
-                pass
-            else:
-                raise AnalyzerConfigurationException(
-                    f"Observable {self.observable_classification} not supported."
-                    "Currently supported are: ip, domain, hash, url, generic."
-                )
+        params = self._build_search_params()
 
         try:
             result_search = misp_instance.search(**params)

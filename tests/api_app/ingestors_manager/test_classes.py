@@ -47,7 +47,9 @@ class IngestorTestCase(CustomTestCase):
                 try:
                     sub.start(None, {}, None)
                 except (requests.exceptions.RequestException, AnalyzerRunException) as e:
-                    print(f"Network error for {subclass.__name__}, skipping: {e}")
+                    self.skipTest(
+                        f"Network error for {subclass.__name__} with config {config.name}, skipping: {e}"
+                    )
                 except Exception as e:
                     self.fail(f"Ingestor {subclass.__name__} with config {config.name} failed {e}")
                 finally:

@@ -4,7 +4,7 @@ import ipaddress
 import logging
 import re
 import uuid
-from typing import Dict, Generator, List, Union
+from typing import Dict, Iterator, List, Union
 
 import django.core
 from django.conf import settings
@@ -259,7 +259,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         self,
         tlp,
         plugins_requested: Union[List[Union[AnalyzerConfig, ConnectorConfig, VisualizerConfig]], QuerySet],
-    ) -> Generator[Union[AnalyzerConfig, ConnectorConfig, VisualizerConfig]]:
+    ) -> Iterator[Union[AnalyzerConfig, ConnectorConfig, VisualizerConfig]]:
         if not plugins_requested:
             return
         if isinstance(plugins_requested, QuerySet):

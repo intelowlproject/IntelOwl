@@ -78,7 +78,7 @@ class Status(models.TextChoices):
     FAILED = "failed", "failed"
 
     @classmethod
-    def get_enums_with_suffix(cls, suffix: str) -> typing.Generator[enum.Enum]:
+    def get_enums_with_suffix(cls, suffix: str) -> typing.Iterator[enum.Enum]:
         for key in cls:
             if key.name.endswith(suffix):
                 yield key

@@ -501,9 +501,7 @@ export default function ReportsSearch() {
                 {[
                   { value: "true", label: "Reports with errors" },
                   { value: "false", label: "Reports without errors" },
-                ]
-                  .sort()
-                  .map((option) => (
+                ].map((option) => (
                     <option
                       key={`search__errors-select-option-${option.value}`}
                       value={option.value}

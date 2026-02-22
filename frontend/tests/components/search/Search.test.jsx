@@ -30,7 +30,7 @@ describe("test Search component", () => {
     // first row
     const typeField = screen.getByRole("combobox", { name: /Type:/i });
     expect(typeField).toBeInTheDocument();
-    const nameField = screen.getByRole("textbox", { name: /Name:/i });
+    const nameField = screen.getByPlaceholderText("Search and select a plugin...");
     expect(nameField).toBeInTheDocument();
     const statusField = screen.getByRole("combobox", { name: /Status:/i });
     expect(statusField).toBeInTheDocument();
@@ -145,7 +145,7 @@ describe("test Search component", () => {
     // first row
     const typeField = screen.getByRole("combobox", { name: /Type:/i });
     expect(typeField).toBeInTheDocument();
-    const nameField = screen.getByRole("textbox", { name: /Name:/i });
+    const nameField = screen.getByPlaceholderText("Search and select a plugin...");
     expect(nameField).toBeInTheDocument();
     const statusField = screen.getByRole("combobox", { name: /Status:/i });
     expect(statusField).toBeInTheDocument();

@@ -77,19 +77,21 @@ class MISPTestCase(BaseAnalyzerTest):
         }
         mock_pymisp.servers.getVersion.return_value = {"version": "2.4.180"}
 
-        with patch("pymisp.PyMISP", return_value=mock_pymisp):
-            with patch.object(
+        with (
+            patch("pymisp.PyMISP", return_value=mock_pymisp),
+            patch.object(
                 self.__class__,
                 "get_extra_config",
                 return_value={**self.get_extra_config(), "debug": True},
-            ):
-                analyzer = self._setup_analyzer(config, "ip", "8.8.8.8")
-                with self.assertRaises(AnalyzerRunException) as context:
-                    analyzer.run()
+            ),
+        ):
+            analyzer = self._setup_analyzer(config, "ip", "8.8.8.8")
+            with self.assertRaises(AnalyzerRunException) as context:
+                analyzer.run()
 
-                error_message = str(context.exception)
-                self.assertIn("GET/POST mismatch", error_message)
-                self.assertIn("https://", error_message)
-                self.assertIn("[debug:", error_message)
-                self.assertIn("PyMISP version=", error_message)
-                self.assertIn("ssl_check=", error_message)
+            error_message = str(context.exception)
+            self.assertIn("GET/POST mismatch", error_message)
+            self.assertIn("https://", error_message)
+            self.assertIn("[debug:", error_message)
+            self.assertIn("PyMISP version=", error_message)
+            self.assertIn("ssl_check=", error_message)

@@ -7,11 +7,9 @@ registration, email verification, login, and token generation.
 """
 
 import logging
-import re
 
 import rest_email_auth.serializers
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from django.db import DatabaseError, transaction
 from rest_framework import serializers as rfs
 from rest_framework.authtoken.models import Token

@@ -1,10 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
-# See the file 'LICENSE' for copying permission.
-
 import re
+
 from django.core.exceptions import ValidationError
 
 REGEX_EMAIL = r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$"

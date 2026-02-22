@@ -231,7 +231,7 @@ class TestUserAuth(CustomOAuthTestCase):
 
     def test_change_password_200(self):
         new_password = "veryStrongPassword123"
-        
+
         self.client.force_authenticate(user=self.user)
         response = self.client.post(
             change_password_uri,
@@ -261,7 +261,7 @@ class TestUserAuth(CustomOAuthTestCase):
 
         self.assertEqual(400, response.status_code, msg=msg)
         self.assertIn("Invalid password", content["error"], msg=msg)
-        
+
     def test_change_password_special_chars_400(self):
         self.client.force_authenticate(user=self.user)
         response = self.client.post(

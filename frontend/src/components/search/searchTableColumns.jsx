@@ -1,10 +1,16 @@
 /* eslint-disable react/prop-types */
+// @ts-nocheck
 import React from "react";
 import { UncontrolledTooltip } from "reactstrap";
 
-import { DateHoverable } from "@certego/certego-ui";
+import {
+  DateHoverable,
+  DefaultColumnFilter,
+  SelectOptionsFilter,
+} from "@certego/certego-ui";
 
 import { JobResultSections } from "../../constants/miscConst";
+import { PluginFinalStatuses, PluginsTypes } from "../../constants/pluginConst";
 import { StatusTag } from "../common/StatusTag";
 import { TableCellCollapse } from "../common/TableCellCollapse";
 
@@ -32,6 +38,14 @@ export const searchTableColumns = [
     maxWidth: 60,
   },
   {
+    Header: "Analyzable",
+    id: "analyzable",
+    accessor: "job.analyzable_name",
+    disableSortBy: true,
+    Filter: DefaultColumnFilter,
+    maxWidth: 150,
+  },
+  {
     Header: "Start time",
     id: "start_time",
     accessor: "start_time",
@@ -56,6 +70,12 @@ export const searchTableColumns = [
     id: "type",
     accessor: "config.plugin_name",
     disableSortBy: true,
+    Filter: SelectOptionsFilter,
+    selectOptions: [
+      PluginsTypes.ANALYZER,
+      PluginsTypes.CONNECTOR,
+      PluginsTypes.PIVOT,
+    ],
     maxWidth: 100,
   },
   {
@@ -63,6 +83,7 @@ export const searchTableColumns = [
     id: "name",
     accessor: "config.name",
     disableSortBy: true,
+    Filter: DefaultColumnFilter,
   },
   {
     Header: "Status",
@@ -70,6 +91,8 @@ export const searchTableColumns = [
     accessor: "status",
     Cell: ({ value }) => <StatusTag status={value} className="py-0" />,
     disableSortBy: true,
+    Filter: SelectOptionsFilter,
+    selectOptions: Object.values(PluginFinalStatuses),
     maxWidth: 100,
   },
   {

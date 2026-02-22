@@ -54,19 +54,22 @@ class MISP(classes.ObservableAnalyzer):
         raise AnalyzerRunException(errors)
 
     def run(self):
-        # this allows self-signed certificates to be used
         ssl_param = (
             f"{settings.PROJECT_LOCATION}/configuration/misp_ssl.crt"
             if self.ssl_check and self.self_signed_certificate
             else self.ssl_check
         )
-        misp_instance = pymisp.PyMISP(
-            url=self._url_key_name,
-            key=self._api_key_name,
-            ssl=ssl_param,
-            debug=self.debug,
-            timeout=self.timeout,
-        )
+        try:
+            misp_instance = pymisp.PyMISP(
+                url=self._url_key_name,
+                key=self._api_key_name,
+                ssl=ssl_param,
+                debug=self.debug,
+                timeout=self.timeout,
+            )
+        except Exception as e:
+            raise AnalyzerRunException(f"MISP connection failed during initialization: {str(e)}")
+
         now = datetime.datetime.now()
         date_from = now - datetime.timedelta(days=self.from_days)
         params = {
@@ -86,16 +89,14 @@ class MISP(classes.ObservableAnalyzer):
         if self.strict_search:
             params["value"] = self.observable_name
         else:
-            string_wildcard = f"%{self.observable_name}%"
-            params["searchall"] = string_wildcard
+            params["searchall"] = f"%{self.observable_name}%"
 
         if self.from_days != 0:
             params["date_from"] = date_from.strftime("%Y-%m-%d %H:%M:%S")
         if self.filter_on_type:
-            params["type_attribute"] = [self.observable_classification]
             if self.observable_classification == Classification.HASH:
                 params["type_attribute"] = ["md5", "sha1", "sha256"]
-            if self.observable_classification == Classification.IP:
+            elif self.observable_classification == Classification.IP:
                 params["type_attribute"] = [
                     "ip-dst",
                     "ip-src",
@@ -104,9 +105,10 @@ class MISP(classes.ObservableAnalyzer):
                     "domain|ip",
                 ]
             elif self.observable_classification == Classification.DOMAIN:
-                params["type_attribute"] = [self.observable_classification, "domain|ip"]
-            elif self.observable_classification == Classification.HASH:
-                params["type_attribute"] = ["md5", "sha1", "sha256"]
+                params["type_attribute"] = [
+                    self.observable_classification,
+                    "domain|ip",
+                ]
             elif self.observable_classification == Classification.URL:
                 params["type_attribute"] = [self.observable_classification]
             elif self.observable_classification == Classification.GENERIC:
@@ -117,10 +119,17 @@ class MISP(classes.ObservableAnalyzer):
                     "Currently supported are: ip, domain, hash, url, generic."
                 )
 
-        result_search = misp_instance.search(**params)
+        try:
+            result_search = misp_instance.search(**params)
+        except Exception as e:
+            raise AnalyzerRunException(f"MISP search failed: {str(e)}")
+
         if isinstance(result_search, dict):
             errors = result_search.get("errors", [])
             if errors:
                 self._handle_search_errors(errors)
 
-        return {"result_search": result_search, "instance_url": self._url_key_name}
+        return {
+            "result_search": result_search,
+            "instance_url": self._url_key_name,
+        }

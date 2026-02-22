@@ -165,6 +165,72 @@ class AnalyzerReportTestCase(CustomTestCase):
         job2.delete()
         an1.delete()
 
+    def test_create_data_model_reuse_reversed_order(self):
+        """Verify reuse works when SetField array elements are in different order."""
+        an1 = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+        job1 = Job.objects.create(
+            analyzable=an1,
+            status=Job.STATUSES.ANALYZERS_RUNNING.value,
+        )
+        job2 = Job.objects.create(
+            analyzable=an1,
+            status=Job.STATUSES.ANALYZERS_RUNNING.value,
+        )
+        config = AnalyzerConfig.objects.first()
+        config.mapping_data_model = {
+            "evaluation": "evaluation",
+            "urls.url": "external_references",
+        }
+        config.save()
+        job1.analyzers_to_execute.set([config])
+        job2.analyzers_to_execute.set([config])
+
+        ar1 = AnalyzerReport.objects.create(
+            report={
+                "evaluation": "MALICIOUS",
+                "urls": [{"url": "www.intelowl.com"}, {"url": "www.example.com"}],
+            },
+            job=job1,
+            config=config,
+            status=AnalyzerReport.STATUSES.SUCCESS.value,
+            task_id=str(uuid()),
+            parameters={},
+        )
+        # Same URLs, reversed order
+        ar2 = AnalyzerReport.objects.create(
+            report={
+                "evaluation": "MALICIOUS",
+                "urls": [{"url": "www.example.com"}, {"url": "www.intelowl.com"}],
+            },
+            job=job2,
+            config=config,
+            status=AnalyzerReport.STATUSES.SUCCESS.value,
+            task_id=str(uuid()),
+            parameters={},
+        )
+
+        dm1 = ar1.create_data_model()
+        self.assertIsNotNone(dm1)
+
+        count_before = DomainDataModel.objects.count()
+
+        dm2 = ar2.create_data_model()
+        self.assertIsNotNone(dm2)
+
+        # Reversed order of same elements
+        self.assertEqual(dm1.pk, dm2.pk)
+        self.assertEqual(count_before, DomainDataModel.objects.count())
+
+        dm1.delete()
+        ar1.delete()
+        ar2.delete()
+        job1.delete()
+        job2.delete()
+        an1.delete()
+
     def test_create_data_model_no_false_reuse(self):
         """Verify that different report data creates separate data models."""
         an1 = Analyzable.objects.create(

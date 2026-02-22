@@ -125,6 +125,14 @@ class AnalyzerReport(AbstractReport):
             return None
         dictionary = self._create_data_model_dictionary()
 
+        for key, value in dictionary.items():
+            if isinstance(value, list):
+                try:
+                    dictionary[key] = sorted(value)
+                except TypeError:
+                    # Elements not sortable (e.g. dicts); leave order as-is
+                    pass
+
         # Optimization: reuse an existing data model if one with identical content exists
         # instead of creating a new object every time.
         # Skip reuse lookup if dictionary is empty, as filter(**{}) would

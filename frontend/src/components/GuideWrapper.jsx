@@ -63,8 +63,8 @@ export default function GuideWrapper() {
           <h3>Scan Page</h3>
           <p>
             You can get started analyzing observables or files here by filling
-            out the form and running either the playbook of your choice or single
-            analyzers indipendently.
+            out the form and running either the playbook of your choice or
+            single analyzers indipendently.
           </p>
         </div>
       ),

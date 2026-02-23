@@ -63,7 +63,8 @@ export default function GuideWrapper() {
           <h3>Scan Page</h3>
           <p>
             You can get started analyzing observables or files here by filling
-            out the form and running your selected playbooks.
+            out the form and running either the playbook of your choice or single
+            analyzers indipendently.
           </p>
         </div>
       ),
@@ -146,8 +147,9 @@ export default function GuideWrapper() {
         <div id="guidebox">
           <h3>Artifacts</h3>
           <p>
-            Explore organization artifacts like yara rules, signatures, and
-            threat rules
+            An artifact is the representation of an observable or a file, and is
+            therefore a unique object that can be analyzed multiple times for
+            different evaluations.
           </p>
         </div>
       ),

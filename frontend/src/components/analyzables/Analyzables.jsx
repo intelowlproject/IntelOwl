@@ -42,14 +42,11 @@ export default function Analyzables() {
   const [showUserEventModal, setShowUserEventModal] = React.useState(false);
   const [selectedRows, setSelectedRows] = React.useState([]);
 
-  const formik = useFormik({
-    initialValues: {
-      analyzables: [""],
-    },
-    onSubmit: async () => {
+  const doSearch = React.useCallback(
+    async (analyzableNames) => {
       let response = null;
       const searchParams = new URLSearchParams();
-      formik.values.analyzables
+      analyzableNames
         .filter((value) => value !== "")
         .forEach((name) => searchParams.append("name", name));
       try {
@@ -62,8 +59,8 @@ export default function Analyzables() {
       } finally {
         setLoadingData(false);
         const resultData = [];
-        if (response.data.count !== formik.values.analyzables.length) {
-          formik.values.analyzables.forEach((analyzableName) => {
+        if (response.data.count !== analyzableNames.length) {
+          analyzableNames.forEach((analyzableName) => {
             if (
               response.data.results
                 .map((result) => result.name)
@@ -85,10 +82,33 @@ export default function Analyzables() {
         } else {
           setData(response.data.results);
         }
-        formik.setSubmitting(false);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
+  const formik = useFormik({
+    initialValues: {
+      analyzables: [""],
+    },
+    onSubmit: async () => {
+      await doSearch(formik.values.analyzables);
+      formik.setSubmitting(false);
+    },
   });
+
+  const onEvaluationSuccess = React.useCallback(
+    (submittedAnalyzables) => {
+      const firstAnalyzable = submittedAnalyzables[0];
+      if (firstAnalyzable) {
+        formik.setFieldValue("analyzables", [firstAnalyzable], false);
+        doSearch([firstAnalyzable]);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [doSearch],
+  );
 
   return (
     <Container fluid>
@@ -193,6 +213,7 @@ export default function Analyzables() {
           }
           toggle={setShowUserEventModal}
           isOpen={showUserEventModal}
+          onSuccess={onEvaluationSuccess}
         />
       )}
       <Row className="mt-2 me-2">

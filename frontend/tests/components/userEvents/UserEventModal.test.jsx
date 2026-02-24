@@ -656,4 +656,58 @@ describe("test UserEventModal component", () => {
       });
     });
   });
+
+  test("UserEventModal - onSubmitCallback is called after successful submission", async () => {
+    const user = userEvent.setup();
+    const onSubmitCallbackMock = jest.fn();
+    axios.get.mockImplementation(() =>
+      Promise.resolve({ status: 200, data: { count: 0 } }),
+    );
+    axios.post.mockImplementation(() =>
+      Promise.resolve({ status: 200, data: {} }),
+    );
+    render(
+      <BrowserRouter>
+        <UserEventModal
+          toggle={() => jest.fn()}
+          isOpen
+          onSubmitCallback={onSubmitCallbackMock}
+        />
+      </BrowserRouter>,
+    );
+
+    const analyzablesInput = screen.getAllByRole("textbox")[0];
+    fireEvent.change(analyzablesInput, { target: { value: "test.com" } });
+    expect(analyzablesInput.value).toBe("test.com");
+
+    const reasonInput = screen.getAllByRole("textbox")[1];
+    fireEvent.change(reasonInput, { target: { value: "my reason" } });
+    expect(reasonInput.value).toBe("my reason");
+
+    // IMPORTANT - wait for the state change
+    await screen.findByText("artifact");
+
+    const saveButton = screen.getByRole("button", { name: /Save/i });
+    expect(saveButton.className).not.toContain("disabled");
+
+    await user.click(saveButton);
+    await waitFor(() => {
+      expect(axios.post).toHaveBeenCalledWith(`${USER_EVENT_ANALYZABLE}`, {
+        analyzable: { name: "test.com" },
+        data_model_content: {
+          evaluation: "malicious",
+          reliability: 10,
+          malware_family: "",
+          kill_chain_phase: "",
+          related_threats: [],
+          external_references: [],
+          tags: [],
+        },
+        reason: "my reason",
+        decay_progression: "0",
+        decay_timedelta_days: 120,
+      });
+      expect(onSubmitCallbackMock).toHaveBeenCalledWith(["test.com"]);
+    });
+  });
 });

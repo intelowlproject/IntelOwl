@@ -28,23 +28,22 @@ export default function GuideWrapper() {
       disableBeacon: true,
     },
     {
-      target: "#Analyzers",
+      target: "#analyzers",
       content: (
         <div id="guidebox">
           <h3>Plugins</h3>
           <br />
           <p>
-            Plugins are the core modular components of IntelOwl that can be
-            easily added, changed and customized. The most important ones are
-            the Analyzers that allow to perform data extraction on the
-            observables and/or files that you would like to analyze.
+            Plugins are the core modular components of IntelOwl. Analyzers
+            perform data extraction, Connectors export data, and Visualizers
+            display it. You can manage them all here!
           </p>
         </div>
       ),
       disableBeacon: true,
     },
     {
-      target: "#pluginconfigbutton",
+      target: ".pluginconfigbutton",
       content: (
         <div id="guidebox">
           <h3>Plugin Configurations</h3>
@@ -63,8 +62,9 @@ export default function GuideWrapper() {
         <div id="guidebox">
           <h3>Scan Page</h3>
           <p>
-            You could get started with analyzing various observables with just
-            three steps{" "}
+            You can get started analyzing observables or files here by filling
+            out the form and running either the playbook of your choice or
+            single analyzers indipendently.
           </p>
         </div>
       ),
@@ -117,7 +117,7 @@ export default function GuideWrapper() {
       disableBeacon: true,
     },
     {
-      target: "#Investigations",
+      target: "#investigations",
       content: (
         <div id="guidebox">
           <h3>Investigations History</h3>
@@ -137,6 +137,20 @@ export default function GuideWrapper() {
         <div id="guidebox">
           <h3>Dashboard</h3>
           <p>See previous job details here with charts and more</p>
+        </div>
+      ),
+      disableBeacon: true,
+    },
+    {
+      target: "#artifacts",
+      content: (
+        <div id="guidebox">
+          <h3>Artifacts</h3>
+          <p>
+            An artifact is the representation of an observable or a file, and is
+            therefore a unique object that can be analyzed multiple times for
+            different evaluations.
+          </p>
         </div>
       ),
       disableBeacon: true,
@@ -224,7 +238,7 @@ export default function GuideWrapper() {
         if (type === "step:after") {
           if (action === "close") {
             setGuideState({ run: true, stepIndex: 7 });
-            navigate("/history/jobs");
+            navigate("/history");
           } else {
             setGuideState({ run: false, stepIndex: 0 });
             navigate("/");
@@ -256,6 +270,7 @@ export default function GuideWrapper() {
         if (type === "step:after") {
           if (action === "close") {
             setGuideState({ run: true, stepIndex: 10 });
+            navigate("/artifacts");
           } else {
             setGuideState({ run: false, stepIndex: 0 });
             navigate("/");
@@ -266,6 +281,17 @@ export default function GuideWrapper() {
         if (type === "step:after") {
           if (action === "close") {
             setGuideState({ run: true, stepIndex: 11 });
+            navigate("/dashboard");
+          } else {
+            setGuideState({ run: false, stepIndex: 0 });
+            navigate("/");
+          }
+        }
+        break;
+      case 11:
+        if (type === "step:after") {
+          if (action === "close") {
+            setGuideState({ run: true, stepIndex: 12 });
             navigate("/");
           } else {
             setGuideState({ run: false, stepIndex: 0 });
@@ -300,6 +326,7 @@ export default function GuideWrapper() {
             backgroundColor: "#001D24",
             primaryColor: "#5592AA",
             textColor: "#fff",
+            zIndex: 10000,
           },
         }}
       />

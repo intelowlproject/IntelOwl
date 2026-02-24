@@ -44,6 +44,7 @@ class BaseFileAnalyzerTest(TestCase):
         "text/xml": "android.xml",
         "application/zip": "test.zip",
         "application/x-dex": "sample.dex",
+        "application/x-mach-binary": "macho_sample",
     }
 
     @classmethod
@@ -140,7 +141,7 @@ class BaseFileAnalyzerTest(TestCase):
                 with self._apply_patches(patches):
                     md5 = hashlib.md5(file_bytes).hexdigest()
 
-                    analyzer = self.analyzer_class(config)
+                    analyzer = self.analyzer_class(config)  # pylint: disable=not-callable
                     analyzer.file_mimetype = mimetype
                     analyzer.filename = f"test_file_{mimetype}"
                     analyzer.md5 = md5

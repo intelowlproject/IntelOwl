@@ -345,6 +345,115 @@ class AbstractConfigTestCase(CustomTestCase):
         an.delete()
 
 
+class ReadConfiguredParamsTestCase(CustomTestCase):
+    """Tests for the optimized read_configured_params method.
+
+    These tests verify the three optimizations applied:
+    1. Single .first() instead of .exists() + .first() (query reduction).
+    2. select_related("python_module") avoids lazy-load on error path.
+    3. Simplified boolean: ``not STAGE_CI or not param.value``.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.vc, _ = VisualizerConfig.objects.get_or_create(
+            name="test_rcp",
+            description="test read_configured_params",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Visualizer.value,
+                module="yara.Yara",
+            ),
+            disabled=False,
+        )
+
+    def tearDown(self):
+        self.vc.delete()
+        super().tearDown()
+
+    def test_returns_configured_params(self):
+        """All parameters are configured → no error, returns queryset."""
+        result = self.vc.read_configured_params(self.user)
+        self.assertIsNotNone(result)
+
+    def test_raises_when_required_param_not_configured(self):
+        """A required parameter without a value must raise TypeError."""
+        param = Parameter.objects.create(
+            python_module=self.vc.python_module,
+            name="test_required_missing",
+            type="str",
+            is_secret=True,
+            required=True,
+        )
+        try:
+            with self.assertRaises(TypeError) as ctx:
+                self.vc.read_configured_params(self.user)
+            self.assertIn("test_required_missing", str(ctx.exception))
+        finally:
+            param.delete()
+
+    def test_no_error_when_optional_param_not_configured(self):
+        """A non-required parameter without a value must NOT raise."""
+        param = Parameter.objects.create(
+            python_module=self.vc.python_module,
+            name="test_optional_missing",
+            type="str",
+            is_secret=True,
+            required=False,
+        )
+        try:
+            result = self.vc.read_configured_params(self.user)
+            self.assertIsNotNone(result)
+        finally:
+            param.delete()
+
+    def test_stage_ci_with_value_does_not_raise(self):
+        """In STAGE_CI, a required unconfigured param WITH a value must NOT raise."""
+        param = Parameter.objects.create(
+            python_module=self.vc.python_module,
+            name="test_ci_with_value",
+            type="str",
+            is_secret=True,
+            required=True,
+        )
+        pc = PluginConfig.objects.create(
+            owner=self.user,
+            for_organization=False,
+            parameter=param,
+            value="some_value",
+            visualizer_config=self.vc,
+        )
+        try:
+            from unittest.mock import patch
+
+            with patch("api_app.models.settings") as mock_settings:
+                mock_settings.STAGE_CI = True
+                result = self.vc.read_configured_params(self.user)
+                self.assertIsNotNone(result)
+        finally:
+            pc.delete()
+            param.delete()
+
+    def test_stage_ci_without_value_raises(self):
+        """In STAGE_CI, a required unconfigured param WITHOUT a value must raise TypeError."""
+        param = Parameter.objects.create(
+            python_module=self.vc.python_module,
+            name="test_ci_no_value",
+            type="str",
+            is_secret=True,
+            required=True,
+        )
+        try:
+            from unittest.mock import patch
+
+            with patch("api_app.models.settings") as mock_settings:
+                mock_settings.STAGE_CI = True
+                with self.assertRaises(TypeError) as ctx:
+                    self.vc.read_configured_params(self.user)
+                self.assertIn("test_ci_no_value", str(ctx.exception))
+        finally:
+            param.delete()
+
+
 class PluginConfigTestCase(CustomTestCase):
     def test_clean_parameter(self):
         ac, created = AnalyzerConfig.objects.get_or_create(

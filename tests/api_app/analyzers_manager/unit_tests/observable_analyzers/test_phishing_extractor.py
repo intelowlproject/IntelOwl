@@ -78,6 +78,7 @@ class PhishingExtractorTestCase(BaseAnalyzerTest):
         analyzer = self._make_analyzer()
         analyzer.observable_name = "evil.example.com"
         analyzer.observable_classification = "domain"
+        analyzer._job = self._create_mock_analyzer_job("evil.example.com", "domain")
         self._config_analyzer(analyzer)
         self.assertIn("--target=http://evil.example.com", analyzer.args)
 
@@ -85,5 +86,6 @@ class PhishingExtractorTestCase(BaseAnalyzerTest):
         analyzer = self._make_analyzer()
         analyzer.observable_name = "https://evil.example.com/login"
         analyzer.observable_classification = "url"
+        analyzer._job = self._create_mock_analyzer_job("https://evil.example.com/login", "url")
         self._config_analyzer(analyzer)
         self.assertIn("--target=https://evil.example.com/login", analyzer.args)

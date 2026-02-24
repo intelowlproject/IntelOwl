@@ -92,9 +92,7 @@ def _build_har_request(req: dict) -> dict:
     }
     if req.get("body"):
         har_req["postData"] = {
-            "mimeType": (req.get("headers") or {}).get(
-                "content-type", "application/octet-stream"
-            ),
+            "mimeType": (req.get("headers") or {}).get("content-type", "application/octet-stream"),
             "text": (
                 req["body"].decode("utf-8", errors="replace")
                 if isinstance(req.get("body"), bytes)
@@ -422,9 +420,7 @@ class PlaywrightDriverWrapper:
                 return
             if entry.get("response") and self._cdp_session:
                 try:
-                    body_result = self._cdp_session.send(
-                        "Network.getResponseBody", {"requestId": req_id}
-                    )
+                    body_result = self._cdp_session.send("Network.getResponseBody", {"requestId": req_id})
                     raw = body_result.get("body", "")
                     if body_result.get("base64Encoded"):
                         entry["response"]["body"] = base64.b64decode(raw)

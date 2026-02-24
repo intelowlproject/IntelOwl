@@ -33,6 +33,8 @@ export default function AuthGuard({ children }) {
     } else {
       setInitialCheckDone(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // intentionally run only once on mount to restore session from cookie
   }, []);
 
   // side effects

@@ -1,5 +1,4 @@
 from logging import getLogger
-from typing import Dict
 
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, ObservableAnalyzer
 from api_app.choices import Classification
@@ -7,10 +6,16 @@ from api_app.models import PythonConfig
 
 logger = getLogger(__name__)
 
+_PHISHING_BASE_URL = "http://phishing_analyzers:4005"
+_ENGINE_ENDPOINTS = {
+    "selenium": f"{_PHISHING_BASE_URL}/phishing_extractor",
+    "playwright": f"{_PHISHING_BASE_URL}/phishing_extractor_playwright",
+}
+
 
 class PhishingExtractor(ObservableAnalyzer, DockerBasedAnalyzer):
     name: str = "Phishing_Extractor"
-    url: str = "http://phishing_analyzers:4005/phishing_extractor"
+    url: str = _ENGINE_ENDPOINTS["selenium"]
     max_tries: int = 20
     poll_distance: int = 3
 
@@ -18,6 +23,7 @@ class PhishingExtractor(ObservableAnalyzer, DockerBasedAnalyzer):
     window_width: int
     window_height: int
     user_agent: str = ""
+    phishing_engine: str = "selenium"
 
     def __init__(
         self,
@@ -25,10 +31,20 @@ class PhishingExtractor(ObservableAnalyzer, DockerBasedAnalyzer):
         **kwargs,
     ):
         super().__init__(config, **kwargs)
-        self.args: [] = []
+        self.args: list = []
 
-    def config(self, runtime_configuration: Dict):
+    def config(self, runtime_configuration: dict):
         super().config(runtime_configuration)
+
+        engine = self.phishing_engine.lower().strip()
+        if engine not in _ENGINE_ENDPOINTS:
+            logger.warning(
+                f"Unknown phishing_engine={engine!r}, falling back to 'selenium'"
+            )
+            engine = "selenium"
+        self.url = _ENGINE_ENDPOINTS[engine]
+        logger.info(f"Phishing engine set to {engine!r} -> {self.url}")
+
         target = self.observable_name
         # handle domain names by appending default
         # protocol. selenium opens only URL types
@@ -45,10 +61,8 @@ class PhishingExtractor(ObservableAnalyzer, DockerBasedAnalyzer):
             self.args.append(f"--user_agent={self.user_agent}")
 
     def run(self):
-        req_data: {} = {
-            "args": [
-                *self.args,
-            ],
+        req_data: dict = {
+            "args": self.args,
         }
         logger.info(f"sending {req_data=} to {self.url}")
         return self._docker_run(req_data)

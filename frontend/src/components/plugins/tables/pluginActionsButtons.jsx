@@ -386,6 +386,7 @@ export function PluginConfigButton({ pluginConfig, pluginType_ }) {
     <div className="d-flex flex-column align-items-center p-1">
       <IconButton
         id={`plugin-config-btn__${pluginConfig?.name}`}
+        className="pluginconfigbutton"
         color={pluginConfig.verification.configured ? "success" : "warning"}
         size="sm"
         Icon={isBasicAnalyzer ? MdEdit : AiFillSetting}

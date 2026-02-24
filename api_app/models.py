@@ -1716,11 +1716,15 @@ class PythonConfig(AbstractConfig):
         params = self.parameters.annotate_configured(self, user).annotate_value_for_user(
             self, user, config_runtime
         )
-        not_configured_params = params.filter(required=True, configured=False)
-        # TODO to optimize
-        if not_configured_params.exists():
-            param = not_configured_params.first()
-            if not settings.STAGE_CI or settings.STAGE_CI and not param.value:
+        # Use a single .first() instead of .exists() + .first() to reduce
+        # DB queries from 2 to 1. select_related avoids a lazy‑load query
+        # when we access param.python_module.module in the error message.
+        not_configured_params = params.filter(required=True, configured=False).select_related("python_module")
+        param = not_configured_params.first()
+
+        if param is not None:
+            # Simplified: "not A or (A and not B)" ≡ "not A or not B"
+            if not settings.STAGE_CI or not param.value:
                 raise TypeError(
                     f"Required param {param.name} "
                     f"of plugin {param.python_module.module}"

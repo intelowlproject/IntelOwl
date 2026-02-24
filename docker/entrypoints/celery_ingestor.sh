@@ -5,6 +5,11 @@ do
     echo "Waiting for server volume..."
 done
 
+# Ensure capa cache directory exists and is writable by www-data
+mkdir -p /opt/deploy/intel_owl/.cache
+chmod 755 /opt/deploy/intel_owl/.cache
+chown www-data:www-data /opt/deploy/intel_owl/.cache
+
 if [ "$AWS_SQS" = "True" ]
 then
   queues="ingestor.fifo,config.fifo"

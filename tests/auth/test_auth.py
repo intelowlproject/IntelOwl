@@ -20,6 +20,7 @@ resend_verificaton_uri = reverse("auth_resend-verification")
 request_pwd_reset_uri = reverse("auth_request-password-reset")
 reset_pwd_uri = reverse("auth_reset-password")
 configuration = reverse("auth_configuration")
+change_password_uri = reverse("auth_changepassword")
 
 
 @tag("api", "user")
@@ -227,6 +228,54 @@ class TestUserAuth(CustomOAuthTestCase):
         self.assertEqual(200, response.status_code, msg=msg)
         user.refresh_from_db()
         self.assertTrue(user.check_password(new_password), msg=msg)
+
+    def test_change_password_200(self):
+        new_password = "veryStrongPassword123"
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(
+            change_password_uri,
+            {
+                "old_password": "hunter2",
+                "new_password": new_password,
+            },
+        )
+        content = response.json()
+        msg = (response, content)
+
+        self.assertEqual(200, response.status_code, msg=msg)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password(new_password), msg="Password should be changed successfully")
+
+    def test_change_password_weak_password_400(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(
+            change_password_uri,
+            {
+                "old_password": "hunter2",
+                "new_password": "weak",
+            },
+        )
+        content = response.json()
+        msg = (response, content)
+
+        self.assertEqual(400, response.status_code, msg=msg)
+        self.assertIn("Invalid password", content["error"], msg=msg)
+
+    def test_change_password_special_chars_400(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(
+            change_password_uri,
+            {
+                "old_password": "hunter2",
+                "new_password": "intelowlintelowl$",
+            },
+        )
+        content = response.json()
+        msg = (response, content)
+
+        self.assertEqual(400, response.status_code, msg=msg)
+        self.assertIn("Invalid password", content["error"], msg=msg)
 
     def test_min_password_lenght_400(self):
         current_users = User.objects.count()

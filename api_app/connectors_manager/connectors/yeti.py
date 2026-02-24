@@ -58,6 +58,7 @@ class YETI(classes.Connector):
                 headers=headers,
                 json=payload,
                 verify=self.verify_ssl,
+                timeout=60,
             )
             resp.raise_for_status()
         except requests.RequestException as e:

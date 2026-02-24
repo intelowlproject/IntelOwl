@@ -11,6 +11,7 @@ class SetField(ArrayField):
 
 
 class LowercaseCharField(models.CharField):
+
     def to_python(self, value: Any):
         result = super().to_python(value)
         if result and isinstance(result, str):

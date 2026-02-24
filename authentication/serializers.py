@@ -238,14 +238,18 @@ class RegistrationSerializer(rest_email_auth.serializers.RegistrationSerializer)
 
             # update profile object only if user object was actually saved
             if getattr(user, "pk", None):
-                self._profile_serializer.update(user.profile, self._profile_serializer.data)
+                self._profile_serializer.update(
+                    user.profile, self._profile_serializer.data
+                )
                 user.refresh_from_db()
         except DatabaseError:
             transaction.rollback()
         return user
 
 
-class EmailVerificationSerializer(rest_email_auth.serializers.EmailVerificationSerializer):
+class EmailVerificationSerializer(
+    rest_email_auth.serializers.EmailVerificationSerializer
+):
     """
     Serializer for email verification.
 
@@ -272,11 +276,13 @@ class EmailVerificationSerializer(rest_email_auth.serializers.EmailVerificationS
             err_str = str(exc.detail)
             if "invalid" in err_str:
                 exc.detail = (
-                    "The provided verification key is invalid or your email address is already verified."
+                    "The provided verification key"
+                    " is invalid or your email address is already verified."
                 )
             if "expired" in err_str:
                 exc.detail = (
-                    "The provided verification key has expired or your email address is already verified."
+                    "The provided verification key"
+                    " has expired or your email address is already verified."
                 )
             raise exc
 
@@ -290,11 +296,17 @@ class EmailVerificationSerializer(rest_email_auth.serializers.EmailVerificationS
             super().save()
 
         # Send msg on slack
-        if certego_apps_settings.SLACK_TOKEN and certego_apps_settings.DEFAULT_SLACK_CHANNEL:
+        if (
+            certego_apps_settings.SLACK_TOKEN
+            and certego_apps_settings.DEFAULT_SLACK_CHANNEL
+        ):
             userprofile = user.user_profile
-            user_admin_link = f"{settings.WEB_CLIENT_URL}/admin/certego_saas_user/user/{user.pk}"
+            user_admin_link = (
+                f"{settings.WEB_CLIENT_URL}/admin/certego_saas_user/user/{user.pk}"
+            )
             userprofile_admin_link = (
-                f"{settings.WEB_CLIENT_URL}/admin/authentication/userprofile/{userprofile.pk}"
+                f"{settings.WEB_CLIENT_URL}"
+                f"/admin/authentication/userprofile/{userprofile.pk}"
             )
             slack = Slack()
             try:
@@ -310,7 +322,9 @@ class EmailVerificationSerializer(rest_email_auth.serializers.EmailVerificationS
                     channel=certego_apps_settings.DEFAULT_SLACK_CHANNEL,
                 )
             except SlackApiError as exc:
-                slack.log.error(f"Slack message failed for user(#{user.pk}) with error: {str(exc)}")
+                slack.log.error(
+                    f"Slack message failed for user(#{user.pk}) with error: {str(exc)}"
+                )
 
 
 class LoginSerializer(AuthTokenSerializer):
@@ -351,7 +365,9 @@ class LoginSerializer(AuthTokenSerializer):
                         exc.detail = "Your account is pending activation by our team."
                     elif user.approved is False:
                         exc.detail = "Your account was declined."
-                    logger.info(f"User {user} is not active. Error message: {exc.detail}")
+                    logger.info(
+                        f"User {user} is not active. Error message: {exc.detail}"
+                    )
             # else
             raise exc
 

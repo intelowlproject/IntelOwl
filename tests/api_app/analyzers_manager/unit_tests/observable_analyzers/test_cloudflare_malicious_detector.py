@@ -10,6 +10,7 @@ from tests.mock_utils import MockUpResponse
 
 
 class CloudFlareMalicioudDetectorTestCase(BaseAnalyzerTest):
+
     analyzer_class = CloudFlareMaliciousDetector
 
     @staticmethod

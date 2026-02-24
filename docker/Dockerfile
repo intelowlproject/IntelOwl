@@ -20,7 +20,7 @@ ENV DJANGO_SETTINGS_MODULE=intel_owl.settings
 ENV PYTHONPATH=/opt/deploy/intel_owl
 ENV LOG_PATH=/var/log/intel_owl
 ARG REPO_DOWNLOADER_ENABLED=true
-ENV WATCHMAN=false
+ARG WATCHMAN=false
 ARG TARGETARCH
 ENV watch_logs_cmd="watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
 # This is required to allow compatibility with different OpenCTI instances
@@ -64,7 +64,7 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && touch ${LOG_PATH}/django/certego_saas.log ${LOG_PATH}/django/certego_saas_errors.log \
     && touch ${LOG_PATH}/django/authentication.log ${LOG_PATH}/django/authentication_errors.log \
     && touch ${LOG_PATH}/asgi/daphne.log \
-    && mkdir -p -m 755 ${PYTHONPATH}/.cache \
+    && mkdir -p ${PYTHONPATH}/.cache \
     && chown -R www-data:www-data ${LOG_PATH} /opt/deploy/ ${PYTHONPATH}/.cache \
     && ${PYTHONPATH}/docker/scripts/watchman_install.sh \
     # download github stuff

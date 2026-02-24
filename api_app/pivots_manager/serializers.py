@@ -33,7 +33,9 @@ class PivotReportBISerializer(AbstractReportBISerializer):
 
 class PivotMapSerializer(rfs.ModelSerializer):
     starting_job = rfs.PrimaryKeyRelatedField(queryset=Job.objects.all(), required=True)
-    pivot_config = rfs.PrimaryKeyRelatedField(queryset=PivotConfig.objects.all(), required=True)
+    pivot_config = rfs.PrimaryKeyRelatedField(
+        queryset=PivotConfig.objects.all(), required=True
+    )
     ending_job = rfs.PrimaryKeyRelatedField(queryset=Job.objects.all(), required=True)
 
     class Meta:
@@ -47,7 +49,9 @@ class PivotMapSerializer(rfs.ModelSerializer):
             result["starting_job"].user.pk != self.context["request"].user.pk
             or result["ending_job"].user.pk != self.context["request"].user.pk
         ):
-            raise ValidationError({"detail": "You do not have permission to pivot these two jobs"})
+            raise ValidationError(
+                {"detail": "You do not have permission to pivot these two jobs"}
+            )
         return result
 
 
@@ -70,7 +74,9 @@ class PivotConfigSerializer(PythonConfigSerializer):
         many=True,
         required=False,
     )
-    python_module = rfs.SlugRelatedField(queryset=PythonModule.objects.all(), slug_field="module")
+    python_module = rfs.SlugRelatedField(
+        queryset=PythonModule.objects.all(), slug_field="module"
+    )
 
     class Meta:
         model = PivotConfig
@@ -80,8 +86,14 @@ class PivotConfigSerializer(PythonConfigSerializer):
     def validate(self, attrs):
         related_analyzer_configs = attrs.get("related_analyzer_configs", [])
         related_connector_configs = attrs.get("related_connector_configs", [])
-        if not self.instance and not related_analyzer_configs and not related_connector_configs:
-            raise ValidationError({"detail": "No Analyzers and Connectors attached to pivot"})
+        if (
+            not self.instance
+            and not related_analyzer_configs
+            and not related_connector_configs
+        ):
+            raise ValidationError(
+                {"detail": "No Analyzers and Connectors attached to pivot"}
+            )
         return attrs
 
     def to_representation(self, instance):
@@ -92,9 +104,15 @@ class PivotConfigSerializer(PythonConfigSerializer):
 
 
 class PivotConfigSerializerForMigration(PythonConfigSerializerForMigration):
-    related_analyzer_configs = rfs.SlugRelatedField(read_only=True, many=True, slug_field="name")
-    related_connector_configs = rfs.SlugRelatedField(read_only=True, many=True, slug_field="name")
-    playbooks_choice = rfs.SlugRelatedField(read_only=True, slug_field="name", many=True)
+    related_analyzer_configs = rfs.SlugRelatedField(
+        read_only=True, many=True, slug_field="name"
+    )
+    related_connector_configs = rfs.SlugRelatedField(
+        read_only=True, many=True, slug_field="name"
+    )
+    playbooks_choice = rfs.SlugRelatedField(
+        read_only=True, slug_field="name", many=True
+    )
 
     class Meta:
         model = PivotConfig

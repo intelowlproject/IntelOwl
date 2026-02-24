@@ -45,7 +45,9 @@ class TestOTXQuery(CustomTestCase):
         cls.an.delete()
 
     def test_no_report(self):
-        report = extract_otxquery_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        report = extract_otxquery_reports(
+            AnalyzerReport.objects.filter(job=self.job), self.job
+        )
         self.assertEqual([], report)
 
     def test_empty_report(self):
@@ -56,7 +58,9 @@ class TestOTXQuery(CustomTestCase):
             task_id=uuid(),
             config=AnalyzerConfig.objects.get(name="OTXQuery"),
         )
-        report = extract_otxquery_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        report = extract_otxquery_reports(
+            AnalyzerReport.objects.filter(job=self.job), self.job
+        )
         self.assertEqual([], report)
 
     def test_all_data_report(self):
@@ -85,7 +89,9 @@ class TestOTXQuery(CustomTestCase):
             task_id=uuid(),
             config=AnalyzerConfig.objects.get(name="OTXQuery"),
         )
-        report = extract_otxquery_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        report = extract_otxquery_reports(
+            AnalyzerReport.objects.filter(job=self.job), self.job
+        )
         self.assertEqual(
             [
                 PDNSReport(
@@ -128,7 +134,9 @@ class TestThreatminer(CustomTestCase):
         cls.an.delete()
 
     def test_no_report(self):
-        report = extract_threatminer_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        report = extract_threatminer_reports(
+            AnalyzerReport.objects.filter(job=self.job), self.job
+        )
         self.assertEqual([], report)
 
     def test_empty_report(self):
@@ -139,7 +147,9 @@ class TestThreatminer(CustomTestCase):
             task_id=uuid(),
             config=AnalyzerConfig.objects.get(name="Threatminer"),
         )
-        report = extract_threatminer_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        report = extract_threatminer_reports(
+            AnalyzerReport.objects.filter(job=self.job), self.job
+        )
         self.assertEqual([], report)
 
     def test_all_data_report(self):
@@ -165,7 +175,9 @@ class TestThreatminer(CustomTestCase):
             task_id=uuid(),
             config=AnalyzerConfig.objects.get(name="Threatminer"),
         )
-        report = extract_threatminer_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        report = extract_threatminer_reports(
+            AnalyzerReport.objects.filter(job=self.job), self.job
+        )
         self.assertEqual(
             [
                 PDNSReport(
@@ -217,7 +229,9 @@ class TestValidin(CustomTestCase):
         cls.an.delete()
 
     def test_no_report(self):
-        report = extract_validin_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        report = extract_validin_reports(
+            AnalyzerReport.objects.filter(job=self.job), self.job
+        )
         self.assertEqual([], report)
 
     def test_empty_report(self):
@@ -228,7 +242,9 @@ class TestValidin(CustomTestCase):
             task_id=uuid(),
             config=AnalyzerConfig.objects.get(name="Validin"),
         )
-        report = extract_validin_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        report = extract_validin_reports(
+            AnalyzerReport.objects.filter(job=self.job), self.job
+        )
         self.assertEqual([], report)
 
     def test_all_data_report(self):
@@ -271,7 +287,9 @@ class TestValidin(CustomTestCase):
             task_id=uuid(),
             config=AnalyzerConfig.objects.get(name="Validin"),
         )
-        report = extract_validin_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        report = extract_validin_reports(
+            AnalyzerReport.objects.filter(job=self.job), self.job
+        )
 
         self.assertEqual(
             [
@@ -324,7 +342,9 @@ class TestDNSdb(CustomTestCase):
         cls.an.delete()
 
     def test_no_report(self):
-        report = extract_dnsdb_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        report = extract_dnsdb_reports(
+            AnalyzerReport.objects.filter(job=self.job), self.job
+        )
         self.assertEqual([], report)
 
     def test_empty_report(self):
@@ -335,7 +355,9 @@ class TestDNSdb(CustomTestCase):
             task_id=uuid(),
             config=AnalyzerConfig.objects.get(name="DNSDB"),
         )
-        report = extract_dnsdb_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        report = extract_dnsdb_reports(
+            AnalyzerReport.objects.filter(job=self.job), self.job
+        )
         self.assertEqual([], report)
 
     def test_all_data_report(self):
@@ -358,7 +380,9 @@ class TestDNSdb(CustomTestCase):
             task_id=uuid(),
             config=AnalyzerConfig.objects.get(name="DNSDB"),
         )
-        report = extract_dnsdb_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        report = extract_dnsdb_reports(
+            AnalyzerReport.objects.filter(job=self.job), self.job
+        )
         self.assertEqual(
             [
                 PDNSReport(
@@ -401,7 +425,9 @@ class TestRobtex(CustomTestCase):
         cls.an.delete()
 
     def test_no_report(self):
-        report = extract_robtex_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        report = extract_robtex_reports(
+            AnalyzerReport.objects.filter(job=self.job), self.job
+        )
         self.assertEqual([], report)
 
     def test_empty_report(self):
@@ -412,7 +438,9 @@ class TestRobtex(CustomTestCase):
             task_id=uuid(),
             config=AnalyzerConfig.objects.get(name="Robtex"),
         )
-        report = extract_robtex_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        report = extract_robtex_reports(
+            AnalyzerReport.objects.filter(job=self.job), self.job
+        )
         self.assertEqual([], report)
 
     def test_all_data_report(self):
@@ -432,7 +460,9 @@ class TestRobtex(CustomTestCase):
             task_id=uuid(),
             config=AnalyzerConfig.objects.get(name="Robtex"),
         )
-        report = extract_robtex_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        report = extract_robtex_reports(
+            AnalyzerReport.objects.filter(job=self.job), self.job
+        )
         self.assertEqual(
             [
                 PDNSReport(
@@ -475,7 +505,9 @@ class TestMnemonicPDNS(CustomTestCase):
         cls.an.delete()
 
     def test_no_report(self):
-        report = extract_mnemonicpdns_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        report = extract_mnemonicpdns_reports(
+            AnalyzerReport.objects.filter(job=self.job), self.job
+        )
         self.assertEqual([], report)
 
     def test_empty_report(self):
@@ -486,7 +518,9 @@ class TestMnemonicPDNS(CustomTestCase):
             task_id=uuid(),
             config=AnalyzerConfig.objects.get(name="Mnemonic_PassiveDNS"),
         )
-        report = extract_mnemonicpdns_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        report = extract_mnemonicpdns_reports(
+            AnalyzerReport.objects.filter(job=self.job), self.job
+        )
         self.assertEqual([], report)
 
     def test_all_data_report(self):
@@ -506,7 +540,9 @@ class TestMnemonicPDNS(CustomTestCase):
             task_id=uuid(),
             config=AnalyzerConfig.objects.get(name="Mnemonic_PassiveDNS"),
         )
-        report = extract_mnemonicpdns_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        report = extract_mnemonicpdns_reports(
+            AnalyzerReport.objects.filter(job=self.job), self.job
+        )
         self.assertEqual(
             [
                 PDNSReport(
@@ -549,7 +585,9 @@ class TestCIRCLPassiveDNS(CustomTestCase):
         cls.an.delete()
 
     def test_no_report(self):
-        report = extract_circlpdns_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        report = extract_circlpdns_reports(
+            AnalyzerReport.objects.filter(job=self.job), self.job
+        )
         self.assertEqual([], report)
 
     def test_empty_report(self):
@@ -560,7 +598,9 @@ class TestCIRCLPassiveDNS(CustomTestCase):
             task_id=uuid(),
             config=AnalyzerConfig.objects.get(name="CIRCLPassiveDNS"),
         )
-        report = extract_circlpdns_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        report = extract_circlpdns_reports(
+            AnalyzerReport.objects.filter(job=self.job), self.job
+        )
         self.assertEqual([], report)
 
     def test_all_data_report(self):
@@ -580,7 +620,9 @@ class TestCIRCLPassiveDNS(CustomTestCase):
             task_id=uuid(),
             config=AnalyzerConfig.objects.get(name="CIRCLPassiveDNS"),
         )
-        report = extract_circlpdns_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        report = extract_circlpdns_reports(
+            AnalyzerReport.objects.filter(job=self.job), self.job
+        )
         self.assertEqual(
             [
                 PDNSReport(

@@ -21,7 +21,9 @@ class UrlDNATestCase(BaseAnalyzerTest):
                 "requests.Session.post",
                 side_effect=[
                     MockUpResponse(search_response, 200),  # For SEARCH
-                    MockUpResponse(post_scan_response, 200),  # For NEW_SCAN - scan request
+                    MockUpResponse(
+                        post_scan_response, 200
+                    ),  # For NEW_SCAN - scan request
                 ],
             ),
             patch(

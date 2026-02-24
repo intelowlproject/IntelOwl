@@ -2,7 +2,6 @@
 # See the file 'LICENSE' for copying permission.
 
 """Base class for Quad9 analyzers"""
-
 import logging
 from abc import ABCMeta
 
@@ -33,7 +32,9 @@ class Quad9Base(DoHMixin, metaclass=ABCMeta):
         quad9_response = None
         for attempt in range(attempt_number):
             try:
-                quad9_response = httpx.Client(http2=True).get(complete_url, headers=self.headers, timeout=10)
+                quad9_response = httpx.Client(http2=True).get(
+                    complete_url, headers=self.headers, timeout=10
+                )
             except httpx.ConnectError as exception:
                 if attempt == attempt_number - 1:
                     raise exception

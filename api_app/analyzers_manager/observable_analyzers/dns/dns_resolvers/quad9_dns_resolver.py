@@ -2,7 +2,6 @@
 # See the file 'LICENSE' for copying permission.
 
 """Quad9 DNS resolutions"""
-
 import logging
 
 from api_app.analyzers_manager import classes
@@ -21,6 +20,9 @@ class Quad9DNSResolver(Quad9Base, classes.ObservableAnalyzer):
         pass
 
     def run(self):
-        observable = self.convert_to_domain(self.observable_name, self.observable_classification)
+
+        observable = self.convert_to_domain(
+            self.observable_name, self.observable_classification
+        )
         resolutions = self.quad9_dns_query(observable)
         return dns_resolver_response(observable, resolutions)

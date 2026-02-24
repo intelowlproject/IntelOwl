@@ -13,6 +13,7 @@ class DebloatTestCase(BaseFileAnalyzerTest):
 
     @staticmethod
     def get_mocked_response():
+
         pe_patch = patch(
             "api_app.analyzers_manager.file_analyzers.debloat.pefile.PE",
             return_value=MagicMock(name="FakePE"),

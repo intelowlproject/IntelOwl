@@ -41,7 +41,9 @@ class SignatureInfo(FileAnalyzer):
                 elif "No signature found" in output:
                     results["no_signature"] = True
             elif p.returncode != 0:
-                raise AnalyzerRunException(f"osslsigncode return code is {p.returncode}. Error: {err}")
+                raise AnalyzerRunException(
+                    f"osslsigncode return code is {p.returncode}. Error: {err}"
+                )
 
             if output:
                 if "No signature found" in output:

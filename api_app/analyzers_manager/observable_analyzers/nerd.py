@@ -42,7 +42,11 @@ class NERD(ObservableAnalyzer):
             response.raise_for_status()
             result = response.json()
         except requests.RequestException as e:
-            if isinstance(e, HTTPError) and e.response.status_code == 404 and "NOT FOUND" in str(e):
+            if (
+                isinstance(e, HTTPError)
+                and e.response.status_code == 404
+                and "NOT FOUND" in str(e)
+            ):
                 result = {"status": "NO DATA"}
             else:
                 raise AnalyzerRunException(e)

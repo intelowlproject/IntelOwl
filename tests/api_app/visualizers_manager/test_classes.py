@@ -229,9 +229,13 @@ class VisualizableBoolTestCase(CustomTestCase):
 
 class VisualizableTitleTestCase(CustomTestCase):
     def test_to_dict(self):
-        title = VisualizableBase(value="test_title", color=VisualizableColor.DARK, link="http://test_title")
+        title = VisualizableBase(
+            value="test_title", color=VisualizableColor.DARK, link="http://test_title"
+        )
 
-        value = VisualizableBase(value="test_value", color=VisualizableColor.DANGER, link="http://test_value")
+        value = VisualizableBase(
+            value="test_value", color=VisualizableColor.DANGER, link="http://test_value"
+        )
 
         vo = VisualizableTitle(title, value)
 
@@ -249,7 +253,9 @@ class VisualizableTitleTestCase(CustomTestCase):
 class VisualizableVerticalListTestCase(CustomTestCase):
     def test_to_dict(self):
         name = VisualizableBase(value="test")
-        value = VisualizableBase(value="test_value", color=VisualizableColor.DANGER, link="http://test_value")
+        value = VisualizableBase(
+            value="test_value", color=VisualizableColor.DANGER, link="http://test_value"
+        )
         vvl = VisualizableVerticalList(name=name, value=[value])
         expected_result = {
             "alignment": "center",
@@ -266,7 +272,9 @@ class VisualizableVerticalListTestCase(CustomTestCase):
 
     def test_to_dict_values_null(self):
         name = VisualizableBase(value="test")
-        value = VisualizableBase(value="", color=VisualizableColor.DANGER, link="http://test_value")
+        value = VisualizableBase(
+            value="", color=VisualizableColor.DANGER, link="http://test_value"
+        )
         vvl = VisualizableVerticalList(name=name, value=[value])
         expected_result = {
             "alignment": "center",
@@ -309,7 +317,9 @@ class VisualizableVerticalListTestCase(CustomTestCase):
         self.assertEqual(vvl.to_dict(), expected_result)
 
     def test_to_dict_name_null(self):
-        value = VisualizableBase(value="", color=VisualizableColor.DANGER, link="http://test_value")
+        value = VisualizableBase(
+            value="", color=VisualizableColor.DANGER, link="http://test_value"
+        )
         vvl = VisualizableVerticalList(value=[value])
         expected_result = {
             "alignment": "center",
@@ -325,7 +335,13 @@ class VisualizableVerticalListTestCase(CustomTestCase):
 
 class VisualizableTableTestCase(CustomTestCase):
     def test_to_dict(self):
-        data = [{"column_name": VisualizableBase(value="test_value", color=VisualizableColor.DANGER)}]
+        data = [
+            {
+                "column_name": VisualizableBase(
+                    value="test_value", color=VisualizableColor.DANGER
+                )
+            }
+        ]
         columns = [
             VisualizableTableColumn(
                 name="column_name",
@@ -335,7 +351,9 @@ class VisualizableTableTestCase(CustomTestCase):
                 disable_sort_by=True,
             ),
         ]
-        vvl = VisualizableTable(columns=columns, data=data, sort_by_desc=True, sort_by_id="column_name")
+        vvl = VisualizableTable(
+            columns=columns, data=data, sort_by_desc=True, sort_by_id="column_name"
+        )
         expected_result = {
             "size": "auto",
             "alignment": "around",
@@ -404,7 +422,9 @@ class VisualizableTableTestCase(CustomTestCase):
 
 class VisualizableHorizontalListTestCase(CustomTestCase):
     def test_to_dict(self):
-        value = VisualizableBase(value="test_value", color=VisualizableColor.DANGER, link="http://test_value")
+        value = VisualizableBase(
+            value="test_value", color=VisualizableColor.DANGER, link="http://test_value"
+        )
         vvl = VisualizableHorizontalList(value=[value])
         expected_result = {
             "type": "horizontal_list",
@@ -434,9 +454,13 @@ class VisualizableHorizontalListTestCase(CustomTestCase):
 
 class VisualizableLevelTestCase(CustomTestCase):
     def test_to_dict(self):
-        value = VisualizableBase(value="test_value", color=VisualizableColor.DANGER, link="http://test_value")
+        value = VisualizableBase(
+            value="test_value", color=VisualizableColor.DANGER, link="http://test_value"
+        )
         vvl = VisualizableHorizontalList(value=[value])
-        level = VisualizableLevel(position=1, size=VisualizableLevelSize.S_2, horizontal_list=vvl)
+        level = VisualizableLevel(
+            position=1, size=VisualizableLevelSize.S_2, horizontal_list=vvl
+        )
         expected_result = {
             "level_position": 1,
             "level_size": "2",
@@ -447,10 +471,16 @@ class VisualizableLevelTestCase(CustomTestCase):
 
 class VisualizablePageTestCase(CustomTestCase):
     def test_to_dict(self):
-        value = VisualizableBase(value="test_value", color=VisualizableColor.DANGER, link="http://test_value")
+        value = VisualizableBase(
+            value="test_value", color=VisualizableColor.DANGER, link="http://test_value"
+        )
         vvl = VisualizableHorizontalList(value=[value])
         vl = VisualizablePage()
-        vl.add_level(VisualizableLevel(position=1, size=VisualizableLevelSize.S_2, horizontal_list=vvl))
+        vl.add_level(
+            VisualizableLevel(
+                position=1, size=VisualizableLevelSize.S_2, horizontal_list=vvl
+            )
+        )
         expected_result = {
             "level_position": 1,
             "level_size": "2",
@@ -519,21 +549,34 @@ class VisualizerTestCase(CustomTestCase):
 
         subclasses = Visualizer.all_subclasses()
         for subclass in subclasses:
-            print(f"\nTesting Visualizer {subclass.__name__}")
-            configs = VisualizerConfig.objects.filter(python_module=subclass.python_module)
+            print("\n" f"Testing Visualizer {subclass.__name__}")
+            configs = VisualizerConfig.objects.filter(
+                python_module=subclass.python_module
+            )
             if not configs.exists():
-                self.fail(f"There is a python module {subclass.python_module} without any configuration")
+                self.fail(
+                    f"There is a python module {subclass.python_module}"
+                    " without any configuration"
+                )
             for config in configs:
                 job.visualizers_to_execute.set([config])
                 timeout_seconds = config.soft_time_limit
                 timeout_seconds = min(timeout_seconds, 20)
-                print(f"\tTesting with config {config.name} for {timeout_seconds} seconds")
+                print(
+                    "\t"
+                    f"Testing with config {config.name}"
+                    f" for {timeout_seconds} seconds"
+                )
                 sub = subclass(config)
                 signal.alarm(timeout_seconds)
                 try:
                     sub.start(job.pk, {}, uuid())
                 except Exception as e:
-                    self.fail(f"Visualizer {subclass.__name__} with config {config.name} failed {e}")
+                    self.fail(
+                        f"Visualizer {subclass.__name__}"
+                        f" with config {config.name} "
+                        f"failed {e}"
+                    )
                 finally:
                     signal.alarm(0)
 
@@ -546,10 +589,14 @@ class ErrorHandlerTestCase(CustomTestCase):
         @property
         @visualizable_error_handler_with_params()
         def no_error(self):
-            return VisualizableBool(value="test", disable=False, color=VisualizableColor.SUCCESS)
+            return VisualizableBool(
+                value="test", disable=False, color=VisualizableColor.SUCCESS
+            )
 
         @property
-        @visualizable_error_handler_with_params("error component", error_size=VisualizableSize.S_2)
+        @visualizable_error_handler_with_params(
+            "error component", error_size=VisualizableSize.S_2
+        )
         def error(self):
             raise Exception("this is an exception to test the error")
 

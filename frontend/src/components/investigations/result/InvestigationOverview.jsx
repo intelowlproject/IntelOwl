@@ -61,11 +61,11 @@ export function InvestigationOverview({
     <Container fluid className="mb-4">
       {/* bar with investigation id and utilities buttons */}
       <Row
-        className="g-0 d-flex-between-end align-items-center mb-2"
+        className="g-0 d-flex-between-end align-items-center"
         id="utilitiesRow"
       >
         <Col>
-          <h2 className="mb-0">
+          <h2>
             <span className="me-2 text-secondary">
               Investigation #{investigation.id}
             </span>

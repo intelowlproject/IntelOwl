@@ -27,7 +27,9 @@ class Netlas(classes.ObservableAnalyzer):
 
     def run(self):
         try:
-            response = requests.get(self.url, params=self.parameters, headers=self.headers)
+            response = requests.get(
+                self.url, params=self.parameters, headers=self.headers
+            )
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

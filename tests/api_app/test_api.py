@@ -4,9 +4,7 @@
 import datetime
 import hashlib
 import os
-from contextlib import nullcontext
 from typing import Tuple
-from unittest.mock import patch
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -18,7 +16,6 @@ from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import Classification
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.playbooks_manager.models import PlaybookConfig
-from tests.mock_utils import if_mock_connections
 
 from .. import CustomViewSetTestCase
 
@@ -87,7 +84,9 @@ class ApiViewTests(CustomViewSetTestCase):
         floc = f"{settings.PROJECT_LOCATION}/test_files/{fname}"
         with open(floc, "rb") as f:
             binary = f.read()
-        uploaded_file = SimpleUploadedFile(fname, binary, content_type="multipart/form-data")
+        uploaded_file = SimpleUploadedFile(
+            fname, binary, content_type="multipart/form-data"
+        )
         md5 = hashlib.md5(binary).hexdigest()  # nosec
         return uploaded_file, md5
 
@@ -95,17 +94,20 @@ class ApiViewTests(CustomViewSetTestCase):
         md5 = os.environ.get("TEST_MD5", "446c5fbb11b9ce058450555c1c27153c")
         analyzers_needed = ["Classic_DNS", "CIRCLPassiveDNS"]
         data = {"md5": md5, "analyzers": analyzers_needed, "minutes_ago": 1}
-        response = self.client.post("/api/ask_analysis_availability", data, format="json")
+        response = self.client.post(
+            "/api/ask_analysis_availability", data, format="json"
+        )
         self.assertEqual(response.status_code, 200)
 
     def test_ask_analysis_availability__run_all_analyzers(self):
         md5 = os.environ.get("TEST_MD5", "446c5fbb11b9ce058450555c1c27153c")
         data = {"md5": md5, "analyzers": []}
-        response = self.client.post("/api/ask_analysis_availability", data, format="json")
+        response = self.client.post(
+            "/api/ask_analysis_availability", data, format="json"
+        )
         self.assertEqual(response.status_code, 200)
 
-    @if_mock_connections(patch("intel_owl.tasks.job_pipeline.apply_async"))
-    def test_analyze_file__pcap(self, mock_apply_async=None):
+    def test_analyze_file__pcap(self):
         # set a fake API key or YARAify_File_Scan will be skipped as not configured
         models.PluginConfig.objects.create(
             owner=self.user,
@@ -121,7 +123,9 @@ class ApiViewTests(CustomViewSetTestCase):
         )
 
         # with noone, only the PCAP analyzers should be executed
-        analyzers_requested = AnalyzerConfig.objects.all().values_list("name", flat=True)
+        analyzers_requested = AnalyzerConfig.objects.all().values_list(
+            "name", flat=True
+        )
         file_name = "example.pcap"
         uploaded_file, md5 = self.__get_test_file(file_name)
         file_mimetype = "application/vnd.tcpdump.pcap"
@@ -147,10 +151,6 @@ class ApiViewTests(CustomViewSetTestCase):
             ["Suricata", "YARAify_File_Scan", "Hfinger", "DetectItEasy", "Polyswarm"],
             list(job.analyzers_to_execute.all().values_list("name", flat=True)),
         )
-
-        if mock_apply_async is not None:
-            mock_apply_async.assert_called_once()
-            self.assertEqual(mock_apply_async.call_args.kwargs["args"], [job_id])
 
     def test_analyze_file__exe(self):
         data = self.analyze_file_data.copy()
@@ -219,7 +219,9 @@ class ApiViewTests(CustomViewSetTestCase):
             analyzers_requested,
             list(job.analyzers_requested.all().values_list("name", flat=True)),
         )
-        self.assertCountEqual(data["tags_labels"], list(job.tags.values_list("label", flat=True)))
+        self.assertCountEqual(
+            data["tags_labels"], list(job.tags.values_list("label", flat=True))
+        )
 
     def test_analyze_observable__ip(self):
         data = self.analyze_observable_ip_data.copy()
@@ -237,13 +239,16 @@ class ApiViewTests(CustomViewSetTestCase):
             list(job.analyzers_requested.all().values_list("name", flat=True)),
             msg=msg,
         )
-        self.assertEqual(data["observable_classification"], job.analyzable.classification, msg=msg)
+        self.assertEqual(
+            data["observable_classification"], job.analyzable.classification, msg=msg
+        )
         self.assertEqual(self.observable_md5, job.analyzable.md5, msg=msg)
 
-    @if_mock_connections(patch("intel_owl.tasks.job_pipeline.apply_async"))
-    def test_analyze_observable__guess_optional(self, mock_apply_async=None):
+    def test_analyze_observable__guess_optional(self):
         data = self.analyze_observable_ip_data.copy()
-        observable_classification = data.pop("observable_classification")  # let the server calc it
+        observable_classification = data.pop(
+            "observable_classification"
+        )  # let the server calc it
 
         response = self.client.post("/api/analyze_observable", data, format="json")
         content = response.json()
@@ -258,25 +263,23 @@ class ApiViewTests(CustomViewSetTestCase):
             list(job.analyzers_requested.all().values_list("name", flat=True)),
             msg=msg,
         )
-        self.assertEqual(observable_classification, job.analyzable.classification, msg=msg)
+        self.assertEqual(
+            observable_classification, job.analyzable.classification, msg=msg
+        )
         self.assertEqual(self.observable_md5, job.analyzable.md5, msg=msg)
 
-        if mock_apply_async is not None:
-            mock_apply_async.assert_called_once()
-            self.assertEqual(mock_apply_async.call_args.kwargs["args"], [job_id])
-
-    @if_mock_connections(patch("intel_owl.tasks.job_pipeline.apply_async"))
-    def test_analyze_multiple_observables(self, mock_apply_async=None):
+    def test_analyze_multiple_observables(self):
         data = self.mixed_observable_data.copy()
 
-        response = self.client.post("/api/analyze_multiple_observables", data, format="json")
+        response = self.client.post(
+            "/api/analyze_multiple_observables", data, format="json"
+        )
         contents = response.json()
         msg = (response.status_code, contents)
         self.assertEqual(response.status_code, 200, msg=msg)
-        if mock_apply_async is not None:
-            self.assertEqual(mock_apply_async.call_count, len(data["observables"]))
 
         content = contents["results"][0]
+
         job_id = int(content["job_id"])
         job = models.Job.objects.get(pk=job_id)
         self.assertEqual(data["observables"][0][1], job.analyzable.name, msg=msg)
@@ -290,10 +293,9 @@ class ApiViewTests(CustomViewSetTestCase):
             list(job.analyzers_to_execute.all().values_list("name", flat=True)),
             msg=msg,
         )
-        if mock_apply_async is not None:
-            self.assertEqual(mock_apply_async.call_args_list[0].kwargs["args"], [job_id])
 
         content = contents["results"][1]
+
         job_id = int(content["job_id"])
         job = models.Job.objects.get(pk=job_id)
         self.assertEqual(data["observables"][1][1], job.analyzable.name, msg=msg)
@@ -302,8 +304,6 @@ class ApiViewTests(CustomViewSetTestCase):
             list(job.analyzers_to_execute.all().values_list("name", flat=True)),
             msg=msg,
         )
-        if mock_apply_async is not None:
-            self.assertEqual(mock_apply_async.call_args_list[1].kwargs["args"], [job_id])
         job.delete()
 
     def test_observable_no_analyzers_only_connector(self):
@@ -311,7 +311,9 @@ class ApiViewTests(CustomViewSetTestCase):
             value="test subject",
             parameter=models.Parameter.objects.get(
                 name="subject",
-                python_module=models.PythonModule.objects.get(module="email_sender.EmailSender"),
+                python_module=models.PythonModule.objects.get(
+                    module="email_sender.EmailSender"
+                ),
             ),
             connector_config=ConnectorConfig.objects.get(name="EmailSender"),
         )
@@ -319,7 +321,9 @@ class ApiViewTests(CustomViewSetTestCase):
             value="test body",
             parameter=models.Parameter.objects.get(
                 name="body",
-                python_module=models.PythonModule.objects.get(module="email_sender.EmailSender"),
+                python_module=models.PythonModule.objects.get(
+                    module="email_sender.EmailSender"
+                ),
             ),
             connector_config=ConnectorConfig.objects.get(name="EmailSender"),
         )
@@ -331,7 +335,9 @@ class ApiViewTests(CustomViewSetTestCase):
             "connectors_requested": ["EmailSender"],
             "tlp": "CLEAR",
         }
-        response = self.client.post("/api/analyze_multiple_observables", data, format="json")
+        response = self.client.post(
+            "/api/analyze_multiple_observables", data, format="json"
+        )
         contents = response.json()
         msg = (response.status_code, contents)
         self.assertEqual(response.status_code, 200, msg=msg)
@@ -375,7 +381,9 @@ class ApiViewTests(CustomViewSetTestCase):
 
     def test_download_sample_400(self):
         # requesting for job where is_sample=False
-        analyzable = Analyzable.objects.create(name="test.com", classification=Classification.DOMAIN)
+        analyzable = Analyzable.objects.create(
+            name="test.com", classification=Classification.DOMAIN
+        )
         job = models.Job.objects.create(analyzable=analyzable)
         response = self.client.get(f"/api/jobs/{job.id}/download_sample")
         content = response.json()
@@ -392,7 +400,9 @@ class ApiViewTests(CustomViewSetTestCase):
     def test_no_analyzers(self):
         data = self.mixed_observable_data.copy()
         data["analyzers_requested"] = data["analyzers_requested"][1:]
-        response = self.client.post("/api/analyze_multiple_observables", data, format="json")
+        response = self.client.post(
+            "/api/analyze_multiple_observables", data, format="json"
+        )
         contents = response.json()
         msg = (response.status_code, contents)
         self.assertEqual(response.status_code, 400, msg=msg)
@@ -400,7 +410,9 @@ class ApiViewTests(CustomViewSetTestCase):
     def test_incorrect_tlp(self):
         data = self.mixed_observable_data.copy()
         data["tlp"] = "incorrect"
-        response = self.client.post("/api/analyze_multiple_observables", data, format="json")
+        response = self.client.post(
+            "/api/analyze_multiple_observables", data, format="json"
+        )
         contents = response.json()
         msg = (response.status_code, contents)
         self.assertEqual(response.status_code, 400, msg=msg)
@@ -413,12 +425,16 @@ class ApiViewTests(CustomViewSetTestCase):
         md5 = os.environ.get("TEST_MD5", "446c5fbb11b9ce058450555c1c27153c")
         analyzers_needed = ["Classic_DNS", "CIRCLPassiveDNS"]
         data = [{"md5": md5, "analyzers": analyzers_needed, "minutes_ago": 1}]
-        response = self.client.post("/api/ask_multi_analysis_availability", data, format="json")
+        response = self.client.post(
+            "/api/ask_multi_analysis_availability", data, format="json"
+        )
         self.assertEqual(response.status_code, 200)
 
     def test_analyze_multiple_files__exe(self):
         data = self.analyze_multiple_files_data.copy()
-        response = self.client.post("/api/analyze_multiple_files", data, format="multipart")
+        response = self.client.post(
+            "/api/analyze_multiple_files", data, format="multipart"
+        )
         contents = response.json()
         msg = (response.status_code, contents)
         self.assertEqual(response.status_code, 200, msg=msg)
@@ -438,12 +454,16 @@ class ApiViewTests(CustomViewSetTestCase):
                 msg=msg,
             )
             self.assertEqual(self.file_md5, job.analyzable.md5, msg=msg)
-            self.assertEqual(data["file_mimetypes"][index], job.analyzable.mimetype, msg=msg)
+            self.assertEqual(
+                data["file_mimetypes"][index], job.analyzable.mimetype, msg=msg
+            )
 
     def test_analyze_multiple_files__guess_optional(self):
         data = self.analyze_multiple_files_data.copy()
         file_mimetypes = data.pop("file_mimetypes")
-        response = self.client.post("/api/analyze_multiple_files", data, format="multipart")
+        response = self.client.post(
+            "/api/analyze_multiple_files", data, format="multipart"
+        )
         contents = response.json()
         msg = (response.status_code, contents)
         self.assertEqual(response.status_code, 200, msg=msg)
@@ -495,7 +515,9 @@ class ApiViewTests(CustomViewSetTestCase):
             user=self.user,
             analyzable=an,
             status="reported_without_fails",
-            finished_analysis_time=datetime.datetime(2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc)
+            finished_analysis_time=datetime.datetime(
+                2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc
+            )
             - datetime.timedelta(days=5),
             runtime_configuration={
                 "analyzers": {"Classic_DNS": {"query_type": "TXT"}},
@@ -536,7 +558,9 @@ class ApiViewTests(CustomViewSetTestCase):
             user=self.user,
             analyzable=an,
             status="reported_without_fails",
-            finished_analysis_time=datetime.datetime(2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc)
+            finished_analysis_time=datetime.datetime(
+                2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc
+            )
             - datetime.timedelta(days=5),
             playbook_requested=PlaybookConfig.objects.get(name="Dns"),
             runtime_configuration={
@@ -545,19 +569,16 @@ class ApiViewTests(CustomViewSetTestCase):
                 "visualizers": {},
             },
         )
-        # dont actually run the analyzers when mocking connections, they are tested in unit tests
-        ctx = (
-            patch("intel_owl.tasks.job_pipeline.apply_async") if settings.MOCK_CONNECTIONS else nullcontext()
-        )
-        with ctx as mock_apply_async:
-            response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
+        response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
         contents = response.json()
         self.assertEqual(response.status_code, 202, contents)
         new_job_id = int(contents["id"])
         new_job = models.Job.objects.get(pk=new_job_id)
         self.assertEqual(new_job.analyzable.name, "test.com")
         self.assertEqual(new_job.tlp, "CLEAR")
-        self.assertEqual(new_job.playbook_requested, PlaybookConfig.objects.get(name="Dns"))
+        self.assertEqual(
+            new_job.playbook_requested, PlaybookConfig.objects.get(name="Dns")
+        )
         self.assertEqual(
             new_job.runtime_configuration,
             {
@@ -566,19 +587,20 @@ class ApiViewTests(CustomViewSetTestCase):
                 "visualizers": {},
             },
         )
-        if mock_apply_async is not None:
-            mock_apply_async.assert_called_once()
-            self.assertEqual(mock_apply_async.call_args.kwargs["args"], [new_job_id])
         an.delete()
 
     def test_job_rescan__sample_analyzers(self):
-        an = Analyzable.objects.create(file=self.uploaded_file, name="file.exe", classification="file")
+        an = Analyzable.objects.create(
+            file=self.uploaded_file, name="file.exe", classification="file"
+        )
         job = models.Job.objects.create(
             tlp="CLEAR",
             user=self.user,
             analyzable=an,
             status="reported_without_fails",
-            finished_analysis_time=datetime.datetime(2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc)
+            finished_analysis_time=datetime.datetime(
+                2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc
+            )
             - datetime.timedelta(days=5),
             runtime_configuration={
                 "analyzers": {
@@ -593,11 +615,7 @@ class ApiViewTests(CustomViewSetTestCase):
         )
         job.analyzers_requested.set([AnalyzerConfig.objects.get(name="Strings_Info")])
 
-        ctx = (
-            patch("intel_owl.tasks.job_pipeline.apply_async") if settings.MOCK_CONNECTIONS else nullcontext()
-        )
-        with ctx as mock_apply_async:
-            response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
+        response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
         contents = response.json()
         self.assertEqual(response.status_code, 202, contents)
         new_job_id = int(contents["id"])
@@ -609,9 +627,6 @@ class ApiViewTests(CustomViewSetTestCase):
             list(new_job.analyzers_requested.all()),
             [AnalyzerConfig.objects.get(name="Strings_Info")],
         )
-        if mock_apply_async is not None:
-            mock_apply_async.assert_called_once()
-            self.assertEqual(mock_apply_async.call_args.kwargs["args"], [new_job_id])
         self.assertEqual(
             new_job.runtime_configuration,
             {
@@ -629,14 +644,18 @@ class ApiViewTests(CustomViewSetTestCase):
         an.delete()
 
     def test_job_rescan__sample_playbook(self):
-        an = Analyzable.objects.create(file=self.uploaded_file, name="file.exe", classification="file")
+        an = Analyzable.objects.create(
+            file=self.uploaded_file, name="file.exe", classification="file"
+        )
         job = models.Job.objects.create(
             tlp="CLEAR",
             user=self.user,
             analyzable=an,
             status="reported_without_fails",
             playbook_requested=PlaybookConfig.objects.get(name="FREE_TO_USE_ANALYZERS"),
-            finished_analysis_time=datetime.datetime(2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc)
+            finished_analysis_time=datetime.datetime(
+                2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc
+            )
             - datetime.timedelta(days=5),
             runtime_configuration={
                 "analyzers": {
@@ -650,11 +669,7 @@ class ApiViewTests(CustomViewSetTestCase):
             },
         )
 
-        ctx = (
-            patch("intel_owl.tasks.job_pipeline.apply_async") if settings.MOCK_CONNECTIONS else nullcontext()
-        )
-        with ctx as mock_apply_async:
-            response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
+        response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
         contents = response.json()
         self.assertEqual(response.status_code, 202, contents)
         new_job_id = int(contents["id"])
@@ -679,9 +694,6 @@ class ApiViewTests(CustomViewSetTestCase):
                 "visualizers": {},
             },
         )
-        if mock_apply_async is not None:
-            mock_apply_async.assert_called_once()
-            self.assertEqual(mock_apply_async.call_args.kwargs["args"], [new_job_id])
         job.delete()
         an.delete()
 
@@ -696,7 +708,9 @@ class ApiViewTests(CustomViewSetTestCase):
             user=self.user,
             analyzable=an,
             status="reported_without_fails",
-            finished_analysis_time=datetime.datetime(2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc)
+            finished_analysis_time=datetime.datetime(
+                2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc
+            )
             - datetime.timedelta(days=5),
             playbook_requested=PlaybookConfig.objects.get(name="Dns"),
             runtime_configuration={
@@ -705,24 +719,14 @@ class ApiViewTests(CustomViewSetTestCase):
                 "visualizers": {},
             },
         )
-        ctx = (
-            patch("intel_owl.tasks.job_pipeline.apply_async") if settings.MOCK_CONNECTIONS else nullcontext()
-        )
-        with ctx as mock_apply_async:
-            response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
-            contents = response.json()
-            self.assertEqual(response.status_code, 202, contents)
-            new_job_id = int(contents["id"])
-            if mock_apply_async is not None:
-                mock_apply_async.assert_called_once()
-                self.assertEqual(mock_apply_async.call_args.kwargs["args"], [new_job_id])
-                mock_apply_async.reset_mock()
-
-            self.client.logout()
-            self.client.force_login(self.guest)
-            response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
-            contents = response.json()
-            self.assertEqual(response.status_code, 403, contents)
-            if mock_apply_async is not None:
-                mock_apply_async.assert_not_called()
+        # same user
+        response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
+        contents = response.json()
+        self.assertEqual(response.status_code, 202, contents)
+        # another user
+        self.client.logout()
+        self.client.force_login(self.guest)
+        response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
+        contents = response.json()
+        self.assertEqual(response.status_code, 403, contents)
         an.delete()

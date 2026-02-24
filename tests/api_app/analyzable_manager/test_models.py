@@ -9,6 +9,7 @@ from tests.mock_utils import MockUpRequest
 
 
 class TestAnalyzable(CustomTestCase):
+
     def test_get_all_user_events_data_model(self):
         an = Analyzable.objects.create(
             name="test.com",
@@ -26,7 +27,9 @@ class TestAnalyzable(CustomTestCase):
         u.is_valid()
         res = u.save()
         self.assertCountEqual(an.get_all_user_events_data_model(), [res.data_model])
-        self.assertCountEqual(an.get_all_user_events_data_model(self.user), [res.data_model])
+        self.assertCountEqual(
+            an.get_all_user_events_data_model(self.user), [res.data_model]
+        )
         self.assertCountEqual(an.get_all_user_events_data_model(self.superuser), [])
 
         u2 = UserAnalyzableEventSerializer(
@@ -41,7 +44,9 @@ class TestAnalyzable(CustomTestCase):
         u2.is_valid()
         res2 = u2.save()
 
-        self.assertCountEqual(an.get_all_user_events_data_model(), [res.data_model, res2.data_model])
+        self.assertCountEqual(
+            an.get_all_user_events_data_model(), [res.data_model, res2.data_model]
+        )
         self.assertCountEqual(
             an.get_all_user_events_data_model(self.user),
             [res.data_model, res2.data_model],

@@ -8,6 +8,7 @@ if typing.TYPE_CHECKING:
 
 
 class BaseDataModelQuerySet(QuerySet):
+
     def merge(self, append: bool = True) -> "BaseDataModel":
         """
         Base method of merge of multiple data models.

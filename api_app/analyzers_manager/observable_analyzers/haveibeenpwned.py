@@ -28,7 +28,9 @@ class HaveIBeenPwned(classes.ObservableAnalyzer):
 
         headers = {"hibp-api-key": self._api_key_name}
 
-        response = requests.get(self.url + self.observable_name, params=params, headers=headers)
+        response = requests.get(
+            self.url + self.observable_name, params=params, headers=headers
+        )
         response.raise_for_status()
 
         result = response.json()

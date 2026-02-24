@@ -36,7 +36,8 @@ class TriageMixin(BaseAnalyzerMixin, metaclass=ABCMeta):
 
         if self.report_type not in ["overview", "complete"]:
             raise AnalyzerConfigurationException(
-                f"report_type must be 'overview' or 'complete' but it is '{self.report_type}'"
+                "report_type must be 'overview' or 'complete' "
+                f"but it is '{self.report_type}'"
             )
         self.poll_distance = 3
         self.final_report = {}
@@ -62,7 +63,9 @@ class TriageMixin(BaseAnalyzerMixin, metaclass=ABCMeta):
         for _try in range(self.max_tries):
             logger.info(f"triage events polling for result try #{_try + 1}")
             try:
-                self.events_response = self.session.get(self.url + f"samples/{sample_id}/events")
+                self.events_response = self.session.get(
+                    self.url + f"samples/{sample_id}/events"
+                )
                 if self.events_response.status_code == 200:
                     break
                 time.sleep(self.poll_distance)
@@ -99,5 +102,7 @@ class TriageMixin(BaseAnalyzerMixin, metaclass=ABCMeta):
         return static.json()
 
     def get_task_report(self, sample_id, task):
-        task_report = self.session.get(self.url + f"samples/{sample_id}/{task}/report_triage.json")
+        task_report = self.session.get(
+            self.url + f"samples/{sample_id}/{task}/report_triage.json"
+        )
         return task_report.status_code, task_report.json()

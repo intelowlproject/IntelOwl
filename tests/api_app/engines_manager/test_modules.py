@@ -12,6 +12,7 @@ from tests import CustomTestCase
 
 
 class EngineModuleTestCase(CustomTestCase):
+
     def setUp(self) -> None:
         super().setUp()
         self.an = Analyzable.objects.create(

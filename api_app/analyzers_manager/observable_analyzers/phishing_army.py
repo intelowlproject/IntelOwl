@@ -27,7 +27,9 @@ class PhishingArmy(classes.ObservableAnalyzer):
             raise AnalyzerRunException("Failed extraction of Phishing Army db")
 
         if not os.path.exists(database_location):
-            raise AnalyzerRunException(f"database location {database_location} does not exist")
+            raise AnalyzerRunException(
+                f"database location {database_location} does not exist"
+            )
 
         with open(database_location, "r", encoding="utf-8") as f:
             db = f.read()

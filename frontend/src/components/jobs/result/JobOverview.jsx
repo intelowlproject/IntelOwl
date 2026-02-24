@@ -383,29 +383,26 @@ export function JobOverview({
         <Container fluid>
           {/* bar with job id and utilities buttons */}
           <Row
-            className="g-0 d-flex-between-end align-items-center mb-2"
+            className="g-0 d-flex-between-end align-items-center"
             id="utilitiesRow"
           >
             <Col md={4}>
-              <h2 className="d-flex align-items-center mb-0">
+              <h2 className="d-flex align-items-center">
                 <span className="me-2 text-secondary">Job #{job.id}</span>
                 <StatusIcon status={job.status} className="small" />
               </h2>
             </Col>
-            <Col
-              md={8}
-              className="d-flex justify-content-end align-items-center"
-            >
-              <JobActionsBar
-                job={job}
-                relatedInvestigationNumber={relatedInvestigationNumber}
-              />
+            <Col md={8} className="d-flex justify-content-end mt-1">
+              <JobActionsBar job={job} />
             </Col>
           </Row>
           {/* job metadata card */}
           <Row className="g-0">
             <Col>
-              <JobInfoCard job={job} />
+              <JobInfoCard
+                job={job}
+                relatedInvestigationNumber={relatedInvestigationNumber}
+              />
             </Col>
           </Row>
           {isRunningJob && (
@@ -422,7 +419,7 @@ export function JobOverview({
               <ButtonGroup className="ms-2">
                 <Button
                   outline={!isSelectedUI}
-                  color={isSelectedUI ? "secondary" : "tertiary"}
+                  color={isSelectedUI ? "primary" : "tertiary"}
                   onClick={() =>
                     navigate(
                       `/jobs/${job.id}/${
@@ -437,7 +434,7 @@ export function JobOverview({
                 </Button>
                 <Button
                   outline={isSelectedUI}
-                  color={!isSelectedUI ? "secondary" : "tertiary"}
+                  color={!isSelectedUI ? "primary" : "tertiary"}
                   onClick={() =>
                     navigate(
                       `/jobs/${job.id}/${JobResultSections.RAW}/${rawElements[0].name}`,

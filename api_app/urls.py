@@ -17,7 +17,6 @@ from .views import (
     ask_analysis_availability,
     ask_multi_analysis_availability,
     plugin_state_viewer,
-    system_update_check_view,
 )
 
 # Routers provide an easy way of automatically determining the URL conf.
@@ -31,10 +30,11 @@ router.register(r"plugin-config", PluginConfigViewSet, basename="plugin-config")
 urlpatterns = [
     # standalone endpoints
     path("ask_analysis_availability", ask_analysis_availability),
-    path("system/update-check/", system_update_check_view, name="system-update-check"),
     path("ask_multi_analysis_availability", ask_multi_analysis_availability),
     path("analyze_file", analyze_file),
-    path("analyze_multiple_files", analyze_multiple_files, name="analyze_multiple_files"),
+    path(
+        "analyze_multiple_files", analyze_multiple_files, name="analyze_multiple_files"
+    ),
     path("analyze_observable", analyze_observable),
     path(
         "analyze_multiple_observables",

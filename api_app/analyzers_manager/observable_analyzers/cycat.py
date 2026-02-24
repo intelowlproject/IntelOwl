@@ -19,7 +19,9 @@ class CyCat(classes.ObservableAnalyzer):
     url: str = "https://api.cycat.org"
 
     def uuid_lookup(self, uuid: str):
-        logger.info(f"performing lookup on uuid: {uuid}, observable: {self.observable_name}")
+        logger.info(
+            f"performing lookup on uuid: {uuid}, observable: {self.observable_name}"
+        )
         response = requests.get(
             self.url + "/lookup/" + uuid,
             headers={"accept": "application/json"},

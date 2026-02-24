@@ -14,6 +14,7 @@ from tests import CustomTestCase
 
 
 class AnalyzerReportTestCase(CustomTestCase):
+
     def test_clean(self):
         an1 = Analyzable.objects.create(
             name="test.com",
@@ -82,7 +83,9 @@ class AnalyzerReportTestCase(CustomTestCase):
         data_model.refresh_from_db()
         self.assertIsNotNone(data_model)
         self.assertEqual(data_model.evaluation, "malicious")
-        self.assertCountEqual(data_model.external_references, ["www.intelowl.com", "www.intelowl.com"])
+        self.assertCountEqual(
+            data_model.external_references, ["www.intelowl.com", "www.intelowl.com"]
+        )
         self.assertCountEqual([], ar.errors)
         data_model.delete()
         ar.delete()
@@ -112,7 +115,9 @@ class AnalyzerReportTestCase(CustomTestCase):
             parameters={},
         )
         self.assertEqual(ar.get_value(ar.report, ["evaluation"]), "MALICIOUS")
-        self.assertEqual(ar.get_value(ar.report, "urls.0.url".split(".")), "www.intelowl.com")
+        self.assertEqual(
+            ar.get_value(ar.report, "urls.0.url".split(".")), "www.intelowl.com"
+        )
         self.assertCountEqual(
             ar.get_value(ar.report, "urls.url".split(".")),
             ["www.intelowl.com", "www.intelowl.com"],
@@ -123,6 +128,7 @@ class AnalyzerReportTestCase(CustomTestCase):
 
 
 class AnalyzerConfigTestCase(CustomTestCase):
+
     def test_clean_run_hash_type(self):
         ac = AnalyzerConfig(
             name="test",

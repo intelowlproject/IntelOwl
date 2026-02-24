@@ -30,7 +30,9 @@ def visualizable_error_handler_with_params(
                     result.append(
                         VisualizableTitle(
                             title=VisualizableBase(value=error_name),
-                            value=VisualizableBase(value="error", color=VisualizableColor.DANGER),
+                            value=VisualizableBase(
+                                value="error", color=VisualizableColor.DANGER
+                            ),
                             size=error_size,
                         )
                     )

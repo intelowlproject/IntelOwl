@@ -46,14 +46,19 @@ class PaginationMixin:
         Returns:
             Response: The paginated and cached response containing serialized data.
         """
-        cache_name = f"list_{self.serializer_class.Meta.model.__name__}_{request.user.username}"
+        cache_name = (
+            f"list_{self.serializer_class.Meta.model.__name__}_{request.user.username}"
+        )
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
 
         if page is not None:
             objects = queryset.filter(pk__in=[plugin.pk for plugin in page])
             if "page" in request.query_params and "page_size" in request.query_params:
-                cache_name += f"_{request.query_params['page']}_{request.query_params['page_size']}"
+                cache_name += (
+                    f"_{request.query_params['page']}_"
+                    f"{request.query_params['page_size']}"
+                )
             cache_hit = cache.get(cache_name)
             if cache_hit is None:
                 logger.debug(f"View {cache_name} cache not hit")
@@ -90,13 +95,19 @@ class VirusTotalv3BaseMixin(metaclass=abc.ABCMeta):
     def headers(self) -> dict:
         return {"x-apikey": self._api_key_name}
 
-    def _perform_get_request(self, uri: str, ignore_404: bool = False, **kwargs) -> Dict:
+    def _perform_get_request(
+        self, uri: str, ignore_404: bool = False, **kwargs
+    ) -> Dict:
         return self._perform_request(uri, method="GET", ignore_404=ignore_404, **kwargs)
 
     def _perform_post_request(self, uri: str, ignore_404: bool = False, **kwargs):
-        return self._perform_request(uri, method="POST", ignore_404=ignore_404, **kwargs)
+        return self._perform_request(
+            uri, method="POST", ignore_404=ignore_404, **kwargs
+        )
 
-    def _perform_request(self, uri: str, method: str, ignore_404: bool = False, **kwargs) -> Dict:
+    def _perform_request(
+        self, uri: str, method: str, ignore_404: bool = False, **kwargs
+    ) -> Dict:
         error = None
         response = None
         try:
@@ -130,9 +141,7 @@ class VirusTotalv3BaseMixin(metaclass=abc.ABCMeta):
             if not ignore_404 or not response.status_code == 404:
                 response.raise_for_status()
         except requests.exceptions.JSONDecodeError as e:
-            error_message = (
-                f"Raised JSONDecodeError: {e}. Error data: {response.text if response is not None else None}"
-            )
+            error_message = f"Raised JSONDecodeError: {e}. Error data: {response.text if response is not None else None}"
             raise AnalyzerRunException(error_message)
         except Exception as e:
             error_message = f"Raised Error: {e}. Error data: {error}"
@@ -195,7 +204,8 @@ class VirusTotalv3BaseMixin(metaclass=abc.ABCMeta):
                 ]
         else:
             raise AnalyzerRunException(
-                f"Not supported observable type {obs_clfn}. Supported are: hash, ip, domain and url."
+                f"Not supported observable type {obs_clfn}. "
+                "Supported are: hash, ip, domain and url."
             )
         return relationships
 
@@ -208,19 +218,24 @@ class VirusTotalv3BaseMixin(metaclass=abc.ABCMeta):
         # if you like to get all the data about specific relationships,...
         # ..you should perform another query
         # check vt3 API docs for further info
-        relationships_requested = self._get_relationship_for_classification(obs_clfn, iocs)
+        relationships_requested = self._get_relationship_for_classification(
+            obs_clfn, iocs
+        )
         if obs_clfn == Classification.DOMAIN:
             uri = f"domains/{observable_name}"
         elif obs_clfn == Classification.IP:
             uri = f"ip_addresses/{observable_name}"
         elif obs_clfn == Classification.URL:
-            url_id = base64.urlsafe_b64encode(observable_name.encode()).decode().strip("=")
+            url_id = (
+                base64.urlsafe_b64encode(observable_name.encode()).decode().strip("=")
+            )
             uri = f"urls/{url_id}"
         elif obs_clfn == Classification.HASH:
             uri = f"files/{observable_name}"
         else:
             raise AnalyzerRunException(
-                f"Not supported observable type {obs_clfn}. Supported are: hash, ip, domain and url."
+                f"Not supported observable type {obs_clfn}. "
+                "Supported are: hash, ip, domain and url."
             )
 
         if relationships_requested:
@@ -285,12 +300,18 @@ class VirusTotalv3BaseMixin(metaclass=abc.ABCMeta):
                 Classification.HASH, sample_hash, True
             )
             logger.info(f"Requesting IOCs {relationships_requested} from {uri}")
-            result, response = self._perform_get_request(uri, ignore_404=True, params=params)
+            result, response = self._perform_get_request(
+                uri, ignore_404=True, params=params
+            )
             if response.status_code != 404:
                 relationships = result.get("data", {}).get("relationships", {})
-                contacted_ips = [i["id"] for i in relationships.get("contacted_ips", {}).get("data", [])]
+                contacted_ips = [
+                    i["id"]
+                    for i in relationships.get("contacted_ips", {}).get("data", [])
+                ]
                 contacted_domains = [
-                    i["id"] for i in relationships.get("contacted_domains", {}).get("data", [])
+                    i["id"]
+                    for i in relationships.get("contacted_domains", {}).get("data", [])
                 ]
                 contacted_urls = [
                     i["context_attributes"]["url"]
@@ -302,10 +323,15 @@ class VirusTotalv3BaseMixin(metaclass=abc.ABCMeta):
                     "contacted_domains": contacted_domains,
                 }
         except Exception as e:
-            logger.error(f"something went wrong when extracting iocs for sample {sample_hash}: {e}")
+            logger.error(
+                "something went wrong when extracting iocs"
+                f" for sample {sample_hash}: {e}"
+            )
 
 
-class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, BaseAnalyzerMixin, metaclass=abc.ABCMeta):
+class VirusTotalv3AnalyzerMixin(
+    VirusTotalv3BaseMixin, BaseAnalyzerMixin, metaclass=abc.ABCMeta
+):
     # How many times we poll the VT API for scan results
     max_tries: int
     # IntelOwl would sleep for this time between each poll to VT APIs
@@ -354,12 +380,18 @@ class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, BaseAnalyzerMixin, metacl
         try:
             # skip relationship request if something went wrong
             if "error" not in result:
-                relationships_in_results = result.get("data", {}).get("relationships", {})
+                relationships_in_results = result.get("data", {}).get(
+                    "relationships", {}
+                )
                 for relationship in self.relationships_to_request:
                     if relationship not in relationships_requested:
-                        result[relationship] = {"error": "not supported, review configuration."}
+                        result[relationship] = {
+                            "error": "not supported, review configuration."
+                        }
                     else:
-                        found_data = relationships_in_results.get(relationship, {}).get("data", [])
+                        found_data = relationships_in_results.get(relationship, {}).get(
+                            "data", []
+                        )
                         if found_data:
                             logger.info(
                                 f"found data in relationship {relationship} "
@@ -367,14 +399,18 @@ class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, BaseAnalyzerMixin, metacl
                                 " Requesting additional information about"
                             )
                             rel_uri = (
-                                uri + f"/{relationship}?limit={self._get_relationship_limit(relationship)}"
+                                uri + f"/{relationship}"
+                                f"?limit={self._get_relationship_limit(relationship)}"
                             )
                             logger.debug(f"requesting uri: {rel_uri}")
-                            response = requests.get(self.url + rel_uri, headers=self.headers)
+                            response = requests.get(
+                                self.url + rel_uri, headers=self.headers
+                            )
                             result[relationship] = response.json()
         except Exception as e:
             logger.error(
-                f"something went wrong when extracting relationships for observable {observable_name}: {e}"
+                "something went wrong when extracting relationships"
+                f" for observable {observable_name}: {e}"
             )
 
     def _get_url_prefix_postfix(self, result: Dict) -> Tuple[str, str]:
@@ -418,7 +454,8 @@ class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, BaseAnalyzerMixin, metacl
         scan_id = result_data.get("id", "")
         if not scan_id:
             raise AnalyzerRunException(
-                f"no scan_id given by VirusTotal to retrieve the results (Job: {self.job_id}, {md5})"
+                "no scan_id given by VirusTotal to retrieve the results"
+                f" (Job: {self.job_id}, {md5})"
             )
         # max 5 minutes waiting
         got_result = False
@@ -432,7 +469,9 @@ class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, BaseAnalyzerMixin, metacl
             time.sleep(poll_distance)
             result, _ = self._perform_get_request(uri)
             logger.debug(f"result: {result}")
-            analysis_status = result.get("data", {}).get("attributes", {}).get("status", "")
+            analysis_status = (
+                result.get("data", {}).get("attributes", {}).get("status", "")
+            )
             logger.info(
                 f"[POLLING] (Job: {self.job_id}, {md5}) -> "
                 f"GET VT/v3/_vt_scan_file #{chance + 1}/{self.max_tries} "
@@ -448,7 +487,10 @@ class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, BaseAnalyzerMixin, metacl
             # If it's a new sample, it's free of charge.
             result = self._vt_get_report(Classification.HASH, md5)
         else:
-            message = f"[POLLING] (Job: {self.job_id}, {md5}) -> max polls tried, no result"
+            message = (
+                f"[POLLING] (Job: {self.job_id}, {md5}) -> "
+                "max polls tried, no result"
+            )
             # if we tried a rescan, we can still use the old report
             if rescan_instead:
                 logger.info(message)
@@ -472,7 +514,9 @@ class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, BaseAnalyzerMixin, metacl
                 f"GET VT/v3/_vt_get_report #{chance + 1}/{self.max_tries}"
             )
 
-            result, response = self._perform_get_request(uri, ignore_404=True, params=params)
+            result, response = self._perform_get_request(
+                uri, ignore_404=True, params=params
+            )
 
             # if it is not a file, we don't need to perform any scan
             if obs_clfn != Classification.HASH:
@@ -498,7 +542,10 @@ class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, BaseAnalyzerMixin, metacl
                 if last_analysis_results:
                     # at this time, if the flag if set,
                     # we are going to force the analysis again for old samples
-                    if self.force_active_scan_if_old and not already_done_active_scan_because_report_was_old:
+                    if (
+                        self.force_active_scan_if_old
+                        and not already_done_active_scan_because_report_was_old
+                    ):
                         scan_date = attributes.get("last_analysis_date", 0)
                         scan_date_time = datetime.fromtimestamp(scan_date)
                         some_days_ago = datetime.utcnow() - timedelta(
@@ -513,7 +560,9 @@ class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, BaseAnalyzerMixin, metacl
                             )
                             # the "rescan" option will burn quotas.
                             # We should reduce the polling at the minimum
-                            extracted_result = self._vt_scan_file(observable_name, rescan_instead=True)
+                            extracted_result = self._vt_scan_file(
+                                observable_name, rescan_instead=True
+                            )
                             # if we were able to do a successful rescan,
                             # overwrite old report
                             if extracted_result:
@@ -521,17 +570,22 @@ class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, BaseAnalyzerMixin, metacl
                             already_done_active_scan_because_report_was_old = True
                         else:
                             logger.info(
-                                f"hash {observable_name} found on VT with AV reports and scan is recent"
+                                f"hash {observable_name} found on VT"
+                                " with AV reports and scan is recent"
                             )
                             break
                     else:
-                        logger.info(f"hash {observable_name} found on VT with AV reports")
+                        logger.info(
+                            f"hash {observable_name} found on VT with AV reports"
+                        )
                         break
                 else:
                     extra_polling_times = chance + 1
                     base_log = f"hash {observable_name} found on VT withOUT AV reports,"
                     if extra_polling_times == self.max_tries:
-                        logger.warning(f"{base_log} reached max tries ({self.max_tries})")
+                        logger.warning(
+                            f"{base_log} reached max tries ({self.max_tries})"
+                        )
                         result["reached_max_tries_and_no_av_report"] = True
                     else:
                         logger.info(f"{base_log} performing another request...")
@@ -549,7 +603,10 @@ class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, BaseAnalyzerMixin, metacl
         observable_name: str,
     ) -> Dict:
         sandbox_analysis = (
-            result.get("data", {}).get("relationships", {}).get("behaviours", {}).get("data", [])
+            result.get("data", {})
+            .get("relationships", {})
+            .get("behaviours", {})
+            .get("data", [])
         )
         if sandbox_analysis:
             logger.info(
@@ -565,7 +622,10 @@ class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, BaseAnalyzerMixin, metacl
         observable_name: str,
     ) -> Dict:
         sigma_analysis = (
-            result.get("data", {}).get("relationships", {}).get("sigma_analysis", {}).get("data", [])
+            result.get("data", {})
+            .get("relationships", {})
+            .get("sigma_analysis", {})
+            .get("data", [])
         )
         if sigma_analysis:
             logger.info(
@@ -595,15 +655,21 @@ class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, BaseAnalyzerMixin, metacl
             # Include behavioral report, if flag enabled
             # Attention: this will cost additional quota!
             if self.include_behaviour_summary:
-                result["behaviour_summary"] = self._vt_include_behaviour_summary(result, observable_name)
+                result["behaviour_summary"] = self._vt_include_behaviour_summary(
+                    result, observable_name
+                )
 
             # Include sigma analysis report, if flag enabled
             # Attention: this will cost additional quota!
             if self.include_sigma_analyses:
-                result["sigma_analyses"] = self._vt_include_sigma_analyses(result, observable_name)
+                result["sigma_analyses"] = self._vt_include_sigma_analyses(
+                    result, observable_name
+                )
 
         if self.relationships_to_request:
-            self._vt_get_relationships(observable_name, relationships_requested, uri, result)
+            self._vt_get_relationships(
+                observable_name, relationships_requested, uri, result
+            )
 
         uri_prefix, uri_postfix = self._get_url_prefix_postfix(result)
         result["link"] = f"https://www.virustotal.com/gui/{uri_prefix}/{uri_postfix}"
@@ -636,14 +702,19 @@ class JoeSandboxMixin:
         while status != "finished":
             try:
                 status = session.submission_info(submission_id=id)["status"]
-                logger.info(f"Polling again after {self.polling_duration} seconds for submission_id {id}")
+                logger.info(
+                    f"Polling again after {self.polling_duration} seconds for submission_id {id}"
+                )
                 time.sleep(self.polling_duration)
             except Exception as e:
                 raise AnalyzerRunException(f"Analysis failed: {e}")
 
         return bool(status == "finished")
 
-    def check_if_analysis_present(self, session: JoeSandbox, analysis_sample: str) -> list[str] | None:
+    def check_if_analysis_present(
+        self, session: JoeSandbox, analysis_sample: str
+    ) -> list[str] | None:
+
         try:
             analysis_list = session.analysis_search(analysis_sample)
             if analysis_list:
@@ -653,7 +724,9 @@ class JoeSandboxMixin:
                     result.append(analysis["webid"])
                 return result
         except ApiError as e:
-            error_message = f"Failed to check if analysis is present, due to the error : {e}"
+            error_message = (
+                f"Failed to check if analysis is present, due to the error : {e}"
+            )
             logger.error(error_message)
             self.report.errors.append(error_message)
             self.report.save()
@@ -661,15 +734,22 @@ class JoeSandboxMixin:
         logger.info(f"No existing analysis found for {analysis_sample}")
         return None
 
-    def check_submission_exists(self, session: JoeSandbox, analysis_sample_name: str) -> str | None:
+    def check_submission_exists(
+        self, session: JoeSandbox, analysis_sample_name: str
+    ) -> str | None:
+
         logger.info(f"Checking if submssion exists for {analysis_sample_name}")
         submission_list = session.submission_list()
         for submission in submission_list:
             submission_info = session.submission_info(submission["submission_id"])
             if analysis_sample_name == submission_info["name"]:
-                logger.info(f"Existing submission found with {submission['submission_id']}")
+                logger.info(
+                    f"Existing submission found with {submission['submission_id']}"
+                )
                 # checking if submission is in 'finished' state
-                if self.wait_for_analysis_to_finish(session, submission["submission_id"]):
+                if self.wait_for_analysis_to_finish(
+                    session, submission["submission_id"]
+                ):
                     return submission_info["most_relevant_analysis"]["webid"]
         return None
 
@@ -684,7 +764,9 @@ class JoeSandboxMixin:
         logger.info(f"Selected system for analysis: {self.system_to_use}")
         # if File is being provided for analysis
         if file_details:
-            logger.info(f"Creating new submission for filename: {file_details[0]} with hash {self.md5}")
+            logger.info(
+                f"Creating new submission for filename: {file_details[0]} with hash {self.md5}"
+            )
             submission: dict = sandbox_session.submit_sample(
                 file_details, params=params, _chunked_upload=True
             )
@@ -698,15 +780,21 @@ class JoeSandboxMixin:
                 else sandbox_session.submit_url(observable_url, params=params)
             )
 
-        logger.info(f"Sample submitted successfully with submission_id: {submission['submission_id']}")
+        logger.info(
+            f"Sample submitted successfully with submission_id: {submission['submission_id']}"
+        )
 
         return submission["submission_id"]
 
-    def fetch_results(self, sandbox_session: JoeSandbox, submission_id: str, observable_name: str) -> dict:
+    def fetch_results(
+        self, sandbox_session: JoeSandbox, submission_id: str, observable_name: str
+    ) -> dict:
         if self.wait_for_analysis_to_finish(sandbox_session, submission_id):
             logger.info(f"Analysis completed successfully for {observable_name}")
             submission_info = sandbox_session.submission_info(submission_id)
-            most_relevant_analysis_id = submission_info["most_relevant_analysis"]["webid"]
+            most_relevant_analysis_id = submission_info["most_relevant_analysis"][
+                "webid"
+            ]
 
             return sandbox_session.analysis_info(most_relevant_analysis_id)
 
@@ -717,8 +805,11 @@ class JoeSandboxMixin:
         observable_url: str = "",
         file_hash: str = "",
     ) -> dict | None:
+
         # checking if similar submission in private account is already present
-        analysis_id = self.check_submission_exists(sandbox_session, analysis_sample_name=observable_name)
+        analysis_id = self.check_submission_exists(
+            sandbox_session, analysis_sample_name=observable_name
+        )
 
         if analysis_id:
             return {analysis_id: sandbox_session.analysis_info(analysis_id)}
@@ -730,9 +821,13 @@ class JoeSandboxMixin:
 
         # checking if similar analysis is present in public DB
         analysis_ids = (
-            self.check_if_analysis_present(session=sandbox_session, analysis_sample=file_hash)
+            self.check_if_analysis_present(
+                session=sandbox_session, analysis_sample=file_hash
+            )
             if file_hash
-            else self.check_if_analysis_present(session=sandbox_session, analysis_sample=observable_url)
+            else self.check_if_analysis_present(
+                session=sandbox_session, analysis_sample=observable_url
+            )
         )
 
         if analysis_ids:
@@ -833,8 +928,12 @@ class IPQualityScoreMixin:
 
 
 class RulesUtiliyMixin:
+
     @staticmethod
-    def _check_if_latest_version(latest_version: str, python_module: PythonModule) -> bool:
+    def _check_if_latest_version(
+        latest_version: str, python_module: PythonModule
+    ) -> bool:
+
         analyzer_rules_file_version = AnalyzerRulesFileVersion.objects.filter(
             python_module=python_module
         ).first()
@@ -849,7 +948,10 @@ class RulesUtiliyMixin:
         return latest_version == analyzer_rules_file_version.last_downloaded_version
 
     @staticmethod
-    def _update_rules_file_version(latest_version: str, rules_file_url: str, python_module: PythonModule):
+    def _update_rules_file_version(
+        latest_version: str, rules_file_url: str, python_module: PythonModule
+    ):
+
         _, created = AnalyzerRulesFileVersion.objects.update_or_create(
             python_module=python_module,
             defaults={
@@ -862,13 +964,17 @@ class RulesUtiliyMixin:
         if created:
             logger.info(f"Created new entry for {python_module} rules file version")
         else:
-            logger.info(f"Updated existing entry for {python_module} rules file version")
+            logger.info(
+                f"Updated existing entry for {python_module} rules file version"
+            )
 
     @staticmethod
     def _unzip(rule_file_path: pathlib.Path):
         logger.info(f"Extracting rules at {rule_file_path.parent}")
         with ZipFile(rule_file_path, mode="r") as archive:
-            archive.extractall(rule_file_path.parent)  # this will overwrite any existing directory
+            archive.extractall(
+                rule_file_path.parent
+            )  # this will overwrite any existing directory
         logger.info("Rules have been succesfully extracted")
 
     @staticmethod
@@ -879,6 +985,7 @@ class RulesUtiliyMixin:
         latest_version: str,
         analyzer_module: PythonModule,
     ):
+
         if os.path.exists(rule_set_directory):
             logger.info(f"Removing existing rules at {rule_set_directory}")
             shutil.rmtree(rule_set_directory)
@@ -887,7 +994,9 @@ class RulesUtiliyMixin:
         logger.info(f"Created fresh rules directory at {rule_set_directory}")
 
         response = requests.get(rule_set_download_url, stream=True)
-        logger.info(f"Started downloading rules with version: {latest_version} from {rule_set_download_url}")
+        logger.info(
+            f"Started downloading rules with version: {latest_version} from {rule_set_download_url}"
+        )
 
         try:
             with open(rule_file_path, mode="wb+") as file:

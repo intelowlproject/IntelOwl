@@ -17,7 +17,9 @@ class Koodous(classes.ObservableAnalyzer):
         pass
 
     def get_response(self, url):
-        return requests.get(url, headers={"Authorization": f"Token {self._api_key_name}"})
+        return requests.get(
+            url, headers={"Authorization": f"Token {self._api_key_name}"}
+        )
 
     def run(self):
         common_url = self.url + self.observable_name

@@ -43,7 +43,9 @@ class CrtShTestCase(BaseAnalyzerTest):
             },
         ]
 
-        return [patch("requests.get", return_value=MockUpResponse(mock_certificates, 200))]
+        return [
+            patch("requests.get", return_value=MockUpResponse(mock_certificates, 200))
+        ]
 
     @classmethod
     def get_extra_config(cls) -> dict:

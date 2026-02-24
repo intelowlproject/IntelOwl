@@ -37,18 +37,26 @@ class PivotTestCase(CustomTestCase):
         for subclass in Pivot.all_subclasses():
             subclasses.extend(subclass.all_subclasses())
         for subclass in subclasses:
-            print(f"\nTesting Pivot {subclass.__name__}")
+            print("\n" f"Testing Pivot {subclass.__name__}")
             configs = PivotConfig.objects.filter(python_module=subclass.python_module)
             for config in configs:
                 timeout_seconds = config.soft_time_limit
                 timeout_seconds = min(timeout_seconds, 20)
-                print(f"\tTesting with config {config.name} for {timeout_seconds} seconds")
+                print(
+                    "\t"
+                    f"Testing with config {config.name}"
+                    f" for {timeout_seconds} seconds"
+                )
                 job = Job.objects.get(analyzable__classification="domain")
                 sub = subclass(config)
                 signal.alarm(timeout_seconds)
                 try:
                     sub.start(job.pk, {}, uuid())
                 except Exception as e:
-                    self.fail(f"Pivot {subclass.__name__} with config {config.name} failed {e}")
+                    self.fail(
+                        f"Pivot {subclass.__name__}"
+                        f" with config {config.name} "
+                        f"failed {e}"
+                    )
                 finally:
                     signal.alarm(0)

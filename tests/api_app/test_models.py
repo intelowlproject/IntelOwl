@@ -308,7 +308,9 @@ class AbstractConfigTestCase(CustomTestCase):
         )
         job.visualizers_to_execute.set([muc])
         gen_signature = (
-            VisualizerConfig.objects.filter(pk=muc.pk).annotate_runnable(self.user).get_signatures(job)
+            VisualizerConfig.objects.filter(pk=muc.pk)
+            .annotate_runnable(self.user)
+            .get_signatures(job)
         )
         with self.assertRaises(RuntimeWarning):
             try:
@@ -333,7 +335,9 @@ class AbstractConfigTestCase(CustomTestCase):
         )
         job.visualizers_to_execute.set([muc])
         gen_signature = (
-            VisualizerConfig.objects.filter(pk=muc.pk).annotate_runnable(self.user).get_signatures(job)
+            VisualizerConfig.objects.filter(pk=muc.pk)
+            .annotate_runnable(self.user)
+            .get_signatures(job)
         )
         try:
             signature = next(gen_signature)
@@ -343,115 +347,6 @@ class AbstractConfigTestCase(CustomTestCase):
         muc.delete()
         job.delete()
         an.delete()
-
-
-class ReadConfiguredParamsTestCase(CustomTestCase):
-    """Tests for the optimized read_configured_params method.
-
-    These tests verify the three optimizations applied:
-    1. Single .first() instead of .exists() + .first() (query reduction).
-    2. select_related("python_module") avoids lazy-load on error path.
-    3. Simplified boolean: ``not STAGE_CI or not param.value``.
-    """
-
-    def setUp(self):
-        super().setUp()
-        self.vc, _ = VisualizerConfig.objects.get_or_create(
-            name="test_rcp",
-            description="test read_configured_params",
-            python_module=PythonModule.objects.get(
-                base_path=PythonModuleBasePaths.Visualizer.value,
-                module="yara.Yara",
-            ),
-            disabled=False,
-        )
-
-    def tearDown(self):
-        self.vc.delete()
-        super().tearDown()
-
-    def test_returns_configured_params(self):
-        """All parameters are configured → no error, returns queryset."""
-        result = self.vc.read_configured_params(self.user)
-        self.assertIsNotNone(result)
-
-    def test_raises_when_required_param_not_configured(self):
-        """A required parameter without a value must raise TypeError."""
-        param = Parameter.objects.create(
-            python_module=self.vc.python_module,
-            name="test_required_missing",
-            type="str",
-            is_secret=True,
-            required=True,
-        )
-        try:
-            with self.assertRaises(TypeError) as ctx:
-                self.vc.read_configured_params(self.user)
-            self.assertIn("test_required_missing", str(ctx.exception))
-        finally:
-            param.delete()
-
-    def test_no_error_when_optional_param_not_configured(self):
-        """A non-required parameter without a value must NOT raise."""
-        param = Parameter.objects.create(
-            python_module=self.vc.python_module,
-            name="test_optional_missing",
-            type="str",
-            is_secret=True,
-            required=False,
-        )
-        try:
-            result = self.vc.read_configured_params(self.user)
-            self.assertIsNotNone(result)
-        finally:
-            param.delete()
-
-    def test_stage_ci_with_value_does_not_raise(self):
-        """In STAGE_CI, a required unconfigured param WITH a value must NOT raise."""
-        param = Parameter.objects.create(
-            python_module=self.vc.python_module,
-            name="test_ci_with_value",
-            type="str",
-            is_secret=True,
-            required=True,
-        )
-        pc = PluginConfig.objects.create(
-            owner=self.user,
-            for_organization=False,
-            parameter=param,
-            value="some_value",
-            visualizer_config=self.vc,
-        )
-        try:
-            from unittest.mock import patch
-
-            with patch("api_app.models.settings") as mock_settings:
-                mock_settings.STAGE_CI = True
-                result = self.vc.read_configured_params(self.user)
-                self.assertIsNotNone(result)
-        finally:
-            pc.delete()
-            param.delete()
-
-    def test_stage_ci_without_value_raises(self):
-        """In STAGE_CI, a required unconfigured param WITHOUT a value must raise TypeError."""
-        param = Parameter.objects.create(
-            python_module=self.vc.python_module,
-            name="test_ci_no_value",
-            type="str",
-            is_secret=True,
-            required=True,
-        )
-        try:
-            from unittest.mock import patch
-
-            with patch("api_app.models.settings") as mock_settings:
-                mock_settings.STAGE_CI = True
-                with self.assertRaises(TypeError) as ctx:
-                    self.vc.read_configured_params(self.user)
-                self.assertIn("test_ci_no_value", str(ctx.exception))
-        finally:
-            param.delete()
 
 
 class PluginConfigTestCase(CustomTestCase):
@@ -574,6 +469,7 @@ class PluginConfigTestCase(CustomTestCase):
 
 
 class JobTestCase(CustomTestCase):
+
     def test_get_analyzers_data_models(self):
         an1 = Analyzable.objects.create(
             name="test.com",
@@ -635,7 +531,9 @@ class JobTestCase(CustomTestCase):
 
         del j1.pivots_to_execute
         j1.analyzers_to_execute.set([ac])
-        self.assertCountEqual(j1.pivots_to_execute.filter(name="test").values_list("pk", flat=True), [])
+        self.assertCountEqual(
+            j1.pivots_to_execute.filter(name="test").values_list("pk", flat=True), []
+        )
 
         del j1.pivots_to_execute
         j1.analyzers_to_execute.set([ac, ac2, ac3])
@@ -646,7 +544,9 @@ class JobTestCase(CustomTestCase):
 
         del j1.pivots_to_execute
         j1.analyzers_to_execute.set([ac, ac3])
-        self.assertCountEqual(j1.pivots_to_execute.filter(name="test").values_list("pk", flat=True), [])
+        self.assertCountEqual(
+            j1.pivots_to_execute.filter(name="test").values_list("pk", flat=True), []
+        )
 
     def test_get_root_returns_self_when_is_root(self):
         """Test that get_root() returns self when the job is already a root node."""
@@ -701,7 +601,9 @@ class JobTestCase(CustomTestCase):
         )
         # Call get_root multiple times and verify consistent results
         results = [root_job.get_root().pk for _ in range(10)]
-        self.assertEqual(len(set(results)), 1, "get_root() should return consistent results")
+        self.assertEqual(
+            len(set(results)), 1, "get_root() should return consistent results"
+        )
         root_job.delete()
         an.delete()
 

@@ -29,7 +29,8 @@ class Threatminer(classes.ObservableAnalyzer):
             uri = "sample.php"
         else:
             raise AnalyzerRunException(
-                f"Unable to retrieve the uri for classification {self.observable_classification}"
+                "Unable to retrieve the uri for classification"
+                f" {self.observable_classification}"
             )
 
         try:

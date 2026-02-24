@@ -16,7 +16,9 @@ from intel_owl.celery import get_queue_name
 
 class EngineConfig(SingletonModel):
     modules = ArrayField(
-        models.CharField(max_length=255, null=False, blank=False, validators=[validate_engine_module]),
+        models.CharField(
+            max_length=255, null=False, blank=False, validators=[validate_engine_module]
+        ),
         blank=True,
         default=list,
         help_text="List of modules used by the engine. Each module has syntax `name_file.name_class`",
@@ -35,21 +37,18 @@ class EngineConfig(SingletonModel):
             )
 
     def run(self, job: Job) -> None:
-        from django.db import transaction
-
         from api_app.data_model_manager.models import BaseDataModel
 
         if job.analyzable.classification == Classification.GENERIC:
             # at the moment, since there are no datamodels for the generic, we are completely skipping an evaluation
             return
-
-        with transaction.atomic():
-            data_model_result: BaseDataModel = job.get_analyzers_data_models().merge(append=True)
-            previous_data_model = job.data_model
-            job.data_model = data_model_result
-            job.save()
-            if previous_data_model:
-                previous_data_model.delete()
+        data_model_result: BaseDataModel = job.get_analyzers_data_models().merge(
+            append=True
+        )
+        if job.data_model:
+            job.data_model.delete()
+        job.data_model = data_model_result
+        job.save()
 
         runner = group(list(self.get_modules_signatures(job)))
         runner.apply_async(

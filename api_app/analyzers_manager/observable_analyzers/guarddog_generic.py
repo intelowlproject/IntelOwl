@@ -18,6 +18,7 @@ class GuardDogGeneric(ObservableAnalyzer):
 
     def run(self):
         try:
+
             process: subprocess.CompletedProcess = subprocess.run(
                 [
                     "/usr/local/bin/guarddog",

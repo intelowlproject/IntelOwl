@@ -104,12 +104,7 @@ const evaluationOptions = [
   },
 ];
 
-export function UserEventModal({
-  analyzables,
-  toggle,
-  isOpen,
-  onSubmitCallback,
-}) {
+export function UserEventModal({ analyzables, toggle, isOpen }) {
   console.debug("UserEventModal rendered!");
 
   const [user] = useAuthStore((state) => [state.user]);
@@ -247,9 +242,6 @@ export function UserEventModal({
         if (failed.length === 0) {
           formik.setSubmitting(false);
           formik.resetForm();
-          if (onSubmitCallback) {
-            onSubmitCallback(formik.values.analyzables);
-          }
           toggle(false);
         } else {
           formik.setFieldValue("analyzables", failed, false);
@@ -1042,10 +1034,8 @@ UserEventModal.propTypes = {
   analyzables: PropTypes.array,
   toggle: PropTypes.func.isRequired,
   isOpen: PropTypes.bool.isRequired,
-  onSubmitCallback: PropTypes.func,
 };
 
 UserEventModal.defaultProps = {
   analyzables: [""],
-  onSubmitCallback: undefined,
 };

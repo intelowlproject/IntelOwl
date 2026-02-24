@@ -5,10 +5,12 @@ from api_app.analyzers_manager.models import MimeTypes
 
 
 class AndroguardAnalyzer(FileAnalyzer):
+
     def update(self) -> bool:
         pass
 
     def run(self):
+
         self.read_file_bytes()
         session = get_default_session()
 

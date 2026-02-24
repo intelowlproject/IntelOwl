@@ -13,13 +13,8 @@ logger = logging.getLogger(__name__)
 
 get_secret = os.environ.get
 
-try:
-    uid = pwd.getpwnam("www-data").pw_uid
-    gid = grp.getgrnam("www-data").gr_gid
-except (KeyError, AttributeError):
-    # fallback for environments without www-data (like local macOS or CI envs)
-    uid = os.getuid()
-    gid = os.getgid()
+uid = pwd.getpwnam("www-data").pw_uid
+gid = grp.getgrnam("www-data").gr_gid
 
 
 def set_permissions(directory: Path, force_create: bool = False):

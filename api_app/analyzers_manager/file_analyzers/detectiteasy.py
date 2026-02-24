@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class DetectItEasy(FileAnalyzer):
+
     def update(self):
         pass
 

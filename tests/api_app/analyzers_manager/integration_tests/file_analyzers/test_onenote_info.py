@@ -27,5 +27,7 @@ class OneNoteInfoTestCase(CustomTestCase):
             OneNoteInfo,
         )
         self.assertEqual(len(downloader_onenote_report["stored_base64"]), 1)
-        decoded = base64.b64decode(downloader_onenote_report["stored_base64"][0]).decode()
+        decoded = base64.b64decode(
+            downloader_onenote_report["stored_base64"][0]
+        ).decode()
         self.assertIn("91.207.183.9", decoded)

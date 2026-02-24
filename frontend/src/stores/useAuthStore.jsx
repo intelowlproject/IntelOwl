@@ -12,7 +12,6 @@ const CSRF_TOKEN = "csrftoken";
 // hook/ store see: https://github.com/pmndrs/zustand
 export const useAuthStore = create((set, get) => ({
   loading: false,
-
   CSRFToken: Cookies.get(CSRF_TOKEN) || "",
   user: {
     username: "",
@@ -37,9 +36,6 @@ export const useAuthStore = create((set, get) => ({
           access: resp.data.access,
         });
       } catch (err) {
-        if (err?.response?.status === 401) {
-          return;
-        }
         addToast(
           "Error fetching user access information!",
           err.parsedMsg,
@@ -80,10 +76,6 @@ export const useAuthStore = create((set, get) => ({
         .catch(onLogoutCb);
     },
     forceLogout: () => {
-      if (get().loading) {
-        return;
-      }
-      set({ loading: true });
       addToast(
         "Invalid token. You will be logged out shortly",
         null,
@@ -91,7 +83,7 @@ export const useAuthStore = create((set, get) => ({
         true,
         1000,
       );
-      setTimeout(get().service.logoutUser, 500);
+      return setTimeout(get().service.logoutUser, 500);
     },
     changePassword: async (values) => {
       try {

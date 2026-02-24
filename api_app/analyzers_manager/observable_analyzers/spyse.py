@@ -38,7 +38,8 @@ class Spyse(classes.ObservableAnalyzer):
                 )
         else:
             raise AnalyzerRunException(
-                f"{self.observable_classification} not supported. Supported are: IP, domain and generic."
+                f"{self.observable_classification} not supported."
+                "Supported are: IP, domain and generic."
             )
         return f"{self.url}/{endpoint}/{self.observable_name}"
 

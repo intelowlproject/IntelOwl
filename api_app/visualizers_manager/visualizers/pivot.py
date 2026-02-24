@@ -40,7 +40,10 @@ class Pivot(Visualizer):
                             disable=False,
                         ),
                         self.Base(
-                            value=(f"{pivot_report.config.name}: Job was not created {motivation}"),
+                            value=(
+                                f"{pivot_report.config.name}: "
+                                f"Job was not created {motivation}"
+                            ),
                             description=pivot_report.config.description,
                             disable=False,
                         ),
@@ -80,7 +83,10 @@ class Pivot(Visualizer):
                         self.VList(
                             name=self.Base(
                                 value="Children Jobs",
-                                description=("This is the list of jobs created from this job via pivots."),
+                                description=(
+                                    "This is the list of jobs created from this job "
+                                    "via pivots."
+                                ),
                                 disable=False,
                             ),
                             value=children_element_list,
@@ -95,11 +101,16 @@ class Pivot(Visualizer):
 
         return [page.to_dict()]
 
-    def _create_job_ui_element(self, job: Job, pivot_config: PivotConfig = None) -> Visualizer.Base:
+    def _create_job_ui_element(
+        self, job: Job, pivot_config: PivotConfig = None
+    ) -> Visualizer.Base:
         label = ""
         if pivot_config:
             label += f"{pivot_config.name}: "
-        label += f"Job #{job.pk} ({job.analyzable.name}, playbook: {job.playbook_to_execute})"
+        label += (
+            f"Job #{job.pk} ({job.analyzable.name}, "
+            f"playbook: {job.playbook_to_execute})"
+        )
         return self.Base(
             value=label,
             link=job.url,

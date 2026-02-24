@@ -32,7 +32,9 @@ class ThreatFox(AbuseCHMixin, Ingestor):
         content = result.json()
         logger.info(f"ThreatFox data is {content}")
         if content["query_status"] != "ok":
-            raise IngestorRunException(f"Query status is invalid: {content['query_status']}")
+            raise IngestorRunException(
+                f"Query status is invalid: {content['query_status']}"
+            )
         if not isinstance(content["data"], list):
             raise IngestorRunException(f"Content {content} not expected")
         for elem in content["data"]:
@@ -60,7 +62,8 @@ class ThreatFox(AbuseCHMixin, Ingestor):
                                     " identifies a botnet"
                                     " command&control server (C&C)",
                                     "ioc_type": "domain",
-                                    "ioc_type_desc": "Domain that is used for botnet Command&control (C&C)",
+                                    "ioc_type_desc": "Domain that is used for"
+                                    " botnet Command&control (C&C)",
                                     "malware": "win.dridex",
                                     "malware_printable": "Dridex",
                                     "malware_alias": None,

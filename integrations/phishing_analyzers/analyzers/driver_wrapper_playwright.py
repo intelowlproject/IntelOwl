@@ -4,21 +4,24 @@ import json
 import time
 from collections.abc import Iterator
 from datetime import datetime, timezone
-from urllib.parse import urlparse, parse_qsl
+from urllib.parse import parse_qsl, urlparse
 
+from logging_setup import setup_file_logger
 from playwright.sync_api import (
-    sync_playwright,
     Browser,
     BrowserContext,
     Page,
     Request,
     Response,
     WebSocket,
+    sync_playwright,
+)
+from playwright.sync_api import (
     Error as PlaywrightError,
+)
+from playwright.sync_api import (
     TimeoutError as PlaywrightTimeoutError,
 )
-
-from logging_setup import setup_file_logger
 
 logger = setup_file_logger("driver_wrapper_playwright")
 
@@ -47,12 +50,8 @@ def _build_request_entry(
         "body": post_body or b"",
         "date": _utcnow_str(),
         "resource_type": request.resource_type,
-        "redirected_from": (
-            request.redirected_from.url if request.redirected_from else None
-        ),
-        "redirected_to": (
-            request.redirected_to.url if request.redirected_to else None
-        ),
+        "redirected_from": (request.redirected_from.url if request.redirected_from else None),
+        "redirected_to": (request.redirected_to.url if request.redirected_to else None),
         "ws_messages": [],
         "cert": {},
         "response": response,
@@ -77,7 +76,6 @@ def playwright_exception_handler(func):
 
 
 class PlaywrightDriverWrapper:
-
     DEFAULT_USER_AGENT = (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -196,9 +194,7 @@ class PlaywrightDriverWrapper:
 
         def on_request_failed(request: Request):
             try:
-                self._captured_requests.append(
-                    _build_request_entry(request, _get_post_body(request))
-                )
+                self._captured_requests.append(_build_request_entry(request, _get_post_body(request)))
                 self._captured_keys.add((request.url, request.method))
             except Exception as e:
                 logger.warning(f"on_request_failed handler error: {e}")
@@ -293,9 +289,7 @@ class PlaywrightDriverWrapper:
                     "body": post_data.encode("utf-8", errors="replace") if post_data else b"",
                     "date": _utcnow_str(),
                     "resource_type": (params.get("type") or "").lower(),
-                    "redirected_from": (
-                        req.get("url", "") if redirect_resp else None
-                    ),
+                    "redirected_from": (req.get("url", "") if redirect_resp else None),
                     "redirected_to": None,
                     "ws_messages": [],
                     "cert": {},
@@ -349,16 +343,12 @@ class PlaywrightDriverWrapper:
                     return
                 if entry.get("response"):
                     try:
-                        body_result = cdp.send(
-                            "Network.getResponseBody", {"requestId": req_id}
-                        )
+                        body_result = cdp.send("Network.getResponseBody", {"requestId": req_id})
                         raw = body_result.get("body", "")
                         if body_result.get("base64Encoded"):
                             entry["response"]["body"] = base64.b64decode(raw)
                         else:
-                            entry["response"]["body"] = raw.encode(
-                                "utf-8", errors="replace"
-                            )
+                            entry["response"]["body"] = raw.encode("utf-8", errors="replace")
                     except Exception:
                         pass
                 _cdp_commit(entry)
@@ -426,18 +416,13 @@ class PlaywrightDriverWrapper:
         try:
             self._page.goto(url, wait_until="networkidle", timeout=30_000)
         except PlaywrightTimeoutError:
-            logger.warning(
-                f"networkidle timeout exceeded for {url}; proceeding with whatever loaded."
-            )
+            logger.warning(f"networkidle timeout exceeded for {url}; proceeding with whatever loaded.")
 
         if timeout_wait_page:
             try:
                 self._page.wait_for_selector("input", state="visible", timeout=timeout_wait_page * 1_000)
             except PlaywrightTimeoutError:
-                logger.info(
-                    "Timeout waiting for input tag to appear — "
-                    "page may not have an input field."
-                )
+                logger.info("Timeout waiting for input tag to appear — page may not have an input field.")
 
     @playwright_exception_handler
     def get_page_source(self) -> str:

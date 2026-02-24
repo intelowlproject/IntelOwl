@@ -68,8 +68,7 @@ def load_playwright_request(to_load: dict) -> dict:
         }
 
     decoded_ws_messages = [
-        {**msg, "content": base64.b64decode(msg["content"])}
-        for msg in to_load.get("ws_messages", [])
+        {**msg, "content": base64.b64decode(msg["content"])} for msg in to_load.get("ws_messages", [])
     ]
 
     decoded = {

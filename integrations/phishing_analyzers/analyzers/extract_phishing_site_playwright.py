@@ -12,14 +12,9 @@ logger = setup_file_logger("extract_phishing_site_playwright")
 def extract_driver_result(driver_wrapper: PlaywrightDriverWrapper) -> dict:
     logger.info("Extracting Playwright driver result...")
     driver_result: dict = {
-        "page_source": base64.b64encode(
-            driver_wrapper.get_page_source().encode("utf-8")
-        ).decode("utf-8"),
+        "page_source": base64.b64encode(driver_wrapper.get_page_source().encode("utf-8")).decode("utf-8"),
         "page_screenshot_base64": driver_wrapper.get_base64_screenshot(),
-        "page_http_traffic": [
-            dump_playwright_request(entry)
-            for entry in driver_wrapper.iter_requests()
-        ],
+        "page_http_traffic": [dump_playwright_request(entry) for entry in driver_wrapper.iter_requests()],
         "page_http_har": driver_wrapper.get_har(),
     }
     logger.info("Finished extracting Playwright driver result")
@@ -49,9 +44,7 @@ def analyze_target(
 
         print(result)
     except Exception as e:
-        logger.exception(
-            f"Exception during Playwright analysis of target website {target_url}: {e}"
-        )
+        logger.exception(f"Exception during Playwright analysis of target website {target_url}: {e}")
     finally:
         if driver_wrapper:
             driver_wrapper.quit()
@@ -64,7 +57,9 @@ if __name__ == "__main__":
     parser.add_argument("--window_width", type=int, required=False, default=1920)
     parser.add_argument("--window_height", type=int, required=False, default=1080)
     parser.add_argument(
-        "--user_agent", type=str, required=False,
+        "--user_agent",
+        type=str,
+        required=False,
         default=PlaywrightDriverWrapper.DEFAULT_USER_AGENT,
     )
     arguments = parser.parse_args()

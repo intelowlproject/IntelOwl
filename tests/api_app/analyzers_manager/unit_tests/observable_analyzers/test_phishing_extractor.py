@@ -1,8 +1,8 @@
 from unittest.mock import MagicMock, patch
 
 from api_app.analyzers_manager.observable_analyzers.phishing.phishing_extractor import (
-    PhishingExtractor,
     _ENGINE_ENDPOINTS,
+    PhishingExtractor,
 )
 from tests.api_app.analyzers_manager.unit_tests.observable_analyzers.base_test_class import (
     BaseAnalyzerTest,

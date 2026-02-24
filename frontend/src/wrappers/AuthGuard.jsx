@@ -5,7 +5,7 @@ import Cookies from "js-cookie";
 
 import { FallBackLoading, addToast } from "@certego/certego-ui";
 
-import { useAuthStore } from "../stores/useAuthStore";
+import { useAuthStore, CSRF_TOKEN } from "../stores/useAuthStore";
 
 /*
 Wrapper for Routes which should be accessible only to a authenticated user
@@ -28,7 +28,7 @@ export default function AuthGuard({ children }) {
 
   const [initialCheckDone, setInitialCheckDone] = React.useState(false);
   React.useEffect(() => {
-    if (!isAuthenticated && Cookies.get("csrftoken")) {
+    if (!isAuthenticated && Cookies.get(CSRF_TOKEN)) {
       fetchUserAccess().finally(() => setInitialCheckDone(true));
     } else {
       setInitialCheckDone(true);

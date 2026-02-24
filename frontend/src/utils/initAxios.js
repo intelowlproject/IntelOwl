@@ -2,7 +2,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 import { isObject, objToString } from "@certego/certego-ui";
-import { useAuthStore } from "../stores/useAuthStore";
+import { useAuthStore, CSRF_TOKEN } from "../stores/useAuthStore";
 
 export default function initAxios() {
   // base config
@@ -11,7 +11,7 @@ export default function initAxios() {
   axios.defaults.certegoUIenableProgressBar = true;
   // request interceptor
   axios.interceptors.request.use((req) => {
-    const CSRFToken = Cookies.get("csrftoken");
+    const CSRFToken = Cookies.get(CSRF_TOKEN);
     if (CSRFToken) {
       req.headers["X-CSRFToken"] = CSRFToken;
     }

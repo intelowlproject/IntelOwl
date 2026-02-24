@@ -20,8 +20,8 @@ class PhishingExtractor(ObservableAnalyzer, DockerBasedAnalyzer):
     poll_distance: int = 3
 
     proxy_address: str = ""
-    window_width: int
-    window_height: int
+    window_width: int = 0
+    window_height: int = 0
     user_agent: str = ""
     phishing_engine: str = "selenium"
 

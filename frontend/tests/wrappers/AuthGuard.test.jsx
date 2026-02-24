@@ -79,6 +79,11 @@ describe("AuthGuard Component", () => {
 
   test("renders children if user is authenticated", () => {
     mockIsAuthenticated = true;
+    useAuthStore.mockImplementation(() => [
+      mockLoading,
+      mockIsAuthenticated,
+      mockFetchUserAccess,
+    ]);
     renderAuthGuard();
 
     expect(screen.getByTestId("protected-content")).toBeInTheDocument();
@@ -86,10 +91,7 @@ describe("AuthGuard Component", () => {
   });
 
   test("redirects to login if user is unauthenticated and no cookie is present", () => {
-    Cookies.get.mockImplementation((key) => {
-      if (key === CSRF_TOKEN) return undefined;
-      return undefined;
-    });
+    Cookies.get.mockReturnValue(undefined);
 
     renderAuthGuard();
 
@@ -157,10 +159,7 @@ describe("AuthGuard Component", () => {
   });
 
   test("redirects to home(/) without ?next if redirecting from a logout path", () => {
-    Cookies.get.mockImplementation((key) => {
-      if (key === CSRF_TOKEN) return undefined;
-      return undefined;
-    });
+    Cookies.get.mockReturnValue(undefined);
     renderAuthGuard("/logout");
 
     expect(screen.getByTestId("home-page")).toBeInTheDocument();
@@ -175,12 +174,13 @@ describe("AuthGuard Component", () => {
   });
 
   test("renders FallBackLoading if store loading is true, regardless of initialCheckDone", () => {
-    Cookies.get.mockImplementation((key) => {
-      if (key === CSRF_TOKEN) return undefined;
-      return undefined;
-    });
-
+    Cookies.get.mockReturnValue(undefined);
     mockLoading = true;
+    useAuthStore.mockImplementation(() => [
+      mockLoading,
+      mockIsAuthenticated,
+      mockFetchUserAccess,
+    ]);
 
     renderAuthGuard();
 

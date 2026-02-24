@@ -159,11 +159,19 @@ export default function ScanForm() {
           errors.files = "required";
         }
       } else if (
-        values.observable_names.filter((observable) => observable.length)
+        values.observable_names.filter((observable) => observable.trim().length)
           .length === 0
       ) {
         // we cannot return a list of errors (one for each observable), or isValid doesn't work
         errors.observable_names = "observable(s) are required";
+      } else if (
+        values.observable_names.some(
+          (observable) =>
+            observable.length > 0 && observable.trim().length === 0,
+        )
+      ) {
+        errors.observable_names =
+          "observable(s) cannot be empty or contain only whitespace";
       }
 
       // check playbook or analyzer selections based on the user selection
@@ -191,9 +199,12 @@ export default function ScanForm() {
       return errors;
     },
     onSubmit: async (values) => {
+      const trimmedObservables = values.observable_names
+        .map((name) => name.trim())
+        .filter((name) => name.length > 0);
       const response = await createJob(
         values.observableType === JobTypes.OBSERVABLE
-          ? values.observable_names
+          ? trimmedObservables
           : values.files,
         values.classification,
         values.playbook.value,

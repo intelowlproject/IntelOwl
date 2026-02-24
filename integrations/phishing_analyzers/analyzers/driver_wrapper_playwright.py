@@ -58,6 +58,103 @@ def _build_request_entry(
     }
 
 
+def _build_cert_info(security: dict) -> dict:
+    return {
+        "subject": security.get("subjectName", ""),
+        "issuer": security.get("issuer", ""),
+        "valid_from": security.get("validFrom", ""),
+        "valid_to": security.get("validTo", ""),
+        "protocol": security.get("protocol", ""),
+        "cipher": security.get("cipher", ""),
+        "san": security.get("sanList", []),
+    }
+
+
+def _headers_to_har(headers: dict) -> list[dict]:
+    return [{"name": k, "value": v} for k, v in headers.items()]
+
+
+def _query_string(url: str) -> list[dict]:
+    parsed = urlparse(url)
+    return [{"name": k, "value": v} for k, v in parse_qsl(parsed.query)]
+
+
+def _build_har_request(req: dict) -> dict:
+    har_req = {
+        "method": req["method"],
+        "url": req["url"],
+        "httpVersion": "HTTP/1.1",
+        "headers": _headers_to_har(req.get("headers", {})),
+        "queryString": _query_string(req["url"]),
+        "cookies": [],
+        "headersSize": -1,
+        "bodySize": len(req.get("body") or b""),
+    }
+    if req.get("body"):
+        har_req["postData"] = {
+            "mimeType": (req.get("headers") or {}).get(
+                "content-type", "application/octet-stream"
+            ),
+            "text": (
+                req["body"].decode("utf-8", errors="replace")
+                if isinstance(req.get("body"), bytes)
+                else str(req.get("body") or "")
+            ),
+        }
+    return har_req
+
+
+def _build_har_response(response: dict | None, resp_body: bytes, resp_mime: str) -> dict:
+    if response:
+        return {
+            "status": response.get("status_code", 0),
+            "statusText": response.get("reason", ""),
+            "httpVersion": "HTTP/1.1",
+            "headers": _headers_to_har(response.get("headers") or {}),
+            "cookies": [],
+            "content": {
+                "size": len(resp_body),
+                "mimeType": resp_mime,
+                "text": base64.b64encode(resp_body).decode("utf-8"),
+                "encoding": "base64",
+            },
+            "redirectURL": response.get("headers", {}).get("location", ""),
+            "headersSize": -1,
+            "bodySize": len(resp_body),
+        }
+    return {
+        "status": 0,
+        "statusText": "",
+        "httpVersion": "HTTP/1.1",
+        "headers": [],
+        "cookies": [],
+        "content": {"size": 0, "mimeType": "application/octet-stream"},
+        "redirectURL": "",
+        "headersSize": -1,
+        "bodySize": 0,
+    }
+
+
+def _build_har_entry(req: dict) -> dict:
+    response = req.get("response")
+    resp_body: bytes = (response.get("body") or b"") if response else b""
+    if not isinstance(resp_body, bytes):
+        resp_body = str(resp_body).encode("utf-8", errors="replace")
+    resp_mime = (
+        (response.get("headers") or {}).get("content-type", "application/octet-stream")
+        if response
+        else "application/octet-stream"
+    )
+    return {
+        "startedDateTime": req["date"],
+        "time": -1,
+        "request": _build_har_request(req),
+        "response": _build_har_response(response, resp_body, resp_mime),
+        "cache": {},
+        "timings": {"send": 0, "wait": 0, "receive": 0},
+    }
+
+
 def playwright_exception_handler(func):
     @functools.wraps(func)
     def handle_exception(self, *args, **kwargs):
@@ -241,6 +338,125 @@ class PlaywrightDriverWrapper:
         page.on("requestfailed", on_request_failed)
         page.on("websocket", on_websocket)
 
+    def _cdp_commit(self, entry: dict):
+        url = entry.get("url", "")
+        method = entry.get("method", "GET")
+        cert = entry.get("cert") or {}
+
+        if any(cert.values()):
+            self._cdp_security_by_url[url] = cert
+
+        if (url, method) not in self._captured_keys:
+            self._cdp_extra_requests.append(entry)
+
+    def _on_cdp_request(self, params: dict):
+        try:
+            req_id = params.get("requestId", "")
+            req = params.get("request", {})
+            redirect_resp = params.get("redirectResponse")
+
+            if redirect_resp and req_id in self._cdp_inflight:
+                prev = self._cdp_inflight.pop(req_id)
+                prev["redirected_to"] = req.get("url", "")
+                self._cdp_commit(prev)
+
+            post_data = req.get("postData", "")
+            entry: dict = {
+                "_cdp_source": True,
+                "_cdp_request_id": req_id,
+                "_cdp_type": params.get("type", ""),
+                "_cdp_initiator": params.get("initiator", {}),
+                "_cdp_from_cache": False,
+                "_cdp_blocked_reason": "",
+                "_cdp_error": "",
+                "id": req_id,
+                "method": req.get("method", "GET"),
+                "url": req.get("url", ""),
+                "headers": req.get("headers", {}),
+                "body": post_data.encode("utf-8", errors="replace") if post_data else b"",
+                "date": _utcnow_str(),
+                "resource_type": (params.get("type") or "").lower(),
+                "redirected_from": (req.get("url", "") if redirect_resp else None),
+                "redirected_to": None,
+                "ws_messages": [],
+                "cert": {},
+                "response": None,
+            }
+            self._cdp_inflight[req_id] = entry
+        except Exception as e:
+            logger.warning(f"CDP on_cdp_request error: {e}")
+
+    def _on_cdp_response(self, params: dict):
+        try:
+            req_id = params.get("requestId", "")
+            resp = params.get("response", {})
+            security = resp.get("securityDetails") or {}
+
+            cert_info = _build_cert_info(security)
+
+            url = resp.get("url", "")
+            if any(cert_info.values()):
+                self._cdp_security_by_url[url] = cert_info
+
+            entry = self._cdp_inflight.get(req_id)
+            if entry:
+                entry["cert"] = cert_info
+                entry["response"] = {
+                    "status_code": resp.get("status", 0),
+                    "reason": resp.get("statusText", ""),
+                    "headers": resp.get("headers", {}),
+                    "body": b"",
+                    "date": _utcnow_str(),
+                    "cert": cert_info,
+                    "from_disk_cache": resp.get("fromDiskCache", False),
+                    "from_service_worker": resp.get("fromServiceWorker", False),
+                }
+        except Exception as e:
+            logger.warning(f"CDP on_cdp_response error: {e}")
+
+    def _on_cdp_finished(self, params: dict):
+        try:
+            req_id = params.get("requestId", "")
+            entry = self._cdp_inflight.pop(req_id, None)
+            if not entry:
+                return
+            if entry.get("response") and self._cdp_session:
+                try:
+                    body_result = self._cdp_session.send(
+                        "Network.getResponseBody", {"requestId": req_id}
+                    )
+                    raw = body_result.get("body", "")
+                    if body_result.get("base64Encoded"):
+                        entry["response"]["body"] = base64.b64decode(raw)
+                    else:
+                        entry["response"]["body"] = raw.encode("utf-8", errors="replace")
+                except Exception:
+                    pass
+            self._cdp_commit(entry)
+        except Exception as e:
+            logger.warning(f"CDP on_cdp_finished error: {e}")
+
+    def _on_cdp_failed(self, params: dict):
+        try:
+            req_id = params.get("requestId", "")
+            entry = self._cdp_inflight.pop(req_id, None)
+            if not entry:
+                return
+            entry["_cdp_blocked_reason"] = params.get("blockedReason", "")
+            entry["_cdp_error"] = params.get("errorText", "")
+            self._cdp_commit(entry)
+        except Exception as e:
+            logger.warning(f"CDP on_cdp_failed error: {e}")
+
+    def _on_cdp_from_cache(self, params: dict):
+        try:
+            req_id = params.get("requestId", "")
+            entry = self._cdp_inflight.get(req_id)
+            if entry:
+                entry["_cdp_from_cache"] = True
+        except Exception as e:
+            logger.warning(f"CDP on_cdp_from_cache error: {e}")
+
     def _attach_cdp_listeners(self, page: Page):
         try:
             cdp = self._context.new_cdp_session(page)
@@ -262,137 +478,11 @@ class PlaywrightDriverWrapper:
 
         self._cdp_session = cdp
 
-        def on_cdp_request(params: dict):
-            try:
-                req_id = params.get("requestId", "")
-                req = params.get("request", {})
-                redirect_resp = params.get("redirectResponse")
-
-                if redirect_resp and req_id in self._cdp_inflight:
-                    prev = self._cdp_inflight.pop(req_id)
-                    prev["redirected_to"] = req.get("url", "")
-                    _cdp_commit(prev)
-
-                post_data = req.get("postData", "")
-                entry: dict = {
-                    "_cdp_source": True,
-                    "_cdp_request_id": req_id,
-                    "_cdp_type": params.get("type", ""),
-                    "_cdp_initiator": params.get("initiator", {}),
-                    "_cdp_from_cache": False,
-                    "_cdp_blocked_reason": "",
-                    "_cdp_error": "",
-                    "id": req_id,
-                    "method": req.get("method", "GET"),
-                    "url": req.get("url", ""),
-                    "headers": req.get("headers", {}),
-                    "body": post_data.encode("utf-8", errors="replace") if post_data else b"",
-                    "date": _utcnow_str(),
-                    "resource_type": (params.get("type") or "").lower(),
-                    "redirected_from": (req.get("url", "") if redirect_resp else None),
-                    "redirected_to": None,
-                    "ws_messages": [],
-                    "cert": {},
-                    "response": None,
-                }
-                self._cdp_inflight[req_id] = entry
-            except Exception as e:
-                logger.warning(f"CDP on_cdp_request error: {e}")
-
-        def on_cdp_response(params: dict):
-            try:
-                req_id = params.get("requestId", "")
-                resp = params.get("response", {})
-                security = resp.get("securityDetails") or {}
-
-                cert_info = {
-                    "subject": security.get("subjectName", ""),
-                    "issuer": security.get("issuer", ""),
-                    "valid_from": security.get("validFrom", ""),
-                    "valid_to": security.get("validTo", ""),
-                    "protocol": security.get("protocol", ""),
-                    "cipher": security.get("cipher", ""),
-                    "san": security.get("sanList", []),
-                }
-
-                url = resp.get("url", "")
-                if any(cert_info.values()):
-                    self._cdp_security_by_url[url] = cert_info
-
-                entry = self._cdp_inflight.get(req_id)
-                if entry:
-                    entry["cert"] = cert_info
-                    entry["response"] = {
-                        "status_code": resp.get("status", 0),
-                        "reason": resp.get("statusText", ""),
-                        "headers": resp.get("headers", {}),
-                        "body": b"",
-                        "date": _utcnow_str(),
-                        "cert": cert_info,
-                        "from_disk_cache": resp.get("fromDiskCache", False),
-                        "from_service_worker": resp.get("fromServiceWorker", False),
-                    }
-            except Exception as e:
-                logger.warning(f"CDP on_cdp_response error: {e}")
-
-        def on_cdp_finished(params: dict):
-            try:
-                req_id = params.get("requestId", "")
-                entry = self._cdp_inflight.pop(req_id, None)
-                if not entry:
-                    return
-                if entry.get("response"):
-                    try:
-                        body_result = cdp.send("Network.getResponseBody", {"requestId": req_id})
-                        raw = body_result.get("body", "")
-                        if body_result.get("base64Encoded"):
-                            entry["response"]["body"] = base64.b64decode(raw)
-                        else:
-                            entry["response"]["body"] = raw.encode("utf-8", errors="replace")
-                    except Exception:
-                        pass
-                _cdp_commit(entry)
-            except Exception as e:
-                logger.warning(f"CDP on_cdp_finished error: {e}")
-
-        def on_cdp_failed(params: dict):
-            try:
-                req_id = params.get("requestId", "")
-                entry = self._cdp_inflight.pop(req_id, None)
-                if not entry:
-                    return
-                entry["_cdp_blocked_reason"] = params.get("blockedReason", "")
-                entry["_cdp_error"] = params.get("errorText", "")
-                _cdp_commit(entry)
-            except Exception as e:
-                logger.warning(f"CDP on_cdp_failed error: {e}")
-
-        def on_cdp_from_cache(params: dict):
-            try:
-                req_id = params.get("requestId", "")
-                entry = self._cdp_inflight.get(req_id)
-                if entry:
-                    entry["_cdp_from_cache"] = True
-            except Exception as e:
-                logger.warning(f"CDP on_cdp_from_cache error: {e}")
-
-        def _cdp_commit(entry: dict):
-            url = entry.get("url", "")
-            method = entry.get("method", "GET")
-            cert = entry.get("cert") or {}
-
-            if any(cert.values()):
-                self._cdp_security_by_url[url] = cert
-
-            already_captured = (url, method) in self._captured_keys
-            if not already_captured:
-                self._cdp_extra_requests.append(entry)
-
-        cdp.on("Network.requestWillBeSent", on_cdp_request)
-        cdp.on("Network.responseReceived", on_cdp_response)
-        cdp.on("Network.loadingFinished", on_cdp_finished)
-        cdp.on("Network.loadingFailed", on_cdp_failed)
-        cdp.on("Network.requestServedFromCache", on_cdp_from_cache)
+        cdp.on("Network.requestWillBeSent", self._on_cdp_request)
+        cdp.on("Network.responseReceived", self._on_cdp_response)
+        cdp.on("Network.loadingFinished", self._on_cdp_finished)
+        cdp.on("Network.loadingFailed", self._on_cdp_failed)
+        cdp.on("Network.requestServedFromCache", self._on_cdp_from_cache)
         logger.info("CDP Network listeners attached")
 
     def restart(self, motivation: str = "", timeout_wait_page: int = 0):
@@ -467,7 +557,7 @@ class PlaywrightDriverWrapper:
             results.append(entry)
             result_keys.add((url, entry.get("method", "GET")))
 
-        for req_id, entry in list(self._cdp_inflight.items()):
+        for _, entry in list(self._cdp_inflight.items()):
             url = entry.get("url", "")
             method = entry.get("method", "GET")
             if (url, method) not in result_keys:
@@ -478,89 +568,10 @@ class PlaywrightDriverWrapper:
         return iter(results)
 
     def get_har(self) -> str:
-        def _headers_to_har(headers: dict) -> list[dict]:
-            return [{"name": k, "value": v} for k, v in headers.items()]
-
-        def _query_string(url: str) -> list[dict]:
-            parsed = urlparse(url)
-            return [{"name": k, "value": v} for k, v in parse_qsl(parsed.query)]
-
         entries = []
         all_requests = list(self._captured_requests) + list(self._cdp_extra_requests)
         for req in all_requests:
-            response = req.get("response")
-            resp_body: bytes = (response.get("body") or b"") if response else b""
-            if not isinstance(resp_body, bytes):
-                resp_body = str(resp_body).encode("utf-8", errors="replace")
-            resp_mime = (
-                (response.get("headers") or {}).get("content-type", "application/octet-stream")
-                if response
-                else "application/octet-stream"
-            )
-
-            entry = {
-                "startedDateTime": req["date"],
-                "time": -1,
-                "request": {
-                    "method": req["method"],
-                    "url": req["url"],
-                    "httpVersion": "HTTP/1.1",
-                    "headers": _headers_to_har(req.get("headers", {})),
-                    "queryString": _query_string(req["url"]),
-                    "cookies": [],
-                    "headersSize": -1,
-                    "bodySize": len(req.get("body") or b""),
-                    **(
-                        {
-                            "postData": {
-                                "mimeType": (req.get("headers") or {}).get(
-                                    "content-type", "application/octet-stream"
-                                ),
-                                "text": (
-                                    req["body"].decode("utf-8", errors="replace")
-                                    if isinstance(req.get("body"), bytes)
-                                    else str(req.get("body") or "")
-                                ),
-                            }
-                        }
-                        if req.get("body")
-                        else {}
-                    ),
-                },
-                "response": (
-                    {
-                        "status": response.get("status_code", 0),
-                        "statusText": response.get("reason", ""),
-                        "httpVersion": "HTTP/1.1",
-                        "headers": _headers_to_har(response.get("headers") or {}),
-                        "cookies": [],
-                        "content": {
-                            "size": len(resp_body),
-                            "mimeType": resp_mime,
-                            "text": base64.b64encode(resp_body).decode("utf-8"),
-                            "encoding": "base64",
-                        },
-                        "redirectURL": response.get("headers", {}).get("location", ""),
-                        "headersSize": -1,
-                        "bodySize": len(resp_body),
-                    }
-                    if response
-                    else {
-                        "status": 0,
-                        "statusText": "",
-                        "httpVersion": "HTTP/1.1",
-                        "headers": [],
-                        "cookies": [],
-                        "content": {"size": 0, "mimeType": "application/octet-stream"},
-                        "redirectURL": "",
-                        "headersSize": -1,
-                        "bodySize": 0,
-                    }
-                ),
-                "cache": {},
-                "timings": {"send": 0, "wait": 0, "receive": 0},
-            }
-            entries.append(entry)
+            entries.append(_build_har_entry(req))
 
         har = {
             "log": {

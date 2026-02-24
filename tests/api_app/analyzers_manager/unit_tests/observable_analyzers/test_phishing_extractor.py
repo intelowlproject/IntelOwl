@@ -44,7 +44,8 @@ class PhishingExtractorTestCase(BaseAnalyzerTest):
             analyzer.phishing_engine = phishing_engine
         return analyzer
 
-    def _config_analyzer(self, analyzer):
+    @staticmethod
+    def _config_analyzer(analyzer):
         with patch("api_app.classes.Plugin.config"):
             analyzer.config({})
 

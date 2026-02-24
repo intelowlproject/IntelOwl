@@ -14,14 +14,10 @@ from api_app.connectors_manager.models import ConnectorConfig, ConnectorReport
 from api_app.models import Job, Parameter, PluginConfig, Tag
 from tests import CustomTestCase
 
-OPENCTI_MODULE = "api_app.connectors_manager.connectors.opencti"
 
-
-def _opencti_patch(target: str):
-    """Patch target inside the opencti connector module."""
-    return patch(f"{OPENCTI_MODULE}.{target}")
-
-
+# Connector uses pycti.Identity(inst).create(...), i.e. class(instance).method().
+# Patching pycti.Identity.create does not intercept instance calls in all environments.
+# Patch the CLASS so pycti.Identity(...) returns a mock; configure .return_value.create etc.
 def _partial_state_errors(report):
     """Errors that contain the partial-state contract message."""
     return [e for e in report.errors if "Created IDs:" in str(e)]
@@ -100,29 +96,32 @@ class OpenCTIConnectorTestCase(CustomTestCase):
 
     # --- Test 1: Failure after observable creation ---
     @patch.object(OpenCTI, "_monkeypatch", classmethod(lambda cls: None))
-    @_opencti_patch("pycti.OpenCTIApiClient")
-    @_opencti_patch("pycti.Label.create")
-    @_opencti_patch("pycti.StixCyberObservable.create")
-    @_opencti_patch("pycti.Identity.create")
-    @_opencti_patch("pycti.MarkingDefinition.create")
+    @patch("pycti.OpenCTIApiClient")
+    @patch("pycti.Label")
+    @patch("pycti.StixCyberObservable")
+    @patch("pycti.Identity")
+    @patch("pycti.MarkingDefinition")
     def test_failure_after_observable_creation_partial_state_reported(
         self,
-        marking_create_mock,
-        identity_create_mock,
-        stix_observable_create_mock,
-        label_create_mock,
+        marking_mock,
+        identity_mock,
+        stix_observable_mock,
+        label_mock,
         _api_client_mock,
     ):
-        identity_create_mock.return_value = {"id": "org-1"}
-        marking_create_mock.return_value = {"id": "mark-1"}
-        stix_observable_create_mock.return_value = {"id": "obs-1"}
-        label_create_mock.side_effect = Exception("label failure")
+        identity_mock.return_value.create.return_value = {"id": "org-1"}
+        marking_mock.return_value.create.return_value = {"id": "mark-1"}
+        stix_observable_mock.return_value.create.return_value = {"id": "obs-1"}
+        label_mock.return_value.create.side_effect = Exception("label failure")
 
         job, config, pcs = self._setup_job_with_opencti(add_tag=True)
         try:
             task_id = uuid()
             connector = OpenCTI(config)
-            connector.start(job.pk, {}, task_id)
+            try:
+                connector.start(job.pk, {}, task_id)
+            except Exception:
+                pass  # In CI, after_run_failed re-raises; report is already FAILED
 
             report = ConnectorReport.objects.get(job=job, config=config)
             self.assertEqual(report.status, ConnectorReport.STATUSES.FAILED)
@@ -141,35 +140,38 @@ class OpenCTIConnectorTestCase(CustomTestCase):
 
     # --- Test 2: Failure after report creation ---
     @patch.object(OpenCTI, "_monkeypatch", classmethod(lambda cls: None))
-    @_opencti_patch("pycti.OpenCTIApiClient")
-    @_opencti_patch("pycti.ExternalReference.create")
-    @_opencti_patch("pycti.Report.create")
-    @_opencti_patch("pycti.Label.create")
-    @_opencti_patch("pycti.StixCyberObservable.create")
-    @_opencti_patch("pycti.Identity.create")
-    @_opencti_patch("pycti.MarkingDefinition.create")
+    @patch("pycti.OpenCTIApiClient")
+    @patch("pycti.ExternalReference")
+    @patch("pycti.Report")
+    @patch("pycti.Label")
+    @patch("pycti.StixCyberObservable")
+    @patch("pycti.Identity")
+    @patch("pycti.MarkingDefinition")
     def test_failure_after_report_creation_partial_state_reported(
         self,
-        marking_create_mock,
-        identity_create_mock,
-        stix_observable_create_mock,
-        label_create_mock,
-        report_create_mock,
-        external_ref_create_mock,
+        marking_mock,
+        identity_mock,
+        stix_observable_mock,
+        label_mock,
+        report_mock,
+        external_ref_mock,
         _api_client_mock,
     ):
-        identity_create_mock.return_value = {"id": "org-1"}
-        marking_create_mock.return_value = {"id": "mark-1"}
-        stix_observable_create_mock.return_value = {"id": "obs-1"}
-        label_create_mock.return_value = {"id": "label-1"}
-        report_create_mock.return_value = {"id": "report-1"}
-        external_ref_create_mock.side_effect = Exception("external ref failure")
+        identity_mock.return_value.create.return_value = {"id": "org-1"}
+        marking_mock.return_value.create.return_value = {"id": "mark-1"}
+        stix_observable_mock.return_value.create.return_value = {"id": "obs-1"}
+        label_mock.return_value.create.return_value = {"id": "label-1"}
+        report_mock.return_value.create.return_value = {"id": "report-1"}
+        external_ref_mock.return_value.create.side_effect = Exception("external ref failure")
 
         job, config, pcs = self._setup_job_with_opencti(add_tag=True)
         try:
             task_id = uuid()
             connector = OpenCTI(config)
-            connector.start(job.pk, {}, task_id)
+            try:
+                connector.start(job.pk, {}, task_id)
+            except Exception:
+                pass  # In CI, after_run_failed re-raises; report is already FAILED
 
             report = ConnectorReport.objects.get(job=job, config=config)
             self.assertEqual(report.status, ConnectorReport.STATUSES.FAILED)
@@ -188,38 +190,41 @@ class OpenCTIConnectorTestCase(CustomTestCase):
 
     # --- Test 3: Failure after external reference but before linking ---
     @patch.object(OpenCTI, "_monkeypatch", classmethod(lambda cls: None))
-    @_opencti_patch("pycti.OpenCTIApiClient")
-    @_opencti_patch("pycti.StixDomainObject.add_external_reference")
-    @_opencti_patch("pycti.ExternalReference.create")
-    @_opencti_patch("pycti.Report.create")
-    @_opencti_patch("pycti.Label.create")
-    @_opencti_patch("pycti.StixCyberObservable.create")
-    @_opencti_patch("pycti.Identity.create")
-    @_opencti_patch("pycti.MarkingDefinition.create")
+    @patch("pycti.OpenCTIApiClient")
+    @patch("pycti.StixDomainObject")
+    @patch("pycti.ExternalReference")
+    @patch("pycti.Report")
+    @patch("pycti.Label")
+    @patch("pycti.StixCyberObservable")
+    @patch("pycti.Identity")
+    @patch("pycti.MarkingDefinition")
     def test_failure_after_external_reference_before_linking_partial_state(
         self,
-        marking_create_mock,
-        identity_create_mock,
-        stix_observable_create_mock,
-        label_create_mock,
-        report_create_mock,
-        external_ref_create_mock,
-        add_external_ref_mock,
+        marking_mock,
+        identity_mock,
+        stix_observable_mock,
+        label_mock,
+        report_mock,
+        external_ref_mock,
+        stix_domain_mock,
         _api_client_mock,
     ):
-        identity_create_mock.return_value = {"id": "org-1"}
-        marking_create_mock.return_value = {"id": "mark-1"}
-        stix_observable_create_mock.return_value = {"id": "obs-1"}
-        label_create_mock.return_value = {"id": "label-1"}
-        report_create_mock.return_value = {"id": "report-1"}
-        external_ref_create_mock.return_value = {"id": "ext-ref-1"}
-        add_external_ref_mock.side_effect = Exception("link failure")
+        identity_mock.return_value.create.return_value = {"id": "org-1"}
+        marking_mock.return_value.create.return_value = {"id": "mark-1"}
+        stix_observable_mock.return_value.create.return_value = {"id": "obs-1"}
+        label_mock.return_value.create.return_value = {"id": "label-1"}
+        report_mock.return_value.create.return_value = {"id": "report-1"}
+        external_ref_mock.return_value.create.return_value = {"id": "ext-ref-1"}
+        stix_domain_mock.return_value.add_external_reference.side_effect = Exception("link failure")
 
         job, config, pcs = self._setup_job_with_opencti(add_tag=True)
         try:
             task_id = uuid()
             connector = OpenCTI(config)
-            connector.start(job.pk, {}, task_id)
+            try:
+                connector.start(job.pk, {}, task_id)
+            except Exception:
+                pass  # In CI, after_run_failed re-raises; report is already FAILED
 
             report = ConnectorReport.objects.get(job=job, config=config)
             self.assertEqual(report.status, ConnectorReport.STATUSES.FAILED)
@@ -238,41 +243,35 @@ class OpenCTIConnectorTestCase(CustomTestCase):
 
     # --- Test 4: Success path integrity ---
     @patch.object(OpenCTI, "_monkeypatch", classmethod(lambda cls: None))
-    @_opencti_patch("pycti.OpenCTIApiClient")
-    @_opencti_patch("pycti.Report.add_stix_object_or_stix_relationship")
-    @_opencti_patch("pycti.Report.read")
-    @_opencti_patch("pycti.Report.create")
-    @_opencti_patch("pycti.StixDomainObject.add_external_reference")
-    @_opencti_patch("pycti.ExternalReference.create")
-    @_opencti_patch("pycti.Label.create")
-    @_opencti_patch("pycti.StixCyberObservable.read")
-    @_opencti_patch("pycti.StixCyberObservable.create")
-    @_opencti_patch("pycti.Identity.create")
-    @_opencti_patch("pycti.MarkingDefinition.create")
+    @patch("pycti.OpenCTIApiClient")
+    @patch("pycti.Report")
+    @patch("pycti.StixDomainObject")
+    @patch("pycti.ExternalReference")
+    @patch("pycti.Label")
+    @patch("pycti.StixCyberObservable")
+    @patch("pycti.Identity")
+    @patch("pycti.MarkingDefinition")
     def test_success_path_integrity(
         self,
-        marking_create_mock,
-        identity_create_mock,
-        stix_observable_create_mock,
-        stix_observable_read_mock,
-        label_create_mock,
-        external_ref_create_mock,
-        add_external_ref_mock,
-        report_create_mock,
-        report_read_mock,
-        report_add_stix_mock,
+        marking_mock,
+        identity_mock,
+        stix_observable_mock,
+        label_mock,
+        external_ref_mock,
+        stix_domain_mock,
+        report_mock,
         _api_client_mock,
     ):
-        identity_create_mock.return_value = {"id": "org-1"}
-        marking_create_mock.return_value = {"id": "mark-1"}
-        stix_observable_create_mock.return_value = {"id": "obs-1"}
-        stix_observable_read_mock.return_value = {"id": "obs-1"}
-        label_create_mock.return_value = {"id": "label-1"}
-        report_create_mock.return_value = {"id": "report-1"}
-        report_read_mock.return_value = {"id": "report-1"}
-        external_ref_create_mock.return_value = {"id": "ext-1"}
-        add_external_ref_mock.return_value = None
-        report_add_stix_mock.return_value = None
+        identity_mock.return_value.create.return_value = {"id": "org-1"}
+        marking_mock.return_value.create.return_value = {"id": "mark-1"}
+        stix_observable_mock.return_value.create.return_value = {"id": "obs-1"}
+        stix_observable_mock.return_value.read.return_value = {"id": "obs-1"}
+        label_mock.return_value.create.return_value = {"id": "label-1"}
+        report_mock.return_value.create.return_value = {"id": "report-1"}
+        report_mock.return_value.read.return_value = {"id": "report-1"}
+        external_ref_mock.return_value.create.return_value = {"id": "ext-1"}
+        stix_domain_mock.return_value.add_external_reference.return_value = None
+        report_mock.return_value.add_stix_object_or_stix_relationship.return_value = None
 
         job, config, pcs = self._setup_job_with_opencti(add_tag=True)
         try:
@@ -291,41 +290,35 @@ class OpenCTIConnectorTestCase(CustomTestCase):
 
     # --- Test 5: Organization and marking called only once ---
     @patch.object(OpenCTI, "_monkeypatch", classmethod(lambda cls: None))
-    @_opencti_patch("pycti.OpenCTIApiClient")
-    @_opencti_patch("pycti.Report.add_stix_object_or_stix_relationship")
-    @_opencti_patch("pycti.Report.read")
-    @_opencti_patch("pycti.Report.create")
-    @_opencti_patch("pycti.StixDomainObject.add_external_reference")
-    @_opencti_patch("pycti.ExternalReference.create")
-    @_opencti_patch("pycti.Label.create")
-    @_opencti_patch("pycti.StixCyberObservable.read")
-    @_opencti_patch("pycti.StixCyberObservable.create")
-    @_opencti_patch("pycti.Identity.create")
-    @_opencti_patch("pycti.MarkingDefinition.create")
+    @patch("pycti.OpenCTIApiClient")
+    @patch("pycti.Report")
+    @patch("pycti.StixDomainObject")
+    @patch("pycti.ExternalReference")
+    @patch("pycti.Label")
+    @patch("pycti.StixCyberObservable")
+    @patch("pycti.Identity")
+    @patch("pycti.MarkingDefinition")
     def test_organization_and_marking_called_only_once(
         self,
-        marking_create_mock,
-        identity_create_mock,
-        stix_observable_create_mock,
-        stix_observable_read_mock,
-        label_create_mock,
-        external_ref_create_mock,
-        add_external_ref_mock,
-        report_create_mock,
-        report_read_mock,
-        report_add_stix_mock,
+        marking_mock,
+        identity_mock,
+        stix_observable_mock,
+        label_mock,
+        external_ref_mock,
+        stix_domain_mock,
+        report_mock,
         _api_client_mock,
     ):
-        identity_create_mock.return_value = {"id": "org-1"}
-        marking_create_mock.return_value = {"id": "mark-1"}
-        stix_observable_create_mock.return_value = {"id": "obs-1"}
-        stix_observable_read_mock.return_value = {"id": "obs-1"}
-        label_create_mock.return_value = {"id": "label-1"}
-        report_create_mock.return_value = {"id": "report-1"}
-        report_read_mock.return_value = {"id": "report-1"}
-        report_add_stix_mock.return_value = None
-        external_ref_create_mock.return_value = {"id": "ext-1"}
-        add_external_ref_mock.return_value = None
+        identity_mock.return_value.create.return_value = {"id": "org-1"}
+        marking_mock.return_value.create.return_value = {"id": "mark-1"}
+        stix_observable_mock.return_value.create.return_value = {"id": "obs-1"}
+        stix_observable_mock.return_value.read.return_value = {"id": "obs-1"}
+        label_mock.return_value.create.return_value = {"id": "label-1"}
+        report_mock.return_value.create.return_value = {"id": "report-1"}
+        report_mock.return_value.read.return_value = {"id": "report-1"}
+        external_ref_mock.return_value.create.return_value = {"id": "ext-1"}
+        stix_domain_mock.return_value.add_external_reference.return_value = None
+        report_mock.return_value.add_stix_object_or_stix_relationship.return_value = None
 
         job, config, pcs = self._setup_job_with_opencti(add_tag=True)
         try:
@@ -333,46 +326,49 @@ class OpenCTIConnectorTestCase(CustomTestCase):
             connector = OpenCTI(config)
             connector.start(job.pk, {}, task_id)
 
-            identity_create_mock.assert_called_once()
-            marking_create_mock.assert_called_once()
+            identity_mock.return_value.create.assert_called_once()
+            marking_mock.return_value.create.assert_called_once()
         finally:
             self._cleanup_test_objects(job, config, pcs)
 
     # --- Test 6: API schema drift — StixCyberObservable.create returns non-dict ---
     @patch.object(OpenCTI, "_monkeypatch", classmethod(lambda cls: None))
-    @_opencti_patch("pycti.OpenCTIApiClient")
-    @_opencti_patch("pycti.StixDomainObject.add_external_reference")
-    @_opencti_patch("pycti.ExternalReference.create")
-    @_opencti_patch("pycti.Report.create")
-    @_opencti_patch("pycti.Label.create")
-    @_opencti_patch("pycti.StixCyberObservable.create")
-    @_opencti_patch("pycti.Identity.create")
-    @_opencti_patch("pycti.MarkingDefinition.create")
+    @patch("pycti.OpenCTIApiClient")
+    @patch("pycti.StixDomainObject")
+    @patch("pycti.ExternalReference")
+    @patch("pycti.Report")
+    @patch("pycti.Label")
+    @patch("pycti.StixCyberObservable")
+    @patch("pycti.Identity")
+    @patch("pycti.MarkingDefinition")
     def test_observable_create_returns_non_dict_handled_safely(
         self,
-        marking_create_mock,
-        identity_create_mock,
-        stix_observable_create_mock,
-        label_create_mock,
-        report_create_mock,
-        external_ref_create_mock,
-        add_external_ref_mock,
+        marking_mock,
+        identity_mock,
+        stix_observable_mock,
+        label_mock,
+        report_mock,
+        external_ref_mock,
+        stix_domain_mock,
         _api_client_mock,
     ):
         """StixCyberObservable.create returns non-dict → connector records observable=None, fails safely."""
-        identity_create_mock.return_value = {"id": "org-1"}
-        marking_create_mock.return_value = {"id": "mark-1"}
-        stix_observable_create_mock.return_value = None
-        label_create_mock.return_value = {"id": "label-1"}
-        report_create_mock.return_value = {"id": "report-1"}
-        external_ref_create_mock.return_value = {"id": "ext-1"}
-        add_external_ref_mock.return_value = None
+        identity_mock.return_value.create.return_value = {"id": "org-1"}
+        marking_mock.return_value.create.return_value = {"id": "mark-1"}
+        stix_observable_mock.return_value.create.return_value = None
+        label_mock.return_value.create.return_value = {"id": "label-1"}
+        report_mock.return_value.create.return_value = {"id": "report-1"}
+        external_ref_mock.return_value.create.return_value = {"id": "ext-1"}
+        stix_domain_mock.return_value.add_external_reference.return_value = None
 
         job, config, pcs = self._setup_job_with_opencti(add_tag=True)
         try:
             task_id = uuid()
             connector = OpenCTI(config)
-            connector.start(job.pk, {}, task_id)
+            try:
+                connector.start(job.pk, {}, task_id)
+            except Exception:
+                pass  # In CI, after_run_failed re-raises; report is already FAILED
 
             report = ConnectorReport.objects.get(job=job, config=config)
             self.assertEqual(report.status, ConnectorReport.STATUSES.FAILED)
@@ -388,30 +384,33 @@ class OpenCTIConnectorTestCase(CustomTestCase):
 
     # --- Test 7: API schema drift — Label.create returns non-dict → ValueError contract ---
     @patch.object(OpenCTI, "_monkeypatch", classmethod(lambda cls: None))
-    @_opencti_patch("pycti.OpenCTIApiClient")
-    @_opencti_patch("pycti.Label.create")
-    @_opencti_patch("pycti.StixCyberObservable.create")
-    @_opencti_patch("pycti.Identity.create")
-    @_opencti_patch("pycti.MarkingDefinition.create")
+    @patch("pycti.OpenCTIApiClient")
+    @patch("pycti.Label")
+    @patch("pycti.StixCyberObservable")
+    @patch("pycti.Identity")
+    @patch("pycti.MarkingDefinition")
     def test_label_create_returns_non_dict_raises_value_error(
         self,
-        marking_create_mock,
-        identity_create_mock,
-        stix_observable_create_mock,
-        label_create_mock,
+        marking_mock,
+        identity_mock,
+        stix_observable_mock,
+        label_mock,
         _api_client_mock,
     ):
         """Label.create returns non-dict → connector raises ValueError, partial state has observable + labels=[]."""
-        identity_create_mock.return_value = {"id": "org-1"}
-        marking_create_mock.return_value = {"id": "mark-1"}
-        stix_observable_create_mock.return_value = {"id": "obs-1"}
-        label_create_mock.return_value = None
+        identity_mock.return_value.create.return_value = {"id": "org-1"}
+        marking_mock.return_value.create.return_value = {"id": "mark-1"}
+        stix_observable_mock.return_value.create.return_value = {"id": "obs-1"}
+        label_mock.return_value.create.return_value = None
 
         job, config, pcs = self._setup_job_with_opencti(add_tag=True)
         try:
             task_id = uuid()
             connector = OpenCTI(config)
-            connector.start(job.pk, {}, task_id)
+            try:
+                connector.start(job.pk, {}, task_id)
+            except Exception:
+                pass  # In CI, after_run_failed re-raises; report is already FAILED
 
             report = ConnectorReport.objects.get(job=job, config=config)
             self.assertEqual(report.status, ConnectorReport.STATUSES.FAILED)
@@ -464,7 +463,10 @@ class OpenCTIConnectorTestCase(CustomTestCase):
         job.connectors_to_execute.set([config])
         try:
             connector = OpenCTI(config)
-            connector.start(job.pk, {}, uuid())
+            try:
+                connector.start(job.pk, {}, uuid())
+            except Exception:
+                pass  # In CI, after_run_failed re-raises on failure
             report = ConnectorReport.objects.get(job=job, config=config)
             self.assertIn(
                 report.status,

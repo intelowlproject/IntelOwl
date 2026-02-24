@@ -89,6 +89,8 @@ class OpenCTI(classes.Connector):
             ),
             update=True,  # just in case the description is updated in future
         )
+        if not isinstance(org, dict) or "id" not in org:
+            raise ValueError("Invalid response from OpenCTI Identity.create")
         return org["id"]
 
     @property
@@ -100,6 +102,8 @@ class OpenCTI(classes.Connector):
             x_opencti_color=self.tlp["color"].lower(),
             x_opencti_order=self.tlp["x_opencti_order"],
         )
+        if not isinstance(md, dict) or "id" not in md:
+            raise ValueError("Invalid response from OpenCTI MarkingDefinition.create")
         return md["id"]
 
     def config(self, runtime_configuration: Dict):
@@ -213,22 +217,36 @@ class OpenCTI(classes.Connector):
 
     @classmethod
     def _monkeypatch(cls):
+        # Patch classes so Identity(inst).create() etc. are intercepted (instance method path).
+        def _configure_pycti_mocks(start_fn):
+            def inner(self, job_id, runtime_configuration, task_id, *args, **kwargs):
+                import pycti as pycti_mod
+
+                pycti_mod.Identity.return_value.create.return_value = {"id": 1}
+                pycti_mod.MarkingDefinition.return_value.create.return_value = {"id": 1}
+                pycti_mod.StixCyberObservable.return_value.create.return_value = {"id": 1}
+                pycti_mod.StixCyberObservable.return_value.read.return_value = {"id": 1}
+                pycti_mod.Label.return_value.create.return_value = {"id": 1}
+                pycti_mod.Report.return_value.create.return_value = {"id": 1}
+                pycti_mod.Report.return_value.read.return_value = {"id": 1}
+                pycti_mod.Report.return_value.add_stix_object_or_stix_relationship.return_value = None
+                pycti_mod.ExternalReference.return_value.create.return_value = {"id": 1}
+                pycti_mod.StixDomainObject.return_value.add_external_reference.return_value = None
+                return start_fn(self, job_id, runtime_configuration, task_id, *args, **kwargs)
+
+            return inner
+
         patches = [
             if_mock_connections(
+                _configure_pycti_mocks,
                 patch("pycti.OpenCTIApiClient", return_value=None),
-                patch("pycti.Identity.create", return_value={"id": 1}),
-                patch("pycti.MarkingDefinition.create", return_value={"id": 1}),
-                patch("pycti.StixCyberObservable.create", return_value={"id": 1}),
-                patch("pycti.Label.create", return_value={"id": 1}),
-                patch("pycti.Report.create", return_value={"id": 1}),
-                patch("pycti.ExternalReference.create", return_value={"id": 1}),
-                patch("pycti.StixDomainObject.add_external_reference", return_value=None),
-                patch(
-                    "pycti.Report.add_stix_object_or_stix_relationship",
-                    return_value=None,
-                ),
-                patch("pycti.StixCyberObservable.read", return_value={"id": 1}),
-                patch("pycti.Report.read", return_value={"id": 1}),
+                patch("pycti.Identity"),
+                patch("pycti.MarkingDefinition"),
+                patch("pycti.StixCyberObservable"),
+                patch("pycti.Label"),
+                patch("pycti.Report"),
+                patch("pycti.ExternalReference"),
+                patch("pycti.StixDomainObject"),
             )
         ]
         return super()._monkeypatch(patches=patches)

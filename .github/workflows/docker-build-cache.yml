@@ -1,4 +1,6 @@
-permissions: read-all
+permissions:
+  contents: read
+  actions: write
 name: Docker Build Cache
 
 on:

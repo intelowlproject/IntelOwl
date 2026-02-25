@@ -344,6 +344,7 @@ class PlaywrightDriverWrapper:
         logger.info("Closing Playwright page")
         if self._page:
             self._page.close()
+            self._page = None
 
     def quit(self):
         logger.info("Quitting Playwright browser")

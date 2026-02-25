@@ -228,13 +228,7 @@ class TestUserAnalyzableEventQuerySet(CustomTestCase):
         ua.save()
 
         # Should NOT raise IntegrityError; should safely null next_decay
-        try:
-            ua.__class__.objects.filter(pk=ua.pk).decay()
-        except Exception as e:
-            self.fail(
-                f"decay() crashed with reliability=0: {type(e).__name__}: {e}. "
-                f"Fix: use `reliability <= 0` instead of `== 0`."
-            )
+        ua.__class__.objects.filter(pk=ua.pk).decay()
 
         ua.refresh_from_db()
         self.assertIsNone(ua.next_decay)
@@ -269,8 +263,9 @@ class TestUserDomainWildCardEventQuerySetQueryCount(CustomTestCase):
         with CaptureQueriesContext(connection) as ctx:
             count = UserDomainWildCardEvent.objects.filter(pk__in=pks).decay()
 
-        num_queries = len(ctx.captured_queries)
-        update_queries = [q for q in ctx.captured_queries if q["sql"].strip().upper().startswith("UPDATE")]
+        real_queries = [q for q in ctx.captured_queries if not q["sql"].strip().upper().startswith("EXPLAIN")]
+        num_queries = len(real_queries)
+        update_queries = [q for q in real_queries if q["sql"].strip().upper().startswith("UPDATE")]
 
         self.assertEqual(count, 3)
         # O(1): expect at most 6 queries (generous bound for savepoint variants)
@@ -278,7 +273,7 @@ class TestUserDomainWildCardEventQuerySetQueryCount(CustomTestCase):
             num_queries,
             6,
             f"decay() used {num_queries} queries for N=3 events. "
-            f"N+1 approach would use 7. Queries: " + "; ".join(q["sql"][:80] for q in ctx.captured_queries),
+            f"N+1 approach would use 7. Queries: " + "; ".join(q["sql"][:80] for q in real_queries),
         )
         # Specifically: at most 2 UPDATEs (one per bulk_update call)
         self.assertLessEqual(

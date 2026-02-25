@@ -19,9 +19,6 @@ class UserEventQuerySet(QuerySet):
             .filter(next_decay__lte=now())
         )
 
-        if not objects.exists():
-            return 0
-
         # ForeignKey appears in _meta.fields (wildcard models) -> use JOIN.
         # GenericForeignKey does not (UserAnalyzableEvent) -> use prefetch.
         model_fields = {field.name for field in self.model._meta.fields}
@@ -39,8 +36,8 @@ class UserEventQuerySet(QuerySet):
         if not events:
             return 0
 
-        # Deduplicate by PK: if two events share the same data_model row,
-        # only one Python object exists so reliability decrements exactly once.
+        # Deduplicate by PK: select_related yields distinct objects per event;
+        # this ensures shared DB rows decrement exactly once per cycle.
         data_models_by_pk = {}
 
         for event in events:
@@ -87,7 +84,8 @@ class UserEventQuerySet(QuerySet):
         if not events:
             return 0
 
-        # Deduplicate by (class, pk): each unique DB row is decremented once.
+        # Deduplicate by (class, pk): prefetch_related yields distinct objects
+        # per event; this ensures shared DB rows decrement exactly once.
         data_models_by_class_pk = {}  # {(class, pk): data_model_obj}
         data_models_by_class = defaultdict(list)
 

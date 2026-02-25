@@ -135,7 +135,6 @@ class PlaywrightDriverWrapper:
         self._captured_requests = []
 
     def _create_context_and_page(self):
-        # Use a temp file for built-in HAR recording
         _har_tmp = tempfile.NamedTemporaryFile(suffix=".har", delete=False)
         self._har_path = _har_tmp.name
         _har_tmp.close()
@@ -186,7 +185,6 @@ class PlaywrightDriverWrapper:
                     except Exception:
                         body = b""
 
-                    # Use Playwright's built-in security_details() for TLS cert info
                     cert = _build_cert_info(response.security_details())
 
                     resp_dict = {
@@ -313,7 +311,6 @@ class PlaywrightDriverWrapper:
         return iter(self._captured_requests)
 
     def get_har(self) -> str:
-        # Flush the HAR to disk by closing the page (context stays open)
         try:
             if self._page:
                 self._page.close()
@@ -321,7 +318,6 @@ class PlaywrightDriverWrapper:
         except PlaywrightError:
             pass
 
-        # Route HAR through context close which writes the file
         try:
             if self._context:
                 self._context.close()
@@ -332,7 +328,7 @@ class PlaywrightDriverWrapper:
         try:
             with open(self._har_path, "r", encoding="utf-8") as f:
                 return f.read()
-        except (OSError, FileNotFoundError):
+        except OSError:
             logger.warning("HAR file not found; returning empty HAR")
             return json.dumps(
                 {
@@ -356,7 +352,6 @@ class PlaywrightDriverWrapper:
         finally:
             if self._playwright_ctx:
                 self._playwright_ctx.stop()
-            # Clean up temp HAR file
             try:
                 if self._har_path and os.path.exists(self._har_path):
                     os.unlink(self._har_path)

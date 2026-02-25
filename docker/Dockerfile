@@ -7,9 +7,9 @@ WORKDIR /
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm install npm@latest --location=global && npm install
 
-COPY docker/.env .env.local
 # copy react source code
 COPY frontend/ .
+COPY docker/.env .env.local
 RUN PUBLIC_URL=/static/reactapp/ npm run build
 
 # Stage 2: Backend

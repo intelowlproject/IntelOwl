@@ -49,6 +49,7 @@ RUN apt-get update \
 
 COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
 COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
+COPY requirements/django-server-requirements.txt $PYTHONPATH/requirements/django-server-requirements.txt
 WORKDIR $PYTHONPATH
 
 RUN pip3 install --no-cache-dir --use-pep517 --compile -r project-requirements.txt \

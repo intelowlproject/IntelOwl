@@ -61,6 +61,28 @@ class OrganizationPluginConfigurationTestCase(CustomTestCase):
         org.delete()
         obj.delete()
 
+    def test_disable_for_rate_limit_with_none_timeout(self):
+        """Test disable_for_rate_limit when rate_limit_timeout is None."""
+        org = Organization.objects.create(name="test_org_no_timeout")
+
+        Membership.objects.create(user=self.user, organization=org, is_owner=True)
+
+        obj = OrganizationPluginConfiguration.objects.create(
+            organization=org,
+            rate_limit_timeout=None,  # No timeout configured
+            config=AnalyzerConfig.objects.first(),
+        )
+        self.assertFalse(obj.disabled)
+        self.assertIsNone(obj.rate_limit_enable_task)
+        obj.disable_for_rate_limit()
+        obj.refresh_from_db()
+        self.assertTrue(obj.disabled)
+        # When rate_limit_timeout is None, no periodic task should be created
+        self.assertIsNone(obj.rate_limit_enable_task)
+        self.assertIn("No re-enable timeout was configured", obj.disabled_comment)
+        org.delete()
+        obj.delete()
+
 
 class PythonModuleTestCase(CustomTestCase):
     def test_clean_python_module(self):

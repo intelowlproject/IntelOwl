@@ -1083,7 +1083,7 @@ class OrganizationPluginConfiguration(models.Model):
                 "Disabling the plugin, but no re-enable task will be scheduled."
             )
             self.disabled_comment = (
-                f"Rate limit hit at {now().strftime('%d %m %Y: %H %M %S')}.\n"
+                f"Rate limit hit at {now().strftime('%Y-%m-%d %H:%M:%S')}.\n"
                 "No re-enable timeout was configured — please re-enable manually."
             )
             self.save()
@@ -1092,9 +1092,9 @@ class OrganizationPluginConfiguration(models.Model):
         enabled_to = now() + self.rate_limit_timeout
         self.disabled_comment = (
             "Rate limit hit at "
-            f"{now().strftime('%d %m %Y: %H %M %S')}.\n"
+            f"{now().strftime('%Y-%m-%d %H:%M:%S')}.\n"
             "Will be enabled back at "
-            f"{enabled_to.strftime('%d %m %Y: %H %M %S')}"
+            f"{enabled_to.strftime('%Y-%m-%d %H:%M:%S')}"
         )
         clock_schedule = ClockedSchedule.objects.get_or_create(clocked_time=enabled_to)[0]
         if not self.rate_limit_enable_task:

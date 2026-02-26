@@ -8,8 +8,7 @@ COPY frontend/ .
 # copy version file as an env file
 COPY docker/.env .env.local
 # install and build
-RUN npm install npm@latest --location=global \
-    && npm install \
+RUN npm install \
     && PUBLIC_URL=/static/reactapp/ npm run build
 
 # Stage 2: Backend

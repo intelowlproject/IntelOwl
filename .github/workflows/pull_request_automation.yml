@@ -106,7 +106,7 @@ jobs:
 
       - name: Setup coverage
         run: |
-          docker exec intelowl_uwsgi pip3 install coverage
+          docker exec intelowl_uwsgi pip3 install coverage -r requirements/test-requirements.txt
 
       - name: Run test
         run: |

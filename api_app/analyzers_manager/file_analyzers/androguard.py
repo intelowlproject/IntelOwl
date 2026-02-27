@@ -1,4 +1,4 @@
-from androguard.misc import get_default_session
+from androguard.misc import AnalyzeAPK, AnalyzeDex
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.models import MimeTypes
@@ -10,13 +10,11 @@ class AndroguardAnalyzer(FileAnalyzer):
 
     def run(self):
         self.read_file_bytes()
-        session = get_default_session()
-
         if self._job.analyzable.mimetype == MimeTypes.DEX:
-            session.addDEX(self._job.analyzable.name, self.read_file_bytes())
+            AnalyzeDex(self._job.analyzable.name, self.read_file_bytes())
             results = {}
         else:
-            _, apk = session.addAPK(self._job.analyzable.name, self.read_file_bytes())
+            apk, _, _ = AnalyzeAPK(self.read_file_bytes(), raw=True)
             results = {
                 "app_name": apk.get_app_name(),
                 "permissions": apk.get_permissions(),

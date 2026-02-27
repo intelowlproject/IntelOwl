@@ -9,8 +9,8 @@ class TestAndroguardAnalyzer(BaseFileAnalyzerTest):
     analyzer_class = AndroguardAnalyzer
 
     def get_mocked_response(self):
-        # Mock the androguard session and APK object
-        mock_session = MagicMock()
+        # Mock the APK object
+        mock_apk = MagicMock()
         mock_apk = MagicMock()
 
         # Configure APK mock methods to return sample data
@@ -40,12 +40,23 @@ class TestAndroguardAnalyzer(BaseFileAnalyzerTest):
         mock_apk.get_androidversion_code.return_value = "1"
         mock_apk.get_androidversion_name.return_value = "1.0.0"
 
-        # Configure session mock methods
-        mock_session.addAPK.return_value = (
-            tuple("sample"),
-            mock_apk,
-        )  # Returns (a, apk) tuple
-        mock_session.addDEX.return_value = tuple("sample_dex")
+        # We mock AnalyzeAPK to return (apk, list_of_dex, analysis_obj)
+        # We only really need apk in our tests
+        analyze_apk_patch = patch(
+            "api_app.analyzers_manager.file_analyzers.androguard.AnalyzeAPK",
+            return_value=(mock_apk, tuple("sample_dex"), MagicMock())
+        )
+        
+        # We also mock AnalyzeDex for dex files
+        analyze_dex_patch = patch(
+            "api_app.analyzers_manager.file_analyzers.androguard.AnalyzeDex",
+            return_value=(MagicMock(), tuple("sample_dex"), MagicMock())
+        )
+        
+        # Start the patches if needed by the test framework setup
+        self.analyze_apk_mock = analyze_apk_patch.start()
+        self.analyze_dex_mock = analyze_dex_patch.start()
+        
+        # Return none, or return the patches so base test can clean them up
+        return analyze_apk_patch
 
-        # Return the patch for get_default_session
-        return patch("androguard.misc.get_default_session", return_value=mock_session)

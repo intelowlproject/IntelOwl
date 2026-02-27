@@ -28,10 +28,12 @@ logger = setup_file_logger("driver_wrapper_playwright")
 
 
 def _utcnow_str() -> str:
+    """Return the current UTC time formatted as a human-readable string."""
     return datetime.now(timezone.utc).strftime("%Y-%m-%d, %H:%M:%S.%f")
 
 
 def _get_post_body(request: Request) -> bytes | None:
+    """Safely extract the raw POST body bytes from a Playwright request, or None on failure."""
     try:
         return request.post_data_buffer
     except Exception:
@@ -39,6 +41,7 @@ def _get_post_body(request: Request) -> bytes | None:
 
 
 def _build_cert_info(security: dict | None) -> dict:
+    """Build a normalised certificate-info dict from Playwright's security_details() response."""
     if not security:
         return {}
     return {
@@ -55,6 +58,7 @@ def _build_request_entry(
     post_body: bytes | None,
     response: dict | None = None,
 ) -> dict:
+    """Build a structured dict representing a captured HTTP request and its optional response."""
     return {
         "id": id(request),
         "method": request.method,
@@ -72,6 +76,8 @@ def _build_request_entry(
 
 
 def playwright_exception_handler(func):
+    """Decorator that catches PlaywrightError exceptions, restarts the browser, and retries the wrapped call once."""
+
     @functools.wraps(func)
     def handle_exception(self, *args, **kwargs):
         url = kwargs.get("url", "")
@@ -102,6 +108,14 @@ class PlaywrightDriverWrapper:
         window_height: int = 1080,
         user_agent: str = DEFAULT_USER_AGENT,
     ):
+        """
+        Initialise the Playwright driver wrapper.
+
+        :param proxy_address: Optional HTTP/SOCKS proxy URL.
+        :param window_width: Browser viewport width in pixels.
+        :param window_height: Browser viewport height in pixels.
+        :param user_agent: User-agent string sent with every request.
+        """
         self.proxy: str = proxy_address
         self.window_width: int = window_width
         self.window_height: int = window_height
@@ -119,6 +133,7 @@ class PlaywrightDriverWrapper:
         self._init_driver()
 
     def _build_launch_kwargs(self) -> dict:
+        """Build the keyword arguments dict used when launching the Chromium browser."""
         kwargs = {
             "headless": True,
             "args": [
@@ -132,9 +147,11 @@ class PlaywrightDriverWrapper:
         return kwargs
 
     def _reset_state(self):
+        """Reset internal per-navigation state (captured requests list)."""
         self._captured_requests = []
 
     def _create_context_and_page(self):
+        """Create a fresh browser context (with HAR recording) and open a new page with network listeners attached."""
         _har_tmp = tempfile.NamedTemporaryFile(suffix=".har", delete=False)
         self._har_path = _har_tmp.name
         _har_tmp.close()
@@ -150,6 +167,7 @@ class PlaywrightDriverWrapper:
         self._attach_network_listeners(self._page)
 
     def _close_browser(self):
+        """Gracefully close the active page, context, and browser, logging any errors."""
         try:
             if self._page:
                 self._page.close()
@@ -161,6 +179,7 @@ class PlaywrightDriverWrapper:
             logger.warning(f"Error while closing browser: {e}")
 
     def _init_driver(self):
+        """Launch the Chromium browser and create the initial context and page."""
         logger.info(f"Initialising Playwright Chromium driver (proxy={self.proxy!r})")
         self._playwright_ctx = sync_playwright().start()
         self._browser = self._playwright_ctx.chromium.launch(**self._build_launch_kwargs())
@@ -168,6 +187,8 @@ class PlaywrightDriverWrapper:
         logger.info("Playwright driver initialised successfully")
 
     def _attach_network_listeners(self, page: Page):
+        """Attach Playwright event listeners to capture HTTP requests, responses, and WebSocket traffic."""
+
         def on_request_finished(request: Request):
             try:
                 try:
@@ -251,6 +272,7 @@ class PlaywrightDriverWrapper:
         page.on("websocket", on_websocket)
 
     def restart(self, motivation: str = "", timeout_wait_page: int = 0):
+        """Close and re-launch the browser, then re-navigate to the last visited URL if available."""
         logger.info(f"Restarting Playwright driver: {motivation=}")
         self._close_browser()
         self._browser = self._playwright_ctx.chromium.launch(**self._build_launch_kwargs())
@@ -262,6 +284,7 @@ class PlaywrightDriverWrapper:
 
     @playwright_exception_handler
     def navigate(self, url: str = "", timeout_wait_page: int = 0):
+        """Navigate the browser to `url`, waiting for network idle; optionally wait for an input element to appear."""
         if not url:
             logger.error("Empty URL! Something's wrong!")
             return
@@ -281,6 +304,7 @@ class PlaywrightDriverWrapper:
 
     @playwright_exception_handler
     def get_page_source(self) -> str:
+        """Return the full HTML source of the current page, retrying up to 3 times on failure."""
         logger.info(f"Extracting page source for url {self.last_url}")
         for attempt in range(3):
             try:
@@ -298,19 +322,23 @@ class PlaywrightDriverWrapper:
 
     @playwright_exception_handler
     def get_current_url(self) -> str:
-        logger.info("Extracting current URL of page")
+        """Return the URL that the browser is currently showing."""
+        logger.info(f"Extracting current URL of page for {self.last_url}")
         return self._page.url
 
     @playwright_exception_handler
     def get_base64_screenshot(self) -> str:
+        """Capture a full-page screenshot and return it as a base64-encoded string."""
         logger.info(f"Taking screenshot for url {self.last_url}")
         screenshot_bytes: bytes = self._page.screenshot(full_page=True)
         return base64.b64encode(screenshot_bytes).decode("utf-8")
 
     def iter_requests(self) -> Iterator[dict]:
+        """Iterate over all HTTP/WebSocket requests captured during the current page session."""
         return iter(self._captured_requests)
 
     def get_har(self) -> str:
+        """Close the context to flush the HAR file, then read and return its JSON content as a string."""
         try:
             if self._page:
                 self._page.close()
@@ -341,12 +369,14 @@ class PlaywrightDriverWrapper:
             )
 
     def close(self):
+        """Close only the current page without stopping the browser or context."""
         logger.info("Closing Playwright page")
         if self._page:
             self._page.close()
             self._page = None
 
     def quit(self):
+        """Fully shut down the browser, Playwright context, and clean up the temporary HAR file."""
         logger.info("Quitting Playwright browser")
         try:
             self._close_browser()

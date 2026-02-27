@@ -38,7 +38,7 @@ class PhishingExtractor(ObservableAnalyzer, DockerBasedAnalyzer):
 
         engine = self.phishing_engine.lower().strip()
         if engine not in _ENGINE_ENDPOINTS:
-            logger.warning(f"Unknown phishing_engine={engine!r}, falling back to 'selenium'")
+            logger.info(f"Unknown phishing_engine={engine!r}, falling back to 'selenium'")
             engine = "selenium"
         self.url = _ENGINE_ENDPOINTS[engine]
         logger.info(f"Phishing engine set to {engine!r} -> {self.url}")

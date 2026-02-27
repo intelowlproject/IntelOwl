@@ -46,17 +46,17 @@ class TestAndroguardAnalyzer(BaseFileAnalyzerTest):
             "api_app.analyzers_manager.file_analyzers.androguard.AnalyzeAPK",
             return_value=(mock_apk, tuple("sample_dex"), MagicMock())
         )
-        
+
         # We also mock AnalyzeDex for dex files
         analyze_dex_patch = patch(
             "api_app.analyzers_manager.file_analyzers.androguard.AnalyzeDex",
             return_value=(MagicMock(), tuple("sample_dex"), MagicMock())
         )
-        
+
         # Start the patches if needed by the test framework setup
         self.analyze_apk_mock = analyze_apk_patch.start()
         self.analyze_dex_mock = analyze_dex_patch.start()
-        
+
         # Return none, or return the patches so base test can clean them up
         return analyze_apk_patch
 

@@ -11,7 +11,6 @@ class TestAndroguardAnalyzer(BaseFileAnalyzerTest):
     def get_mocked_response(self):
         # Mock the APK object
         mock_apk = MagicMock()
-        mock_apk = MagicMock()
 
         # Configure APK mock methods to return sample data
         mock_apk.get_app_name.return_value = "TestApp"
@@ -53,9 +52,5 @@ class TestAndroguardAnalyzer(BaseFileAnalyzerTest):
             return_value=(MagicMock(), tuple("sample_dex"), MagicMock()),
         )
 
-        # Start the patches if needed by the test framework setup
-        self.analyze_apk_mock = analyze_apk_patch.start()
-        self.analyze_dex_mock = analyze_dex_patch.start()
-
-        # Return none, or return the patches so base test can clean them up
-        return analyze_apk_patch
+        # Return the patches so base test can manage their context manager lifecycle
+        return (analyze_apk_patch, analyze_dex_patch)

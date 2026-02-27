@@ -1,4 +1,9 @@
+import sys
 from unittest.mock import MagicMock, patch
+
+sys.modules["quark"] = MagicMock()
+sys.modules["quark.report"] = MagicMock()
+sys.modules["quark.config"] = MagicMock()
 
 from api_app.analyzers_manager.file_analyzers.quark_engine import QuarkEngine
 

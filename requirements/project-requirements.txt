@@ -86,7 +86,7 @@ knock-subdomains==8.0.0
 dotnetfile==0.2.4
 docxpy==0.8.5
 pylnk3==0.4.2
-androguard==4.1.3
+androguard>=4.1.3,<=4.1.5  # Or another compatible version with quark-engine
 wad==0.4.6
 debloat==1.6.4
 phonenumbers==9.0.3

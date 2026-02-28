@@ -1,8 +1,12 @@
-from unittest.mock import patch
+import sys
+from unittest.mock import MagicMock, patch
 
-from api_app.analyzers_manager.file_analyzers.perm_hash import Permhash
+sys.modules["permhash"] = MagicMock()
+sys.modules["permhash.functions"] = MagicMock()
 
-from .base_test_class import BaseFileAnalyzerTest
+from api_app.analyzers_manager.file_analyzers.perm_hash import Permhash  # noqa: E402
+
+from .base_test_class import BaseFileAnalyzerTest  # noqa: E402
 
 
 class TestPermhash(BaseFileAnalyzerTest):

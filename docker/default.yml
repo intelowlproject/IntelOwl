@@ -7,7 +7,7 @@ services:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_uwsgi
     volumes:
-      - ../configuration/intel_owl.ini:/etc/uwsgi/sites/intel_owl.ini # uwsgi configuration file
+      - ../configuration/gunicorn.conf.py:/opt/deploy/intel_owl/configuration/gunicorn.conf.py
       - ../configuration:/opt/deploy/intel_owl/configuration
       - generic_logs:/var/log/intel_owl
       - static_content:/opt/deploy/intel_owl/static
@@ -20,7 +20,7 @@ services:
       - env_file_app
       - .env
     healthcheck:
-      test: [ "CMD-SHELL", "nc -z localhost 8001 || exit 1" ]
+      test: [ "CMD-SHELL", "curl -f http://localhost:8001/hc || exit 1" ]
       interval: 5s
       timeout: 2s
       start_period: 300s

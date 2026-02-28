@@ -31,6 +31,7 @@ SHELL ["/bin/bash", "-c"]
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \
     ${LOG_PATH}/uwsgi \
+    ${LOG_PATH}/gunicorn \
     ${LOG_PATH}/asgi \
     /opt/deploy/files_required /opt/deploy/configuration /opt/deploy/files_required/blint /opt/deploy/files_required/yara
 
@@ -80,5 +81,8 @@ COPY --from=frontend-build /build /var/www/reactapp
 # so we have to set the home env variable to allow to create its directory
 ENV HOME="${PYTHONPATH}"
 ENV XDG_CACHE_HOME="${PYTHONPATH}/.cache"
+
+# Default command to run Gunicorn
+CMD ["gunicorn", "intel_owl.wsgi:application", "-c", "/opt/deploy/intel_owl/configuration/gunicorn.conf.py"]
 
 

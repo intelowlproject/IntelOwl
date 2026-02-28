@@ -76,10 +76,8 @@ class OrganizationPluginConfigurationTestCase(CustomTestCase):
         self.assertIsNone(obj.rate_limit_enable_task)
         obj.disable_for_rate_limit()
         obj.refresh_from_db()
-        self.assertTrue(obj.disabled)
-        # When rate_limit_timeout is None, no periodic task should be created
+        self.assertFalse(obj.disabled)
         self.assertIsNone(obj.rate_limit_enable_task)
-        self.assertIn("No re-enable timeout was configured", obj.disabled_comment)
         org.delete()
         obj.delete()
 

@@ -1075,20 +1075,14 @@ class OrganizationPluginConfiguration(models.Model):
         """
         Disables the configuration for the organization due to rate limits.
         """
-        self.disabled = True
-
         if not self.rate_limit_timeout:
             logger.warning(
                 f"{self} hit a rate limit but rate_limit_timeout isn't configured. "
-                "Disabling the plugin, but no re-enable task will be scheduled."
+                "Skipping disable — please set a rate_limit_timeout."
             )
-            self.disabled_comment = (
-                f"Rate limit hit at {now().strftime('%Y-%m-%d %H:%M:%S')}.\n"
-                "No re-enable timeout was configured — please re-enable manually."
-            )
-            self.save()
             return
 
+        self.disabled = True
         enabled_to = now() + self.rate_limit_timeout
         self.disabled_comment = (
             "Rate limit hit at "

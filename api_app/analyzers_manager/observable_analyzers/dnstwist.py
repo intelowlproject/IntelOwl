@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+import ssl
 from ipaddress import AddressValueError, IPv4Address
 from urllib.parse import urlparse
 
@@ -55,6 +56,12 @@ class DNStwist(classes.ObservableAnalyzer):
         if self.user_agent:
             params["useragent"] = self.user_agent
 
-        report = dnstwist.run(**params)
+        try:
+            report = dnstwist.run(**params)
+        except (OSError, ssl.SSLError) as e:
+            error_msg = f"{self.observable_name}: {str(e)}"
+            logger.error(error_msg)
+            self.report.errors.append(error_msg)
+            return []
 
         return report

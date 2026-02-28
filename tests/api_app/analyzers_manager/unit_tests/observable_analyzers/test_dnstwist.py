@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from api_app.analyzers_manager.observable_analyzers.dnstwist import DNStwist
 from tests.api_app.analyzers_manager.unit_tests.observable_analyzers.base_test_class import (
@@ -33,3 +33,35 @@ class DNStwistTestCase(BaseAnalyzerTest):
             "user_agent": "IntelOwl-Test",
             "nameservers": "8.8.8.8,8.8.4.4",
         }
+
+    def test_run_with_ssl_error(self):
+        import ssl
+
+        from api_app.analyzers_manager.models import AnalyzerConfig
+        from api_app.choices import Classification
+
+        config = AnalyzerConfig.objects.filter(name="DNStwist").first()
+        analyzer = self._setup_analyzer(config, Classification.DOMAIN, "example.com")
+        analyzer.report = MagicMock()
+        analyzer.report.errors = []
+
+        with patch("dnstwist.run", side_effect=ssl.SSLEOFError("EOF occurred in violation of protocol")):
+            analyzer.run()
+            self.assertTrue(any("EOF occurred in violation of protocol" in e for e in analyzer.report.errors))
+            self.assertTrue(any("example.com" in e for e in analyzer.report.errors))
+
+    def test_run_with_dns_error(self):
+        import socket
+
+        from api_app.analyzers_manager.models import AnalyzerConfig
+        from api_app.choices import Classification
+
+        config = AnalyzerConfig.objects.filter(name="DNStwist").first()
+        analyzer = self._setup_analyzer(config, Classification.DOMAIN, "example.com")
+        analyzer.report = MagicMock()
+        analyzer.report.errors = []
+
+        with patch("dnstwist.run", side_effect=socket.gaierror(-2, "Name or service not known")):
+            analyzer.run()
+            self.assertTrue(any("Name or service not known" in e for e in analyzer.report.errors))
+            self.assertTrue(any("example.com" in e for e in analyzer.report.errors))

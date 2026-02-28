@@ -6,7 +6,7 @@ import { prettifyErrors } from "../../utils/api";
 
 export async function pluginReportQueries(body, pageSize, pageLimit) {
   let resultList = [];
-  const params = {...body};
+  const params = { ...body };
   // default request: page=1
   params.page = 1;
   params.page_size = pageSize;
@@ -22,8 +22,11 @@ export async function pluginReportQueries(body, pageSize, pageLimit) {
         addtionalPageIndex <= Math.min(resp.data.total_pages, pageLimit);
         addtionalPageIndex += 1
       ) {
-
-        additionalRequests.push(axios.get(PLUGIN_REPORT_QUERIES, {params: { ...params, page: addtionalPageIndex }}));
+        additionalRequests.push(
+          axios.get(PLUGIN_REPORT_QUERIES, {
+            params: { ...params, page: addtionalPageIndex },
+          }),
+        );
       }
       // Promise.all works only if ALL the requests are done successfully
       const multipleResponses = await Promise.allSettled(additionalRequests);
@@ -36,10 +39,15 @@ export async function pluginReportQueries(body, pageSize, pageLimit) {
     }
     return resultList;
   } catch (error) {
-     if (error?.response?.status === 501) {
-          addToast("Elastic search not configured","Check the docs", "warning", true);
-    return []; 
-  }
+    if (error?.response?.status === 501) {
+      addToast(
+        "Elastic search not configured",
+        "Check the docs",
+        "warning",
+        true,
+      );
+      return [];
+    }
     addToast("Query failed!", prettifyErrors(error), "danger", true);
     return Promise.reject(error);
   }

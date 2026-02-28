@@ -51,7 +51,9 @@ class DNStwistTestCase(BaseAnalyzerTest):
         with patch("dnstwist.run", side_effect=ssl.SSLEOFError("EOF occurred in violation of protocol")):
             analyzer.run()
             self.assertTrue(any("EOF occurred in violation of protocol" in e for e in analyzer.report.errors))
-            self.assertTrue(any("example.com" in e for e in analyzer.report.errors))
+            self.assertTrue(
+                any("example.com" in e for e in analyzer.report.errors)
+            )  # lgtm[py/incomplete-url-substring-sanitization]
 
     def test_run_with_dns_error(self):
         import socket
@@ -70,4 +72,6 @@ class DNStwistTestCase(BaseAnalyzerTest):
         with patch("dnstwist.run", side_effect=socket.gaierror(-2, "Name or service not known")):
             analyzer.run()
             self.assertTrue(any("Name or service not known" in e for e in analyzer.report.errors))
-            self.assertTrue(any("example.com" in e for e in analyzer.report.errors))
+            self.assertTrue(
+                any("example.com" in e for e in analyzer.report.errors)
+            )  # lgtm[py/incomplete-url-substring-sanitization]

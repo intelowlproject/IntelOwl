@@ -260,34 +260,39 @@ class TestUserAuth(CustomOAuthTestCase):
         msg = (response, content)
 
         self.assertEqual(400, response.status_code, msg=msg)
-        self.assertIn("Invalid password", content["error"], msg=msg)
+        self.assertIn("error", content, msg=msg)
 
-    def test_change_password_special_chars_400(self):
+    def test_change_password_special_chars_200(self):
+        new_password = "intelowlSecure1$"
         self.client.force_authenticate(user=self.user)
         response = self.client.post(
             change_password_uri,
             {
                 "old_password": "hunter2",
-                "new_password": "intelowlintelowl$",
+                "new_password": new_password,
             },
         )
         content = response.json()
         msg = (response, content)
 
-        self.assertEqual(400, response.status_code, msg=msg)
-        self.assertIn("Invalid password", content["error"], msg=msg)
+        self.assertEqual(200, response.status_code, msg=msg)
+        self.user.refresh_from_db()
+        self.assertTrue(
+            self.user.check_password(new_password),
+            msg="Password with special chars should be accepted",
+        )
 
     def test_min_password_lenght_400(self):
         current_users = User.objects.count()
 
-        # register new user with invalid password
+        # register new user with short password (rejected by MinimumLengthValidator)
         body = {
             **self.creds,
             "email": self.testregisteruser["email"],
             "username": "blahblah",
             "first_name": "blahblah",
             "last_name": "blahblah",
-            "password": "intelowl",
+            "password": "short1",
         }
 
         response = self.client.post(register_uri, body)
@@ -295,39 +300,32 @@ class TestUserAuth(CustomOAuthTestCase):
 
         # response assertions
         self.assertEqual(400, response.status_code)
-        self.assertIn(
-            "Invalid password",
-            content["errors"]["password"],
-        )
+        self.assertIn("password", content["errors"])
 
         # db assertions
         self.assertEqual(User.objects.count(), current_users, msg="no new user was created")
 
-    def test_special_characters_password_400(self):
+    def test_special_characters_password_200(self):
+        """Passwords with special characters should now be accepted during registration."""
         current_users = User.objects.count()
 
-        # register new user with invalid password
         body = {
             **self.creds,
             "email": self.testregisteruser["email"],
             "username": "blahblah",
             "first_name": "blahblah",
             "last_name": "blahblah",
-            "password": "intelowlintelowl$",
+            "password": "intelowlSecure1$",
+            "profile": self.testregisteruser["profile"],
         }
 
-        response = self.client.post(register_uri, body)
-        content = response.json()
+        response = self.client.post(register_uri, body, format="json")
 
         # response assertions
-        self.assertEqual(400, response.status_code)
-        self.assertIn(
-            "Invalid password",
-            content["errors"]["password"],
-        )
+        self.assertEqual(201, response.status_code)
 
         # db assertions
-        self.assertEqual(User.objects.count(), current_users, msg="no new user was created")
+        self.assertEqual(User.objects.count(), current_users + 1, msg="new user should be created")
 
     # utils
     def __register_user(self, body: dict):

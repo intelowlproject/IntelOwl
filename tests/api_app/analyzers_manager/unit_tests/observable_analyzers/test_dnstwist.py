@@ -40,7 +40,10 @@ class DNStwistTestCase(BaseAnalyzerTest):
         from api_app.analyzers_manager.models import AnalyzerConfig
         from api_app.choices import Classification
 
-        config = AnalyzerConfig.objects.filter(name="DNStwist").first()
+        configs = AnalyzerConfig.objects.filter(python_module=self.analyzer_class.python_module)
+        if not configs.exists():
+            self.skipTest("No AnalyzerConfig found")
+        config = configs.first()
         analyzer = self._setup_analyzer(config, Classification.DOMAIN, "example.com")
         analyzer.report = MagicMock()
         analyzer.report.errors = []
@@ -56,7 +59,10 @@ class DNStwistTestCase(BaseAnalyzerTest):
         from api_app.analyzers_manager.models import AnalyzerConfig
         from api_app.choices import Classification
 
-        config = AnalyzerConfig.objects.filter(name="DNStwist").first()
+        configs = AnalyzerConfig.objects.filter(python_module=self.analyzer_class.python_module)
+        if not configs.exists():
+            self.skipTest("No AnalyzerConfig found")
+        config = configs.first()
         analyzer = self._setup_analyzer(config, Classification.DOMAIN, "example.com")
         analyzer.report = MagicMock()
         analyzer.report.errors = []

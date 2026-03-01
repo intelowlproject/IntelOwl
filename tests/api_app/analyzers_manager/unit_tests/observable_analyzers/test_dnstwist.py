@@ -52,7 +52,6 @@ class DNStwistTestCase(BaseAnalyzerTest):
             self.assertEqual(len(analyzer.report.errors), 1)
             error = analyzer.report.errors[0]
             self.assertIn(f"Analysis failed for domain '{analyzer.observable_name}'", error)
-            self.assertIn("EOF occurred in violation of protocol", error)
 
     def test_run_with_dns_error(self):
         import socket
@@ -72,4 +71,3 @@ class DNStwistTestCase(BaseAnalyzerTest):
             self.assertEqual(len(analyzer.report.errors), 1)
             error = analyzer.report.errors[0]
             self.assertIn(f"Analysis failed for domain '{analyzer.observable_name}'", error)
-            self.assertIn("Name or service not known", error)

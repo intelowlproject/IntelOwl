@@ -207,15 +207,7 @@ class RegistrationSerializer(rest_email_auth.serializers.RegistrationSerializer)
             ValidationError: If the password does not meet the validation criteria.
         """
         super().validate_password(password)
-        user_data = {}
-        if hasattr(self, "initial_data"):
-            for attr in ("username", "email", "first_name", "last_name"):
-                value = self.initial_data.get(attr)
-                if value:
-                    user_data[attr] = value
-        user = User(**user_data) if user_data else None
-
-        django_validate_password(password, user=user)
+        django_validate_password(password)
         return password
 
     def create(self, validated_data):

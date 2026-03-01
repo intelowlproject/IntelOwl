@@ -996,7 +996,7 @@ class PluginConfig(OwnershipAbstractModel):
         """
         if self.config.python_module != self.parameter.python_module:
             raise ValidationError(
-                f"Missmatch between config python module {self.config.python_module}"
+                f"Mismatch between config python module {self.config.python_module}"
                 f" and parameter python module {self.parameter.python_module}"
             )
 

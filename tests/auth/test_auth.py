@@ -26,6 +26,9 @@ change_password_uri = reverse("auth_changepassword")
 @tag("api", "user")
 class TestUserAuth(CustomOAuthTestCase):
     def setUp(self):
+        # ensure user password is reset before each test
+        self.user.set_password(self.creds["password"])
+        self.user.save()
         # test data
         self.testregisteruser = {
             "email": "testregisteruser@test.com",
@@ -236,7 +239,7 @@ class TestUserAuth(CustomOAuthTestCase):
         response = self.client.post(
             change_password_uri,
             {
-                "old_password": "hunter2",
+                "old_password": self.creds["password"],
                 "new_password": new_password,
             },
         )
@@ -252,7 +255,7 @@ class TestUserAuth(CustomOAuthTestCase):
         response = self.client.post(
             change_password_uri,
             {
-                "old_password": "hunter2",
+                "old_password": self.creds["password"],
                 "new_password": "weak",
             },
         )
@@ -268,7 +271,7 @@ class TestUserAuth(CustomOAuthTestCase):
         response = self.client.post(
             change_password_uri,
             {
-                "old_password": "hunter2",
+                "old_password": self.creds["password"],
                 "new_password": new_password,
             },
         )

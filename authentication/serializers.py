@@ -207,10 +207,6 @@ class RegistrationSerializer(rest_email_auth.serializers.RegistrationSerializer)
             ValidationError: If the password does not meet the validation criteria.
         """
         super().validate_password(password)
-
-        # For registration, construct an unsaved User instance from the incoming
-        # data so that UserAttributeSimilarityValidator can compare the password
-        # against user attributes (e.g., username, email, first/last name).
         user_data = {}
         if hasattr(self, "initial_data"):
             for attr in ("username", "email", "first_name", "last_name"):

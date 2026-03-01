@@ -2,7 +2,6 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-import ssl
 from ipaddress import AddressValueError, IPv4Address
 from urllib.parse import urlparse
 
@@ -58,9 +57,14 @@ class DNStwist(classes.ObservableAnalyzer):
 
         try:
             report = dnstwist.run(**params)
-        except (OSError, ssl.SSLError) as e:
-            error_msg = f"{self.observable_name}: {str(e)}"
-            logger.error(error_msg)
+        except OSError as e:
+            error_msg = (
+                f"Analysis failed for domain '{self.observable_name}'. "
+                f"Please verify that the domain is valid and reachable. "
+                f"Details: {str(e)}"
+            )
+            logger.error(error_msg, exc_info=True)
+
             self.report.errors.append(error_msg)
             return []
 

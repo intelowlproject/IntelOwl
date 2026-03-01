@@ -38,7 +38,7 @@ services:
     env_file:
       - env_file_app
     healthcheck:
-      test: ["CMD-SHELL", "curl -s -o /dev/null http://localhost:8011"]
+      test: ["CMD-SHELL", "curl -fsS -o /dev/null http://localhost:8011"]
       interval: 10s
       timeout: 2s
       start_period: 10s

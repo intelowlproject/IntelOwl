@@ -18,4 +18,3 @@ docker-compose*
 *.quark.log
 .pre-commit-config.yaml
 .ipython/
-tests/

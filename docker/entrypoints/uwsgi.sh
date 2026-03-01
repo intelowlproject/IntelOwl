@@ -5,6 +5,12 @@ do
     echo "Waiting for server volume..."
 done
 
+# Ensure mounted runtime directories exist and have appropriate ownership
+# (named volumes mask the image layer, so build-time mkdir/chown may not apply)
+mkdir -p /var/log/intel_owl/django /var/log/intel_owl/uwsgi /var/log/intel_owl/asgi \
+    /opt/deploy/files_required /opt/deploy/files_required/blint /opt/deploy/files_required/yara
+chown -R www-data:www-data /var/log/intel_owl /opt/deploy/files_required
+
 # Apply database migrations
 echo "Waiting for db to be ready..."
 # makemigrations is needed only for the durin package.

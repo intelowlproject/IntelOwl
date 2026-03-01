@@ -88,6 +88,10 @@ FROM production AS development
 RUN pip install --no-cache-dir --root-user-action=ignore --disable-pip-version-check -q \
     -r requirements/test-requirements.txt
 
+## ------------------------------- CI Stage ------------------------------ ##
+# CI image is based on the development image and includes test requirements
+FROM development AS ci
+
 ## ------------------------------- Default Stage ------------------------------ ##
 
 # Ensure the default build target is production

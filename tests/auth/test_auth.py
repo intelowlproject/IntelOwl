@@ -35,7 +35,7 @@ class TestUserAuth(CustomOAuthTestCase):
             "username": "testregisteruser",
             "first_name": "testregisteruser",
             "last_name": "testregisteruser",
-            "password": "testregisteruser",
+            "password": "S3cureP@ssw0rd!",
             "profile": {
                 "company_name": "companytest",
                 "company_role": "intelowl test",

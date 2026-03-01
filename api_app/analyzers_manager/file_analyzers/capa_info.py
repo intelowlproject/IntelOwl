@@ -109,7 +109,7 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
         logger.info("Successfully updated signatures")
 
     @classmethod
-    def update(cls, anayzer_module: PythonModule) -> bool:
+    def update(cls, analyzer_module: PythonModule) -> bool:
         try:
             logger.info("Updating capa rules")
             response = requests.get("https://api.github.com/repos/mandiant/capa-rules/releases/latest")
@@ -121,7 +121,7 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
                 rule_set_directory=RULES_LOCATION,
                 rule_file_path=RULES_FILE,
                 latest_version=latest_version,
-                analyzer_module=anayzer_module,
+                analyzer_module=analyzer_module,
             )
 
             cls._unzip(Path(RULES_FILE))

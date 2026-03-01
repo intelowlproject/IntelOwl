@@ -1,7 +1,3 @@
-x-no-healthcheck: &no-healthcheck
-  healthcheck:
-    disable: true
-
 services:
   uwsgi:
     environment:
@@ -24,7 +20,8 @@ services:
     depends_on:
       uwsgi:
         condition: service_healthy
-    <<: *no-healthcheck
+    healthcheck:
+      disable: true
 
   celery_worker_long:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
@@ -43,7 +40,8 @@ services:
     depends_on:
       uwsgi:
         condition: service_healthy
-    <<: *no-healthcheck
+    healthcheck:
+      disable: true
 
   celery_worker_ingestor:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
@@ -62,4 +60,5 @@ services:
     depends_on:
       uwsgi:
         condition: service_healthy
-    <<: *no-healthcheck
+    healthcheck:
+      disable: true

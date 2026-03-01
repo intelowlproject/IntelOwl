@@ -58,6 +58,16 @@ INSTALLED_APPS = [
     "django_extensions",
 ]
 
+from .commons import DEBUG  # noqa: E402
+
+if DEBUG:
+    try:
+        import django_watchfiles  # noqa: F401
+
+        INSTALLED_APPS.append("django_watchfiles")
+    except ImportError:
+        pass
+
 from .a_secrets import *  # lgtm [py/polluting-import]
 from .auth import *  # lgtm [py/polluting-import]
 from .aws import *  # lgtm [py/polluting-import]

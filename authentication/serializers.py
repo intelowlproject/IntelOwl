@@ -208,11 +208,18 @@ class RegistrationSerializer(rest_email_auth.serializers.RegistrationSerializer)
         """
         super().validate_password(password)
 
-        # For registration, we can't build a proper user instance yet since
-        # the user doesn't exist. Django's built-in validators will still check
-        # minimum length, common passwords, and numeric-only rejection.
-        # UserAttributeSimilarityValidator is only useful for existing users.
-        django_validate_password(password)
+        # For registration, construct an unsaved User instance from the incoming
+        # data so that UserAttributeSimilarityValidator can compare the password
+        # against user attributes (e.g., username, email, first/last name).
+        user_data = {}
+        if hasattr(self, "initial_data"):
+            for attr in ("username", "email", "first_name", "last_name"):
+                value = self.initial_data.get(attr)
+                if value:
+                    user_data[attr] = value
+        user = User(**user_data) if user_data else None
+
+        django_validate_password(password, user=user)
         return password
 
     def create(self, validated_data):

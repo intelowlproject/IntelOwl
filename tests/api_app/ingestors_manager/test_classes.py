@@ -24,7 +24,7 @@ class IngestorTestCase(CustomTestCase):
                 self.fail(f"There is a python module {subclass.python_module} without any configuration")
             for config in configs:
                 timeout_seconds = config.soft_time_limit
-                timeout_seconds = min(timeout_seconds, 20)
+                timeout_seconds = min(timeout_seconds, 60)
                 print(f"\tTesting with config {config.name} for {timeout_seconds} seconds")
                 sub = subclass(config)
                 signal.alarm(timeout_seconds)

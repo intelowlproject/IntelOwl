@@ -3,7 +3,7 @@
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/intelowlproject/IntelOwl)](https://github.com/intelowlproject/IntelOwl/releases)
 [![GitHub Repo stars](https://img.shields.io/github/stars/intelowlproject/IntelOwl?style=social)](https://github.com/intelowlproject/IntelOwl/stargazers)
 [![Docker](https://img.shields.io/docker/pulls/intelowlproject/intelowl)](https://hub.docker.com/repository/docker/intelowlproject/intelowl)
-[![Twitter Follow](https://img.shields.io/twitter/follow/intel_owl?style=social)](https://twitter.com/intel_owl)
+[![X Follow](https://img.shields.io/badge/Follow-%40intel__owl-black?logo=x)](https://x.com/intel_owl)
 [![Linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/company/intelowl/)
 [![Official Site](https://img.shields.io/badge/official-site-blue)](https://intelowlproject.github.io)
 [![Live Instance](https://img.shields.io/badge/live-demo-blue)](https://intelowl.honeynet.org)
@@ -106,10 +106,10 @@ In 2022 IntelOwl joined the official [DigitalOcean Open Source Program](https://
 
 ## About the author and maintainers
 
-Feel free to contact the main developers at any time on Twitter:
+Feel free to contact the main developers at any time on X (formerly Twitter):
 
-- [Matteo Lodi](https://twitter.com/matte_lodi): Author, Advisor and Administrator
+- [Matteo Lodi](https://x.com/matte_lodi): Author, Advisor and Administrator
 - [Daniele Rosetti](https://github.com/drosetti): Administrator and Frontend Maintainer
-- [Simone Berni](https://twitter.com/0ssig3no): Backend Maintainer
+- [Simone Berni](https://x.com/0ssig3no): Backend Maintainer
 - [Federico Gibertoni](https://x.com/fgibertoni1): Maintainer and Community Assistant
-- [Eshaan Bansal](https://twitter.com/eshaan7_): Key Contributor
+- [Eshaan Bansal](https://x.com/eshaan7_): Key Contributor

@@ -600,9 +600,9 @@ We are also moving forward to release the next major version (v4). We just need 
 - Improved VT3 analyzers: now it is possible to extract relationships data + the analyzers are optimized to reduce the number of queries and save quota (#988)
 - New [VirusTotal_v3_Intelligence_Search](https://developers.virustotal.com/reference/search) for premium users (#981)
 - New [Yara_Scan_Bartblaze](https://github.com/bartblaze/Yara-rules) analyzer
-- New [DocGuard](docguard.io) analyzer (#990)
-- New [Anomali ThreatStream](threatstream.com) analyzer for premium users (#976)
-- New [IntelX_Intelligent_Search](intelx.io) analyzer (it comes to complete the IntelX endpoints already available) (#974)
+- New [DocGuard](https://docguard.io) analyzer (#990)
+- New [Anomali ThreatStream](https://threatstream.com) analyzer for premium users (#976)
+- New [IntelX_Intelligent_Search](https://intelx.io) analyzer (it comes to complete the IntelX endpoints already available) (#974)
 
 **Other:**
 - some fixes #952, #938

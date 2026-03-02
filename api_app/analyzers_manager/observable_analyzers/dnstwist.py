@@ -64,9 +64,7 @@ class DNStwist(classes.ObservableAnalyzer):
                 "Please verify that the domain is valid and reachable."
             )
             logger.error(
-                "DNStwist analysis failed for domain '%s'. Exception: %s",
-                error_domain,
-                e,
+                f"DNStwist analysis failed for domain '{error_domain}'. Exception: {e}",
                 exc_info=True,
             )
 

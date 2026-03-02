@@ -320,9 +320,6 @@ class TestUserDomainWildCardEventQuerySetQueryCount(CustomTestCase):
         # After dedup fix: one shared row decrements exactly once (5 -> 4)
         self.assertEqual(ua1.data_model.reliability, 4)
 
-        ua2.delete()
-        ua1.delete()
-
 
 class TestUserDomainWildCardEventQuerySet(CustomTestCase):
     def test_matches(self):

@@ -781,7 +781,7 @@ class RulesUtiliyMixin:
         logger.info(f"Extracting rules at {rule_file_path.parent}")
         with ZipFile(rule_file_path, mode="r") as archive:
             archive.extractall(rule_file_path.parent)  # this will overwrite any existing directory
-        logger.info("Rules have been succesfully extracted")
+        logger.info("Rules have been successfully extracted")
 
     @staticmethod
     def _download_rules(

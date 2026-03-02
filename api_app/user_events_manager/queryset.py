@@ -19,6 +19,9 @@ class UserEventQuerySet(QuerySet):
             .filter(next_decay__lte=now())
         )
 
+        if not objects.exists():
+            return 0
+
         # ForeignKey appears in _meta.fields (wildcard models) -> use JOIN.
         # GenericForeignKey does not (UserAnalyzableEvent) -> use prefetch.
         model_fields = {field.name for field in self.model._meta.fields}

@@ -288,7 +288,6 @@ class TestUserDomainWildCardEventQuerySetQueryCount(CustomTestCase):
 
     def test_decay_shared_data_model_reliability_decrements_correctly(self):
         # Shared data_model should decrement exactly once per decay cycle, not once per event.
-        # Create two wildcard events that share the same data_model
         ue1 = UserDomainWildCardEventSerializer(
             data={
                 "query": r".*\.shared1\.com",
@@ -301,20 +300,14 @@ class TestUserDomainWildCardEventQuerySetQueryCount(CustomTestCase):
         ue1.is_valid(raise_exception=True)
         ua1 = ue1.save()
 
-        ue2 = UserDomainWildCardEventSerializer(
-            data={
-                "query": r".*\.shared2\.com",
-                "decay_progression": DecayProgressionEnum.LINEAR.value,
-                "decay_timedelta_days": 7,
-                "data_model_content": {"evaluation": "malicious", "reliability": 5},
-            },
-            context={"request": MockUpRequest(self.user)},
+        # Create ua2 directly, sharing ua1's data_model from the start
+        ua2 = UserDomainWildCardEvent(
+            user=self.user,
+            query=r".*\.shared2\.com",
+            decay_progression=DecayProgressionEnum.LINEAR.value,
+            decay_timedelta_days=7,
+            data_model=ua1.data_model,
         )
-        ue2.is_valid(raise_exception=True)
-        ua2 = ue2.save()
-
-        # Manually point both events at the same data_model row
-        ua2.data_model = ua1.data_model
         ua2.save()
 
         for ua in [ua1, ua2]:
@@ -327,8 +320,8 @@ class TestUserDomainWildCardEventQuerySetQueryCount(CustomTestCase):
         # After dedup fix: one shared row decrements exactly once (5 -> 4)
         self.assertEqual(ua1.data_model.reliability, 4)
 
-        ua1.delete()
         ua2.delete()
+        ua1.delete()
 
 
 class TestUserDomainWildCardEventQuerySet(CustomTestCase):

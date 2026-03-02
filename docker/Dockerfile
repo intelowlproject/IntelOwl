@@ -6,7 +6,7 @@ WORKDIR /app
 
 # install dependencies first for layer caching
 COPY frontend/package.json frontend/package-lock.json ./
-RUN npm ci
+RUN npm install
 
 # copy react source code and version env file
 COPY frontend/ .

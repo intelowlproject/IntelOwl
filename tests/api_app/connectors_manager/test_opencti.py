@@ -27,10 +27,12 @@ class OpenCTIConnectorTestCase(CustomTestCase):
         "api_app/fixtures/0001_user.json",
     ]
 
-    def _get_opencti_config(self):
+    @staticmethod
+    def _get_opencti_config():
         return ConnectorConfig.objects.get(name="OpenCTI")
 
-    def _create_plugin_configs(self, config):
+    @staticmethod
+    def _create_plugin_configs(config):
         """Create required PluginConfig for OpenCTI (url_key_name, api_key_name)."""
         pcs = []
         for name in ("url_key_name", "api_key_name"):
@@ -72,7 +74,8 @@ class OpenCTIConnectorTestCase(CustomTestCase):
 
         return job, config, pcs
 
-    def _cleanup_test_objects(self, job, config, pcs):
+    @staticmethod
+    def _cleanup_test_objects(job, config, pcs):
         """Delete only objects created by this test (report for job+config, job, analyzable, pcs)."""
         try:
             report = ConnectorReport.objects.get(job=job, config=config)

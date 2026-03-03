@@ -10,7 +10,6 @@ from pycti.api.opencti_api_client import File
 from api_app import helpers
 from api_app.choices import Classification
 from api_app.connectors_manager import classes
-from tests.mock_utils import if_mock_connections, patch
 
 INTELOWL_OPENCTI_TYPE_MAP = {
     Classification.IP: {
@@ -77,7 +76,7 @@ class OpenCTI(classes.Connector):
 
     @property
     def organization_id(self) -> str:
-        # Create author (if not exists); else update
+        # Idempotent author organization for all OpenCTI objects.
         org = pycti.Identity(self.opencti_instance).create(
             type="Organization",
             name="IntelOwl",
@@ -89,22 +88,22 @@ class OpenCTI(classes.Connector):
             ),
             update=True,  # just in case the description is updated in future
         )
-        if not isinstance(org, dict) or "id" not in org:
-            raise ValueError("Invalid response from OpenCTI Identity.create")
-        return org["id"]
+        if isinstance(org, dict):
+            return org.get("id")
+        return None
 
     @property
     def marking_definition_id(self) -> str:
-        # Create the marking definition (if not exists)
+        # Idempotent TLP marking used on all OpenCTI objects.
         md = pycti.MarkingDefinition(self.opencti_instance).create(
             definition_type="TLP",
             definition=f"TLP:{self.tlp['type'].upper()}",
             x_opencti_color=self.tlp["color"].lower(),
             x_opencti_order=self.tlp["x_opencti_order"],
         )
-        if not isinstance(md, dict) or "id" not in md:
-            raise ValueError("Invalid response from OpenCTI MarkingDefinition.create")
-        return md["id"]
+        if isinstance(md, dict):
+            return md.get("id")
+        return None
 
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
@@ -112,7 +111,7 @@ class OpenCTI(classes.Connector):
             self.ssl_verify = False
 
     def run(self):
-        # set up client
+        # Initialize OpenCTI client for this run.
         self.opencti_instance = pycti.OpenCTIApiClient(
             url=self._url_key_name,
             token=self._api_key_name,
@@ -130,9 +129,7 @@ class OpenCTI(classes.Connector):
             org_id = self.organization_id
             marking_id = self.marking_definition_id
 
-            # Entities in OpenCTI are created only if they don't exist
-            # create queries will return the existing entity in that case
-            # use update (default: False) to update the entity if exists
+            # OpenCTI upserts entities; duplicate create calls are safe.
 
             # Create the observable (if not exists with the given type and values)
             observable_data = self.generate_observable_data()
@@ -141,7 +138,8 @@ class OpenCTI(classes.Connector):
                 createdBy=org_id,
                 objectMarking=marking_id,
             )
-            created["observable"] = observable.get("id") if isinstance(observable, dict) else None
+            observable_id = observable["id"] if isinstance(observable, dict) and "id" in observable else None
+            created["observable"] = observable_id
 
             # Create labels from Job tags (if not exists)
             label_ids = []
@@ -150,12 +148,13 @@ class OpenCTI(classes.Connector):
                     value=f"intelowl-tag:{tag.label}",
                     color=tag.color,
                 )
-                if isinstance(label, dict) and "id" in label:
-                    label_id = label["id"]
-                    created["labels"].append(label_id)
-                    label_ids.append(label_id)
-                else:
+                # If Label.create raised, we are in the except-block below; only guard for
+                # schema drift (non-dict / missing id) here.
+                if not isinstance(label, dict) or "id" not in label:
                     raise ValueError("Invalid response from OpenCTI Label.create")
+                label_id = label["id"]
+                created["labels"].append(label_id)
+                label_ids.append(label_id)
 
             # Create the report
             report = pycti.Report(self.opencti_instance).create(
@@ -173,7 +172,11 @@ class OpenCTI(classes.Connector):
                 objectLabel=label_ids,
                 x_opencti_report_status=2,  # Analyzed
             )
-            created["report"] = report.get("id") if isinstance(report, dict) else None
+            if not isinstance(report, dict) or "id" not in report:
+                created["report"] = None
+                raise ValueError("Invalid response from OpenCTI Report.create")
+            report_id = report["id"]
+            created["report"] = report_id
 
             # Create the external reference
             external_reference = pycti.ExternalReference(self.opencti_instance, None).create(
@@ -181,25 +184,32 @@ class OpenCTI(classes.Connector):
                 description="View analysis report on the IntelOwl instance",
                 url=f"{settings.WEB_CLIENT_URL}/jobs/{self.job_id}",
             )
-            created["external_reference"] = (
-                external_reference.get("id") if isinstance(external_reference, dict) else None
-            )
+            if not isinstance(external_reference, dict) or "id" not in external_reference:
+                created["external_reference"] = None
+                raise ValueError("Invalid response from OpenCTI ExternalReference.create")
+            external_ref_id = external_reference["id"]
+            created["external_reference"] = external_ref_id
 
             # Add the external reference to the report
-            pycti.StixDomainObject(self.opencti_instance, File).add_external_reference(
-                id=report["id"], external_reference_id=external_reference["id"]
-            )
+            if report_id is not None and external_ref_id is not None:
+                pycti.StixDomainObject(self.opencti_instance, File).add_external_reference(
+                    id=report_id, external_reference_id=external_ref_id
+                )
 
             # Link Observable and Report
-            pycti.Report(self.opencti_instance).add_stix_object_or_stix_relationship(
-                id=report["id"], stixObjectOrStixRelationshipId=observable["id"]
-            )
+            if report_id is not None and observable_id is not None:
+                pycti.Report(self.opencti_instance).add_stix_object_or_stix_relationship(
+                    id=report_id, stixObjectOrStixRelationshipId=observable_id
+                )
 
+            # Enforce observable contract once all dependent creations have been attempted.
+            if observable_id is None:
+                raise ValueError("Invalid response from OpenCTI StixCyberObservable.create")
+
+            # Return a JSON-serializable summary instead of raw SDK responses.
             return {
-                "observable": pycti.StixCyberObservable(self.opencti_instance, File).read(
-                    id=observable["id"]
-                ),
-                "report": pycti.Report(self.opencti_instance).read(id=report["id"]),
+                "observable": {"id": observable_id},
+                "report": {"id": report_id},
             }
         except Exception as e:
             try:
@@ -217,36 +227,37 @@ class OpenCTI(classes.Connector):
 
     @classmethod
     def _monkeypatch(cls):
-        # Patch classes so Identity(inst).create() etc. are intercepted (instance method path).
-        def _configure_pycti_mocks(start_fn):
+        """Install pycti stubs when connection mocking is enabled."""
+        if not getattr(settings, "MOCK_CONNECTIONS", False):
+            return
+
+        def _configure(start_fn):
             def inner(self, job_id, runtime_configuration, task_id, *args, **kwargs):
                 import pycti as pycti_mod
 
-                pycti_mod.Identity.return_value.create.return_value = {"id": 1}
-                pycti_mod.MarkingDefinition.return_value.create.return_value = {"id": 1}
-                pycti_mod.StixCyberObservable.return_value.create.return_value = {"id": 1}
-                pycti_mod.StixCyberObservable.return_value.read.return_value = {"id": 1}
-                pycti_mod.Label.return_value.create.return_value = {"id": 1}
-                pycti_mod.Report.return_value.create.return_value = {"id": 1}
-                pycti_mod.Report.return_value.read.return_value = {"id": 1}
-                pycti_mod.Report.return_value.add_stix_object_or_stix_relationship.return_value = None
-                pycti_mod.ExternalReference.return_value.create.return_value = {"id": 1}
-                pycti_mod.StixDomainObject.return_value.add_external_reference.return_value = None
+                # Avoid real OpenCTI network calls
+                pycti_mod.OpenCTIApiClient = lambda *a, **k: None
+
+                def _fake_create(*_args, **_kwargs):
+                    return {"id": 1}
+
+                def _noop(*_args, **_kwargs):
+                    return None
+
+                # Ensure core entities always return a dict with an id in CI generic tests.
+                pycti_mod.Identity.create = _fake_create
+                pycti_mod.MarkingDefinition.create = _fake_create
+                pycti_mod.StixCyberObservable.create = _fake_create
+                pycti_mod.Label.create = _fake_create
+                pycti_mod.Report.create = _fake_create
+                pycti_mod.ExternalReference.create = _fake_create
+
+                # No-op the linking methods that would otherwise dereference opencti/app_logger.
+                pycti_mod.StixDomainObject.add_external_reference = _noop
+                pycti_mod.Report.add_stix_object_or_stix_relationship = _noop
+
                 return start_fn(self, job_id, runtime_configuration, task_id, *args, **kwargs)
 
             return inner
 
-        patches = [
-            if_mock_connections(
-                _configure_pycti_mocks,
-                patch("pycti.OpenCTIApiClient", return_value=None),
-                patch("pycti.Identity"),
-                patch("pycti.MarkingDefinition"),
-                patch("pycti.StixCyberObservable"),
-                patch("pycti.Label"),
-                patch("pycti.Report"),
-                patch("pycti.ExternalReference"),
-                patch("pycti.StixDomainObject"),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)
+        return super()._monkeypatch(patches=[_configure])

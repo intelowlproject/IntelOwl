@@ -16,8 +16,7 @@ from tests import CustomTestCase
 
 
 # Connector uses pycti.Identity(inst).create(...), i.e. class(instance).method().
-# Patching pycti.Identity.create does not intercept instance calls in all environments.
-# Patch the CLASS so pycti.Identity(...) returns a mock; configure .return_value.create etc.
+# Tests patch the pycti classes so instance calls are reliably intercepted.
 def _partial_state_errors(report):
     """Errors that contain the partial-state contract message."""
     return [e for e in report.errors if "Created IDs:" in str(e)]
@@ -121,7 +120,7 @@ class OpenCTIConnectorTestCase(CustomTestCase):
             try:
                 connector.start(job.pk, {}, task_id)
             except Exception:
-                pass  # In CI, after_run_failed re-raises; report is already FAILED
+                pass
 
             report = ConnectorReport.objects.get(job=job, config=config)
             self.assertEqual(report.status, ConnectorReport.STATUSES.FAILED)
@@ -171,7 +170,7 @@ class OpenCTIConnectorTestCase(CustomTestCase):
             try:
                 connector.start(job.pk, {}, task_id)
             except Exception:
-                pass  # In CI, after_run_failed re-raises; report is already FAILED
+                pass
 
             report = ConnectorReport.objects.get(job=job, config=config)
             self.assertEqual(report.status, ConnectorReport.STATUSES.FAILED)
@@ -224,7 +223,7 @@ class OpenCTIConnectorTestCase(CustomTestCase):
             try:
                 connector.start(job.pk, {}, task_id)
             except Exception:
-                pass  # In CI, after_run_failed re-raises; report is already FAILED
+                pass
 
             report = ConnectorReport.objects.get(job=job, config=config)
             self.assertEqual(report.status, ConnectorReport.STATUSES.FAILED)

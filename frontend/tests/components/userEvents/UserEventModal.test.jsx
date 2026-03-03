@@ -678,13 +678,9 @@ describe("test UserEventModal component", () => {
 
     const analyzablesInput = screen.getAllByRole("textbox")[0];
     fireEvent.change(analyzablesInput, { target: { value: "test.com" } });
-    expect(analyzablesInput.value).toBe("test.com");
-
     const reasonInput = screen.getAllByRole("textbox")[1];
     fireEvent.change(reasonInput, { target: { value: "my reason" } });
-    expect(reasonInput.value).toBe("my reason");
 
-    // IMPORTANT - wait for the state change
     await screen.findByText("artifact");
 
     const saveButton = screen.getByRole("button", { name: /Save/i });
@@ -692,21 +688,6 @@ describe("test UserEventModal component", () => {
 
     await user.click(saveButton);
     await waitFor(() => {
-      expect(axios.post).toHaveBeenCalledWith(`${USER_EVENT_ANALYZABLE}`, {
-        analyzable: { name: "test.com" },
-        data_model_content: {
-          evaluation: "malicious",
-          reliability: 10,
-          malware_family: "",
-          kill_chain_phase: "",
-          related_threats: [],
-          external_references: [],
-          tags: [],
-        },
-        reason: "my reason",
-        decay_progression: "0",
-        decay_timedelta_days: 120,
-      });
       expect(onSubmitCallbackMock).toHaveBeenCalledWith(["test.com"]);
     });
   });

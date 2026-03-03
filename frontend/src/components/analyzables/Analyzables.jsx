@@ -58,33 +58,35 @@ export default function Analyzables() {
         addToast("Search failed!", prettifyErrors(error), "danger", true);
       } finally {
         setLoadingData(false);
-        const resultData = [];
-        if (response.data.count !== analyzableNames.length) {
-          analyzableNames.forEach((analyzableName) => {
-            if (
-              response.data.results
-                .map((result) => result.name)
-                .includes(analyzableName)
-            ) {
-              resultData.push(
-                response.data.results.filter(
-                  (result) => result.name === analyzableName,
-                )[0],
-              );
-            } else {
-              resultData.push({
-                name: analyzableName,
-                last_data_model: { tags: ["not_found"] },
-              });
-            }
-          });
-          setData(resultData);
-        } else {
-          setData(response.data.results);
+        if (response) {
+          const resultData = [];
+          if (response.data.count !== analyzableNames.length) {
+            analyzableNames.forEach((analyzableName) => {
+              if (
+                response.data.results
+                  .map((result) => result.name)
+                  .includes(analyzableName)
+              ) {
+                resultData.push(
+                  response.data.results.filter(
+                    (result) => result.name === analyzableName,
+                  )[0],
+                );
+              } else {
+                resultData.push({
+                  name: analyzableName,
+                  last_data_model: { tags: ["not_found"] },
+                });
+              }
+            });
+            setData(resultData);
+          } else {
+            setData(response.data.results);
+          }
         }
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps  
     [],
   );
 
@@ -213,7 +215,7 @@ export default function Analyzables() {
           }
           toggle={setShowUserEventModal}
           isOpen={showUserEventModal}
-          onSuccess={onEvaluationSuccess}
+          onSubmitCallback={onEvaluationSuccess}
         />
       )}
       <Row className="mt-2 me-2">

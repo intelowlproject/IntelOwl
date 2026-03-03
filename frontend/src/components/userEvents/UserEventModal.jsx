@@ -245,10 +245,11 @@ export function UserEventModal({
           }
         });
         if (failed.length === 0) {
+          const submittedAnalyzables = [...formik.values.analyzables];
           formik.setSubmitting(false);
           formik.resetForm();
           if (onSubmitCallback) {
-            onSubmitCallback(formik.values.analyzables);
+            onSubmitCallback(submittedAnalyzables);
           }
           toggle(false);
         } else {

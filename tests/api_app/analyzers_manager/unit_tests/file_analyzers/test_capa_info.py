@@ -53,7 +53,7 @@ class TestCapaInfoAnalyzer(BaseFileAnalyzerTest):
         return {
             "shellcode": False,
             "arch": "64",
-            "timeout": 15,
+            "timeout": 120,
             "force_pull_signatures": False,
         }
 

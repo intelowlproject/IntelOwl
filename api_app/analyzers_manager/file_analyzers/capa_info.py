@@ -31,7 +31,7 @@ CACHE_LOCATION = os.environ.get("XDG_CACHE_HOME", f"{settings.MEDIA_ROOT}/.cache
 class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
     shellcode: bool
     arch: str
-    timeout: float = 15
+    timeout: float = 120
     force_pull_signatures: bool = False
 
     @classmethod

@@ -12,14 +12,14 @@ from tests import CustomTestCase
 def _capa_available() -> bool:
     """Return True if capa binary is runnable (for skipIf)."""
     try:
-        subprocess.run(
+        result = subprocess.run(
             ["/usr/local/bin/capa", "--version"],
             capture_output=True,
             timeout=5,
             check=False,
         )
-        return True
-    except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+        return result.returncode == 0
+    except (OSError, subprocess.TimeoutExpired):
         return False
 
 

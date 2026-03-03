@@ -14,6 +14,7 @@ django-silk==5.4.3
 django-treebeard==4.7
 django-solo==2.4.0
 django_extensions==3.2.3
+django-watchfiles==1.4.0
 jsonschema==4.25.1
 # django rest framework libs
 Authlib==1.6.5

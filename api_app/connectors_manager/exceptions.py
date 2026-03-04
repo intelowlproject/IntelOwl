@@ -3,12 +3,15 @@
 
 
 class NotRunnableConnector(Exception):
+    """Exception raised when a connector cannot be run."""
     pass
 
 
 class ConnectorConfigurationException(Exception):
+    """Exception raised when connector configuration is invalid."""
     pass
 
 
 class ConnectorRunException(Exception):
+    """Exception raised when a connector run fails."""
     pass

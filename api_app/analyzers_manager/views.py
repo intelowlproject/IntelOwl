@@ -7,12 +7,11 @@ from rest_framework.exceptions import NotFound
 
 from api_app.decorators import classproperty
 from api_app.models import PluginConfig
-
-from ..permissions import isPluginActionsPermission
-from ..views import PluginConfigViewSet, PythonConfigViewSet, PythonReportActionViewSet
-from .filters import AnalyzerConfigFilter
-from .models import AnalyzerConfig, AnalyzerReport
-from .serializers import AnalyzerConfigSerializer
+from api_app.permissions import isPluginActionsPermission
+from api_app.views import PluginConfigViewSet, PythonConfigViewSet, PythonReportActionViewSet
+from api_app.analyzers_manager.filters import AnalyzerConfigFilter
+from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
+from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +28,7 @@ class AnalyzerConfigViewSet(
     mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
 ):
+    """ViewSet for AnalyzerConfig model with full CRUD operations."""
     serializer_class = AnalyzerConfigSerializer
     filterset_class = AnalyzerConfigFilter
     queryset = AnalyzerConfig.objects.all()
@@ -41,12 +41,15 @@ class AnalyzerConfigViewSet(
 
 
 class AnalyzerActionViewSet(PythonReportActionViewSet):
+    """ViewSet for analyzer actions."""
+
     @classproperty
-    def report_model(cls):
+    def report_model(cls):  # type: ignore
         return AnalyzerReport
 
 
 class AnalyzerPluginConfigViewSet(PluginConfigViewSet):
+    """ViewSet for analyzer plugin configuration."""
     queryset = AnalyzerConfig.objects.all()
 
     def update(self, request, name=None):

@@ -5,6 +5,8 @@ from api_app.fields import ChoiceArrayField
 
 
 class AnalyzerConfigFilter(filters.FilterSet):
+    """Filter set for AnalyzerConfig model."""
+
     class Meta:
         model = AnalyzerConfig
         filter_overrides = {

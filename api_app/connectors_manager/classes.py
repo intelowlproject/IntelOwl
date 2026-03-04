@@ -18,7 +18,7 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
     """
     Abstract class for all Connectors.
     Inherit from this branch when defining a connector.
-    Need to overrwrite `set_params(self, params: dict)`
+    Need to overwrite `set_params(self, params: dict)`
      and `run(self)` functions.
     """
 

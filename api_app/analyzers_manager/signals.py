@@ -1,5 +1,6 @@
 import logging
 import uuid
+from typing import Any
 
 from django.conf import settings
 from django.dispatch import receiver
@@ -13,11 +14,11 @@ logger = logging.getLogger(__name__)
 
 @receiver(migrate_finished)
 def post_migrate_analyzers_manager(
-    sender,
-    *args,
+    sender: Any,
+    *args: Any,
     check_unapplied: bool = False,
-    **kwargs,
-):
+    **kwargs: Any,
+) -> None:
     logger.info(f"Post migrate {args} {kwargs}")
     if check_unapplied:
         return

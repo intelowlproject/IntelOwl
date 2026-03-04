@@ -86,8 +86,10 @@ class YaraRepo:
 
     def update(self):
         logger.info(f"Starting update of {self.url}")
-        if self.is_zip():
-            # private url not supported at the moment for private
+
+        if self.is_unprotect_api():
+            self._update_unprotect_api()
+        elif self.is_zip():
             self._update_zip()
         else:
             self._update_git()
@@ -149,9 +151,59 @@ class YaraRepo:
                 if settings.GIT_KEY_PATH.exists():
                     os.remove(settings.GIT_KEY_PATH)
 
+    def _update_unprotect_api(self):
+        logger.info(f"Fetching Unprotect rules from {self.url}")
+
+        os.makedirs(self.directory, exist_ok=True)
+
+        page = 1
+        MAX_PAGES = 50
+
+        while page <= MAX_PAGES:
+            try:
+                response = requests.get(f"{self.url}?page={page}", timeout=30)
+                response.raise_for_status()
+            except requests.RequestException as e:
+                logger.error(f"Failed fetching Unprotect page {page}: {e}")
+                break
+
+            data = response.json()
+            results = data.get("results", [])
+
+            if not results:
+                break
+
+            for rule in results:
+                yara_rule = rule.get("yara_rule")
+                if not yara_rule:    # IMPORTANT: filter YARA-only rules
+                    continue
+
+                rule_name = rule.get(
+                    "name",
+                    f"unprotect_{page}_{rule.get('id')}"
+                )
+                safe_name = "".join(
+                    [c for c in rule_name if c.isalnum() or c in (" ", ".", "_")]
+                ).strip()
+
+                if not safe_name:
+                    continue
+
+                file_path = self.directory / f"{safe_name}.yar"
+
+                with open(file_path, "w", encoding="utf-8") as f:
+                    f.write(yara_rule)
+
+            if not data.get("next"):
+                break
+
+        page += 1
+
+    logger.info("Finished fetching Unprotect rules")
+
     def delete_lock_file(self):
         lock_file_path = self.directory / ".git" / "index.lock"
-        lock_file_path.unlink(missing_ok=False)
+        lock_file_path.unlink(missing_ok=True)
 
     @property
     def compiled_file_name(self):
@@ -172,6 +224,9 @@ class YaraRepo:
 
     def is_zip(self):
         return self.url.endswith(".zip")
+
+    def is_unprotect_api(self):
+        return "unprotect.it/api/detection_rules" in self.url
 
     @cached_property
     def head_branch(self) -> str:

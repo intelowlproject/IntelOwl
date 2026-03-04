@@ -26,9 +26,9 @@ from django.db import IntegrityError, models
 from django.db.models import (
     BooleanField,
     Case,
+    Count,
     Exists,
     F,
-    Func,
     IntegerField,
     JSONField,
     OuterRef,
@@ -805,7 +805,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
                     Subquery(
                         Parameter.objects.filter(python_module=OuterRef("python_module"), required=True)
                         # count them
-                        .annotate(count=Func(F("pk"), function="Count"))
+                        .annotate(count=Count("pk"))
                         .values("count"),
                         output_field=IntegerField(),
                     ),
@@ -830,7 +830,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
                                 .values("parameter__pk")
                             )
                         )
-                        .annotate(count=Func(F("pk"), function="Count"))
+                        .annotate(count=Count("pk"))
                         .values("count"),
                         output_field=IntegerField(),
                     ),

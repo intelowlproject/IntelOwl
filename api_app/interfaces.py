@@ -38,11 +38,11 @@ class CreateJobsFromPlaybookInterface:
     delay: datetime.timedelta
 
     @property
-    def playbooks_names(self):
+    def playbooks_names(self) -> str:
         """Returns a comma-separated string of playbook names."""
         return ", ".join(self.playbooks_choice.values_list("name", flat=True))
 
-    def validate_playbooks(self, user: User):
+    def validate_playbooks(self, user: User) -> None:
         """
         Validates that the user has visibility to the selected playbooks.
 
@@ -56,7 +56,9 @@ class CreateJobsFromPlaybookInterface:
 
         for playbook in self.playbooks_choice.all():
             if not PlaybookConfig.objects.filter(pk=playbook.pk).visible_for_user(user).exists():
-                raise RuntimeError(f"User {user.username} do not have visibility to playbook {playbook.pk}")
+                raise RuntimeError(
+                    f"User {user.username} does not have visibility to playbook {playbook.pk}"
+                )
 
     def _get_serializer(
         self,

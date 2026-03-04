@@ -1,7 +1,7 @@
 import datetime
 from typing import Union
 
-from django.db.models import F, Func, OuterRef, QuerySet, Subquery, Value
+from django.db.models import Count, F, OuterRef, QuerySet, Subquery, Value
 from django.utils.timezone import now
 
 from api_app.models import Job
@@ -19,7 +19,7 @@ class PlaybookConfigQuerySet(AbstractConfigQuerySet, ModelWithOwnershipQuerySet)
                 playbook_to_execute=OuterRef("pk"),
                 finished_analysis_time__gte=now() - datetime.timedelta(days=30),
             )
-            .annotate(count=Func(F("pk"), function="Count"))
+            .annotate(count=Count("pk"))
             .values("count")
         )
 
@@ -35,7 +35,7 @@ class PlaybookConfigQuerySet(AbstractConfigQuerySet, ModelWithOwnershipQuerySet)
                     finished_analysis_time__gte=now() - datetime.timedelta(days=30),
                 )
                 .exclude(user__pk=user.pk)
-                .annotate(count=Func(F("pk"), function="Count"))
+                .annotate(count=Count("pk"))
                 .values("count")
             )
         return Value(0)
@@ -52,14 +52,14 @@ class PlaybookConfigQuerySet(AbstractConfigQuerySet, ModelWithOwnershipQuerySet)
                 .exclude(
                     user__membership__organization__pk=user.membership.organization.pk,
                 )
-                .annotate(count=Func(F("pk"), function="Count"))
+                .annotate(count=Count("pk"))
                 .values("count")
             )
         return Subquery(
             Job.objects.prefetch_related("user")
             .filter(playbook_to_execute=OuterRef("pk"), user__profile__is_robot=False)
             .exclude(user__pk=user.pk)
-            .annotate(count=Func(F("pk"), function="Count"))
+            .annotate(count=Count("pk"))
             .values("count")
         )
 

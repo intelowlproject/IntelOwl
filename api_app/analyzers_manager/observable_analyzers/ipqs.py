@@ -171,10 +171,10 @@ class IPQualityScore(classes.ObservableAnalyzer):
                 "payload": self._get_phone_payload(),
             }
         return {
-                "type": "credentials",
-                "username_endpoint": self.USERNAME_ENDPOINT,
-                "password_endpoint": self.PASSWORD_ENDPOINT,
-            }
+            "type": "credentials",
+            "username_endpoint": self.USERNAME_ENDPOINT,
+            "password_endpoint": self.PASSWORD_ENDPOINT,
+        }
 
     def run(self):
         endpoints = self._get_calling_endpoint()

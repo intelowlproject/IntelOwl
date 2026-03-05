@@ -5,8 +5,7 @@ FROM node:lts-alpine3.21 AS frontend-build
 WORKDIR /
 
 COPY frontend/package.json frontend/package-lock.json ./
-RUN --mount=type=cache,id=npm-cache,target=/root/.npm \
-    npm install npm@11.11.0 --location=global && npm install
+RUN npm install npm@11.11.0 --location=global && npm install
 
 # copy react source code
 COPY frontend/ .
@@ -41,25 +40,22 @@ RUN mkdir -p ${LOG_PATH} \
 # apache2-utils is required to execute htpasswd
 # tshark is required for Hfinger file analyzer
 # libemail-outlook-message-perl and libemail-address-perl are required for msgconvert
-RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,id=apt-lib,target=/var/lib/apt,sharing=locked \
-    apt-get update \
+RUN apt-get update \
     && apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev netcat-traditional \
     vim libldap2-dev libfuzzy-dev net-tools python3-psycopg2 git apache2-utils tshark  \
-    libemail-outlook-message-perl libemail-address-perl
-
-RUN --mount=type=cache,id=pip-cache,target=/root/.cache/pip \
-    pip3 install --upgrade pip
+    libemail-outlook-message-perl libemail-address-perl \
+    && apt-get clean && apt-get autoclean && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/* \
+    && pip3 install --no-cache-dir --upgrade pip
 
 COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
 COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
 COPY requirements/django-server-requirements.txt $PYTHONPATH/requirements/django-server-requirements.txt
 WORKDIR $PYTHONPATH
 
-RUN --mount=type=cache,id=pip-cache,target=/root/.cache/pip \
-    pip3 install --use-pep517 --compile -r project-requirements.txt \
-    && pip3 install pycti==${PYCTI_VERSION} \
-    && pip3 install --compile -r certego-requirements.txt
+RUN pip3 install --no-cache-dir --use-pep517 --compile -r project-requirements.txt \
+    && pip3 install --no-cache-dir pycti==${PYCTI_VERSION} \
+    && pip3 install --no-cache-dir --compile -r certego-requirements.txt
 
 COPY api_app/analyzers_manager/repo_downloader.sh ${PYTHONPATH}/api_app/analyzers_manager/repo_downloader.sh
 COPY docker/scripts/watchman_install.sh ${PYTHONPATH}/docker/scripts/watchman_install.sh

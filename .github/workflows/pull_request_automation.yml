@@ -76,41 +76,31 @@ jobs:
           cp docker/env_file_app_template docker/env_file_app
           cp docker/env_file_postgres_template docker/env_file_postgres
 
+      - name: Set image repo
+        run: echo "IMAGE_REPO=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Restore buildkit cache
-        uses: reproducible-containers/buildkit-cache-dance@v3
         with:
-          cache-map: |
-            {
-              "/var/cache/apt": "apt-cache",
-              "/var/lib/apt": "apt-lib",
-              "/root/.cache/pip": "pip-cache",
-              "/root/.npm": "npm-cache"
-            }
+          driver: docker
 
-      - name: Build main image with cache
-        uses: docker/build-push-action@v6
+      - name: Login to GHCR
+        uses: docker/login-action@v3
         with:
-          context: .
-          file: docker/Dockerfile
-          push: false
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Bake images
+        if: "!contains(github.base_ref, 'master')"
+        uses: docker/bake-action@v6
+        with:
+          source: .
+          files: docker/docker-bake.ci.hcl
           load: true
-          tags: intelowlproject/intelowl:ci
-          build-args: |
-            REPO_DOWNLOADER_ENABLED=false
-          cache-from: type=gha,scope=intelowl-main
-
-      - name: Build nginx image with cache
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: docker/Dockerfile_nginx
           push: false
-          load: true
-          tags: intelowlproject/intelowl_nginx:ci
-          cache-from: type=gha,scope=intelowl-nginx
+        env:
+          CACHE_REPO: ${{ env.IMAGE_REPO }}
 
       - name: Startup script launch (Slow)
         if: contains(github.base_ref, 'master')

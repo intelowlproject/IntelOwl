@@ -26,7 +26,16 @@ if STAGE_LOCAL:
     CSRF_TRUSTED_ORIGINS = [f"{WEB_CLIENT_URL}:80/"]
 # Restrict hosts in production environments
 if STAGE_PRODUCTION or STAGE_STAGING:
-    ALLOWED_HOSTS = [WEB_CLIENT_DOMAIN]
+    _allowed_hosts_env = get_secret("ALLOWED_HOSTS", None)
+    if _allowed_hosts_env:
+        _extra_allowed_hosts = [
+            host.strip() for host in _allowed_hosts_env.split(",") if host.strip()
+        ]
+    else:
+        _extra_allowed_hosts = []
+    _allowed_hosts = set(_extra_allowed_hosts)
+    _allowed_hosts.add(WEB_CLIENT_DOMAIN)
+    ALLOWED_HOSTS = list(_allowed_hosts)
 else:
     ALLOWED_HOSTS = ["*"]
 

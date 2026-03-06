@@ -1,31 +1,48 @@
-# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
-# See the file 'LICENSE' for copying permission.
+import os
+import logging
 
-# Security Stuff
-from django.core.management.utils import get_random_secret_key
+from intel_owl.settings.commons import STAGE_LOCAL, STAGE_PRODUCTION, STAGE_STAGING
 
-from ._util import get_secret
-from .commons import STAGE_LOCAL, WEB_CLIENT_DOMAIN
+logger = logging.getLogger(__name__)
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = get_secret("DJANGO_SECRET", None) or get_random_secret_key()
+# Get WEB_CLIENT_DOMAIN from environment
+WEB_CLIENT_DOMAIN = os.environ.get("WEB_CLIENT_DOMAIN", "").strip()
 
-HTTPS_ENABLED = get_secret("HTTPS_ENABLED", False) == "True"
-if HTTPS_ENABLED:
-    CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_SECURE = True
-    WEB_CLIENT_URL = f"https://{WEB_CLIENT_DOMAIN}"
+# Conditional ALLOWED_HOSTS configuration
+if STAGE_PRODUCTION or STAGE_STAGING:
+    # Validate WEB_CLIENT_DOMAIN is set
+    if not WEB_CLIENT_DOMAIN:
+        raise ValueError(
+            "WEB_CLIENT_DOMAIN must be set in production/staging environments."
+        )
+
+    # Parse WEB_CLIENT_DOMAIN into individual hosts (supports comma-separated)
+    _allowed_hosts = sorted(
+        {
+            host.strip()
+            for host in WEB_CLIENT_DOMAIN.split(",")
+            if host.strip()
+        }
+    )
+
+    # Validate that we have at least one valid host
+    if not _allowed_hosts:
+        raise ValueError(
+            "WEB_CLIENT_DOMAIN contained no valid hosts after parsing."
+        )
+
+    ALLOWED_HOSTS = _allowed_hosts
+
+    logger.info(f"ALLOWED_HOSTS restricted to production values: {ALLOWED_HOSTS}")
+elif STAGE_LOCAL:
+    # Allow all hosts for local development
+    ALLOWED_HOSTS = ["*"]
+    logger.warning(
+        "ALLOWED_HOSTS set to ['*'] - this should only be used in local development!"
+    )
 else:
-    WEB_CLIENT_URL = f"http://{WEB_CLIENT_DOMAIN}"
-
-CSRF_COOKIE_SAMESITE = "Strict"
-CSRF_TRUSTED_ORIGINS = [f"{WEB_CLIENT_URL}"]
-
-if STAGE_LOCAL:
-    # required to allow requests from port 3001 (frontend development)
-    CSRF_TRUSTED_ORIGINS = [f"{WEB_CLIENT_URL}:80/"]
-ALLOWED_HOSTS = ["*"]
-
-# https://docs.djangoproject.com/en/4.2/ref/settings/#data-upload-max-memory-size
-DATA_UPLOAD_MAX_MEMORY_SIZE = 100 * (10**6)
-FILE_UPLOAD_MAX_MEMORY_SIZE = 100 * (10**6)
+    # Default fallback for unknown environments
+    ALLOWED_HOSTS = ["*"]
+    logger.warning(
+        "ALLOWED_HOSTS set to ['*'] - environment not detected, using permissive setting!"
+    )

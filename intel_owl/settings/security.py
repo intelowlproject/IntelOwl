@@ -31,11 +31,13 @@ if STAGE_PRODUCTION or STAGE_STAGING:
         _extra_allowed_hosts = [
             host.strip() for host in _allowed_hosts_env.split(",") if host.strip()
         ]
+        # Prevent wildcard host acceptance in production/staging
+        _extra_allowed_hosts = [host for host in _extra_allowed_hosts if host != "*"]
     else:
         _extra_allowed_hosts = []
     _allowed_hosts = set(_extra_allowed_hosts)
     _allowed_hosts.add(WEB_CLIENT_DOMAIN)
-    ALLOWED_HOSTS = list(_allowed_hosts)
+    ALLOWED_HOSTS = sorted(_allowed_hosts)
 else:
     ALLOWED_HOSTS = ["*"]
 

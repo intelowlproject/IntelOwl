@@ -5,7 +5,7 @@
 from django.core.management.utils import get_random_secret_key
 
 from ._util import get_secret
-from .commons import STAGE_LOCAL, WEB_CLIENT_DOMAIN
+from .commons import STAGE_LOCAL, STAGE_PRODUCTION, STAGE_STAGING, WEB_CLIENT_DOMAIN
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = get_secret("DJANGO_SECRET", None) or get_random_secret_key()
@@ -24,20 +24,8 @@ CSRF_TRUSTED_ORIGINS = [f"{WEB_CLIENT_URL}"]
 if STAGE_LOCAL:
     # required to allow requests from port 3001 (frontend development)
     CSRF_TRUSTED_ORIGINS = [f"{WEB_CLIENT_URL}:80/"]
-# Restrict hosts in production environments
 if STAGE_PRODUCTION or STAGE_STAGING:
-    _allowed_hosts_env = get_secret("ALLOWED_HOSTS", None)
-    if _allowed_hosts_env:
-        _extra_allowed_hosts = [
-            host.strip() for host in _allowed_hosts_env.split(",") if host.strip()
-        ]
-        # Prevent wildcard host acceptance in production/staging
-        _extra_allowed_hosts = [host for host in _extra_allowed_hosts if host != "*"]
-    else:
-        _extra_allowed_hosts = []
-    _allowed_hosts = set(_extra_allowed_hosts)
-    _allowed_hosts.add(WEB_CLIENT_DOMAIN)
-    ALLOWED_HOSTS = sorted(_allowed_hosts)
+    ALLOWED_HOSTS = [WEB_CLIENT_DOMAIN]
 else:
     ALLOWED_HOSTS = ["*"]
 

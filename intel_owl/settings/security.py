@@ -24,7 +24,11 @@ CSRF_TRUSTED_ORIGINS = [f"{WEB_CLIENT_URL}"]
 if STAGE_LOCAL:
     # required to allow requests from port 3001 (frontend development)
     CSRF_TRUSTED_ORIGINS = [f"{WEB_CLIENT_URL}:80/"]
-ALLOWED_HOSTS = ["*"]
+# Restrict hosts in production environments
+if STAGE_PRODUCTION or STAGE_STAGING:
+    ALLOWED_HOSTS = [WEB_CLIENT_DOMAIN]
+else:
+    ALLOWED_HOSTS = ["*"]
 
 # https://docs.djangoproject.com/en/4.2/ref/settings/#data-upload-max-memory-size
 DATA_UPLOAD_MAX_MEMORY_SIZE = 100 * (10**6)

@@ -1686,13 +1686,12 @@ class PythonConfig(AbstractConfig):
         not_configured_params = params.filter(required=True, configured=False)
         # TODO to optimize
         param = not_configured_params.first()
-        if param is not None:
-            if not settings.STAGE_CI or settings.STAGE_CI and not param.value:
-                raise TypeError(
-                    f"Required param {param.name} "
-                    f"of plugin {param.python_module.module}"
-                    " does not have a valid value"
-                )
+        if param is not None and (not settings.STAGE_CI or not param.value):
+            raise TypeError(
+                f"Required param {param.name} "
+                f"of plugin {param.python_module.module}"
+                " does not have a valid value"
+            )
         if settings.STAGE_CI:
             return params.filter(Q(configured=True) | Q(value__isnull=False))
         return params.filter(configured=True)

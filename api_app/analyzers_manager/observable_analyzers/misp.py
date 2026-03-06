@@ -51,8 +51,7 @@ class MISP(classes.ObservableAnalyzer):
             return [cls]
 
         raise AnalyzerConfigurationException(
-            f"Observable {cls} not supported."
-            "Currently supported are: ip, domain, hash, url, generic."
+            f"Observable {cls} not supported. Currently supported are: ip, domain, hash, url, generic."
         )
 
     def run(self):

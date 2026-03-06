@@ -33,6 +33,28 @@ class MISP(classes.ObservableAnalyzer):
     def update(self):
         pass
 
+    def _get_type_attributes(self) -> list:
+        cls = self.observable_classification
+        if cls == Classification.HASH:
+            return ["md5", "sha1", "sha256"]
+        if cls == Classification.IP:
+            return [
+                "ip-dst",
+                "ip-src",
+                "ip-src|port",
+                "ip-dst|port",
+                "domain|ip",
+            ]
+        if cls == Classification.DOMAIN:
+            return [cls, "domain|ip"]
+        if cls in [Classification.URL, Classification.GENERIC]:
+            return [cls]
+
+        raise AnalyzerConfigurationException(
+            f"Observable {cls} not supported."
+            "Currently supported are: ip, domain, hash, url, generic."
+        )
+
     def run(self):
         # this allows self-signed certificates to be used
         ssl_param = (
@@ -69,30 +91,7 @@ class MISP(classes.ObservableAnalyzer):
         if self.from_days != 0:
             params["date_from"] = date_from.strftime("%Y-%m-%d %H:%M:%S")
         if self.filter_on_type:
-            params["type_attribute"] = [self.observable_classification]
-            if self.observable_classification == Classification.HASH:
-                params["type_attribute"] = ["md5", "sha1", "sha256"]
-            if self.observable_classification == Classification.IP:
-                params["type_attribute"] = [
-                    "ip-dst",
-                    "ip-src",
-                    "ip-src|port",
-                    "ip-dst|port",
-                    "domain|ip",
-                ]
-            elif self.observable_classification == Classification.DOMAIN:
-                params["type_attribute"] = [self.observable_classification, "domain|ip"]
-            elif self.observable_classification == Classification.HASH:
-                params["type_attribute"] = ["md5", "sha1", "sha256"]
-            elif self.observable_classification == Classification.URL:
-                params["type_attribute"] = [self.observable_classification]
-            elif self.observable_classification == Classification.GENERIC:
-                pass
-            else:
-                raise AnalyzerConfigurationException(
-                    f"Observable {self.observable_classification} not supported."
-                    "Currently supported are: ip, domain, hash, url, generic."
-                )
+            params["type_attribute"] = self._get_type_attributes()
 
         result_search = misp_instance.search(**params)
         if isinstance(result_search, dict):

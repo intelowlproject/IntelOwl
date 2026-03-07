@@ -180,7 +180,7 @@ class YaraRepo:
                 yara_rule = rule.get("yara_rule")
                 if not yara_rule:    # IMPORTANT: filter YARA-only rules
                     continue
-                
+
                 rule_name = rule.get(
                     "name",
                     f"unprotect_{page}_{rule.get('id')}"

@@ -1,14 +1,16 @@
-from unittest.mock import patch, MagicMock
 import tempfile
 from pathlib import Path
-from api_app.analyzers_manager.file_analyzers.yara_scan import YaraScan
+from unittest.mock import MagicMock, patch
+
+from api_app.analyzers_manager.file_analyzers.yara_scan import YaraRepo, YaraScan
+
 from .base_test_class import BaseFileAnalyzerTest
-from api_app.analyzers_manager.file_analyzers.yara_scan import YaraRepo
+
 
 class TestYaraScan(BaseFileAnalyzerTest):
     analyzer_class = YaraScan
 
-    
+
 
     def get_extra_config(self):
         return {
@@ -46,7 +48,7 @@ class TestYaraScan(BaseFileAnalyzerTest):
                 "_private_repositories": {},
             }
         )
-        
+
 
     @patch("api_app.analyzers_manager.file_analyzers.yara_scan.requests.get")
     def test_unprotect_update_downloads_yara_rules(self, mock_get):

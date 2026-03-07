@@ -152,6 +152,9 @@ class YaraRepo:
                     os.remove(settings.GIT_KEY_PATH)
 
     def _update_unprotect_api(self):
+        for f in self.directory.glob("*.yar"):
+            f.unlink(missing_ok=True)
+
         logger.info(f"Fetching Unprotect rules from {self.url}")
 
         os.makedirs(self.directory, exist_ok=True)
@@ -177,19 +180,27 @@ class YaraRepo:
                 yara_rule = rule.get("yara_rule")
                 if not yara_rule:    # IMPORTANT: filter YARA-only rules
                     continue
-
+                
                 rule_name = rule.get(
                     "name",
                     f"unprotect_{page}_{rule.get('id')}"
                 )
+
+                try:
+                    yara.compile(source=yara_rule)
+                except (yara.Error, yara.SyntaxError):
+                    logger.warning(f"INvalid rule skipped: {rule_name}")
+                    continue
+
                 safe_name = "".join(
-                    [c for c in rule_name if c.isalnum() or c in (" ", ".", "_")]
+                    c for c in rule_name if c.isalnum() or c in ("_", "-", ".")
                 ).strip()
 
                 if not safe_name:
                     continue
 
-                file_path = self.directory / f"{safe_name}.yar"
+                rule_id = rule.get("id", page)
+                file_path = self.directory / f"{safe_name}_{rule_id}.yar"
 
                 with open(file_path, "w", encoding="utf-8") as f:
                     f.write(yara_rule)
@@ -197,9 +208,9 @@ class YaraRepo:
             if not data.get("next"):
                 break
 
-        page += 1
+            page += 1
 
-    logger.info("Finished fetching Unprotect rules")
+        logger.info("Finished fetching Unprotect rules")
 
     def delete_lock_file(self):
         lock_file_path = self.directory / ".git" / "index.lock"

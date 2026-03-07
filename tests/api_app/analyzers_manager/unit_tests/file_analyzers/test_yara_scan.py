@@ -3,10 +3,12 @@ import tempfile
 from pathlib import Path
 from api_app.analyzers_manager.file_analyzers.yara_scan import YaraScan
 from .base_test_class import BaseFileAnalyzerTest
-
+from api_app.analyzers_manager.file_analyzers.yara_scan import YaraRepo
 
 class TestYaraScan(BaseFileAnalyzerTest):
     analyzer_class = YaraScan
+
+    
 
     def get_extra_config(self):
         return {
@@ -34,6 +36,17 @@ class TestYaraScan(BaseFileAnalyzerTest):
                 ],
             )
         ]
+    def setUp(self):
+        super().setUp()
+
+        self.analyzer = YaraScan(
+            {
+                "repositories": [],
+                "local_rules": "",
+                "_private_repositories": {},
+            }
+        )
+        
 
     @patch("api_app.analyzers_manager.file_analyzers.yara_scan.requests.get")
     def test_unprotect_update_downloads_yara_rules(self, mock_get):
@@ -66,23 +79,10 @@ class TestYaraScan(BaseFileAnalyzerTest):
         with tempfile.TemporaryDirectory() as tmpdir:
             base_dir = Path(tmpdir)
 
-            # 🔹 Properly configure YaraScan with Unprotect repo
-            self.analyzer.config["repositories"] = [
-                "https://unprotect.it/api/detection_rules/"
-            ]
-
-            # Reinitialize repositories after config change
-            self.analyzer._init_repositories()
-
-            # 🔹 Find the YaraRepo configured with Unprotect URL
-            unprotect_repo = next(
-                repo
-                for repo in getattr(self.analyzer, "repositories", [])
-                if "unprotect.it/api/detection_rules/" in getattr(repo, "url", "")
+            unprotect_repo =YaraRepo(
+                url="https://unprotect.it/api/detection_rules/",
+                directory=base_dir
             )
-
-            # Override directory to temp dir
-            unprotect_repo.directory = base_dir
 
             # 🔹 Call update on the correct repo
             unprotect_repo.update()
@@ -99,7 +99,7 @@ class TestYaraScan(BaseFileAnalyzerTest):
 
             created_file = created_files[0]
             self.assertEqual(created_file.suffix, ".yar")
-            self.assertEqual(created_file.name, "Test Rule.yar")
+            self.assertEqual(created_file.name, "TestRule_1.yar")
 
             #  Verify file content
             with open(created_file, "r", encoding="utf-8") as f:

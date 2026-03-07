@@ -178,13 +178,10 @@ class YaraRepo:
 
             for rule in results:
                 yara_rule = rule.get("yara_rule")
-                if not yara_rule:    # IMPORTANT: filter YARA-only rules
+                if not yara_rule:  # IMPORTANT: filter YARA-only rules
                     continue
 
-                rule_name = rule.get(
-                    "name",
-                    f"unprotect_{page}_{rule.get('id')}"
-                )
+                rule_name = rule.get("name", f"unprotect_{page}_{rule.get('id')}")
 
                 try:
                     yara.compile(source=yara_rule)
@@ -192,9 +189,7 @@ class YaraRepo:
                     logger.warning(f"INvalid rule skipped: {rule_name}")
                     continue
 
-                safe_name = "".join(
-                    c for c in rule_name if c.isalnum() or c in ("_", "-", ".")
-                ).strip()
+                safe_name = "".join(c for c in rule_name if c.isalnum() or c in ("_", "-", ".")).strip()
 
                 if not safe_name:
                     continue

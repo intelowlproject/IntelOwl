@@ -10,8 +10,6 @@ from .base_test_class import BaseFileAnalyzerTest
 class TestYaraScan(BaseFileAnalyzerTest):
     analyzer_class = YaraScan
 
-
-
     def get_extra_config(self):
         return {
             "repositories": ["https://example.com/yara_rules.git"],
@@ -26,9 +24,7 @@ class TestYaraScan(BaseFileAnalyzerTest):
                 return_value=[
                     {
                         "match": "test_rule",
-                        "strings": [
-                            {"identifier": "$a", "plaintext": ["found"]}
-                        ],
+                        "strings": [{"identifier": "$a", "plaintext": ["found"]}],
                         "tags": ["malware"],
                         "meta": {"author": "test"},
                         "path": "rules/test.yar",
@@ -38,6 +34,7 @@ class TestYaraScan(BaseFileAnalyzerTest):
                 ],
             )
         ]
+
     def setUp(self):
         super().setUp()
 
@@ -48,7 +45,6 @@ class TestYaraScan(BaseFileAnalyzerTest):
                 "_private_repositories": {},
             }
         )
-
 
     @patch("api_app.analyzers_manager.file_analyzers.yara_scan.requests.get")
     def test_unprotect_update_downloads_yara_rules(self, mock_get):
@@ -61,19 +57,19 @@ class TestYaraScan(BaseFileAnalyzerTest):
         mock_response = MagicMock()
         mock_response.raise_for_status.return_value = None
         mock_response.json.return_value = {
-        "results": [
-            {
-                "id": 1,
-                "name": "Test Rule",
-                "yara_rule": "rule test_rule { condition: true }",
-            },
-            {
-                "id": 2,
-                "name": "CAPA Rule",
-                "yara_rule": None,  # Should be skipped
-            },
-        ],
-        "next": None,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Test Rule",
+                    "yara_rule": "rule test_rule { condition: true }",
+                },
+                {
+                    "id": 2,
+                    "name": "CAPA Rule",
+                    "yara_rule": None,  # Should be skipped
+                },
+            ],
+            "next": None,
         }
 
         mock_get.return_value = mock_response
@@ -81,10 +77,7 @@ class TestYaraScan(BaseFileAnalyzerTest):
         with tempfile.TemporaryDirectory() as tmpdir:
             base_dir = Path(tmpdir)
 
-            unprotect_repo =YaraRepo(
-                url="https://unprotect.it/api/detection_rules/",
-                directory=base_dir
-            )
+            unprotect_repo = YaraRepo(url="https://unprotect.it/api/detection_rules/", directory=base_dir)
 
             # 🔹 Call update on the correct repo
             unprotect_repo.update()
@@ -107,7 +100,4 @@ class TestYaraScan(BaseFileAnalyzerTest):
             with open(created_file, "r", encoding="utf-8") as f:
                 content = f.read()
 
-            self.assertEqual(
-                content,
-                "rule test_rule { condition: true }"
-            )
+            self.assertEqual(content, "rule test_rule { condition: true }")

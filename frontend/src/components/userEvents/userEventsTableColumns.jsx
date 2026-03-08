@@ -95,22 +95,57 @@ export const userEventsTableEndColumns = [
     maxWidth: 100,
   },
   {
-    Header: "Reasons",
-    id: "related_threats",
-    accessor: (userEvent) => userEvent.reason,
-    Cell: ({ value: comments, row }) =>
-      comments.length > 0 && (
-        <TableCell
-          id={`table-cell-related_threats__${row?.id}`}
-          isCopyToClipboard
-          isTruncate
-          value={comments?.toString()}
-        />
-      ),
     disableSortBy: true,
     maxWidth: 160,
   },
+  {
+    Header: "Actions",
+    id: "actions",
+    accessor: "user",
+    disableSortBy: true,
+    Cell: ({ row: { original } }) => {
+      // Import dynamically to avoid circular dependencies in column definition file
+      const { useAuthStore } = require("../../stores/useAuthStore");
+      const { IconButton } = require("@certego/certego-ui");
+      const { MdDelete } = require("react-icons/md");
+      const { deleteUserEvent } = require("./userEventsApi");
+
+      const currentUser = useAuthStore((state) => state.user?.username);
+
+      if (original.user === currentUser) {
+        return (
+          <div className="d-flex justify-content-center py-2">
+            <IconButton
+              id={`delete-user-event-${original.id}`}
+              Icon={MdDelete}
+              size="sm"
+              color="danger"
+              title="Delete evaluation"
+              titlePlacement="top"
+              onClick={async (e) => {
+                e.stopPropagation();
+                try {
+                  const { AnalyzableHistoryTypes } = require("../../../constants/miscConst");
+                  let type = AnalyzableHistoryTypes.USER_EVENT;
+                  if (original.analyzables_name) type = AnalyzableHistoryTypes.USER_DOMAIN_WILDCARD_EVENT;
+                  if (original.start_ip) type = AnalyzableHistoryTypes.USER_IP_WILDCARD_EVENT;
+
+                  await deleteUserEvent(original.id, type);
+                  window.location.reload();
+                } catch (err) {
+                  console.error(err);
+                }
+              }}
+            />
+          </div>
+        );
+      }
+      return <div />;
+    },
+    maxWidth: 80,
+  },
 ];
+
 
 export const userAnalyzableEventsTableColumns = [
   ...userEventsTableStartColumns,

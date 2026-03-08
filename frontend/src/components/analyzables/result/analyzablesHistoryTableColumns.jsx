@@ -64,7 +64,6 @@ function UserEventDeleteButton({ original }) {
   return <div />;
 }
 
-
 export const analyzablesHistoryTableColumns = [
   {
     Header: "ID",
@@ -219,7 +218,9 @@ export const analyzablesHistoryTableColumns = [
     id: "actions",
     accessor: "user",
     disableSortBy: true,
-    Cell: ({ row: { original } }) => <UserEventDeleteButton original={original} />,
+    Cell: ({ row: { original } }) => (
+      <UserEventDeleteButton original={original} />
+    ),
     maxWidth: 80,
   },
 ];

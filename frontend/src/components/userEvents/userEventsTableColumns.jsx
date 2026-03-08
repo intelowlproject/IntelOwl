@@ -152,11 +152,12 @@ export const userEventsTableEndColumns = [
     id: "actions",
     accessor: "user",
     disableSortBy: true,
-    Cell: ({ row: { original } }) => <UserEventDeleteButton original={original} />,
+    Cell: ({ row: { original } }) => (
+      <UserEventDeleteButton original={original} />
+    ),
     maxWidth: 80,
   },
 ];
-
 
 export const userAnalyzableEventsTableColumns = [
   ...userEventsTableStartColumns,

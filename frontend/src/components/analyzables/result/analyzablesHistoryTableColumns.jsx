@@ -19,6 +19,52 @@ import {
   datetimeFormatStr,
 } from "../../../constants/miscConst";
 
+// eslint-disable-next-line react/prop-types
+function UserEventDeleteButton({ original }) {
+  // eslint-disable-next-line global-require
+  const { useAuthStore } = require("../../../stores/useAuthStore");
+  // eslint-disable-next-line global-require
+  const { IconButton } = require("@certego/certego-ui");
+  // eslint-disable-next-line global-require
+  const { MdDelete } = require("react-icons/md");
+  // eslint-disable-next-line global-require
+  const { deleteUserEvent } = require("../../userEvents/userEventsApi");
+
+  const currentUser = useAuthStore((state) => state.user?.username);
+
+  const isUserEvent = [
+    AnalyzableHistoryTypes.USER_EVENT,
+    AnalyzableHistoryTypes.USER_DOMAIN_WILDCARD_EVENT,
+    AnalyzableHistoryTypes.USER_IP_WILDCARD_EVENT,
+  ].includes(original.type);
+
+  if (isUserEvent && original.user === currentUser) {
+    return (
+      <div className="d-flex justify-content-center py-2">
+        <IconButton
+          id={`delete-user-event-${original.id}`}
+          Icon={MdDelete}
+          size="sm"
+          color="danger"
+          title="Delete evaluation"
+          titlePlacement="top"
+          onClick={async (event) => {
+            event.stopPropagation();
+            try {
+              await deleteUserEvent(original.id, original.type);
+              window.location.reload();
+            } catch (err) {
+              console.error(err);
+            }
+          }}
+        />
+      </div>
+    );
+  }
+  return <div />;
+}
+
+
 export const analyzablesHistoryTableColumns = [
   {
     Header: "ID",
@@ -173,46 +219,7 @@ export const analyzablesHistoryTableColumns = [
     id: "actions",
     accessor: "user",
     disableSortBy: true,
-    Cell: ({ row: { original } }) => {
-      // Import dynamically to avoid circular dependencies in column definition file
-      const { useAuthStore } = require("../../../stores/useAuthStore");
-      const { IconButton } = require("@certego/certego-ui");
-      const { MdDelete } = require("react-icons/md");
-      const { deleteUserEvent } = require("../../userEvents/userEventsApi");
-
-      const currentUser = useAuthStore((state) => state.user?.username);
-
-      const isUserEvent = [
-        AnalyzableHistoryTypes.USER_EVENT,
-        AnalyzableHistoryTypes.USER_DOMAIN_WILDCARD_EVENT,
-        AnalyzableHistoryTypes.USER_IP_WILDCARD_EVENT,
-      ].includes(original.type);
-
-      if (isUserEvent && original.user === currentUser) {
-        return (
-          <div className="d-flex justify-content-center py-2">
-            <IconButton
-              id={`delete-user-event-${original.id}`}
-              Icon={MdDelete}
-              size="sm"
-              color="danger"
-              title="Delete evaluation"
-              titlePlacement="top"
-              onClick={async (e) => {
-                e.stopPropagation();
-                try {
-                  await deleteUserEvent(original.id, original.type);
-                  window.location.reload();
-                } catch (err) {
-                  console.error(err);
-                }
-              }}
-            />
-          </div>
-        );
-      }
-      return <div />;
-    },
+    Cell: ({ row: { original } }) => <UserEventDeleteButton original={original} />,
     maxWidth: 80,
   },
 ];

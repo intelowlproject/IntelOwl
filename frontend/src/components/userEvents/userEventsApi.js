@@ -6,6 +6,7 @@ import {
   USER_EVENT_DOMAIN_WILDCARD,
   USER_EVENT_IP_WILDCARD,
 } from "../../constants/apiURLs";
+// eslint-disable-next-line import/extensions
 import { AnalyzableHistoryTypes } from "../../../constants/miscConst";
 
 export const deleteUserEvent = async (id, type) => {

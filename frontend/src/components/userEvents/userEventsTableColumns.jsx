@@ -1,12 +1,20 @@
 /* eslint-disable react/prop-types */
 import React from "react";
 
-import { DefaultColumnFilter, DateHoverable } from "@certego/certego-ui";
+import {
+  DefaultColumnFilter,
+  DateHoverable,
+  IconButton,
+} from "@certego/certego-ui";
+import { MdDelete } from "react-icons/md";
 
 import { LastEvaluationComponent } from "../common/engineBadges";
 import { UserEventDecay } from "./UserEventDecay";
 import TableCell from "../common/TableCell";
 import TagsCell from "../common/TagsCell";
+import { useAuthStore } from "../../stores/useAuthStore";
+import { deleteUserEvent } from "./userEventsApi";
+import { AnalyzableHistoryTypes } from "../../constants/miscConst";
 
 export const userEventsTableStartColumns = [
   {
@@ -56,15 +64,6 @@ export const userEventsTableStartColumns = [
 
 // eslint-disable-next-line react/prop-types
 function UserEventDeleteButton({ original }) {
-  // eslint-disable-next-line global-require
-  const { useAuthStore } = require("../../stores/useAuthStore");
-  // eslint-disable-next-line global-require
-  const { IconButton } = require("@certego/certego-ui");
-  // eslint-disable-next-line global-require
-  const { MdDelete } = require("react-icons/md");
-  // eslint-disable-next-line global-require
-  const { deleteUserEvent } = require("./userEventsApi");
-
   const currentUser = useAuthStore((state) => state.user?.username);
 
   if (original.user === currentUser) {
@@ -80,10 +79,6 @@ function UserEventDeleteButton({ original }) {
           onClick={async (event) => {
             event.stopPropagation();
             try {
-              const {
-                AnalyzableHistoryTypes,
-                // eslint-disable-next-line global-require, import/extensions
-              } = require("../../../constants/miscConst.js");
               let type = AnalyzableHistoryTypes.USER_EVENT;
               if (original.analyzables_name)
                 type = AnalyzableHistoryTypes.USER_DOMAIN_WILDCARD_EVENT;

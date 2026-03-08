@@ -6,7 +6,9 @@ import {
   DateHoverable,
   DefaultColumnFilter,
   SelectOptionsFilter,
+  IconButton,
 } from "@certego/certego-ui";
+import { MdDelete } from "react-icons/md";
 import { format } from "date-fns-tz";
 
 import TableCell from "../../common/TableCell";
@@ -19,17 +21,11 @@ import {
   datetimeFormatStr,
 } from "../../../constants/miscConst";
 
+import { useAuthStore } from "../../../stores/useAuthStore";
+import { deleteUserEvent } from "../../userEvents/userEventsApi";
+
 // eslint-disable-next-line react/prop-types
 function UserEventDeleteButton({ original }) {
-  // eslint-disable-next-line global-require
-  const { useAuthStore } = require("../../../stores/useAuthStore");
-  // eslint-disable-next-line global-require
-  const { IconButton } = require("@certego/certego-ui");
-  // eslint-disable-next-line global-require
-  const { MdDelete } = require("react-icons/md");
-  // eslint-disable-next-line global-require
-  const { deleteUserEvent } = require("../../userEvents/userEventsApi");
-
   const currentUser = useAuthStore((state) => state.user?.username);
 
   const isUserEvent = [

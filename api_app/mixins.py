@@ -820,6 +820,7 @@ class RulesUtiliyMixin:
             f"Rules with version: {latest_version} have been successfully downloaded at {rule_set_directory}"
         )
 
+
 class IPQualityScoreMixin:
     base_url: str = "https://www.ipqualityscore.com/api/json"  # Ensure correct API base
     _ipqs_api_key: str
@@ -856,18 +857,14 @@ class IPQualityScoreMixin:
                     timeout=request_timeout,
                 )
             else:
-                response = requests.get(
-                    url, headers=headers, json=params, timeout=request_timeout
-                )
+                response = requests.get(url, headers=headers, json=params, timeout=request_timeout)
 
             response.raise_for_status()
             result = response.json()
 
             # IPQS often returns 200 OK even if the API logic failed
             if not result.get("success", True):
-                raise AnalyzerRunException(
-                    f"IPQS API Error: {result.get('message', 'Unknown Error')}"
-                )
+                raise AnalyzerRunException(f"IPQS API Error: {result.get('message', 'Unknown Error')}")
 
             return result
 
@@ -876,9 +873,7 @@ class IPQualityScoreMixin:
                 f"Request timed out after {request_timeout}s. File might be too large for sync scan."
             )
         except requests.exceptions.JSONDecodeError:
-            raise AnalyzerRunException(
-                f"Failed to decode JSON. Raw response: {response.text}"
-            )
+            raise AnalyzerRunException(f"Failed to decode JSON. Raw response: {response.text}")
 
     def _poll_for_report(self, endpoint: str, _api_key: str, request_id: str) -> Dict:
         """
@@ -891,13 +886,9 @@ class IPQualityScoreMixin:
         params = {"request_id": request_id}
 
         for attempt in range(max_retries):
-            logger.info(
-                f"Polling attempt {attempt + 1}/{max_retries} for ID: {request_id}"
-            )
+            logger.info(f"Polling attempt {attempt + 1}/{max_retries} for ID: {request_id}")
 
-            result = self._make_request(
-                endpoint, "GET", _api_key=_api_key, params=params
-            )
+            result = self._make_request(endpoint, "GET", _api_key=_api_key, params=params)
 
             # Check if processing is finished
             if result.get("status") != "pending":

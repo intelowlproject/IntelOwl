@@ -22,7 +22,6 @@ class IPQSUrlScan(classes.ObservableAnalyzer, IPQualityScoreMixin):
         pass
 
     def run(self):
-
         # lookup check for url results into ipqs database
         lookup_result = self._make_request(
             endpoint=self.lookup_endpoint,

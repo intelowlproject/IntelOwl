@@ -110,9 +110,7 @@ class IPQualityScore(classes.ObservableAnalyzer):
     def _get_ip_payload(self):
         payload = {
             "strictness": self.ip_strictness,
-            "allow_public_access_points": (
-                str(self.allow_public_access_points).lower()
-            ),
+            "allow_public_access_points": (str(self.allow_public_access_points).lower()),
             "fast": str(self.ip_fast).lower(),
             "lighter_penalties": (str(self.lighter_penalties).lower()),
             "mobile": str(self.mobile).lower(),
@@ -142,17 +140,13 @@ class IPQualityScore(classes.ObservableAnalyzer):
         }
 
     def _get_calling_endpoint(self):
-        if re.match(IP_REG, self.observable_name) or re.match(
-            IPV6_REG, self.observable_name
-        ):
+        if re.match(IP_REG, self.observable_name) or re.match(IPV6_REG, self.observable_name):
             return {
                 "type": "ip",
                 "endpoint": self.IP_ENDPOINT,
                 "payload": self._get_ip_payload(),
             }
-        if re.match(DOMAIN_REG, self.observable_name) or re.match(
-            URL_REG, self.observable_name
-        ):
+        if re.match(DOMAIN_REG, self.observable_name) or re.match(URL_REG, self.observable_name):
             return {
                 "type": "url",
                 "endpoint": self.URL_ENDPOINT,

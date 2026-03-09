@@ -8,6 +8,7 @@ import logging
 import re
 
 import requests
+
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -46,7 +47,7 @@ DOMAIN_REG = re.compile(
     r"[A-Za-z]$"
 )
 
-PHONE_REG = r"^\+?[1-9]\d{0,2}(?:[-.\s]?\d+)+$"
+PHONE_REG = r"^\+?[0-9(). -]{7,20}$"
 
 URL_REG = (
     r"((http|https)://)"
@@ -171,10 +172,10 @@ class IPQualityScore(classes.ObservableAnalyzer):
                 "payload": self._get_phone_payload(),
             }
         return {
-            "type": "credentials",
-            "username_endpoint": self.USERNAME_ENDPOINT,
-            "password_endpoint": self.PASSWORD_ENDPOINT,
-        }
+                "type": "credentials",
+                "username_endpoint": self.USERNAME_ENDPOINT,
+                "password_endpoint": self.PASSWORD_ENDPOINT,
+            }
 
     def run(self):
         endpoints = self._get_calling_endpoint()

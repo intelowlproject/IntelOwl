@@ -79,28 +79,12 @@ jobs:
       - name: Set image repo
         run: echo "IMAGE_REPO=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          driver: docker
-
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Bake images
-        if: "!contains(github.base_ref, 'master')"
-        uses: docker/bake-action@v6
-        with:
-          source: .
-          files: docker/docker-bake.ci.hcl
-          load: true
-          push: false
-        env:
-          CACHE_REPO: ${{ env.IMAGE_REPO }}
 
       - name: Startup script launch (Slow)
         if: contains(github.base_ref, 'master')
@@ -116,10 +100,13 @@ jobs:
       - name: Startup script launch (Fast)
         if: "!contains(github.base_ref, 'master')"
         run: |
-          ./start ci up -- -d
+          ./start ci up -- --build -d
         env:
+          DOCKER_BUILDKIT: 1
+          BUILDKIT_PROGRESS: "plain"
           STAGE: "ci"
-
+          REPO_DOWNLOADER_ENABLED: false
+          
       - name: Docker debug
         if: always()
         run: |

@@ -1,0 +1,133 @@
+# IntelOwl with Elasticsearch and Kibana
+# Enables analysis results indexing and visualization
+#
+# Prerequisites:
+# - CloudNative-PG operator installed
+# - Gateway API CRDs installed
+# - ECK operator installed (or will be installed as dependency)
+#   helm repo add elastic https://helm.elastic.co
+#   helm install elastic-operator elastic/eck-operator -n elastic-system --create-namespace
+#
+# Install (from helm directory):
+#   cd helm
+#   helm install intelowl . -f examples/with-elasticsearch.yaml -n intelowl --create-namespace
+#
+# Access Kibana:
+#   kubectl port-forward svc/intelowl-kibana-kb-http 5601:5601 -n intelowl
+#   Open https://localhost:5601
+#   Username: elastic
+#   Password: kubectl get secret intelowl-es-es-elastic-user -n intelowl -o jsonpath='{.data.elastic}' | base64 -d
+
+app:
+  version: "v6.5.1"
+  django:
+    secretKey: "your-secret-key-change-me"
+    debug: false
+
+# Standard service configuration
+uwsgi:
+  replicaCount: 2
+
+daphne:
+  enabled: true
+  replicaCount: 2
+
+nginx:
+  replicaCount: 2
+
+celeryWorkerDefault:
+  replicaCount: 2
+  concurrency: 4
+
+# Database
+postgresql:
+  enabled: true
+  instances: 1
+  storage:
+    size: "10Gi"
+
+# Redis
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: true
+  persistence:
+    size: "5Gi"
+
+# Storage
+storage:
+  genericLogs:
+    size: "10Gi"
+  sharedFiles:
+    size: "20Gi"
+  staticContent:
+    size: "5Gi"
+
+# Gateway API networking
+networking:
+  type: "gateway"
+  gateway:
+    create: true
+    gatewayClass:
+      name: "nginx"
+    httpRoute:
+      hostnames:
+        - "intelowl.local"
+
+# =====================================
+# Elasticsearch + Kibana (ECK)
+# =====================================
+
+elasticsearch:
+  enabled: true
+  version: "8.19.12"
+  replicas: 1
+
+  # Set to true for production performance (requires vm.max_map_count=262144)
+  allowMmap: false
+
+  # Additional Elasticsearch configuration
+  # config:
+  #   xpack.security.enabled: true
+
+  storage:
+    size: "30Gi"
+
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "500m"
+    limits:
+      memory: "4Gi"
+      cpu: "2"
+
+  # Kibana dashboard
+  kibana:
+    enabled: true
+    replicas: 1
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
+
+    # Enable Kibana Ingress (optional)
+    # ingress:
+    #   enabled: true
+    #   className: "nginx"
+    #   hosts:
+    #     - host: kibana.intelowl.local
+    #       paths:
+    #         - path: /
+    #           pathType: Prefix
+    #   tls:
+    #     - secretName: kibana-tls
+    #       hosts:
+    #         - kibana.intelowl.local
+
+# Monitoring
+flower:
+  enabled: false

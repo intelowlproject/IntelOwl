@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "intelowl.fullname" . }}-uwsgi
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: uwsgi
+spec:
+  type: {{ .Values.uwsgi.service.type }}
+  ports:
+    - port: {{ .Values.uwsgi.service.port }}
+      targetPort: uwsgi
+      protocol: TCP
+      name: uwsgi
+    - port: 9191
+      targetPort: stats
+      protocol: TCP
+      name: stats
+  selector:
+    {{- include "intelowl.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: uwsgi

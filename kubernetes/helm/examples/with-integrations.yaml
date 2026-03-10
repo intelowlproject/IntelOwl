@@ -1,0 +1,201 @@
+# IntelOwl with additional integrations enabled
+# This example enables several optional Docker-based analyzers
+#
+# Prerequisites:
+# - CloudNative-PG operator installed
+# - Gateway API CRDs installed
+# - Sufficient cluster resources for additional integrations
+#
+# Install (from helm directory):
+#   cd helm
+#   helm install intelowl . -f examples/with-integrations.yaml -n intelowl --create-namespace
+
+app:
+  version: "v6.5.1"
+  django:
+    secretKey: "your-secret-key-change-me"
+    debug: false
+
+# Standard service configuration
+uwsgi:
+  replicaCount: 2
+
+daphne:
+  enabled: true
+  replicaCount: 2
+
+nginx:
+  replicaCount: 2
+
+celeryWorkerDefault:
+  replicaCount: 3
+  concurrency: 4
+
+# Database
+postgresql:
+  enabled: true
+  instances: 1
+  storage:
+    size: "10Gi"
+
+# Redis
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: true
+  persistence:
+    size: "5Gi"
+
+# Storage - larger for integrations data
+storage:
+  genericLogs:
+    size: "20Gi"
+  sharedFiles:
+    size: "50Gi"
+  staticContent:
+    size: "5Gi"
+
+# Gateway API networking
+networking:
+  type: "gateway"
+  gateway:
+    create: true
+    gatewayClass:
+      name: "nginx"
+    httpRoute:
+      hostnames:
+        - "intelowl.local"
+
+# =====================================
+# Optional Integrations
+# =====================================
+
+integrations:
+  # CyberChef - Data transformation recipes
+  cyberchef:
+    enabled: true
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
+
+  # Malware Tools - ClamAV, Qiling emulator
+  malwareTools:
+    enabled: true
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "500m"
+      limits:
+        memory: "4Gi"
+        cpu: "2"
+
+  # Nuclei - Vulnerability scanner
+  nuclei:
+    enabled: true
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+      limits:
+        memory: "2Gi"
+        cpu: "1"
+
+  # PCAP Analyzers - Suricata network analysis
+  pcapAnalyzers:
+    enabled: true
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+      limits:
+        memory: "2Gi"
+        cpu: "1"
+
+  # BBOT - OSINT automation
+  bbot:
+    enabled: true
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+      limits:
+        memory: "2Gi"
+        cpu: "1"
+
+  # Thug - Low-interaction honeyclient for URL analysis
+  thug:
+    enabled: true
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+      limits:
+        memory: "2Gi"
+        cpu: "1"
+
+  # Tor Analyzers - Tor network analysis
+  torAnalyzers:
+    enabled: true
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
+
+  # Phishing Analyzers (includes Selenium Hub + Chromium)
+  # Note: This integration requires more resources
+  phishingAnalyzers:
+    enabled: false # Set to true if needed
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+      limits:
+        memory: "2Gi"
+        cpu: "1"
+    selenium:
+      hub:
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+      chromium:
+        replicaCount: 2
+        maxSessions: 4
+        shmSize: "2Gi"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1"
+
+  # PhoneInfoga - Phone number OSINT
+  phoneinfoga:
+    enabled: false
+
+  # Phunter - Phone number hunting
+  phunter:
+    enabled: false
+
+# Monitoring
+flower:
+  enabled: true
+  auth:
+    enabled: false
+
+# Network policies to isolate integrations
+networkPolicy:
+  enabled: true
+  allowExternalEgress: true

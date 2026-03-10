@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "intelowl.fullname" . }}-test-connection
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  restartPolicy: Never
+  containers:
+    - name: test-nginx-health
+      image: busybox:1.36
+      command:
+        - sh
+        - -c
+        - |
+          echo "Testing Nginx health endpoint..."
+          wget -q --spider --timeout=10 http://{{ include "intelowl.fullname" . }}-nginx:{{ .Values.nginx.service.port }}/hc
+          if [ $? -eq 0 ]; then
+            echo "PASS: Nginx health check endpoint is responding"
+          else
+            echo "FAIL: Nginx health check endpoint is not responding"
+            exit 1
+          fi
+    - name: test-uwsgi-connection
+      image: busybox:1.36
+      command:
+        - sh
+        - -c
+        - |
+          echo "Testing uWSGI TCP connection..."
+          nc -z -w 10 {{ include "intelowl.fullname" . }}-uwsgi {{ .Values.uwsgi.service.port }}
+          if [ $? -eq 0 ]; then
+            echo "PASS: uWSGI is accepting connections"
+          else
+            echo "FAIL: uWSGI is not accepting connections"
+            exit 1
+          fi
+    - name: test-db-connection
+      image: busybox:1.36
+      command:
+        - sh
+        - -c
+        - |
+          echo "Testing PostgreSQL TCP connection..."
+          nc -z -w 10 {{ include "intelowl.databaseHost" . }} {{ include "intelowl.databasePort" . }}
+          if [ $? -eq 0 ]; then
+            echo "PASS: PostgreSQL is accepting connections"
+          else
+            echo "FAIL: PostgreSQL is not accepting connections"
+            exit 1
+          fi
+    - name: test-redis-connection
+      image: busybox:1.36
+      command:
+        - sh
+        - -c
+        - |
+          echo "Testing Redis TCP connection..."
+          nc -z -w 10 {{ include "intelowl.redisHost" . }} {{ include "intelowl.redisPort" . }}
+          if [ $? -eq 0 ]; then
+            echo "PASS: Redis is accepting connections"
+          else
+            echo "FAIL: Redis is not accepting connections"
+            exit 1
+          fi

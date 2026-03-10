@@ -1,0 +1,33 @@
+{{- if .Values.celeryWorkerDefault.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "intelowl.fullname" . }}-celery-worker-default
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: celery-worker-default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "intelowl.fullname" . }}-celery-worker-default
+  minReplicas: {{ .Values.celeryWorkerDefault.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.celeryWorkerDefault.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.celeryWorkerDefault.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.celeryWorkerDefault.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.celeryWorkerDefault.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.celeryWorkerDefault.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}

@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "intelowl.fullname" . }}-uwsgi-config
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: uwsgi
+data:
+  intel_owl.ini: |
+    [uwsgi]
+    # Django application
+    chdir = /opt/deploy/intel_owl
+    module = intel_owl.wsgi:application
+
+    # Process management
+    master = true
+    processes = 12
+    threads = 2
+    enable-threads = true
+
+    # Socket configuration
+    http = :8001
+    http-keepalive = true
+    http-auto-chunked = true
+
+    # Timeouts
+    harakiri = 300
+    harakiri-verbose = true
+    socket-timeout = 300
+    http-timeout = 300
+
+    # Memory management
+    max-requests = 5000
+    max-requests-delta = 500
+    reload-on-rss = 512
+
+    # Worker recycling
+    max-worker-lifetime = 3600
+
+    # Logging
+    log-slow = 3000
+    log-4xx = true
+    log-5xx = true
+    disable-logging = false
+
+    # Stats
+    stats = :9191
+    stats-http = true
+
+    # Buffer sizes
+    buffer-size = 65535
+    post-buffering = 65535
+
+    # Misc
+    vacuum = true
+    die-on-term = true
+    need-app = true
+    lazy-apps = true
+
+    # Static files (handled by nginx, but fallback)
+    static-map = /static=/opt/deploy/intel_owl/static
+
+    # Python optimizations
+    optimize = 2
+    thunder-lock = true

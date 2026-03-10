@@ -1,0 +1,37 @@
+{{- if and .Values.rbac.create .Values.rbac.createRole }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "intelowl.fullname" . }}
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+rules:
+  # Allow reading ConfigMaps and Secrets
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["get", "list", "watch"]
+  # Allow reading Pods for health checks
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  {{- if .Values.celeryRestart.enabled }}
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "patch"]
+  {{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "intelowl.fullname" . }}
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "intelowl.fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "intelowl.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}

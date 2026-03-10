@@ -1,0 +1,117 @@
+{{- if .Values.daphne.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "intelowl.fullname" . }}-daphne
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: daphne
+spec:
+  replicas: {{ .Values.daphne.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "intelowl.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: daphne
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/secrets/app-secrets.yaml") . | sha256sum }}
+        {{- if .Values.metrics.enabled }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8011"
+        prometheus.io/path: "/metrics"
+        {{- end }}
+      labels:
+        {{- include "intelowl.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: daphne
+    spec:
+      {{- include "intelowl.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ include "intelowl.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        {{- include "intelowl.waitForUwsgiInitContainer" . | nindent 8 }}
+        {{- if .Values.storage.localStorage }}
+        {{- include "intelowl.initDirectoriesContainer" . | nindent 8 }}
+        {{- end }}
+      containers:
+        - name: daphne
+          image: {{ include "intelowl.image" (dict "imageRoot" .Values.daphne.image "Chart" .Chart "Values" .Values) }}
+          imagePullPolicy: {{ .Values.daphne.image.pullPolicy }}
+          {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          command:
+            - daphne
+            - -b
+            - "0.0.0.0"
+            - -p
+            - "8011"
+            - intel_owl.asgi:application
+          ports:
+            - name: daphne
+              containerPort: 8011
+              protocol: TCP
+          env:
+            {{- include "intelowl.commonEnvVars" . | nindent 12 }}
+            {{- with .Values.daphne.extraEnvVars }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            {{- include "intelowl.commonVolumeMounts" . | nindent 12 }}
+            {{- with .Values.daphne.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- if .Values.daphne.startupProbe.enabled }}
+          startupProbe:
+            tcpSocket:
+              port: daphne
+            initialDelaySeconds: {{ .Values.daphne.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.daphne.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.daphne.startupProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.daphne.startupProbe.failureThreshold }}
+            successThreshold: {{ .Values.daphne.startupProbe.successThreshold }}
+          {{- end }}
+          {{- if .Values.daphne.livenessProbe.enabled }}
+          livenessProbe:
+            tcpSocket:
+              port: daphne
+            initialDelaySeconds: {{ .Values.daphne.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.daphne.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.daphne.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.daphne.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.daphne.livenessProbe.successThreshold }}
+          {{- end }}
+          {{- if .Values.daphne.readinessProbe.enabled }}
+          readinessProbe:
+            tcpSocket:
+              port: daphne
+            initialDelaySeconds: {{ .Values.daphne.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.daphne.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.daphne.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.daphne.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.daphne.readinessProbe.successThreshold }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.daphne.resources | nindent 12 }}
+      volumes:
+        {{- include "intelowl.commonVolumes" . | nindent 8 }}
+        {{- with .Values.daphne.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.daphne.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.daphne.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.daphne.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

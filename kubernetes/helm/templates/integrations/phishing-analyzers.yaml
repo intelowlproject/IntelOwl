@@ -1,0 +1,218 @@
+{{- if .Values.integrations.phishingAnalyzers.enabled }}
+{{/*
+Phishing Analyzers Integration
+Requires: Selenium Hub + Chromium WebDriver for browser-based phishing detection
+*/}}
+---
+# Selenium Hub Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "intelowl.fullname" . }}-selenium-hub
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: selenium-hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "intelowl.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: selenium-hub
+  template:
+    metadata:
+      labels:
+        {{- include "intelowl.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: selenium-hub
+    spec:
+      {{- include "intelowl.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ include "intelowl.serviceAccountName" . }}
+      containers:
+        - name: selenium-hub
+          image: "{{ .Values.integrations.phishingAnalyzers.selenium.hub.image.repository }}:{{ .Values.integrations.phishingAnalyzers.selenium.hub.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: hub
+              containerPort: 4444
+              protocol: TCP
+            - name: publish
+              containerPort: 4442
+              protocol: TCP
+            - name: subscribe
+              containerPort: 4443
+              protocol: TCP
+          env:
+            - name: SE_ENABLE_TRACING
+              value: "false"
+          livenessProbe:
+            httpGet:
+              path: /wd/hub/status
+              port: hub
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /wd/hub/status
+              port: hub
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.integrations.phishingAnalyzers.selenium.hub.resources | nindent 12 }}
+---
+# Selenium Hub Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "intelowl.fullname" . }}-selenium-hub
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: selenium-hub
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4444
+      targetPort: hub
+      protocol: TCP
+      name: hub
+    - port: 4442
+      targetPort: publish
+      protocol: TCP
+      name: publish
+    - port: 4443
+      targetPort: subscribe
+      protocol: TCP
+      name: subscribe
+  selector:
+    {{- include "intelowl.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: selenium-hub
+---
+# Chromium WebDriver Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "intelowl.fullname" . }}-chromium-webdriver
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: chromium-webdriver
+spec:
+  replicas: {{ .Values.integrations.phishingAnalyzers.selenium.chromium.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "intelowl.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: chromium-webdriver
+  template:
+    metadata:
+      labels:
+        {{- include "intelowl.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: chromium-webdriver
+    spec:
+      {{- include "intelowl.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ include "intelowl.serviceAccountName" . }}
+      containers:
+        - name: chromium
+          image: "{{ .Values.integrations.phishingAnalyzers.selenium.chromium.image.repository }}:{{ .Values.integrations.phishingAnalyzers.selenium.chromium.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: SE_ENABLE_TRACING
+              value: "false"
+            - name: SE_EVENT_BUS_HOST
+              value: {{ include "intelowl.fullname" . }}-selenium-hub
+            - name: SE_EVENT_BUS_PUBLISH_PORT
+              value: "4442"
+            - name: SE_EVENT_BUS_SUBSCRIBE_PORT
+              value: "4443"
+            - name: SE_NODE_OVERRIDE_MAX_SESSIONS
+              value: "true"
+            - name: SE_NODE_MAX_SESSIONS
+              value: "{{ .Values.integrations.phishingAnalyzers.selenium.chromium.maxSessions }}"
+            # Clean session for long running containers
+            - name: SE_ENABLE_BROWSER_LEFTOVERS_CLEANUP
+              value: "true"
+            - name: SE_BROWSER_LEFTOVERS_INTERVAL_SECS
+              value: "86400"
+            - name: SE_BROWSER_LEFTOVERS_PROCESSES_SECS
+              value: "86400"
+          volumeMounts:
+            - name: dshm
+              mountPath: /dev/shm
+          resources:
+            {{- toYaml .Values.integrations.phishingAnalyzers.selenium.chromium.resources | nindent 12 }}
+      volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: {{ .Values.integrations.phishingAnalyzers.selenium.chromium.shmSize }}
+---
+# Phishing Analyzers Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "intelowl.fullname" . }}-phishing-analyzers
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: phishing-analyzers
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "intelowl.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: phishing-analyzers
+  template:
+    metadata:
+      labels:
+        {{- include "intelowl.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: phishing-analyzers
+    spec:
+      {{- include "intelowl.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ include "intelowl.serviceAccountName" . }}
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 0
+      containers:
+        - name: phishing-analyzers
+          image: "{{ .Values.integrations.phishingAnalyzers.image.repository }}:{{ .Values.integrations.phishingAnalyzers.image.tag | default .Values.app.version }}"
+          imagePullPolicy: {{ .Values.integrations.phishingAnalyzers.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.integrations.phishingAnalyzers.service.port }}
+              protocol: TCP
+          env:
+            {{- include "intelowl.commonEnvVars" . | nindent 12 }}
+            # Selenium Hub URL
+            - name: SELENIUM_HUB_URL
+              value: "http://{{ include "intelowl.fullname" . }}-selenium-hub:4444/wd/hub"
+          volumeMounts:
+            {{- include "intelowl.commonVolumeMounts" . | nindent 12 }}
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.integrations.phishingAnalyzers.resources | nindent 12 }}
+      volumes:
+        {{- include "intelowl.commonVolumes" . | nindent 8 }}
+---
+# Phishing Analyzers Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "intelowl.fullname" . }}-phishing-analyzers
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: phishing-analyzers
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.integrations.phishingAnalyzers.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "intelowl.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: phishing-analyzers
+{{- end }}

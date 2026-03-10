@@ -1,0 +1,3410 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "IntelOwl Helm Chart Values",
+    "description": "JSON Schema for validating IntelOwl Helm chart values",
+    "type": "object",
+    "properties": {
+        "app": {
+            "type": "object",
+            "properties": {
+                "baseUrl": {
+                    "description": "Base URL for the application (used for CORS and absolute URLs)",
+                    "type": "string"
+                },
+                "defaultTimeout": {
+                    "description": "Default timeout for analyzers in seconds",
+                    "type": "integer"
+                },
+                "django": {
+                    "type": "object",
+                    "properties": {
+                        "allowedHosts": {
+                            "description": "Django allowed hosts (comma-separated)",
+                            "type": "string"
+                        },
+                        "debug": {
+                            "description": "Enable Django debug mode (never enable in production)",
+                            "type": "boolean"
+                        },
+                        "existingSecret": {
+                            "description": "Use existing secret for Django secret key (key: django-secret)",
+                            "type": "string"
+                        },
+                        "secretKey": {
+                            "description": "Django secret key (required). Generate with: python -c \"from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())\"",
+                            "type": "string"
+                        }
+                    }
+                },
+                "email": {
+                    "type": "object",
+                    "properties": {
+                        "defaultEmail": {
+                            "description": "Default recipient email address",
+                            "type": "string"
+                        },
+                        "defaultFromEmail": {
+                            "description": "Default sender email address",
+                            "type": "string"
+                        },
+                        "enabled": {
+                            "description": "Enable email notifications",
+                            "type": "boolean"
+                        },
+                        "existingSecret": {
+                            "description": "Use existing secret for SMTP password (key: email-password)",
+                            "type": "string"
+                        },
+                        "host": {
+                            "description": "SMTP server host",
+                            "type": "string"
+                        },
+                        "hostPassword": {
+                            "description": "SMTP password",
+                            "type": "string"
+                        },
+                        "hostUser": {
+                            "description": "SMTP username",
+                            "type": "string"
+                        },
+                        "port": {
+                            "description": "SMTP server port",
+                            "type": "integer"
+                        },
+                        "useSsl": {
+                            "description": "Use SSL for SMTP",
+                            "type": "boolean"
+                        },
+                        "useTls": {
+                            "description": "Use TLS for SMTP",
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "httpsEnabled": {
+                    "description": "Enable HTTPS security headers (set to true when TLS is terminated at ingress/gateway)",
+                    "type": "boolean"
+                },
+                "logLevel": {
+                    "description": "Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
+                    "type": "string"
+                },
+                "oldJobsRetentionDays": {
+                    "description": "Number of days to retain old jobs (set to 0 to disable)",
+                    "type": "integer"
+                },
+                "slack": {
+                    "type": "object",
+                    "properties": {
+                        "defaultChannel": {
+                            "description": "Default Slack channel for notifications",
+                            "type": "string"
+                        },
+                        "enabled": {
+                            "description": "Enable Slack notifications",
+                            "type": "boolean"
+                        },
+                        "existingSecret": {
+                            "description": "Use existing secret for Slack token (key: slack-token)",
+                            "type": "string"
+                        },
+                        "token": {
+                            "description": "Slack API token",
+                            "type": "string"
+                        }
+                    }
+                },
+                "version": {
+                    "description": "IntelOwl application version",
+                    "type": "string"
+                }
+            }
+        },
+        "broker": {
+            "type": "object",
+            "properties": {
+                "rabbitmq": {
+                    "type": "object",
+                    "properties": {
+                        "external": {
+                            "type": "object",
+                            "properties": {
+                                "existingSecret": {
+                                    "description": "Use existing secret for RabbitMQ password (key: rabbitmq-password)",
+                                    "type": "string"
+                                },
+                                "host": {
+                                    "description": "External RabbitMQ host",
+                                    "type": "string"
+                                },
+                                "password": {
+                                    "description": "External RabbitMQ password",
+                                    "type": "string"
+                                },
+                                "port": {
+                                    "description": "External RabbitMQ port",
+                                    "type": "integer"
+                                },
+                                "user": {
+                                    "description": "External RabbitMQ user",
+                                    "type": "string"
+                                },
+                                "vhost": {
+                                    "description": "External RabbitMQ virtual host",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "internal": {
+                            "description": "Use internal RabbitMQ subchart",
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "redis": {
+                    "type": "object",
+                    "properties": {
+                        "external": {
+                            "type": "object",
+                            "properties": {
+                                "db": {
+                                    "description": "Redis database number",
+                                    "type": "integer"
+                                },
+                                "existingSecret": {
+                                    "description": "Use existing secret for Redis password (key: redis-password)",
+                                    "type": "string"
+                                },
+                                "host": {
+                                    "description": "External Redis host",
+                                    "type": "string"
+                                },
+                                "password": {
+                                    "description": "External Redis password",
+                                    "type": "string"
+                                },
+                                "port": {
+                                    "description": "External Redis port",
+                                    "type": "integer"
+                                }
+                            }
+                        },
+                        "internal": {
+                            "description": "Use internal Redis subchart",
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "sqs": {
+                    "type": "object",
+                    "properties": {
+                        "accessKeyId": {
+                            "description": "AWS access key ID",
+                            "type": "string"
+                        },
+                        "existingSecret": {
+                            "description": "Use existing secret for AWS credentials",
+                            "type": "string"
+                        },
+                        "region": {
+                            "description": "AWS region for SQS",
+                            "type": "string"
+                        },
+                        "secretAccessKey": {
+                            "description": "AWS secret access key",
+                            "type": "string"
+                        }
+                    }
+                },
+                "type": {
+                    "description": "Broker type: redis, rabbitmq, or sqs",
+                    "type": "string"
+                }
+            }
+        },
+        "celeryBeat": {
+            "type": "object",
+            "properties": {
+                "affinity": {
+                    "description": "Affinity rules for Celery Beat pod",
+                    "type": "object"
+                },
+                "extraEnvVars": {
+                    "description": "Additional environment variables for Celery Beat",
+                    "type": "array"
+                },
+                "extraVolumeMounts": {
+                    "description": "Additional volume mounts for Celery Beat",
+                    "type": "array"
+                },
+                "extraVolumes": {
+                    "description": "Additional volumes for Celery Beat",
+                    "type": "array"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "pullPolicy": {
+                            "description": "Celery Beat image pull policy",
+                            "type": "string"
+                        },
+                        "repository": {
+                            "description": "Celery Beat image repository",
+                            "type": "string"
+                        },
+                        "tag": {
+                            "description": "Celery Beat image tag (defaults to app.version)",
+                            "type": "string"
+                        }
+                    }
+                },
+                "nodeSelector": {
+                    "description": "Node selector for Celery Beat pod",
+                    "type": "object"
+                },
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "description": "CPU limit for Celery Beat",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "description": "Memory limit for Celery Beat",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "description": "CPU request for Celery Beat",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "description": "Memory request for Celery Beat",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tolerations": {
+                    "description": "Tolerations for Celery Beat pod",
+                    "type": "array"
+                }
+            }
+        },
+        "celeryRestart": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "description": "Enable weekly Celery worker restart CronJob",
+                    "type": "boolean"
+                },
+                "schedule": {
+                    "description": "Cron schedule (default: every Sunday at 3:00 AM)",
+                    "type": "string"
+                }
+            }
+        },
+        "celeryWorkerDefault": {
+            "type": "object",
+            "properties": {
+                "affinity": {
+                    "description": "Affinity rules for Celery Worker pods",
+                    "type": "object"
+                },
+                "autoscaling": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable Horizontal Pod Autoscaler for Celery Worker",
+                            "type": "boolean"
+                        },
+                        "maxReplicas": {
+                            "description": "Maximum number of replicas",
+                            "type": "integer"
+                        },
+                        "minReplicas": {
+                            "description": "Minimum number of replicas",
+                            "type": "integer"
+                        },
+                        "targetCPUUtilizationPercentage": {
+                            "description": "Target CPU utilization percentage",
+                            "type": "integer"
+                        },
+                        "targetMemoryUtilizationPercentage": {
+                            "description": "Target memory utilization percentage",
+                            "type": "integer"
+                        }
+                    }
+                },
+                "concurrency": {
+                    "description": "Celery concurrency (number of worker processes per pod)",
+                    "type": "integer"
+                },
+                "extraEnvVars": {
+                    "description": "Additional environment variables for Celery Worker",
+                    "type": "array"
+                },
+                "extraVolumeMounts": {
+                    "description": "Additional volume mounts for Celery Worker",
+                    "type": "array"
+                },
+                "extraVolumes": {
+                    "description": "Additional volumes for Celery Worker",
+                    "type": "array"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "pullPolicy": {
+                            "description": "Celery Worker image pull policy",
+                            "type": "string"
+                        },
+                        "repository": {
+                            "description": "Celery Worker image repository",
+                            "type": "string"
+                        },
+                        "tag": {
+                            "description": "Celery Worker image tag (defaults to app.version)",
+                            "type": "string"
+                        }
+                    }
+                },
+                "nodeSelector": {
+                    "description": "Node selector for Celery Worker pods",
+                    "type": "object"
+                },
+                "pdb": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable Pod Disruption Budget for Celery Worker",
+                            "type": "boolean"
+                        },
+                        "minAvailable": {
+                            "description": "Minimum available pods",
+                            "type": "integer"
+                        }
+                    }
+                },
+                "replicaCount": {
+                    "description": "Number of Celery Worker replicas",
+                    "type": "integer"
+                },
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "description": "CPU limit for Celery Worker",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "description": "Memory limit for Celery Worker",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "description": "CPU request for Celery Worker",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "description": "Memory request for Celery Worker",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "terminationGracePeriodSeconds": {
+                    "description": "Termination grace period in seconds (allow tasks to complete)",
+                    "type": "integer"
+                },
+                "tolerations": {
+                    "description": "Tolerations for Celery Worker pods",
+                    "type": "array"
+                }
+            }
+        },
+        "containerSecurityContext": {
+            "description": "Container security context applied to all containers",
+            "type": "object",
+            "properties": {
+                "allowPrivilegeEscalation": {
+                    "type": "boolean"
+                },
+                "capabilities": {
+                    "type": "object",
+                    "properties": {
+                        "drop": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "readOnlyRootFilesystem": {
+                    "type": "boolean"
+                },
+                "seccompProfile": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "daphne": {
+            "type": "object",
+            "properties": {
+                "affinity": {
+                    "description": "Affinity rules for Daphne pods",
+                    "type": "object"
+                },
+                "enabled": {
+                    "description": "Enable Daphne service",
+                    "type": "boolean"
+                },
+                "extraEnvVars": {
+                    "description": "Additional environment variables for Daphne",
+                    "type": "array"
+                },
+                "extraVolumeMounts": {
+                    "description": "Additional volume mounts for Daphne",
+                    "type": "array"
+                },
+                "extraVolumes": {
+                    "description": "Additional volumes for Daphne",
+                    "type": "array"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "pullPolicy": {
+                            "description": "Daphne image pull policy",
+                            "type": "string"
+                        },
+                        "repository": {
+                            "description": "Daphne image repository",
+                            "type": "string"
+                        },
+                        "tag": {
+                            "description": "Daphne image tag (defaults to app.version)",
+                            "type": "string"
+                        }
+                    }
+                },
+                "livenessProbe": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable liveness probe",
+                            "type": "boolean"
+                        },
+                        "failureThreshold": {
+                            "description": "Failure threshold",
+                            "type": "integer"
+                        },
+                        "initialDelaySeconds": {
+                            "description": "Initial delay seconds",
+                            "type": "integer"
+                        },
+                        "periodSeconds": {
+                            "description": "Period seconds",
+                            "type": "integer"
+                        },
+                        "successThreshold": {
+                            "description": "Success threshold",
+                            "type": "integer"
+                        },
+                        "timeoutSeconds": {
+                            "description": "Timeout seconds",
+                            "type": "integer"
+                        }
+                    }
+                },
+                "nodeSelector": {
+                    "description": "Node selector for Daphne pods",
+                    "type": "object"
+                },
+                "pdb": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable Pod Disruption Budget for Daphne",
+                            "type": "boolean"
+                        },
+                        "minAvailable": {
+                            "description": "Minimum available pods",
+                            "type": "integer"
+                        }
+                    }
+                },
+                "readinessProbe": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable readiness probe",
+                            "type": "boolean"
+                        },
+                        "failureThreshold": {
+                            "description": "Failure threshold",
+                            "type": "integer"
+                        },
+                        "initialDelaySeconds": {
+                            "description": "Initial delay seconds",
+                            "type": "integer"
+                        },
+                        "periodSeconds": {
+                            "description": "Period seconds",
+                            "type": "integer"
+                        },
+                        "successThreshold": {
+                            "description": "Success threshold",
+                            "type": "integer"
+                        },
+                        "timeoutSeconds": {
+                            "description": "Timeout seconds",
+                            "type": "integer"
+                        }
+                    }
+                },
+                "replicaCount": {
+                    "description": "Number of Daphne replicas",
+                    "type": "integer"
+                },
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "description": "CPU limit for Daphne",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "description": "Memory limit for Daphne",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "description": "CPU request for Daphne",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "description": "Memory request for Daphne",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "service": {
+                    "type": "object",
+                    "properties": {
+                        "port": {
+                            "description": "Daphne service port",
+                            "type": "integer"
+                        },
+                        "type": {
+                            "description": "Daphne service type",
+                            "type": "string"
+                        }
+                    }
+                },
+                "startupProbe": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable startup probe",
+                            "type": "boolean"
+                        },
+                        "failureThreshold": {
+                            "description": "Failure threshold",
+                            "type": "integer"
+                        },
+                        "initialDelaySeconds": {
+                            "description": "Initial delay seconds",
+                            "type": "integer"
+                        },
+                        "periodSeconds": {
+                            "description": "Period seconds",
+                            "type": "integer"
+                        },
+                        "successThreshold": {
+                            "description": "Success threshold",
+                            "type": "integer"
+                        },
+                        "timeoutSeconds": {
+                            "description": "Timeout seconds",
+                            "type": "integer"
+                        }
+                    }
+                },
+                "tolerations": {
+                    "description": "Tolerations for Daphne pods",
+                    "type": "array"
+                }
+            }
+        },
+        "database": {
+            "type": "object",
+            "properties": {
+                "external": {
+                    "type": "object",
+                    "properties": {
+                        "existingSecret": {
+                            "description": "Use existing secret for database password (key: db-password)",
+                            "type": "string"
+                        },
+                        "host": {
+                            "description": "External database host",
+                            "type": "string"
+                        },
+                        "name": {
+                            "description": "External database name",
+                            "type": "string"
+                        },
+                        "password": {
+                            "description": "External database password",
+                            "type": "string"
+                        },
+                        "port": {
+                            "description": "External database port",
+                            "type": "integer"
+                        },
+                        "sslMode": {
+                            "description": "SSL mode for PostgreSQL connection",
+                            "type": "string"
+                        },
+                        "user": {
+                            "description": "External database user",
+                            "type": "string"
+                        }
+                    }
+                },
+                "internal": {
+                    "description": "Use internal PostgreSQL (CloudNative-PG) subchart",
+                    "type": "boolean"
+                }
+            }
+        },
+        "elasticsearch": {
+            "type": "object",
+            "properties": {
+                "affinity": {
+                    "description": "Affinity rules for Elasticsearch pods",
+                    "type": "object"
+                },
+                "allowMmap": {
+                    "description": "Allow mmap (set to true for production performance)",
+                    "type": "boolean"
+                },
+                "config": {
+                    "description": "Additional Elasticsearch configuration",
+                    "type": "object"
+                },
+                "enabled": {
+                    "description": "Enable Elasticsearch for analysis results indexing",
+                    "type": "boolean"
+                },
+                "kibana": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable Kibana dashboard",
+                            "type": "boolean"
+                        },
+                        "ingress": {
+                            "type": "object",
+                            "properties": {
+                                "annotations": {
+                                    "description": "Ingress annotations",
+                                    "type": "object"
+                                },
+                                "className": {
+                                    "description": "Ingress class name",
+                                    "type": "string"
+                                },
+                                "enabled": {
+                                    "description": "Enable Ingress for Kibana",
+                                    "type": "boolean"
+                                },
+                                "hosts": {
+                                    "description": "Ingress hosts",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "host": {
+                                                "type": "string"
+                                            },
+                                            "paths": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "path": {
+                                                            "type": "string"
+                                                        },
+                                                        "pathType": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "tls": {
+                                    "description": "TLS configuration",
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "nodeSelector": {
+                            "description": "Node selector for Kibana pods",
+                            "type": "object"
+                        },
+                        "replicas": {
+                            "description": "Number of Kibana replicas",
+                            "type": "integer"
+                        },
+                        "resources": {
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU limit for Kibana",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory limit for Kibana",
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU request for Kibana",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory request for Kibana",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "tolerations": {
+                            "description": "Tolerations for Kibana pods",
+                            "type": "array"
+                        }
+                    }
+                },
+                "nodeSelector": {
+                    "description": "Node selector for Elasticsearch pods",
+                    "type": "object"
+                },
+                "operator": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Install ECK operator via this chart (set to false if ECK operator is already installed)",
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "replicas": {
+                    "description": "Number of Elasticsearch nodes",
+                    "type": "integer"
+                },
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "description": "CPU limit for Elasticsearch",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "description": "Memory limit for Elasticsearch",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "description": "CPU request for Elasticsearch",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "description": "Memory request for Elasticsearch",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "storage": {
+                    "type": "object",
+                    "properties": {
+                        "size": {
+                            "description": "Storage size for Elasticsearch data",
+                            "type": "string"
+                        },
+                        "storageClass": {
+                            "description": "Storage class (uses global.storageClass if empty)",
+                            "type": "string"
+                        }
+                    }
+                },
+                "tolerations": {
+                    "description": "Tolerations for Elasticsearch pods",
+                    "type": "array"
+                },
+                "version": {
+                    "description": "Elasticsearch version",
+                    "type": "string"
+                }
+            }
+        },
+        "externalSecrets": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "description": "Enable External Secrets Operator integration",
+                    "type": "boolean"
+                },
+                "refreshInterval": {
+                    "description": "Refresh interval for secrets",
+                    "type": "string"
+                },
+                "remoteRefs": {
+                    "type": "object",
+                    "properties": {
+                        "dbPassword": {
+                            "type": "object",
+                            "properties": {
+                                "key": {
+                                    "description": "Remote key for database password",
+                                    "type": "string"
+                                },
+                                "property": {
+                                    "description": "Property name in remote secret",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "djangoSecret": {
+                            "type": "object",
+                            "properties": {
+                                "key": {
+                                    "description": "Remote key for Django secret",
+                                    "type": "string"
+                                },
+                                "property": {
+                                    "description": "Property name in remote secret",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "redisPassword": {
+                            "type": "object",
+                            "properties": {
+                                "key": {
+                                    "description": "Remote key for Redis password",
+                                    "type": "string"
+                                },
+                                "property": {
+                                    "description": "Property name in remote secret",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "secretStoreRef": {
+                    "type": "object",
+                    "properties": {
+                        "kind": {
+                            "description": "SecretStore kind",
+                            "type": "string"
+                        },
+                        "name": {
+                            "description": "SecretStore name",
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "flower": {
+            "type": "object",
+            "properties": {
+                "affinity": {
+                    "description": "Affinity rules for Flower pod",
+                    "type": "object"
+                },
+                "auth": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable basic authentication",
+                            "type": "boolean"
+                        },
+                        "existingSecret": {
+                            "description": "Use existing secret for password (key: flower-password)",
+                            "type": "string"
+                        },
+                        "password": {
+                            "description": "Password for basic auth (auto-generated if empty)",
+                            "type": "string"
+                        },
+                        "username": {
+                            "description": "Username for basic auth",
+                            "type": "string"
+                        }
+                    }
+                },
+                "enabled": {
+                    "description": "Enable Flower dashboard",
+                    "type": "boolean"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "pullPolicy": {
+                            "description": "Flower image pull policy",
+                            "type": "string"
+                        },
+                        "repository": {
+                            "description": "Flower image repository",
+                            "type": "string"
+                        },
+                        "tag": {
+                            "description": "Flower image tag",
+                            "type": "string"
+                        }
+                    }
+                },
+                "ingress": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "description": "Ingress annotations",
+                            "type": "object"
+                        },
+                        "className": {
+                            "description": "Ingress class name",
+                            "type": "string"
+                        },
+                        "enabled": {
+                            "description": "Enable Ingress for Flower",
+                            "type": "boolean"
+                        },
+                        "hosts": {
+                            "description": "Ingress hosts",
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "host": {
+                                        "type": "string"
+                                    },
+                                    "paths": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "path": {
+                                                    "type": "string"
+                                                },
+                                                "pathType": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "tls": {
+                            "description": "TLS configuration",
+                            "type": "array"
+                        }
+                    }
+                },
+                "nodeSelector": {
+                    "description": "Node selector for Flower pod",
+                    "type": "object"
+                },
+                "replicaCount": {
+                    "description": "Number of Flower replicas",
+                    "type": "integer"
+                },
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "description": "CPU limit for Flower",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "description": "Memory limit for Flower",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "description": "CPU request for Flower",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "description": "Memory request for Flower",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "service": {
+                    "type": "object",
+                    "properties": {
+                        "port": {
+                            "description": "Flower service port",
+                            "type": "integer"
+                        },
+                        "type": {
+                            "description": "Flower service type",
+                            "type": "string"
+                        }
+                    }
+                },
+                "tolerations": {
+                    "description": "Tolerations for Flower pod",
+                    "type": "array"
+                }
+            }
+        },
+        "fullnameOverride": {
+            "description": "String to fully override intelowl.fullname",
+            "type": "string"
+        },
+        "global": {
+            "type": "object",
+            "properties": {
+                "imagePullSecrets": {
+                    "description": "Global Docker registry secret names as an array",
+                    "type": "array"
+                },
+                "imageRegistry": {
+                    "description": "Global Docker image registry",
+                    "type": "string"
+                },
+                "storageClass": {
+                    "description": "Global StorageClass for Persistent Volume(s)",
+                    "type": "string"
+                }
+            }
+        },
+        "integrations": {
+            "type": "object",
+            "properties": {
+                "bbot": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable BBOT integration",
+                            "type": "boolean"
+                        },
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "pullPolicy": {
+                                    "description": "Image pull policy",
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "description": "BBOT image repository",
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "description": "Image tag (defaults to app.version)",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "resources": {
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU limit",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory limit",
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU request",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory request",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "service": {
+                            "type": "object",
+                            "properties": {
+                                "port": {
+                                    "description": "Service port",
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                },
+                "cyberchef": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable CyberChef integration",
+                            "type": "boolean"
+                        },
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "pullPolicy": {
+                                    "description": "Image pull policy",
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "description": "CyberChef image repository",
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "description": "CyberChef image tag (defaults to app.version)",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "resources": {
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU limit",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory limit",
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU request",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory request",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "service": {
+                            "type": "object",
+                            "properties": {
+                                "port": {
+                                    "description": "Service port",
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                },
+                "malwareTools": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable Malware Tools integration",
+                            "type": "boolean"
+                        },
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "pullPolicy": {
+                                    "description": "Image pull policy",
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "description": "Malware Tools image repository",
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "description": "Image tag (defaults to app.version)",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "resources": {
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU limit",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory limit",
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU request",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory request",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "service": {
+                            "type": "object",
+                            "properties": {
+                                "port": {
+                                    "description": "Service port",
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                },
+                "nuclei": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable Nuclei integration",
+                            "type": "boolean"
+                        },
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "pullPolicy": {
+                                    "description": "Image pull policy",
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "description": "Nuclei image repository",
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "description": "Image tag (defaults to app.version)",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "resources": {
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU limit",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory limit",
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU request",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory request",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "service": {
+                            "type": "object",
+                            "properties": {
+                                "port": {
+                                    "description": "Service port",
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                },
+                "pcapAnalyzers": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable PCAP Analyzers integration",
+                            "type": "boolean"
+                        },
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "pullPolicy": {
+                                    "description": "Image pull policy",
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "description": "PCAP Analyzers image repository",
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "description": "Image tag (defaults to app.version)",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "resources": {
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU limit",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory limit",
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU request",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory request",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "service": {
+                            "type": "object",
+                            "properties": {
+                                "port": {
+                                    "description": "Service port",
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                },
+                "phishingAnalyzers": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable Phishing Analyzers integration (includes Selenium)",
+                            "type": "boolean"
+                        },
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "pullPolicy": {
+                                    "description": "Image pull policy",
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "description": "Phishing Analyzers image repository",
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "description": "Image tag (defaults to app.version)",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "resources": {
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU limit",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory limit",
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU request",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory request",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "selenium": {
+                            "type": "object",
+                            "properties": {
+                                "chromium": {
+                                    "type": "object",
+                                    "properties": {
+                                        "image": {
+                                            "type": "object",
+                                            "properties": {
+                                                "repository": {
+                                                    "description": "Chromium node image repository",
+                                                    "type": "string"
+                                                },
+                                                "tag": {
+                                                    "description": "Chromium node image tag",
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "maxSessions": {
+                                            "description": "Maximum sessions per node",
+                                            "type": "integer"
+                                        },
+                                        "replicaCount": {
+                                            "description": "Number of Chromium nodes",
+                                            "type": "integer"
+                                        },
+                                        "resources": {
+                                            "type": "object",
+                                            "properties": {
+                                                "limits": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "cpu": {
+                                                            "description": "CPU limit",
+                                                            "type": "string"
+                                                        },
+                                                        "memory": {
+                                                            "description": "Memory limit",
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "requests": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "cpu": {
+                                                            "description": "CPU request",
+                                                            "type": "string"
+                                                        },
+                                                        "memory": {
+                                                            "description": "Memory request",
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "shmSize": {
+                                            "description": "Shared memory size for Chromium",
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "hub": {
+                                    "type": "object",
+                                    "properties": {
+                                        "image": {
+                                            "type": "object",
+                                            "properties": {
+                                                "repository": {
+                                                    "description": "Selenium Hub image repository",
+                                                    "type": "string"
+                                                },
+                                                "tag": {
+                                                    "description": "Selenium Hub image tag",
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "resources": {
+                                            "type": "object",
+                                            "properties": {
+                                                "limits": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "cpu": {
+                                                            "description": "CPU limit",
+                                                            "type": "string"
+                                                        },
+                                                        "memory": {
+                                                            "description": "Memory limit",
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "requests": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "cpu": {
+                                                            "description": "CPU request",
+                                                            "type": "string"
+                                                        },
+                                                        "memory": {
+                                                            "description": "Memory request",
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "service": {
+                            "type": "object",
+                            "properties": {
+                                "port": {
+                                    "description": "Service port",
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                },
+                "phoneinfoga": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable PhoneInfoga integration",
+                            "type": "boolean"
+                        },
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "pullPolicy": {
+                                    "description": "Image pull policy",
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "description": "PhoneInfoga image repository",
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "description": "Image tag",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "resources": {
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU limit",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory limit",
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU request",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory request",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "service": {
+                            "type": "object",
+                            "properties": {
+                                "port": {
+                                    "description": "Service port",
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                },
+                "phunter": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable Phunter integration",
+                            "type": "boolean"
+                        },
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "pullPolicy": {
+                                    "description": "Image pull policy",
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "description": "Phunter image repository",
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "description": "Image tag (defaults to app.version)",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "resources": {
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU limit",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory limit",
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU request",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory request",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "service": {
+                            "type": "object",
+                            "properties": {
+                                "port": {
+                                    "description": "Service port",
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                },
+                "thug": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable Thug integration",
+                            "type": "boolean"
+                        },
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "pullPolicy": {
+                                    "description": "Image pull policy",
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "description": "Thug image repository",
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "description": "Image tag (defaults to app.version)",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "resources": {
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU limit",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory limit",
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU request",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory request",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "service": {
+                            "type": "object",
+                            "properties": {
+                                "port": {
+                                    "description": "Service port",
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                },
+                "torAnalyzers": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable Tor Analyzers integration",
+                            "type": "boolean"
+                        },
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "pullPolicy": {
+                                    "description": "Image pull policy",
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "description": "Tor Analyzers image repository",
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "description": "Image tag (defaults to app.version)",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "resources": {
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU limit",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory limit",
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU request",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory request",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "service": {
+                            "type": "object",
+                            "properties": {
+                                "port": {
+                                    "description": "Service port",
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "logCleanup": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "description": "Enable log cleanup CronJob",
+                    "type": "boolean"
+                },
+                "retentionDays": {
+                    "description": "Number of days to retain log files",
+                    "type": "integer"
+                },
+                "schedule": {
+                    "description": "Cron schedule (default: every day at 2:00 AM)",
+                    "type": "string"
+                }
+            }
+        },
+        "metrics": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "description": "Enable Prometheus metrics",
+                    "type": "boolean"
+                },
+                "podMonitor": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable PodMonitor for Prometheus Operator",
+                            "type": "boolean"
+                        },
+                        "interval": {
+                            "description": "Scrape interval",
+                            "type": "string"
+                        },
+                        "labels": {
+                            "description": "Additional labels for PodMonitor",
+                            "type": "object"
+                        },
+                        "scrapeTimeout": {
+                            "description": "Scrape timeout",
+                            "type": "string"
+                        }
+                    }
+                },
+                "serviceMonitor": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable ServiceMonitor for Prometheus Operator",
+                            "type": "boolean"
+                        },
+                        "interval": {
+                            "description": "Scrape interval",
+                            "type": "string"
+                        },
+                        "labels": {
+                            "description": "Additional labels for ServiceMonitor",
+                            "type": "object"
+                        },
+                        "scrapeTimeout": {
+                            "description": "Scrape timeout",
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "migration": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "description": "Enable migration job as pre-install/pre-upgrade hook",
+                    "type": "boolean"
+                },
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "description": "CPU limit for migration job",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "description": "Memory limit for migration job",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "description": "CPU request for migration job",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "description": "Memory request for migration job",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "timeout": {
+                    "description": "Migration timeout in seconds",
+                    "type": "integer"
+                }
+            }
+        },
+        "multiQueue": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "description": "Enable multi-queue workers for better resource isolation",
+                    "type": "boolean"
+                },
+                "workerIngestor": {
+                    "type": "object",
+                    "properties": {
+                        "affinity": {
+                            "description": "Affinity rules",
+                            "type": "object"
+                        },
+                        "concurrency": {
+                            "description": "Worker concurrency",
+                            "type": "integer"
+                        },
+                        "enabled": {
+                            "description": "Enable ingestor worker",
+                            "type": "boolean"
+                        },
+                        "nodeSelector": {
+                            "description": "Node selector",
+                            "type": "object"
+                        },
+                        "replicaCount": {
+                            "description": "Number of replicas",
+                            "type": "integer"
+                        },
+                        "resources": {
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU limit",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory limit",
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU request",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory request",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "terminationGracePeriodSeconds": {
+                            "description": "Termination grace period",
+                            "type": "integer"
+                        },
+                        "tolerations": {
+                            "description": "Tolerations",
+                            "type": "array"
+                        }
+                    }
+                },
+                "workerLocal": {
+                    "type": "object",
+                    "properties": {
+                        "affinity": {
+                            "description": "Affinity rules",
+                            "type": "object"
+                        },
+                        "concurrency": {
+                            "description": "Worker concurrency",
+                            "type": "integer"
+                        },
+                        "enabled": {
+                            "description": "Enable local queue worker",
+                            "type": "boolean"
+                        },
+                        "nodeSelector": {
+                            "description": "Node selector",
+                            "type": "object"
+                        },
+                        "replicaCount": {
+                            "description": "Number of replicas",
+                            "type": "integer"
+                        },
+                        "resources": {
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU limit",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory limit",
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU request",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory request",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "terminationGracePeriodSeconds": {
+                            "description": "Termination grace period",
+                            "type": "integer"
+                        },
+                        "tolerations": {
+                            "description": "Tolerations",
+                            "type": "array"
+                        }
+                    }
+                },
+                "workerLong": {
+                    "type": "object",
+                    "properties": {
+                        "affinity": {
+                            "description": "Affinity rules",
+                            "type": "object"
+                        },
+                        "concurrency": {
+                            "description": "Worker concurrency",
+                            "type": "integer"
+                        },
+                        "enabled": {
+                            "description": "Enable long-running tasks worker",
+                            "type": "boolean"
+                        },
+                        "nodeSelector": {
+                            "description": "Node selector",
+                            "type": "object"
+                        },
+                        "replicaCount": {
+                            "description": "Number of replicas",
+                            "type": "integer"
+                        },
+                        "resources": {
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU limit",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory limit",
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "description": "CPU request",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "description": "Memory request",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "terminationGracePeriodSeconds": {
+                            "description": "Termination grace period (longer for long tasks)",
+                            "type": "integer"
+                        },
+                        "tolerations": {
+                            "description": "Tolerations",
+                            "type": "array"
+                        }
+                    }
+                }
+            }
+        },
+        "nameOverride": {
+            "description": "String to partially override intelowl.fullname",
+            "type": "string"
+        },
+        "networkPolicy": {
+            "type": "object",
+            "properties": {
+                "allowExternalEgress": {
+                    "description": "Allow external egress (required for analyzers that need internet access)",
+                    "type": "boolean"
+                },
+                "allowedNamespaces": {
+                    "description": "Allow traffic from specific namespaces",
+                    "type": "array"
+                },
+                "enabled": {
+                    "description": "Enable network policies",
+                    "type": "boolean"
+                }
+            }
+        },
+        "networking": {
+            "type": "object",
+            "properties": {
+                "gateway": {
+                    "type": "object",
+                    "properties": {
+                        "create": {
+                            "description": "Create Gateway resource",
+                            "type": "boolean"
+                        },
+                        "gatewayClass": {
+                            "type": "object",
+                            "properties": {
+                                "create": {
+                                    "description": "Create GatewayClass (usually created by the provider)",
+                                    "type": "boolean"
+                                },
+                                "name": {
+                                    "description": "GatewayClass name to use",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "httpRoute": {
+                            "type": "object",
+                            "properties": {
+                                "create": {
+                                    "description": "Create HTTPRoute",
+                                    "type": "boolean"
+                                },
+                                "hostnames": {
+                                    "description": "Hostnames for the route",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "websocket": {
+                                    "type": "object",
+                                    "properties": {
+                                        "enabled": {
+                                            "description": "Enable WebSocket route for Daphne",
+                                            "type": "boolean"
+                                        },
+                                        "path": {
+                                            "description": "WebSocket path prefix",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "listeners": {
+                            "description": "Gateway listeners configuration",
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "allowedRoutes": {
+                                        "type": "object",
+                                        "properties": {
+                                            "namespaces": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "from": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "port": {
+                                        "type": "integer"
+                                    },
+                                    "protocol": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "name": {
+                            "description": "Gateway name (auto-generated if empty)",
+                            "type": "string"
+                        }
+                    }
+                },
+                "gatewayProvider": {
+                    "description": "Gateway API provider: nginx-gateway-fabric, envoy-gateway, istio, kong, traefik",
+                    "type": "string"
+                },
+                "ingress": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "description": "Ingress annotations",
+                            "type": "object"
+                        },
+                        "className": {
+                            "description": "Ingress class name",
+                            "type": "string"
+                        },
+                        "enabled": {
+                            "description": "Enable Ingress",
+                            "type": "boolean"
+                        },
+                        "hosts": {
+                            "description": "Ingress hosts configuration",
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "host": {
+                                        "type": "string"
+                                    },
+                                    "paths": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "path": {
+                                                    "type": "string"
+                                                },
+                                                "pathType": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "tls": {
+                            "description": "TLS configuration",
+                            "type": "array"
+                        }
+                    }
+                },
+                "type": {
+                    "description": "Networking type: \"gateway\" (Gateway API) or \"ingress\" (traditional Ingress)",
+                    "type": "string"
+                }
+            }
+        },
+        "nginx": {
+            "type": "object",
+            "properties": {
+                "affinity": {
+                    "description": "Affinity rules for Nginx pods",
+                    "type": "object"
+                },
+                "extraEnvVars": {
+                    "description": "Additional environment variables for Nginx",
+                    "type": "array"
+                },
+                "extraVolumeMounts": {
+                    "description": "Additional volume mounts for Nginx",
+                    "type": "array"
+                },
+                "extraVolumes": {
+                    "description": "Additional volumes for Nginx",
+                    "type": "array"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "pullPolicy": {
+                            "description": "Nginx image pull policy",
+                            "type": "string"
+                        },
+                        "repository": {
+                            "description": "Nginx image repository",
+                            "type": "string"
+                        },
+                        "tag": {
+                            "description": "Nginx image tag (defaults to app.version)",
+                            "type": "string"
+                        }
+                    }
+                },
+                "livenessProbe": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable liveness probe",
+                            "type": "boolean"
+                        },
+                        "failureThreshold": {
+                            "description": "Failure threshold",
+                            "type": "integer"
+                        },
+                        "initialDelaySeconds": {
+                            "description": "Initial delay seconds",
+                            "type": "integer"
+                        },
+                        "periodSeconds": {
+                            "description": "Period seconds",
+                            "type": "integer"
+                        },
+                        "successThreshold": {
+                            "description": "Success threshold",
+                            "type": "integer"
+                        },
+                        "timeoutSeconds": {
+                            "description": "Timeout seconds",
+                            "type": "integer"
+                        }
+                    }
+                },
+                "nodeSelector": {
+                    "description": "Node selector for Nginx pods",
+                    "type": "object"
+                },
+                "pdb": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable Pod Disruption Budget for Nginx",
+                            "type": "boolean"
+                        },
+                        "minAvailable": {
+                            "description": "Minimum available pods",
+                            "type": "integer"
+                        }
+                    }
+                },
+                "readinessProbe": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable readiness probe",
+                            "type": "boolean"
+                        },
+                        "failureThreshold": {
+                            "description": "Failure threshold",
+                            "type": "integer"
+                        },
+                        "initialDelaySeconds": {
+                            "description": "Initial delay seconds",
+                            "type": "integer"
+                        },
+                        "periodSeconds": {
+                            "description": "Period seconds",
+                            "type": "integer"
+                        },
+                        "successThreshold": {
+                            "description": "Success threshold",
+                            "type": "integer"
+                        },
+                        "timeoutSeconds": {
+                            "description": "Timeout seconds",
+                            "type": "integer"
+                        }
+                    }
+                },
+                "replicaCount": {
+                    "description": "Number of Nginx replicas",
+                    "type": "integer"
+                },
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "description": "CPU limit for Nginx",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "description": "Memory limit for Nginx",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "description": "CPU request for Nginx",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "description": "Memory request for Nginx",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "service": {
+                    "type": "object",
+                    "properties": {
+                        "httpsPort": {
+                            "description": "Nginx HTTPS port",
+                            "type": "integer"
+                        },
+                        "port": {
+                            "description": "Nginx HTTP port",
+                            "type": "integer"
+                        },
+                        "type": {
+                            "description": "Nginx service type",
+                            "type": "string"
+                        }
+                    }
+                },
+                "startupProbe": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable startup probe",
+                            "type": "boolean"
+                        },
+                        "failureThreshold": {
+                            "description": "Failure threshold",
+                            "type": "integer"
+                        },
+                        "initialDelaySeconds": {
+                            "description": "Initial delay seconds",
+                            "type": "integer"
+                        },
+                        "periodSeconds": {
+                            "description": "Period seconds",
+                            "type": "integer"
+                        },
+                        "successThreshold": {
+                            "description": "Success threshold",
+                            "type": "integer"
+                        },
+                        "timeoutSeconds": {
+                            "description": "Timeout seconds",
+                            "type": "integer"
+                        }
+                    }
+                },
+                "tolerations": {
+                    "description": "Tolerations for Nginx pods",
+                    "type": "array"
+                }
+            }
+        },
+        "podSecurityContext": {
+            "description": "Pod security context applied to all pods",
+            "type": "object",
+            "properties": {
+                "fsGroup": {
+                    "type": "integer"
+                },
+                "runAsGroup": {
+                    "type": "integer"
+                },
+                "runAsNonRoot": {
+                    "type": "boolean"
+                },
+                "runAsUser": {
+                    "type": "integer"
+                }
+            }
+        },
+        "postgresql": {
+            "type": "object",
+            "properties": {
+                "affinity": {
+                    "description": "Affinity rules for PostgreSQL pods",
+                    "type": "object"
+                },
+                "backup": {
+                    "type": "object",
+                    "properties": {
+                        "destinationPath": {
+                            "description": "S3 destination path",
+                            "type": "string"
+                        },
+                        "enabled": {
+                            "description": "Enable backup to S3-compatible storage",
+                            "type": "boolean"
+                        },
+                        "endpointURL": {
+                            "description": "S3 endpoint URL",
+                            "type": "string"
+                        },
+                        "retentionPolicy": {
+                            "description": "Backup retention policy",
+                            "type": "string"
+                        },
+                        "s3Credentials": {
+                            "type": "object",
+                            "properties": {
+                                "accessKeyIdKey": {
+                                    "description": "Key for access key ID",
+                                    "type": "string"
+                                },
+                                "secretAccessKeyKey": {
+                                    "description": "Key for secret access key",
+                                    "type": "string"
+                                },
+                                "secretName": {
+                                    "description": "Secret name containing S3 credentials",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "database": {
+                    "description": "Database name",
+                    "type": "string"
+                },
+                "enabled": {
+                    "description": "Enable PostgreSQL (creates CNPG Cluster resource)",
+                    "type": "boolean"
+                },
+                "existingSecret": {
+                    "description": "Use existing secret for credentials",
+                    "type": "string"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "pullPolicy": {
+                            "description": "Image pull policy",
+                            "type": "string"
+                        },
+                        "repository": {
+                            "description": "PostgreSQL image repository",
+                            "type": "string"
+                        },
+                        "tag": {
+                            "description": "PostgreSQL version tag",
+                            "type": "string"
+                        }
+                    }
+                },
+                "initdb": {
+                    "type": "object",
+                    "properties": {
+                        "postInitSQL": {
+                            "description": "Post-init SQL statements",
+                            "type": "array"
+                        }
+                    }
+                },
+                "instances": {
+                    "description": "Number of PostgreSQL instances (1 for dev, 3 for HA)",
+                    "type": "integer"
+                },
+                "monitoring": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable PostgreSQL monitoring",
+                            "type": "boolean"
+                        },
+                        "podMonitor": {
+                            "description": "Enable PodMonitor for PostgreSQL",
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "nodeSelector": {
+                    "description": "Node selector for PostgreSQL pods",
+                    "type": "object"
+                },
+                "operator": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Install CloudNative-PG operator via this chart (set to true only if not already installed)",
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "parameters": {
+                    "description": "PostgreSQL server parameters",
+                    "type": "object"
+                },
+                "password": {
+                    "description": "Database password (auto-generated if empty)",
+                    "type": "string"
+                },
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "description": "CPU limit for PostgreSQL",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "description": "Memory limit for PostgreSQL",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "description": "CPU request for PostgreSQL",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "description": "Memory request for PostgreSQL",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "storage": {
+                    "type": "object",
+                    "properties": {
+                        "size": {
+                            "description": "Storage size for PostgreSQL data",
+                            "type": "string"
+                        },
+                        "storageClass": {
+                            "description": "Storage class (uses global.storageClass if empty)",
+                            "type": "string"
+                        }
+                    }
+                },
+                "synchronous": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable synchronous replication (requires instances \u003e 1)",
+                            "type": "boolean"
+                        },
+                        "maxSyncReplicas": {
+                            "description": "Maximum synchronous replicas",
+                            "type": "integer"
+                        },
+                        "minSyncReplicas": {
+                            "description": "Minimum synchronous replicas",
+                            "type": "integer"
+                        }
+                    }
+                },
+                "tolerations": {
+                    "description": "Tolerations for PostgreSQL pods",
+                    "type": "array"
+                },
+                "username": {
+                    "description": "Database username",
+                    "type": "string"
+                },
+                "walStorage": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable separate WAL storage",
+                            "type": "boolean"
+                        },
+                        "size": {
+                            "description": "WAL storage size",
+                            "type": "string"
+                        },
+                        "storageClass": {
+                            "description": "WAL storage class",
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "rabbitmq": {
+            "type": "object",
+            "properties": {
+                "affinity": {
+                    "description": "Affinity rules for RabbitMQ pods",
+                    "type": "object"
+                },
+                "auth": {
+                    "type": "object",
+                    "properties": {
+                        "existingSecret": {
+                            "description": "Use existing secret for credentials",
+                            "type": "string"
+                        },
+                        "existingSecretPasswordKey": {
+                            "description": "Key in existingSecret containing the password (CloudPirates chart uses \"password\")",
+                            "type": "string"
+                        },
+                        "password": {
+                            "description": "RabbitMQ password (auto-generated if empty)",
+                            "type": "string"
+                        },
+                        "username": {
+                            "description": "RabbitMQ username",
+                            "type": "string"
+                        }
+                    }
+                },
+                "enabled": {
+                    "description": "Enable RabbitMQ subchart",
+                    "type": "boolean"
+                },
+                "management": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable RabbitMQ management plugin",
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "nodeSelector": {
+                    "description": "Node selector for RabbitMQ pods",
+                    "type": "object"
+                },
+                "persistence": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable RabbitMQ persistence",
+                            "type": "boolean"
+                        },
+                        "size": {
+                            "description": "Persistence storage size",
+                            "type": "string"
+                        },
+                        "storageClass": {
+                            "description": "Storage class",
+                            "type": "string"
+                        }
+                    }
+                },
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "description": "CPU limit for RabbitMQ",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "description": "Memory limit for RabbitMQ",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "description": "CPU request for RabbitMQ",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "description": "Memory request for RabbitMQ",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tolerations": {
+                    "description": "Tolerations for RabbitMQ pods",
+                    "type": "array"
+                },
+                "vhost": {
+                    "description": "RabbitMQ virtual host",
+                    "type": "string"
+                }
+            }
+        },
+        "rbac": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "description": "Annotations for ServiceAccount",
+                    "type": "object"
+                },
+                "create": {
+                    "description": "Create ServiceAccount",
+                    "type": "boolean"
+                },
+                "createRole": {
+                    "description": "Create Role and RoleBinding",
+                    "type": "boolean"
+                },
+                "serviceAccountName": {
+                    "description": "ServiceAccount name (auto-generated if empty)",
+                    "type": "string"
+                }
+            }
+        },
+        "redis": {
+            "type": "object",
+            "properties": {
+                "affinity": {
+                    "description": "Affinity rules for Redis pods",
+                    "type": "object"
+                },
+                "architecture": {
+                    "description": "Redis architecture: standalone or replication",
+                    "type": "string"
+                },
+                "auth": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable Redis authentication",
+                            "type": "boolean"
+                        },
+                        "existingSecret": {
+                            "description": "Use existing secret for password",
+                            "type": "string"
+                        },
+                        "existingSecretPasswordKey": {
+                            "description": "Key in existingSecret containing the password",
+                            "type": "string"
+                        },
+                        "password": {
+                            "description": "Redis password (auto-generated if empty)",
+                            "type": "string"
+                        }
+                    }
+                },
+                "enabled": {
+                    "description": "Enable Redis subchart",
+                    "type": "boolean"
+                },
+                "nodeSelector": {
+                    "description": "Node selector for Redis pods",
+                    "type": "object"
+                },
+                "persistence": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable Redis persistence",
+                            "type": "boolean"
+                        },
+                        "size": {
+                            "description": "Persistence storage size",
+                            "type": "string"
+                        },
+                        "storageClass": {
+                            "description": "Storage class",
+                            "type": "string"
+                        }
+                    }
+                },
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "description": "CPU limit for Redis",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "description": "Memory limit for Redis",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "description": "CPU request for Redis",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "description": "Memory request for Redis",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "sentinel": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable Sentinel for HA (requires architecture: replication)",
+                            "type": "boolean"
+                        },
+                        "quorum": {
+                            "description": "Sentinel quorum",
+                            "type": "integer"
+                        }
+                    }
+                },
+                "tolerations": {
+                    "description": "Tolerations for Redis pods",
+                    "type": "array"
+                }
+            }
+        },
+        "storage": {
+            "type": "object",
+            "properties": {
+                "genericLogs": {
+                    "type": "object",
+                    "properties": {
+                        "accessModes": {
+                            "description": "Access modes for generic logs PVC",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "size": {
+                            "description": "Storage size for generic logs",
+                            "type": "string"
+                        },
+                        "storageClass": {
+                            "description": "Storage class for generic logs (uses global.storageClass if empty)",
+                            "type": "string"
+                        }
+                    }
+                },
+                "localStorage": {
+                    "description": "Use local storage (PVCs). Set to false for cloud storage (S3)",
+                    "type": "boolean"
+                },
+                "s3": {
+                    "type": "object",
+                    "properties": {
+                        "accessKeyId": {
+                            "description": "AWS access key ID",
+                            "type": "string"
+                        },
+                        "bucket": {
+                            "description": "S3 bucket name",
+                            "type": "string"
+                        },
+                        "enabled": {
+                            "description": "Enable S3 storage",
+                            "type": "boolean"
+                        },
+                        "endpoint": {
+                            "description": "S3 endpoint URL (for S3-compatible storage like MinIO)",
+                            "type": "string"
+                        },
+                        "existingSecret": {
+                            "description": "Use existing secret for S3 credentials",
+                            "type": "string"
+                        },
+                        "region": {
+                            "description": "AWS region",
+                            "type": "string"
+                        },
+                        "secretAccessKey": {
+                            "description": "AWS secret access key",
+                            "type": "string"
+                        }
+                    }
+                },
+                "sharedFiles": {
+                    "type": "object",
+                    "properties": {
+                        "accessModes": {
+                            "description": "Access modes for shared files PVC",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "size": {
+                            "description": "Storage size for shared files",
+                            "type": "string"
+                        },
+                        "storageClass": {
+                            "description": "Storage class for shared files (uses global.storageClass if empty)",
+                            "type": "string"
+                        }
+                    }
+                },
+                "staticContent": {
+                    "type": "object",
+                    "properties": {
+                        "accessModes": {
+                            "description": "Access modes for static content PVC",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "size": {
+                            "description": "Storage size for static content",
+                            "type": "string"
+                        },
+                        "storageClass": {
+                            "description": "Storage class for static content (uses global.storageClass if empty)",
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "superuser": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "description": "Superuser email",
+                    "type": "string"
+                },
+                "enabled": {
+                    "description": "Enable automatic superuser creation (post-install hook)",
+                    "type": "boolean"
+                },
+                "existingSecret": {
+                    "description": "Use existing secret for superuser password (key: superuser-password)",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "Superuser password (auto-generated if empty)",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "Superuser username",
+                    "type": "string"
+                }
+            }
+        },
+        "uwsgi": {
+            "type": "object",
+            "properties": {
+                "affinity": {
+                    "description": "Affinity rules for uWSGI pods",
+                    "type": "object"
+                },
+                "autoscaling": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable Horizontal Pod Autoscaler for uWSGI",
+                            "type": "boolean"
+                        },
+                        "maxReplicas": {
+                            "description": "Maximum number of replicas",
+                            "type": "integer"
+                        },
+                        "minReplicas": {
+                            "description": "Minimum number of replicas",
+                            "type": "integer"
+                        },
+                        "targetCPUUtilizationPercentage": {
+                            "description": "Target CPU utilization percentage",
+                            "type": "integer"
+                        },
+                        "targetMemoryUtilizationPercentage": {
+                            "description": "Target memory utilization percentage",
+                            "type": "integer"
+                        }
+                    }
+                },
+                "extraEnvVars": {
+                    "description": "Additional environment variables for uWSGI",
+                    "type": "array"
+                },
+                "extraVolumeMounts": {
+                    "description": "Additional volume mounts for uWSGI",
+                    "type": "array"
+                },
+                "extraVolumes": {
+                    "description": "Additional volumes for uWSGI",
+                    "type": "array"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "pullPolicy": {
+                            "description": "uWSGI image pull policy",
+                            "type": "string"
+                        },
+                        "repository": {
+                            "description": "uWSGI image repository",
+                            "type": "string"
+                        },
+                        "tag": {
+                            "description": "uWSGI image tag (defaults to app.version)",
+                            "type": "string"
+                        }
+                    }
+                },
+                "livenessProbe": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable liveness probe",
+                            "type": "boolean"
+                        },
+                        "failureThreshold": {
+                            "description": "Failure threshold",
+                            "type": "integer"
+                        },
+                        "initialDelaySeconds": {
+                            "description": "Initial delay seconds",
+                            "type": "integer"
+                        },
+                        "periodSeconds": {
+                            "description": "Period seconds",
+                            "type": "integer"
+                        },
+                        "successThreshold": {
+                            "description": "Success threshold",
+                            "type": "integer"
+                        },
+                        "timeoutSeconds": {
+                            "description": "Timeout seconds",
+                            "type": "integer"
+                        }
+                    }
+                },
+                "nodeSelector": {
+                    "description": "Node selector for uWSGI pods",
+                    "type": "object"
+                },
+                "pdb": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable Pod Disruption Budget for uWSGI",
+                            "type": "boolean"
+                        },
+                        "minAvailable": {
+                            "description": "Minimum available pods",
+                            "type": "integer"
+                        }
+                    }
+                },
+                "readinessProbe": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable readiness probe",
+                            "type": "boolean"
+                        },
+                        "failureThreshold": {
+                            "description": "Failure threshold",
+                            "type": "integer"
+                        },
+                        "initialDelaySeconds": {
+                            "description": "Initial delay seconds",
+                            "type": "integer"
+                        },
+                        "periodSeconds": {
+                            "description": "Period seconds",
+                            "type": "integer"
+                        },
+                        "successThreshold": {
+                            "description": "Success threshold",
+                            "type": "integer"
+                        },
+                        "timeoutSeconds": {
+                            "description": "Timeout seconds",
+                            "type": "integer"
+                        }
+                    }
+                },
+                "replicaCount": {
+                    "description": "Number of uWSGI replicas",
+                    "type": "integer"
+                },
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "description": "CPU limit for uWSGI",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "description": "Memory limit for uWSGI",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "description": "CPU request for uWSGI",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "description": "Memory request for uWSGI",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "service": {
+                    "type": "object",
+                    "properties": {
+                        "port": {
+                            "description": "uWSGI service port",
+                            "type": "integer"
+                        },
+                        "type": {
+                            "description": "uWSGI service type",
+                            "type": "string"
+                        }
+                    }
+                },
+                "startupProbe": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable startup probe",
+                            "type": "boolean"
+                        },
+                        "failureThreshold": {
+                            "description": "Failure threshold",
+                            "type": "integer"
+                        },
+                        "initialDelaySeconds": {
+                            "description": "Initial delay seconds",
+                            "type": "integer"
+                        },
+                        "periodSeconds": {
+                            "description": "Period seconds",
+                            "type": "integer"
+                        },
+                        "successThreshold": {
+                            "description": "Success threshold",
+                            "type": "integer"
+                        },
+                        "timeoutSeconds": {
+                            "description": "Timeout seconds",
+                            "type": "integer"
+                        }
+                    }
+                },
+                "tolerations": {
+                    "description": "Tolerations for uWSGI pods",
+                    "type": "array"
+                }
+            }
+        }
+    }
+}

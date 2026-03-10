@@ -1,0 +1,284 @@
+# Production IntelOwl deployment
+# High availability configuration suitable for production environments
+#
+# Features:
+# - HA PostgreSQL with 3 instances and synchronous replication
+# - Multiple replicas for all core services
+# - Pod Disruption Budgets enabled
+# - Horizontal Pod Autoscaling
+# - Multi-queue Celery workers
+# - Prometheus metrics enabled
+# - TLS termination
+# - Automatic superuser creation
+# - Celery worker restart CronJob
+# - Log cleanup CronJob
+# - Network policies
+#
+# Prerequisites:
+# - CloudNative-PG operator installed
+# - Gateway API CRDs installed
+# - Gateway controller (nginx-gateway-fabric) installed
+# - StorageClass with ReadWriteMany support
+# - TLS certificate secret created
+#
+# Install (from helm directory):
+#   cd helm
+#   helm install intelowl . -f examples/production.yaml -n intelowl --create-namespace
+
+app:
+  version: "v6.5.1"
+  django:
+    # CRITICAL: Generate a unique secret key for production
+    # python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+    secretKey: "" # Set via --set or secrets management
+    existingSecret: "" # Or use existing secret
+    debug: false
+    allowedHosts: "intelowl.example.com"
+  baseUrl: "https://intelowl.example.com"
+  logLevel: "INFO"
+  defaultTimeout: 300
+  oldJobsRetentionDays: 14
+  httpsEnabled: true
+
+  # Slack notifications (optional)
+  # slack:
+  #   enabled: true
+  #   token: ""  # Set via --set or existingSecret
+  #   defaultChannel: "#intelowl-alerts"
+
+  # Email notifications (optional)
+  # email:
+  #   enabled: true
+  #   host: "smtp.example.com"
+  #   port: 587
+  #   hostUser: "alerts@example.com"
+  #   hostPassword: ""  # Set via --set or existingSecret
+  #   defaultFromEmail: "intelowl@example.com"
+  #   defaultEmail: "admin@example.com"
+  #   useTls: true
+
+# uWSGI with autoscaling
+uwsgi:
+  replicaCount: 3
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "1"
+    limits:
+      memory: "8Gi"
+      cpu: "4"
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  pdb:
+    enabled: true
+    minAvailable: 2
+
+# Daphne for WebSockets
+daphne:
+  enabled: true
+  replicaCount: 3
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "2Gi"
+      cpu: "1"
+  pdb:
+    enabled: true
+    minAvailable: 2
+
+# Nginx reverse proxy
+nginx:
+  replicaCount: 3
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "200m"
+    limits:
+      memory: "1Gi"
+      cpu: "1"
+  pdb:
+    enabled: true
+    minAvailable: 2
+
+# Default Celery workers with autoscaling
+celeryWorkerDefault:
+  replicaCount: 3
+  concurrency: 4
+  terminationGracePeriodSeconds: 300
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "1"
+    limits:
+      memory: "8Gi"
+      cpu: "4"
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 70
+  pdb:
+    enabled: true
+    minAvailable: 2
+
+# Multi-queue Celery workers for better resource isolation
+multiQueue:
+  enabled: true
+  workerLocal:
+    enabled: true
+    replicaCount: 2
+    concurrency: 2
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "500m"
+      limits:
+        memory: "4Gi"
+        cpu: "2"
+  workerLong:
+    enabled: true
+    replicaCount: 2
+    concurrency: 2
+    terminationGracePeriodSeconds: 600
+    resources:
+      requests:
+        memory: "2Gi"
+        cpu: "1"
+      limits:
+        memory: "8Gi"
+        cpu: "4"
+  workerIngestor:
+    enabled: false
+
+# HA PostgreSQL with 3 instances
+postgresql:
+  enabled: true
+  instances: 3
+  storage:
+    size: "50Gi"
+  walStorage:
+    enabled: true
+    size: "10Gi"
+  synchronous:
+    enabled: true
+    minSyncReplicas: 1
+    maxSyncReplicas: 2
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "1"
+    limits:
+      memory: "8Gi"
+      cpu: "4"
+
+# Redis with replication
+redis:
+  enabled: true
+  architecture: replication
+  auth:
+    enabled: true
+  persistence:
+    size: "10Gi"
+  sentinel:
+    enabled: true
+    quorum: 2
+
+# Production storage sizes
+storage:
+  genericLogs:
+    size: "50Gi"
+  sharedFiles:
+    size: "100Gi"
+  staticContent:
+    size: "10Gi"
+
+# Gateway API with TLS
+networking:
+  type: "gateway"
+  gatewayProvider: "nginx-gateway-fabric"
+  gateway:
+    create: true
+    gatewayClass:
+      name: "nginx"
+    listeners:
+      - name: http
+        port: 80
+        protocol: HTTP
+        allowedRoutes:
+          namespaces:
+            from: Same
+      - name: https
+        port: 443
+        protocol: HTTPS
+        tls:
+          mode: Terminate
+          certificateRefs:
+            - name: intelowl-tls
+              kind: Secret
+        allowedRoutes:
+          namespaces:
+            from: Same
+    httpRoute:
+      hostnames:
+        - "intelowl.example.com"
+      websocket:
+        enabled: true
+
+# Flower dashboard with authentication
+flower:
+  enabled: true
+  auth:
+    enabled: true
+    username: "admin"
+    # Set password via --set or existingSecret
+    password: ""
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+# Prometheus metrics
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    interval: "30s"
+    labels:
+      release: prometheus
+  podMonitor:
+    enabled: true
+    interval: "30s"
+    labels:
+      release: prometheus
+
+# Network policies for security
+networkPolicy:
+  enabled: true
+  allowExternalEgress: true
+
+# Automatic superuser creation
+superuser:
+  enabled: true
+  username: "admin"
+  email: "admin@example.com"
+  password: "" # Set via --set (auto-generated if empty)
+
+# Weekly Celery worker restart (prevents memory leaks)
+celeryRestart:
+  enabled: true
+  schedule: "0 3 * * 0" # Every Sunday at 3:00 AM
+
+# Log cleanup
+logCleanup:
+  enabled: true
+  schedule: "0 2 * * *" # Every day at 2:00 AM
+  retentionDays: 30

@@ -1,0 +1,153 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "intelowl.fullname" . }}-uwsgi
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: uwsgi
+spec:
+  {{- if not .Values.uwsgi.autoscaling.enabled }}
+  replicas: {{ .Values.uwsgi.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "intelowl.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: uwsgi
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmaps/uwsgi-config.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secrets/app-secrets.yaml") . | sha256sum }}
+        {{- if .Values.metrics.enabled }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8001"
+        prometheus.io/path: "/metrics"
+        {{- end }}
+      labels:
+        {{- include "intelowl.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: uwsgi
+    spec:
+      {{- include "intelowl.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ include "intelowl.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        {{- include "intelowl.waitForDbInitContainer" . | nindent 8 }}
+        {{- include "intelowl.waitForRedisInitContainer" . | nindent 8 }}
+        {{- if .Values.storage.localStorage }}
+        {{- include "intelowl.initDirectoriesContainer" . | nindent 8 }}
+        {{- end }}
+        - name: collect-static
+          image: {{ include "intelowl.image" (dict "imageRoot" .Values.uwsgi.image "Chart" .Chart "Values" .Values) }}
+          imagePullPolicy: {{ .Values.uwsgi.image.pullPolicy }}
+          command:
+            - python
+            - manage.py
+            - collectstatic
+            - --noinput
+          env:
+            {{- include "intelowl.commonEnvVars" . | nindent 12 }}
+          volumeMounts:
+            - name: static-content
+              mountPath: /opt/deploy/intel_owl/static
+          {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+      containers:
+        - name: uwsgi
+          image: {{ include "intelowl.image" (dict "imageRoot" .Values.uwsgi.image "Chart" .Chart "Values" .Values) }}
+          imagePullPolicy: {{ .Values.uwsgi.image.pullPolicy }}
+          {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          command:
+            - uwsgi
+            - --ini
+            - /etc/uwsgi/intel_owl.ini
+          ports:
+            - name: uwsgi
+              containerPort: 8001
+              protocol: TCP
+            - name: stats
+              containerPort: 9191
+              protocol: TCP
+          env:
+            {{- include "intelowl.commonEnvVars" . | nindent 12 }}
+            {{- with .Values.uwsgi.extraEnvVars }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            - name: uwsgi-config
+              mountPath: /etc/uwsgi
+            - name: static-content
+              mountPath: /opt/deploy/intel_owl/static
+            {{- include "intelowl.commonVolumeMounts" . | nindent 12 }}
+            {{- with .Values.uwsgi.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- if .Values.uwsgi.startupProbe.enabled }}
+          startupProbe:
+            tcpSocket:
+              port: uwsgi
+            initialDelaySeconds: {{ .Values.uwsgi.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.uwsgi.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.uwsgi.startupProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.uwsgi.startupProbe.failureThreshold }}
+            successThreshold: {{ .Values.uwsgi.startupProbe.successThreshold }}
+          {{- end }}
+          {{- if .Values.uwsgi.livenessProbe.enabled }}
+          livenessProbe:
+            tcpSocket:
+              port: uwsgi
+            initialDelaySeconds: {{ .Values.uwsgi.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.uwsgi.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.uwsgi.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.uwsgi.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.uwsgi.livenessProbe.successThreshold }}
+          {{- end }}
+          {{- if .Values.uwsgi.readinessProbe.enabled }}
+          readinessProbe:
+            tcpSocket:
+              port: uwsgi
+            initialDelaySeconds: {{ .Values.uwsgi.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.uwsgi.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.uwsgi.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.uwsgi.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.uwsgi.readinessProbe.successThreshold }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.uwsgi.resources | nindent 12 }}
+      volumes:
+        - name: uwsgi-config
+          configMap:
+            name: {{ include "intelowl.fullname" . }}-uwsgi-config
+        - name: static-content
+          persistentVolumeClaim:
+            claimName: {{ include "intelowl.fullname" . }}-static-content
+        {{- include "intelowl.commonVolumes" . | nindent 8 }}
+        {{- with .Values.uwsgi.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.uwsgi.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.uwsgi.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.uwsgi.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

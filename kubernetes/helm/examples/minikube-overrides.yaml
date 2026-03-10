@@ -1,0 +1,12 @@
+# Minikube-specific overrides
+# Minikube's default StorageClass only supports ReadWriteOnce
+storage:
+  genericLogs:
+    accessModes:
+      - ReadWriteOnce
+  sharedFiles:
+    accessModes:
+      - ReadWriteOnce
+  staticContent:
+    accessModes:
+      - ReadWriteOnce

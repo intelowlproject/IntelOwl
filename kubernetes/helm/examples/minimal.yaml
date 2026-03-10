@@ -1,0 +1,132 @@
+# Minimal IntelOwl deployment for testing
+# This is the simplest configuration to get IntelOwl running
+#
+# Prerequisites:
+# - CloudNative-PG operator installed
+# - Gateway API CRDs installed (or set networking.type=ingress)
+#
+# Install (from helm directory):
+#   cd helm
+#   helm install intelowl . -f examples/minimal.yaml -n intelowl --create-namespace
+#
+# Access:
+#   kubectl port-forward svc/intelowl-nginx 8080:80 -n intelowl
+#   Open http://localhost:8080
+
+app:
+  version: "v6.5.1"
+  django:
+    # IMPORTANT: Generate a real secret key for any non-test deployment
+    # python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+    secretKey: "test-secret-key-change-me-in-production"
+    debug: false
+
+# Single replica for minimal resource usage
+uwsgi:
+  replicaCount: 1
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "2Gi"
+      cpu: "1"
+  pdb:
+    enabled: false
+
+daphne:
+  enabled: true
+  replicaCount: 1
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+  pdb:
+    enabled: false
+
+nginx:
+  replicaCount: 1
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "50m"
+    limits:
+      memory: "256Mi"
+      cpu: "250m"
+  pdb:
+    enabled: false
+
+celeryWorkerDefault:
+  replicaCount: 1
+  concurrency: 2
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "2Gi"
+      cpu: "1"
+  pdb:
+    enabled: false
+
+celeryBeat:
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "250m"
+
+# Single PostgreSQL instance
+postgresql:
+  enabled: true
+  instances: 1
+  storage:
+    size: "5Gi"
+
+# Standalone Redis
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: true
+  persistence:
+    size: "2Gi"
+
+# Smaller PVCs for testing
+storage:
+  genericLogs:
+    size: "2Gi"
+  sharedFiles:
+    size: "5Gi"
+  staticContent:
+    size: "1Gi"
+
+# Use Gateway API (default)
+networking:
+  type: "gateway"
+  gateway:
+    create: true
+    gatewayClass:
+      name: "nginx"
+    httpRoute:
+      hostnames:
+        - "intelowl.local"
+
+# Disable monitoring for minimal setup
+flower:
+  enabled: false
+
+metrics:
+  enabled: false
+
+# Automatic superuser creation (optional, convenient for quick testing)
+# superuser:
+#   enabled: true
+#   username: "admin"
+#   email: "admin@test.local"
+#   password: "changeme"

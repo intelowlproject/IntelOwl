@@ -1,0 +1,55 @@
+{{- if .Values.celeryRestart.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "intelowl.fullname" . }}-celery-restart
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: celery-restart
+spec:
+  schedule: {{ .Values.celeryRestart.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 600
+      template:
+        metadata:
+          labels:
+            {{- include "intelowl.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: celery-restart
+        spec:
+          serviceAccountName: {{ include "intelowl.serviceAccountName" . }}
+          restartPolicy: Never
+          containers:
+            - name: restart-celery
+              image: bitnami/kubectl:latest
+              command:
+                - sh
+                - -c
+                - |
+                  echo "Restarting Celery workers to prevent memory leaks..."
+                  kubectl rollout restart deployment/{{ include "intelowl.fullname" . }}-celery-worker-default -n {{ .Release.Namespace }}
+                  kubectl rollout restart deployment/{{ include "intelowl.fullname" . }}-celery-beat -n {{ .Release.Namespace }}
+                  {{- if .Values.multiQueue.enabled }}
+                  {{- if .Values.multiQueue.workerLocal.enabled }}
+                  kubectl rollout restart deployment/{{ include "intelowl.fullname" . }}-celery-worker-local -n {{ .Release.Namespace }}
+                  {{- end }}
+                  {{- if .Values.multiQueue.workerLong.enabled }}
+                  kubectl rollout restart deployment/{{ include "intelowl.fullname" . }}-celery-worker-long -n {{ .Release.Namespace }}
+                  {{- end }}
+                  {{- if .Values.multiQueue.workerIngestor.enabled }}
+                  kubectl rollout restart deployment/{{ include "intelowl.fullname" . }}-celery-worker-ingestor -n {{ .Release.Namespace }}
+                  {{- end }}
+                  {{- end }}
+                  echo "Celery workers restarted successfully!"
+              resources:
+                requests:
+                  memory: "64Mi"
+                  cpu: "50m"
+                limits:
+                  memory: "128Mi"
+                  cpu: "100m"
+{{- end }}

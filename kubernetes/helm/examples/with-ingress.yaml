@@ -1,0 +1,105 @@
+# IntelOwl with traditional Ingress (instead of Gateway API)
+# Use this if you prefer Kubernetes Ingress over Gateway API
+#
+# Prerequisites:
+# - CloudNative-PG operator installed
+# - Ingress controller installed (nginx-ingress, traefik, etc.)
+#
+# Install (from helm directory):
+#   cd helm
+#   helm install intelowl . -f examples/with-ingress.yaml -n intelowl --create-namespace
+#
+# Access:
+#   Configure DNS or /etc/hosts to point intelowl.local to your Ingress IP
+
+app:
+  version: "v6.5.1"
+  django:
+    secretKey: "your-secret-key-change-me"
+    debug: false
+    allowedHosts: "intelowl.local"
+  baseUrl: "http://intelowl.local"
+
+# Standard service configuration
+uwsgi:
+  replicaCount: 2
+
+daphne:
+  enabled: true
+  replicaCount: 2
+
+nginx:
+  replicaCount: 2
+
+celeryWorkerDefault:
+  replicaCount: 2
+  concurrency: 4
+
+# Database
+postgresql:
+  enabled: true
+  instances: 1
+  storage:
+    size: "10Gi"
+
+# Redis
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: true
+  persistence:
+    size: "5Gi"
+
+# Storage
+storage:
+  genericLogs:
+    size: "10Gi"
+  sharedFiles:
+    size: "20Gi"
+  staticContent:
+    size: "5Gi"
+
+# Use traditional Ingress instead of Gateway API
+networking:
+  type: "ingress"
+
+  # Disable Gateway API
+  gateway:
+    create: false
+    httpRoute:
+      create: false
+
+  # Configure Ingress
+  ingress:
+    enabled: true
+    className: "nginx" # Change to your ingress class (nginx, traefik, etc.)
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+      nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+      # For WebSocket support
+      nginx.ingress.kubernetes.io/websocket-services: "intelowl-daphne"
+    hosts:
+      - host: intelowl.local
+        paths:
+          - path: /
+            pathType: Prefix
+    # Enable TLS (optional)
+    # tls:
+    #   - secretName: intelowl-tls
+    #     hosts:
+    #       - intelowl.local
+
+# Flower with Ingress
+flower:
+  enabled: false
+  # ingress:
+  #   enabled: true
+  #   className: "nginx"
+  #   hosts:
+  #     - host: flower.intelowl.local
+  #       paths:
+  #         - path: /
+  #           pathType: Prefix

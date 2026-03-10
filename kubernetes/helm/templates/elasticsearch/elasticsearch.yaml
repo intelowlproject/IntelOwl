@@ -1,0 +1,49 @@
+{{- if .Values.elasticsearch.enabled }}
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: {{ include "intelowl.fullname" . }}-es
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: elasticsearch
+spec:
+  version: {{ .Values.elasticsearch.version | quote }}
+  nodeSets:
+    - name: default
+      count: {{ .Values.elasticsearch.replicas }}
+      config:
+        node.store.allow_mmap: {{ .Values.elasticsearch.allowMmap }}
+        {{- with .Values.elasticsearch.config }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      podTemplate:
+        spec:
+          {{- with .Values.elasticsearch.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.elasticsearch.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.elasticsearch.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          containers:
+            - name: elasticsearch
+              resources:
+                {{- toYaml .Values.elasticsearch.resources | nindent 16 }}
+      volumeClaimTemplates:
+        - metadata:
+            name: elasticsearch-data
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: {{ .Values.elasticsearch.storage.size }}
+            {{- if or .Values.elasticsearch.storage.storageClass .Values.global.storageClass }}
+            storageClassName: {{ .Values.elasticsearch.storage.storageClass | default .Values.global.storageClass | quote }}
+            {{- end }}
+{{- end }}

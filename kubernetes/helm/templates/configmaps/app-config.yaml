@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "intelowl.fullname" . }}-app-config
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+data:
+  # Application settings
+  DEBUG: {{ .Values.app.django.debug | quote }}
+  LOG_LEVEL: {{ .Values.app.logLevel | quote }}
+  DEFAULT_TIMEOUT: {{ .Values.app.defaultTimeout | quote }}
+  DJANGO_ALLOWED_HOSTS: {{ .Values.app.django.allowedHosts | quote }}
+
+  # Database settings
+  DB_HOST: {{ include "intelowl.databaseHost" . | quote }}
+  DB_PORT: {{ include "intelowl.databasePort" . | quote }}
+  DB_NAME: {{ include "intelowl.databaseName" . | quote }}
+  DB_USER: {{ include "intelowl.databaseUser" . | quote }}
+
+  # Redis settings
+  REDIS_HOST: {{ include "intelowl.redisHost" . | quote }}
+  REDIS_PORT: {{ include "intelowl.redisPort" . | quote }}
+
+  # Broker settings
+  BROKER_TYPE: {{ .Values.broker.type | quote }}
+
+  {{- if .Values.app.baseUrl }}
+  BASE_URL: {{ .Values.app.baseUrl | quote }}
+  INTELOWL_WEB_CLIENT_DOMAIN: {{ .Values.app.baseUrl | quote }}
+  {{- end }}
+
+  # Job retention
+  OLD_JOBS_RETENTION_DAYS: {{ .Values.app.oldJobsRetentionDays | quote }}
+
+  # HTTPS settings
+  {{- if .Values.app.httpsEnabled }}
+  HTTPS_ENABLED: "true"
+  {{- else }}
+  HTTPS_ENABLED: "false"
+  {{- end }}
+
+  # Elasticsearch settings
+  {{- if .Values.elasticsearch.enabled }}
+  ELASTICSEARCH_DSL_ENABLED: "true"
+  ELASTICSEARCH_DSL_HOST: {{ printf "%s-es-http" (include "intelowl.fullname" .) | quote }}
+  ELASTICSEARCH_DSL_PORT: "9200"
+  {{- end }}
+
+  # Email/SMTP settings
+  {{- if .Values.app.email.enabled }}
+  DEFAULT_FROM_EMAIL: {{ .Values.app.email.defaultFromEmail | quote }}
+  DEFAULT_EMAIL: {{ .Values.app.email.defaultEmail | quote }}
+  EMAIL_HOST: {{ .Values.app.email.host | quote }}
+  EMAIL_PORT: {{ .Values.app.email.port | quote }}
+  EMAIL_HOST_USER: {{ .Values.app.email.hostUser | quote }}
+  EMAIL_USE_TLS: {{ .Values.app.email.useTls | quote }}
+  EMAIL_USE_SSL: {{ .Values.app.email.useSsl | quote }}
+  {{- end }}
+
+  # Slack settings
+  {{- if .Values.app.slack.enabled }}
+  DEFAULT_SLACK_CHANNEL: {{ .Values.app.slack.defaultChannel | quote }}
+  {{- end }}
+
+  # Storage settings
+  {{- if .Values.storage.s3.enabled }}
+  USE_S3: "true"
+  AWS_STORAGE_BUCKET_NAME: {{ .Values.storage.s3.bucket | quote }}
+  AWS_S3_REGION_NAME: {{ .Values.storage.s3.region | quote }}
+  {{- if .Values.storage.s3.endpoint }}
+  AWS_S3_ENDPOINT_URL: {{ .Values.storage.s3.endpoint | quote }}
+  {{- end }}
+  {{- else }}
+  USE_S3: "false"
+  {{- end }}
+
+  # Service URLs (internal)
+  UWSGI_HOST: {{ include "intelowl.fullname" . }}-uwsgi
+  UWSGI_PORT: {{ .Values.uwsgi.service.port | quote }}
+  {{- if .Values.daphne.enabled }}
+  DAPHNE_HOST: {{ include "intelowl.fullname" . }}-daphne
+  DAPHNE_PORT: {{ .Values.daphne.service.port | quote }}
+  {{- end }}

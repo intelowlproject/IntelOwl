@@ -1,0 +1,271 @@
+================================================================================
+                    IntelOwl {{ .Chart.AppVersion }} Installation Complete
+================================================================================
+
+Thank you for installing IntelOwl!
+
+Your release is named: {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+
+================================================================================
+                              Getting Started
+================================================================================
+
+1. Get the application URL:
+{{- if eq .Values.networking.type "gateway" }}
+{{- if .Values.networking.gateway.httpRoute.hostnames }}
+{{- range $host := .Values.networking.gateway.httpRoute.hostnames }}
+   http://{{ $host }}
+{{- end }}
+{{- else }}
+   # Get the Gateway address:
+   kubectl get gateway {{ include "intelowl.gatewayName" . }} -n {{ .Release.Namespace }} -o jsonpath='{.status.addresses[0].value}'
+{{- end }}
+{{- else if and (eq .Values.networking.type "ingress") .Values.networking.ingress.enabled }}
+{{- range $host := .Values.networking.ingress.hosts }}
+   http{{ if $.Values.networking.ingress.tls }}s{{ end }}://{{ $host.host }}
+{{- end }}
+{{- else }}
+   # Port forward to access the application:
+   kubectl port-forward svc/{{ include "intelowl.fullname" . }}-nginx 8080:{{ .Values.nginx.service.port }} -n {{ .Release.Namespace }}
+
+   Then open: http://localhost:8080
+{{- end }}
+
+2. Create a superuser account:
+{{- if .Values.superuser.enabled }}
+   A superuser will be created automatically (post-install hook).
+   Username: {{ .Values.superuser.username }}
+   {{- if .Values.superuser.password }}
+   Password: (as configured in values)
+   {{- else }}
+   Password: kubectl get secret {{ include "intelowl.fullname" . }}-app-secrets -n {{ .Release.Namespace }} -o jsonpath='{.data.superuser-password}' | base64 -d
+   {{- end }}
+{{- else }}
+   kubectl exec -it deploy/{{ include "intelowl.fullname" . }}-uwsgi -n {{ .Release.Namespace }} -- python manage.py createsuperuser
+{{- end }}
+
+3. Access the admin panel:
+   URL: http://localhost:8080/admin
+
+================================================================================
+                              Components Status
+================================================================================
+
+Core Services:
+  - uWSGI (Django): {{ .Values.uwsgi.replicaCount }} replica(s)
+{{- if .Values.daphne.enabled }}
+  - Daphne (WebSockets): {{ .Values.daphne.replicaCount }} replica(s)
+{{- end }}
+  - Nginx (Reverse Proxy): {{ .Values.nginx.replicaCount }} replica(s)
+  - Celery Beat (Scheduler): 1 replica
+  - Celery Worker (Default): {{ .Values.celeryWorkerDefault.replicaCount }} replica(s)
+
+{{- if .Values.multiQueue.enabled }}
+Optional Workers (Multi-Queue Enabled):
+{{- if .Values.multiQueue.workerLocal.enabled }}
+  - Celery Worker (Local): {{ .Values.multiQueue.workerLocal.replicaCount }} replica(s)
+{{- end }}
+{{- if .Values.multiQueue.workerLong.enabled }}
+  - Celery Worker (Long): {{ .Values.multiQueue.workerLong.replicaCount }} replica(s)
+{{- end }}
+{{- if .Values.multiQueue.workerIngestor.enabled }}
+  - Celery Worker (Ingestor): {{ .Values.multiQueue.workerIngestor.replicaCount }} replica(s)
+{{- end }}
+{{- end }}
+
+Database:
+{{- if .Values.database.internal }}
+  - PostgreSQL (CloudNative-PG): {{ .Values.postgresql.instances | default 1 }} instance(s)
+    Service: {{ include "intelowl.databaseHost" . }}
+{{- else }}
+  - PostgreSQL (External): {{ .Values.database.external.host }}:{{ .Values.database.external.port }}
+{{- end }}
+
+Message Broker:
+{{- if eq .Values.broker.type "redis" }}
+{{- if .Values.broker.redis.internal }}
+  - Redis (CloudPirates): {{ .Values.redis.architecture | default "standalone" }}
+    Service: {{ include "intelowl.redisHost" . }}
+{{- else }}
+  - Redis (External): {{ .Values.broker.redis.external.host }}:{{ .Values.broker.redis.external.port }}
+{{- end }}
+{{- else if eq .Values.broker.type "rabbitmq" }}
+{{- if .Values.broker.rabbitmq.internal }}
+  - RabbitMQ (CloudPirates): Internal
+    Service: {{ include "intelowl.rabbitmqHost" . }}:{{ include "intelowl.rabbitmqPort" . }}
+{{- else }}
+  - RabbitMQ (External): {{ .Values.broker.rabbitmq.external.host }}:{{ .Values.broker.rabbitmq.external.port }}
+{{- end }}
+{{- else if eq .Values.broker.type "sqs" }}
+  - AWS SQS: {{ .Values.broker.sqs.region }}
+{{- end }}
+
+Networking:
+{{- if eq .Values.networking.type "gateway" }}
+  - Gateway API ({{ .Values.networking.gatewayProvider | default "nginx-gateway-fabric" }})
+    Gateway: {{ include "intelowl.gatewayName" . }}
+{{- else }}
+  - Traditional Ingress
+{{- end }}
+
+{{- if .Values.flower.enabled }}
+Monitoring:
+  - Flower Dashboard: Enabled
+{{- if .Values.flower.ingress.enabled }}
+{{- range $host := .Values.flower.ingress.hosts }}
+    URL: http{{ if $.Values.flower.ingress.tls }}s{{ end }}://{{ $host.host }}
+{{- end }}
+{{- else }}
+    kubectl port-forward svc/{{ include "intelowl.fullname" . }}-flower 5555:{{ .Values.flower.service.port }} -n {{ .Release.Namespace }}
+{{- end }}
+{{- end }}
+
+{{- $integrationsEnabled := false }}
+{{- if or .Values.integrations.cyberchef.enabled .Values.integrations.malwareTools.enabled .Values.integrations.nuclei.enabled .Values.integrations.pcapAnalyzers.enabled .Values.integrations.bbot.enabled .Values.integrations.phishingAnalyzers.enabled .Values.integrations.phoneinfoga.enabled .Values.integrations.phunter.enabled .Values.integrations.thug.enabled .Values.integrations.torAnalyzers.enabled }}
+{{- $integrationsEnabled = true }}
+{{- end }}
+{{- if $integrationsEnabled }}
+Integrations (Optional Analyzers):
+{{- if .Values.integrations.cyberchef.enabled }}
+  - CyberChef: Enabled (port {{ .Values.integrations.cyberchef.service.port }})
+{{- end }}
+{{- if .Values.integrations.malwareTools.enabled }}
+  - Malware Tools (ClamAV, Qiling): Enabled (port {{ .Values.integrations.malwareTools.service.port }})
+{{- end }}
+{{- if .Values.integrations.nuclei.enabled }}
+  - Nuclei Vulnerability Scanner: Enabled (port {{ .Values.integrations.nuclei.service.port }})
+{{- end }}
+{{- if .Values.integrations.pcapAnalyzers.enabled }}
+  - PCAP Analyzers (Suricata): Enabled (port {{ .Values.integrations.pcapAnalyzers.service.port }})
+{{- end }}
+{{- if .Values.integrations.bbot.enabled }}
+  - BBOT OSINT Automation: Enabled (port {{ .Values.integrations.bbot.service.port }})
+{{- end }}
+{{- if .Values.integrations.phishingAnalyzers.enabled }}
+  - Phishing Analyzers + Selenium: Enabled (port {{ .Values.integrations.phishingAnalyzers.service.port }})
+{{- end }}
+{{- if .Values.integrations.phoneinfoga.enabled }}
+  - PhoneInfoga: Enabled (port {{ .Values.integrations.phoneinfoga.service.port }})
+{{- end }}
+{{- if .Values.integrations.phunter.enabled }}
+  - Phunter: Enabled (port {{ .Values.integrations.phunter.service.port }})
+{{- end }}
+{{- if .Values.integrations.thug.enabled }}
+  - Thug Honeyclient: Enabled (port {{ .Values.integrations.thug.service.port }})
+{{- end }}
+{{- if .Values.integrations.torAnalyzers.enabled }}
+  - Tor Analyzers: Enabled (port {{ .Values.integrations.torAnalyzers.service.port }})
+{{- end }}
+{{- end }}
+
+================================================================================
+                              Useful Commands
+================================================================================
+
+# Check pod status
+kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+# View logs
+kubectl logs -f deploy/{{ include "intelowl.fullname" . }}-uwsgi -n {{ .Release.Namespace }}
+kubectl logs -f deploy/{{ include "intelowl.fullname" . }}-celery-worker-default -n {{ .Release.Namespace }}
+
+# Run Django management commands
+kubectl exec -it deploy/{{ include "intelowl.fullname" . }}-uwsgi -n {{ .Release.Namespace }} -- python manage.py <command>
+
+# Scale workers
+kubectl scale deploy/{{ include "intelowl.fullname" . }}-celery-worker-default --replicas=4 -n {{ .Release.Namespace }}
+
+================================================================================
+                              Prerequisites
+================================================================================
+
+{{- if .Values.database.internal }}
+CloudNative-PG Operator:
+  {{- if .Values.postgresql.operator.enabled }}
+  The CNPG operator is being installed by this chart.
+  {{- else }}
+  Make sure CloudNative-PG operator is installed:
+    helm repo add cnpg https://cloudnative-pg.github.io/charts
+    helm install cnpg cnpg/cloudnative-pg -n cnpg-system --create-namespace
+  {{- end }}
+{{- end }}
+
+{{- if eq .Values.networking.type "gateway" }}
+Gateway API:
+  1. Install Gateway API CRDs:
+     kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.0/standard-install.yaml
+
+  2. Install {{ .Values.networking.gatewayProvider | default "nginx-gateway-fabric" }}:
+  {{- if eq (.Values.networking.gatewayProvider | default "nginx-gateway-fabric") "nginx-gateway-fabric" }}
+     helm install ngf oci://ghcr.io/nginx/charts/nginx-gateway-fabric \
+       -n nginx-gateway --create-namespace
+  {{- else if eq .Values.networking.gatewayProvider "envoy-gateway" }}
+     helm install eg oci://docker.io/envoyproxy/gateway-helm \
+       -n envoy-gateway-system --create-namespace
+  {{- else if eq .Values.networking.gatewayProvider "istio" }}
+     istioctl install --set profile=minimal
+  {{- end }}
+{{- end }}
+
+{{- if .Values.elasticsearch.enabled }}
+Elasticsearch:
+  - Elasticsearch (ECK): {{ .Values.elasticsearch.replicas }} node(s), version {{ .Values.elasticsearch.version }}
+    Service: {{ include "intelowl.fullname" . }}-es-es-http
+  {{- if .Values.elasticsearch.kibana.enabled }}
+  - Kibana Dashboard: Enabled
+    kubectl port-forward svc/{{ include "intelowl.fullname" . }}-kibana-kb-http 5601:5601 -n {{ .Release.Namespace }}
+  {{- end }}
+{{- end }}
+
+================================================================================
+                              Helm Tests
+================================================================================
+
+Run the following command to verify your deployment:
+  helm test {{ .Release.Name }} -n {{ .Release.Namespace }}
+
+{{- if .Values.celeryRestart.enabled }}
+
+================================================================================
+                              Maintenance
+================================================================================
+
+Celery Worker Restart:
+  A CronJob is configured to restart Celery workers periodically.
+  Schedule: {{ .Values.celeryRestart.schedule }}
+  This helps prevent memory leaks in long-running Celery processes.
+{{- end }}
+
+{{- if .Values.logCleanup.enabled }}
+
+Log Cleanup:
+  A CronJob is configured to clean up old log files.
+  Schedule: {{ .Values.logCleanup.schedule }}
+  Retention: {{ .Values.logCleanup.retentionDays }} days
+{{- end }}
+
+================================================================================
+                              Documentation
+================================================================================
+
+- IntelOwl Documentation: https://intelowl.readthedocs.io/
+- GitHub Repository: https://github.com/intelowlproject/IntelOwl
+- API Documentation: Available at /api/schema/swagger-ui/ after login
+- CloudNative-PG: https://cloudnative-pg.io/documentation/
+- Gateway API: https://gateway-api.sigs.k8s.io/
+{{- if .Values.elasticsearch.enabled }}
+- ECK Documentation: https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-overview.html
+{{- end }}
+
+================================================================================
+                              Support
+================================================================================
+
+If you encounter any issues:
+1. Check the logs: kubectl logs -f <pod-name> -n {{ .Release.Namespace }}
+2. Review the documentation
+3. Run helm tests: helm test {{ .Release.Name }} -n {{ .Release.Namespace }}
+4. Open an issue: https://github.com/intelowlproject/IntelOwl/issues
+
+================================================================================

@@ -1,0 +1,211 @@
+{{- if .Values.networkPolicy.enabled }}
+# Default deny all ingress traffic
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "intelowl.fullname" . }}-default-deny
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "intelowl.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+---
+# Allow traffic to Nginx from ingress controller
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "intelowl.fullname" . }}-nginx-ingress
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "intelowl.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: nginx
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+        {{- range .Values.networkPolicy.allowedNamespaces }}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ . }}
+        {{- end }}
+      ports:
+        - protocol: TCP
+          port: 80
+---
+# Allow internal traffic between IntelOwl components
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "intelowl.fullname" . }}-internal
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "intelowl.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "intelowl.selectorLabels" . | nindent 14 }}
+---
+# Allow traffic to PostgreSQL from IntelOwl
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "intelowl.fullname" . }}-postgresql
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: postgresql
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "intelowl.selectorLabels" . | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+# Allow traffic to Redis from IntelOwl
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "intelowl.fullname" . }}-redis
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: redis
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "intelowl.selectorLabels" . | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: 6379
+{{- if .Values.elasticsearch.enabled }}
+---
+# Allow traffic to Elasticsearch from IntelOwl
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "intelowl.fullname" . }}-elasticsearch
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      elasticsearch.k8s.elastic.co/cluster-name: {{ include "intelowl.fullname" . }}-es
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "intelowl.selectorLabels" . | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: 9200
+{{- end }}
+---
+# Restrict integration services: only accept traffic from IntelOwl core pods
+{{- $integrations := list "cyberchef" "malwareTools" "nuclei" "pcapAnalyzers" "bbot" "phishingAnalyzers" "phoneinfoga" "phunter" "thug" "torAnalyzers" }}
+{{- range $name := $integrations }}
+{{- $integration := index $.Values.integrations $name }}
+{{- if $integration.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "intelowl.fullname" $ }}-integration-{{ $name | kebabcase }}
+  labels:
+    {{- include "intelowl.labels" $ | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "intelowl.selectorLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: {{ $name | kebabcase }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "intelowl.selectorLabels" $ | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: {{ $integration.service.port }}
+  egress:
+    # Allow DNS
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow internal cluster traffic only
+    - to:
+        - podSelector: {}
+---
+{{- end }}
+{{- end }}
+{{- if .Values.networkPolicy.allowExternalEgress }}
+---
+# Allow egress to external services (for analyzers)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "intelowl.fullname" . }}-external-egress
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "intelowl.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Egress
+  egress:
+    # Allow DNS
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow HTTPS
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+    # Allow HTTP
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 80
+    # Allow internal cluster traffic
+    - to:
+        - podSelector: {}
+{{- end }}
+{{- end }}

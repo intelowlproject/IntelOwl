@@ -1,0 +1,78 @@
+apiVersion: v2
+name: intelowl
+description: A Helm chart for deploying IntelOwl - Open Source Intelligence Platform
+type: application
+version: 1.0.0
+appVersion: "v6.5.1"
+
+keywords:
+  - intelowl
+  - threat-intelligence
+  - osint
+  - malware-analysis
+  - security
+
+home: https://github.com/intelowlproject/IntelOwl
+
+sources:
+  - https://github.com/intelowlproject/IntelOwl
+
+maintainers:
+  - name: IntelOwl Project
+    url: https://github.com/intelowlproject
+  - name: Maxime Wewer
+    url: https://github.com/MaximeWewer
+
+icon: https://raw.githubusercontent.com/intelowlproject/IntelOwl/master/docs/static/intel_owl_negative.png
+
+kubeVersion: ">=1.25.0-0"
+
+dependencies:
+  # CloudNative-PG Operator
+  - name: cloudnative-pg
+    version: "0.27.*"
+    repository: "https://cloudnative-pg.github.io/charts"
+    condition: postgresql.operator.enabled
+    alias: cnpg
+
+  # CloudPirates Redis
+  - name: redis
+    version: "0.26.*"
+    repository: "oci://registry-1.docker.io/cloudpirates"
+    condition: redis.enabled
+    alias: redis
+
+  # CloudPirates RabbitMQ
+  - name: rabbitmq
+    version: "0.18.*"
+    repository: "oci://registry-1.docker.io/cloudpirates"
+    condition: rabbitmq.enabled
+    alias: rabbitmq
+
+  # ECK Operator (Elastic Cloud on Kubernetes)
+  - name: eck-operator
+    version: "3.3.*"
+    repository: "https://helm.elastic.co"
+    condition: elasticsearch.operator.enabled
+    alias: eck
+
+annotations:
+  artifacthub.io/license: AGPL-3.0
+
+  kubernetes.io/minimum-version: "1.25.0"
+
+  category: "Security"
+
+  artifacthub.io/screenshots: |
+    - title: Scan page
+      url: https://intelowlproject.github.io/docs/IntelOwl/static/pivot_scan_page.png
+    - title: Pivot investigation
+      url: https://intelowlproject.github.io/docs/IntelOwl/static/pivot_investigation.png
+    - title: Complexe investigation
+      url: https://intelowlproject.github.io/docs/IntelOwl/static/pivot_investigation.png
+
+  artifacthub.io/links: |
+    - name: Documentation
+      url: https://intelowl.readthedocs.io/
+    - name: Source
+      url: https://github.com/intelowlproject/IntelOwl

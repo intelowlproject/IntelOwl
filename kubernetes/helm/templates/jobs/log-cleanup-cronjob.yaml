@@ -1,0 +1,54 @@
+{{- if .Values.logCleanup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "intelowl.fullname" . }}-log-cleanup
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: log-cleanup
+spec:
+  schedule: {{ .Values.logCleanup.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 300
+      template:
+        metadata:
+          labels:
+            {{- include "intelowl.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: log-cleanup
+        spec:
+          {{- with .Values.podSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          restartPolicy: Never
+          containers:
+            - name: log-cleanup
+              image: busybox:1.36
+              command:
+                - sh
+                - -c
+                - |
+                  echo "Cleaning up old log files..."
+                  find /var/log/intel_owl -name "*.log" -type f -mtime +{{ .Values.logCleanup.retentionDays }} -delete
+                  find /var/log/intel_owl -name "*.log.*" -type f -mtime +{{ .Values.logCleanup.retentionDays }} -delete
+                  echo "Log cleanup completed!"
+              volumeMounts:
+                - name: generic-logs
+                  mountPath: /var/log/intel_owl
+              resources:
+                requests:
+                  memory: "32Mi"
+                  cpu: "10m"
+                limits:
+                  memory: "64Mi"
+                  cpu: "50m"
+          volumes:
+            - name: generic-logs
+              persistentVolumeClaim:
+                claimName: {{ include "intelowl.fullname" . }}-generic-logs
+{{- end }}

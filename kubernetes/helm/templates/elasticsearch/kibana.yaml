@@ -1,0 +1,65 @@
+{{- if and .Values.elasticsearch.enabled .Values.elasticsearch.kibana.enabled }}
+apiVersion: kibana.k8s.elastic.co/v1
+kind: Kibana
+metadata:
+  name: {{ include "intelowl.fullname" . }}-kibana
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: kibana
+spec:
+  version: {{ .Values.elasticsearch.version | quote }}
+  count: {{ .Values.elasticsearch.kibana.replicas }}
+  elasticsearchRef:
+    name: {{ include "intelowl.fullname" . }}-es
+  podTemplate:
+    spec:
+      {{- with .Values.elasticsearch.kibana.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.elasticsearch.kibana.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: kibana
+          resources:
+            {{- toYaml .Values.elasticsearch.kibana.resources | nindent 12 }}
+{{- if .Values.elasticsearch.kibana.ingress.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "intelowl.fullname" . }}-kibana
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: kibana
+  {{- with .Values.elasticsearch.kibana.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.elasticsearch.kibana.ingress.className }}
+  ingressClassName: {{ .Values.elasticsearch.kibana.ingress.className }}
+  {{- end }}
+  rules:
+    {{- range .Values.elasticsearch.kibana.ingress.hosts }}
+    - host: {{ .host }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ include "intelowl.fullname" $ }}-kibana-kb-http
+                port:
+                  number: 5601
+          {{- end }}
+    {{- end }}
+  {{- with .Values.elasticsearch.kibana.ingress.tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}

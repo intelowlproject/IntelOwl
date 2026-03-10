@@ -1,0 +1,1606 @@
+# IntelOwl Helm Chart Values
+# Full documentation: https://intelowl.readthedocs.io/
+# To update README.md : `cd helm && helm-docs`
+
+# @section Global parameters
+
+global:
+  # -- Global Docker image registry
+  imageRegistry: ""
+  # -- Global Docker registry secret names as an array
+  imagePullSecrets: []
+  # -- Global StorageClass for Persistent Volume(s)
+  storageClass: ""
+
+# @section Common parameters
+
+# -- String to partially override intelowl.fullname
+nameOverride: ""
+# -- String to fully override intelowl.fullname
+fullnameOverride: ""
+
+# @section Application parameters
+
+app:
+  # -- IntelOwl application version
+  version: "v6.5.1"
+
+  django:
+    # -- Django secret key (required). Generate with: python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+    secretKey: ""
+    # -- Use existing secret for Django secret key (key: django-secret)
+    existingSecret: ""
+    # -- Enable Django debug mode (never enable in production)
+    debug: false
+    # -- Django allowed hosts (comma-separated)
+    allowedHosts: "*"
+
+  # -- Base URL for the application (used for CORS and absolute URLs)
+  baseUrl: ""
+  # -- Default timeout for analyzers in seconds
+  defaultTimeout: 300
+  # -- Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+  logLevel: "INFO"
+  # -- Number of days to retain old jobs (set to 0 to disable)
+  oldJobsRetentionDays: 14
+  # -- Enable HTTPS security headers (set to true when TLS is terminated at ingress/gateway)
+  httpsEnabled: false
+
+  # Slack notification configuration
+  slack:
+    # -- Enable Slack notifications
+    enabled: false
+    # -- Slack API token
+    token: ""
+    # -- Default Slack channel for notifications
+    defaultChannel: ""
+    # -- Use existing secret for Slack token (key: slack-token)
+    existingSecret: ""
+
+  # Email/SMTP configuration
+  email:
+    # -- Enable email notifications
+    enabled: false
+    # -- Default sender email address
+    defaultFromEmail: ""
+    # -- Default recipient email address
+    defaultEmail: ""
+    # -- SMTP server host
+    host: ""
+    # -- SMTP server port
+    port: 587
+    # -- SMTP username
+    hostUser: ""
+    # -- SMTP password
+    hostPassword: ""
+    # -- Use TLS for SMTP
+    useTls: true
+    # -- Use SSL for SMTP
+    useSsl: false
+    # -- Use existing secret for SMTP password (key: email-password)
+    existingSecret: ""
+
+# @section Database parameters
+
+database:
+  # -- Use internal PostgreSQL (CloudNative-PG) subchart
+  internal: true
+
+  # External database configuration (used when internal is false)
+  external:
+    # -- External database host
+    host: ""
+    # -- External database port
+    port: 5432
+    # -- External database name
+    name: "intel_owl_db"
+    # -- External database user
+    user: "intelowl"
+    # -- External database password
+    password: ""
+    # -- Use existing secret for database password (key: db-password)
+    existingSecret: ""
+    # -- SSL mode for PostgreSQL connection
+    sslMode: "prefer"
+
+# @section Broker parameters
+
+broker:
+  # -- Broker type: redis, rabbitmq, or sqs
+  type: "redis"
+
+  redis:
+    # -- Use internal Redis subchart
+    internal: true
+
+    # External Redis configuration (used when internal is false)
+    external:
+      # -- External Redis host
+      host: ""
+      # -- External Redis port
+      port: 6379
+      # -- External Redis password
+      password: ""
+      # -- Use existing secret for Redis password (key: redis-password)
+      existingSecret: ""
+      # -- Redis database number
+      db: 0
+
+  rabbitmq:
+    # -- Use internal RabbitMQ subchart
+    internal: false
+
+    # External RabbitMQ configuration (used when internal is false)
+    external:
+      # -- External RabbitMQ host
+      host: ""
+      # -- External RabbitMQ port
+      port: 5672
+      # -- External RabbitMQ user
+      user: "guest"
+      # -- External RabbitMQ password
+      password: ""
+      # -- External RabbitMQ virtual host
+      vhost: "/"
+      # -- Use existing secret for RabbitMQ password (key: rabbitmq-password)
+      existingSecret: ""
+
+  sqs:
+    # -- AWS region for SQS
+    region: ""
+    # -- AWS access key ID
+    accessKeyId: ""
+    # -- AWS secret access key
+    secretAccessKey: ""
+    # -- Use existing secret for AWS credentials
+    existingSecret: ""
+
+# @section Storage parameters
+
+storage:
+  # -- Use local storage (PVCs). Set to false for cloud storage (S3)
+  localStorage: true
+
+  # Generic logs storage configuration
+  genericLogs:
+    # -- Storage size for generic logs
+    size: "10Gi"
+    # -- Access modes for generic logs PVC
+    accessModes:
+      - ReadWriteMany
+    # -- Storage class for generic logs (uses global.storageClass if empty)
+    storageClass: ""
+
+  # Shared files storage configuration (analyzer results, uploads)
+  sharedFiles:
+    # -- Storage size for shared files
+    size: "20Gi"
+    # -- Access modes for shared files PVC
+    accessModes:
+      - ReadWriteMany
+    # -- Storage class for shared files (uses global.storageClass if empty)
+    storageClass: ""
+
+  # Static content storage configuration (Django static files)
+  staticContent:
+    # -- Storage size for static content
+    size: "5Gi"
+    # -- Access modes for static content PVC
+    accessModes:
+      - ReadWriteMany
+    # -- Storage class for static content (uses global.storageClass if empty)
+    storageClass: ""
+
+  # S3 configuration (when localStorage is false)
+  s3:
+    # -- Enable S3 storage
+    enabled: false
+    # -- S3 bucket name
+    bucket: ""
+    # -- AWS region
+    region: ""
+    # -- AWS access key ID
+    accessKeyId: ""
+    # -- AWS secret access key
+    secretAccessKey: ""
+    # -- Use existing secret for S3 credentials
+    existingSecret: ""
+    # -- S3 endpoint URL (for S3-compatible storage like MinIO)
+    endpoint: ""
+
+# @section uWSGI parameters
+# Django application server configuration
+
+uwsgi:
+  # -- Number of uWSGI replicas
+  replicaCount: 2
+
+  image:
+    # -- uWSGI image repository
+    repository: intelowlproject/intelowl
+    # -- uWSGI image tag (defaults to app.version)
+    tag: ""
+    # -- uWSGI image pull policy
+    pullPolicy: IfNotPresent
+
+  resources:
+    requests:
+      # -- Memory request for uWSGI
+      memory: "1Gi"
+      # -- CPU request for uWSGI
+      cpu: "500m"
+    limits:
+      # -- Memory limit for uWSGI
+      memory: "4Gi"
+      # -- CPU limit for uWSGI
+      cpu: "2"
+
+  autoscaling:
+    # -- Enable Horizontal Pod Autoscaler for uWSGI
+    enabled: false
+    # -- Minimum number of replicas
+    minReplicas: 2
+    # -- Maximum number of replicas
+    maxReplicas: 10
+    # -- Target CPU utilization percentage
+    targetCPUUtilizationPercentage: 80
+    # -- Target memory utilization percentage
+    targetMemoryUtilizationPercentage: 80
+
+  pdb:
+    # -- Enable Pod Disruption Budget for uWSGI
+    enabled: true
+    # -- Minimum available pods
+    minAvailable: 1
+
+  # -- Node selector for uWSGI pods
+  nodeSelector: {}
+  # -- Tolerations for uWSGI pods
+  tolerations: []
+  # -- Affinity rules for uWSGI pods
+  affinity: {}
+  # -- Additional environment variables for uWSGI
+  extraEnvVars: []
+  # -- Additional volume mounts for uWSGI
+  extraVolumeMounts: []
+  # -- Additional volumes for uWSGI
+  extraVolumes: []
+
+  service:
+    # -- uWSGI service type
+    type: ClusterIP
+    # -- uWSGI service port
+    port: 8001
+
+  startupProbe:
+    # -- Enable startup probe
+    enabled: true
+    # -- Initial delay seconds
+    initialDelaySeconds: 30
+    # -- Period seconds
+    periodSeconds: 10
+    # -- Timeout seconds
+    timeoutSeconds: 5
+    # -- Failure threshold
+    failureThreshold: 30
+    # -- Success threshold
+    successThreshold: 1
+
+  livenessProbe:
+    # -- Enable liveness probe
+    enabled: true
+    # -- Initial delay seconds
+    initialDelaySeconds: 10
+    # -- Period seconds
+    periodSeconds: 10
+    # -- Timeout seconds
+    timeoutSeconds: 5
+    # -- Failure threshold
+    failureThreshold: 6
+    # -- Success threshold
+    successThreshold: 1
+
+  readinessProbe:
+    # -- Enable readiness probe
+    enabled: true
+    # -- Initial delay seconds
+    initialDelaySeconds: 5
+    # -- Period seconds
+    periodSeconds: 10
+    # -- Timeout seconds
+    timeoutSeconds: 5
+    # -- Failure threshold
+    failureThreshold: 6
+    # -- Success threshold
+    successThreshold: 1
+
+# @section Daphne parameters
+# ASGI server for WebSockets
+
+daphne:
+  # -- Enable Daphne service
+  enabled: true
+  # -- Number of Daphne replicas
+  replicaCount: 2
+
+  image:
+    # -- Daphne image repository
+    repository: intelowlproject/intelowl
+    # -- Daphne image tag (defaults to app.version)
+    tag: ""
+    # -- Daphne image pull policy
+    pullPolicy: IfNotPresent
+
+  resources:
+    requests:
+      # -- Memory request for Daphne
+      memory: "512Mi"
+      # -- CPU request for Daphne
+      cpu: "250m"
+    limits:
+      # -- Memory limit for Daphne
+      memory: "2Gi"
+      # -- CPU limit for Daphne
+      cpu: "1"
+
+  pdb:
+    # -- Enable Pod Disruption Budget for Daphne
+    enabled: true
+    # -- Minimum available pods
+    minAvailable: 1
+
+  # -- Node selector for Daphne pods
+  nodeSelector: {}
+  # -- Tolerations for Daphne pods
+  tolerations: []
+  # -- Affinity rules for Daphne pods
+  affinity: {}
+  # -- Additional environment variables for Daphne
+  extraEnvVars: []
+  # -- Additional volume mounts for Daphne
+  extraVolumeMounts: []
+  # -- Additional volumes for Daphne
+  extraVolumes: []
+
+  service:
+    # -- Daphne service type
+    type: ClusterIP
+    # -- Daphne service port
+    port: 8011
+
+  startupProbe:
+    # -- Enable startup probe
+    enabled: true
+    # -- Initial delay seconds
+    initialDelaySeconds: 10
+    # -- Period seconds
+    periodSeconds: 5
+    # -- Timeout seconds
+    timeoutSeconds: 3
+    # -- Failure threshold
+    failureThreshold: 12
+    # -- Success threshold
+    successThreshold: 1
+
+  livenessProbe:
+    # -- Enable liveness probe
+    enabled: true
+    # -- Initial delay seconds
+    initialDelaySeconds: 10
+    # -- Period seconds
+    periodSeconds: 10
+    # -- Timeout seconds
+    timeoutSeconds: 5
+    # -- Failure threshold
+    failureThreshold: 6
+    # -- Success threshold
+    successThreshold: 1
+
+  readinessProbe:
+    # -- Enable readiness probe
+    enabled: true
+    # -- Initial delay seconds
+    initialDelaySeconds: 5
+    # -- Period seconds
+    periodSeconds: 10
+    # -- Timeout seconds
+    timeoutSeconds: 5
+    # -- Failure threshold
+    failureThreshold: 6
+    # -- Success threshold
+    successThreshold: 1
+
+# @section Nginx parameters
+# Reverse proxy configuration
+
+nginx:
+  # -- Number of Nginx replicas
+  replicaCount: 2
+
+  image:
+    # -- Nginx image repository
+    repository: intelowlproject/intelowl_nginx
+    # -- Nginx image tag (defaults to app.version)
+    tag: ""
+    # -- Nginx image pull policy
+    pullPolicy: IfNotPresent
+
+  resources:
+    requests:
+      # -- Memory request for Nginx
+      memory: "128Mi"
+      # -- CPU request for Nginx
+      cpu: "100m"
+    limits:
+      # -- Memory limit for Nginx
+      memory: "512Mi"
+      # -- CPU limit for Nginx
+      cpu: "500m"
+
+  pdb:
+    # -- Enable Pod Disruption Budget for Nginx
+    enabled: true
+    # -- Minimum available pods
+    minAvailable: 1
+
+  # -- Node selector for Nginx pods
+  nodeSelector: {}
+  # -- Tolerations for Nginx pods
+  tolerations: []
+  # -- Affinity rules for Nginx pods
+  affinity: {}
+  # -- Additional environment variables for Nginx
+  extraEnvVars: []
+  # -- Additional volume mounts for Nginx
+  extraVolumeMounts: []
+  # -- Additional volumes for Nginx
+  extraVolumes: []
+
+  service:
+    # -- Nginx service type
+    type: ClusterIP
+    # -- Nginx HTTP port
+    port: 80
+    # -- Nginx HTTPS port
+    httpsPort: 443
+
+  startupProbe:
+    # -- Enable startup probe
+    enabled: true
+    # -- Initial delay seconds
+    initialDelaySeconds: 5
+    # -- Period seconds
+    periodSeconds: 5
+    # -- Timeout seconds
+    timeoutSeconds: 3
+    # -- Failure threshold
+    failureThreshold: 12
+    # -- Success threshold
+    successThreshold: 1
+
+  livenessProbe:
+    # -- Enable liveness probe
+    enabled: true
+    # -- Initial delay seconds
+    initialDelaySeconds: 10
+    # -- Period seconds
+    periodSeconds: 10
+    # -- Timeout seconds
+    timeoutSeconds: 5
+    # -- Failure threshold
+    failureThreshold: 6
+    # -- Success threshold
+    successThreshold: 1
+
+  readinessProbe:
+    # -- Enable readiness probe
+    enabled: true
+    # -- Initial delay seconds
+    initialDelaySeconds: 5
+    # -- Period seconds
+    periodSeconds: 10
+    # -- Timeout seconds
+    timeoutSeconds: 5
+    # -- Failure threshold
+    failureThreshold: 6
+    # -- Success threshold
+    successThreshold: 1
+
+# @section Celery Beat parameters
+# Task scheduler (always runs as single instance)
+
+celeryBeat:
+  image:
+    # -- Celery Beat image repository
+    repository: intelowlproject/intelowl
+    # -- Celery Beat image tag (defaults to app.version)
+    tag: ""
+    # -- Celery Beat image pull policy
+    pullPolicy: IfNotPresent
+
+  resources:
+    requests:
+      # -- Memory request for Celery Beat
+      memory: "256Mi"
+      # -- CPU request for Celery Beat
+      cpu: "100m"
+    limits:
+      # -- Memory limit for Celery Beat
+      memory: "512Mi"
+      # -- CPU limit for Celery Beat
+      cpu: "250m"
+
+  # -- Node selector for Celery Beat pod
+  nodeSelector: {}
+  # -- Tolerations for Celery Beat pod
+  tolerations: []
+  # -- Affinity rules for Celery Beat pod
+  affinity: {}
+  # -- Additional environment variables for Celery Beat
+  extraEnvVars: []
+  # -- Additional volume mounts for Celery Beat
+  extraVolumeMounts: []
+  # -- Additional volumes for Celery Beat
+  extraVolumes: []
+
+# @section Celery Worker parameters
+# Default queue worker configuration
+
+celeryWorkerDefault:
+  # -- Number of Celery Worker replicas
+  replicaCount: 2
+  # -- Celery concurrency (number of worker processes per pod)
+  concurrency: 4
+  # -- Termination grace period in seconds (allow tasks to complete)
+  terminationGracePeriodSeconds: 180
+
+  image:
+    # -- Celery Worker image repository
+    repository: intelowlproject/intelowl
+    # -- Celery Worker image tag (defaults to app.version)
+    tag: ""
+    # -- Celery Worker image pull policy
+    pullPolicy: IfNotPresent
+
+  resources:
+    requests:
+      # -- Memory request for Celery Worker
+      memory: "1Gi"
+      # -- CPU request for Celery Worker
+      cpu: "500m"
+    limits:
+      # -- Memory limit for Celery Worker
+      memory: "4Gi"
+      # -- CPU limit for Celery Worker
+      cpu: "2"
+
+  autoscaling:
+    # -- Enable Horizontal Pod Autoscaler for Celery Worker
+    enabled: false
+    # -- Minimum number of replicas
+    minReplicas: 2
+    # -- Maximum number of replicas
+    maxReplicas: 10
+    # -- Target CPU utilization percentage
+    targetCPUUtilizationPercentage: 80
+    # -- Target memory utilization percentage
+    targetMemoryUtilizationPercentage: 80
+
+  pdb:
+    # -- Enable Pod Disruption Budget for Celery Worker
+    enabled: true
+    # -- Minimum available pods
+    minAvailable: 1
+
+  # -- Node selector for Celery Worker pods
+  nodeSelector: {}
+  # -- Tolerations for Celery Worker pods
+  tolerations: []
+  # -- Affinity rules for Celery Worker pods
+  affinity: {}
+  # -- Additional environment variables for Celery Worker
+  extraEnvVars: []
+  # -- Additional volume mounts for Celery Worker
+  extraVolumeMounts: []
+  # -- Additional volumes for Celery Worker
+  extraVolumes: []
+
+# @section Multi-queue workers parameters
+# Optional specialized workers for different task types
+
+multiQueue:
+  # -- Enable multi-queue workers for better resource isolation
+  enabled: false
+
+  # Local queue worker (fast, local-only tasks)
+  workerLocal:
+    # -- Enable local queue worker
+    enabled: true
+    # -- Number of replicas
+    replicaCount: 1
+    # -- Worker concurrency
+    concurrency: 2
+    # -- Termination grace period
+    terminationGracePeriodSeconds: 180
+    resources:
+      requests:
+        # -- Memory request
+        memory: "512Mi"
+        # -- CPU request
+        cpu: "250m"
+      limits:
+        # -- Memory limit
+        memory: "2Gi"
+        # -- CPU limit
+        cpu: "1"
+    # -- Node selector
+    nodeSelector: {}
+    # -- Tolerations
+    tolerations: []
+    # -- Affinity rules
+    affinity: {}
+
+  # Long-running tasks worker
+  workerLong:
+    # -- Enable long-running tasks worker
+    enabled: true
+    # -- Number of replicas
+    replicaCount: 1
+    # -- Worker concurrency
+    concurrency: 2
+    # -- Termination grace period (longer for long tasks)
+    terminationGracePeriodSeconds: 600
+    resources:
+      requests:
+        # -- Memory request
+        memory: "1Gi"
+        # -- CPU request
+        cpu: "500m"
+      limits:
+        # -- Memory limit
+        memory: "4Gi"
+        # -- CPU limit
+        cpu: "2"
+    # -- Node selector
+    nodeSelector: {}
+    # -- Tolerations
+    tolerations: []
+    # -- Affinity rules
+    affinity: {}
+
+  # Ingestor worker (data ingestion tasks)
+  workerIngestor:
+    # -- Enable ingestor worker
+    enabled: true
+    # -- Number of replicas
+    replicaCount: 1
+    # -- Worker concurrency
+    concurrency: 2
+    # -- Termination grace period
+    terminationGracePeriodSeconds: 180
+    resources:
+      requests:
+        # -- Memory request
+        memory: "512Mi"
+        # -- CPU request
+        cpu: "250m"
+      limits:
+        # -- Memory limit
+        memory: "2Gi"
+        # -- CPU limit
+        cpu: "1"
+    # -- Node selector
+    nodeSelector: {}
+    # -- Tolerations
+    tolerations: []
+    # -- Affinity rules
+    affinity: {}
+
+# @section Flower parameters
+# Celery monitoring dashboard
+
+flower:
+  # -- Enable Flower dashboard
+  enabled: false
+  # -- Number of Flower replicas
+  replicaCount: 1
+
+  image:
+    # -- Flower image repository
+    repository: mher/flower
+    # -- Flower image tag
+    tag: "2.0"
+    # -- Flower image pull policy
+    pullPolicy: IfNotPresent
+
+  resources:
+    requests:
+      # -- Memory request for Flower
+      memory: "256Mi"
+      # -- CPU request for Flower
+      cpu: "100m"
+    limits:
+      # -- Memory limit for Flower
+      memory: "512Mi"
+      # -- CPU limit for Flower
+      cpu: "500m"
+
+  # Basic authentication for Flower dashboard
+  auth:
+    # -- Enable basic authentication
+    enabled: true
+    # -- Username for basic auth
+    username: "admin"
+    # -- Password for basic auth (auto-generated if empty)
+    password: ""
+    # -- Use existing secret for password (key: flower-password)
+    existingSecret: ""
+
+  # -- Node selector for Flower pod
+  nodeSelector: {}
+  # -- Tolerations for Flower pod
+  tolerations: []
+  # -- Affinity rules for Flower pod
+  affinity: {}
+
+  service:
+    # -- Flower service type
+    type: ClusterIP
+    # -- Flower service port
+    port: 5555
+
+  # Ingress for Flower dashboard
+  ingress:
+    # -- Enable Ingress for Flower
+    enabled: false
+    # -- Ingress class name
+    className: ""
+    # -- Ingress annotations
+    annotations: {}
+    # -- Ingress hosts
+    hosts:
+      - host: flower.intelowl.local
+        paths:
+          - path: /
+            pathType: Prefix
+    # -- TLS configuration
+    tls: []
+
+# @section Integrations parameters
+# Optional Docker-based analyzers
+
+integrations:
+  # CyberChef integration (recipe-based data transformation)
+  cyberchef:
+    # -- Enable CyberChef integration
+    enabled: false
+    image:
+      # -- CyberChef image repository
+      repository: intelowlproject/intelowl_cyberchef
+      # -- CyberChef image tag (defaults to app.version)
+      tag: ""
+      # -- Image pull policy
+      pullPolicy: IfNotPresent
+    service:
+      # -- Service port
+      port: 3000
+    resources:
+      requests:
+        # -- Memory request
+        memory: "256Mi"
+        # -- CPU request
+        cpu: "100m"
+      limits:
+        # -- Memory limit
+        memory: "512Mi"
+        # -- CPU limit
+        cpu: "500m"
+
+  # Malware Tools integration (ClamAV, Qiling, etc.)
+  malwareTools:
+    # -- Enable Malware Tools integration
+    enabled: false
+    image:
+      # -- Malware Tools image repository
+      repository: intelowlproject/intelowl_malware_tools_analyzers
+      # -- Image tag (defaults to app.version)
+      tag: ""
+      # -- Image pull policy
+      pullPolicy: IfNotPresent
+    service:
+      # -- Service port
+      port: 4002
+    resources:
+      requests:
+        # -- Memory request
+        memory: "512Mi"
+        # -- CPU request
+        cpu: "250m"
+      limits:
+        # -- Memory limit
+        memory: "2Gi"
+        # -- CPU limit
+        cpu: "1"
+
+  # Nuclei integration (vulnerability scanner)
+  nuclei:
+    # -- Enable Nuclei integration
+    enabled: false
+    image:
+      # -- Nuclei image repository
+      repository: intelowlproject/intelowl_nuclei_analyzer
+      # -- Image tag (defaults to app.version)
+      tag: ""
+      # -- Image pull policy
+      pullPolicy: IfNotPresent
+    service:
+      # -- Service port
+      port: 4008
+    resources:
+      requests:
+        # -- Memory request
+        memory: "256Mi"
+        # -- CPU request
+        cpu: "100m"
+      limits:
+        # -- Memory limit
+        memory: "1Gi"
+        # -- CPU limit
+        cpu: "500m"
+
+  # PCAP Analyzers integration (Suricata, network analysis)
+  pcapAnalyzers:
+    # -- Enable PCAP Analyzers integration
+    enabled: false
+    image:
+      # -- PCAP Analyzers image repository
+      repository: intelowlproject/intelowl_pcap_analyzers
+      # -- Image tag (defaults to app.version)
+      tag: ""
+      # -- Image pull policy
+      pullPolicy: IfNotPresent
+    service:
+      # -- Service port
+      port: 4004
+    resources:
+      requests:
+        # -- Memory request
+        memory: "512Mi"
+        # -- CPU request
+        cpu: "250m"
+      limits:
+        # -- Memory limit
+        memory: "2Gi"
+        # -- CPU limit
+        cpu: "1"
+
+  # BBOT integration (OSINT automation)
+  bbot:
+    # -- Enable BBOT integration
+    enabled: false
+    image:
+      # -- BBOT image repository
+      repository: intelowlproject/intelowl_bbot_analyzer
+      # -- Image tag (defaults to app.version)
+      tag: ""
+      # -- Image pull policy
+      pullPolicy: IfNotPresent
+    service:
+      # -- Service port
+      port: 5001
+    resources:
+      requests:
+        # -- Memory request
+        memory: "512Mi"
+        # -- CPU request
+        cpu: "250m"
+      limits:
+        # -- Memory limit
+        memory: "2Gi"
+        # -- CPU limit
+        cpu: "1"
+
+  # Phishing Analyzers integration (URL/website phishing detection)
+  phishingAnalyzers:
+    # -- Enable Phishing Analyzers integration (includes Selenium)
+    enabled: false
+    image:
+      # -- Phishing Analyzers image repository
+      repository: intelowlproject/intelowl_phishing_analyzers
+      # -- Image tag (defaults to app.version)
+      tag: ""
+      # -- Image pull policy
+      pullPolicy: IfNotPresent
+    service:
+      # -- Service port
+      port: 4005
+    resources:
+      requests:
+        # -- Memory request
+        memory: "512Mi"
+        # -- CPU request
+        cpu: "250m"
+      limits:
+        # -- Memory limit
+        memory: "2Gi"
+        # -- CPU limit
+        cpu: "1"
+
+    # Selenium configuration for browser-based analysis
+    selenium:
+      hub:
+        image:
+          # -- Selenium Hub image repository
+          repository: selenium/hub
+          # -- Selenium Hub image tag
+          tag: "4.41"
+        resources:
+          requests:
+            # -- Memory request
+            memory: "256Mi"
+            # -- CPU request
+            cpu: "100m"
+          limits:
+            # -- Memory limit
+            memory: "1Gi"
+            # -- CPU limit
+            cpu: "500m"
+      chromium:
+        image:
+          # -- Chromium node image repository
+          repository: selenium/node-chromium
+          # -- Chromium node image tag
+          tag: "145.0"
+        # -- Number of Chromium nodes
+        replicaCount: 1
+        # -- Maximum sessions per node
+        maxSessions: 4
+        # -- Shared memory size for Chromium
+        shmSize: "2Gi"
+        resources:
+          requests:
+            # -- Memory request
+            memory: "1Gi"
+            # -- CPU request
+            cpu: "500m"
+          limits:
+            # -- Memory limit
+            memory: "2Gi"
+            # -- CPU limit
+            cpu: "1"
+
+  # PhoneInfoga integration (phone number OSINT)
+  phoneinfoga:
+    # -- Enable PhoneInfoga integration
+    enabled: false
+    image:
+      # -- PhoneInfoga image repository
+      repository: sundowndev/phoneinfoga
+      # -- Image tag
+      tag: "v2.11.0"
+      # -- Image pull policy
+      pullPolicy: IfNotPresent
+    service:
+      # -- Service port
+      port: 5000
+    resources:
+      requests:
+        # -- Memory request
+        memory: "128Mi"
+        # -- CPU request
+        cpu: "100m"
+      limits:
+        # -- Memory limit
+        memory: "512Mi"
+        # -- CPU limit
+        cpu: "500m"
+
+  # Phunter integration (phone number hunting)
+  phunter:
+    # -- Enable Phunter integration
+    enabled: false
+    image:
+      # -- Phunter image repository
+      repository: intelowlproject/phunter
+      # -- Image tag (defaults to app.version)
+      tag: ""
+      # -- Image pull policy
+      pullPolicy: IfNotPresent
+    service:
+      # -- Service port
+      port: 5612
+    resources:
+      requests:
+        # -- Memory request
+        memory: "256Mi"
+        # -- CPU request
+        cpu: "100m"
+      limits:
+        # -- Memory limit
+        memory: "512Mi"
+        # -- CPU limit
+        cpu: "500m"
+
+  # Thug integration (low-interaction honeyclient)
+  thug:
+    # -- Enable Thug integration
+    enabled: false
+    image:
+      # -- Thug image repository
+      repository: intelowlproject/intelowl_thug
+      # -- Image tag (defaults to app.version)
+      tag: ""
+      # -- Image pull policy
+      pullPolicy: IfNotPresent
+    service:
+      # -- Service port
+      port: 4002
+    resources:
+      requests:
+        # -- Memory request
+        memory: "512Mi"
+        # -- CPU request
+        cpu: "250m"
+      limits:
+        # -- Memory limit
+        memory: "2Gi"
+        # -- CPU limit
+        cpu: "1"
+
+  # Tor Analyzers integration (Tor network analysis)
+  torAnalyzers:
+    # -- Enable Tor Analyzers integration
+    enabled: false
+    image:
+      # -- Tor Analyzers image repository
+      repository: intelowlproject/intelowl_tor_analyzers
+      # -- Image tag (defaults to app.version)
+      tag: ""
+      # -- Image pull policy
+      pullPolicy: IfNotPresent
+    service:
+      # -- Service port
+      port: 4001
+    resources:
+      requests:
+        # -- Memory request
+        memory: "256Mi"
+        # -- CPU request
+        cpu: "100m"
+      limits:
+        # -- Memory limit
+        memory: "1Gi"
+        # -- CPU limit
+        cpu: "500m"
+
+# @section Networking parameters
+
+networking:
+  # -- Networking type: "gateway" (Gateway API) or "ingress" (traditional Ingress)
+  type: "gateway"
+  # -- Gateway API provider: nginx-gateway-fabric, envoy-gateway, istio, kong, traefik
+  gatewayProvider: "nginx-gateway-fabric"
+
+  # Gateway API configuration
+  gateway:
+    # -- Create Gateway resource
+    create: true
+    # -- Gateway name (auto-generated if empty)
+    name: ""
+
+    # GatewayClass configuration
+    gatewayClass:
+      # -- Create GatewayClass (usually created by the provider)
+      create: false
+      # -- GatewayClass name to use
+      name: "nginx"
+
+    # -- Gateway listeners configuration
+    listeners:
+      - name: http
+        port: 80
+        protocol: HTTP
+        allowedRoutes:
+          namespaces:
+            from: Same
+      # Uncomment for HTTPS:
+      # - name: https
+      #   port: 443
+      #   protocol: HTTPS
+      #   tls:
+      #     mode: Terminate
+      #     certificateRefs:
+      #       - name: intelowl-tls
+      #         kind: Secret
+
+    # HTTPRoute configuration
+    httpRoute:
+      # -- Create HTTPRoute
+      create: true
+      # -- Hostnames for the route
+      hostnames:
+        - "intelowl.local"
+
+      # WebSocket route configuration
+      websocket:
+        # -- Enable WebSocket route for Daphne
+        enabled: true
+        # -- WebSocket path prefix
+        path: "/ws"
+
+  # Traditional Ingress configuration (when type=ingress)
+  ingress:
+    # -- Enable Ingress
+    enabled: false
+    # -- Ingress class name
+    className: "nginx"
+    # -- Ingress annotations
+    annotations: {}
+      # nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+      # nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+      # nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+      # nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    # -- Ingress hosts configuration
+    hosts:
+      - host: intelowl.local
+        paths:
+          - path: /
+            pathType: Prefix
+    # -- TLS configuration
+    tls: []
+      # - secretName: intelowl-tls
+      #   hosts:
+      #     - intelowl.local
+
+# @section Network Policy parameters
+
+networkPolicy:
+  # -- Enable network policies
+  enabled: false
+  # -- Allow traffic from specific namespaces
+  allowedNamespaces: []
+  # -- Allow external egress (required for analyzers that need internet access)
+  allowExternalEgress: true
+
+# @section RBAC parameters
+
+rbac:
+  # -- Create ServiceAccount
+  create: true
+  # -- ServiceAccount name (auto-generated if empty)
+  serviceAccountName: ""
+  # -- Create Role and RoleBinding
+  createRole: true
+  # -- Annotations for ServiceAccount
+  annotations: {}
+
+# @section Security Context parameters
+
+# -- Pod security context applied to all pods
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 33
+  runAsGroup: 33
+  fsGroup: 33
+
+# -- Container security context applied to all containers
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+  seccompProfile:
+    type: RuntimeDefault
+
+# @section Migration parameters
+
+migration:
+  # -- Enable migration job as pre-install/pre-upgrade hook
+  enabled: true
+  # -- Migration timeout in seconds
+  timeout: 600
+
+  resources:
+    requests:
+      # -- Memory request for migration job
+      memory: "512Mi"
+      # -- CPU request for migration job
+      cpu: "250m"
+    limits:
+      # -- Memory limit for migration job
+      memory: "1Gi"
+      # -- CPU limit for migration job
+      cpu: "500m"
+
+# @section External Secrets parameters
+
+externalSecrets:
+  # -- Enable External Secrets Operator integration
+  enabled: false
+  # -- Refresh interval for secrets
+  refreshInterval: "1h"
+
+  # Secret store reference
+  secretStoreRef:
+    # -- SecretStore name
+    name: "cluster-secret-store"
+    # -- SecretStore kind
+    kind: "ClusterSecretStore"
+
+  # Remote references for secrets
+  remoteRefs:
+    djangoSecret:
+      # -- Remote key for Django secret
+      key: "intelowl/secrets"
+      # -- Property name in remote secret
+      property: "DJANGO_SECRET"
+    dbPassword:
+      # -- Remote key for database password
+      key: "intelowl/secrets"
+      # -- Property name in remote secret
+      property: "DB_PASSWORD"
+    redisPassword:
+      # -- Remote key for Redis password
+      key: "intelowl/secrets"
+      # -- Property name in remote secret
+      property: "REDIS_PASSWORD"
+
+# @section Metrics parameters
+
+metrics:
+  # -- Enable Prometheus metrics
+  enabled: false
+
+  # ServiceMonitor configuration
+  serviceMonitor:
+    # -- Enable ServiceMonitor for Prometheus Operator
+    enabled: false
+    # -- Scrape interval
+    interval: "30s"
+    # -- Scrape timeout
+    scrapeTimeout: "10s"
+    # -- Additional labels for ServiceMonitor
+    labels: {}
+
+  # PodMonitor configuration (for Celery workers)
+  podMonitor:
+    # -- Enable PodMonitor for Prometheus Operator
+    enabled: false
+    # -- Scrape interval
+    interval: "30s"
+    # -- Scrape timeout
+    scrapeTimeout: "10s"
+    # -- Additional labels for PodMonitor
+    labels: {}
+
+# @section Elasticsearch parameters (ECK)
+# Requires ECK operator. See: https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-overview.html
+
+elasticsearch:
+  # -- Enable Elasticsearch for analysis results indexing
+  enabled: false
+
+  operator:
+    # -- Install ECK operator via this chart (set to false if ECK operator is already installed)
+    enabled: false
+
+  # -- Elasticsearch version
+  version: "8.19.12"
+  # -- Number of Elasticsearch nodes
+  replicas: 1
+  # -- Allow mmap (set to true for production performance)
+  allowMmap: false
+
+  # -- Additional Elasticsearch configuration
+  config: {}
+    # xpack.security.enabled: true
+
+  storage:
+    # -- Storage size for Elasticsearch data
+    size: "30Gi"
+    # -- Storage class (uses global.storageClass if empty)
+    storageClass: ""
+
+  resources:
+    requests:
+      # -- Memory request for Elasticsearch
+      memory: "2Gi"
+      # -- CPU request for Elasticsearch
+      cpu: "500m"
+    limits:
+      # -- Memory limit for Elasticsearch
+      memory: "4Gi"
+      # -- CPU limit for Elasticsearch
+      cpu: "2"
+
+  # Kibana dashboard configuration
+  kibana:
+    # -- Enable Kibana dashboard
+    enabled: true
+    # -- Number of Kibana replicas
+    replicas: 1
+
+    resources:
+      requests:
+        # -- Memory request for Kibana
+        memory: "512Mi"
+        # -- CPU request for Kibana
+        cpu: "250m"
+      limits:
+        # -- Memory limit for Kibana
+        memory: "1Gi"
+        # -- CPU limit for Kibana
+        cpu: "500m"
+
+    # -- Node selector for Kibana pods
+    nodeSelector: {}
+    # -- Tolerations for Kibana pods
+    tolerations: []
+
+    # Ingress for Kibana dashboard
+    ingress:
+      # -- Enable Ingress for Kibana
+      enabled: false
+      # -- Ingress class name
+      className: ""
+      # -- Ingress annotations
+      annotations: {}
+      # -- Ingress hosts
+      hosts:
+        - host: kibana.intelowl.local
+          paths:
+            - path: /
+              pathType: Prefix
+      # -- TLS configuration
+      tls: []
+
+  # -- Node selector for Elasticsearch pods
+  nodeSelector: {}
+  # -- Tolerations for Elasticsearch pods
+  tolerations: []
+  # -- Affinity rules for Elasticsearch pods
+  affinity: {}
+
+# @section Superuser parameters
+# Automatically create a Django superuser on first install
+
+superuser:
+  # -- Enable automatic superuser creation (post-install hook)
+  enabled: false
+  # -- Superuser username
+  username: "admin"
+  # -- Superuser email
+  email: "admin@example.com"
+  # -- Superuser password (auto-generated if empty)
+  password: ""
+  # -- Use existing secret for superuser password (key: superuser-password)
+  existingSecret: ""
+
+# @section Celery Restart parameters
+# Weekly CronJob to restart Celery workers (prevents memory leaks)
+
+celeryRestart:
+  # -- Enable weekly Celery worker restart CronJob
+  enabled: false
+  # -- Cron schedule (default: every Sunday at 3:00 AM)
+  schedule: "0 3 * * 0"
+
+# @section Log Cleanup parameters
+# CronJob for cleaning up old log files
+
+logCleanup:
+  # -- Enable log cleanup CronJob
+  enabled: false
+  # -- Cron schedule (default: every day at 2:00 AM)
+  schedule: "0 2 * * *"
+  # -- Number of days to retain log files
+  retentionDays: 30
+
+# @section PostgreSQL parameters (CloudNative-PG)
+# Requires CloudNative-PG operator. See: https://cloudnative-pg.io/
+
+postgresql:
+  # -- Enable PostgreSQL (creates CNPG Cluster resource)
+  enabled: true
+
+  operator:
+    # -- Install CloudNative-PG operator via this chart (set to true only if not already installed)
+    enabled: false
+
+  # -- Number of PostgreSQL instances (1 for dev, 3 for HA)
+  instances: 1
+
+  image:
+    # -- PostgreSQL image repository
+    repository: ghcr.io/cloudnative-pg/postgresql
+    # -- PostgreSQL version tag
+    tag: "16"
+    # -- Image pull policy
+    pullPolicy: IfNotPresent
+
+  # -- Database name
+  database: "intel_owl_db"
+  # -- Database username
+  username: "intelowl"
+  # -- Database password (auto-generated if empty)
+  password: ""
+  # -- Use existing secret for credentials
+  existingSecret: ""
+
+  storage:
+    # -- Storage size for PostgreSQL data
+    size: "10Gi"
+    # -- Storage class (uses global.storageClass if empty)
+    storageClass: ""
+
+  walStorage:
+    # -- Enable separate WAL storage
+    enabled: false
+    # -- WAL storage size
+    size: "2Gi"
+    # -- WAL storage class
+    storageClass: ""
+
+  # -- PostgreSQL server parameters
+  parameters: {}
+    # max_connections: "200"
+    # shared_buffers: "256MB"
+
+  initdb:
+    # -- Post-init SQL statements
+    postInitSQL: []
+
+  synchronous:
+    # -- Enable synchronous replication (requires instances > 1)
+    enabled: false
+    # -- Minimum synchronous replicas
+    minSyncReplicas: 1
+    # -- Maximum synchronous replicas
+    maxSyncReplicas: 2
+
+  backup:
+    # -- Enable backup to S3-compatible storage
+    enabled: false
+    # -- S3 destination path
+    destinationPath: ""
+    # -- S3 endpoint URL
+    endpointURL: ""
+    # -- Backup retention policy
+    retentionPolicy: "30d"
+    s3Credentials:
+      # -- Secret name containing S3 credentials
+      secretName: ""
+      # -- Key for access key ID
+      accessKeyIdKey: "ACCESS_KEY_ID"
+      # -- Key for secret access key
+      secretAccessKeyKey: "ACCESS_SECRET_KEY"
+
+  monitoring:
+    # -- Enable PostgreSQL monitoring
+    enabled: false
+    # -- Enable PodMonitor for PostgreSQL
+    podMonitor: false
+
+  resources:
+    requests:
+      # -- Memory request for PostgreSQL
+      memory: "256Mi"
+      # -- CPU request for PostgreSQL
+      cpu: "100m"
+    limits:
+      # -- Memory limit for PostgreSQL
+      memory: "1Gi"
+      # -- CPU limit for PostgreSQL
+      cpu: "500m"
+
+  # -- Node selector for PostgreSQL pods
+  nodeSelector: {}
+  # -- Tolerations for PostgreSQL pods
+  tolerations: []
+  # -- Affinity rules for PostgreSQL pods
+  affinity: {}
+
+# @section Redis parameters (CloudPirates)
+# See: https://github.com/cloudpirates/helm-charts
+
+redis:
+  # -- Enable Redis subchart
+  enabled: true
+  # -- Redis architecture: standalone or replication
+  architecture: standalone
+
+  auth:
+    # -- Enable Redis authentication
+    enabled: true
+    # -- Redis password (auto-generated if empty)
+    password: ""
+    # -- Use existing secret for password
+    existingSecret: ""
+    # -- Key in existingSecret containing the password
+    existingSecretPasswordKey: "redis-password"
+
+  persistence:
+    # -- Enable Redis persistence
+    enabled: true
+    # -- Persistence storage size
+    size: "5Gi"
+    # -- Storage class
+    storageClass: ""
+
+  sentinel:
+    # -- Enable Sentinel for HA (requires architecture: replication)
+    enabled: false
+    # -- Sentinel quorum
+    quorum: 2
+
+  resources:
+    requests:
+      # -- Memory request for Redis
+      memory: "128Mi"
+      # -- CPU request for Redis
+      cpu: "100m"
+    limits:
+      # -- Memory limit for Redis
+      memory: "512Mi"
+      # -- CPU limit for Redis
+      cpu: "500m"
+
+  # -- Node selector for Redis pods
+  nodeSelector: {}
+  # -- Tolerations for Redis pods
+  tolerations: []
+  # -- Affinity rules for Redis pods
+  affinity: {}
+
+# @section RabbitMQ parameters (CloudPirates)
+# Enable when broker.type=rabbitmq and broker.rabbitmq.internal=true
+# See: https://github.com/cloudpirates/helm-charts
+
+rabbitmq:
+  # -- Enable RabbitMQ subchart
+  enabled: false
+
+  auth:
+    # -- RabbitMQ username
+    username: "intelowl"
+    # -- RabbitMQ password (auto-generated if empty)
+    password: ""
+    # -- Use existing secret for credentials
+    existingSecret: ""
+    # -- Key in existingSecret containing the password (CloudPirates chart uses "password")
+    existingSecretPasswordKey: "password"
+
+  # -- RabbitMQ virtual host
+  vhost: "/"
+
+  persistence:
+    # -- Enable RabbitMQ persistence
+    enabled: true
+    # -- Persistence storage size
+    size: "5Gi"
+    # -- Storage class
+    storageClass: ""
+
+  resources:
+    requests:
+      # -- Memory request for RabbitMQ
+      memory: "256Mi"
+      # -- CPU request for RabbitMQ
+      cpu: "100m"
+    limits:
+      # -- Memory limit for RabbitMQ
+      memory: "1Gi"
+      # -- CPU limit for RabbitMQ
+      cpu: "500m"
+
+  management:
+    # -- Enable RabbitMQ management plugin
+    enabled: true
+
+  # -- Node selector for RabbitMQ pods
+  nodeSelector: {}
+  # -- Tolerations for RabbitMQ pods
+  tolerations: []
+  # -- Affinity rules for RabbitMQ pods
+  affinity: {}

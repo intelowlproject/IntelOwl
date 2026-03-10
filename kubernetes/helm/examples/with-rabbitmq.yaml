@@ -1,0 +1,100 @@
+# IntelOwl with RabbitMQ as message broker (instead of Redis)
+# Use this if you prefer RabbitMQ for Celery task queues
+#
+# Prerequisites:
+# - CloudNative-PG operator installed
+# - Gateway API CRDs installed
+#
+# Install (from helm directory):
+#   cd helm
+#   helm install intelowl . -f examples/with-rabbitmq.yaml -n intelowl --create-namespace
+
+app:
+  version: "v6.5.1"
+  django:
+    secretKey: "your-secret-key-change-me"
+    debug: false
+
+# Standard service configuration
+uwsgi:
+  replicaCount: 2
+
+daphne:
+  enabled: true
+  replicaCount: 2
+
+nginx:
+  replicaCount: 2
+
+celeryWorkerDefault:
+  replicaCount: 2
+  concurrency: 4
+
+# Database
+postgresql:
+  enabled: true
+  instances: 1
+  storage:
+    size: "10Gi"
+
+# Message broker configuration
+broker:
+  # Use RabbitMQ instead of Redis
+  type: "rabbitmq"
+
+  # Disable internal Redis (still need it for caching/websockets)
+  redis:
+    internal: true # Redis is still used for result backend and websockets
+
+  # Use internal RabbitMQ
+  rabbitmq:
+    internal: true
+
+# Redis (still needed for result backend and websockets)
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: true
+  persistence:
+    size: "5Gi"
+
+# RabbitMQ configuration
+rabbitmq:
+  enabled: true
+  auth:
+    username: "intelowl"
+    # Password will be auto-generated if not provided
+    password: ""
+  vhost: "/"
+  persistence:
+    size: "5Gi"
+  management:
+    enabled: true
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+
+# Storage
+storage:
+  genericLogs:
+    size: "10Gi"
+  sharedFiles:
+    size: "20Gi"
+  staticContent:
+    size: "5Gi"
+
+# Gateway API networking
+networking:
+  type: "gateway"
+  gateway:
+    create: true
+    gatewayClass:
+      name: "nginx"
+    httpRoute:
+      hostnames:
+        - "intelowl.local"

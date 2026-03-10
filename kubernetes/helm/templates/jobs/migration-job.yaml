@@ -1,0 +1,61 @@
+{{- if .Values.migration.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "intelowl.fullname" . }}-migration
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: migration
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: {{ .Values.migration.timeout }}
+  template:
+    metadata:
+      labels:
+        {{- include "intelowl.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: migration
+    spec:
+      {{- include "intelowl.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ include "intelowl.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      restartPolicy: Never
+      initContainers:
+        {{- include "intelowl.waitForDbInitContainer" . | nindent 8 }}
+        {{/* Redis is not needed for migrations - only database */}}
+      containers:
+        - name: migration
+          image: {{ include "intelowl.image" (dict "imageRoot" .Values.uwsgi.image "Chart" .Chart "Values" .Values) }}
+          imagePullPolicy: {{ .Values.uwsgi.image.pullPolicy }}
+          {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          command:
+            - sh
+            - -c
+            - |
+              echo "Creating log directories..."
+              mkdir -p /var/log/intel_owl/django
+              mkdir -p /var/log/intel_owl/celery
+              mkdir -p /opt/deploy/intel_owl/files
+              echo "Running database migrations..."
+              python manage.py migrate --noinput
+              echo "Creating cache table..."
+              python manage.py createcachetable || true
+              echo "Migrations completed successfully!"
+          env:
+            {{- include "intelowl.migrationEnvVars" . | nindent 12 }}
+          volumeMounts:
+            {{- include "intelowl.commonVolumeMounts" . | nindent 12 }}
+          resources:
+            {{- toYaml .Values.migration.resources | nindent 12 }}
+      volumes:
+        {{- include "intelowl.commonVolumes" . | nindent 8 }}
+{{- end }}

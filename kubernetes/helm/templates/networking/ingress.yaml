@@ -1,0 +1,91 @@
+{{/*
+Main Ingress resource - created when networking.type=ingress and networking.ingress.enabled=true
+*/}}
+{{- if and (eq .Values.networking.type "ingress") .Values.networking.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "intelowl.fullname" . }}
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ingress
+  {{- with .Values.networking.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.networking.ingress.className }}
+  ingressClassName: {{ .Values.networking.ingress.className }}
+  {{- end }}
+  {{- if .Values.networking.ingress.tls }}
+  tls:
+    {{- range .Values.networking.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.networking.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ include "intelowl.fullname" $ }}-nginx
+                port:
+                  name: http
+          {{- end }}
+    {{- end }}
+{{- end }}
+---
+{{/*
+Flower Ingress - only when networking.type=ingress
+*/}}
+{{- if and (eq .Values.networking.type "ingress") .Values.flower.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "intelowl.fullname" . }}-flower
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: flower
+  {{- with .Values.flower.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.flower.ingress.className }}
+  ingressClassName: {{ .Values.flower.ingress.className }}
+  {{- end }}
+  {{- if .Values.flower.ingress.tls }}
+  tls:
+    {{- range .Values.flower.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.flower.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ include "intelowl.fullname" $ }}-flower
+                port:
+                  name: flower
+          {{- end }}
+    {{- end }}
+{{- end }}

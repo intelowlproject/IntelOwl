@@ -1,0 +1,102 @@
+{{- if .Values.flower.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "intelowl.fullname" . }}-flower
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: flower
+spec:
+  replicas: {{ .Values.flower.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "intelowl.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: flower
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/secrets/app-secrets.yaml") . | sha256sum }}
+      labels:
+        {{- include "intelowl.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: flower
+    spec:
+      {{- include "intelowl.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ include "intelowl.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        {{- include "intelowl.waitForRedisInitContainer" . | nindent 8 }}
+      containers:
+        - name: flower
+          image: "{{ .Values.flower.image.repository }}:{{ .Values.flower.image.tag }}"
+          imagePullPolicy: {{ .Values.flower.image.pullPolicy }}
+          {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          command:
+            - celery
+            - --broker=$(BROKER_URL)
+            - flower
+            - --port=5555
+            {{- if .Values.flower.auth.enabled }}
+            - --basic_auth=$(FLOWER_USER):$(FLOWER_PASSWORD)
+            {{- end }}
+          ports:
+            - name: flower
+              containerPort: 5555
+              protocol: TCP
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "intelowl.redisSecretName" . }}
+                  key: {{ include "intelowl.redisPasswordKey" . }}
+            - name: BROKER_URL
+              value: {{ include "intelowl.brokerUrl" . | quote }}
+            {{- if .Values.flower.auth.enabled }}
+            - name: FLOWER_USER
+              value: {{ .Values.flower.auth.username | quote }}
+            - name: FLOWER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.flower.auth.existingSecret }}
+                  name: {{ .Values.flower.auth.existingSecret }}
+                  {{- else }}
+                  name: {{ include "intelowl.fullname" . }}-app-secrets
+                  {{- end }}
+                  key: flower-password
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /healthcheck
+              port: flower
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /healthcheck
+              port: flower
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.flower.resources | nindent 12 }}
+      {{- with .Values.flower.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.flower.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.flower.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

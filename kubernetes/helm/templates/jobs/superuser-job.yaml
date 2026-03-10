@@ -1,0 +1,75 @@
+{{- if .Values.superuser.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "intelowl.fullname" . }}-create-superuser
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: superuser
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: 300
+  template:
+    metadata:
+      labels:
+        {{- include "intelowl.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: superuser
+    spec:
+      {{- include "intelowl.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ include "intelowl.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      restartPolicy: Never
+      initContainers:
+        {{- include "intelowl.waitForDbInitContainer" . | nindent 8 }}
+      containers:
+        - name: create-superuser
+          image: {{ include "intelowl.image" (dict "imageRoot" .Values.uwsgi.image "Chart" .Chart "Values" .Values) }}
+          imagePullPolicy: {{ .Values.uwsgi.image.pullPolicy }}
+          {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          command:
+            - sh
+            - -c
+            - |
+              echo "Creating superuser..."
+              python manage.py shell -c "
+              from django.contrib.auth import get_user_model
+              User = get_user_model()
+              if not User.objects.filter(username='${DJANGO_SUPERUSER_USERNAME}').exists():
+                  User.objects.create_superuser(
+                      username='${DJANGO_SUPERUSER_USERNAME}',
+                      email='${DJANGO_SUPERUSER_EMAIL}',
+                      password='${DJANGO_SUPERUSER_PASSWORD}'
+                  )
+                  print('Superuser created successfully!')
+              else:
+                  print('Superuser already exists, skipping.')
+              "
+          env:
+            {{- include "intelowl.migrationEnvVars" . | nindent 12 }}
+            - name: DJANGO_SUPERUSER_USERNAME
+              value: {{ .Values.superuser.username | quote }}
+            - name: DJANGO_SUPERUSER_EMAIL
+              value: {{ .Values.superuser.email | quote }}
+            - name: DJANGO_SUPERUSER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "intelowl.appSecretsName" . }}
+                  key: superuser-password
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+{{- end }}

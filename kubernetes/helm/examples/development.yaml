@@ -1,0 +1,137 @@
+# Development IntelOwl deployment
+# Suitable for development and testing environments
+#
+# Features:
+# - 2 replicas for core services
+# - Debug mode enabled
+# - Flower dashboard enabled
+# - Gateway API networking
+# - Automatic superuser creation (admin/admin)
+#
+# Prerequisites:
+# - CloudNative-PG operator installed
+# - Gateway API CRDs installed
+#
+# Install (from helm directory):
+#   cd helm
+#   helm install intelowl . -f examples/development.yaml -n intelowl --create-namespace
+#
+# Access:
+#   kubectl port-forward svc/intelowl-nginx 8080:80 -n intelowl
+#   kubectl port-forward svc/intelowl-flower 5555:5555 -n intelowl
+#   Open http://localhost:8080
+
+app:
+  version: "v6.5.1"
+  django:
+    # IMPORTANT: Generate a real secret key
+    secretKey: "development-secret-key-change-in-production"
+    debug: true
+    allowedHosts: "*"
+  logLevel: "DEBUG"
+  oldJobsRetentionDays: 7
+
+# Core services with 2 replicas
+uwsgi:
+  replicaCount: 2
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "4Gi"
+      cpu: "2"
+
+daphne:
+  enabled: true
+  replicaCount: 2
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "2Gi"
+      cpu: "1"
+
+nginx:
+  replicaCount: 2
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+celeryWorkerDefault:
+  replicaCount: 2
+  concurrency: 4
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "4Gi"
+      cpu: "2"
+
+# Single PostgreSQL instance for development
+postgresql:
+  enabled: true
+  instances: 1
+  storage:
+    size: "10Gi"
+
+# Standalone Redis
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: true
+  persistence:
+    size: "5Gi"
+
+# Standard storage sizes
+storage:
+  genericLogs:
+    size: "10Gi"
+  sharedFiles:
+    size: "20Gi"
+  staticContent:
+    size: "5Gi"
+
+# Gateway API networking
+networking:
+  type: "gateway"
+  gateway:
+    create: true
+    gatewayClass:
+      name: "nginx"
+    httpRoute:
+      hostnames:
+        - "intelowl.local"
+      websocket:
+        enabled: true
+
+# Enable Flower dashboard for monitoring
+flower:
+  enabled: true
+  auth:
+    enabled: false
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+# Prometheus metrics disabled
+metrics:
+  enabled: false
+
+# Automatic superuser creation for development
+superuser:
+  enabled: true
+  username: "admin"
+  email: "admin@dev.local"
+  password: "admin" # Acceptable for development only

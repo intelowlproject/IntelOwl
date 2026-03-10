@@ -1,0 +1,24 @@
+{{- if .Values.storage.localStorage }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "intelowl.fullname" . }}-shared-files
+  labels:
+    {{- include "intelowl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: storage
+  {{- if .Values.migration.enabled }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-15"
+    "helm.sh/resource-policy": keep
+  {{- end }}
+spec:
+  accessModes:
+    {{- range .Values.storage.sharedFiles.accessModes }}
+    - {{ . }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.storage.sharedFiles.size }}
+  {{- include "intelowl.storageClass" (dict "storageClass" .Values.storage.sharedFiles.storageClass "Values" .Values) | nindent 2 }}
+{{- end }}

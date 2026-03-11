@@ -71,6 +71,15 @@ const tableProps = {
       maxWidth: 50,
     },
     {
+      Header: "Type",
+      id: "type",
+      accessor: "type",
+      Cell: ({ value }) => <span className="text-capitalize">{value}</span>,
+      Filter: SelectOptionsFilter,
+      selectOptions: Object.values(PluginsTypes),
+      maxWidth: 75,
+    },
+    {
       Header: "Name",
       id: "name",
       accessor: "name",
@@ -113,15 +122,17 @@ const tableProps = {
       Header: "Process Time (s)",
       id: "process_time",
       accessor: "process_time",
+      Filter: DefaultColumnFilter,
       maxWidth: 75,
     },
     {
       Header: "Running Time",
       id: "running_time",
-      accessor: (pluginReport) => pluginReport,
+      accessor: "start_time",
+      Filter: DefaultColumnFilter,
       disableSortBy: true,
       maxWidth: 125,
-      Cell: ({ value: plugin }) => (
+      Cell: ({ row: { original: plugin } }) => (
         <div>
           <DateHoverable value={plugin?.start_time} format="pp" />
           &nbsp;<span className="fw-bold text-muted">-</span>&nbsp;

@@ -12,30 +12,29 @@ semantic_version_comp () {
       return
   fi
 
-  # Remove "v" prefix if present
-  ver1="${1//v/}"  # Used parameter substitution instead of sed (SC2001)
+  # Remove "v" prefix if present (e.g. v2.3.4 or Docker Compose version 5.0.2)
+  ver1="${1//v/}"
   ver2="${2//v/}"
 
-  # Convert version numbers to arrays
+  # Convert version numbers to arrays using stripped values
   local IFS=.
-  read -ra ver1 <<< "$1"
-  read -ra ver2 <<< "$2"
-  # Fill empty fields in ver1 with zeros
-  for ((i=${#ver1[@]}; i<${#ver2[@]}; i++)); do
-      ver1[i]=0
+  read -ra ver1_arr <<< "$ver1"
+  read -ra ver2_arr <<< "$ver2"
+  # Fill empty fields in ver1_arr with zeros
+  for ((i=${#ver1_arr[@]}; i<${#ver2_arr[@]}; i++)); do
+      ver1_arr[i]=0
   done
 
   # Compare version numbers
-  for ((i=0; i<${#ver1[@]}; i++)); do
-      if [[ -z ${ver2[i]} ]]; then
-          # Fill empty fields in ver2 with zeros
-          ver2[i]=0
+  for ((i=0; i<${#ver1_arr[@]}; i++)); do
+      if [[ -z ${ver2_arr[i]} ]]; then
+          ver2_arr[i]=0
       fi
-      if ((10#${ver1[i]} > 10#${ver2[i]})); then
+      if ((10#${ver1_arr[i]} > 10#${ver2_arr[i]})); then
           echo "greaterThan"
           return
       fi
-      if ((10#${ver1[i]} < 10#${ver2[i]})); then
+      if ((10#${ver1_arr[i]} < 10#${ver2_arr[i]})); then
           echo "lessThan"
           return
       fi
@@ -117,9 +116,9 @@ if ! docker compose version; then
     exit 1
   fi
 else
-  # docker compose exists
-  docker_compose_version="$(docker compose version | cut -d 'v' -f3)"
-  if [[ $(semantic_version_comp "$docker_compose_version" "$MINIMUM_DOCKER_COMPOSE_VERSION") == "lessThan" ]]; then
+  # docker compose exists; extract semver (handles "Docker Compose version v2.3.4" or "version 2.3.4")
+  docker_compose_version="$(docker compose version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)"
+  if [[ -z "$docker_compose_version" ]] || [[ $(semantic_version_comp "$docker_compose_version" "$MINIMUM_DOCKER_COMPOSE_VERSION") == "lessThan" ]]; then
     echo "Error: Docker compose version is too old. Please upgrade to at least $MINIMUM_DOCKER_COMPOSE_VERSION." >&2
     exit 1
   else

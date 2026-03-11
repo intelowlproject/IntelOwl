@@ -388,7 +388,7 @@ export default function ReportsSearch() {
                 className="fw-bold mb-0 flex-shrink-0 me-2"
                 for="search__report"
               >
-                Text search:
+                Report search:
                 <MdInfoOutline
                   id="search__report-infoicon"
                   fontSize="20"
@@ -402,8 +402,8 @@ export default function ReportsSearch() {
                   fade={false}
                   innerClassName="p-2 text-start text-nowrap md-fit-content"
                 >
-                  Text field to search within the “report“ and therefore in the
-                  data extracted from the plugins.
+                  Search within the &quot;report&quot; JSON field extracted from
+                  plugins. Does not search in plugin name, status or errors.
                 </UncontrolledTooltip>
               </Label>
               <Input

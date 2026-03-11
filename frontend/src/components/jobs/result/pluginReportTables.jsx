@@ -15,6 +15,7 @@ import {
   SelectOptionsFilter,
   DateHoverable,
 } from "@certego/certego-ui";
+import { useSearchParams } from "react-router-dom";
 
 import { StatusTag } from "../../common/StatusTag";
 import { killPlugin, retryPlugin } from "./jobApi";
@@ -182,7 +183,27 @@ export function PluginsReportTable({
   pluginsStoredLoading,
 }) {
   console.debug("PluginsReportTable rendered");
+  const [searchParams] = useSearchParams();
   const reports = pluginReports;
+
+  const tableInitialState = React.useMemo(() => {
+    const filterableColumnIds = tableProps.columns
+      .filter((column) => Boolean(column.Filter))
+      .map((column) => column.id);
+
+    const filters = filterableColumnIds.reduce((acc, columnId) => {
+      const paramValue = searchParams.get(columnId);
+      if (paramValue) {
+        acc.push({ id: columnId, value: paramValue });
+      }
+      return acc;
+    }, []);
+
+    return {
+      ...tableProps.initialState,
+      filters,
+    };
+  }, [searchParams]);
 
   reports.forEach((report, index) => {
     // description
@@ -204,6 +225,7 @@ export function PluginsReportTable({
         data={reports}
         customProps={{ job, refetch, pluginsLoading: pluginsStoredLoading }}
         {...tableProps}
+        initialState={tableInitialState}
       />
     </div>
   );

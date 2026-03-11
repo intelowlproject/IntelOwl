@@ -91,6 +91,14 @@ class BaseDataModel(models.Model):
         default=dict
     )  # field for additional information related to a specific analyzer
     date = models.DateTimeField(default=now)
+    content_hash = models.CharField(
+        max_length=64,
+        unique=True,
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text="Hash of normalized content for deduplication of identical data models.",
+    )
     analyzers_report = GenericRelation(
         to="analyzers_manager.AnalyzerReport",
         object_id_field="data_model_object_id",

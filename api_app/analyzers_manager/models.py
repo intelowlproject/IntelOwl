@@ -1,8 +1,9 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import hashlib
 import json
 from logging import getLogger
-from typing import Dict, Optional, Type, Union
+from typing import Any, Dict, Optional, Type, Union
 
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
@@ -20,6 +21,25 @@ from api_app.fields import ChoiceArrayField
 from api_app.models import AbstractReport, PythonConfig, PythonModule
 
 logger = getLogger(__name__)
+
+
+def _normalize_for_content_hash(value: Any) -> Any:
+    """Normalize a value for stable content hashing (for data model deduplication)."""
+    if value is None:
+        return None
+    if hasattr(value, "pk"):
+        return value.pk
+    if isinstance(value, dict):
+        return {k: _normalize_for_content_hash(v) for k, v in sorted(value.items())}
+    if isinstance(value, (list, set, tuple)):
+        return sorted((_normalize_for_content_hash(x) for x in value), key=str)
+    return value
+
+
+def _compute_data_model_content_hash(dictionary: Dict) -> str:
+    """Compute a stable hash of the data model dictionary for deduplication."""
+    normalized = _normalize_for_content_hash(dictionary)
+    return hashlib.sha256(json.dumps(normalized, sort_keys=True, default=str).encode()).hexdigest()
 
 
 class AnalyzerReport(AbstractReport):
@@ -121,14 +141,21 @@ class AnalyzerReport(AbstractReport):
         return result
 
     def create_data_model(self) -> Optional[BaseDataModel]:
-        # TODO we don't need to actually crate a new object every time.
-        #  if the report is the same of the previous one, we can just link it
         if not self._validation_before_data_model():
             return None
         dictionary = self._create_data_model_dictionary()
+        content_hash = _compute_data_model_content_hash(dictionary)
 
-        self.data_model: BaseDataModel = self.data_model_class.objects.create()
+        existing = self.data_model_class.objects.filter(content_hash=content_hash).first()
+        if existing is not None:
+            self.data_model = existing
+            self.save()
+            return existing
+
+        self.data_model = self.data_model_class.objects.create()
         self.data_model.merge(dictionary)
+        self.data_model.content_hash = content_hash
+        self.data_model.save(update_fields=["content_hash"])
         self.save()
         return self.data_model
 

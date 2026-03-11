@@ -1684,9 +1684,8 @@ class PythonConfig(AbstractConfig):
             self, user, config_runtime
         )
         not_configured_params = params.filter(required=True, configured=False)
-        # TODO to optimize
-        if not_configured_params.exists():
-            param = not_configured_params.first()
+        param = not_configured_params.first()
+        if param is not None:
             if not settings.STAGE_CI or settings.STAGE_CI and not param.value:
                 raise TypeError(
                     f"Required param {param.name} "

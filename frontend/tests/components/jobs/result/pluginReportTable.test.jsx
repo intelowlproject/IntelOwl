@@ -190,6 +190,9 @@ describe("test plugins report table", () => {
       screen.getByRole("columnheader", { name: "Status All" }),
     ).toBeInTheDocument();
     expect(
+      screen.getByRole("columnheader", { name: "Type All" }),
+    ).toBeInTheDocument();
+    expect(
       screen.getByRole("columnheader", { name: "Name" }),
     ).toBeInTheDocument();
     expect(

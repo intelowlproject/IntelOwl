@@ -1,6 +1,15 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+"""
+Talos IP blocklist analyzer (Cisco/Snort).
+
+Note: As of 2024, the blocklist at snort.org requires accepting terms and conditions
+in a browser. If automatic download fails (e.g. HTML T&C page returned), download
+the list manually from https://snort.org/downloads/ip-block-list and place it at
+MEDIA_ROOT/talos_ip_blacklist.txt.
+"""
+
 import logging
 import os
 
@@ -39,8 +48,18 @@ class Talos(classes.ObservableAnalyzer):
         try:
             logger.info("starting download of db from talos")
             url = "https://snort.org/downloads/ip-block-list"
-            r = requests.get(url)
+            r = requests.get(url, timeout=60)
             r.raise_for_status()
+
+            content_type = (r.headers.get("Content-Type") or "").lower()
+            if "text/html" in content_type:
+                logger.warning(
+                    "Talos blocklist URL returned HTML (likely T&C page). "
+                    "Download the list manually from %s and place it at %s",
+                    url,
+                    database_location,
+                )
+                return False
 
             with open(database_location, "w", encoding="utf-8") as f:
                 f.write(r.content.decode())

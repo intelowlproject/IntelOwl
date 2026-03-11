@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+# Requires Bash 4+ (associative arrays). On macOS: install with 'brew install bash' and run with bash start ...
+
+if [[ -z "${BASH_VERSINFO[0]}" ]] || [[ ${BASH_VERSINFO[0]} -lt 4 ]]; then
+  echo "Error: This script requires Bash 4 or newer. Current: ${BASH_VERSION:-unknown}." >&2
+  echo "On macOS install with: brew install bash" >&2
+  exit 1
+fi
 
 generic_version_regex="^[0-9]{1,2}\.[0-9]{1,2}.[0-9]{1,2}$"
 version_regex="^[3-9]\.[0-9]{1,2}.[0-9]{1,2}$"

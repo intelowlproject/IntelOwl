@@ -127,12 +127,18 @@ else
   fi
 fi
 
-# construct environment files from templates
+# construct environment files from templates (portable: only copy if destination missing)
 echo "Adding environment files"
-cp --update=none docker/env_file_app_template docker/env_file_app
-cp --update=none docker/env_file_postgres_template docker/env_file_postgres
-cp --update=none docker/env_file_integrations_template docker/env_file_integrations
-cp --update=none docker/.env.start.test.template docker/.env.start.test
+_copy_env() {
+  local tpl="$1" dst="$2"
+  if [[ -f "$tpl" ]] && [[ ! -f "$dst" ]]; then
+    cp "$tpl" "$dst"
+  fi
+}
+_copy_env docker/env_file_app_template docker/env_file_app
+_copy_env docker/env_file_postgres_template docker/env_file_postgres
+_copy_env docker/env_file_integrations_template docker/env_file_integrations
+_copy_env docker/.env.start.test.template docker/.env.start.test
 echo "Added environment files"
 
 check_django_secret

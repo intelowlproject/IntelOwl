@@ -18,8 +18,8 @@ semantic_version_comp () {
 
   # Convert version numbers to arrays
   local IFS=.
-  read -ra ver1 <<< "$1"
-  read -ra ver2 <<< "$2"
+  read -ra ver1 <<< "$ver1"
+  read -ra ver2 <<< "$ver2"
   # Fill empty fields in ver1 with zeros
   for ((i=${#ver1[@]}; i<${#ver2[@]}; i++)); do
       ver1[i]=0
@@ -118,7 +118,7 @@ if ! docker compose version; then
   fi
 else
   # docker compose exists
-  docker_compose_version="$(docker compose version | cut -d 'v' -f3)"
+  docker_compose_version="$(docker compose version --short)"
   if [[ $(semantic_version_comp "$docker_compose_version" "$MINIMUM_DOCKER_COMPOSE_VERSION") == "lessThan" ]]; then
     echo "Error: Docker compose version is too old. Please upgrade to at least $MINIMUM_DOCKER_COMPOSE_VERSION." >&2
     exit 1

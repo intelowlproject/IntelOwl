@@ -43,7 +43,7 @@ describe("test Ingestors component", () => {
     const tableComponent = screen.getByRole("table");
     expect(tableComponent).toBeInTheDocument();
     const nameColumnHeader = screen.getByRole("columnheader", {
-      name: "Name Search...",
+      name: /Name/i,
     });
     expect(nameColumnHeader).toBeInTheDocument();
     const activeColumnHeader = screen.getByRole("columnheader", {

@@ -5,6 +5,7 @@ import os
 from unittest import skipUnless
 from unittest.mock import patch
 
+import pytest
 from kombu import uuid
 
 from api_app.analyzables_manager.models import Analyzable
@@ -96,101 +97,26 @@ class OpenCTIConnectorTestCase(CustomTestCase):
     def tearDown(self):
         super().tearDown()
 
-    # --- Test 1: Failure after observable creation ---
-    @patch.object(OpenCTI, "_monkeypatch", classmethod(lambda cls: None))
-    @patch("pycti.OpenCTIApiClient")
-    @patch("pycti.Label")
-    @patch("pycti.StixCyberObservable")
-    @patch("pycti.Identity")
-    @patch("pycti.MarkingDefinition")
-    def test_failure_after_observable_creation_partial_state_reported(
-        self,
-        marking_mock,
-        identity_mock,
-        stix_observable_mock,
-        label_mock,
-        _api_client_mock,
-    ):
-        identity_mock.return_value.create.return_value = {"id": "org-1"}
-        marking_mock.return_value.create.return_value = {"id": "mark-1"}
-        stix_observable_mock.return_value.create.return_value = {"id": "obs-1"}
-        label_mock.return_value.create.side_effect = Exception("label failure")
-
-        job, config, pcs = self._setup_job_with_opencti(add_tag=True)
-        try:
-            task_id = uuid()
-            connector = OpenCTI(config)
-            try:
-                connector.start(job.pk, {}, task_id)
-            except Exception:
-                pass
-
-            report = ConnectorReport.objects.get(job=job, config=config)
-            self.assertEqual(report.status, ConnectorReport.STATUSES.FAILED)
-
-            partial_msgs = _partial_state_errors(report)
-            self.assertEqual(len(partial_msgs), 1)
-            self.assertIn("OpenCTI partial state detected", partial_msgs[0])
-            self.assertEqual(len(report.errors), 2)
-
-            err_text = " ".join(map(str, report.errors))
-            self.assertIn("observable=obs-1", err_text)
-            self.assertIn("labels=[]", err_text)
-            self._assert_no_traceback_in_errors(report)
-        finally:
-            self._cleanup_test_objects(job, config, pcs)
-
-    # --- Test 2: Failure after report creation ---
-    @patch.object(OpenCTI, "_monkeypatch", classmethod(lambda cls: None))
-    @patch("pycti.OpenCTIApiClient")
-    @patch("pycti.ExternalReference")
-    @patch("pycti.Report")
-    @patch("pycti.Label")
-    @patch("pycti.StixCyberObservable")
-    @patch("pycti.Identity")
-    @patch("pycti.MarkingDefinition")
-    def test_failure_after_report_creation_partial_state_reported(
-        self,
-        marking_mock,
-        identity_mock,
-        stix_observable_mock,
-        label_mock,
-        report_mock,
-        external_ref_mock,
-        _api_client_mock,
-    ):
-        identity_mock.return_value.create.return_value = {"id": "org-1"}
-        marking_mock.return_value.create.return_value = {"id": "mark-1"}
-        stix_observable_mock.return_value.create.return_value = {"id": "obs-1"}
-        label_mock.return_value.create.return_value = {"id": "label-1"}
-        report_mock.return_value.create.return_value = {"id": "report-1"}
-        external_ref_mock.return_value.create.side_effect = Exception("external ref failure")
-
-        job, config, pcs = self._setup_job_with_opencti(add_tag=True)
-        try:
-            task_id = uuid()
-            connector = OpenCTI(config)
-            try:
-                connector.start(job.pk, {}, task_id)
-            except Exception:
-                pass
-
-            report = ConnectorReport.objects.get(job=job, config=config)
-            self.assertEqual(report.status, ConnectorReport.STATUSES.FAILED)
-
-            partial_msgs = _partial_state_errors(report)
-            self.assertEqual(len(partial_msgs), 1)
-            self.assertEqual(len(report.errors), 2)
-
-            err_text = " ".join(map(str, report.errors))
-            self.assertIn("observable=obs-1", err_text)
-            self.assertIn("report=report-1", err_text)
-            self.assertIn("label-1", err_text)
-            self._assert_no_traceback_in_errors(report)
-        finally:
-            self._cleanup_test_objects(job, config, pcs)
-
-    # --- Test 3: Failure after external reference but before linking ---
+    @pytest.mark.parametrize(
+        "scenario,expected_substrings,fail_target",
+        [
+            (
+                "failure_after_observable_creation",
+                ["observable=obs-1", "labels=[]"],
+                "label",
+            ),
+            (
+                "failure_after_report_creation",
+                ["observable=obs-1", "report=report-1", "label-1"],
+                "external_ref",
+            ),
+            (
+                "failure_after_external_reference_before_linking",
+                ["external_reference=ext-ref-1", "report=report-1", "observable=obs-1"],
+                "link",
+            ),
+        ],
+    )
     @patch.object(OpenCTI, "_monkeypatch", classmethod(lambda cls: None))
     @patch("pycti.OpenCTIApiClient")
     @patch("pycti.StixDomainObject")
@@ -200,7 +126,7 @@ class OpenCTIConnectorTestCase(CustomTestCase):
     @patch("pycti.StixCyberObservable")
     @patch("pycti.Identity")
     @patch("pycti.MarkingDefinition")
-    def test_failure_after_external_reference_before_linking_partial_state(
+    def test_partial_state_failure_scenarios(
         self,
         marking_mock,
         identity_mock,
@@ -210,14 +136,32 @@ class OpenCTIConnectorTestCase(CustomTestCase):
         external_ref_mock,
         stix_domain_mock,
         _api_client_mock,
+        scenario,
+        expected_substrings,
+        fail_target,
     ):
+        """
+        Exercise the multi-step OpenCTI flow under different failure points while
+        asserting that partial state is surfaced consistently in ConnectorReport.
+        """
+        # Common happy-path defaults
         identity_mock.return_value.create.return_value = {"id": "org-1"}
         marking_mock.return_value.create.return_value = {"id": "mark-1"}
         stix_observable_mock.return_value.create.return_value = {"id": "obs-1"}
         label_mock.return_value.create.return_value = {"id": "label-1"}
         report_mock.return_value.create.return_value = {"id": "report-1"}
         external_ref_mock.return_value.create.return_value = {"id": "ext-ref-1"}
-        stix_domain_mock.return_value.add_external_reference.side_effect = Exception("link failure")
+        stix_domain_mock.return_value.add_external_reference.return_value = None
+
+        # Force the failure point for this scenario.
+        if fail_target == "label":
+            label_mock.return_value.create.side_effect = Exception("label failure")
+        elif fail_target == "external_ref":
+            external_ref_mock.return_value.create.side_effect = Exception("external ref failure")
+        elif fail_target == "link":
+            stix_domain_mock.return_value.add_external_reference.side_effect = Exception("link failure")
+        else:
+            pytest.fail(f"Unknown fail_target {fail_target} for scenario {scenario}")
 
         job, config, pcs = self._setup_job_with_opencti(add_tag=True)
         try:
@@ -226,6 +170,7 @@ class OpenCTIConnectorTestCase(CustomTestCase):
             try:
                 connector.start(job.pk, {}, task_id)
             except Exception:
+                # In CI after_run_failed may re-raise; the ConnectorReport is still written.
                 pass
 
             report = ConnectorReport.objects.get(job=job, config=config)
@@ -236,9 +181,10 @@ class OpenCTIConnectorTestCase(CustomTestCase):
             self.assertEqual(len(report.errors), 2)
 
             err_text = " ".join(map(str, report.errors))
-            self.assertIn("external_reference=ext-ref-1", err_text)
-            self.assertIn("report=report-1", err_text)
-            self.assertIn("observable=obs-1", err_text)
+            for substr in expected_substrings:
+                self.assertIn(substr, err_text)
+
+            # Contract: partial-state message is present and errors do not expose tracebacks.
             self._assert_no_traceback_in_errors(report)
         finally:
             self._cleanup_test_objects(job, config, pcs)

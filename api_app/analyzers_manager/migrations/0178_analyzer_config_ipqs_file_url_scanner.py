@@ -7,9 +7,70 @@ from django.db.models.fields.related_descriptors import (
     ReverseOneToOneDescriptor,
 )
 
-plugin = {'python_module': {'health_check_schedule': None, 'update_schedule': None, 'module': 'ipqsurl.IPQSUrlScan', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'IPQS_File_URL_Scanner', 'description': 'Scans files hosted or accessible via a URL using IPQualityScore’s malware detection API.', 'disabled': False, 'soft_time_limit': 60, 'routing_key': 'default', 'health_check_status': True, 'type': 'observable', 'docker_based': False, 'maximum_tlp': 'RED', 'observable_supported': ['url'], 'supported_filetypes': [], 'run_hash': False, 'run_hash_type': '', 'not_supported_filetypes': [], 'mapping_data_model': {}, 'model': 'analyzers_manager.AnalyzerConfig'}
+plugin = {
+    "python_module": {
+        "health_check_schedule": None,
+        "update_schedule": None,
+        "module": "ipqsurl.IPQSUrlScan",
+        "base_path": "api_app.analyzers_manager.observable_analyzers",
+    },
+    "name": "IPQS_File_URL_Scanner",
+    "description": (
+        "Scans files hosted or accessible via a URL using "
+        "[IPQualityScore](https://www.ipqualityscore.com/) malware "
+        "detection API."
+    ),
+    "disabled": False,
+    "soft_time_limit": 60,
+    "routing_key": "default",
+    "health_check_status": True,
+    "type": "observable",
+    "docker_based": False,
+    "maximum_tlp": "AMBER",
+    "observable_supported": ["url"],
+    "supported_filetypes": [],
+    "run_hash": False,
+    "run_hash_type": "",
+    "not_supported_filetypes": [],
+    "mapping_data_model": {},
+    "model": "analyzers_manager.AnalyzerConfig",
+}
 
-params = [{'python_module': {'module': 'ipqsurl.IPQSUrlScan', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'ipqs_api_key', 'type': 'str', 'description': 'Please provide the IPQS API key.', 'is_secret': True, 'required': True}]
+params = [
+    {
+        "python_module": {
+            "module": "ipqsurl.IPQSUrlScan",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "ipqs_api_key",
+        "type": "str",
+        "description": "Please provide the IPQS API key.",
+        "is_secret": True,
+        "required": True,
+    },
+    {
+        "python_module": {
+            "module": "ipqsurl.IPQSUrlScan",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "polling_interval",
+        "type": "int",
+        "description": "Please provide the polling interval.",
+        "is_secret": False,
+        "required": True,
+    },
+    {
+        "python_module": {
+            "module": "ipqsurl.IPQSUrlScan",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "max_retries",
+        "type": "int",
+        "description": "Please provide the maximum number of retries.",
+        "is_secret": False,
+        "required": True,
+    },
+]
 
 values = []
 
@@ -40,7 +101,7 @@ def _get_real_obj(Model, field, value):
             ReverseOneToOneDescriptor,
             ForwardOneToOneDescriptor,
         ]
-            and value
+        and value
     ):
         other_model = getattr(Model, field).get_queryset().model
         value = _get_obj(Model, other_model, value)
@@ -48,6 +109,7 @@ def _get_real_obj(Model, field, value):
         other_model = getattr(Model, field).rel.model
         value = [_get_obj(Model, other_model, val) for val in value]
     return value
+
 
 def _create_object(Model, data):
     mtm, no_mtm = {}, {}
@@ -69,10 +131,11 @@ def _create_object(Model, data):
                 attribute.set(value)
         return False
     return True
-    
+
+
 def migrate(apps, schema_editor):
     Parameter = apps.get_model("api_app", "Parameter")
-    PluginConfig = apps.get_model("api_app", "PluginConfig")    
+    PluginConfig = apps.get_model("api_app", "PluginConfig")
     python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
     if not Model.objects.filter(name=plugin["name"]).exists():
@@ -84,25 +147,17 @@ def migrate(apps, schema_editor):
                 _create_object(PluginConfig, value)
 
 
-
 def reverse_migrate(apps, schema_editor):
     python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
     Model.objects.get(name=plugin["name"]).delete()
 
 
-
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ('api_app', '0072_update_check_system'),
-        ('analyzers_manager', '0177_update_urlscan_observable_supported'),
+        ("api_app", "0072_update_check_system"),
+        ("analyzers_manager", "0177_update_urlscan_observable_supported"),
     ]
 
-    operations = [
-        migrations.RunPython(
-            migrate, reverse_migrate
-        )
-    ]
-        
-        
+    operations = [migrations.RunPython(migrate, reverse_migrate)]

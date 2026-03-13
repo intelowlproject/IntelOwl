@@ -75,14 +75,20 @@ class YaraRepo:
                     org = path_repo[1]
                     repo = path_repo[2]
                 else:
-                    raise AnalyzerRunException(f"Unable to update url {self.url}: malformed")
+                    raise AnalyzerRunException(
+                        f"Unable to update url {self.url}: malformed"
+                    )
 
             # we are removing the .zip, .git. .whatever
             repo = repo.split(".")[0]
 
             # directory name is organization_repository
             directory_name = "_".join([org, repo]).lower()
-            path = settings.YARA_RULES_PATH / str(self.owner) if self.owner else settings.YARA_RULES_PATH
+            path = (
+                settings.YARA_RULES_PATH / str(self.owner)
+                if self.owner
+                else settings.YARA_RULES_PATH
+            )
             self._directory = path / directory_name
         return self._directory
 
@@ -103,7 +109,9 @@ class YaraRepo:
             response.raise_for_status()
         except Exception as e:
             logger.exception(e)
-            os.makedirs(self.directory, exist_ok=True)  # still create the folder or raise errors
+            os.makedirs(
+                self.directory, exist_ok=True
+            )  # still create the folder or raise errors
         else:
             zipfile_ = zipfile.ZipFile(io.BytesIO(response.content))
             zipfile_.extractall(self.directory)
@@ -120,7 +128,9 @@ class YaraRepo:
 
                 with open(settings.GIT_KEY_PATH, "w", encoding="utf_8") as f:
                     f.write(ssh_key)
-                logger.info(f"Writing key to download {self.url} at {str(settings.GIT_KEY_PATH)}")
+                logger.info(
+                    f"Writing key to download {self.url} at {str(settings.GIT_KEY_PATH)}"
+                )
                 os.chmod(settings.GIT_KEY_PATH, 0o600)
                 os.environ["GIT_SSH"] = str(settings.GIT_SSH_SCRIPT_PATH)
             logger.info(f"checking {self.directory=} for {self.url=} and {self.owner=}")
@@ -153,12 +163,34 @@ class YaraRepo:
                 if settings.GIT_KEY_PATH.exists():
                     os.remove(settings.GIT_KEY_PATH)
 
+    def _write_rule_to_temp(self, rule, temp_dir, page_num):
+        """Helper to handle the logic of processing and writing a single rule."""
+        yara_rule = rule.get("yara_rule")
+        if not yara_rule:
+            return False
+
+        rule_name = rule.get("name", f"unprotect_{page_num}_{rule.get('id')}")
+        safe_name = "".join(
+            c for c in rule_name if c.isalnum() or c in ("_", "-", ".")
+        ).strip()
+
+        if not safe_name:
+            return False
+
+        rule_id = rule.get("id", page_num)
+        file_path = temp_dir / f"{safe_name}_{rule_id}.yar"
+
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(yara_rule)
+        return True
+
     def _update_unprotect_api(self):
         logger.info(f"Fetching Unprotect rules from {self.url}")
 
-        # Use a temporary directory to avoid leaving the main directory empty on failures.
         os.makedirs(self.directory.parent, exist_ok=True)
-        temp_dir_path = PosixPath(tempfile.mkdtemp(prefix="unprotect_tmp_", dir=str(self.directory.parent)))
+        temp_dir_path = PosixPath(
+            tempfile.mkdtemp(prefix="unprotect_tmp_", dir=str(self.directory.parent))
+        )
 
         page = 1
         MAX_PAGES = 50
@@ -169,14 +201,9 @@ class YaraRepo:
                 try:
                     response = requests.get(self.url, params={"page": page}, timeout=30)
                     response.raise_for_status()
-                except requests.RequestException as e:
-                    logger.error(f"Failed fetching Unprotect page {page}: {e}")
-                    break
-
-                try:
                     data = response.json()
-                except (ValueError, requests.exceptions.JSONDecodeError) as e:
-                    logger.error(f"Failed decoding JSON from Unprotect page {page}: {e}")
+                except (requests.RequestException, ValueError) as e:
+                    logger.error(f"Failed fetching/decoding Unprotect page {page}: {e}")
                     break
 
                 results = data.get("results", [])
@@ -184,40 +211,31 @@ class YaraRepo:
                     break
 
                 for rule in results:
-                    yara_rule = rule.get("yara_rule")
-                    if not yara_rule:
-                        continue
-
-                    rule_name = rule.get("name", f"unprotect_{page}_{rule.get('id')}")
-                    safe_name = "".join(c for c in rule_name if c.isalnum() or c in ("_", "-", ".")).strip()
-
-                    if not safe_name:
-                        continue
-
-                    rule_id = rule.get("id", page)
-                    file_path = temp_dir_path / f"{safe_name}_{rule_id}.yar"
-
-                    with open(file_path, "w", encoding="utf-8") as f:
-                        f.write(yara_rule)
-
-                    rules_written += 1
+                    if self._write_rule_to_temp(rule, temp_dir_path, page):
+                        rules_written += 1
 
                 if not data.get("next"):
                     break
                 page += 1
 
             if rules_written > 0:
-                os.makedirs(self.directory, exist_ok=True)
-                for f in self.directory.glob("*.yar"):
-                    f.unlink(missing_ok=True)
-                for f in temp_dir_path.glob("*.yar"):
-                    shutil.move(str(f), self.directory)
-                logger.info("Finished fetching Unprotect rules; wrote %d files", rules_written)
+                self._finalize_rules(temp_dir_path, rules_written)
             else:
-                logger.warning("No Unprotect rules were fetched; keeping existing local rules.")
+                logger.warning(
+                    "No Unprotect rules were fetched; keeping existing local rules."
+                )
         finally:
             if temp_dir_path.exists():
                 shutil.rmtree(temp_dir_path, ignore_errors=True)
+
+    def _finalize_rules(self, temp_dir, count):
+        """Helper to move files from temp to final directory."""
+        os.makedirs(self.directory, exist_ok=True)
+        for f in self.directory.glob("*.yar"):
+            f.unlink(missing_ok=True)
+        for f in temp_dir.glob("*.yar"):
+            shutil.move(str(f), self.directory)
+        logger.info("Finished fetching Unprotect rules; wrote %d files", count)
 
     def delete_lock_file(self):
         lock_file_path = self.directory / ".git" / "index.lock"
@@ -238,7 +256,10 @@ class YaraRepo:
 
     @cached_property
     def compiled_paths(self) -> List[PosixPath]:
-        return [path / self.compiled_file_name for path in self.first_level_directories + [self.directory]]
+        return [
+            path / self.compiled_file_name
+            for path in self.first_level_directories + [self.directory]
+        ]
 
     def is_zip(self):
         return self.url.endswith(".zip")
@@ -306,8 +327,12 @@ class YaraRepo:
                         continue
                     else:
                         valid_rules_path.append(str(rule))
-            logger.info(f"Compiling {len(valid_rules_path)} rules for {self} at {directory}")
-            compiled_rule = yara.compile(filepaths={str(path): str(path) for path in valid_rules_path})
+            logger.info(
+                f"Compiling {len(valid_rules_path)} rules for {self} at {directory}"
+            )
+            compiled_rule = yara.compile(
+                filepaths={str(path): str(path) for path in valid_rules_path}
+            )
             compiled_rule.save(str(directory / self.compiled_file_name))
             compiled_rules.append(compiled_rule)
             logger.info(f"Rules {self} saved on file")
@@ -333,7 +358,9 @@ class YaraRepo:
                     raise e
 
             for match in matches:
-                logger.info(f"{self} analyzing strings analysis of {filename} for match {match}")
+                logger.info(
+                    f"{self} analyzing strings analysis of {filename} for match {match}"
+                )
                 strings = []
                 # limited to 20 strings reasons because it could be a very long list
                 for string in match.strings[:20]:
@@ -345,7 +372,9 @@ class YaraRepo:
                     strings.append(entry)
                     logger.debug(f"{strings=}")
 
-                logger.info(f"{self} found {len(strings)} strings for {filename}for match {match}")
+                logger.info(
+                    f"{self} found {len(strings)} strings for {filename}for match {match}"
+                )
                 result.append(
                     {
                         "match": str(match),
@@ -364,7 +393,9 @@ class YaraStorage:
     def __init__(self):
         self.repos: List[YaraRepo] = []
 
-    def add_repo(self, url: str, owner: str = None, key: str = None, directory: PosixPath = None):
+    def add_repo(
+        self, url: str, owner: str = None, key: str = None, directory: PosixPath = None
+    ):
         new_repo = YaraRepo(url, owner, key, directory)
         for i, repo in enumerate(self.repos):
             if repo.url == url:
@@ -385,7 +416,9 @@ class YaraStorage:
                 # free some memory
                 repo._rules = []
             except Exception as e:
-                logger.warning(f"{filename} rules analysis failed: {e}", stack_info=True)
+                logger.warning(
+                    f"{filename} rules analysis failed: {e}", stack_info=True
+                )
                 errors.append(str(e))
         return result, errors
 
@@ -411,7 +444,12 @@ class YaraScan(FileAnalyzer):
                 .annotate_value_for_user(self._config, self._job.user)
                 .first()
             )
-            if parameter and parameter.configured and parameter.value and parameter.is_from_org:
+            if (
+                parameter
+                and parameter.configured
+                and parameter.value
+                and parameter.is_from_org
+            ):
                 if self._job.user.has_membership():
                     owner = (
                         f"{self._job.user.membership.organization.name}"
@@ -435,11 +473,15 @@ class YaraScan(FileAnalyzer):
             owner, key = self._get_owner_and_key(url)
             storage.add_repo(url, owner, key)
         if self.local_rules:
-            path: PosixPath = settings.YARA_RULES_PATH / self._job.user.username / "custom_rule"
+            path: PosixPath = (
+                settings.YARA_RULES_PATH / self._job.user.username / "custom_rule"
+            )
             if path.exists():
                 storage.add_repo(
                     "",
-                    directory=settings.YARA_RULES_PATH / self._job.user.username / "custom_rule",
+                    directory=settings.YARA_RULES_PATH
+                    / self._job.user.username
+                    / "custom_rule",
                 )
         report, errors = storage.analyze(self.filepath, self.filename)
         if errors:

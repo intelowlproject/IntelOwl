@@ -85,10 +85,10 @@ class TestYaraScan(BaseFileAnalyzerTest):
             # Verify HTTP request was made correctly
             mock_get.assert_called()
             called_url = mock_get.call_args[0][0]
-            called_params =  mock_get.call_args.kwargs.get("params", {})
+            called_params = mock_get.call_args.kwargs.get("params", {})
             self.assertIn("unprotect.it/api/detection_rules/", called_url)
             self.assertEqual(called_params.get("page"), 1)
-            
+
             # Verify .yar file was created
             created_files = list(base_dir.iterdir())
             self.assertEqual(len(created_files), 1)

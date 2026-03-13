@@ -71,7 +71,7 @@ def analyze():
     try:
         logger.info("Executing Phunter CLI tool")
         result = subprocess.run(
-            ["python3", "phunter.py", "-t", str(phone_number)],
+            ["/usr/bin/python3", "phunter.py", "-t", str(phone_number)],
             capture_output=True,
             text=True,
             check=True,

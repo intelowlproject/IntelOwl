@@ -179,11 +179,12 @@ class YaraRepo:
         temp_dir_path = PosixPath(tempfile.mkdtemp(prefix="unprotect_tmp_", dir=str(self.directory.parent)))
 
         page = 1
-        MAX_PAGES = 50
+        max_pages = getattr(settings, "UNPROTECT_MAX_PAGES", None)
         rules_written = 0
+        completed = False
 
         try:
-            while page <= MAX_PAGES:
+            while True:
                 try:
                     response = requests.get(self.url, params={"page": page}, timeout=30)
                     response.raise_for_status()
@@ -194,18 +195,35 @@ class YaraRepo:
 
                 results = data.get("results", [])
                 if not results:
+                    completed = True
                     break
 
                 for rule in results:
                     if self._write_rule_to_temp(rule, temp_dir_path, page):
                         rules_written += 1
 
-                if not data.get("next"):
+                next_link = data.get("next")
+                if not next_link:
                     break
                 page += 1
 
-            if rules_written > 0:
+                next_page = page + 1
+                if max_pages is not None and next_page > max_pages:
+                    logger.warning(
+                        "Reached configured UNPROTECT_MAX_PAGES (%s); "
+                        "stopping pagination while Unprotect API still indicates more pages.",
+                        max_pages,
+                    )
+                    break
+                page = next_page
+
+            if rules_written > 0 and completed:
                 self._finalize_rules(temp_dir_path, rules_written)
+            elif rules_written > 0 and not completed:
+                logger.warning(
+                    "Unprotect rules download did not complete successfully; "
+                    "keeping existing local rules and discarding partial update."
+                )
             else:
                 logger.warning("No Unprotect rules were fetched; keeping existing local rules.")
         finally:
@@ -217,6 +235,10 @@ class YaraRepo:
         os.makedirs(self.directory, exist_ok=True)
         for f in self.directory.glob("*.yar"):
             f.unlink(missing_ok=True)
+        # Invalidate any previously compiled YARA rule files so that
+        # the next run recompiles from the newly fetched .yar files.
+        for compiled_path in self.compiled_paths:
+            compiled_path.unlink(missing_ok=True)
         for f in temp_dir.glob("*.yar"):
             shutil.move(str(f), self.directory)
         logger.info("Finished fetching Unprotect rules; wrote %d files", count)

@@ -49,8 +49,8 @@ class TestYaraScan(BaseFileAnalyzerTest):
     @patch("api_app.analyzers_manager.file_analyzers.yara_scan.requests.get")
     def test_unprotect_update_downloads_yara_rules(self, mock_get):
         """
-        Ensure Unprotect API repository downloads only valid YARA rules
-        and creates .yar files correctly.
+        Ensure Unprotect API repository downloads YARA rules with a non-empty
+        yara_rule field and creates .yar files correctly.
         """
 
         # Mock API response
@@ -79,7 +79,7 @@ class TestYaraScan(BaseFileAnalyzerTest):
 
             unprotect_repo = YaraRepo(url="https://unprotect.it/api/detection_rules/", directory=base_dir)
 
-            # 🔹 Call update on the correct repo
+            # Call update on the correct repo
             unprotect_repo.update()
 
             # Verify HTTP request was made correctly

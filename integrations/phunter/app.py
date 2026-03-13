@@ -69,10 +69,8 @@ def analyze():
 
     try:
         logger.info("Executing Phunter CLI tool")
-        command_str = f"python3 phunter.py -t {phone_number}"
-        command = shlex.split(command_str)
         result = subprocess.run(
-            command,
+            ["python3", "phunter.py", "-t", str(phone_number)],
             capture_output=True,
             text=True,
             check=True,

@@ -75,20 +75,14 @@ class YaraRepo:
                     org = path_repo[1]
                     repo = path_repo[2]
                 else:
-                    raise AnalyzerRunException(
-                        f"Unable to update url {self.url}: malformed"
-                    )
+                    raise AnalyzerRunException(f"Unable to update url {self.url}: malformed")
 
             # we are removing the .zip, .git. .whatever
             repo = repo.split(".")[0]
 
             # directory name is organization_repository
             directory_name = "_".join([org, repo]).lower()
-            path = (
-                settings.YARA_RULES_PATH / str(self.owner)
-                if self.owner
-                else settings.YARA_RULES_PATH
-            )
+            path = settings.YARA_RULES_PATH / str(self.owner) if self.owner else settings.YARA_RULES_PATH
             self._directory = path / directory_name
         return self._directory
 
@@ -109,9 +103,7 @@ class YaraRepo:
             response.raise_for_status()
         except Exception as e:
             logger.exception(e)
-            os.makedirs(
-                self.directory, exist_ok=True
-            )  # still create the folder or raise errors
+            os.makedirs(self.directory, exist_ok=True)  # still create the folder or raise errors
         else:
             zipfile_ = zipfile.ZipFile(io.BytesIO(response.content))
             zipfile_.extractall(self.directory)
@@ -128,9 +120,7 @@ class YaraRepo:
 
                 with open(settings.GIT_KEY_PATH, "w", encoding="utf_8") as f:
                     f.write(ssh_key)
-                logger.info(
-                    f"Writing key to download {self.url} at {str(settings.GIT_KEY_PATH)}"
-                )
+                logger.info(f"Writing key to download {self.url} at {str(settings.GIT_KEY_PATH)}")
                 os.chmod(settings.GIT_KEY_PATH, 0o600)
                 os.environ["GIT_SSH"] = str(settings.GIT_SSH_SCRIPT_PATH)
             logger.info(f"checking {self.directory=} for {self.url=} and {self.owner=}")
@@ -170,9 +160,7 @@ class YaraRepo:
             return False
 
         rule_name = rule.get("name", f"unprotect_{page_num}_{rule.get('id')}")
-        safe_name = "".join(
-            c for c in rule_name if c.isalnum() or c in ("_", "-", ".")
-        ).strip()
+        safe_name = "".join(c for c in rule_name if c.isalnum() or c in ("_", "-", ".")).strip()
 
         if not safe_name:
             return False
@@ -188,9 +176,7 @@ class YaraRepo:
         logger.info(f"Fetching Unprotect rules from {self.url}")
 
         os.makedirs(self.directory.parent, exist_ok=True)
-        temp_dir_path = PosixPath(
-            tempfile.mkdtemp(prefix="unprotect_tmp_", dir=str(self.directory.parent))
-        )
+        temp_dir_path = PosixPath(tempfile.mkdtemp(prefix="unprotect_tmp_", dir=str(self.directory.parent)))
 
         page = 1
         MAX_PAGES = 50
@@ -221,9 +207,7 @@ class YaraRepo:
             if rules_written > 0:
                 self._finalize_rules(temp_dir_path, rules_written)
             else:
-                logger.warning(
-                    "No Unprotect rules were fetched; keeping existing local rules."
-                )
+                logger.warning("No Unprotect rules were fetched; keeping existing local rules.")
         finally:
             if temp_dir_path.exists():
                 shutil.rmtree(temp_dir_path, ignore_errors=True)
@@ -256,10 +240,7 @@ class YaraRepo:
 
     @cached_property
     def compiled_paths(self) -> List[PosixPath]:
-        return [
-            path / self.compiled_file_name
-            for path in self.first_level_directories + [self.directory]
-        ]
+        return [path / self.compiled_file_name for path in self.first_level_directories + [self.directory]]
 
     def is_zip(self):
         return self.url.endswith(".zip")
@@ -327,12 +308,8 @@ class YaraRepo:
                         continue
                     else:
                         valid_rules_path.append(str(rule))
-            logger.info(
-                f"Compiling {len(valid_rules_path)} rules for {self} at {directory}"
-            )
-            compiled_rule = yara.compile(
-                filepaths={str(path): str(path) for path in valid_rules_path}
-            )
+            logger.info(f"Compiling {len(valid_rules_path)} rules for {self} at {directory}")
+            compiled_rule = yara.compile(filepaths={str(path): str(path) for path in valid_rules_path})
             compiled_rule.save(str(directory / self.compiled_file_name))
             compiled_rules.append(compiled_rule)
             logger.info(f"Rules {self} saved on file")
@@ -358,9 +335,7 @@ class YaraRepo:
                     raise e
 
             for match in matches:
-                logger.info(
-                    f"{self} analyzing strings analysis of {filename} for match {match}"
-                )
+                logger.info(f"{self} analyzing strings analysis of {filename} for match {match}")
                 strings = []
                 # limited to 20 strings reasons because it could be a very long list
                 for string in match.strings[:20]:
@@ -372,9 +347,7 @@ class YaraRepo:
                     strings.append(entry)
                     logger.debug(f"{strings=}")
 
-                logger.info(
-                    f"{self} found {len(strings)} strings for {filename}for match {match}"
-                )
+                logger.info(f"{self} found {len(strings)} strings for {filename}for match {match}")
                 result.append(
                     {
                         "match": str(match),
@@ -393,9 +366,7 @@ class YaraStorage:
     def __init__(self):
         self.repos: List[YaraRepo] = []
 
-    def add_repo(
-        self, url: str, owner: str = None, key: str = None, directory: PosixPath = None
-    ):
+    def add_repo(self, url: str, owner: str = None, key: str = None, directory: PosixPath = None):
         new_repo = YaraRepo(url, owner, key, directory)
         for i, repo in enumerate(self.repos):
             if repo.url == url:
@@ -416,9 +387,7 @@ class YaraStorage:
                 # free some memory
                 repo._rules = []
             except Exception as e:
-                logger.warning(
-                    f"{filename} rules analysis failed: {e}", stack_info=True
-                )
+                logger.warning(f"{filename} rules analysis failed: {e}", stack_info=True)
                 errors.append(str(e))
         return result, errors
 
@@ -444,12 +413,7 @@ class YaraScan(FileAnalyzer):
                 .annotate_value_for_user(self._config, self._job.user)
                 .first()
             )
-            if (
-                parameter
-                and parameter.configured
-                and parameter.value
-                and parameter.is_from_org
-            ):
+            if parameter and parameter.configured and parameter.value and parameter.is_from_org:
                 if self._job.user.has_membership():
                     owner = (
                         f"{self._job.user.membership.organization.name}"
@@ -473,15 +437,11 @@ class YaraScan(FileAnalyzer):
             owner, key = self._get_owner_and_key(url)
             storage.add_repo(url, owner, key)
         if self.local_rules:
-            path: PosixPath = (
-                settings.YARA_RULES_PATH / self._job.user.username / "custom_rule"
-            )
+            path: PosixPath = settings.YARA_RULES_PATH / self._job.user.username / "custom_rule"
             if path.exists():
                 storage.add_repo(
                     "",
-                    directory=settings.YARA_RULES_PATH
-                    / self._job.user.username
-                    / "custom_rule",
+                    directory=settings.YARA_RULES_PATH / self._job.user.username / "custom_rule",
                 )
         report, errors = storage.analyze(self.filepath, self.filename)
         if errors:

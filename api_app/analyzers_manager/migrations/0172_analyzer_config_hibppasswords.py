@@ -128,7 +128,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     atomic = True
     dependencies = [
-        ('analyzers_manager', '0171_analyzer_config_hibpbreaches'),
+        ('analyzers_manager', '0171_add_unprotect_yara_rules'),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

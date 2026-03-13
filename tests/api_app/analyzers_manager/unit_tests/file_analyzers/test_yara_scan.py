@@ -66,7 +66,7 @@ class TestYaraScan(BaseFileAnalyzerTest):
                 {
                     "id": 2,
                     "name": "CAPA Rule",
-                    "yara_rule": None,  # Should be skipped
+                    "yara_rule": None,
                 },
             ],
             "next": None,

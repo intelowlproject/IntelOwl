@@ -9,7 +9,10 @@ def add_unprotect_url(apps, schema_editor):
 
     try:
         
-        yara_module = PythonModule.objects.get(module="yara_scan.YaraScan")
+        yara_module = PythonModule.objects.get(
+            module="yara_scan.YaraScan",
+            base_path="api_app.analyzers_manager.file_analyzers",
+            )
         
         
         parameter = Parameter.objects.get(python_module=yara_module,name="repositories")
@@ -25,13 +28,10 @@ def add_unprotect_url(apps, schema_editor):
         if unprotect_url not in value:
             value.append(unprotect_url)
             pc.value = value
-            try:
-                pc.save(update_fields=["value"])
-            except Exception:
-                continue
+            pc.save(update_fields=["value"])
 class Migration(migrations.Migration):
     dependencies = [
-        ('analyzers_manager', '0170_update_yaraify_archive'),
+        ('analyzers_manager', '0171_analyzer_config_hibpbreaches'),
     ]
     operations = [
         migrations.RunPython(add_unprotect_url),

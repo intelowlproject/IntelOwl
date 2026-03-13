@@ -164,13 +164,17 @@ class YaraRepo:
 
         while page <= MAX_PAGES:
             try:
-                response = requests.get(f"{self.url}?page={page}", timeout=30)
+                response = requests.get(self.url, params={"page": page}, timeout=30)
                 response.raise_for_status()
             except requests.RequestException as e:
                 logger.error(f"Failed fetching Unprotect page {page}: {e}")
                 break
 
-            data = response.json()
+            try:
+                data = response.json()
+            except (ValueError, requests.expecions.JsonDecodeError) as e:
+                logger.error(f"Failed decoding JSON from Unprotect page {page}: {e}")
+                break
             results = data.get("results", [])
 
             if not results:
@@ -182,12 +186,6 @@ class YaraRepo:
                     continue
 
                 rule_name = rule.get("name", f"unprotect_{page}_{rule.get('id')}")
-
-                try:
-                    yara.compile(source=yara_rule)
-                except (yara.Error, yara.SyntaxError):
-                    logger.warning(f"INvalid rule skipped: {rule_name}")
-                    continue
 
                 safe_name = "".join(c for c in rule_name if c.isalnum() or c in ("_", "-", ".")).strip()
 
@@ -232,7 +230,16 @@ class YaraRepo:
         return self.url.endswith(".zip")
 
     def is_unprotect_api(self):
-        return "unprotect.it/api/detection_rules" in self.url
+        """
+        Return True if the cpnfigured URL points to the Unprotect.it
+        detection rules API endpoint.
+        """
+        parsed = urlparse(self.url)
+        netloc = parsed.netloc.lower()
+
+        # Normalize path to handle optional trailing slash
+        path = parsed.path.rstrip("/")
+        return netloc == "unprotect.it" and path.startswith("api/detection_rules")
 
     @cached_property
     def head_branch(self) -> str:

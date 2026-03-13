@@ -204,26 +204,24 @@ export function UserEventModal({
       const failed = [];
       Promise.allSettled(
         formik.values.analyzables.map((analyzable) => {
-          if (inputState[analyzable].type === UserEventTypes.IP_WILDCARD)
+          const state = inputState[analyzable] ?? {
+            type: UserEventTypes.ANALYZABLE,
+            eventId: null,
+          };
+          if (state.type === UserEventTypes.IP_WILDCARD)
             evaluation.network = analyzable;
-          else if (
-            inputState[analyzable].type === UserEventTypes.DOMAIN_WILDCARD
-          )
+          else if (state.type === UserEventTypes.DOMAIN_WILDCARD)
             evaluation.query = analyzable;
           else evaluation.analyzable = { name: analyzable };
 
-          if (inputState[analyzable]?.eventId) {
-            // edit an existing evaluation
+          if (state.eventId) {
             return axios.patch(
-              `${userEventTypesToApiMapping[inputState[analyzable].type]}/${
-                inputState[analyzable].eventId
-              }`,
+              `${userEventTypesToApiMapping[state.type]}/${state.eventId}`,
               evaluation,
             );
           }
-          // create a new evaluation
           return axios.post(
-            `${userEventTypesToApiMapping[inputState[analyzable].type]}`,
+            `${userEventTypesToApiMapping[state.type]}`,
             evaluation,
           );
         }),

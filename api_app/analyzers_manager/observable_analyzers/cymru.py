@@ -38,7 +38,7 @@ class Cymru(ObservableAnalyzer):
             results["timeout"] = True
         except Exception as e:
             logger.exception(e)
-            self.report.errors.append(e)
+            self.report.errors.append(str(e))
             results["unexpected_error"] = True
 
         if domains:

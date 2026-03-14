@@ -10,7 +10,6 @@ from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
 from api_app.models import PythonConfig
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 

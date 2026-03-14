@@ -14,7 +14,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("analyzers_manager", "0181_misp_published_default_none"),
+        ("analyzers_manager", "0180_add_local_db_models_phishing_army"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

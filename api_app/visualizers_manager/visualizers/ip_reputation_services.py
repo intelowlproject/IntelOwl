@@ -329,20 +329,6 @@ class IPReputationServices(Visualizer):
             )
             return tor_report
 
-    @visualizable_error_handler_with_params("Talos Reputation")
-    def _talos(self):
-        try:
-            analyzer_report = self.get_analyzer_reports().get(config__name="TalosReputation")
-        except AnalyzerReport.DoesNotExist:
-            logger.warning("TalosReputation report does not exist")
-        else:
-            found = analyzer_report.report.get("found", False)
-            talos_report = self.Bool(
-                value="Talos Reputation",
-                disable=not (analyzer_report.status == ReportStatus.SUCCESS and found),
-            )
-            return talos_report
-
     def run(self) -> List[Dict]:
         first_level_elements = []
         second_level_elements = []
@@ -377,8 +363,6 @@ class IPReputationServices(Visualizer):
         third_level_elements.append(self._firehol())
 
         third_level_elements.append(self._tor())
-
-        third_level_elements.append(self._talos())
 
         page = self.Page(name="Reputation")
         page.add_level(

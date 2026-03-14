@@ -68,6 +68,6 @@ class HoneyDB(classes.ObservableAnalyzer):
             response.raise_for_status()
         except Exception as e:
             logger.exception(e)
-            self.result[endpoint] = {"error": e}
+            self.result[endpoint] = {"error": str(e)}
         else:
             self.result[endpoint] = response.json()

@@ -52,8 +52,11 @@ def make_hibp_request(
             else:
                 return response.text
         elif response.status_code == 404:
-            # No breaches found - treat as success with empty result
-            return [] if "json" in url else ""
+            # No breaches found - treat as success with empty result.
+            # Breach endpoints (haveibeenpwned.com) return JSON lists;
+            # the pwned-passwords range endpoint (api.pwnedpasswords.com)
+            # returns plain text. Use the host to pick the right empty value.
+            return [] if "haveibeenpwned.com" in url else ""
         elif response.status_code == 403:
             raise RuntimeError("Forbidden: Check API key or User-Agent.")  # noqa: E501
         elif response.status_code == 429:

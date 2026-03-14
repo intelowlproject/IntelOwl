@@ -34,7 +34,7 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
         def to_internal_value(data):
             if not data:
                 raise ValidationError({"detail": "Empty insertion"})
-            logger.info(f"verifying that value {data} ({type(data)}) is JSON compliant")
+            logger.debug(f"verifying that value ({type(data)}) is JSON compliant")
             try:
                 return json.loads(data)
             except json.JSONDecodeError:
@@ -42,7 +42,7 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
                     data = json.dumps(data)
                     return json.loads(data)
                 except json.JSONDecodeError:
-                    logger.info(f"value {data} ({type(data)}) raised ValidationError")
+                    logger.debug(f"value ({type(data)}) raised ValidationError")
                     raise ValidationError({"detail": "Value is not JSON-compliant."})
 
         def get_attribute(self, instance: PluginConfig):

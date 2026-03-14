@@ -150,8 +150,9 @@ class Plugin(metaclass=ABCMeta):
         for parameter in self.__parameters:
             attribute_name = f"_{parameter.name}" if parameter.is_secret else parameter.name
             setattr(self, attribute_name, parameter.value)
+            logged_value = "<redacted>" if parameter.is_secret else parameter.value
             logger.debug(
-                f"Adding to {self.__class__.__name__} param {attribute_name} with value {parameter.value} "
+                f"Adding to {self.__class__.__name__} param {attribute_name} with value {logged_value}"
             )
 
     def before_run(self):

@@ -14,14 +14,13 @@ import warnings
 from django.utils import timezone
 
 SENSITIVE_KEYS = {
-    "api_key",
     "password",
     "token",
     "auth",
     "secret",
     "key",
     "credential",
-    "private_key",
+    "signature",
 }
 
 
@@ -43,8 +42,17 @@ def mask_recursive(data: typing.Any) -> typing.Any:
         masked_dict = {}
         for k, v in data.items():
             if isinstance(k, str):
+                # Tokenize key to handle camelCase, snake_case, and kebab-case
+                # Split on camelCase boundaries and non-alphanumeric delimiters
+                tokens = re.sub("([a-z0-9])([A-Z])", r"\1 \2", k).lower()
+                tokens = re.split(r"[^a-z0-9]", tokens)
+
                 k_lower = k.lower()
-                if any(sk in k_lower for sk in SENSITIVE_KEYS):
+
+                 k_lower = k.lower()
+
+                if any(tk in SENSITIVE_KEYS for tk in tokens):
+                     masked_dict[k] = "<redacted>"
                     masked_dict[k] = "<redacted>"
                 else:
                     masked_dict[k] = mask_recursive(v)

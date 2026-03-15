@@ -64,14 +64,24 @@ class HelperTests(TestCase):
     def test_mask_recursive_substring(self):
         data = {
             "_api_key": "secret",
-            "my_password_field": "secret",
-            "authentication_token": "secret",
+            "password_field": "secret",
+            "auth_token": "secret",
+            "apiKey": "secret",  # camelCase support
+            "myPassword": "secret",  # camelCase support
+            "authToken": "secret",  # camelCase support
+            "secretValue": "secret",  # camelCase support
+            "monkey": "is_safe",  # Still safe
             "normal_field": "safe",
         }
         expected = {
             "_api_key": "<redacted>",
-            "my_password_field": "<redacted>",
-            "authentication_token": "<redacted>",
+            "password_field": "<redacted>",
+            "auth_token": "<redacted>",
+            "apiKey": "<redacted>",
+            "myPassword": "<redacted>",
+            "authToken": "<redacted>",
+            "secretValue": "<redacted>",
+            "monkey": "is_safe",
             "normal_field": "safe",
         }
         self.assertEqual(mask_recursive(data), expected)

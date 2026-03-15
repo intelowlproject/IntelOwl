@@ -31,5 +31,5 @@ class DehashedSearchTestCase(BaseAnalyzerTest):
             "size": 100,
             "pages": 1,
             "operator": "password",  # Set default operator for hash types
-            "_api_key_name": "test_api_key:test_password",
+            "_api_key_name": "test_api_key",
         }

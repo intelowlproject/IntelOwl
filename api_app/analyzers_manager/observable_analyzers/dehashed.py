@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import base64
 import logging
 import re
 
@@ -20,7 +19,7 @@ class DehashedSearch(ObservableAnalyzer):
     - API key is mandatory for dehased.com's API.
     """
 
-    url: str = "https://api.dehashed.com/"
+    url: str = "https://api.dehashed.com/v2/"
     size: int
     pages: int
     operator: str
@@ -74,13 +73,10 @@ class DehashedSearch(ObservableAnalyzer):
                 self.operator = "name"
 
     def __search(self, value: str) -> list:
-        # the API uses basic auth so we need to base64 encode the auth payload
-        auth_b64 = base64.b64encode(self._api_key_name.encode()).decode()
-        # construct headers
         headers = CaseInsensitiveDict(
             {
                 "Accept": "application/json",
-                "Authorization": f"Basic {auth_b64}",
+                "Qs-Api-Key": self._api_key_name,
                 "User-Agent": "IntelOwl",
             }
         )

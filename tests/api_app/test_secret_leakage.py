@@ -1,7 +1,9 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 from django.test import TestCase
+
 from api_app.helpers import mask_recursive, mask_sensitive_data
+
 
 class SecretLeakageTests(TestCase):
     def test_mask_sensitive_data(self):

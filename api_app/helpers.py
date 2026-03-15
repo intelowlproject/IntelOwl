@@ -36,7 +36,7 @@ def mask_sensitive_data(value: typing.Any, is_secret: bool = True) -> typing.Any
 def mask_recursive(data: typing.Any) -> typing.Any:
     """
     Recursively masks sensitive keys in dictionaries and lists.
-    Uses substring matching to catch variations like `_api_key` or `password_field`.
+    Uses word-boundary/camelCase aware matching to avoid false positives.
     """
     if isinstance(data, dict):
         masked_dict = {}
@@ -47,12 +47,7 @@ def mask_recursive(data: typing.Any) -> typing.Any:
                 tokens = re.sub("([a-z0-9])([A-Z])", r"\1 \2", k).lower()
                 tokens = re.split(r"[^a-z0-9]", tokens)
 
-                k_lower = k.lower()
-
-                 k_lower = k.lower()
-
                 if any(tk in SENSITIVE_KEYS for tk in tokens):
-                     masked_dict[k] = "<redacted>"
                     masked_dict[k] = "<redacted>"
                 else:
                     masked_dict[k] = mask_recursive(v)

@@ -8,9 +8,53 @@ import ipaddress
 import logging
 import random
 import re
+import typing
 import warnings
 
 from django.utils import timezone
+
+SENSITIVE_KEYS = {
+    "api_key",
+    "password",
+    "token",
+    "auth",
+    "secret",
+    "key",
+    "credential",
+    "private_key",
+}
+
+
+def mask_sensitive_data(value: typing.Any, is_secret: bool = True) -> typing.Any:
+    """
+    Returns "<redacted>" if is_secret is True, otherwise returns the value.
+    """
+    if is_secret:
+        return "<redacted>"
+    return value
+
+
+def mask_recursive(data: typing.Any) -> typing.Any:
+    """
+    Recursively masks sensitive keys in dictionaries and lists.
+    Uses substring matching to catch variations like `_api_key` or `password_field`.
+    """
+    if isinstance(data, dict):
+        masked_dict = {}
+        for k, v in data.items():
+            if isinstance(k, str):
+                k_lower = k.lower()
+                if any(sk in k_lower for sk in SENSITIVE_KEYS):
+                    masked_dict[k] = "<redacted>"
+                else:
+                    masked_dict[k] = mask_recursive(v)
+            else:
+                masked_dict[k] = mask_recursive(v)
+        return masked_dict
+    elif isinstance(data, list):
+        return [mask_recursive(item) for item in data]
+    return data
+
 
 logger = logging.getLogger(__name__)
 

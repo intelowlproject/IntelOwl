@@ -116,3 +116,4 @@ DeepDiff==8.6.1
 lxml==6.0.2
 Faker==36.1.0
 beautifulsoup4==4.14.2
+machofile==2026.02.10

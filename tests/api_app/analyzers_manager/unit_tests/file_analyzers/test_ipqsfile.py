@@ -9,7 +9,11 @@ class TestIPQSFileScan(BaseFileAnalyzerTest):
     analyzer_class = IPQSFileScan
 
     def get_extra_config(self):
-        return {"_ipqs_api_key": "dummy_key"}
+        return {
+            "_ipqs_api_key": "dummy_key",
+            "polling_interval": 0,
+            "max_retries": 1,
+        }
 
     def get_mocked_response(self):
         lookup_response = {

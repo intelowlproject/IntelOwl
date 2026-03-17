@@ -5,14 +5,29 @@ import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { AnalyzableOverview } from "../../../../src/components/analyzables/result/AnalyzableOverview";
+import { addToast } from "@certego/certego-ui";
+import axios from "axios";
+import { useAuthStore } from "../../../../src/stores/useAuthStore";
 
 jest.mock("axios-hooks");
+jest.mock("axios");
+jest.mock("../../../../src/stores/useAuthStore", () => ({
+  useAuthStore: jest.fn(),
+}));
+jest.mock("@certego/certego-ui", () => ({
+  ...jest.requireActual("@certego/certego-ui"),
+  addToast: jest.fn(),
+}));
 
 describe("test AnalyzableOverview", () => {
   const jobDate = new Date();
   jobDate.setDate(new Date().getDate() - 1);
   const userReportDate = new Date();
   userReportDate.setDate(new Date().getDate() - 2);
+
+  // Default mocks for existing tests
+  useAuthStore.mockReturnValue([{ username: "admin" }]);
+  axios.delete = jest.fn();
 
   useAxios.mockReturnValue([
     {
@@ -352,5 +367,68 @@ describe("test AnalyzableOverview", () => {
       screen.getByRole("cell", { name: "user evaluation" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("cell", { name: "MALICIOUS" })).toBeInTheDocument();
+  });
+
+  test("AnalyzableOverview delete history entry", async () => {
+    const user = userEvent.setup();
+    const refetch = jest.fn();
+    useAxios.mockReturnValue([
+      {
+        data: {
+          jobs: [
+            {
+              id: 13,
+              user: "admin",
+              date: jobDate,
+              data_model: {
+                evaluation: "trusted",
+                reliability: 7,
+                tags: ["scanner"],
+                related_threats: ["my comment"],
+                external_references: ["test references"],
+              },
+            },
+          ],
+          user_events: [],
+          user_domain_wildcard_events: [],
+          user_ip_wildcard_events: [],
+        },
+        loading: false,
+        error: null,
+      },
+      refetch,
+    ]);
+    useAuthStore.mockReturnValue([{ username: "admin" }]);
+
+    window.confirm = jest.fn().mockReturnValue(true);
+    axios.delete.mockResolvedValue({});
+
+    const { container } = render(
+      <BrowserRouter>
+        <AnalyzableOverview
+          analyzable={{
+            id: 1,
+            discovery_date: jobDate,
+          }}
+        />
+      </BrowserRouter>,
+    );
+    const deleteButton = container.querySelector(
+      "#analyzable-history-delete__13",
+    );
+    expect(deleteButton).toBeInTheDocument();
+
+    await user.click(deleteButton);
+
+    expect(window.confirm).toHaveBeenCalledWith(
+      "Are you sure you want to delete this entry?",
+    );
+    expect(axios.delete).toHaveBeenCalledWith("/api/jobs/13");
+    expect(addToast).toHaveBeenCalledWith(
+      "Entry deleted successfully",
+      null,
+      "success",
+    );
+    expect(refetch).toHaveBeenCalled();
   });
 });

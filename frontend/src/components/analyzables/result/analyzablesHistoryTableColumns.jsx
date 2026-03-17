@@ -180,14 +180,24 @@ export const getAnalyzablesHistoryTableColumns = (
     Cell: ({ value: row }) => (
       <div className="d-flex justify-content-center align-items-center h-100">
         {row.user === currentUser && (
-          <Button
-            id={`analyzable-history-delete__${row.id}`}
-            color="link"
-            className="p-0 text-danger"
-            onClick={() => handleDelete(row)}
-          >
-            <FaTrash />
-          </Button>
+          <>
+            <Button
+              id={`analyzable-history-delete__${row.id}`}
+              color="link"
+              className="p-0 text-danger"
+              onClick={() => handleDelete(row)}
+              aria-label="Delete"
+              title="Delete"
+            >
+              <FaTrash />
+            </Button>
+            <UncontrolledTooltip
+              placement="top"
+              target={`analyzable-history-delete__${row.id}`}
+            >
+              Delete
+            </UncontrolledTooltip>
+          </>
         )}
       </div>
     ),

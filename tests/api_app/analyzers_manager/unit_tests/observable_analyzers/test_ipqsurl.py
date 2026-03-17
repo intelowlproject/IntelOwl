@@ -65,4 +65,8 @@ class IPQSUrlScanTestCase(base_test_class.BaseAnalyzerTest):
 
     @classmethod
     def get_extra_config(cls) -> dict:
-        return {"_ipqs_api_key": "dummy_key"}
+         return {
+            "_ipqs_api_key": "dummy_key",
+            "polling_interval": 0,
+            "max_retries": 1,
+         }

@@ -4,11 +4,18 @@ import useAxios from "axios-hooks";
 import { Col, Row, Container } from "reactstrap";
 import { FaTag } from "react-icons/fa";
 
-import { DateHoverable, DataTable, Loader } from "@certego/certego-ui";
+import {
+  DateHoverable,
+  DataTable,
+  Loader,
+  addToast,
+} from "@certego/certego-ui";
+
+import axios from "axios";
 
 import { AnalyzableActionsBar } from "./AnalyzableActionBar";
 import { AnalyzableInfoCard } from "./AnalyzableInfoCard";
-import { analyzablesHistoryTableColumns } from "./analyzablesHistoryTableColumns";
+import { getAnalyzablesHistoryTableColumns } from "./analyzablesHistoryTableColumns";
 
 import { HorizontalListVisualizer } from "../../common/visualizer/elements/horizontalList";
 import { TitleVisualizer } from "../../common/visualizer/elements/title";
@@ -21,7 +28,15 @@ import { DataModelTagsIcons } from "../../../constants/dataModelConst";
 import { TagsColors } from "../../../constants/colorConst";
 import { getIcon } from "../../common/icon/icons";
 import { AnalyzableHistoryTypes } from "../../../constants/miscConst";
-import { ANALYZABLES_URI } from "../../../constants/apiURLs";
+import {
+  ANALYZABLES_URI,
+  USER_EVENT_ANALYZABLE,
+  USER_EVENT_IP_WILDCARD,
+  USER_EVENT_DOMAIN_WILDCARD,
+  JOB_BASE_URI,
+} from "../../../constants/apiURLs";
+
+import { useAuthStore } from "../../../stores/useAuthStore";
 
 const tableInitialState = {
   pageSize: 10,
@@ -31,12 +46,49 @@ const tableInitialState = {
 export function AnalyzableOverview({ analyzable }) {
   console.debug("AnalyzableOverview rendered");
 
+  const [user] = useAuthStore((state) => [state.user]);
+
   // API to download the analyzable history data
-  const [{ data: history, loading, error }] = useAxios(
+  const [{ data: history, loading, error }, refetch] = useAxios(
     {
       url: `${ANALYZABLES_URI}/${analyzable.id}/history`,
     },
     { cache: false },
+  );
+
+  const handleDelete = async (row) => {
+    // eslint-disable-next-line no-alert
+    if (window.confirm("Are you sure you want to delete this entry?")) {
+      try {
+        let url = "";
+        switch (row.type) {
+          case AnalyzableHistoryTypes.JOB:
+            url = `${JOB_BASE_URI}/${row.id}`;
+            break;
+          case AnalyzableHistoryTypes.USER_EVENT:
+            url = `${USER_EVENT_ANALYZABLE}/${row.id}`;
+            break;
+          case AnalyzableHistoryTypes.USER_IP_WILDCARD_EVENT:
+            url = `${USER_EVENT_IP_WILDCARD}/${row.id}`;
+            break;
+          case AnalyzableHistoryTypes.USER_DOMAIN_WILDCARD_EVENT:
+            url = `${USER_EVENT_DOMAIN_WILDCARD}/${row.id}`;
+            break;
+          default:
+            return;
+        }
+        await axios.delete(url);
+        addToast("Entry deleted successfully", null, "success");
+        refetch();
+      } catch (err) {
+        addToast("Error deleting entry", err.parsedMsg, "danger");
+      }
+    }
+  };
+
+  const columns = React.useMemo(
+    () => getAnalyzablesHistoryTableColumns(user?.username, handleDelete),
+    [user?.username],
   );
 
   const jobs = history?.jobs?.map((job) => ({
@@ -137,6 +189,7 @@ export function AnalyzableOverview({ analyzable }) {
               ],
             ].map(([title, value], index) => (
               <TitleVisualizer
+                key={`title-visualizer__element-${title.replace(/\s+/g, "_")}`}
                 id={`title-visualizer__element-${index}`}
                 title={
                   <BaseVisualizer
@@ -173,6 +226,7 @@ export function AnalyzableOverview({ analyzable }) {
                 "Tags",
                 (analyzable?.last_data_model?.tags || []).map((tag, index) => (
                   <BooleanVisualizer
+                    key={`tags-${tag}`}
                     value={tag}
                     id={`tags-${index}`}
                     icon={
@@ -196,6 +250,7 @@ export function AnalyzableOverview({ analyzable }) {
                 (analyzable?.last_data_model?.external_references || []).map(
                   (value, index) => (
                     <BaseVisualizer
+                      key={`external_references-${btoa(value).slice(0, 20)}`}
                       value={value}
                       id={`external_references-${index}`}
                       size="h6"
@@ -208,6 +263,7 @@ export function AnalyzableOverview({ analyzable }) {
                 (analyzable?.last_data_model?.related_threats || []).map(
                   (value, index) => (
                     <BaseVisualizer
+                      key={`related_threats-${btoa(value).slice(0, 20)}`}
                       value={value}
                       id={`related_threats-${index}`}
                       size="h6"
@@ -217,6 +273,7 @@ export function AnalyzableOverview({ analyzable }) {
               ],
             ].map(([title, values], index) => (
               <VerticalListVisualizer
+                key={`vlist-visualizer__element-${title.replace(/\s+/g, "_")}`}
                 id={`vlist-visualizer__element-${index}`}
                 alignment="center"
                 startOpen={values.length <= 5}
@@ -258,7 +315,7 @@ export function AnalyzableOverview({ analyzable }) {
               )}
               config={{}}
               initialState={tableInitialState}
-              columns={analyzablesHistoryTableColumns}
+              columns={columns}
               autoResetPage
             />
           )}

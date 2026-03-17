@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from "react";
-import { UncontrolledTooltip } from "reactstrap";
+import { UncontrolledTooltip, Button } from "reactstrap";
+import { FaTrash } from "react-icons/fa";
 
 import {
   DateHoverable,
@@ -19,7 +20,10 @@ import {
   datetimeFormatStr,
 } from "../../../constants/miscConst";
 
-export const analyzablesHistoryTableColumns = [
+export const getAnalyzablesHistoryTableColumns = (
+  currentUser,
+  handleDelete,
+) => [
   {
     Header: "ID",
     id: "pk",
@@ -167,5 +171,26 @@ export const analyzablesHistoryTableColumns = [
         />
       ),
     minWidth: 200,
+  },
+  {
+    Header: "Actions",
+    id: "actions",
+    accessor: (row) => row,
+    disableSortBy: true,
+    Cell: ({ value: row }) => (
+      <div className="d-flex justify-content-center align-items-center h-100">
+        {row.user === currentUser && (
+          <Button
+            id={`analyzable-history-delete__${row.id}`}
+            color="link"
+            className="p-0 text-danger"
+            onClick={() => handleDelete(row)}
+          >
+            <FaTrash />
+          </Button>
+        )}
+      </div>
+    ),
+    maxWidth: 60,
   },
 ];

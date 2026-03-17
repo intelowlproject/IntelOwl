@@ -47,12 +47,12 @@ async function downloadAllPlugin(pluginUrl) {
 }
 
 export const usePluginConfigurationStore = create((set, get) => ({
-  analyzersLoading: true,
-  connectorsLoading: true,
-  pivotsLoading: true,
-  visualizersLoading: true,
-  ingestorsLoading: true,
-  playbooksLoading: true,
+  analyzersLoading: false,
+  connectorsLoading: false,
+  pivotsLoading: false,
+  visualizersLoading: false,
+  ingestorsLoading: false,
+  playbooksLoading: false,
   analyzersError: null,
   connectorsError: null,
   pivotsError: null,

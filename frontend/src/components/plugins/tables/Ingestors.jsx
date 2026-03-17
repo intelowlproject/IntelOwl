@@ -3,6 +3,7 @@ import React from "react";
 import { ingestorTableColumns } from "./pluginTableColumns";
 import PluginWrapper from "./PluginWrapper";
 import { PluginsTypes } from "../../../constants/pluginConst";
+import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 
 export default function Ingestors() {
   console.debug("Ingestors rendered!");
@@ -16,6 +17,15 @@ export default function Ingestors() {
     ],
     [],
   );
+
+  const [ingestorsLoading, , ingestors, retrieveIngestorsConfiguration] =
+    usePluginConfigurationStore(stateSelector);
+
+  React.useEffect(() => {
+    if (ingestors.length === 0 && !ingestorsLoading) {
+      retrieveIngestorsConfiguration();
+    }
+  }, []);
 
   return (
     <PluginWrapper

@@ -3,6 +3,7 @@ import React from "react";
 import { analyzersTableColumns } from "./pluginTableColumns";
 import PluginWrapper from "./PluginWrapper";
 import { PluginsTypes } from "../../../constants/pluginConst";
+import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 
 export default function Analyzers() {
   console.debug("Analyzers rendered!");
@@ -16,6 +17,15 @@ export default function Analyzers() {
     ],
     [],
   );
+
+  const [analyzersLoading, , analyzers, retrieveAnalyzersConfiguration] =
+    usePluginConfigurationStore(stateSelector);
+
+  React.useEffect(() => {
+    if (analyzers.length === 0 && !analyzersLoading) {
+      retrieveAnalyzersConfiguration();
+    }
+  }, []);
 
   return (
     <PluginWrapper

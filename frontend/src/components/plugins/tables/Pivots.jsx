@@ -3,6 +3,7 @@ import React from "react";
 import { pivotTableColumns } from "./pluginTableColumns";
 import PluginWrapper from "./PluginWrapper";
 import { PluginsTypes } from "../../../constants/pluginConst";
+import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 
 export default function Pivots() {
   console.debug("Pivots rendered!");
@@ -16,6 +17,15 @@ export default function Pivots() {
     ],
     [],
   );
+
+  const [pivotsLoading, , pivots, retrievePivotsConfiguration] =
+    usePluginConfigurationStore(stateSelector);
+
+  React.useEffect(() => {
+    if (pivots.length === 0 && !pivotsLoading) {
+      retrievePivotsConfiguration();
+    }
+  }, []);
 
   return (
     <PluginWrapper

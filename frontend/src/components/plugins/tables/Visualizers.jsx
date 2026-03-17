@@ -3,6 +3,7 @@ import React from "react";
 import { visualizerTableColumns } from "./pluginTableColumns";
 import PluginWrapper from "./PluginWrapper";
 import { PluginsTypes } from "../../../constants/pluginConst";
+import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 
 export default function Visualizers() {
   console.debug("Visualizers rendered!");
@@ -16,6 +17,15 @@ export default function Visualizers() {
     ],
     [],
   );
+
+  const [visualizersLoading, , visualizers, retrieveVisualizersConfiguration] =
+    usePluginConfigurationStore(stateSelector);
+
+  React.useEffect(() => {
+    if (visualizers.length === 0 && !visualizersLoading) {
+      retrieveVisualizersConfiguration();
+    }
+  }, []);
 
   return (
     <PluginWrapper

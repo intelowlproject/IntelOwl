@@ -18,6 +18,7 @@ import {
 } from "../../../../src/components/plugins/tables/pluginActionsButtons";
 import {
   mockedUseOrganizationStoreOwner,
+  mockedUsePluginConfigurationStore,
   mockedPlaybooks,
 } from "../../../mock";
 
@@ -46,6 +47,23 @@ jest.mock("../../../../src/stores/useAuthStore", () => ({
     }),
   ),
 }));
+jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
+  ...jest.requireActual("../../../../src/stores/usePluginConfigurationStore"),
+  usePluginConfigurationStore: jest.fn(),
+}));
+
+const actualPluginConfigurationStore = jest.requireActual(
+  "../../../../src/stores/usePluginConfigurationStore",
+);
+const {
+  usePluginConfigurationStore,
+} = require("../../../../src/stores/usePluginConfigurationStore");
+
+beforeEach(() => {
+  usePluginConfigurationStore.mockImplementation(
+    actualPluginConfigurationStore.usePluginConfigurationStore,
+  );
+});
 
 describe("PluginHealthCheckButton test", () => {
   test.each([
@@ -367,6 +385,13 @@ describe("PlaybooksEditButton test", () => {
   };
 
   test("Playbook edit btn - loading", async () => {
+    usePluginConfigurationStore.mockImplementation((state) =>
+      state({
+        ...mockedUsePluginConfigurationStore,
+        analyzersLoading: true,
+      }),
+    );
+
     const userAction = userEvent.setup();
     const { container } = render(
       <BrowserRouter>

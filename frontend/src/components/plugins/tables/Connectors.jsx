@@ -3,6 +3,7 @@ import React from "react";
 import { connectorTableColumns } from "./pluginTableColumns";
 import PluginWrapper from "./PluginWrapper";
 import { PluginsTypes } from "../../../constants/pluginConst";
+import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 
 export default function Connectors() {
   console.debug("Connectors rendered!");
@@ -16,6 +17,15 @@ export default function Connectors() {
     ],
     [],
   );
+
+  const [connectorsLoading, , connectors, retrieveConnectorsConfiguration] =
+    usePluginConfigurationStore(stateSelector);
+
+  React.useEffect(() => {
+    if (connectors.length === 0 && !connectorsLoading) {
+      retrieveConnectorsConfiguration();
+    }
+  }, []);
 
   return (
     <PluginWrapper

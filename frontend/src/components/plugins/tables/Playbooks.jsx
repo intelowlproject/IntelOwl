@@ -3,6 +3,7 @@ import React from "react";
 import { playbookTableColumns } from "./pluginTableColumns";
 import { PluginsTypes } from "../../../constants/pluginConst";
 import PluginWrapper from "./PluginWrapper";
+import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 
 export default function Playbooks() {
   console.debug("Playbooks rendered!");
@@ -16,6 +17,15 @@ export default function Playbooks() {
     ],
     [],
   );
+
+  const [playbooksLoading, , playbooks, retrievePlaybooksConfiguration] =
+    usePluginConfigurationStore(stateSelector);
+
+  React.useEffect(() => {
+    if (playbooks.length === 0 && !playbooksLoading) {
+      retrievePlaybooksConfiguration();
+    }
+  }, []);
 
   return (
     <PluginWrapper

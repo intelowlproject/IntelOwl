@@ -1,7 +1,6 @@
 import React from "react";
 
 import { useAuthStore } from "../stores/useAuthStore";
-import { usePluginConfigurationStore } from "../stores/usePluginConfigurationStore";
 
 /**
  * Higher Order Component (HoC) -> https://reactjs.org/docs/higher-order-components.html
@@ -9,7 +8,6 @@ import { usePluginConfigurationStore } from "../stores/usePluginConfigurationSto
  *
  * In this specific case this function wraps all the main pages and check:
  * 1 - the user is authenticated
- * 2 - the plugins data have been downloaded
  */
 function withAuth(WrappedComponent) {
   function AuthenticatedComponent(props) {
@@ -21,17 +19,11 @@ function withAuth(WrappedComponent) {
       ),
     );
 
-    // check if the data about plugins have been downloaded or not.
-    const [fetchPluginsConf] = usePluginConfigurationStore(
-      React.useCallback((state) => [state.hydrate], []),
-    );
-
     React.useEffect(() => {
       if (isAuthenticated) {
         fetchUserAccess();
-        fetchPluginsConf();
       }
-    }, [isAuthenticated, fetchUserAccess, fetchPluginsConf]); // onAuthStateChange
+    }, [isAuthenticated, fetchUserAccess]);
 
     return <WrappedComponent {...props} />;
   }

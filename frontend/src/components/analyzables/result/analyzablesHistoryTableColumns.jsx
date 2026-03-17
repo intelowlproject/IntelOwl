@@ -162,14 +162,14 @@ export const getAnalyzablesHistoryTableColumns = (
     },
     disableSortBy: true,
     Cell: ({ value, row }) =>
-      value && (
+      value ? (
         <TableCell
           id={`table-cell-description__${row.id}`}
           isCopyToClipboard
           isTruncate
           value={value}
         />
-      ),
+      ) : null,
     minWidth: 200,
   },
   {
@@ -182,7 +182,7 @@ export const getAnalyzablesHistoryTableColumns = (
         {row.user === currentUser && (
           <>
             <Button
-              id={`analyzable-history-delete__${row.id}`}
+              id={`analyzable-history-delete__${row.type}__${row.id}`}
               color="link"
               className="p-0 text-danger"
               onClick={() => handleDelete(row)}
@@ -193,7 +193,7 @@ export const getAnalyzablesHistoryTableColumns = (
             </Button>
             <UncontrolledTooltip
               placement="top"
-              target={`analyzable-history-delete__${row.id}`}
+              target={`analyzable-history-delete__${row.type}__${row.id}`}
             >
               Delete
             </UncontrolledTooltip>

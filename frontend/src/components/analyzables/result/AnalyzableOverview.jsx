@@ -56,39 +56,42 @@ export function AnalyzableOverview({ analyzable }) {
     { cache: false },
   );
 
-  const handleDelete = async (row) => {
-    // eslint-disable-next-line no-alert
-    if (window.confirm("Are you sure you want to delete this entry?")) {
-      try {
-        let url = "";
-        switch (row.type) {
-          case AnalyzableHistoryTypes.JOB:
-            url = `${JOB_BASE_URI}/${row.id}`;
-            break;
-          case AnalyzableHistoryTypes.USER_EVENT:
-            url = `${USER_EVENT_ANALYZABLE}/${row.id}`;
-            break;
-          case AnalyzableHistoryTypes.USER_IP_WILDCARD_EVENT:
-            url = `${USER_EVENT_IP_WILDCARD}/${row.id}`;
-            break;
-          case AnalyzableHistoryTypes.USER_DOMAIN_WILDCARD_EVENT:
-            url = `${USER_EVENT_DOMAIN_WILDCARD}/${row.id}`;
-            break;
-          default:
-            return;
+  const handleDelete = React.useCallback(
+    async (row) => {
+      // eslint-disable-next-line no-alert
+      if (window.confirm("Are you sure you want to delete this entry?")) {
+        try {
+          let url = "";
+          switch (row.type) {
+            case AnalyzableHistoryTypes.JOB:
+              url = `${JOB_BASE_URI}/${row.id}`;
+              break;
+            case AnalyzableHistoryTypes.USER_EVENT:
+              url = `${USER_EVENT_ANALYZABLE}/${row.id}`;
+              break;
+            case AnalyzableHistoryTypes.USER_IP_WILDCARD_EVENT:
+              url = `${USER_EVENT_IP_WILDCARD}/${row.id}`;
+              break;
+            case AnalyzableHistoryTypes.USER_DOMAIN_WILDCARD_EVENT:
+              url = `${USER_EVENT_DOMAIN_WILDCARD}/${row.id}`;
+              break;
+            default:
+              return;
+          }
+          await axios.delete(url);
+          addToast("Entry deleted successfully", null, "success");
+          refetch();
+        } catch (err) {
+          addToast("Error deleting entry", err.parsedMsg, "danger");
         }
-        await axios.delete(url);
-        addToast("Entry deleted successfully", null, "success");
-        refetch();
-      } catch (err) {
-        addToast("Error deleting entry", err.parsedMsg, "danger");
       }
-    }
-  };
+    },
+    [refetch],
+  );
 
   const columns = React.useMemo(
     () => getAnalyzablesHistoryTableColumns(user?.username, handleDelete),
-    [user?.username],
+    [user?.username, handleDelete],
   );
 
   const jobs = history?.jobs?.map((job) => ({
@@ -250,7 +253,7 @@ export function AnalyzableOverview({ analyzable }) {
                 (analyzable?.last_data_model?.external_references || []).map(
                   (value, index) => (
                     <BaseVisualizer
-                      key={`external_references-${btoa(value).slice(0, 20)}`}
+                      key={`external_reference-${value}`}
                       value={value}
                       id={`external_references-${index}`}
                       size="h6"
@@ -263,7 +266,7 @@ export function AnalyzableOverview({ analyzable }) {
                 (analyzable?.last_data_model?.related_threats || []).map(
                   (value, index) => (
                     <BaseVisualizer
-                      key={`related_threats-${btoa(value).slice(0, 20)}`}
+                      key={`related_threat-${value}`}
                       value={value}
                       id={`related_threats-${index}`}
                       size="h6"

@@ -28,13 +28,17 @@ def dump_playwright_request(entry: dict) -> dict:
             "cert": raw_response.get("cert", {}),
         }
 
+    ws_messages_raw = entry.get("ws_messages")
+    if ws_messages_raw is None:
+        ws_messages_raw = entry.get("ws_message", [])
+
     serialised_ws_messages = [
         {
             "from_client": msg.get("from_client", False),
             "content": _encode_body(msg.get("content")),
             "date": msg.get("date", ""),
         }
-        for msg in entry.get("ws_messages", [])
+        for msg in ws_messages_raw
     ]
 
     serialised: dict = {
@@ -47,6 +51,7 @@ def dump_playwright_request(entry: dict) -> dict:
         "resource_type": entry.get("resource_type", ""),
         "redirected_from": entry.get("redirected_from"),
         "redirected_to": entry.get("redirected_to"),
+        "ws_message": serialised_ws_messages,
         "ws_messages": serialised_ws_messages,
         "cert": entry.get("cert", {}),
         "response": serialised_response,
@@ -67,13 +72,18 @@ def load_playwright_request(to_load: dict) -> dict:
             "body": base64.b64decode(r["body"]),
         }
 
+    ws_messages_raw = to_load.get("ws_messages")
+    if ws_messages_raw is None:
+        ws_messages_raw = to_load.get("ws_message", [])
+
     decoded_ws_messages = [
-        {**msg, "content": base64.b64decode(msg["content"])} for msg in to_load.get("ws_messages", [])
+        {**msg, "content": base64.b64decode(msg["content"])} for msg in ws_messages_raw
     ]
 
     decoded = {
         **to_load,
         "body": base64.b64decode(to_load["body"]),
+        "ws_message": decoded_ws_messages,
         "ws_messages": decoded_ws_messages,
         "response": decoded_response,
     }

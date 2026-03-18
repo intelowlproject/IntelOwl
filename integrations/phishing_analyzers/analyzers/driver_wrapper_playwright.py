@@ -246,6 +246,12 @@ class PlaywrightDriverWrapper:
                     "response": None,
                 }
 
+                # Append immediately so open WebSockets are not lost if analysis ends
+                try:
+                    self._captured_requests.append(ws_entry)
+                except Exception as e:
+                    logger.warning(f"on_websocket append handler error: {e}")
+
                 def _on_frame(payload, from_client):
                     try:
                         raw = payload if isinstance(payload, bytes) else (str(payload or "")).encode()
@@ -255,9 +261,11 @@ class PlaywrightDriverWrapper:
                     except Exception as e:
                         logger.warning(f"ws frame handler error: {e}")
 
-                def _on_close():
+                def _on_close(*args):
                     try:
-                        self._captured_requests.append(ws_entry)
+                        # Mark the WebSocket as closed; entry already in _captured_requests
+                        ws_entry["closed"] = True
+                        ws_entry["closed_date"] = _utcnow_str()
                     except Exception as e:
                         logger.warning(f"ws _on_close handler error: {e}")
 

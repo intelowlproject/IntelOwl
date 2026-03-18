@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
-        ("analyzers_manager", "0177_update_urlscan_observable_supported"),
+        ("analyzers_manager", "0180_add_local_db_models_phishing_army"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

@@ -106,7 +106,7 @@ export function HistoryNav({ pageType, startTimeParam, endTimeParam }) {
       >
         <RRNavLink
           className="nav-link"
-          to={`/history/user-events?event_date__gte=${encodeURIComponent(
+          to={`/history/user-evaluations?event_date__gte=${encodeURIComponent(
             startDate,
           )}&event_date__lte=${encodeURIComponent(endDate)}&ordering=-date`}
         >
@@ -122,7 +122,7 @@ export function HistoryNav({ pageType, startTimeParam, endTimeParam }) {
       >
         <RRNavLink
           className="nav-link"
-          to={`/history/user-ip-wildcard-events?event_date__gte=${encodeURIComponent(
+          to={`/history/user-ip-wildcard-evaluations?event_date__gte=${encodeURIComponent(
             startDate,
           )}&event_date__lte=${encodeURIComponent(endDate)}&ordering=-date`}
         >
@@ -138,7 +138,7 @@ export function HistoryNav({ pageType, startTimeParam, endTimeParam }) {
       >
         <RRNavLink
           className="nav-link"
-          to={`/history/user-domain-wildcard-events?event_date__gte=${encodeURIComponent(
+          to={`/history/user-domain-wildcard-evaluations?event_date__gte=${encodeURIComponent(
             startDate,
           )}&event_date__lte=${encodeURIComponent(endDate)}&ordering=-date`}
         >

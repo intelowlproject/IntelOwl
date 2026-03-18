@@ -204,7 +204,7 @@ export function AnalyzableOverview({ analyzable }) {
                 ),
               ],
               [
-                "Reasons",
+                "Related Artifacts",
                 (analyzable?.last_data_model?.related_threats || []).map(
                   (value, index) => (
                     <BaseVisualizer

@@ -76,9 +76,7 @@ def load_playwright_request(to_load: dict) -> dict:
     if ws_messages_raw is None:
         ws_messages_raw = to_load.get("ws_message", [])
 
-    decoded_ws_messages = [
-        {**msg, "content": base64.b64decode(msg["content"])} for msg in ws_messages_raw
-    ]
+    decoded_ws_messages = [{**msg, "content": base64.b64decode(msg["content"])} for msg in ws_messages_raw]
 
     decoded = {
         **to_load,

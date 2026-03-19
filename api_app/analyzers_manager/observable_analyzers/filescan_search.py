@@ -5,6 +5,7 @@ import base64
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -25,7 +26,7 @@ class FileScanSearch(ObservableAnalyzer):
         endpoint = "?query={input}"
         url = f"{self.url}/{endpoint.format(input=observable_name_base64)}"
         try:
-            response = requests.get(url, headers={"X-Api-Key": self._api_key})
+            response = http_utils.get(url, headers={"X-Api-Key": self._api_key})
             response.raise_for_status()
         except requests.RequestException as error:
             raise AnalyzerRunException(error)

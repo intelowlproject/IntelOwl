@@ -9,6 +9,7 @@ from typing import Tuple
 import requests
 from django.conf import settings
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.decorators import classproperty
@@ -86,7 +87,7 @@ class Feodo_Tracker(AbuseCHMixin, classes.ObservableAnalyzer):
             logger.info(f"starting download of db from {db_url}")
 
             try:
-                r = requests.get(db_url, headers=cls.get_service_auth_headers())
+                r = http_utils.get(db_url, headers=cls.get_service_auth_headers())
                 r.raise_for_status()
             except requests.RequestException:
                 return False

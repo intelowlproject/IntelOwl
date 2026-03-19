@@ -7,8 +7,8 @@ from urllib.parse import urlparse
 
 import dns.message
 import dns.rdatatype
-import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.choices import Classification
 
@@ -32,7 +32,7 @@ class CleanBrowsingMaliciousDetector(classes.ObservableAnalyzer):
         query = dns.message.make_query(observable, dns.rdatatype.A)
         query_wire = query.to_wire()
 
-        response = requests.post(
+        response = http_utils.post(
             self.url,
             data=query_wire,
             headers={

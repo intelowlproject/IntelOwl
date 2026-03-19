@@ -5,9 +5,9 @@ import base64
 import logging
 import re
 
-import requests
 from requests.structures import CaseInsensitiveDict
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.choices import Classification
 
@@ -89,7 +89,7 @@ class DehashedSearch(ObservableAnalyzer):
         total_entries = []
         for page_no in range(1, self.pages + 1):
             logger.info(f"{self.__repr__()} -> fetching search results for page #{page_no}")
-            resp = requests.get(f"{url}&page={page_no}", headers=headers)
+            resp = http_utils.get(f"{url}&page={page_no}", headers=headers)
             resp.raise_for_status()
             entries_fetched = resp.json().get("entries", None)
             if not entries_fetched:

@@ -2,10 +2,10 @@ import logging
 import os
 import pathlib
 
-import requests
 import yara_x
 from django.conf import settings
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.mixins import RulesUtiliyMixin
@@ -37,7 +37,7 @@ class YaraX(FileAnalyzer, RulesUtiliyMixin):
         rule_set_download_url = ""
         filename = ""
         try:
-            response = requests.get(RULES_URL)
+            response = http_utils.get(RULES_URL)
             assets = response.json()["assets"]
             latest_version = response.json()["tag_name"]
             for asset in assets:
@@ -79,7 +79,7 @@ class YaraX(FileAnalyzer, RulesUtiliyMixin):
 
         rule_dir = f"{BASE_RULES_LOCATION}/{self.rule_set}"
 
-        response = requests.get(RULES_URL)
+        response = http_utils.get(RULES_URL)
 
         latest_version = response.json()["tag_name"]
 

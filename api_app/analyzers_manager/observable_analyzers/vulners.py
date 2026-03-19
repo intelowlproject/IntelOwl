@@ -1,7 +1,6 @@
 import logging
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 
 logger = logging.getLogger(__name__)
@@ -19,14 +18,14 @@ class Vulners(classes.ObservableAnalyzer):
     url = "https://vulners.com/api/v3"
 
     def search_ai(self):
-        return requests.post(
+        return http_utils.post(
             url=self.url + "/ai/scoretext/",
             headers={"Content-Type": "application/json"},
             json={"text": self.observable_name, "apiKey": self._api_key_name},
         )
 
     def search_databse(self):
-        return requests.post(
+        return http_utils.post(
             url=self.url + "/search/lucene",
             headers={"Content-Type": "application/json"},
             json={

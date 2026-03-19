@@ -1,9 +1,9 @@
 import logging
 from typing import Dict
 
-import requests
 from requests import HTTPError
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.choices import Classification
 
@@ -22,7 +22,7 @@ class CriminalIp(classes.ObservableAnalyzer, CriminalIpBase):
     hash_view: bool = True  # domain
 
     def make_request(self, url: str, params: Dict[str, str] = None) -> Dict:
-        resp = requests.get(url, headers=self.getHeaders(), params=params)
+        resp = http_utils.get(url, headers=self.getHeaders(), params=params)
         resp.raise_for_status()
         resp = resp.json()
         if resp.get("status", None) not in [None, 200]:

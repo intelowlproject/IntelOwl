@@ -3,8 +3,7 @@
 
 import logging
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -27,7 +26,7 @@ class DocGuardUpload(FileAnalyzer):
         binary = self.read_file_bytes()
         if not binary:
             raise AnalyzerRunException("File is empty")
-        response = requests.post(
+        response = http_utils.post(
             self.url + "/FileAnalyzing/AnalyzeFile",
             headers=headers,
             files={"file": (self.filename, binary)},

@@ -1,8 +1,7 @@
 import logging
 import re
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 
 logger = logging.getLogger(__name__)
@@ -20,7 +19,7 @@ class CyCat(classes.ObservableAnalyzer):
 
     def uuid_lookup(self, uuid: str):
         logger.info(f"performing lookup on uuid: {uuid}, observable: {self.observable_name}")
-        response = requests.get(
+        response = http_utils.get(
             self.url + "/lookup/" + uuid,
             headers={"accept": "application/json"},
         )
@@ -37,7 +36,7 @@ class CyCat(classes.ObservableAnalyzer):
             final_response = self.uuid_lookup(self.observable_name)
 
         else:
-            response = requests.get(
+            response = http_utils.get(
                 self.url + "/search/" + self.observable_name,
                 headers={"accept": "application/json"},
             )

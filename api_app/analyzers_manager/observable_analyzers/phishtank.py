@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
@@ -35,7 +36,7 @@ class Phishtank(ObservableAnalyzer):
         else:
             data["app_key"] = self._api_key_name
         try:
-            resp = requests.post("https://checkurl.phishtank.com/checkurl/", data=data, headers=headers)
+            resp = http_utils.post("https://checkurl.phishtank.com/checkurl/", data=data, headers=headers)
             resp.raise_for_status()
             result = resp.json()
         except requests.RequestException as e:

@@ -6,6 +6,7 @@ from typing import Dict
 import requests
 from django.conf import settings
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -47,7 +48,7 @@ class CyberChef(ObservableAnalyzer, DockerBasedAnalyzer):
             request_payload = {"input": self.observable_name, "recipe": self.recipe}
             if self.output_type:
                 request_payload["outputType"] = self.output_type
-            response = requests.post(self.url, json=request_payload)
+            response = http_utils.post(self.url, json=request_payload)
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

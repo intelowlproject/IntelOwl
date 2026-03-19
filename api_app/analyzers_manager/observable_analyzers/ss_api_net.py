@@ -5,6 +5,7 @@ import base64
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
@@ -44,7 +45,7 @@ class SSAPINet(classes.ObservableAnalyzer):
             if self.use_proxy:
                 params["proxy"] = self.proxy
 
-            resp = requests.get(self.url, params=params)
+            resp = http_utils.get(self.url, params=params)
             resp.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

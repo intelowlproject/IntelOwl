@@ -3,9 +3,9 @@
 
 import logging
 
-import requests
 from django.db import transaction
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.models import TorDanMeUKNode
 
@@ -29,7 +29,7 @@ class TorNodesDanMeUK(classes.ObservableAnalyzer):
     def update(cls) -> bool:
         try:
             logger.info("starting download of tor nodes from https://dan.me.uk")
-            response = requests.get(cls.url)
+            response = http_utils.get(cls.url)
             response.raise_for_status()
 
             unique_ips = {ip for ip in response.content.decode().split("\n") if ip.strip()}

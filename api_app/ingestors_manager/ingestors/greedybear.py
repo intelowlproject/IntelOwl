@@ -3,8 +3,7 @@ import logging
 from typing import Any, Iterable
 from unittest.mock import patch
 
-import requests
-
+from api_app import http_utils
 from api_app.ingestors_manager.classes import Ingestor
 from api_app.ingestors_manager.exceptions import (
     IngestorConfigurationException,
@@ -42,7 +41,7 @@ class GreedyBear(Ingestor):
             raise IngestorConfigurationException(f"Invalid age: {self.age}. Must be one of {self.VALID_AGE}")
 
         req_url = f"{self.url}/api/feeds/{self.feed_type}/{self.attack_type}/{self.age}.json"
-        result = requests.get(req_url)
+        result = http_utils.get(req_url)
         result.raise_for_status()
         content = result.json()
         if not isinstance(content.get("iocs"), list):

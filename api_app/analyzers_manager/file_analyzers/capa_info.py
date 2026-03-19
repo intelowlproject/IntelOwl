@@ -10,9 +10,9 @@ import tempfile
 from pathlib import Path
 from shlex import quote
 
-import requests
 from django.conf import settings
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.models import PythonModule
@@ -89,7 +89,7 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
 
         signatures_url = "https://api.github.com/repos/mandiant/capa/contents/sigs"
         try:
-            response = requests.get(signatures_url)
+            response = http_utils.get(signatures_url)
             signatures_list = response.json()
 
             for signature in signatures_list:
@@ -98,7 +98,7 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
 
                 signature_file_path = os.path.join(SIGNATURE_LOCATION, filename)
 
-                sig_content = requests.get(download_url, stream=True)
+                sig_content = http_utils.get(download_url, stream=True)
                 with open(signature_file_path, mode="wb") as file:
                     for chunk in sig_content.iter_content(chunk_size=10 * 1024):
                         file.write(chunk)
@@ -112,7 +112,7 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
     def update(cls, analyzer_module: PythonModule) -> bool:
         try:
             logger.info("Updating capa rules")
-            response = requests.get("https://api.github.com/repos/mandiant/capa-rules/releases/latest")
+            response = http_utils.get("https://api.github.com/repos/mandiant/capa-rules/releases/latest")
             latest_version = response.json()["tag_name"]
             capa_rules_download_url = RULES_URL + latest_version + ".zip"
 
@@ -138,7 +138,7 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
     def run(self):
         cache_dir = self._ensure_cache_directory()
         try:
-            response = requests.get("https://api.github.com/repos/mandiant/capa-rules/releases/latest")
+            response = http_utils.get("https://api.github.com/repos/mandiant/capa-rules/releases/latest")
             latest_version = response.json()["tag_name"]
 
             capa_analyzer_module = self.python_module

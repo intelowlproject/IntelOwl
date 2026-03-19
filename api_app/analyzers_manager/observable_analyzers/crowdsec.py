@@ -2,9 +2,9 @@
 # See the file 'LICENSE' for copying permission.
 import logging
 
-import requests
 from django.conf import settings
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.data_model_manager.enums import DataModelTags
 
@@ -25,7 +25,7 @@ class Crowdsec(ObservableAnalyzer):
             "User-Agent": f"crowdsec-intelowl/{settings.VERSION}",
         }
         url = f"{self.url}/v2/smoke/{self.observable_name}"
-        response = requests.get(url, headers=headers)
+        response = http_utils.get(url, headers=headers)
         if response.status_code == 404:
             result = {"not_found": True}
         else:

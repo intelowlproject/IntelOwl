@@ -4,9 +4,9 @@
 import logging
 import os
 
-import requests
 from django.conf import settings
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.models import PluginConfig
 
@@ -74,7 +74,7 @@ class GreynoiseLabs(ObservableAnalyzer):
                 "query": value["query_string"],
                 "variables": {"ip": f"{self.observable_name}"},
             }
-            response = requests.post(headers=headers, json=json_body, url=url)
+            response = http_utils.post(headers=headers, json=json_body, url=url)
             response.raise_for_status()
             result[key] = response.json()
 
@@ -100,7 +100,7 @@ class GreynoiseLabs(ObservableAnalyzer):
 
         try:
             logger.info("Fetching data from greynoise API (Greynoise_Labs).....")
-            response = requests.post(
+            response = http_utils.post(
                 headers=headers,
                 json={"query": queries["topc2s"]["query_string"]},
                 url=url,

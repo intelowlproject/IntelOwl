@@ -6,6 +6,7 @@ import time
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
@@ -42,7 +43,7 @@ class UrlDNA(ObservableAnalyzer):
             "Authorization": self._api_key_name,
         }
 
-        self.session = requests.Session()
+        self.session = http_utils.Session()
         self.session.headers = headers
         if self.urldna_analysis == "SEARCH":
             result = self.__urldna_search()

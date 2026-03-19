@@ -4,9 +4,9 @@
 import logging
 import os
 
-import requests
 from django.conf import settings
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -39,7 +39,7 @@ class Talos(classes.ObservableAnalyzer):
         try:
             logger.info("starting download of db from talos")
             url = "https://snort.org/downloads/ip-block-list"
-            r = requests.get(url)
+            r = http_utils.get(url)
             r.raise_for_status()
 
             with open(database_location, "w", encoding="utf-8") as f:

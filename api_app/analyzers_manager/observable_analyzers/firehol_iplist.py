@@ -7,9 +7,9 @@ import os
 import traceback
 from datetime import datetime
 
-import requests
 from django.conf import settings
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
@@ -63,7 +63,7 @@ class FireHol_IPList(classes.ObservableAnalyzer):
 
             logger.info(f"starting download of {list_name} from firehol iplist")
             url = f"https://iplists.firehol.org/files/{list_name}"
-            r = requests.get(url)
+            r = http_utils.get(url)
             r.raise_for_status()
 
             data_extracted = r.content.decode()

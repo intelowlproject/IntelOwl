@@ -6,6 +6,7 @@ from typing import Tuple
 import requests
 from django.conf import settings
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -61,7 +62,7 @@ class TweetFeeds(ObservableAnalyzer):
             logger.info(f"TweetFeeds extending using {run_url}")
 
             # simply make api call and search for observable
-            response = requests.get(run_url)
+            response = http_utils.get(run_url)
             response.raise_for_status()
             db = response.json()
             for tweet in db:
@@ -82,7 +83,7 @@ class TweetFeeds(ObservableAnalyzer):
         logger.info(f"Updating TweetFeeds {db_url} at {db_location}")
 
         try:
-            response = requests.get(db_url)
+            response = http_utils.get(db_url)
             response.raise_for_status()
         except requests.RequestException as e:
             logger.error(f"TweetFeeds failed to update {db_url}: {e}")

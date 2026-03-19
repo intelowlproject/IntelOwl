@@ -3,6 +3,7 @@
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -16,7 +17,7 @@ class VirusheeCheckHash(ObservableAnalyzer):
         pass
 
     def run(self):
-        self.__session = requests.Session()
+        self.__session = http_utils.Session()
         if hasattr(self, "_api_key_name"):
             self.__session.headers["X-API-Key"] = self._api_key_name
         url = self.url.format(input=self.observable_name)

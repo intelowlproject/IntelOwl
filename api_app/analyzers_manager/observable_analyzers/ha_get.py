@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
@@ -26,7 +27,7 @@ class HybridAnalysisGet(ObservableAnalyzer):
     def _fetch_sample_summary(self, sha256: str, headers: Dict[str, str]) -> Optional[Dict[str, Any]]:
         overview_uri = f"overview/{sha256}"
         try:
-            res = requests.get(self.api_url + overview_uri, headers=headers)
+            res = http_utils.get(self.api_url + overview_uri, headers=headers)
             res.raise_for_status()
             data = res.json()
             return data if isinstance(data, dict) else None
@@ -34,14 +35,14 @@ class HybridAnalysisGet(ObservableAnalyzer):
             return None
 
     def _search_terms(self, key: str, value: str, headers: Dict[str, str]):
-        return requests.post(
+        return http_utils.post(
             self.api_url + "search/terms",
             data={key: value},
             headers=headers,
         )
 
     def _search_hash(self, value: str, headers: Dict[str, str]):
-        return requests.get(
+        return http_utils.get(
             self.api_url + "search/hash",
             params={"hash": value},
             headers=headers,

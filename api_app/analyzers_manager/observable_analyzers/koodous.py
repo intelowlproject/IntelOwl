@@ -1,8 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 
 
@@ -17,7 +16,7 @@ class Koodous(classes.ObservableAnalyzer):
         pass
 
     def get_response(self, url):
-        return requests.get(url, headers={"Authorization": f"Token {self._api_key_name}"})
+        return http_utils.get(url, headers={"Authorization": f"Token {self._api_key_name}"})
 
     def run(self):
         common_url = self.url + self.observable_name

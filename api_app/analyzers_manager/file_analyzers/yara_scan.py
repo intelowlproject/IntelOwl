@@ -11,11 +11,11 @@ from typing import Dict, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
 import git
-import requests
 import yara
 from django.conf import settings
 from django.utils.functional import cached_property
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.models import Parameter, PluginConfig
@@ -94,7 +94,7 @@ class YaraRepo:
 
     def _update_zip(self):
         logger.info(f"About to download zip file from {self.url} to {self.directory}")
-        response = requests.get(self.url, stream=True)
+        response = http_utils.get(self.url, stream=True)
         try:
             response.raise_for_status()
         except Exception as e:

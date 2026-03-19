@@ -1,7 +1,6 @@
 import logging
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
@@ -20,7 +19,7 @@ class SpamhausWQS(classes.ObservableAnalyzer):
 
     def run(self):
         headers = {"Authorization": f"Bearer {self._api_key}"}
-        response = requests.get(
+        response = http_utils.get(
             url=f"""{self.url}/
             {"DBL" if self.observable_classification == Classification.DOMAIN.value else "AUTHBL"}
             /{self.observable_name}""",

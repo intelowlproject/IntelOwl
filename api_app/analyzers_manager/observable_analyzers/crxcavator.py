@@ -3,6 +3,7 @@
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -17,7 +18,7 @@ class CRXcavator(classes.ObservableAnalyzer):
 
     def run(self):
         try:
-            response = requests.get(self.url + self.observable_name)
+            response = http_utils.get(self.url + self.observable_name)
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

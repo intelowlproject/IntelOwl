@@ -5,9 +5,9 @@ import logging
 import os
 from datetime import date, datetime
 
-import requests
 from django.conf import settings
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -63,7 +63,7 @@ class Stratos(classes.ObservableAnalyzer):
     @staticmethod
     def download_dataset(url, db_loc):
         # Dataset website certificates are not correctly configured.
-        p = requests.get(url, verify=False)  # lgtm [py/request-without-cert-validation]
+        p = http_utils.get(url, verify=False)  # lgtm [py/request-without-cert-validation]
         p.raise_for_status()
 
         with open(db_loc, "w", encoding="utf-8") as f:

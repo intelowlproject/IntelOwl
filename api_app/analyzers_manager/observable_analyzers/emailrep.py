@@ -1,8 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
@@ -37,7 +36,7 @@ class EmailRep(classes.ObservableAnalyzer):
 
         url = self.url.format(self.observable_name)
 
-        response = requests.get(url, headers=headers)
+        response = http_utils.get(url, headers=headers)
         response.raise_for_status()
 
         return response.json()

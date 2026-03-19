@@ -1,8 +1,7 @@
 import logging
 import time
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager.classes import FileAnalyzer
 
 logger = logging.getLogger(__name__)
@@ -37,7 +36,7 @@ class MobSF_Service(FileAnalyzer):
         pass
 
     def query_mobsf(self, endpoint, headers, data):
-        response = requests.post(
+        response = http_utils.post(
             url=self.mobsf_host + endpoint,
             data=data,
             headers=headers,
@@ -112,7 +111,7 @@ class MobSF_Service(FileAnalyzer):
         logger.info(f"File bytes for file:{self.filename} read successfully. Initiating upload request")
 
         upload_url = self.mobsf_host + self.UPLOAD_ENDPOINT
-        upload_response = requests.post(
+        upload_response = http_utils.post(
             url=upload_url,
             files={"file": (self.filename, binary, "application/octet-stream")},
             headers=headers,

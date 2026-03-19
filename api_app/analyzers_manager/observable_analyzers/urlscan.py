@@ -6,6 +6,7 @@ import time
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
@@ -32,7 +33,7 @@ class UrlScan(ObservableAnalyzer):
         else:
             headers["API-Key"] = self._api_key_name
 
-        self.session = requests.Session()
+        self.session = http_utils.Session()
         self.session.headers = headers
         if self.urlscan_analysis == "search":
             result = self.__urlscan_search()

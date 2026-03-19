@@ -3,6 +3,7 @@
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -18,7 +19,7 @@ class IPInfo(classes.ObservableAnalyzer):
 
     def run(self):
         try:
-            response = requests.get(
+            response = http_utils.get(
                 self.url + self.observable_name,
                 params={"token": self._api_key_name},
             )

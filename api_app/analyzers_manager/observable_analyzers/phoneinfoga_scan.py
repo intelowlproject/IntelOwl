@@ -4,6 +4,7 @@ from typing import Dict, List
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 
@@ -68,7 +69,7 @@ class Phoneinfoga(classes.ObservableAnalyzer, classes.DockerBasedAnalyzer):
                         "GOOGLE_API_KEY": self._GOOGLE_API_KEY,
                         "GOOGLECSE_MAX_RESULTS": self.googlecse_max_results,
                     }
-                response = requests.post(
+                response = http_utils.post(
                     url,
                     headers={
                         "Content-Type": "application/json",

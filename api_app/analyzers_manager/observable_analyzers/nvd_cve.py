@@ -2,6 +2,7 @@ import re
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import AnalyzerRunException, ObservableAnalyzer
 
 
@@ -25,7 +26,7 @@ class NVDDetails(ObservableAnalyzer):
                 raise ValueError(f"Invalid CVE format: {self.observable_name}")
 
             params = {"cveId": self.observable_name.upper()}
-            response = requests.get(url=self.url, params=params, headers=headers)
+            response = http_utils.get(url=self.url, params=params, headers=headers)
             response.raise_for_status()
 
         except ValueError as e:

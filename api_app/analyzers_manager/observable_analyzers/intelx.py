@@ -8,6 +8,7 @@ from typing import Dict
 import requests
 from django.utils.functional import cached_property
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
@@ -44,7 +45,7 @@ class IntelX(ObservableAnalyzer):
 
     @cached_property
     def _session(self):
-        session = requests.Session()
+        session = http_utils.Session()
         session.headers.update({"x-key": self._api_key_name, "User-Agent": "IntelOwl"})
         return session
 

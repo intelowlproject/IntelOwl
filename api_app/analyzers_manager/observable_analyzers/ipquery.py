@@ -5,6 +5,7 @@ import logging
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -22,7 +23,7 @@ class IPQuery(classes.ObservableAnalyzer):
         logger.info(f"Running IPQuery Analyzer for {self.observable_name}")
 
         try:
-            response = requests.get(f"{self.url}{self.observable_name}?format=json")
+            response = http_utils.get(f"{self.url}{self.observable_name}?format=json")
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

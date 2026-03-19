@@ -4,6 +4,7 @@ from typing import Dict
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
@@ -26,12 +27,12 @@ class BinaryEdge(classes.ObservableAnalyzer):
         results = {}
         if self.observable_classification == Classification.IP:
             try:
-                response_recent_ip_info = requests.get(
+                response_recent_ip_info = http_utils.get(
                     self.url + "ip/" + self.observable_name, headers=self.headers
                 )
                 response_recent_ip_info.raise_for_status()
 
-                response_query_ip = requests.get(
+                response_query_ip = http_utils.get(
                     self.url + "search?query=ip:" + self.observable_name,
                     headers=self.headers,
                 )
@@ -46,7 +47,7 @@ class BinaryEdge(classes.ObservableAnalyzer):
             }
         elif self.observable_classification == Classification.DOMAIN:
             try:
-                response_domain_report = requests.get(
+                response_domain_report = http_utils.get(
                     self.url + "domains/subdomain/" + self.observable_name,
                     headers=self.headers,
                 )

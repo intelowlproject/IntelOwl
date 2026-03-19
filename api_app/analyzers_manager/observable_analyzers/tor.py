@@ -4,9 +4,9 @@
 import logging
 import re
 
-import requests
 from django.db import transaction
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.models import TorExitNode
 
@@ -27,7 +27,7 @@ class Tor(classes.ObservableAnalyzer):
     def update(cls) -> bool:
         try:
             logger.info("starting download of db from tor project")
-            response = requests.get(cls.url)
+            response = http_utils.get(cls.url)
             response.raise_for_status()
 
             unique_ips = set(

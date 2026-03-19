@@ -6,8 +6,8 @@ from typing import Dict, Optional
 from urllib.parse import urlparse
 
 import dateparser
-import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
@@ -76,7 +76,7 @@ class DNSdb(classes.ObservableAnalyzer):
         params = self._create_params()
 
         # perform request
-        response = requests.get(url, params=params, headers=headers)
+        response = http_utils.get(url, params=params, headers=headers)
         # for API v1, 404 means no results found
         if self.api_version == 1 and response.status_code == 404:
             self.no_results_found = True

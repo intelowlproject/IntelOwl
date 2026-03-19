@@ -6,6 +6,7 @@ from tempfile import NamedTemporaryFile
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.constants import HTTPMethods
 from api_app.analyzers_manager.exceptions import (
@@ -74,7 +75,7 @@ class BasicObservableAnalyzer(ObservableAnalyzer):
                 url = self.url
                 if not self.params.keys():
                     url = self.url + self.observable_name
-                response = requests.get(
+                response = http_utils.get(
                     url,
                     params=self.params,
                     headers=self.headers,

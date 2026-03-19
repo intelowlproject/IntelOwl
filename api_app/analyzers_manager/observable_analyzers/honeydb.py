@@ -4,8 +4,7 @@
 import logging
 from typing import Dict
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 
@@ -64,7 +63,7 @@ class HoneyDB(classes.ObservableAnalyzer):
             logger.error(f"endpoint {endpoint} not supported")
             return
         try:
-            response = requests.get(url, headers=self.headers)
+            response = http_utils.get(url, headers=self.headers)
             response.raise_for_status()
         except Exception as e:
             logger.exception(e)

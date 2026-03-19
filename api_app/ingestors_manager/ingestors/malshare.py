@@ -2,8 +2,7 @@ import logging
 from typing import Any, Iterable
 from unittest.mock import patch
 
-import requests
-
+from api_app import http_utils
 from api_app.ingestors_manager.classes import Ingestor
 from api_app.ingestors_manager.exceptions import IngestorRunException
 from tests.mock_utils import MockUpResponse, if_mock_connections
@@ -33,7 +32,7 @@ class Malshare(Ingestor):
                 "action": "getfile",
                 "hash": sample_hash,
             }
-            response = requests.get(self.base_url, params=params)
+            response = http_utils.get(self.base_url, params=params)
             response.raise_for_status()
             if not isinstance(response.content, bytes):
                 raise ValueError("The downloaded file is not instance of bytes")
@@ -53,7 +52,7 @@ class Malshare(Ingestor):
             "api_key": self._api_key_name,
             "action": "getlist",
         }
-        result = requests.get(self.base_url, params=params)
+        result = http_utils.get(self.base_url, params=params)
         result.raise_for_status()
         content = result.json()
         if not isinstance(content, list):

@@ -6,8 +6,8 @@ from typing import List
 from urllib.parse import urlparse
 
 import OTXv2
-import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
@@ -32,7 +32,7 @@ class OTXv2Extended(OTXv2.OTXv2):
         # this was needed because, otherwise, the analyzer could last too much time
         # and become the bottleneck of all the application
         if self.request_session is None:
-            self.request_session = requests.Session()
+            self.request_session = http_utils.Session()
 
         return self.request_session
 

@@ -6,6 +6,7 @@ from typing import Dict
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
@@ -38,7 +39,7 @@ class Hunter_How(classes.ObservableAnalyzer):
 
     def run(self):
         try:
-            response_ip = requests.get(self.url, params=self.parameters)
+            response_ip = http_utils.get(self.url, params=self.parameters)
             response_ip.raise_for_status()
 
         except requests.RequestException as e:

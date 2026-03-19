@@ -2,6 +2,7 @@ import logging
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import (  # AnalyzerConfigurationException
     AnalyzerRunException,
@@ -31,7 +32,7 @@ class Validin(classes.ObservableAnalyzer):
             for query_name, query_url in (endpoints.get(self.observable_classification)).items():
                 logger.info(f"Executing query {query_name}")
                 try:
-                    response = requests.get(self.url + query_url, headers=headers)
+                    response = http_utils.get(self.url + query_url, headers=headers)
                     if response.status_code != 200:
                         logger.error(f"Query {query_name} failed")
 
@@ -47,7 +48,7 @@ class Validin(classes.ObservableAnalyzer):
         if self.observable_classification in endpoints:
             try:
                 query_url = endpoints[self.observable_classification][self.scan_choice]
-                response = requests.get(self.url + query_url, headers=headers)
+                response = http_utils.get(self.url + query_url, headers=headers)
                 return response.json()
             except KeyError:
                 raise AnalyzerRunException(

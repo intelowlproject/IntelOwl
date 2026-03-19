@@ -7,6 +7,7 @@ from typing import Dict
 import requests
 from django.utils.functional import cached_property
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.models import MimeTypes
@@ -141,7 +142,7 @@ class Sublime(FileAnalyzer):
 
     def run(self) -> Dict:
         self.headers["Authorization"] = f"Bearer {self._api_key}"
-        session = requests.Session()
+        session = http_utils.Session()
         session.headers = self.headers
         report = self._analysis(session, self.raw_message)
         if self.analyze_internal_eml_on_pec and self.file_mimetype == MimeTypes.EML.value and self.is_pec():

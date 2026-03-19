@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
@@ -34,7 +35,7 @@ class CloudFlareDNSResolver(classes.ObservableAnalyzer):
                 "type": self.query_type,
             }
             headers = {"accept": "application/dns-json"}
-            response = requests.get("https://cloudflare-dns.com/dns-query", params=params, headers=headers)
+            response = http_utils.get("https://cloudflare-dns.com/dns-query", params=params, headers=headers)
             response.raise_for_status()
             response_dict = response.json()
 

@@ -2,8 +2,7 @@ import logging
 from typing import Any, Iterable
 from unittest.mock import patch
 
-import requests
-
+from api_app import http_utils
 from api_app.ingestors_manager.classes import Ingestor
 from api_app.ingestors_manager.exceptions import IngestorRunException
 from api_app.mixins import AbuseCHMixin
@@ -23,7 +22,7 @@ class ThreatFox(AbuseCHMixin, Ingestor):
         pass
 
     def run(self) -> Iterable[Any]:
-        result = requests.post(
+        result = http_utils.post(
             self.url,
             json={"query": "get_iocs", "days": self.days},
             headers=self.authentication_header,

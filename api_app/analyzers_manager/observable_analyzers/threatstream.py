@@ -3,6 +3,7 @@
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
@@ -62,7 +63,7 @@ class Threatstream(classes.ObservableAnalyzer):
             )
         try:
             api_header = {"Authorization": f"apikey {self._api_user_name}:{self._api_key_name}"}
-            response = requests.get(self.url + uri, params=params, headers=api_header)
+            response = http_utils.get(self.url + uri, params=params, headers=api_header)
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

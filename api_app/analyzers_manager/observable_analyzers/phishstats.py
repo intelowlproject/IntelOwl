@@ -4,8 +4,7 @@
 from ipaddress import AddressValueError, IPv4Address
 from urllib.parse import urlparse
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
@@ -46,7 +45,7 @@ class PhishStats(ObservableAnalyzer):
 
     def run(self):
         api_url = self.__build_phishstats_url()
-        response = requests.get(api_url)
+        response = http_utils.get(api_url)
         response.raise_for_status()
 
         return {"api_url": api_url, "results": response.json()}

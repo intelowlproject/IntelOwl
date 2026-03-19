@@ -4,6 +4,7 @@
 import requests
 from django.conf import settings
 
+from api_app import http_utils
 from api_app.connectors_manager import classes
 from api_app.connectors_manager.exceptions import ConnectorRunException
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
@@ -53,7 +54,7 @@ class YETI(classes.Connector):
         # create observable with `obs_value` if it doesn't exists
         # new context, tags, source are appended with existing ones
         try:
-            resp = requests.post(
+            resp = http_utils.post(
                 url=url,
                 headers=headers,
                 json=payload,

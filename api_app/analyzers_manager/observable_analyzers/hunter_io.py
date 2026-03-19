@@ -1,8 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 
 
@@ -17,7 +16,7 @@ class Hunter_Io(classes.ObservableAnalyzer):
 
     def run(self):
         url = f"{self.url}domain={self.observable_name}&api_key={self._api_key_name}"
-        response = requests.get(url)
+        response = http_utils.get(url)
         response.raise_for_status()
 
         return response.json()

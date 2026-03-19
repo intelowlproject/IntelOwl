@@ -4,9 +4,9 @@ import json
 import logging
 import os
 
-import requests
 from django.conf import settings
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
@@ -94,7 +94,7 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
                 db_url = cls.asn_url
             else:
                 raise AnalyzerRunException(f"Invalid data_type provided to update: {data_type}")
-            response = requests.get(url=db_url)
+            response = http_utils.get(url=db_url)
             response.raise_for_status()
             data = cls.convert_to_json(response.text)
             database_location = cls.location(data_type)

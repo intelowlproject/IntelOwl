@@ -2,8 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 from typing import Dict
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 
 
@@ -25,10 +24,10 @@ class IPApi(classes.ObservableAnalyzer):
         ]
 
     def run(self):
-        response_batch = requests.post(self.batch_url, json=self.IP)
+        response_batch = http_utils.post(self.batch_url, json=self.IP)
         response_batch.raise_for_status()
 
-        response_dns = requests.get(self.dns_url)
+        response_dns = http_utils.get(self.dns_url)
         response_dns.raise_for_status()
 
         response = {"ip_info": response_batch.json(), "dns_info": response_dns.json()}

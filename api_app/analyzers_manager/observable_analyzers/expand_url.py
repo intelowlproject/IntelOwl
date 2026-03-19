@@ -3,6 +3,7 @@ import logging
 import requests
 from bs4 import BeautifulSoup
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -45,7 +46,7 @@ class ExpandURL(ObservableAnalyzer):
         logger.info(f"Expanding {url}")
         try:
             while no_more_redirects is False:
-                final_response = requests.get(url, headers=headers, allow_redirects=True)
+                final_response = http_utils.get(url, headers=headers, allow_redirects=True)
                 final_response.raise_for_status()
                 for response in final_response.history:
                     redirection_chain.append(response.url)

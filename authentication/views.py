@@ -8,7 +8,7 @@ import rest_email_auth.views
 from authlib.integrations.base_client import OAuthError
 from authlib.oauth2 import OAuth2Error
 from django.conf import settings
-from django.contrib.auth import get_user_model, login, logout
+from django.contrib.auth import get_user_model, login, logout, update_session_auth_hash
 from django.contrib.auth.hashers import check_password
 from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
@@ -200,6 +200,12 @@ class ChangePasswordView(APIView):
         # Set the new password for the user
         user.set_password(new_password)
         user.save()
+
+        # Invalidate all API tokens for this user
+        Token.objects.filter(user=user).delete()
+
+        # Update current session hash so the user isn't abruptly logged out
+        update_session_auth_hash(request, user)
 
         # Return a success response
         return Response({"message": "Password changed successfully"})

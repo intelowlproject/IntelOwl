@@ -1,7 +1,7 @@
 import datetime
 import io
 import logging
-from typing import TYPE_CHECKING, Any, Generator, Iterable, Optional, Union
+from typing import TYPE_CHECKING, Any, Generator, Iterable, Iterator, Optional, Union
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -177,7 +177,7 @@ class CreateJobsFromPlaybookInterface:
         delay: datetime.timedelta = datetime.timedelta(),
         send_task: bool = True,
         parent_job=None,
-    ) -> Generator["Job", None, None]:
+    ) -> Iterator["Job"]:
         """
         Creates jobs from the given playbook configuration.
 

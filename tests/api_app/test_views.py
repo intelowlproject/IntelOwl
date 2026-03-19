@@ -480,7 +480,8 @@ class TagViewsetTests(CustomViewSetTestCase):
         msg = (response, content)
 
         self.assertEqual(response.status_code, 201, msg=msg)
-        self.assertDictContainsSubset(data, content, msg=msg)
+        for key, value in data.items():
+            self.assertEqual(content[key], value, msg=msg)
         self.assertEqual(Tag.objects.count(), 2)
 
     def test_create_400(self):
@@ -513,7 +514,8 @@ class TagViewsetTests(CustomViewSetTestCase):
         msg = (response, content)
 
         self.assertEqual(response.status_code, 200, msg=msg)
-        self.assertDictContainsSubset(new_data, content, msg=msg)
+        for key, value in new_data.items():
+            self.assertEqual(content[key], value, msg=msg)
 
     def test_delete_204(self):
         self.assertEqual(Tag.objects.count(), 1)
@@ -639,7 +641,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
     def setUp(self):
         super().setUp()
 
-    def test_plugin_config(self):
+    def test_plugin_config(self):  # skipcq: PY-R1000
         org = Organization.create("test_org", self.user)
         Membership.objects.create(user=self.admin, organization=org, is_owner=False, is_admin=True)
         ac = AnalyzerConfig.objects.get(name="AbuseIPDB")

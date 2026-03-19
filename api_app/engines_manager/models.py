@@ -1,5 +1,5 @@
 import uuid
-from typing import Generator
+from typing import Iterator
 
 from celery import group
 from celery.canvas import Signature
@@ -22,7 +22,7 @@ class EngineConfig(SingletonModel):
         help_text="List of modules used by the engine. Each module has syntax `name_file.name_class`",
     )
 
-    def get_modules_signatures(self, job) -> Generator[Signature, None, None]:
+    def get_modules_signatures(self, job) -> Iterator[Signature]:
         from api_app.engines_manager.tasks import execute_engine_module
 
         for path in self.modules:

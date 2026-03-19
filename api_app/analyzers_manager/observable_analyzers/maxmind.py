@@ -25,11 +25,11 @@ logger = logging.getLogger(__name__)
 
 
 class MaxmindDBManager:
-    _supported_dbs: [str] = ["GeoLite2-Country", "GeoLite2-City", "GeoLite2-ASN"]
+    _supported_dbs: list[str] = ["GeoLite2-Country", "GeoLite2-City", "GeoLite2-ASN"]
     _default_db_extension: str = ".mmdb"
 
     @classmethod
-    def get_supported_dbs(cls) -> [str]:
+    def get_supported_dbs(cls) -> list[str]:
         return [db_name + cls._default_db_extension for db_name in cls._supported_dbs]
 
     @classmethod
@@ -184,7 +184,7 @@ class Maxmind(classes.ObservableAnalyzer):
         return maxmind_final_result
 
     @classmethod
-    def get_db_names(cls) -> [str]:
+    def get_db_names(cls) -> list[str]:
         return cls._maxmind_db_manager.get_supported_dbs()
 
     @classmethod
@@ -192,7 +192,7 @@ class Maxmind(classes.ObservableAnalyzer):
         for plugin in PluginConfig.objects.filter(
             parameter__python_module=cls.python_module,
             parameter__is_secret=True,
-            parameter__name="_api_key_name",
+            parameter__name="api_key_name",
         ):
             if plugin.value:
                 return plugin.value
@@ -202,7 +202,7 @@ class Maxmind(classes.ObservableAnalyzer):
     def update(cls) -> bool:
         auth_token = cls._get_api_key()
         if auth_token:
-            return cls._maxmind_db_manager.update_all_dbs(cls._api_key_name)
+            return cls._maxmind_db_manager.update_all_dbs(auth_token)
         return False
 
     def _update_data_model(self, data_model) -> None:

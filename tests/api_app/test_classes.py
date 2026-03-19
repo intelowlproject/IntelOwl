@@ -10,7 +10,7 @@ from api_app.choices import Classification, PythonModuleBasePaths
 from api_app.classes import Plugin
 from api_app.connectors_manager.classes import Connector
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.models import Job, PythonModule
+from api_app.models import Job, PluginConfig, PythonModule
 from tests import CustomTestCase
 
 
@@ -35,7 +35,17 @@ class PluginTestCase(CustomTestCase):
             disabled=False,
             run_on_failure=False,
         )
+        for param in self.cc.parameters.annotate_configured(self.cc, self.user).filter(
+            required=True, configured=False
+        ):
+            PluginConfig.objects.create(
+                connector_config=self.cc,
+                parameter=param,
+                value="https://intelowl.com" if "url" in param.name else "test",
+                owner=self.user,
+            )
         self.job.connectors_to_execute.set([self.cc])
+        self.job.refresh_from_db()
 
     def tearDown(self) -> None:
         self.job.delete()
@@ -64,8 +74,7 @@ class PluginTestCase(CustomTestCase):
 
         with patch.multiple(Connector, __abstractmethods__=set()), patch.multiple(Connector, run=raise_error):
             plugin = Connector(self.cc)
-            with self.assertRaises(TypeError):
-                plugin.start(self.job.pk, {}, uuid())
+            plugin.start(self.job.pk, {}, uuid())
             self.assertEqual(plugin.report.status, plugin.report.STATUSES.FAILED)
             self.assertEqual(1, len(plugin.report.errors))
             self.assertEqual("Test", plugin.report.errors[0])

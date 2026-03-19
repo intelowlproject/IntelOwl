@@ -1,7 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from kombu import uuid
 
@@ -20,7 +20,11 @@ class ConnectorTestCase(CustomTestCase):
         "api_app/fixtures/0001_user.json",
     ]
 
-    def test_health_check(self):
+    @patch("requests.head")
+    def test_health_check(self, mock_head):
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_head.return_value = mock_response
         pm = PythonModule.objects.get(base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP")
         cc = ConnectorConfig.objects.create(
             name="test",
@@ -42,8 +46,7 @@ class ConnectorTestCase(CustomTestCase):
             parameter=Parameter.objects.get(name="url_key_name", python_module=pm),
             connector_config=cc,
         )
-        with patch("requests.head"):
-            result = MockUpConnector(cc).health_check(self.user)
+        result = MockUpConnector(cc).health_check(self.user)
         self.assertTrue(result)
         cc.disabled = False
         cc.save()
@@ -126,6 +129,16 @@ class ConnectorTestCase(CustomTestCase):
                 timeout_seconds = config.soft_time_limit
                 timeout_seconds = min(timeout_seconds, 20)
                 print(f"\tTesting with config {config.name} for {timeout_seconds} seconds")
+                for param in config.parameters.annotate_configured(config, job.user).filter(
+                    required=True, configured=False
+                ):
+                    PluginConfig.objects.create(
+                        parameter=param,
+                        value="https://intelowl.com" if "url" in param.name else "test",
+                        connector_config=config,
+                        owner=job.user,
+                    )
+
                 sub = subclass(
                     config,
                 )

@@ -14,7 +14,7 @@ COPY docker/.env .env.local
 RUN PUBLIC_URL=/static/reactapp/ npm run build
 
 # Stage 2: Backend
-FROM python:3.11.7 AS backend-build
+FROM python:3.13.12 AS backend-build
 
 ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE=intel_owl.settings

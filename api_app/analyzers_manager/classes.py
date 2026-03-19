@@ -230,9 +230,12 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             str: The file path.
         """
         if not self.__filepath:
-            self.__filepath = self._job.analyzable.file.storage.retrieve(
-                file=self._job.analyzable.file, analyzer=self.analyzer_name
-            )
+            storage = self._job.analyzable.file.storage
+            retrieve = getattr(storage, "retrieve", None)
+            if callable(retrieve):
+                self.__filepath = retrieve(file=self._job.analyzable.file, analyzer=self.analyzer_name)
+            else:
+                self.__filepath = self._job.analyzable.file.path
         return self.__filepath
 
     def before_run(self):

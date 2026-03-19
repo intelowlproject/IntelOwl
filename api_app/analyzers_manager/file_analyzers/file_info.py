@@ -2,11 +2,11 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-from pathlib import PosixPath
+from pathlib import Path
 from typing import Optional
 
 import magic
-import pydeep
+import ppdeep
 import tlsh
 from django.conf import settings
 from django.utils.functional import cached_property
@@ -19,8 +19,8 @@ logger = logging.getLogger(__name__)
 
 
 class FileInfo(FileAnalyzer):
-    EXIF_TOOL_PATH: PosixPath = settings.BASE_DIR / "exiftool_download"
-    EXIF_TOOL_VERSION_PATH: PosixPath = EXIF_TOOL_PATH / "exiftool_version.txt"
+    EXIF_TOOL_PATH: Path = settings.BASE_DIR / "exiftool_download"
+    EXIF_TOOL_VERSION_PATH: Path = EXIF_TOOL_PATH / "exiftool_version.txt"
 
     @cached_property
     def exiftool_path(self) -> Optional[str]:
@@ -40,7 +40,7 @@ class FileInfo(FileAnalyzer):
         results["md5"] = calculate_md5(binary)
         results["sha1"] = calculate_sha1(binary)
         results["sha256"] = calculate_sha256(binary)
-        results["ssdeep"] = pydeep.hash_file(self.filepath).decode()
+        results["ssdeep"] = ppdeep.hash_from_file(self.filepath)
         results["tlsh"] = tlsh.hash(binary)
 
         if self.exiftool_path:

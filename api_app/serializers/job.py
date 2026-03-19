@@ -4,7 +4,7 @@ import ipaddress
 import logging
 import re
 import uuid
-from typing import Dict, Generator, List, Union
+from typing import Dict, Iterator, List, Union
 
 import django.core
 from django.conf import settings
@@ -259,7 +259,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         self,
         tlp,
         plugins_requested: Union[List[Union[AnalyzerConfig, ConnectorConfig, VisualizerConfig]], QuerySet],
-    ) -> Generator[Union[AnalyzerConfig, ConnectorConfig, VisualizerConfig], None, None]:
+    ) -> Iterator[Union[AnalyzerConfig, ConnectorConfig, VisualizerConfig]]:
         if not plugins_requested:
             return
         if isinstance(plugins_requested, QuerySet):
@@ -574,7 +574,7 @@ class JobSerializer(_AbstractJobViewSerializer):
             return root_investigation.name
         return instance.investigation
 
-    def get_analyzable_id(self, instance: Job) -> int:
+    def get_analyzable_id(self, instance: Job) -> int:  # skipcq: PYL-R0201
         return instance.analyzable.pk
 
     def get_fields(self):
@@ -595,7 +595,7 @@ class JobSerializer(_AbstractJobViewSerializer):
             )
         return super().get_fields()
 
-    def get_data_model(self, instance: Job):
+    def get_data_model(self, instance: Job):  # skipcq: PYL-R0201
         if instance.data_model:
             return instance.data_model.serialize()
         return {}
@@ -1166,7 +1166,7 @@ class JobAnalyzableHistorySerializer(rfs.ModelSerializer):
         model = Job
         fields = ["playbook", "user", "date", "data_model", "id"]
 
-    def get_data_model(self, instance: Job):
+    def get_data_model(self, instance: Job):  # skipcq: PYL-R0201
         logger.debug(f"{instance=}")
         logger.debug(f"{instance.analyzable=}")
 

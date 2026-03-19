@@ -195,8 +195,8 @@ class PhishingFormCompiler(FileAnalyzer):
         return response
 
     @staticmethod
-    def handle_3xx_response(response: Response) -> [str]:
-        result: [] = []
+    def handle_3xx_response(response: Response) -> list[str]:
+        result: list[str] = []
         # extract all redirection history
         for history in response.history:
             logger.info(f"Extracting 3xx {response.status_code} HTTP response with url {history.request.url}")

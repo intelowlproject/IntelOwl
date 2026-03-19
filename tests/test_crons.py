@@ -3,6 +3,7 @@
 import os
 
 from django.conf import settings
+from django.test import override_settings
 from django.utils.timezone import now
 
 from api_app.analyzables_manager.models import Analyzable
@@ -24,11 +25,12 @@ from api_app.models import Job, Parameter, PluginConfig, PythonModule
 from intel_owl.tasks import check_stuck_analysis, remove_old_jobs
 
 from . import CustomTestCase, get_logger
-from .mock_utils import MockUpResponse, if_mock_connections, patch, skip
+from .mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = get_logger()
 
 
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True, CELERY_BROKER_URL="memory://")
 class CronTests(CustomTestCase):
     def test_check_stuck_analysis(self):
         import datetime
@@ -77,18 +79,34 @@ class CronTests(CustomTestCase):
         )
         self.assertEqual(remove_old_jobs(), 0)
 
-        _job.finished_analysis_time = now() - datetime.timedelta(days=10)
+        _job.finished_analysis_time = now() - datetime.timedelta(days=15)
         _job.save()
         self.assertEqual(remove_old_jobs(), 1)
 
         _job.delete()
         an.delete()
 
-    @if_mock_connections(skip("not working without connection"))
-    def test_maxmind_updater(self):
+    @if_mock_connections(
+        patch(
+            "api_app.analyzers_manager.observable_analyzers.maxmind.Maxmind._get_api_key",
+            return_value="test_key",
+        ),
+        patch("api_app.analyzers_manager.observable_analyzers.maxmind.MaxmindDBManager.update_all_dbs"),
+    )
+    def test_maxmind_updater(self, mock_update=None, mock_key=None):
+        def create_dummy_dbs(*args, **kwargs):
+            for db_name in maxmind.MaxmindDBManager.get_supported_dbs():
+                path = os.path.join(settings.MEDIA_ROOT, db_name)
+                with open(path, "w") as f:
+                    f.write("dummy")
+            return True
+
+        if mock_update:
+            mock_update.side_effect = create_dummy_dbs
+
         maxmind.Maxmind.update()
         for db in maxmind.Maxmind.get_db_names():
-            self.assertTrue(os.path.exists(db))
+            self.assertTrue(os.path.exists(os.path.join(settings.MEDIA_ROOT, db)))
 
     @if_mock_connections(patch("requests.get", return_value=MockUpResponse({}, 200, text="91.192.100.61")))
     def test_talos_updater(self, mock_get=None):
@@ -303,45 +321,43 @@ class CronTests(CustomTestCase):
             result = yara_scan.YaraScan.update()
             self.assertTrue(result)
 
-    @if_mock_connections(
-        patch(
-            "requests.post",
-            return_value=MockUpResponse(
-                {
-                    "data": {
-                        "topC2s": {
-                            "queryInfo": {
-                                "resultsAvailable": 1914,
-                                "resultsLimit": 191,
-                            },
-                            "c2s": [
-                                {
-                                    "source_ip": "91.92.247.12",
-                                    "c2_ips": ["103.245.236.120"],
-                                    "c2_domains": [],
-                                    "hits": 11608,
-                                },
-                                {
-                                    "source_ip": "14.225.208.190",
-                                    "c2_ips": ["14.225.213.142"],
-                                    "c2_domains": [],
-                                    "hits": 2091,
-                                    "pervasiveness": 26,
-                                },
-                                {
-                                    "source_ip": "157.10.53.101",
-                                    "c2_ips": ["14.225.208.190"],
-                                    "c2_domains": [],
-                                    "hits": 1193,
-                                    "pervasiveness": 23,
-                                },
-                            ],
+    @patch(
+        "api_app.analyzers_manager.observable_analyzers.greynoise_labs.requests.post",
+        return_value=MockUpResponse(
+            {
+                "data": {
+                    "topC2s": {
+                        "queryInfo": {
+                            "resultsAvailable": 1914,
+                            "resultsLimit": 191,
                         },
+                        "c2s": [
+                            {
+                                "source_ip": "91.92.247.12",
+                                "c2_ips": ["103.245.236.120"],
+                                "c2_domains": [],
+                                "hits": 11608,
+                            },
+                            {
+                                "source_ip": "14.225.208.190",
+                                "c2_ips": ["14.225.213.142"],
+                                "c2_domains": [],
+                                "hits": 2091,
+                                "pervasiveness": 26,
+                            },
+                            {
+                                "source_ip": "157.10.53.101",
+                                "c2_ips": ["14.225.208.190"],
+                                "c2_domains": [],
+                                "hits": 1193,
+                                "pervasiveness": 23,
+                            },
+                        ],
                     },
                 },
-                200,
-            ),
-        )
+            },
+            200,
+        ),
     )
     def test_greynoise_labs_updater(self, mock_post=None):
         python_module = PythonModule.objects.get(

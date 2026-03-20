@@ -51,7 +51,7 @@ class HttpUtilsTestCase(SimpleTestCase):
             for env_value, expected in test_cases:
                 with self.subTest(env_value=env_value):
 
-                    def fake_get_secret(key, default=None):
+                    def fake_get_secret(key, default=None, env_value=env_value):
                         if key == "HTTP_TIMEOUT":
                             return env_value
                         return default

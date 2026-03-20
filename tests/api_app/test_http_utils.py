@@ -40,11 +40,11 @@ class HttpUtilsTestCase(SimpleTestCase):
 
         test_cases = [
             ("15", 15),
-            ("invalid", 30),
-            ("0", 30),
-            ("-5", 30),
+            ("invalid", 90),
+            ("0", 90),
+            ("-5", 90),
             (" 15 ", 15),
-            (None, 30),
+            (None, 90),
         ]
 
         try:

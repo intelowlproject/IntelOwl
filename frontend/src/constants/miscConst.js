@@ -27,7 +27,7 @@ export const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 export const HistoryPages = Object.freeze({
   JOB: "jobs",
-  INVESTIGAITON: "investigations",
+  INVESTIGATION: "investigations",
   USER_EVENT: "user-events",
   USER_DOMAIN_WILDCARD_EVENT: "user-domain-wildcard-events",
   USER_IP_WILDCARD_EVENT: "user-ip-wildcard-events",

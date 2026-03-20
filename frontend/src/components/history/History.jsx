@@ -30,7 +30,7 @@ export default function History() {
   if (pageType === HistoryPages.JOB) {
     startTimeString = "received_request_time__gte";
     endTimeString = "received_request_time__lte";
-  } else if (pageType === HistoryPages.INVESTIGAITON) {
+  } else if (pageType === HistoryPages.INVESTIGATION) {
     startTimeString = "start_time__gte";
     endTimeString = "start_time__lte";
   }

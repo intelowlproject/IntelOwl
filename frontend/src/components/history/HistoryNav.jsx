@@ -17,7 +17,7 @@ export function HistoryNav({ pageType, startTimeParam, endTimeParam }) {
   let createButtonTitle = "New evaluation";
   if (pageType === HistoryPages.JOB) {
     createButtonTitle = "Create job";
-  } else if (pageType === HistoryPages.INVESTIGAITON) {
+  } else if (pageType === HistoryPages.INVESTIGATION) {
     createButtonTitle = "Create Investigation";
   }
 
@@ -29,7 +29,7 @@ export function HistoryNav({ pageType, startTimeParam, endTimeParam }) {
   const onClick = async () => {
     if (pageType === HistoryPages.JOB) {
       navigate("/scan");
-    } else if (pageType === HistoryPages.INVESTIGAITON) {
+    } else if (pageType === HistoryPages.INVESTIGATION) {
       try {
         const investigationId = await createInvestigation();
         if (investigationId) navigate(`/investigation/${investigationId}`);

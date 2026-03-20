@@ -66,7 +66,7 @@ export function HistoryTable({ pageType, startTimeParam, endTimeParam }) {
       const newParams = { ...currentParams };
       newParams[startTimeParam] = searchFromDateValue;
       newParams[endTimeParam] = searchToDateValue;
-      if (pageType === HistoryPages.INVESTIGAITON) {
+      if (pageType === HistoryPages.INVESTIGATION) {
         newParams.analyzed_object_name = searchNameRequest;
       }
       setSearchParams(newParams);
@@ -81,7 +81,7 @@ export function HistoryTable({ pageType, startTimeParam, endTimeParam }) {
 
   let tableComponent;
   switch (pageType) {
-    case HistoryPages.INVESTIGAITON:
+    case HistoryPages.INVESTIGATION:
       tableComponent = (
         <InvestigationTable
           searchFromDateValue={searchFromDateValue}

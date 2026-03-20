@@ -11,6 +11,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model, login, logout, update_session_auth_hash
 from django.contrib.auth.hashers import check_password
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.shortcuts import redirect
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -197,21 +198,26 @@ class ChangePasswordView(APIView):
             # Return an error response if the old password doesn't match
             return Response({"error": "Invalid old password"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Set the new password for the user
-        user.set_password(new_password)
-        user.save()
+        # Wrap DB mutations in a transaction to ensure atomicity
+        with transaction.atomic():
+            # Set the new password for the user
+            user.set_password(new_password)
+            user.save()
 
-        # Invalidate all API tokens for this user
-        Token.objects.filter(user=user).delete()
+            # Invalidate all API tokens for this user
+            Token.objects.filter(user=user).delete()
 
-        # Update current session hash so the user isn't abruptly logged out
-        # (Only if an existing session is in use, to avoid unnecessary DB churn)
-        if (
-            hasattr(request, "_request")
-            and hasattr(request._request, "session")
-            and getattr(request._request.session, "session_key", None) is not None
-        ):
-            update_session_auth_hash(request, user)
+            # Update current session hash so the user isn't abruptly logged out
+            # (Only if an existing session is in use, to avoid unnecessary DB churn)
+            if (
+                hasattr(request, "_request")
+                and hasattr(request._request, "session")
+                and getattr(request._request.session, "session_key", None) is not None
+            ):
+                session = request._request.session
+                auth_user_id = session.get("_auth_user_id")
+                if auth_user_id is not None and str(auth_user_id) == str(user.pk):
+                    update_session_auth_hash(request, user)
 
         # Return a success response
         return Response({"message": "Password changed successfully"})

@@ -311,7 +311,7 @@ class TestUserAuth(CustomOAuthTestCase):
 
         # 5. Verify Client 2 is NO LONGER authenticated (other session invalidated by hash change)
         response = client2.get(protected_url)
-        self.assertNotEqual(200, response.status_code, msg="Other session should be invalidated")
+        self.assertIn(response.status_code, (401, 403), msg="Other session should be invalidated")
 
     def test_change_password_weak_password_400(self):
         self.client.force_authenticate(user=self.user)

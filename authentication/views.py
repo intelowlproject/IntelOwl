@@ -205,8 +205,12 @@ class ChangePasswordView(APIView):
         Token.objects.filter(user=user).delete()
 
         # Update current session hash so the user isn't abruptly logged out
-        # (Only if the request is using a session, to avoid unnecessary DB churn)
-        if hasattr(request, "_request") and hasattr(request._request, "session"):
+        # (Only if an existing session is in use, to avoid unnecessary DB churn)
+        if (
+            hasattr(request, "_request")
+            and hasattr(request._request, "session")
+            and getattr(request._request.session, "session_key", None) is not None
+        ):
             update_session_auth_hash(request, user)
 
         # Return a success response

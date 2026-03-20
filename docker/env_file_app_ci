@@ -10,6 +10,7 @@ DB_NAME=intel_owl_db
 # Config variables
 OLD_JOBS_RETENTION_DAYS=2
 INTELOWL_WEB_CLIENT_DOMAIN=localhost
+HTTP_TIMEOUT=90
 # Storage
 LOCAL_STORAGE=True
 

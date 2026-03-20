@@ -14,11 +14,11 @@ import { usePluginConfigurationStore } from "../stores/usePluginConfigurationSto
 function withAuth(WrappedComponent) {
   function AuthenticatedComponent(props) {
     // stores
-    const [isAuthenticated, fetchUserAccess] = useAuthStore(
-      React.useCallback(
-        (state) => [state.isAuthenticated(), state.service.fetchUserAccess],
-        [],
-      ),
+    const isAuthenticated = useAuthStore(
+      React.useCallback((state) => state.isAuthenticated(), []),
+    );
+    const fetchUserAccess = useAuthStore(
+      React.useCallback((state) => state.service.fetchUserAccess, []),
     );
 
     // check if the data about plugins have been downloaded or not.

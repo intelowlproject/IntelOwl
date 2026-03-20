@@ -37,7 +37,7 @@ class TestCuckooAnalysis(BaseFileAnalyzerTest):
 
         # Patch requests.Session to return our mocked session
         return patch(
-            "api_app.analyzers_manager.file_analyzers.cuckoo_scan.requests.Session",
+            "api_app.analyzers_manager.file_analyzers.cuckoo_scan.http_utils.Session",
             return_value=mock_session,
         )
 

@@ -39,7 +39,7 @@ class TestCapaInfoAnalyzer(BaseFileAnalyzerTest):
             patch.object(CapaInfo, "update", return_value=True),
             patch("subprocess.run", return_value=response_from_command),
             patch(
-                "api_app.analyzers_manager.file_analyzers.capa_info.requests.get",
+                "api_app.analyzers_manager.file_analyzers.capa_info.http_utils.get",
                 return_value=mock_requests_get,
             ),
             patch.object(CapaInfo, "_check_if_latest_version", return_value=True),

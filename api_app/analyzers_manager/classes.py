@@ -455,7 +455,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         basic health check: if instance is up or not (timeout - 10s)
         """
         try:
-            http_utils.head(self.url, timeout=settings.HTTP_TIMEOUT)
+            http_utils.head(self.url, timeout=10)
         except requests.exceptions.RequestException:
             health_status = False
         else:

@@ -374,7 +374,7 @@ class Plugin(metaclass=ABCMeta):
             try:
                 # momentarily set this to False to
                 # avoid fails for https services
-                response = http_utils.head(url, timeout=settings.HTTP_TIMEOUT, verify=False)
+                response = http_utils.head(url, timeout=10, verify=False)
                 # This may happen when even the HEAD request is protected by authentication
                 # We cannot create a generic health check that consider auth too
                 # because every analyzer has its own way to authenticate

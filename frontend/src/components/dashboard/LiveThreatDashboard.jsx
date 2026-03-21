@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Row, Col, Card, CardHeader, CardBody, Badge, ListGroup, ListGroupItem } from "reactstrap";
 import { JobStatusBarChart, JobTopPlaybookBarChart } from "./charts";
 import { WEBSOCKET_JOBS_URI } from "../../constants/apiURLs";
-import { StatusColors, TLPColors } from "../../constants/colorConst";
+import { StatusColors } from "../../constants/colorConst";
 import { useAuthStore } from "../../stores/useAuthStore";
-import { JobFinalStatuses, JobStatuses } from "../../constants/jobConst";
+import { JobFinalStatuses } from "../../constants/jobConst";
 import { TLPTag } from "../common/TLPTag";
-import { Link } from "react-router-dom";
 
-export const LiveThreatDashboard = ({ orgName }) => {
+export function LiveThreatDashboard({ orgName }) {
   const [activeJobsCount, setActiveJobsCount] = useState(0);
   const [liveFeed, setLiveFeed] = useState([]);
   const [activeJobIds, setActiveJobIds] = useState(new Set());
@@ -17,19 +17,19 @@ export const LiveThreatDashboard = ({ orgName }) => {
   );
 
   useEffect(() => {
-    let ws = null;
+    let wsClient = null;
 
     const connectWebSocket = () => {
-      let wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      let wsUrl = `${wsProtocol}//${window.location.host}/${WEBSOCKET_JOBS_URI}/all`;
+      const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsUrl = `${wsProtocol}//${window.location.host}/${WEBSOCKET_JOBS_URI}/all`;
 
-      ws = new WebSocket(wsUrl);
+      wsClient = new WebSocket(wsUrl);
 
-      ws.onopen = () => {
-        console.log("Connected to Live Threat WebSocket");
+      wsClient.onopen = () => {
+        // Connected to Live Threat WebSocket
       };
 
-      ws.onmessage = (event) => {
+      wsClient.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
           if (data && data.status) {
@@ -61,7 +61,7 @@ export const LiveThreatDashboard = ({ orgName }) => {
         }
       };
 
-      ws.onerror = (err) => {
+      wsClient.onerror = (err) => {
         console.error("WebSocket error:", err);
       };
     };
@@ -71,7 +71,7 @@ export const LiveThreatDashboard = ({ orgName }) => {
     }
 
     return () => {
-      if (ws) ws.close();
+      if (wsClient) wsClient.close();
     };
   }, [isAuthenticated]);
 
@@ -142,4 +142,4 @@ export const LiveThreatDashboard = ({ orgName }) => {
       </Row>
     </div>
   );
-};
+}

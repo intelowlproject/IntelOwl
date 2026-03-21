@@ -8,17 +8,17 @@ import {
 } from "@certego/certego-ui";
 
 import {
-  JobStatusBarChart,
   JobTypeBarChart,
   JobObsClassificationBarChart,
   JobFileMimetypeBarChart,
-  JobTopPlaybookBarChart,
   JobTopUserBarChart,
   JobTopTLPBarChart,
 } from "./charts";
 
 import { useGuideContext } from "../../contexts/GuideContext";
 import { useOrganizationStore } from "../../stores/useOrganizationStore";
+
+import { LiveThreatDashboard } from "./LiveThreatDashboard";
 
 const typeRow = [
   ["JobTypeBarChart", "Job: Type", JobTypeBarChart],
@@ -30,7 +30,6 @@ const typeRow = [
   ["JobFileMimetypeBarChart", "Job: File Mimetype", JobFileMimetypeBarChart],
 ];
 const usageRow = [
-  ["JobTopPlaybookBarChart", "Job: Top 5 Playbooks", JobTopPlaybookBarChart],
   ["JobTopUserBarChart", "Job: Top 5 Users", JobTopUserBarChart],
   ["JobTopTLPBarChart", "Job: Top 5 TLP", JobTopTLPBarChart],
 ];
@@ -111,20 +110,8 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <Row className="d-flex flex-wrap flex-lg-nowrap">
-        <Col key="JobStatusBarChart" md={12}>
-          <SmallInfoCard
-            id="JobStatusBarChart"
-            header="Job: Status"
-            body={
-              <div className="pt-2">
-                <JobStatusBarChart orgName={orgState} />
-              </div>
-            }
-            style={{ minHeight: 360 }}
-          />
-        </Col>
-      </Row>
+      <LiveThreatDashboard orgName={orgState} />
+
       <Row className="d-flex flex-wrap flex-lg-nowrap mt-4">
         {typeRow.map(([id, header, Component]) => (
           <Col key={id} md={12} lg={4}>

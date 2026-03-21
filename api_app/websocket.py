@@ -103,6 +103,16 @@ class JobConsumer(JsonWebsocketConsumer):
         user: User = self.scope["user"]
         job_id = self.scope["url_route"]["kwargs"]["job_id"]
         logger.info(f"user: {user} requested the analysis for the job {job_id}")
+
+        if job_id == "all":
+            self.accept()
+            async_to_sync(self.channel_layer.group_add)(
+                "jobs_all",
+                self.channel_name,
+            )
+            logger.debug(f"user: {user} added to the group: jobs_all")
+            return
+
         try:
             job = Job.objects.get(id=job_id)
         except Job.DoesNotExist:
@@ -131,20 +141,28 @@ class JobConsumer(JsonWebsocketConsumer):
         """
         user: User = self.scope["user"]
         job_id = self.scope["url_route"]["kwargs"]["job_id"]
-        try:
-            job = Job.objects.get(id=job_id)
-        except Job.DoesNotExist:
-            logger.warning(
-                f"close ws by the user: {user} for a non-existing job "
-                "This happens in case user tried to open a conn to a non existing job"
-            )
-            subscribed_group = ""
-        else:
-            subscribed_group = self.JobChannelGroups(job).get_group_for_user(user)
+
+        if job_id == "all":
+            subscribed_group = "jobs_all"
             async_to_sync(self.channel_layer.group_discard)(
                 subscribed_group,
                 self.channel_name,
             )
+        else:
+            try:
+                job = Job.objects.get(id=job_id)
+            except Job.DoesNotExist:
+                logger.warning(
+                    f"close ws by the user: {user} for a non-existing job "
+                    "This happens in case user tried to open a conn to a non existing job"
+                )
+                subscribed_group = ""
+            else:
+                subscribed_group = self.JobChannelGroups(job).get_group_for_user(user)
+                async_to_sync(self.channel_layer.group_discard)(
+                    subscribed_group,
+                    self.channel_name,
+                )
         logger.debug(
             f"user: {user} disconnected from the group: {subscribed_group}. Close code: {close_code}"
         )
@@ -181,7 +199,7 @@ class JobConsumer(JsonWebsocketConsumer):
         """
         # send data
         groups = cls.JobChannelGroups(job)
-        groups_list = groups.group_list
+        groups_list = groups.group_list + ["jobs_all"]
         channel_layer = get_channel_layer()
         logger.debug(f"send data for the job: {job.id} to the groups: {groups_list}")
         for group in groups_list:

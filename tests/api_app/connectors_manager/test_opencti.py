@@ -20,17 +20,20 @@ PARTIAL_STATE_SCENARIOS = (
     {
         "name": "failure_after_observable",
         "fail_mock": "label",
-        "expected": ["observable=obs-1", "labels=[]"],
+        "expected_exception": "label failure",
+        "expected_ids": ["observable=obs-1", "labels=[]"],
     },
     {
         "name": "failure_after_report",
         "fail_mock": "external_ref",
-        "expected": ["observable=obs-1", "report=report-1", "label-1"],
+        "expected_exception": "external ref failure",
+        "expected_ids": ["observable=obs-1", "report=report-1", "label-1"],
     },
     {
         "name": "failure_after_external_ref",
         "fail_mock": "link",
-        "expected": ["external_reference=ext-ref-1", "report=report-1", "observable=obs-1"],
+        "expected_exception": "link failure",
+        "expected_ids": ["external_reference=ext-ref-1", "report=report-1", "observable=obs-1"],
     },
 )
 
@@ -42,6 +45,10 @@ def _partial_state_errors(report):
 
 def _apply_happy_path_defaults(mocks):
     """Wire up all pycti mocks to return valid dicts so the connector can proceed."""
+    # subTest reuses patched objects, so reset them before each scenario.
+    for key in ("identity", "marking", "observable", "label", "report", "external_ref", "stix_domain"):
+        mocks[key].reset_mock()
+
     mocks["identity"].return_value.create.return_value = {"id": "org-1"}
     mocks["marking"].return_value.create.return_value = {"id": "mark-1"}
     mocks["observable"].return_value.create.return_value = {"id": "obs-1"}
@@ -54,15 +61,18 @@ def _apply_happy_path_defaults(mocks):
     mocks["report"].return_value.add_stix_object_or_stix_relationship.return_value = None
 
 
-def _inject_failure(mocks, fail_mock):
-    """Override one mock to raise, simulating a mid-flow API failure."""
-    targets = {
-        "label": (mocks["label"].return_value.create, "side_effect"),
-        "external_ref": (mocks["external_ref"].return_value.create, "side_effect"),
-        "link": (mocks["stix_domain"].return_value.add_external_reference, "side_effect"),
+def _inject_failure_for_scenario(mocks, fail_mock):
+    """Inject exactly one failure point while keeping the rest on the happy path."""
+    failure_targets = {
+        "label": (mocks["label"].return_value.create, "label failure"),
+        "external_ref": (mocks["external_ref"].return_value.create, "external ref failure"),
+        "link": (mocks["stix_domain"].return_value.add_external_reference, "link failure"),
     }
-    mock_obj, attr = targets[fail_mock]
-    setattr(mock_obj, attr, Exception(f"{fail_mock} failure"))
+    try:
+        target, message = failure_targets[fail_mock]
+    except KeyError as exc:
+        raise AssertionError(f"Unsupported fail_mock scenario: {fail_mock}") from exc
+    target.side_effect = Exception(message)
 
 
 class OpenCTIConnectorTestCase(CustomTestCase):
@@ -186,7 +196,7 @@ class OpenCTIConnectorTestCase(CustomTestCase):
         for scenario in PARTIAL_STATE_SCENARIOS:
             with self.subTest(scenario=scenario["name"]):
                 _apply_happy_path_defaults(mocks)
-                _inject_failure(mocks, scenario["fail_mock"])
+                _inject_failure_for_scenario(mocks, scenario["fail_mock"])
 
                 job, config, pcs = self._setup_job_with_opencti(add_tag=True)
                 try:
@@ -202,9 +212,17 @@ class OpenCTIConnectorTestCase(CustomTestCase):
                     partial_msgs = _partial_state_errors(report)
                     self.assertEqual(len(partial_msgs), 1)
                     self.assertEqual(len(report.errors), 2)
+                    self.assertIn(
+                        "OpenCTI partial state detected after exception:",
+                        partial_msgs[0],
+                    )
+
+                    non_partial_errors = [str(e) for e in report.errors if "Created IDs:" not in str(e)]
+                    self.assertTrue(non_partial_errors)
+                    self.assertIn(scenario["expected_exception"], non_partial_errors[0])
 
                     err_text = " ".join(map(str, report.errors))
-                    for substr in scenario["expected"]:
+                    for substr in scenario["expected_ids"]:
                         self.assertIn(substr, err_text)
                     self._assert_no_traceback_in_errors(report)
                 finally:

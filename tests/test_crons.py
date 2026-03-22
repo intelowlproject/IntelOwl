@@ -14,7 +14,6 @@ from api_app.analyzers_manager.observable_analyzers import (
     ja4_db,
     maxmind,
     phishing_army,
-
     tor,
     tweetfeeds,
 )

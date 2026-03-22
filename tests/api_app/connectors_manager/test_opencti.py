@@ -49,6 +49,11 @@ def _apply_happy_path_defaults(mocks):
     for key in ("identity", "marking", "observable", "label", "report", "external_ref", "stix_domain"):
         mocks[key].reset_mock()
 
+    # reset_mock() does not clear nested child side_effect values, so clear them explicitly.
+    mocks["label"].return_value.create.side_effect = None
+    mocks["external_ref"].return_value.create.side_effect = None
+    mocks["stix_domain"].return_value.add_external_reference.side_effect = None
+
     mocks["identity"].return_value.create.return_value = {"id": "org-1"}
     mocks["marking"].return_value.create.return_value = {"id": "mark-1"}
     mocks["observable"].return_value.create.return_value = {"id": "obs-1"}

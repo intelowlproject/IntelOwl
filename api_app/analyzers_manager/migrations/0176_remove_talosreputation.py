@@ -21,6 +21,7 @@ def reverse_migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
+        ("api_app", "0071_delete_last_elastic_report"),
         ("analyzers_manager", "0175_analyzer_config_cleanbrowsing_malicious_detector"),
     ]
 

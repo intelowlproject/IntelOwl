@@ -5,8 +5,14 @@ from django.db import migrations
 
 
 def migrate(apps, schema_editor):
-    AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
-    AnalyzerConfig.objects.filter(name="TalosReputation").delete()
+    PythonModule = apps.get_model("api_app", "PythonModule")
+    pm = PythonModule.objects.filter(
+        module="talos.Talos",
+        base_path="api_app.analyzers_manager.observable_analyzers",
+    ).first()
+    if pm:
+        pm.analyzerconfigs.all().delete()
+        pm.delete()
 
 
 def reverse_migrate(apps, schema_editor):

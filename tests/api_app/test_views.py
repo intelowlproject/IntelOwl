@@ -240,6 +240,28 @@ class JobViewSetTests(CustomViewSetTestCase):
         self.assertIn("total_pages", content, msg=msg)
         self.assertIn("results", content, msg=msg)
 
+    def test_list_query_counts(self):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        self.client.force_authenticate(user=self.superuser)
+        # Check query counts to prevent N+1 regressions.
+        # The N+1 bug caused 100+ queries for 10 jobs; asserting < 35
+        # is a safe threshold that accounts for constant-time overhead
+        # queries (auth, permissions, pagination, etc.)
+        with CaptureQueriesContext(connection) as queries:
+            response = self.client.get(self.jobs_list_uri)
+            self.assertEqual(200, response.status_code)
+
+        self.assertLess(
+            len(queries),
+            35,
+            msg=(
+                f"Too many queries ({len(queries)})! "
+                "Expected <35 to prevent N+1 regressions."
+            ),
+        )
+
     def test_list_filter_observable(self):
         response = self.client.get(self.jobs_list_uri, {"is_sample": False})
         self.assertEqual(response.status_code, 200)

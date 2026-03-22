@@ -329,7 +329,6 @@ class IPReputationServices(Visualizer):
             )
             return tor_report
 
-
     def run(self) -> List[Dict]:
         first_level_elements = []
         second_level_elements = []
@@ -364,7 +363,6 @@ class IPReputationServices(Visualizer):
         third_level_elements.append(self._firehol())
 
         third_level_elements.append(self._tor())
-
 
         page = self.Page(name="Reputation")
         page.add_level(

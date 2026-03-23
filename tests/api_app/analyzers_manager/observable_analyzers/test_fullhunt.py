@@ -19,9 +19,7 @@ def test_fullhunt_analyzer(requests_mock):
 def test_fullhunt_not_found(requests_mock):
     """Test handling of 404 Not Found response."""
     analyzer = FullHunt(config={"api_key": "test_key"})
-    requests_mock.get(
-        "https://fullhunt.io/api/v1/domain/fake.com/details", status_code=404
-    )
+    requests_mock.get("https://fullhunt.io/api/v1/domain/fake.com/details", status_code=404)
     result = analyzer.run("fake.com")
     assert result["message"] == "No data found for this domain."
     assert result["status"] == "empty"

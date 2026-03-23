@@ -27,9 +27,7 @@ class TestQuarkEngine(BaseFileAnalyzerTest):
                             "method": "sendTextMessage",
                         }
                     ],
-                    "register": [
-                        {"class": "Lcom/example/MainActivity", "method": "onCreate"}
-                    ],
+                    "register": [{"class": "Lcom/example/MainActivity", "method": "onCreate"}],
                 }
             ],
             "total_score": 50,

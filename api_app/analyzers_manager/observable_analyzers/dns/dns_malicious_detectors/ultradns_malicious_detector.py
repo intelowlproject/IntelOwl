@@ -43,11 +43,11 @@ class UltraDNSMaliciousDetector(classes.ObservableAnalyzer):
                     is_malicious = True
                     break
 
+        except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer):
+            is_malicious = False
         except dns.exception.Timeout:
-            raise AnalyzerRunException(
-                "Connection to UltraDNS failed - both servers timed out"
-            )
+            raise AnalyzerRunException("Connection to UltraDNS failed - both servers timed out")
         except Exception as e:
-            raise Exception(f"DNS query failed: {e}")
+            raise AnalyzerRunException(f"DNS query failed: {e}")
 
         return malicious_detector_response(self.observable_name, is_malicious)

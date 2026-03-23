@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from "react";
-import { UncontrolledTooltip } from "reactstrap";
+import { UncontrolledTooltip, Button } from "reactstrap";
+import { FaTrash } from "react-icons/fa";
 
 import {
   DateHoverable,
@@ -15,10 +16,14 @@ import { LastEvaluationComponent } from "../../common/engineBadges";
 import {
   JobResultSections,
   AnalyzableHistoryTypes,
+  HistoryPages,
   datetimeFormatStr,
 } from "../../../constants/miscConst";
 
-export const analyzablesHistoryTableColumns = [
+export const getAnalyzablesHistoryTableColumns = (
+  currentUser,
+  handleDelete,
+) => [
   {
     Header: "ID",
     id: "pk",
@@ -34,10 +39,14 @@ export const analyzablesHistoryTableColumns = [
               href={
                 original.type === AnalyzableHistoryTypes.JOB
                   ? `/jobs/${id}/${JobResultSections.VISUALIZER}`
-                  : `/history/${original.type.replaceAll(
-                      "_",
-                      "-",
-                    )}s?event_date__gte=${encodeURIComponent(
+                  : `/history/${
+                      HistoryPages[
+                        Object.keys(AnalyzableHistoryTypes).find(
+                          (key) =>
+                            AnalyzableHistoryTypes[key] === original.type,
+                        )
+                      ]
+                    }?event_date__gte=${encodeURIComponent(
                       format(fromDate, datetimeFormatStr),
                     )}&event_date__lte=${encodeURIComponent(
                       format(new Date(), datetimeFormatStr),
@@ -153,14 +162,45 @@ export const analyzablesHistoryTableColumns = [
     },
     disableSortBy: true,
     Cell: ({ value, row }) =>
-      value && (
+      value ? (
         <TableCell
           id={`table-cell-description__${row.id}`}
           isCopyToClipboard
           isTruncate
           value={value}
         />
-      ),
+      ) : null,
     minWidth: 200,
+  },
+  {
+    Header: "Actions",
+    id: "actions",
+    accessor: (row) => row,
+    disableSortBy: true,
+    Cell: ({ value: row }) => (
+      <div className="d-flex justify-content-center align-items-center h-100">
+        {row.user === currentUser && (
+          <>
+            <Button
+              id={`analyzable-history-delete__${row.type}__${row.id}`}
+              color="link"
+              className="p-0 text-danger"
+              onClick={() => handleDelete(row)}
+              aria-label="Delete"
+              title="Delete"
+            >
+              <FaTrash />
+            </Button>
+            <UncontrolledTooltip
+              placement="top"
+              target={`analyzable-history-delete__${row.type}__${row.id}`}
+            >
+              Delete
+            </UncontrolledTooltip>
+          </>
+        )}
+      </div>
+    ),
+    maxWidth: 60,
   },
 ];

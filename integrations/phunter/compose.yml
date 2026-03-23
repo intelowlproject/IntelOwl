@@ -1,6 +1,6 @@
 services:
   phunter:
-    image: intelowlproject/intelowl_phunter:${REACT_APP_INTELOWL_VERSION}
+    image: intelowlproject/phunter:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_phunter
     restart: unless-stopped
     expose:

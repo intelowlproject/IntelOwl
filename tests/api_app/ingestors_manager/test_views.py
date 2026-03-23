@@ -1,41 +1,36 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from api_app.decorators import classproperty
 from api_app.ingestors_manager.models import IngestorConfig
 from certego_saas.apps.organization.organization import Membership, Organization
 from tests import CustomViewSetTestCase
 from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
 
 
-class IngestorConfigViewSetTestCase(
-    AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase
-):
+class IngestorConfigViewSetTestCase(AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase):
     URL = "/api/ingestor"
 
-    @classmethod
-    @property
+    @classproperty
     def model_class(cls) -> IngestorConfig:
         return IngestorConfig
 
     def test_organization_disable(self):
         org, _ = Organization.objects.get_or_create(name="test")
-        Membership.objects.get_or_create(
-            user=self.user, organization=org, is_owner=False
-        )
+        Membership.objects.get_or_create(user=self.user, organization=org, is_owner=False)
         response = self.client.post(f"{self.URL}/GreedyBear/organization")
         self.assertEqual(response.status_code, 404)
 
     def test_organization_enable(self):
         org, _ = Organization.objects.get_or_create(name="test")
-        Membership.objects.get_or_create(
-            user=self.user, organization=org, is_owner=False
-        )
+        Membership.objects.get_or_create(user=self.user, organization=org, is_owner=False)
         response = self.client.delete(f"{self.URL}/GreedyBear/organization")
         self.assertEqual(response.status_code, 404)
 
     def test_get(self):
         # 1 - existing ingestor
         self.client.force_authenticate(user=self.user)
+        ingestor = self.model_class.objects.get(name="GreedyBear")
         response = self.client.get(f"{self.URL}/GreedyBear")
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(
@@ -48,11 +43,11 @@ class IngestorConfigViewSetTestCase(
                 "disabled": True,
                 "health_check_status": True,
                 "health_check_task": None,
-                "id": 4,
+                "id": ingestor.id,
                 "maximum_jobs": 50,
                 "name": "GreedyBear",
                 "playbooks_choice": ["Popular_IP_Reputation_Services"],
-                "python_module": 216,
+                "python_module": ingestor.python_module.id,
                 "routing_key": "ingestor",
                 "schedule": {
                     "day_of_month": "*",
@@ -68,9 +63,7 @@ class IngestorConfigViewSetTestCase(
         response = self.client.get(f"{self.URL}/non_existing")
         self.assertEqual(response.status_code, 404, response.content)
         result = response.json()
-        self.assertEqual(
-            result, {"detail": "No IngestorConfig matches the given query."}
-        )
+        self.assertEqual(result, {"detail": "No IngestorConfig matches the given query."})
 
     def test_get_config(self):
         # 1 - existing ingestor
@@ -81,111 +74,99 @@ class IngestorConfigViewSetTestCase(
         # auto filled by the model and hard to mock
         for user_config in result["user_config"]:
             user_config.pop("updated_at", "")
-        self.assertEqual(
-            result,
+            # pop dynamic IDs to avoid mismatch
+            user_config.pop("id", None)
+            user_config.pop("parameter", None)
+
+        expected_user_config = [
             {
-                "organization_config": [],
-                "user_config": [
-                    {
-                        "analyzer_config": None,
-                        "attribute": "url",
-                        "connector_config": None,
-                        "description": "API endpoint",
-                        "exist": True,
-                        "for_organization": False,
-                        "id": 356,
-                        "ingestor_config": "GreedyBear",
-                        "is_secret": False,
-                        "organization": None,
-                        "owner": None,
-                        "parameter": 541,
-                        "pivot_config": None,
-                        "required": False,
-                        "type": "str",
-                        "value": "https://greedybear.honeynet.org",
-                        "visualizer_config": None,
-                    },
-                    {
-                        "analyzer_config": None,
-                        "attribute": "limit",
-                        "connector_config": None,
-                        "description": "Max number of results.",
-                        "exist": True,
-                        "for_organization": False,
-                        "id": 357,
-                        "ingestor_config": "GreedyBear",
-                        "is_secret": False,
-                        "organization": None,
-                        "owner": None,
-                        "parameter": 542,
-                        "pivot_config": None,
-                        "required": False,
-                        "type": "int",
-                        "value": 50,
-                        "visualizer_config": None,
-                    },
-                    {
-                        "analyzer_config": None,
-                        "attribute": "feed_type",
-                        "connector_config": None,
-                        "description": "The available feed types are log4j, cowrie, "
-                        "and all.",
-                        "exist": True,
-                        "for_organization": False,
-                        "id": 358,
-                        "ingestor_config": "GreedyBear",
-                        "is_secret": False,
-                        "organization": None,
-                        "owner": None,
-                        "parameter": 543,
-                        "pivot_config": None,
-                        "required": False,
-                        "type": "str",
-                        "value": "all",
-                        "visualizer_config": None,
-                    },
-                    {
-                        "analyzer_config": None,
-                        "attribute": "attack_type",
-                        "connector_config": None,
-                        "description": "The available attack_type are scanner, "
-                        "payload_request, and all.",
-                        "exist": True,
-                        "for_organization": False,
-                        "id": 359,
-                        "ingestor_config": "GreedyBear",
-                        "is_secret": False,
-                        "organization": None,
-                        "owner": None,
-                        "parameter": 544,
-                        "pivot_config": None,
-                        "required": False,
-                        "type": "str",
-                        "value": "all",
-                        "visualizer_config": None,
-                    },
-                    {
-                        "analyzer_config": None,
-                        "attribute": "age",
-                        "connector_config": None,
-                        "description": "The available age are recent and persistent.",
-                        "exist": True,
-                        "for_organization": False,
-                        "id": 360,
-                        "ingestor_config": "GreedyBear",
-                        "is_secret": False,
-                        "organization": None,
-                        "owner": None,
-                        "parameter": 545,
-                        "pivot_config": None,
-                        "required": False,
-                        "type": "str",
-                        "value": "recent",
-                        "visualizer_config": None,
-                    },
-                ],
+                "analyzer_config": None,
+                "attribute": "url",
+                "connector_config": None,
+                "description": "API endpoint",
+                "exist": True,
+                "for_organization": False,
+                "ingestor_config": "GreedyBear",
+                "is_secret": False,
+                "organization": None,
+                "owner": None,
+                "pivot_config": None,
+                "required": False,
+                "type": "str",
+                "value": "https://greedybear.honeynet.org",
+                "visualizer_config": None,
             },
-        )
+            {
+                "analyzer_config": None,
+                "attribute": "limit",
+                "connector_config": None,
+                "description": "Max number of results.",
+                "exist": True,
+                "for_organization": False,
+                "ingestor_config": "GreedyBear",
+                "is_secret": False,
+                "organization": None,
+                "owner": None,
+                "pivot_config": None,
+                "required": False,
+                "type": "int",
+                "value": 50,
+                "visualizer_config": None,
+            },
+            {
+                "analyzer_config": None,
+                "attribute": "feed_type",
+                "connector_config": None,
+                "description": "The available feed types are log4j, cowrie, and all.",
+                "exist": True,
+                "for_organization": False,
+                "ingestor_config": "GreedyBear",
+                "is_secret": False,
+                "organization": None,
+                "owner": None,
+                "pivot_config": None,
+                "required": False,
+                "type": "str",
+                "value": "all",
+                "visualizer_config": None,
+            },
+            {
+                "analyzer_config": None,
+                "attribute": "attack_type",
+                "connector_config": None,
+                "description": "The available attack_type are scanner, payload_request, and all.",
+                "exist": True,
+                "for_organization": False,
+                "ingestor_config": "GreedyBear",
+                "is_secret": False,
+                "organization": None,
+                "owner": None,
+                "pivot_config": None,
+                "required": False,
+                "type": "str",
+                "value": "all",
+                "visualizer_config": None,
+            },
+            {
+                "analyzer_config": None,
+                "attribute": "age",
+                "connector_config": None,
+                "description": "The available age are recent and persistent.",
+                "exist": True,
+                "for_organization": False,
+                "ingestor_config": "GreedyBear",
+                "is_secret": False,
+                "organization": None,
+                "owner": None,
+                "pivot_config": None,
+                "required": False,
+                "type": "str",
+                "value": "recent",
+                "visualizer_config": None,
+            },
+        ]
+        self.assertEqual(result["organization_config"], [])
+        self.assertEqual(result["user_config"], expected_user_config)
         # 2 - missing ingestor
         response = self.client.get(f"{self.URL}/missing_ingestor/plugin_config")
         self.assertEqual(response.status_code, 404, response.content)

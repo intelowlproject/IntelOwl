@@ -22,9 +22,7 @@ class CriminalIpScanTestCase(BaseAnalyzerTest):
             },
         }
         get_status_response = {"data": {"scan_percentage": 100}}
-        get_report_response = {
-            "data": {"verdict": "suspicious", "details": {"score": 85}}
-        }
+        get_report_response = {"data": {"verdict": "suspicious", "details": {"score": 85}}}
 
         return [
             patch(

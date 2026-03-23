@@ -26,11 +26,11 @@ export const datetimeFormatStr = "yyyy-MM-dd'T'HH:mm:ss";
 export const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 export const HistoryPages = Object.freeze({
-  JOBS: "jobs",
-  INVESTIGAITONS: "investigations",
-  USER_EVENTS: "user-events",
-  USER_DOMAIN_WILDCARD_EVENTS: "user-domain-wildcard-events",
-  USER_IP_WILDCARD_EVENTS: "user-ip-wildcard-events",
+  JOB: "jobs",
+  INVESTIGAITON: "investigations",
+  USER_EVENT: "user-events",
+  USER_DOMAIN_WILDCARD_EVENT: "user-domain-wildcard-events",
+  USER_IP_WILDCARD_EVENT: "user-ip-wildcard-events",
 });
 
 export const Classifications = Object.freeze({

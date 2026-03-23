@@ -1,6 +1,7 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
 import logging
 import re
-import shlex
 import subprocess
 
 from flask import Flask, jsonify, request
@@ -69,10 +70,8 @@ def analyze():
 
     try:
         logger.info("Executing Phunter CLI tool")
-        command_str = f"python3 phunter.py -t {phone_number}"
-        command = shlex.split(command_str)
         result = subprocess.run(
-            command,
+            ["/usr/bin/python3", "phunter.py", "-t", str(phone_number)],
             capture_output=True,
             text=True,
             check=True,

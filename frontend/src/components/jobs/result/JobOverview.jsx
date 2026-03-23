@@ -244,6 +244,7 @@ export function JobOverview({
   // state
   const navigate = useNavigate();
   const location = useLocation();
+  const searchSuffix = location.search || "";
   const [UIElements, setUIElements] = useState([]);
   console.debug(
     `location pathname: ${
@@ -281,7 +282,7 @@ export function JobOverview({
         navigate(
           `/jobs/${job.id}/${JobResultSections.VISUALIZER}/${encodeURIComponent(
             visualizerSections[0],
-          )}`,
+          )}${searchSuffix}`,
           { replace: true },
         );
       } else if (
@@ -297,14 +298,14 @@ export function JobOverview({
         navigate(
           `/jobs/${job.id}/${JobResultSections.VISUALIZER}/${encodeURIComponent(
             visualizerSections[0],
-          )}`,
+          )}${searchSuffix}`,
           { replace: true },
         );
       } else if (subSection === NO_VISUALIZER_UI_ELEMENT_CODE) {
         console.debug("[AUTO REDIRECT] navigate to raw data - analyzer");
         // in case there is no visualizer redirect to raw data
         navigate(
-          `/jobs/${job.id}/${JobResultSections.RAW}/${rawElements[0].name}`,
+          `/jobs/${job.id}/${JobResultSections.RAW}/${rawElements[0].name}${searchSuffix}`,
           { replace: true },
         );
       }
@@ -383,26 +384,29 @@ export function JobOverview({
         <Container fluid>
           {/* bar with job id and utilities buttons */}
           <Row
-            className="g-0 d-flex-between-end align-items-center"
+            className="g-0 d-flex-between-end align-items-center mb-2"
             id="utilitiesRow"
           >
             <Col md={4}>
-              <h2 className="d-flex align-items-center">
+              <h2 className="d-flex align-items-center mb-0">
                 <span className="me-2 text-secondary">Job #{job.id}</span>
                 <StatusIcon status={job.status} className="small" />
               </h2>
             </Col>
-            <Col md={8} className="d-flex justify-content-end mt-1">
-              <JobActionsBar job={job} />
+            <Col
+              md={8}
+              className="d-flex justify-content-end align-items-center"
+            >
+              <JobActionsBar
+                job={job}
+                relatedInvestigationNumber={relatedInvestigationNumber}
+              />
             </Col>
           </Row>
           {/* job metadata card */}
           <Row className="g-0">
             <Col>
-              <JobInfoCard
-                job={job}
-                relatedInvestigationNumber={relatedInvestigationNumber}
-              />
+              <JobInfoCard job={job} />
             </Col>
           </Row>
           {isRunningJob && (
@@ -419,7 +423,7 @@ export function JobOverview({
               <ButtonGroup className="ms-2">
                 <Button
                   outline={!isSelectedUI}
-                  color={isSelectedUI ? "primary" : "tertiary"}
+                  color={isSelectedUI ? "secondary" : "tertiary"}
                   onClick={() =>
                     navigate(
                       `/jobs/${job.id}/${
@@ -434,7 +438,7 @@ export function JobOverview({
                 </Button>
                 <Button
                   outline={isSelectedUI}
-                  color={!isSelectedUI ? "primary" : "tertiary"}
+                  color={!isSelectedUI ? "secondary" : "tertiary"}
                   onClick={() =>
                     navigate(
                       `/jobs/${job.id}/${JobResultSections.RAW}/${rawElements[0].name}`,

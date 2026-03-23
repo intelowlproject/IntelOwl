@@ -91,24 +91,17 @@ class DNSdb(classes.ObservableAnalyzer):
 
         if self.api_version not in _supported_api_version:
             raise AnalyzerRunException(
-                f"{self.api_version} not supported version,"
-                f"available versions: {_supported_api_version}"
+                f"{self.api_version} not supported version,available versions: {_supported_api_version}"
             )
 
         if str(self.rrtype) not in _supported_rrtype:
-            raise AnalyzerRunException(
-                f"{self.rrtype} is not a valid rrtype: {_supported_rrtype}"
-            )
+            raise AnalyzerRunException(f"{self.rrtype} is not a valid rrtype: {_supported_rrtype}")
 
         if self.query_type and self.query_type not in _query_types:
-            raise AnalyzerRunException(
-                f"{self.query_type} not in available query types"
-            )
+            raise AnalyzerRunException(f"{self.query_type} not in available query types")
 
         if not isinstance(self.limit, int):
-            raise AnalyzerRunException(
-                f"limit: {self.limit} ({type(self.limit)}) must be a integer"
-            )
+            raise AnalyzerRunException(f"limit: {self.limit} ({type(self.limit)}) must be a integer")
 
     @staticmethod
     def convert_date_type(date_string):
@@ -124,10 +117,7 @@ class DNSdb(classes.ObservableAnalyzer):
         except ValueError:
             error_message = f"{date_string} cannot be converted to a valid datetime"
         except TypeError:
-            error_message = (
-                f"{type(date_string)} is not a string and cannot be "
-                f"converted to a datetime "
-            )
+            error_message = f"{type(date_string)} is not a string and cannot be converted to a datetime "
         except Exception:
             error_message = (
                 f"{date_string} with type: {type(date_string)},"
@@ -148,8 +138,7 @@ class DNSdb(classes.ObservableAnalyzer):
             header_application_type = "application/x-ndjson"
         else:
             raise AnalyzerRunException(
-                f"{self.api_version} not in supported versions list: "
-                f"{_supported_api_version}"
+                f"{self.api_version} not in supported versions list: {_supported_api_version}"
             )
 
         return {"Accept": header_application_type, "X-API-Key": self._api_key_name}
@@ -161,8 +150,7 @@ class DNSdb(classes.ObservableAnalyzer):
             return "/dnsdb/v2"
         else:
             raise AnalyzerRunException(
-                f"{api_version} not in supported versions list: "
-                f"{_supported_api_version}"
+                f"{api_version} not in supported versions list: {_supported_api_version}"
             )
 
     def _create_url(self):
@@ -202,14 +190,9 @@ class DNSdb(classes.ObservableAnalyzer):
             else:
                 raise AnalyzerRunException(f"{self.query_type} not supported")
         else:
-            raise AnalyzerRunException(
-                f"{self.observable_classification} not supported"
-            )
+            raise AnalyzerRunException(f"{self.observable_classification} not supported")
 
-        return (
-            f"https://{self.server}{api_version}/lookup/{endpoint}"
-            f"/{observable_to_check}/{self.rrtype}"
-        )
+        return f"https://{self.server}{api_version}/lookup/{endpoint}/{observable_to_check}/{self.rrtype}"
 
     def _create_params(self):
         """Generate API request params.
@@ -269,9 +252,7 @@ class DNSdb(classes.ObservableAnalyzer):
                         json_extracted_results["data"].append(e)
                     # elements are ordered, the begin set the flag to false,
                     # but if the last element is succeeded and set it to true
-                    json_extracted_results["query_successful"] = new_element.get(
-                        "cond", ""
-                    )
+                    json_extracted_results["query_successful"] = new_element.get("cond", "")
         elif self.api_version == 1:
             json_extracted_results["query_successful"] = "not supported for v1"
             if not self.no_results_found:
@@ -282,16 +263,15 @@ class DNSdb(classes.ObservableAnalyzer):
                             json_extracted_results["data"].append(json.loads(item))
         else:
             raise AnalyzerRunException(
-                f"{self.api_version} not supported version, "
-                f"available versions: {_supported_api_version}"
+                f"{self.api_version} not supported version, available versions: {_supported_api_version}"
             )
 
         return json_extracted_results
 
     def _get_health_check_url(self, user: User = None) -> Optional[str]:
-        params = self._config.parameters.annotate_configured(
+        params = self._config.parameters.annotate_configured(self._config, user).annotate_value_for_user(
             self._config, user
-        ).annotate_value_for_user(self._config, user)
+        )
         server = params.get(name="server")
         api_version = self._get_version_endpoint(params.get(name="api_version").value)
 

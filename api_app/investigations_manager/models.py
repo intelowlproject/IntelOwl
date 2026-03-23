@@ -43,11 +43,7 @@ class Investigation(OwnershipAbstractModel, ListCachable):
         indexes = [models.Index(fields=["start_time"])]
 
     def __str__(self):
-        return (
-            f"{self.name}:"
-            f" jobs {', '.join([str(job.pk) for job in self.jobs.all()])} "
-            f"-> {self.status}"
-        )
+        return f"{self.name}: jobs {', '.join([str(job.pk) for job in self.jobs.all()])} -> {self.status}"
 
     def user_can_edit(self, user: User) -> bool:
         if (
@@ -64,7 +60,6 @@ class Investigation(OwnershipAbstractModel, ListCachable):
         return False
 
     def set_correct_status(self, save: bool = True):
-
         logger.info(f"Setting status for investigation {self.pk}")
         # if I have some jobs
         if self.jobs.exists():
@@ -72,17 +67,15 @@ class Investigation(OwnershipAbstractModel, ListCachable):
             for job in self.jobs.all():
                 job: Job
                 jobs = job.get_tree(job)
-                running_jobs_list = jobs.exclude(
-                    status__in=Job.STATUSES.final_statuses()
-                ).values_list("pk", flat=True)
+                running_jobs_list = jobs.exclude(status__in=Job.STATUSES.final_statuses()).values_list(
+                    "pk", flat=True
+                )
                 running_jobs_count = len(running_jobs_list)
                 logger.info(
                     f"{running_jobs_count} out of {self.jobs.count()} jobs are still running for investigation {self.pk}"
                 )
                 if running_jobs_count > 0:
-                    logger.info(
-                        f"Jobs {running_jobs_list} are still running for investigation {self.pk}"
-                    )
+                    logger.info(f"Jobs {running_jobs_list} are still running for investigation {self.pk}")
                     self.status = self.STATUSES.RUNNING.value
                     self.end_time = None
                     break
@@ -90,11 +83,7 @@ class Investigation(OwnershipAbstractModel, ListCachable):
             else:
                 logger.info(f"Setting investigation {self.pk} to concluded")
                 self.status = self.STATUSES.CONCLUDED.value
-                self.end_time = (
-                    self.jobs.order_by("-finished_analysis_time")
-                    .first()
-                    .finished_analysis_time
-                )
+                self.end_time = self.jobs.order_by("-finished_analysis_time").first().finished_analysis_time
         else:
             logger.info(f"Setting investigation {self.pk} to created")
             self.status = self.STATUSES.CREATED.value
@@ -108,14 +97,9 @@ class Investigation(OwnershipAbstractModel, ListCachable):
     ) -> models.QuerySet:
         from django.db.models import Q
 
-        jobs = Job.objects.filter(
-            Q(finished_analysis_time__gte=now() - datetime.timedelta(days=30))
-        )
+        jobs = Job.objects.filter(Q(finished_analysis_time__gte=now() - datetime.timedelta(days=30)))
         analyzable = Analyzable.objects.filter(name=analyzed_object_name).first()
-        if (
-            not analyzable
-            or analyzable.classification == analyzable.CLASSIFICATIONS.DOMAIN.value
-        ):
+        if not analyzable or analyzable.classification == analyzable.CLASSIFICATIONS.DOMAIN.value:
             jobs = jobs.filter(
                 Q(analyzable__name=analyzed_object_name)
                 | Q(analyzable__name__endswith=f".{analyzed_object_name}")
@@ -133,17 +117,11 @@ class Investigation(OwnershipAbstractModel, ListCachable):
     @property
     def tlp(self) -> TLP:
         return (
-            max(
-                TLP[tlp_string]
-                for tlp_string in self.jobs.values_list("tlp", flat=True)
-            )
+            max(TLP[tlp_string] for tlp_string in self.jobs.values_list("tlp", flat=True))
             if self.jobs.exists()
             else TLP.CLEAR.value
         )
 
     @property
     def total_jobs(self) -> int:
-        return (
-            sum(job.get_descendant_count() for job in self.jobs.all())
-            + self.jobs.count()
-        )
+        return sum(job.get_descendant_count() for job in self.jobs.all()) + self.jobs.count()

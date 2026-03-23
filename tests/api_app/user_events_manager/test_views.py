@@ -127,9 +127,7 @@ class TestUserAnalyzableEventViewSet(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 201, response.content)
         # create an evaluation for the same user, but for a different analyzable
         self.client.force_authenticate(user=self.user)
-        an3 = Analyzable.objects.filter(
-            name="test3.com", classification=Classification.DOMAIN
-        )
+        an3 = Analyzable.objects.filter(name="test3.com", classification=Classification.DOMAIN)
         self.assertFalse(an3.exists())
         response = self.client.post(
             self.URL,
@@ -168,14 +166,10 @@ class TestUserAnalyzableEventViewSet(CustomViewSetTestCase):
             "data_model_content": {"evaluation": "trusted", "reliability": 10},
         }
         self.client.force_authenticate(self.user)
-        response = self.client.patch(
-            f"{self.URL}/{self.res.pk}", payload, format="json"
-        )
+        response = self.client.patch(f"{self.URL}/{self.res.pk}", payload, format="json")
         self.assertEqual(response.status_code, 200, response.json())
         self.client.force_authenticate(self.guest)
-        response = self.client.patch(
-            f"{self.URL}/{self.res.pk}", payload, format="json"
-        )
+        response = self.client.patch(f"{self.URL}/{self.res.pk}", payload, format="json")
         self.assertEqual(response.status_code, 404, response.json())
 
     def test_delete(self):
@@ -301,9 +295,7 @@ class TestUserIPWildCardEventViewSet(CustomViewSetTestCase):
 
     def test_validate(self):
         self.client.force_authenticate(self.user)
-        response = self.client.put(
-            f"{self.URL}/validate", {"network": "1.2.3.0/24"}, format="json"
-        )
+        response = self.client.put(f"{self.URL}/validate", {"network": "1.2.3.0/24"}, format="json")
         self.assertEqual(response.status_code, 200, response.json())
         result = response.json()
         self.assertEqual(len(result), 1)
@@ -313,9 +305,7 @@ class TestUserIPWildCardEventViewSet(CustomViewSetTestCase):
             name="1.2.4.4",
             classification=Classification.IP,
         )
-        response = self.client.put(
-            f"{self.URL}/validate", {"network": "1.2.3.0/24"}, format="json"
-        )
+        response = self.client.put(f"{self.URL}/validate", {"network": "1.2.3.0/24"}, format="json")
         self.assertEqual(response.status_code, 200, response.json())
         result = response.json()
         self.assertEqual(len(result), 1)
@@ -383,14 +373,10 @@ class TestUserDomainWildCardEventViewSet(CustomViewSetTestCase):
 
     def test_validate(self):
         self.client.force_authenticate(self.user)
-        response = self.client.put(
-            f"{self.URL}/validate", {"query": "*\.test.com"}, format="json"
-        )
+        response = self.client.put(f"{self.URL}/validate", {"query": "*\.test.com"}, format="json")
         self.assertEqual(response.status_code, 400, response.json())
 
-        response = self.client.put(
-            f"{self.URL}/validate", {"query": ".*\.?test.com"}, format="json"
-        )
+        response = self.client.put(f"{self.URL}/validate", {"query": ".*\.?test.com"}, format="json")
         self.assertEqual(response.status_code, 200, response.json())
         result = response.json()
         self.assertEqual(len(result), 1)

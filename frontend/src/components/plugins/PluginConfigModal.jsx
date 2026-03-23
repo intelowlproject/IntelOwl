@@ -19,7 +19,7 @@ export function PluginConfigModal({
 }) {
   console.debug("PluginConfigModal rendered!");
 
-  const isEditing = Object.keys(pluginConfig).length > 0;
+  let isEditing = Object.keys(pluginConfig).length > 0;
   const isBasicAnalyzer =
     pluginType === PluginsTypes.ANALYZER &&
     pluginConfig.python_module ===
@@ -84,6 +84,10 @@ export function PluginConfigModal({
     );
   } else if (pluginType === PluginsTypes.PLAYBOOK) {
     title = "Edit playbook config";
+    // save as a playbook button -> create new playbook
+    if (isEditing && !Object.keys(pluginConfig).includes("name")) {
+      isEditing = false;
+    }
     // case F-G: create/edit playbook
     component = (
       <PlaybookConfigForm

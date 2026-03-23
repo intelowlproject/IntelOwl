@@ -5,8 +5,19 @@ import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { AnalyzableOverview } from "../../../../src/components/analyzables/result/AnalyzableOverview";
+import { addToast } from "@certego/certego-ui";
+import axios from "axios";
+import { useAuthStore } from "../../../../src/stores/useAuthStore";
 
 jest.mock("axios-hooks");
+jest.mock("axios");
+jest.mock("../../../../src/stores/useAuthStore", () => ({
+  useAuthStore: jest.fn(),
+}));
+jest.mock("@certego/certego-ui", () => ({
+  ...jest.requireActual("@certego/certego-ui"),
+  addToast: jest.fn(),
+}));
 
 describe("test AnalyzableOverview", () => {
   const jobDate = new Date();
@@ -14,75 +25,83 @@ describe("test AnalyzableOverview", () => {
   const userReportDate = new Date();
   userReportDate.setDate(new Date().getDate() - 2);
 
-  useAxios.mockReturnValue([
-    {
-      data: {
-        jobs: [
-          {
-            playbook: "Dns",
-            id: 13,
-            user: "admin",
-            date: jobDate,
-            data_model: {
-              id: 14,
-              analyzers_report: [],
-              ietf_report: [],
-              evaluation: "trusted",
-              reliability: 7,
-              kill_chain_phase: null,
-              external_references: ["test references"],
-              related_threats: ["my comment"],
-              tags: ["scanner"],
-              malware_family: null,
-              additional_info: {},
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Default mocks for existing tests
+    useAuthStore.mockReturnValue([{ username: "admin" }]);
+    axios.delete = jest.fn();
+
+    // Default useAxios mock for original tests
+    useAxios.mockReturnValue([
+      {
+        data: {
+          jobs: [
+            {
+              playbook: "Dns",
+              id: 13,
+              user: "admin",
               date: jobDate,
-              rank: null,
-              resolutions: [],
+              data_model: {
+                id: 14,
+                analyzers_report: [],
+                ietf_report: [],
+                evaluation: "trusted",
+                reliability: 7,
+                kill_chain_phase: null,
+                external_references: ["test references"],
+                related_threats: ["my comment"],
+                tags: ["scanner"],
+                malware_family: null,
+                additional_info: {},
+                date: jobDate,
+                rank: null,
+                resolutions: [],
+              },
             },
-          },
-        ],
-        user_events: [
-          {
-            id: 6,
-            user: "admin",
-            date: userReportDate,
-            next_decay: "2025-06-03T10:36:04.762720Z",
-            decay_times: 1,
-            analyzable: {
-              id: 1,
-              name: "google.com",
-              // ...
-            },
-            data_model: {
-              id: 15,
-              analyzers_report: [],
-              ietf_report: [],
-              evaluation: "malicious",
-              reliability: 6,
-              kill_chain_phase: null,
-              external_references: [],
-              related_threats: [],
-              tags: null,
-              malware_family: null,
-              additional_info: {},
+          ],
+          user_events: [
+            {
+              id: 6,
+              user: "admin",
               date: userReportDate,
-              rank: null,
-              resolutions: [],
+              next_decay: "2025-06-03T10:36:04.762720Z",
+              decay_times: 1,
+              analyzable: {
+                id: 1,
+                name: "google.com",
+              },
+              data_model: {
+                id: 15,
+                analyzers_report: [],
+                ietf_report: [],
+                evaluation: "malicious",
+                reliability: 6,
+                kill_chain_phase: null,
+                external_references: [],
+                related_threats: [],
+                tags: null,
+                malware_family: null,
+                additional_info: {},
+                date: userReportDate,
+                rank: null,
+                resolutions: [],
+              },
+              reason: "my reason",
+              data_model_object_id: 15,
+              decay_progression: 0,
+              decay_timedelta_days: 3,
+              data_model_content_type: 44,
             },
-            reason: "my reason",
-            data_model_object_id: 15,
-            decay_progression: 0,
-            decay_timedelta_days: 3,
-            data_model_content_type: 44,
-          },
-        ],
-        user_domain_wildcard_events: [],
-        user_ip_wildcard_events: [],
+          ],
+          user_domain_wildcard_events: [],
+          user_ip_wildcard_events: [],
+        },
+        loading: false,
+        error: null,
       },
-      loading: false,
-      error: null,
-    },
-  ]);
+      jest.fn(),
+    ]);
+  });
 
   test("AnalyzableOverview components", async () => {
     const user = userEvent.setup();
@@ -126,13 +145,16 @@ describe("test AnalyzableOverview", () => {
       screen.getByRole("heading", { name: "Artifact #1" }),
     ).toBeInTheDocument();
     // buttons
-    const rescanButton = screen.getByRole("link", { name: "Rescan" });
-    expect(rescanButton).toBeInTheDocument();
-    expect(rescanButton.href).toContain("/scan?observable=google.com");
     const createEvaluationButton = screen.getByRole("button", {
       name: /Your evaluation/i,
     });
     expect(createEvaluationButton).toBeInTheDocument();
+    const actionMenuButton = container.querySelector("#artifactActions");
+    expect(actionMenuButton).toBeInTheDocument();
+    await user.click(actionMenuButton);
+    const rescanButton = screen.getByRole("menuitem", { name: "Rescan" });
+    expect(rescanButton).toBeInTheDocument();
+    expect(rescanButton.href).toContain("/scan?observable=google.com");
     // name
     expect(
       screen.getByRole("heading", { name: "google.com" }),
@@ -253,13 +275,16 @@ describe("test AnalyzableOverview", () => {
       screen.getByRole("heading", { name: "Artifact #1" }),
     ).toBeInTheDocument();
     // buttons
-    const rescanButton = screen.getByRole("link", { name: "Rescan" });
-    expect(rescanButton).toBeInTheDocument();
-    expect(rescanButton.href).toContain("/scan?observable=1.1.1.1:443");
     const createEvaluationButton = screen.getByRole("button", {
       name: /Your evaluation/i,
     });
     expect(createEvaluationButton).toBeInTheDocument();
+    const actionMenuButton = container.querySelector("#artifactActions");
+    expect(actionMenuButton).toBeInTheDocument();
+    await user.click(actionMenuButton);
+    const rescanButton = screen.getByRole("menuitem", { name: "Rescan" });
+    expect(rescanButton).toBeInTheDocument();
+    expect(rescanButton.href).toContain("/scan?observable=1.1.1.1:443");
     // name
     expect(
       screen.getByRole("heading", { name: "1.1.1.1:443" }),
@@ -346,5 +371,200 @@ describe("test AnalyzableOverview", () => {
       screen.getByRole("cell", { name: "user evaluation" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("cell", { name: "MALICIOUS" })).toBeInTheDocument();
+  });
+
+  test("AnalyzableOverview delete history entry", async () => {
+    const user = userEvent.setup();
+    const refetch = jest.fn();
+    useAxios.mockReturnValue([
+      {
+        data: {
+          jobs: [
+            {
+              id: 13,
+              user: "admin",
+              date: jobDate,
+              data_model: { evaluation: "trusted" },
+            },
+          ],
+          user_events: [],
+          user_domain_wildcard_events: [],
+          user_ip_wildcard_events: [],
+        },
+        loading: false,
+        error: null,
+      },
+      refetch,
+    ]);
+    useAuthStore.mockReturnValue([{ username: "admin" }]);
+
+    const confirmSpy = jest.spyOn(window, "confirm").mockReturnValue(true);
+    axios.delete.mockResolvedValue({});
+
+    const { container } = render(
+      <BrowserRouter>
+        <AnalyzableOverview analyzable={{ id: 1, discovery_date: jobDate }} />
+      </BrowserRouter>,
+    );
+    const deleteButton = container.querySelector(
+      "#analyzable-history-delete__job__13",
+    );
+    expect(deleteButton).toBeInTheDocument();
+
+    await user.click(deleteButton);
+
+    expect(window.confirm).toHaveBeenCalledWith(
+      "Are you sure you want to delete this entry?",
+    );
+    expect(axios.delete).toHaveBeenCalledWith("/api/jobs/13");
+    expect(addToast).toHaveBeenCalledWith(
+      "Entry deleted successfully",
+      null,
+      "success",
+    );
+    expect(refetch).toHaveBeenCalled();
+    confirmSpy.mockRestore();
+  });
+
+  test("AnalyzableOverview delete user event", async () => {
+    const user = userEvent.setup();
+    const refetch = jest.fn();
+    useAxios.mockReturnValue([
+      {
+        data: {
+          jobs: [],
+          user_events: [
+            {
+              id: 6,
+              user: "admin",
+              date: jobDate,
+              data_model: { evaluation: "malicious" },
+            },
+          ],
+          user_domain_wildcard_events: [],
+          user_ip_wildcard_events: [],
+        },
+        loading: false,
+        error: null,
+      },
+      refetch,
+    ]);
+    useAuthStore.mockReturnValue([{ username: "admin" }]);
+
+    const confirmSpy = jest.spyOn(window, "confirm").mockReturnValue(true);
+    axios.delete.mockResolvedValue({});
+
+    const { container } = render(
+      <BrowserRouter>
+        <AnalyzableOverview analyzable={{ id: 1, discovery_date: jobDate }} />
+      </BrowserRouter>,
+    );
+    const deleteButton = container.querySelector(
+      "#analyzable-history-delete__user_evaluation__6",
+    );
+    expect(deleteButton).toBeInTheDocument();
+
+    await user.click(deleteButton);
+
+    expect(axios.delete).toHaveBeenCalledWith("/api/user_event/analyzable/6");
+    expect(addToast).toHaveBeenCalledWith(
+      "Entry deleted successfully",
+      null,
+      "success",
+    );
+    expect(refetch).toHaveBeenCalled();
+    confirmSpy.mockRestore();
+  });
+
+  test("AnalyzableOverview delete IP wildcard event", async () => {
+    const user = userEvent.setup();
+    const refetch = jest.fn();
+    useAxios.mockReturnValue([
+      {
+        data: {
+          jobs: [],
+          user_events: [],
+          user_domain_wildcard_events: [],
+          user_ip_wildcard_events: [
+            {
+              id: 7,
+              user: "admin",
+              date: jobDate,
+              data_model: { evaluation: "malicious" },
+            },
+          ],
+        },
+        loading: false,
+        error: null,
+      },
+      refetch,
+    ]);
+    useAuthStore.mockReturnValue([{ username: "admin" }]);
+
+    const confirmSpy = jest.spyOn(window, "confirm").mockReturnValue(true);
+    axios.delete.mockResolvedValue({});
+
+    const { container } = render(
+      <BrowserRouter>
+        <AnalyzableOverview analyzable={{ id: 1, discovery_date: jobDate }} />
+      </BrowserRouter>,
+    );
+    const deleteButton = container.querySelector(
+      "#analyzable-history-delete__user_ip_wildcard_evaluation__7",
+    );
+    expect(deleteButton).toBeInTheDocument();
+
+    await user.click(deleteButton);
+
+    expect(axios.delete).toHaveBeenCalledWith("/api/user_event/ip_wildcard/7");
+    expect(refetch).toHaveBeenCalled();
+    confirmSpy.mockRestore();
+  });
+
+  test("AnalyzableOverview delete domain wildcard event", async () => {
+    const user = userEvent.setup();
+    const refetch = jest.fn();
+    useAxios.mockReturnValue([
+      {
+        data: {
+          jobs: [],
+          user_events: [],
+          user_domain_wildcard_events: [
+            {
+              id: 8,
+              user: "admin",
+              date: jobDate,
+              data_model: { evaluation: "malicious" },
+            },
+          ],
+          user_ip_wildcard_events: [],
+        },
+        loading: false,
+        error: null,
+      },
+      refetch,
+    ]);
+    useAuthStore.mockReturnValue([{ username: "admin" }]);
+
+    const confirmSpy = jest.spyOn(window, "confirm").mockReturnValue(true);
+    axios.delete.mockResolvedValue({});
+
+    const { container } = render(
+      <BrowserRouter>
+        <AnalyzableOverview analyzable={{ id: 1, discovery_date: jobDate }} />
+      </BrowserRouter>,
+    );
+    const deleteButton = container.querySelector(
+      "#analyzable-history-delete__user_domain_wildcard_evaluation__8",
+    );
+    expect(deleteButton).toBeInTheDocument();
+
+    await user.click(deleteButton);
+
+    expect(axios.delete).toHaveBeenCalledWith(
+      "/api/user_event/domain_wildcard/8",
+    );
+    expect(refetch).toHaveBeenCalled();
+    confirmSpy.mockRestore();
   });
 });

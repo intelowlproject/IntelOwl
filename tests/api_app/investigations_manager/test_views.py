@@ -24,16 +24,10 @@ class InvestigationViewSetTestCase(APITestCase):
         super().setUp()
         self.first_user, _ = User.objects.get_or_create(username="first_inv_user")
         self.second_user, _ = User.objects.get_or_create(username="second_inv_user")
-        self.another_org_user, _ = User.objects.get_or_create(
-            username="another_inv_user"
-        )
+        self.another_org_user, _ = User.objects.get_or_create(username="another_inv_user")
         self.org, _ = Organization.objects.get_or_create(name="inv organization")
-        Membership.objects.get_or_create(
-            user=self.first_user, organization=self.org, is_owner=True
-        )
-        Membership.objects.get_or_create(
-            user=self.second_user, organization=self.org, is_owner=False
-        )
+        Membership.objects.get_or_create(user=self.first_user, organization=self.org, is_owner=True)
+        Membership.objects.get_or_create(user=self.second_user, organization=self.org, is_owner=False)
         self.first_investigation = Investigation.objects.create(
             owner=self.first_user, name="first investigation"
         )
@@ -54,9 +48,7 @@ class InvestigationViewSetTestCase(APITestCase):
             analyzable=self.an,
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
             investigation=self.third_investigation,
-            finished_analysis_time=datetime.datetime(
-                2025, 1, 1, tzinfo=datetime.timezone.utc
-            ),
+            finished_analysis_time=datetime.datetime(2025, 1, 1, tzinfo=datetime.timezone.utc),
         )
         self.client.force_authenticate(self.first_user)
 
@@ -83,9 +75,7 @@ class InvestigationViewSetTestCase(APITestCase):
             ["first investigation", "third investigation"],
         )
         # test filter for analyzed name
-        filtered_investigation_response = self.client.get(
-            self.URL, data={"analyzed_object_name": "test.com"}
-        )
+        filtered_investigation_response = self.client.get(self.URL, data={"analyzed_object_name": "test.com"})
         self.assertEqual(filtered_investigation_response.status_code, 200)
         filtered_investigation_response_data = filtered_investigation_response.json()
         self.assertEqual(filtered_investigation_response_data["count"], 1)
@@ -107,9 +97,7 @@ class InvestigationViewSetTestCase(APITestCase):
         self.assertEqual(response.status_code, 403, response.json())
 
     def test_update(self, *args, **kwargs):
-        response = self.client.patch(
-            f"{self.URL}/{self.first_investigation.pk}", data={"name": "newName"}
-        )
+        response = self.client.patch(f"{self.URL}/{self.first_investigation.pk}", data={"name": "newName"})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["name"], "newName")
         self.client.force_authenticate(self.second_user)
@@ -129,52 +117,36 @@ class InvestigationViewSetTestCase(APITestCase):
     def test_create(self, *args, **kwargs):
         response = self.client.post(f"{self.URL}", data={})
         self.assertEqual(response.status_code, 400)
-        response = self.client.post(
-            f"{self.URL}", data={"name": "Test2", "description": "test desc"}
-        )
+        response = self.client.post(f"{self.URL}", data={"name": "Test2", "description": "test desc"})
         self.assertEqual(response.status_code, 201)
         an = Investigation.objects.get(pk=response.json()["id"])
         self.assertEqual(an.name, "Test2")
         self.assertEqual(an.description, "test desc")
 
     def test_add_job(self, *args, **kwargs):
-        response = self.client.post(
-            f"{self.URL}/{self.first_investigation.pk}/add_job", data={}
-        )
+        response = self.client.post(f"{self.URL}/{self.first_investigation.pk}/add_job", data={})
         self.assertEqual(response.status_code, 400)
         result = response.json()
-        self.assertEqual(
-            result["errors"]["detail"], "You should set the `job` argument in the data"
-        )
+        self.assertEqual(result["errors"]["detail"], "You should set the `job` argument in the data")
         job = Job.objects.create(
             user=self.second_user,
             analyzable=self.an,
         )
-        response = self.client.post(
-            f"{self.URL}/{self.first_investigation.pk}/add_job", data={"job": job.pk}
-        )
+        response = self.client.post(f"{self.URL}/{self.first_investigation.pk}/add_job", data={"job": job.pk})
         self.assertEqual(response.status_code, 403)
         job.user = self.first_user
         job.save()
-        response = self.client.post(
-            f"{self.URL}/{self.first_investigation.pk}/add_job", data={"job": job.pk}
-        )
+        response = self.client.post(f"{self.URL}/{self.first_investigation.pk}/add_job", data={"job": job.pk})
         self.assertEqual(response.status_code, 200)
-        response = self.client.post(
-            f"{self.URL}/{self.first_investigation.pk}/add_job", data={"job": job.pk}
-        )
+        response = self.client.post(f"{self.URL}/{self.first_investigation.pk}/add_job", data={"job": job.pk})
         self.assertEqual(response.status_code, 400)
         job.delete()
 
     def test_remove_job(self, *args, **kwargs):
-        response = self.client.post(
-            f"{self.URL}/{self.first_investigation.pk}/remove_job", data={}
-        )
+        response = self.client.post(f"{self.URL}/{self.first_investigation.pk}/remove_job", data={})
         self.assertEqual(response.status_code, 400)
         result = response.json()
-        self.assertEqual(
-            result["errors"]["detail"], "You should set the `job` argument in the data"
-        )
+        self.assertEqual(result["errors"]["detail"], "You should set the `job` argument in the data")
         job = Job.objects.create(
             user=self.second_user,
             analyzable=self.an,

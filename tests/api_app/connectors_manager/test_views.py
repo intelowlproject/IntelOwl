@@ -5,18 +5,16 @@ from typing import Type
 from api_app.analyzables_manager.models import Analyzable
 from api_app.choices import Classification
 from api_app.connectors_manager.models import ConnectorConfig, ConnectorReport
+from api_app.decorators import classproperty
 from api_app.models import Job, PluginConfig
 from tests import CustomViewSetTestCase, PluginActionViewsetTestCase
 from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
 
 
-class ConnectorConfigViewSetTestCase(
-    AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase
-):
+class ConnectorConfigViewSetTestCase(AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase):
     URL = "/api/connector"
 
-    @classmethod
-    @property
+    @classproperty
     def model_class(cls) -> Type[ConnectorConfig]:
         return ConnectorConfig
 
@@ -51,6 +49,7 @@ class ConnectorConfigViewSetTestCase(
     def test_get(self):
         # 1 - existing connector
         self.client.force_authenticate(user=self.user)
+        connector = self.model_class.objects.get(name="Slack")
         response = self.client.get(f"{self.URL}/Slack")
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(
@@ -59,10 +58,10 @@ class ConnectorConfigViewSetTestCase(
                 "config": {"queue": "default", "soft_time_limit": 60},
                 "description": "Send the analysis link to a slack channel",
                 "disabled": True,
-                "id": 3,
+                "id": connector.id,
                 "maximum_tlp": "RED",
                 "name": "Slack",
-                "python_module": 3,
+                "python_module": connector.python_module.id,
                 "run_on_failure": True,
             },
         )
@@ -70,9 +69,7 @@ class ConnectorConfigViewSetTestCase(
         response = self.client.get(f"{self.URL}/non_existing")
         self.assertEqual(response.status_code, 404, response.content)
         result = response.json()
-        self.assertEqual(
-            result, {"detail": "No ConnectorConfig matches the given query."}
-        )
+        self.assertEqual(result, {"detail": "No ConnectorConfig matches the given query."})
 
     def test_get_config(self):
         # 1 - existing connector
@@ -83,53 +80,48 @@ class ConnectorConfigViewSetTestCase(
         # auto filled by the model and hard to mock
         for user_config in result["user_config"]:
             user_config.pop("updated_at", "")
-        self.assertEqual(
-            result,
+            user_config.pop("id", None)
+            user_config.pop("parameter", None)
+
+        expected_user_config = [
             {
-                "organization_config": [],
-                "user_config": [
-                    {
-                        "analyzer_config": None,
-                        "attribute": "slack_username",
-                        "connector_config": "Slack",
-                        "description": "Slack username to tag on the message",
-                        "exist": True,
-                        "for_organization": False,
-                        "id": 8,
-                        "ingestor_config": None,
-                        "is_secret": False,
-                        "organization": None,
-                        "owner": None,
-                        "parameter": 12,
-                        "pivot_config": None,
-                        "required": False,
-                        "type": "str",
-                        "value": "",
-                        "visualizer_config": None,
-                    },
-                    {
-                        "attribute": "token",
-                        "description": "Slack token for authentication",
-                        "exist": False,
-                        "is_secret": True,
-                        "parameter": 13,
-                        "required": True,
-                        "type": "str",
-                        "value": None,
-                    },
-                    {
-                        "attribute": "channel",
-                        "description": "Slack channel to send messages",
-                        "exist": False,
-                        "is_secret": True,
-                        "parameter": 14,
-                        "required": True,
-                        "type": "str",
-                        "value": None,
-                    },
-                ],
+                "analyzer_config": None,
+                "attribute": "slack_username",
+                "connector_config": "Slack",
+                "description": "Slack username to tag on the message",
+                "exist": True,
+                "for_organization": False,
+                "ingestor_config": None,
+                "is_secret": False,
+                "organization": None,
+                "owner": None,
+                "pivot_config": None,
+                "required": False,
+                "type": "str",
+                "value": "",
+                "visualizer_config": None,
             },
-        )
+            {
+                "attribute": "token",
+                "description": "Slack token for authentication",
+                "exist": False,
+                "is_secret": True,
+                "required": True,
+                "type": "str",
+                "value": None,
+            },
+            {
+                "attribute": "channel",
+                "description": "Slack channel to send messages",
+                "exist": False,
+                "is_secret": True,
+                "required": True,
+                "type": "str",
+                "value": None,
+            },
+        ]
+        self.assertEqual(result["organization_config"], [])
+        self.assertEqual(result["user_config"], expected_user_config)
         # 2 - missing connector
         response = self.client.get(f"{self.URL}/missing_connector/plugin_config")
         self.assertEqual(response.status_code, 404, response.content)
@@ -158,9 +150,7 @@ class ConnectorActionViewSetTests(CustomViewSetTestCase, PluginActionViewsetTest
             classification=Classification.IP,
         )
 
-        _job = Job.objects.create(
-            user=user, status=Job.STATUSES.REPORTED_WITHOUT_FAILS, analyzable=an1
-        )
+        _job = Job.objects.create(user=user, status=Job.STATUSES.REPORTED_WITHOUT_FAILS, analyzable=an1)
         _job.connectors_to_execute.set([self.config])
         _report, _ = ConnectorReport.objects.get_or_create(
             **{

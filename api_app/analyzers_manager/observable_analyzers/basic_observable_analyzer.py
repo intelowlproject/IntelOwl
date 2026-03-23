@@ -82,9 +82,7 @@ class BasicObservableAnalyzer(ObservableAnalyzer):
                 )
             else:
                 request_method = getattr(requests, self.http_method)
-                response = request_method(
-                    self.url, headers=self.headers, json=self.params, verify=verify
-                )
+                response = request_method(self.url, headers=self.headers, json=self.params, verify=verify)
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

@@ -20,9 +20,7 @@ class IPReputationServices(Visualizer):
     @visualizable_error_handler_with_params("VirusTotal")
     def _vt3(self):
         try:
-            analyzer_report = self.get_analyzer_reports().get(
-                config__name="VirusTotal_v3_Get_Observable"
-            )
+            analyzer_report = self.get_analyzer_reports().get(config__name="VirusTotal_v3_Get_Observable")
         except AnalyzerReport.DoesNotExist:
             logger.warning("VirusTotal_v3_Get_Observable report does not exist")
         else:
@@ -46,16 +44,12 @@ class IPReputationServices(Visualizer):
     @visualizable_error_handler_with_params("Greynoise")
     def _greynoise(self):
         try:
-            analyzer_report = self.get_analyzer_reports().get(
-                config__name="GreyNoiseCommunity"
-            )
+            analyzer_report = self.get_analyzer_reports().get(config__name="GreyNoiseCommunity")
         except AnalyzerReport.DoesNotExist:
             logger.warning("GreynoiseCommunity report does not exist")
         else:
             message = analyzer_report.report.get("message", None)
-            disabled = (
-                analyzer_report.status != ReportStatus.SUCCESS or message != "Success"
-            )
+            disabled = analyzer_report.status != ReportStatus.SUCCESS or message != "Success"
             classification = analyzer_report.report.get("classification", "")
             if classification == "benign":
                 icon = VisualizableIcon.LIKE
@@ -95,11 +89,7 @@ class IPReputationServices(Visualizer):
                     icon=VisualizableIcon.URLHAUS,
                 ),
                 self.Base(
-                    value=(
-                        ""
-                        if disabled
-                        else f'found {analyzer_report.report.get("urlhaus_status", "")}'
-                    )
+                    value=("" if disabled else f"found {analyzer_report.report.get('urlhaus_status', '')}")
                 ),
                 disable=disabled,
             )
@@ -121,9 +111,7 @@ class IPReputationServices(Visualizer):
             if data and isinstance(data, list):
                 malware_printable = data[0].get("malware_printable", "")
             threatfox_report = self.Title(
-                self.Base(
-                    value="ThreatFox", link=analyzer_report.report.get("link", "")
-                ),
+                self.Base(value="ThreatFox", link=analyzer_report.report.get("link", "")),
                 self.Base(value="" if disabled else f"found {malware_printable}"),
                 disable=disabled,
             )
@@ -132,19 +120,13 @@ class IPReputationServices(Visualizer):
     @visualizable_error_handler_with_params("InQuest")
     def _inquest_repdb(self):
         try:
-            analyzer_report = self.get_analyzer_reports().get(
-                config__name="InQuest_REPdb"
-            )
+            analyzer_report = self.get_analyzer_reports().get(config__name="InQuest_REPdb")
         except AnalyzerReport.DoesNotExist:
             logger.warning("InQuest_REPdb report does not exist")
         else:
             success = analyzer_report.report.get("success", False)
             data = analyzer_report.report.get("data", [])
-            disabled = (
-                analyzer_report.status != ReportStatus.SUCCESS
-                or not success
-                or not data
-            )
+            disabled = analyzer_report.status != ReportStatus.SUCCESS or not success or not data
             inquest_report = self.Title(
                 self.Base(
                     value="InQuest",
@@ -167,9 +149,7 @@ class IPReputationServices(Visualizer):
             data = analyzer_report.report.get("data", [])
             isp = data.get("isp", "")
             usage = data.get("usageType", "")
-            disabled = analyzer_report.status != ReportStatus.SUCCESS or (
-                not isp and not usage
-            )
+            disabled = analyzer_report.status != ReportStatus.SUCCESS or (not isp and not usage)
             abuse_report = self.Title(
                 self.Base(
                     value="AbuseIPDB Meta",
@@ -184,10 +164,7 @@ class IPReputationServices(Visualizer):
             for c in data.get("reports", []):
                 categories_extracted.extend(c.get("categories_human_readable", []))
             categories_extracted = list(set(categories_extracted))
-            disabled = (
-                analyzer_report.status != ReportStatus.SUCCESS
-                or not categories_extracted
-            )
+            disabled = analyzer_report.status != ReportStatus.SUCCESS or not categories_extracted
             abuse_categories_report = self.VList(
                 name=self.Base(
                     value="AbuseIPDB Categories",
@@ -238,9 +215,7 @@ class IPReputationServices(Visualizer):
             )
             return gb_report
 
-    @visualizable_error_handler_with_params(
-        "Crowdsec Classifications", "Crowdsec Behaviors"
-    )
+    @visualizable_error_handler_with_params("Crowdsec Classifications", "Crowdsec Behaviors")
     def _crowdsec(self):
         try:
             analyzer_report = self.get_analyzer_reports().get(config__name="Crowdsec")
@@ -260,9 +235,7 @@ class IPReputationServices(Visualizer):
                     color=VisualizableColor.INFO,
                     disable=disabled,
                 ),
-                value=[
-                    self.Base(c.get("label", ""), disable=disabled) for c in all_class
-                ],
+                value=[self.Base(c.get("label", ""), disable=disabled) for c in all_class],
                 start_open=True,
                 max_elements_number=5,
                 report=analyzer_report,
@@ -279,9 +252,7 @@ class IPReputationServices(Visualizer):
                     color=VisualizableColor.DANGER,
                     disable=disabled,
                 ),
-                value=[
-                    self.Base(b.get("label", ""), disable=disabled) for b in behaviors
-                ],
+                value=[self.Base(b.get("label", ""), disable=disabled) for b in behaviors],
                 start_open=True,
                 max_elements_number=5,
                 report=analyzer_report,
@@ -325,9 +296,7 @@ class IPReputationServices(Visualizer):
     @visualizable_error_handler_with_params("FireHol")
     def _firehol(self):
         try:
-            analyzer_report = self.get_analyzer_reports().get(
-                config__name="FireHol_IPList"
-            )
+            analyzer_report = self.get_analyzer_reports().get(config__name="FireHol_IPList")
         except AnalyzerReport.DoesNotExist:
             logger.warning("FireHol_IPList report does not exist")
         else:
@@ -335,13 +304,9 @@ class IPReputationServices(Visualizer):
             for report, found in analyzer_report.report.items():
                 if found:
                     found_in_lists.append(report)
-            disabled = (
-                analyzer_report.status != ReportStatus.SUCCESS or not found_in_lists
-            )
+            disabled = analyzer_report.status != ReportStatus.SUCCESS or not found_in_lists
             otx_report = self.VList(
-                name=self.Base(
-                    value="FireHol", icon=VisualizableIcon.FIRE, disable=disabled
-                ),
+                name=self.Base(value="FireHol", icon=VisualizableIcon.FIRE, disable=disabled),
                 value=[self.Base(f, disable=disabled) for f in found_in_lists],
                 start_open=True,
                 max_elements_number=5,
@@ -367,9 +332,7 @@ class IPReputationServices(Visualizer):
     @visualizable_error_handler_with_params("Talos Reputation")
     def _talos(self):
         try:
-            analyzer_report = self.get_analyzer_reports().get(
-                config__name="TalosReputation"
-            )
+            analyzer_report = self.get_analyzer_reports().get(config__name="TalosReputation")
         except AnalyzerReport.DoesNotExist:
             logger.warning("TalosReputation report does not exist")
         else:

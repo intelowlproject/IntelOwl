@@ -12,7 +12,6 @@ from api_app.user_events_manager.models import UserAnalyzableEvent, UserEvent
 
 
 class UserEventFilterSet(filters.FilterSet):
-
     username = filters.CharFilter(lookup_expr="iexact", field_name="user__username")
     next_decay = filters.DateRangeFilter()
     id = filters.CharFilter(method="filter_for_id")
@@ -35,9 +34,7 @@ class UserEventFilterSet(filters.FilterSet):
 
 
 class UserAnalyzableEventFilterSet(UserEventFilterSet):
-    analyzable_name = filters.CharFilter(
-        field_name="analyzable__name", lookup_expr="icontains"
-    )
+    analyzable_name = filters.CharFilter(field_name="analyzable__name", lookup_expr="icontains")
     event_date__gte = filters.CharFilter(method="filter_for_event_date")
     event_date__lte = filters.CharFilter(method="filter_for_event_date")
 
@@ -57,9 +54,7 @@ class UserAnalyzableEventFilterSet(UserEventFilterSet):
 
         user_events_ids = []
         for model, content_type in data_model_map.items():
-            data_model_ids = model.objects.filter(**date_filters).values_list(
-                "id", flat=True
-            )
+            data_model_ids = model.objects.filter(**date_filters).values_list("id", flat=True)
             if data_model_ids:
                 ids = UserAnalyzableEvent.objects.filter(
                     data_model_content_type=content_type,
@@ -73,24 +68,16 @@ class UserAnalyzableEventFilterSet(UserEventFilterSet):
 class UserDomainWildCardEventFilterSet(UserEventFilterSet):
     query = filters.CharFilter(field_name="query", lookup_expr="icontains")
     analyzables = filters.BaseInFilter(field_name="analyzables__name")
-    event_date__gte = filters.CharFilter(
-        field_name="data_model__date", lookup_expr="gte"
-    )
-    event_date__lte = filters.CharFilter(
-        field_name="data_model__date", lookup_expr="lte"
-    )
+    event_date__gte = filters.CharFilter(field_name="data_model__date", lookup_expr="gte")
+    event_date__lte = filters.CharFilter(field_name="data_model__date", lookup_expr="lte")
 
 
 class UserIPWildCardEventFilterSet(UserEventFilterSet):
     ip = filters.CharFilter(method="filter_for_ip", lookup_expr="icontains")
     network = filters.CharFilter(method="filter_for_network")
     analyzables = filters.BaseInFilter(field_name="analyzables__name")
-    event_date__gte = filters.CharFilter(
-        field_name="data_model__date", lookup_expr="gte"
-    )
-    event_date__lte = filters.CharFilter(
-        field_name="data_model__date", lookup_expr="lte"
-    )
+    event_date__gte = filters.CharFilter(field_name="data_model__date", lookup_expr="gte")
+    event_date__lte = filters.CharFilter(field_name="data_model__date", lookup_expr="lte")
 
     @staticmethod
     def filter_for_ip(queryset, value, _ip, *args, **kwargs):

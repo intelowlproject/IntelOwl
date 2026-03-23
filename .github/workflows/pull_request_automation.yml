@@ -16,10 +16,10 @@ jobs:
     outputs:
       frontend: ${{steps.diff_check.outputs.frontend}}
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v6.0.2
         with:
           ref: ${{ github.base_ref }}
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v6.0.2
         with:
           clean: false
       - name: Generate diffs
@@ -34,10 +34,10 @@ jobs:
 
     steps:
       - name: Checkout IntelOwl
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6.0.2
 
       - name: Set up Python
-        uses: actions/setup-python@v5.4.0
+        uses: actions/setup-python@v6.2.0
         with:
           python-version: 3.11
 
@@ -46,18 +46,14 @@ jobs:
           pip3 install --upgrade pip
           pip3 install -r requirements/test-requirements.txt
 
-      - name: Black formatter
+      - name: Lint with Ruff
         run: |
-          black . --check --diff --exclude "migrations|venv|.ipython|docs_env|.cache"
+          ruff check . --output-format=github
 
-      - name: Lint with flake8 (PEP8 enforcer + linter)
+      - name: Check formatting with Ruff
         run: |
-          flake8 . --config=.flake8 --show-source
+          ruff format . --check --diff
 
-      - name: isort
-        run: |
-          isort . --profile black --filter-files --check-only --diff --skip configuration/ldap_config.py
-      
       - name: Perform ShellCheck Analysis
         run: bash <(curl -s https://raw.githubusercontent.com/CICDToolbox/shellcheck/master/pipeline.sh)
 
@@ -67,12 +63,12 @@ jobs:
 
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.12.0
+        uses: styfle/cancel-workflow-action@0.13.0
         with:
           access_token: ${{ github.token }}
 
       - name: Checkout IntelOwl
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6.0.2
 
       - name: Prepare Launch
         run: |
@@ -80,11 +76,21 @@ jobs:
           cp docker/env_file_app_template docker/env_file_app
           cp docker/env_file_postgres_template docker/env_file_postgres
 
+      - name: Set image repo
+        run: echo "IMAGE_REPO=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Startup script launch (Slow)
         if: contains(github.base_ref, 'master')
         run: |
           cp docker/env_file_integrations_template docker/env_file_integrations
-          ./start ci up --all_analyzers -- --build -d
+          ./start ci up --malware_tools_analyzers --phishing_analyzers -- --build -d
         env:
           DOCKER_BUILDKIT: 1
           BUILDKIT_PROGRESS: "plain"
@@ -100,7 +106,7 @@ jobs:
           BUILDKIT_PROGRESS: "plain"
           STAGE: "ci"
           REPO_DOWNLOADER_ENABLED: false
-
+          
       - name: Docker debug
         if: always()
         run: |
@@ -125,13 +131,13 @@ jobs:
     if: ${{ needs.detect-changes.outputs.frontend > 0 }}
 
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v6.0.2
       - name: Set up NodeJS
         uses: actions/setup-node@v4
         with:
           node-version: 18
       - name: Cache node modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.npm
           key: npm-build-${{ hashFiles('frontend/package-lock.json') }}

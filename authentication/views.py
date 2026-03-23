@@ -10,6 +10,7 @@ from authlib.oauth2 import OAuth2Error
 from django.conf import settings
 from django.contrib.auth import get_user_model, login, logout
 from django.contrib.auth.hashers import check_password
+from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -22,6 +23,7 @@ from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 
 from certego_saas.ext.throttling import POSTUserRateThrottle
+from intel_owl.consts import validate_password_strength
 from intel_owl.settings import AUTH_USER_MODEL
 
 from .oauth import oauth
@@ -181,15 +183,19 @@ class ChangePasswordView(APIView):
         old_password = request.data.get("old_password")
         new_password = request.data.get("new_password")
 
+        # Validate new password strength
+        try:
+            validate_password_strength(new_password)
+        except ValidationError as e:
+            return Response({"error": e.message}, status=status.HTTP_400_BAD_REQUEST)
+
         # Check if the old password matches the user's current password
         user = request.user
         uname = user.username
         if not check_password(old_password, user.password):
             logger.info(f"'{uname}' has inputted invalid old password.")
             # Return an error response if the old password doesn't match
-            return Response(
-                {"error": "Invalid old password"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": "Invalid old password"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Set the new password for the user
         user.set_password(new_password)
@@ -277,9 +283,7 @@ class GoogleLoginCallbackView(LoginView):
             return User.objects.get(email=user_email)
         except User.DoesNotExist:
             logging.info("[Google Oauth] User does not exist. Creating new user.")
-            return User.objects.create_user(
-                email=user_email, username=user_name, password=None
-            )
+            return User.objects.create_user(email=user_email, username=user_name, password=None)
 
     def get(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
@@ -334,9 +338,7 @@ def checkConfiguration(request):
                 errors["SMTP backend"] = "configuration required"
 
     logger.info(f"Configuration errors: {errors}")
-    return Response(
-        status=status.HTTP_200_OK, data={"errors": errors} if errors else {}
-    )
+    return Response(status=status.HTTP_200_OK, data={"errors": errors} if errors else {})
 
 
 class APIAccessTokenView(APIView):

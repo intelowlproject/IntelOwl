@@ -46,13 +46,9 @@ class DownloadFileFromUri(ObservableAnalyzer):
         else:
             if r.content:
                 if "text/html" not in r.headers["Content-Type"]:
-                    result["stored_base64"].append(
-                        base64.b64encode(r.content).decode("ascii")
-                    )
+                    result["stored_base64"].append(base64.b64encode(r.content).decode("ascii"))
                 else:
-                    logger.info(
-                        f"discarded text/html response for {self.observable_name}"
-                    )
+                    logger.info(f"discarded text/html response for {self.observable_name}")
             else:
                 logger.info(f"no response content for {self.observable_name}")
 

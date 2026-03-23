@@ -1,7 +1,7 @@
 import React from "react";
 import axios from "axios";
 import "@testing-library/jest-dom";
-import { render, within, waitFor, screen } from "@testing-library/react";
+import { render, waitFor, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { InvestigationActionsBar } from "../../../../src/components/investigations/result/InvestigationActionBar";
@@ -31,9 +31,13 @@ describe("test InvestigationActionsBar", () => {
       </BrowserRouter>,
     );
     const user = userEvent.setup();
-    const deleteButton = container.querySelector("#deletebtn");
-    expect(within(deleteButton).getByText("Delete")).toBeInTheDocument();
+    const actionMenuButton = container.querySelector("#investigationActions");
+    expect(actionMenuButton).toBeInTheDocument();
+    await user.click(actionMenuButton);
 
+    const deleteButton = screen.getByRole("menuitem", {
+      name: "Delete investigation",
+    });
     await user.click(deleteButton);
     // confirm dialog
     const confirmButton = screen.getByRole("button", {

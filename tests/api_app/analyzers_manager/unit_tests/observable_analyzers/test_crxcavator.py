@@ -37,9 +37,7 @@ class CRXcavatorTestCase(BaseAnalyzerTest):
                 "manifest": {
                     "version": 2,
                     "permissions": ["activeTab", "storage"],
-                    "content_scripts": [
-                        {"matches": ["https://*.example.com/*"], "js": ["content.js"]}
-                    ],
+                    "content_scripts": [{"matches": ["https://*.example.com/*"], "js": ["content.js"]}],
                 },
             },
             "status": "success",

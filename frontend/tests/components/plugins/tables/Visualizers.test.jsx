@@ -35,7 +35,9 @@ describe("test Visualizers component", () => {
     // table
     const tableComponent = screen.getByRole("table");
     expect(tableComponent).toBeInTheDocument();
-    const nameColumnHeader = screen.getByRole("columnheader", { name: "Name" });
+    const nameColumnHeader = screen.getByRole("columnheader", {
+      name: /Name/i,
+    });
     expect(nameColumnHeader).toBeInTheDocument();
     const activeColumnHeader = screen.getByRole("columnheader", {
       name: "Active All",

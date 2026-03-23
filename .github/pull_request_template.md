@@ -11,6 +11,7 @@ Please delete options that are not relevant.
 - [ ] Bug fix (non-breaking change which fixes an issue).
 - [ ] New feature (non-breaking change which adds functionality).
 - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected).
+- [ ] Chore (refactoring, dependency updates, CI/CD changes, code cleanup, docs-only changes).
 
 # Checklist
 
@@ -32,12 +33,14 @@ Please delete options that are not relevant.
 - [ ] I have inserted the copyright banner at the start of the file: ```# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl # See the file 'LICENSE' for copying permission.```
 - [ ] Please avoid adding new libraries as requirements whenever it is possible. Use new libraries only if strictly needed to solve the issue you are working for. In case of doubt, ask a maintainer permission to use a specific library.
 - [ ] If external libraries/packages with restrictive licenses were added, they were added in the [Legal Notice](https://github.com/certego/IntelOwl/blob/master/.github/legal_notice.md) section.
-- [ ] Linters (`Black`, `Flake`, `Isort`) gave 0 errors. If you have correctly installed [pre-commit](https://intelowlproject.github.io/docs/IntelOwl/contribute/#how-to-start-setup-project-and-development-instance), it does these checks and adjustments on your behalf.
+- [ ] Linters (`Ruff`) gave 0 errors. If you have correctly installed [pre-commit](https://intelowlproject.github.io/docs/IntelOwl/contribute/#how-to-start-setup-project-and-development-instance), it does these checks and adjustments on your behalf.
 - [ ] I have added tests for the feature/bug I solved (see `tests` folder). All the tests (new and old ones) gave 0 errors.
 - [ ] If the GUI has been modified:
     - [ ] I have a provided a screenshot of the result in the PR.
     - [ ] I have created new frontend tests for the new component or updated existing ones.
 - [ ] After you had submitted the PR, if `DeepSource`, `Django Doctors` or other third-party linters have triggered any alerts during the CI checks, I have solved those alerts.
+- [ ] I have addressed raised Copilot issues. In case of FPs, I have commented the Copilot issue and proved that it is wrong before having the comment resolved.
+- [ ] I have reviewed and verified any LLM-generated code included in this PR. Also, I have explicitly stated that I have used LLMs in this PR.
 
 ### Important Rules
 - If you miss to compile the Checklist properly, your PR won't be reviewed by the maintainers.

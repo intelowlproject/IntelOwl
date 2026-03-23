@@ -87,7 +87,9 @@ describe("test UserEventModal component", () => {
     expect(analyzablesInput.value).toBe(artifact);
     expect(screen.getByText("Type:")).toBeInTheDocument();
     expect(screen.getByText("Evaluation:")).toBeInTheDocument();
-    const excludeEvaluation = screen.getByRole("checkbox", { id: "exclude-evaluation-flag" });
+    const excludeEvaluation = screen.getByRole("checkbox", {
+      id: "exclude-evaluation-flag",
+    });
     expect(excludeEvaluation).toBeInTheDocument();
     expect(excludeEvaluation).not.toBeChecked();
     const basicEvaluationTab = screen.getByText("Basic");
@@ -95,9 +97,7 @@ describe("test UserEventModal component", () => {
     expect(basicEvaluationTab.closest("a").className).toContain("active"); // selected
     const manualEvaluationTab = screen.getByText("Manual");
     expect(manualEvaluationTab).toBeInTheDocument();
-    expect(manualEvaluationTab.closest("a").className).not.toContain(
-      "active",
-    ); // selected
+    expect(manualEvaluationTab.closest("a").className).not.toContain("active"); // selected
     const malicious10 = screen.getByRole("button", {
       name: "Confirmed malicious",
     });
@@ -219,8 +219,8 @@ describe("test UserEventModal component", () => {
     related_threats: [],
     external_references: [],
     tags: [],
-    date:	"2026-03-17T15:01:13.054478Z"
-  }
+    date: "2026-03-17T15:01:13.054478Z",
+  };
 
   test.each([
     // create evaluation
@@ -246,19 +246,34 @@ describe("test UserEventModal component", () => {
     {
       ...testData.artifact,
       url: `${USER_EVENT_ANALYZABLE}/2`,
-      responseData: { count: 1, results: [{ id: 2, analyzable: {id: 1}, data_model: dataModelExistingEvent }] },
+      responseData: {
+        count: 1,
+        results: [
+          { id: 2, analyzable: { id: 1 }, data_model: dataModelExistingEvent },
+        ],
+      },
       eventType: "update",
     },
     {
       ...testData.ip_wildcard,
       url: `${USER_EVENT_IP_WILDCARD}/2`,
-      responseData: { count: 1, results: [{ id: 2, analyzables: [2], data_model: dataModelExistingEvent}] },
+      responseData: {
+        count: 1,
+        results: [
+          { id: 2, analyzables: [2], data_model: dataModelExistingEvent },
+        ],
+      },
       eventType: "update",
     },
     {
       ...testData.domain_wildcard,
       url: `${USER_EVENT_DOMAIN_WILDCARD}/2`,
-      responseData: { count: 1, results: [{ id: 2, analyzables: [1], data_model: dataModelExistingEvent}] },
+      responseData: {
+        count: 1,
+        results: [
+          { id: 2, analyzables: [1], data_model: dataModelExistingEvent },
+        ],
+      },
       eventType: "update",
     },
   ])(
@@ -282,16 +297,16 @@ describe("test UserEventModal component", () => {
       expect(analyzablesInput).toBeInTheDocument();
       expect(analyzablesInput.id).toBe("analyzables-0");
       expect(analyzablesInput.value).toBe("");
-      
+
       const basicEvaluationTab = screen.getByText("Basic");
       expect(basicEvaluationTab).toBeInTheDocument();
       expect(basicEvaluationTab.closest("a").className).toContain("active"); // selected
-  
+
       const reasonInput = screen.getAllByRole("textbox")[1];
       expect(reasonInput).toBeInTheDocument();
       expect(reasonInput.id).toBe("reason");
       expect(reasonInput.value).toBe("");
-     
+
       const saveButton = screen.getByRole("button", { name: /Save/i });
       expect(saveButton).toBeInTheDocument();
 
@@ -310,13 +325,13 @@ describe("test UserEventModal component", () => {
 
       expect(saveButton.className).not.toContain("disabled");
       await user.click(saveButton);
-      if(eventType === "update"){
+      if (eventType === "update") {
         // confirm dialog
         const confirmButton = screen.getByRole("button", {
           name: "Ok",
         });
         await user.click(confirmButton);
-      };
+      }
 
       await waitFor(() => {
         expect(axios[requestMethod]).toHaveBeenCalledWith(`${url}`, payload);
@@ -353,9 +368,7 @@ describe("test UserEventModal component", () => {
     // add manual evaluation
     const manualEvaluationTab = screen.getByText("Manual");
     expect(manualEvaluationTab).toBeInTheDocument();
-    expect(manualEvaluationTab.closest("a").className).not.toContain(
-      "active",
-    );
+    expect(manualEvaluationTab.closest("a").className).not.toContain("active");
     await user.click(manualEvaluationTab);
     const trusted = screen.getByRole("button", { name: "trusted" });
     expect(trusted).toBeInTheDocument();
@@ -469,9 +482,7 @@ describe("test UserEventModal component", () => {
     expect(basicEvaluationTab.closest("a").className).toContain("active"); // selected
     const manualEvaluationTab = screen.getByText("Manual");
     expect(manualEvaluationTab).toBeInTheDocument();
-    expect(manualEvaluationTab.closest("a").className).not.toContain(
-      "active",
-    ); // selected
+    expect(manualEvaluationTab.closest("a").className).not.toContain("active"); // selected
     const malicious10 = screen.getByRole("button", {
       name: "Confirmed malicious",
     });
@@ -490,7 +501,7 @@ describe("test UserEventModal component", () => {
     expect(reasonInput).toBeInTheDocument();
     expect(reasonInput.id).toBe("reason");
     expect(reasonInput.value).toBe("");
-    
+
     await user.click(manualEvaluationTab);
     const malicious = screen.getByRole("button", { name: "malicious" });
     expect(malicious).toBeInTheDocument();
@@ -551,7 +562,9 @@ describe("test UserEventModal component", () => {
     expect(analyzablesInput.value).toBe("test.com");
 
     // set exclude evaluation flag
-    const excludeEvaluation = screen.getByRole("checkbox", { id: "exclude-evaluation-flag" });
+    const excludeEvaluation = screen.getByRole("checkbox", {
+      id: "exclude-evaluation-flag",
+    });
     expect(excludeEvaluation).toBeInTheDocument();
     expect(excludeEvaluation).not.toBeChecked();
     await user.click(excludeEvaluation);
@@ -652,6 +665,41 @@ describe("test UserEventModal component", () => {
         decay_progression: "0",
         decay_timedelta_days: 120,
       });
+    });
+  });
+
+  test("UserEventModal - onSubmitCallback is called after successful submission", async () => {
+    const user = userEvent.setup();
+    const onSubmitCallbackMock = jest.fn();
+    axios.get.mockImplementation(() =>
+      Promise.resolve({ status: 200, data: { count: 0 } }),
+    );
+    axios.post.mockImplementation(() =>
+      Promise.resolve({ status: 200, data: {} }),
+    );
+    render(
+      <BrowserRouter>
+        <UserEventModal
+          toggle={() => jest.fn()}
+          isOpen
+          onSubmitCallback={onSubmitCallbackMock}
+        />
+      </BrowserRouter>,
+    );
+
+    const analyzablesInput = screen.getAllByRole("textbox")[0];
+    fireEvent.change(analyzablesInput, { target: { value: "test.com" } });
+    const reasonInput = screen.getAllByRole("textbox")[1];
+    fireEvent.change(reasonInput, { target: { value: "my reason" } });
+
+    await screen.findByText("artifact");
+
+    const saveButton = screen.getByRole("button", { name: /Save/i });
+    expect(saveButton.className).not.toContain("disabled");
+
+    await user.click(saveButton);
+    await waitFor(() => {
+      expect(onSubmitCallbackMock).toHaveBeenCalledWith(["test.com"]);
     });
   });
 });

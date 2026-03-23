@@ -56,9 +56,7 @@ class Command(DumpPluginCommand):
                 return self.name_file[:-3]
 
     def _name_file(self, obj, app):
-        last_migration_number = MigrationAutodetector.parse_number(
-            self._get_last_migration(app)
-        )
+        last_migration_number = MigrationAutodetector.parse_number(self._get_last_migration(app))
         if self.migration_counter == 0:
             last_migration_number += 1
         return (

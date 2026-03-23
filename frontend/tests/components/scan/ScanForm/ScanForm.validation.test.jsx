@@ -586,4 +586,53 @@ describe("test ScanForm component form validation", () => {
       {},
     );
   });
+
+  test("form validation - whitespace-only observable should be rejected", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
+
+    const firstObservableInputElement = screen.getByRole("textbox", {
+      name: "",
+    });
+    expect(firstObservableInputElement).toBeInTheDocument();
+    await user.type(firstObservableInputElement, "   ");
+    expect(firstObservableInputElement.value).toBe("   ");
+
+    const startScanButton = screen.getByRole("button", { name: "Start Scan" });
+    expect(startScanButton).toBeInTheDocument();
+    await waitFor(() => {
+      expect(startScanButton.className).toContain("disabled");
+    });
+  });
+
+  test("form validation - whitespace-only observable should show required error", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
+
+    const firstObservableInputElement = screen.getByRole("textbox", {
+      name: "",
+    });
+    expect(firstObservableInputElement).toBeInTheDocument();
+    await user.type(firstObservableInputElement, "   ");
+    expect(firstObservableInputElement.value).toBe("   ");
+    // select a playbook so the only validation error is the observable
+    const playbookDropdownButton = screen.getAllByRole("combobox")[0];
+    await user.click(playbookDropdownButton);
+
+    const startScanButton = screen.getByRole("button", { name: "Start Scan" });
+    expect(startScanButton).toBeInTheDocument();
+    await waitFor(() => {
+      expect(startScanButton.className).toContain("disabled");
+    });
+  });
 });

@@ -6,6 +6,7 @@ import logging
 import os
 import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 from shlex import quote
 
@@ -24,6 +25,7 @@ RULES_LOCATION = f"{BASE_LOCATION}/capa-rules"
 SIGNATURE_LOCATION = f"{BASE_LOCATION}/sigs"
 RULES_FILE = f"{RULES_LOCATION}/capa_rules.zip"
 RULES_URL = "https://github.com/mandiant/capa-rules/archive/refs/tags/"
+CACHE_LOCATION = os.environ.get("XDG_CACHE_HOME", f"{settings.MEDIA_ROOT}/.cache")
 
 
 class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
@@ -31,6 +33,48 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
     arch: str
     timeout: float = 15
     force_pull_signatures: bool = False
+
+    @classmethod
+    def _ensure_cache_directory(cls) -> str:
+        """
+        Ensure a writable cache directory exists for capa.
+        Returns the path to the writable cache directory.
+        Falls back to a temporary directory if the primary location
+        is not usable.
+        """
+        cache_dir = CACHE_LOCATION
+
+        # Step 1: Create if it doesn't exist
+        if not os.path.isdir(cache_dir):
+            logger.info(f"Creating cache directory at {cache_dir}")
+            try:
+                os.makedirs(cache_dir, mode=0o755, exist_ok=True)
+            except OSError as e:
+                logger.warning(
+                    f"Failed to create cache directory at {cache_dir}: {e}. Falling back to temporary directory."
+                )
+                return tempfile.mkdtemp(prefix="capa_cache_")
+
+        # Step 2: Verify writability
+        if not os.access(cache_dir, os.W_OK):
+            logger.warning(
+                f"Cache directory {cache_dir} exists but is not writable. Attempting to fix permissions."
+            )
+            try:
+                os.chmod(cache_dir, 0o700)  # noqa: S103
+            except OSError:
+                logger.warning(f"Cannot fix permissions on {cache_dir}. Falling back to temporary directory.")
+                return tempfile.mkdtemp(prefix="capa_cache_")
+
+            # Re-check after chmod attempt
+            if not os.access(cache_dir, os.W_OK):
+                logger.warning(
+                    f"Cache directory {cache_dir} still not writable after chmod. Falling back to temporary directory."
+                )
+                return tempfile.mkdtemp(prefix="capa_cache_")
+
+        logger.debug(f"Cache directory verified as writable: {cache_dir}")
+        return cache_dir
 
     @classmethod
     def _download_signatures(cls) -> None:
@@ -49,7 +93,6 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
             signatures_list = response.json()
 
             for signature in signatures_list:
-
                 filename = signature["name"]
                 download_url = signature["download_url"]
 
@@ -66,12 +109,10 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
         logger.info("Successfully updated signatures")
 
     @classmethod
-    def update(cls, anayzer_module: PythonModule) -> bool:
+    def update(cls, analyzer_module: PythonModule) -> bool:
         try:
             logger.info("Updating capa rules")
-            response = requests.get(
-                "https://api.github.com/repos/mandiant/capa-rules/releases/latest"
-            )
+            response = requests.get("https://api.github.com/repos/mandiant/capa-rules/releases/latest")
             latest_version = response.json()["tag_name"]
             capa_rules_download_url = RULES_URL + latest_version + ".zip"
 
@@ -80,7 +121,7 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
                 rule_set_directory=RULES_LOCATION,
                 rule_file_path=RULES_FILE,
                 latest_version=latest_version,
-                analyzer_module=anayzer_module,
+                analyzer_module=analyzer_module,
             )
 
             cls._unzip(Path(RULES_FILE))
@@ -95,11 +136,9 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
         return False
 
     def run(self):
+        cache_dir = self._ensure_cache_directory()
         try:
-
-            response = requests.get(
-                "https://api.github.com/repos/mandiant/capa-rules/releases/latest"
-            )
+            response = requests.get("https://api.github.com/repos/mandiant/capa-rules/releases/latest")
             latest_version = response.json()["tag_name"]
 
             capa_analyzer_module = self.python_module
@@ -114,7 +153,6 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
                 self._download_signatures()
 
             if not (os.path.isdir(RULES_LOCATION)) and not update_status:
-
                 raise AnalyzerRunException("Couldn't update capa rules")
 
             command: list[str] = ["/usr/local/bin/capa", "--quiet", "--json"]
@@ -137,12 +175,17 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
                 f"Starting CAPA analysis for {self.filename} with hash: {self.md5} and command: {command}"
             )
 
+            # Build subprocess environment with explicit cache directory
+            process_env = os.environ.copy()
+            process_env["XDG_CACHE_HOME"] = cache_dir
+
             process: subprocess.CompletedProcess = subprocess.run(
                 command,
                 capture_output=True,
                 text=True,
                 timeout=self.timeout,
                 check=True,
+                env=process_env,
             )
 
             result = json.loads(process.stdout)
@@ -155,11 +198,13 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
 
         except subprocess.CalledProcessError as e:
             stderr = e.stderr
-            logger.info(
-                f"Capa Info failed to run for {self.filename} with hash: {self.md5} with command {e}"
-            )
+            logger.info(f"Capa Info failed to run for {self.filename} with hash: {self.md5} with command {e}")
             raise AnalyzerRunException(
                 f" Analyzer for {self.filename} with hash: {self.md5} failed with error: {stderr}"
             )
+        finally:
+            # Clean up temporary cache directory if a fallback was used
+            if cache_dir != CACHE_LOCATION and os.path.isdir(cache_dir):
+                shutil.rmtree(cache_dir, ignore_errors=True)
 
         return result

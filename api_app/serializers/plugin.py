@@ -34,7 +34,8 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
         def to_internal_value(data):
             if not data:
                 raise ValidationError({"detail": "Empty insertion"})
-            logger.info(f"verifying that value {data} ({type(data)}) is JSON compliant")
+            # we don't log the data here because it could contain secrets
+            logger.info("verifying that value is JSON compliant")
             try:
                 return json.loads(data)
             except json.JSONDecodeError:
@@ -42,7 +43,7 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
                     data = json.dumps(data)
                     return json.loads(data)
                 except json.JSONDecodeError:
-                    logger.info(f"value {data} ({type(data)}) raised ValidationError")
+                    logger.info("value raised ValidationError")
                     raise ValidationError({"detail": "Value is not JSON-compliant."})
 
         def get_attribute(self, instance: PluginConfig):
@@ -117,10 +118,7 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
     def validate_value_type(value: Any, parameter: Parameter):
         if type(value).__name__ != parameter.type:
             raise ValidationError(
-                {
-                    "detail": f"Value has type {type(value).__name__}"
-                    f" instead of {parameter.type}"
-                }
+                {"detail": f"Value has type {type(value).__name__} instead of {parameter.type}"}
             )
 
     def validate(self, attrs):
@@ -140,14 +138,11 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
             if attrs["for_organization"]:
                 if (
                     ingestor.user.has_membership()
-                    and ingestor.user.membership.organization
-                    == user_request.membership.organization
+                    and ingestor.user.membership.organization == user_request.membership.organization
                 ):
                     attrs["owner"] = ingestor.user
                 else:
-                    raise ValidationError(
-                        "You have a different organization than the ingestor."
-                    )
+                    raise ValidationError("You have a different organization than the ingestor.")
             elif user_request.is_superuser:
                 attrs["owner"] = ingestor.user
             else:
@@ -175,9 +170,7 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
 
     def to_representation(self, instance: PluginConfig):
         result = super().to_representation(instance)
-        result["organization"] = (
-            instance.organization.name if instance.organization is not None else None
-        )
+        result["organization"] = instance.organization.name if instance.organization is not None else None
         return result
 
 
@@ -212,9 +205,7 @@ class PythonConfigListSerializer(rfs.ListSerializer):
     plugins = rfs.PrimaryKeyRelatedField(read_only=True)
 
     def to_representation_single_plugin(self, plugin: PythonConfig, user: User):
-        cache_name = (
-            f"serializer_{plugin.__class__.__name__}_{plugin.name}_{user.username}"
-        )
+        cache_name = f"serializer_{plugin.__class__.__name__}_{plugin.name}_{user.username}"
         cache_hit = cache.get(cache_name)
         if not cache_hit:
             plugin_representation = self.child.to_representation(plugin)
@@ -339,9 +330,7 @@ class PythonConfigSerializerForMigration(AbstractConfigSerializerForMigration):
     parameters = ParameterSerializer(write_only=True, many=True)
 
     class Meta:
-        exclude = AbstractConfigSerializerForMigration.Meta.exclude + [
-            "health_check_task"
-        ]
+        exclude = AbstractConfigSerializerForMigration.Meta.exclude + ["health_check_task"]
 
     def to_representation(self, instance):
         return super().to_representation(instance)

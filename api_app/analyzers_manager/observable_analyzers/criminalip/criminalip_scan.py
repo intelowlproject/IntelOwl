@@ -34,16 +34,12 @@ class CriminalIpScan(classes.ObservableAnalyzer, CriminalIpBase):
         resp = resp.json()
         if resp.get("status", None) not in [None, 200]:
             raise HTTPError(resp.get("message", ""))
-        logger.info(
-            f"response from CriminalIp_scan for {self.observable_name} -> {resp}"
-        )
+        logger.info(f"response from CriminalIp_scan for {self.observable_name} -> {resp}")
 
         logger.debug(f"{resp=}")
         scan_id = resp["data"]["scan_id"]
         while True:
-            resp = requests.get(
-                url=f"{self.url}{self.status_endpoint}{scan_id}", headers=HEADER
-            )
+            resp = requests.get(url=f"{self.url}{self.status_endpoint}{scan_id}", headers=HEADER)
             resp.raise_for_status()
 
             scan_percent = resp.json()["data"]["scan_percentage"]
@@ -52,15 +48,9 @@ class CriminalIpScan(classes.ObservableAnalyzer, CriminalIpBase):
             time.sleep(poll_distance)
             self.timeout -= poll_distance
             if self.timeout <= 0:
-                raise AnalyzerRunException(
-                    f"Timeout with scan percentage: {scan_percent}"
-                )
-        resp = requests.get(
-            url=f"{self.url}{self.report_endpoint}{scan_id}", headers=HEADER
-        )
+                raise AnalyzerRunException(f"Timeout with scan percentage: {scan_percent}")
+        resp = requests.get(url=f"{self.url}{self.report_endpoint}{scan_id}", headers=HEADER)
         resp.raise_for_status()
         resp = resp.json()
-        logger.info(
-            f"response from CriminalIp_scan for {self.observable_name} -> {resp}"
-        )
+        logger.info(f"response from CriminalIp_scan for {self.observable_name} -> {resp}")
         return resp

@@ -18,9 +18,7 @@ class CustomOAuthTestCase(APITestCase):
                 is_superuser=True,
             )
         except User.DoesNotExist:
-            cls.user = User.objects.create(
-                username=username, email=email, is_superuser=True
-            )
+            cls.user = User.objects.create(username=username, email=email, is_superuser=True)
             cls.user.set_password(password)
             cls.user.save()
 

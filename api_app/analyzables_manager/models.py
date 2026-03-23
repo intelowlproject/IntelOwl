@@ -25,9 +25,7 @@ class Analyzable(models.Model):
     sha1 = models.CharField(max_length=255, unique=True, editable=False)
     classification = models.CharField(max_length=100, choices=Classification.choices)
     mimetype = models.CharField(max_length=80, blank=True, null=True, default=None)
-    file = models.FileField(
-        upload_to=file_directory_path, null=True, blank=True, default=None
-    )
+    file = models.FileField(upload_to=file_directory_path, null=True, blank=True, default=None)
     CLASSIFICATIONS = Classification
     objects = AnalyzableQuerySet.as_manager()
 
@@ -49,15 +47,11 @@ class Analyzable(models.Model):
     def is_sample(self) -> bool:
         return self.classification == Classification.FILE.value
 
-    def get_all_user_events_data_model(
-        self, user: User = None
-    ) -> BaseDataModelQuerySet:
+    def get_all_user_events_data_model(self, user: User = None) -> BaseDataModelQuerySet:
         query = Q(user_events__analyzable=self)
         if user:
             query &= Q(
-                pk__in=self.user_events.visible_for_user(user).values_list(
-                    "data_model_object_id", flat=True
-                )
+                pk__in=self.user_events.visible_for_user(user).values_list("data_model_object_id", flat=True)
             )
         if self.classification in [
             Classification.URL.value,
@@ -66,18 +60,18 @@ class Analyzable(models.Model):
             query2 = Q(domain_wildcard_events__analyzables=self)
             if user:
                 query2 &= Q(
-                    pk__in=self.user_domain_wildcard_events.visible_for_user(
-                        user
-                    ).values_list("data_model__pk", flat=True)
+                    pk__in=self.user_domain_wildcard_events.visible_for_user(user).values_list(
+                        "data_model__pk", flat=True
+                    )
                 )
             query |= query2
         elif self.classification == Classification.IP.value:
             query2 = Q(ip_wildcard_events__analyzables=self)
             if user:
                 query2 &= Q(
-                    pk__in=self.user_ip_wildcard_events.visible_for_user(
-                        user
-                    ).values_list("data_model__pk", flat=True)
+                    pk__in=self.user_ip_wildcard_events.visible_for_user(user).values_list(
+                        "data_model__pk", flat=True
+                    )
                 )
             query |= query2
         logger.debug(f"{query=}")
@@ -111,9 +105,7 @@ class Analyzable(models.Model):
                 self.mimetype = MimeTypes.calculate(content, self.name)
         else:
             if self.mimetype or self.file:
-                raise ValidationError(
-                    "Mimetype and file must not be set for observables"
-                )
+                raise ValidationError("Mimetype and file must not be set for observables")
             content = self.name
         self._set_hashes(content)
 

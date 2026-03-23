@@ -1,7 +1,7 @@
 import React from "react";
 import "@testing-library/jest-dom";
 import { render, screen, waitFor } from "@testing-library/react";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { PluginsReportTable } from "../../../../src/components/jobs/result/pluginReportTables";
 import { mockedUsePluginConfigurationStore } from "../../../mock";
@@ -190,6 +190,9 @@ describe("test plugins report table", () => {
       screen.getByRole("columnheader", { name: "Status All" }),
     ).toBeInTheDocument();
     expect(
+      screen.getByRole("columnheader", { name: "Type All" }),
+    ).toBeInTheDocument();
+    expect(
       screen.getByRole("columnheader", { name: "Name" }),
     ).toBeInTheDocument();
     expect(
@@ -240,5 +243,41 @@ describe("test plugins report table", () => {
       );
       expect(jsonReport).toBeInTheDocument();
     });
+  });
+
+  test("populate filters from query params", () => {
+    render(
+      <MemoryRouter
+        initialEntries={["/jobs/108/visualizer?status=SUCCESS&name=TEST"]}
+      >
+        <PluginsReportTable
+          job={{
+            id: 108,
+            permissions: { plugin_actions: true },
+          }}
+          pluginReports={[
+            {
+              id: 174,
+              name: "TEST_ANALYZER",
+              process_time: 0.07,
+              report: {},
+              status: "SUCCESS",
+              errors: [],
+              start_time: "2023-05-31T08:19:03.380434Z",
+              end_time: "2023-05-31T08:19:03.455218Z",
+              runtime_configuration: {},
+              type: "analyzer",
+            },
+          ]}
+          pluginsStored={mockedUsePluginConfigurationStore.analyzers}
+          pluginsStoredLoading={
+            mockedUsePluginConfigurationStore.analyzersLoading
+          }
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByDisplayValue("SUCCESS")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("TEST")).toBeInTheDocument();
   });
 });

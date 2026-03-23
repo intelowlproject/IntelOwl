@@ -23,7 +23,12 @@ const EMPTY_FORM = Object.freeze({
   decay_timedelta_days: 120,
 });
 
-export function UserEventModal({ analyzables, toggle, isOpen }) {
+export function UserEventModal({
+  analyzables,
+  toggle,
+  isOpen,
+  onSubmitCallback,
+}) {
   console.debug("UserEventModal rendered!");
 
   const initialFormValues = JSON.parse(JSON.stringify(EMPTY_FORM));
@@ -57,7 +62,11 @@ export function UserEventModal({ analyzables, toggle, isOpen }) {
         <small className="text-info">Add your evaluation</small>
       </ModalHeader>
       <ModalBody className="m-2">
-        <UserEventForm initialFormValues={initialFormValues} toggle={toggle} />
+        <UserEventForm
+          initialFormValues={initialFormValues}
+          toggle={toggle}
+          onSubmitCallback={onSubmitCallback}
+        />
       </ModalBody>
     </Modal>
   );
@@ -67,8 +76,10 @@ UserEventModal.propTypes = {
   analyzables: PropTypes.array,
   toggle: PropTypes.func.isRequired,
   isOpen: PropTypes.bool.isRequired,
+  onSubmitCallback: PropTypes.func,
 };
 
 UserEventModal.defaultProps = {
   analyzables: [""],
+  onSubmitCallback: undefined,
 };

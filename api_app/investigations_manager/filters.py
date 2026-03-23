@@ -13,12 +13,8 @@ class InvestigationFilter(filters.FilterSet):
     analyzed_object_name = filters.CharFilter(method="filter_for_analyzed_object_name")
 
     @staticmethod
-    def filter_for_analyzed_object_name(
-        queryset, value, analyzed_object_name, *args, **kwargs
-    ):
-        return Investigation.investigation_for_analyzable(
-            queryset, analyzed_object_name
-        )
+    def filter_for_analyzed_object_name(queryset, value, analyzed_object_name, *args, **kwargs):
+        return Investigation.investigation_for_analyzable(queryset, analyzed_object_name)
 
     @staticmethod
     def filter_for_owner(queryset, value, owner, *args, **kwargs):
@@ -37,18 +33,14 @@ class InvestigationFilter(filters.FilterSet):
     @staticmethod
     def filter_for_tlp(queryset, value, tlp, *args, **kwargs):
         id_list = [
-            investigation.id
-            for investigation in Investigation.objects.all()
-            if investigation.tlp == tlp
+            investigation.id for investigation in Investigation.objects.all() if investigation.tlp == tlp
         ]
         return queryset.filter(id__in=id_list)
 
     @staticmethod
     def filter_for_tags(queryset, value, tags, *args, **kwargs):
         id_list = [
-            investigation.id
-            for investigation in Investigation.objects.all()
-            if tags in investigation.tags
+            investigation.id for investigation in Investigation.objects.all() if tags in investigation.tags
         ]
         return queryset.filter(id__in=id_list)
 

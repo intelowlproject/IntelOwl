@@ -55,7 +55,7 @@ import { areYouSureConfirmDialog } from "../common/areYouSureConfirmDialog";
 
 const EXCLUDE_EVALUATION_RELIABILITY = "8";
 
-export function UserEventForm({ initialFormValues, toggle }) {
+export function UserEventForm({ initialFormValues, toggle, onSubmitCallback }) {
   console.debug("UserEventForm rendered!");
 
   // router navigation
@@ -221,8 +221,12 @@ export function UserEventForm({ initialFormValues, toggle }) {
           );
         } else if (failed.length === 0) {
           // casa B: no errors
+          const submittedAnalyzables = [...formik.values.analyzables];
           formik.setSubmitting(false);
           formik.resetForm();
+          if (onSubmitCallback) {
+            onSubmitCallback(submittedAnalyzables);
+          }
           toggle(false);
         } else {
           // casa C: errors
@@ -719,4 +723,9 @@ export function UserEventForm({ initialFormValues, toggle }) {
 UserEventForm.propTypes = {
   initialFormValues: PropTypes.object.isRequired,
   toggle: PropTypes.func.isRequired,
+  onSubmitCallback: PropTypes.func,
+};
+
+UserEventForm.defaultProps = {
+  onSubmitCallback: undefined,
 };

@@ -8,14 +8,16 @@
 [![Official Site](https://img.shields.io/badge/official-site-blue)](https://intelowlproject.github.io)
 [![Live Instance](https://img.shields.io/badge/live-demo-blue)](https://intelowl.honeynet.org)
 
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![CodeQL](https://github.com/intelowlproject/IntelOwl/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/intelowlproject/IntelOwl/actions/workflows/codeql-analysis.yml)
 [![Dependency Review](https://github.com/intelowlproject/IntelOwl/actions/workflows/dependency_review.yml/badge.svg)](https://github.com/intelowlproject/IntelOwl/actions/workflows/dependency_review.yml)
 [![Build & Tests](https://github.com/intelowlproject/IntelOwl/workflows/Build%20&%20Tests/badge.svg)](https://github.com/intelowlproject/IntelOwl/actions)
 [![DeepSource](https://app.deepsource.com/gh/intelowlproject/IntelOwl.svg/?label=resolved+issues&token=BSvKHrnk875Y0Bykb79GNo8w)](https://app.deepsource.com/gh/intelowlproject/IntelOwl/?ref=repository-badge)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/intelowlproject/IntelOwl/badge)](https://api.securityscorecards.dev/projects/github.com/intelowlproject/IntelOwl)
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7120/badge)](https://bestpractices.coreinfrastructure.org/projects/7120)
+
+<a href="https://trendshift.io/repositories/11483" target="_blank"><img src="https://trendshift.io/api/badge/repositories/11483" alt="intelowlproject%2FIntelOwl | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+
 # Intel Owl
 
 Do you want to get **threat intelligence data** about a malware, an IP address or a domain? Do you want to get this kind of data from multiple sources at the same time using **a single API request**?
@@ -40,6 +42,8 @@ It provides:
   - *ingestors* that allow to automatically ingest stream of observables or files to IntelOwl itself
   - *playbooks* that are meant to make analysis easily repeatable
   - *data models* to map the different data extracted from analyzers to a single common schema
+  - *artifacts* that are representations of observables or files that can be analyzed multiple times for different evaluations
+  - *user events* that allow users to add custom evaluation or additional info to any artifact
 - A starting point for analysts' **Investigations**: users can register their findings, correlate the information found, and collaborate...all in a single place
 
 
@@ -70,8 +74,6 @@ Because of this, we joined [Open Collective](https://opencollective.com/intelowl
   <img src="https://opencollective.com/intelowl-project/donate/button@2x.png?color=blue" width=200 />
 </a>
 
-### 🥇 GOLD
-
 #### Certego
 
 <a href="https://certego.net/?utm_source=intelowl"> <img style="margin-right: 2px" width=250 height=71 src="static/Certego.png" alt="Certego Logo"/></a>
@@ -95,16 +97,6 @@ Since its birth this project has been participating in the [Google Summer of Cod
 
 If you are interested in participating in the next Google Summer of Code, check all the info available in the [dedicated repository](https://github.com/intelowlproject/gsoc)!
 
-
-### 🥈 SILVER
-
-#### ThreatHunter.ai
-
-<a href="https://threathunter.ai?utm_source=intelowl"> <img style="border: 0.2px solid black" width=194 height=80 src="static/threathunter_logo.png" alt="ThreatHunter.ai logo"> </a>
-
-[ThreatHunter.ai®](https://threathunter.ai?utm_source=intelowl), is a 100% Service-Disabled Veteran-Owned Small Business started in 2007 under the name Milton Security Group. ThreatHunter.ai is the global leader in Dynamic Threat Hunting. Operating a true 24x7x365 Security Operation Center with AI/ML-enhanced human Threat Hunters, ThreatHunter.ai has changed the industry in how threats are found, and mitigated in real time. For over 15 years, our teams of Threat Hunters have stopped hundreds of thousands of threats and assisted organizations in defending against threat actors around the clock.
-
-### 🥉 BRONZE
 
 #### Docker
 

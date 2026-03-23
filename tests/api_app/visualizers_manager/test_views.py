@@ -1,56 +1,56 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-from typing import Type
+from __future__ import annotations
 
-from api_app.visualizers_manager.models import VisualizerConfig
+from typing import TYPE_CHECKING, Type
+
+from api_app.decorators import classproperty
 from tests import CustomViewSetTestCase
 from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
 
+if TYPE_CHECKING:
+    from api_app.visualizers_manager.models import VisualizerConfig
 
-class VisualizerConfigViewSetTestCase(
-    AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase
-):
+
+class VisualizerConfigViewSetTestCase(AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase):
     URL = "/api/visualizer"
 
-    @classmethod
-    @property
-    def model_class(cls) -> Type[VisualizerConfig]:
+    @classproperty
+    def model_class(cls) -> "Type['VisualizerConfig']":
+        from api_app.visualizers_manager.models import VisualizerConfig
+
         return VisualizerConfig
 
     def test_get(self):
         # 1 - existing visualizer
         self.client.force_authenticate(user=self.user)
+        visualizer = self.model_class.objects.get(name="DNS")
         response = self.client.get(f"{self.URL}/DNS")
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(
             response.json(),
             {
                 "config": {"queue": "default", "soft_time_limit": 60},
-                "description": "Visualize information about DNS resolvers and DNS malicious "
-                "detectors",
+                "description": "Visualize information about DNS resolvers and DNS malicious detectors",
                 "disabled": True,
-                "id": 1,
+                "id": visualizer.id,
                 "name": "DNS",
                 "playbooks": ["Dns"],
-                "python_module": 128,
+                "python_module": visualizer.python_module.id,
             },
         )
         # 2 - missing visualizer
         response = self.client.get(f"{self.URL}/non_existing")
         self.assertEqual(response.status_code, 404, response.content)
         result = response.json()
-        self.assertEqual(
-            result, {"detail": "No VisualizerConfig matches the given query."}
-        )
+        self.assertEqual(result, {"detail": "No VisualizerConfig matches the given query."})
 
     def test_get_config(self):
         # 1 - existing visualizer
         self.client.force_authenticate(user=self.user)
         response = self.client.get(f"{self.URL}/DNS/plugin_config")
         self.assertEqual(response.status_code, 200, response.content)
-        self.assertEqual(
-            response.json(), {"organization_config": [], "user_config": []}
-        )
+        self.assertEqual(response.json(), {"organization_config": [], "user_config": []})
         # 2 - missing visualizer
         response = self.client.get(f"{self.URL}/missing_visualizer/plugin_config")
         self.assertEqual(response.status_code, 404, response.content)

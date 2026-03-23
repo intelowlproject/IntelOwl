@@ -36,14 +36,14 @@ class Ja4DB(classes.ObservableAnalyzer):
         message = ""
         try:
             # https://github.com/FoxIO-LLC/ja4/blob/main/technical_details/README.md
-            if not observable[0] in ["t", "q"]:
+            if observable[0] not in ["t", "q"]:
                 # checks for protocol,
                 # TCP(t) and QUIC(q) are the only supported protocols
                 raise self.NotJA4Exception("only TCP and QUIC protocols are supported")
-            if not observable[1:3] in ["12", "13"]:
+            if observable[1:3] not in ["12", "13"]:
                 # checks for the version of the protocol
                 raise self.NotJA4Exception("procotol version wrong")
-            if not observable[3] in ["d", "i"]:
+            if observable[3] not in ["d", "i"]:
                 # SNI or no SNI
                 raise self.NotJA4Exception("SNI value not valid")
             if not observable[4:8].isdigit():
@@ -78,9 +78,7 @@ class Ja4DB(classes.ObservableAnalyzer):
 
         database_location = self.location()
         if not os.path.exists(database_location):
-            logger.info(
-                f"Database does not exist in {database_location}, initialising..."
-            )
+            logger.info(f"Database does not exist in {database_location}, initialising...")
             self.update()
         with open(database_location, "r") as f:
             db = json.load(f)

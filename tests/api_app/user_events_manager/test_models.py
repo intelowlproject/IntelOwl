@@ -29,9 +29,7 @@ class TestUserDomainWildCardEvent(CustomTestCase):
             classification=Classification.DOMAIN,
         )
         res.refresh_from_db()
-        self.assertCountEqual(
-            res.analyzables.values_list("pk", flat=True), [an.pk, an2.pk]
-        )
+        self.assertCountEqual(res.analyzables.values_list("pk", flat=True), [an.pk, an2.pk])
 
         res.delete()
         an.delete()

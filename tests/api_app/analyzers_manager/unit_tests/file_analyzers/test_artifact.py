@@ -7,7 +7,6 @@ from tests.api_app.analyzers_manager.unit_tests.file_analyzers.base_test_class i
 
 
 class ArtifactTestCase(BaseFileAnalyzerTest):
-
     analyzer_class = Artifacts
 
     @staticmethod

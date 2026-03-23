@@ -22,8 +22,6 @@ class Artifacts(FileAnalyzer, DockerBasedAnalyzer):
         args = [f"@{fname}", "-a", "-r"]
         req_data = {"args": args}
         req_files = {fname: binary}
-        logger.info(
-            f"Running {self.analyzer_name} on {self.filename} with args: {args}"
-        )
+        logger.info(f"Running {self.analyzer_name} on {self.filename} with args: {args}")
         result = self._docker_run(req_data, req_files, analyzer_name=self.analyzer_name)
         return result

@@ -10,9 +10,8 @@ class TestMobsf(BaseFileAnalyzerTest):
     def get_mocked_response(self):
         return patch(
             "api_app.analyzers_manager.classes.DockerBasedAnalyzer._docker_run",
-            return_value=
             # flake8: noqa
-            {
+            return_value={
                 "report": {
                     "results": {
                         "android_logging": {

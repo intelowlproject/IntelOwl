@@ -2,7 +2,7 @@
 
 generic_version_regex="^[0-9]{1,2}\.[0-9]{1,2}.[0-9]{1,2}$"
 version_regex="^[3-9]\.[0-9]{1,2}.[0-9]{1,2}$"
-pycti_default_version="5.10.0"
+pycti_default_version="6.8.8"
 
 # little trick for exact matching in arrays
 declare -A env_arguments=(["prod"]=1 ["test"]=1 ["ci"]=1)

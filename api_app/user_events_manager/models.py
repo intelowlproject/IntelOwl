@@ -34,9 +34,7 @@ class UserEvent(models.Model):
     decay_timedelta_days = models.PositiveIntegerField(default=0)
 
     # internal usage
-    next_decay = models.DateTimeField(
-        default=None, editable=False, null=True, db_index=True, blank=True
-    )
+    next_decay = models.DateTimeField(default=None, editable=False, null=True, db_index=True, blank=True)
     decay_times = models.PositiveIntegerField(default=0, editable=False)
 
     objects = UserEventQuerySet.as_manager()
@@ -46,13 +44,8 @@ class UserEvent(models.Model):
 
     def clean(self):
         super().clean()
-        if (
-            self.decay_progression == DecayProgressionEnum.FIXED.value
-            and self.decay_timedelta_days != 0
-        ):
-            raise ValidationError(
-                "You cant have a fixed decay progression and timedelta different from 0"
-            )
+        if self.decay_progression == DecayProgressionEnum.FIXED.value and self.decay_timedelta_days != 0:
+            raise ValidationError("You cant have a fixed decay progression and timedelta different from 0")
 
 
 class UserAnalyzableEvent(UserEvent):
@@ -82,9 +75,7 @@ class UserAnalyzableEvent(UserEvent):
 
     class Meta:
         unique_together = (("user", "analyzable"),)
-        indexes = [
-            models.Index(fields=["data_model_content_type", "data_model_object_id"])
-        ]
+        indexes = [models.Index(fields=["data_model_content_type", "data_model_object_id"])]
 
     def clean(self):
         super().clean()
@@ -99,9 +90,7 @@ class UserDomainWildCardEvent(UserEvent):
         related_name="analyzable_domain_wildcard_events",
     )
 
-    query = models.CharField(
-        max_length=100, editable=False, help_text="This use classic regex syntax"
-    )
+    query = models.CharField(max_length=100, editable=False, help_text="This use classic regex syntax")
     analyzables = models.ManyToManyField(
         Analyzable,
         related_name="user_domain_wildcard_events",

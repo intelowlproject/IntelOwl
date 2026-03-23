@@ -1,11 +1,18 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
+import {
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
+  UncontrolledDropdown,
+} from "reactstrap";
+import { TiThMenu } from "react-icons/ti";
+import { MdDelete } from "react-icons/md";
 
-import { ContentSection, IconButton, addToast } from "@certego/certego-ui";
+import { IconButton, addToast } from "@certego/certego-ui";
 
 import { deleteInvestigation } from "./investigationApi";
-import { DeleteIcon } from "../../common/icon/actionIcons";
 import { areYouSureConfirmDialog } from "../../common/areYouSureConfirmDialog";
 
 export function InvestigationActionsBar({ investigation }) {
@@ -26,17 +33,29 @@ export function InvestigationActionsBar({ investigation }) {
   };
 
   return (
-    <ContentSection className="d-inline-flex me-2">
-      <IconButton
-        id="deletebtn"
-        Icon={DeleteIcon}
-        size="sm"
-        color="darker"
-        onClick={onDeleteBtnClick}
-        title="Delete Investigation"
-        titlePlacement="top"
-      />
-    </ContentSection>
+    <div className="d-inline-flex">
+      <UncontrolledDropdown inNavbar>
+        <DropdownToggle nav className="text-center">
+          <IconButton
+            id="investigationActions"
+            Icon={TiThMenu}
+            size="sm"
+            color="light"
+            title="Investigation actions"
+            titlePlacement="top"
+          />
+        </DropdownToggle>
+        <DropdownMenu end className="bg-dark" data-bs-popper>
+          <DropdownItem
+            onClick={onDeleteBtnClick}
+            className=" d-flex align-items-center text-light"
+          >
+            <MdDelete className="text-danger me-1" />
+            Delete investigation
+          </DropdownItem>
+        </DropdownMenu>
+      </UncontrolledDropdown>
+    </div>
   );
 }
 

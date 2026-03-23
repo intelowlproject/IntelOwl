@@ -12,8 +12,8 @@ from django.utils.functional import cached_property
 from certego_saas.apps.organization.organization import Organization
 
 if TYPE_CHECKING:
-    from api_app.playbooks_manager.models import PlaybookConfig
     from api_app.models import Job
+    from api_app.playbooks_manager.models import PlaybookConfig
 
 from django.core.files import File
 from django.http import QueryDict
@@ -55,15 +55,8 @@ class CreateJobsFromPlaybookInterface:
         from api_app.playbooks_manager.models import PlaybookConfig
 
         for playbook in self.playbooks_choice.all():
-            if (
-                not PlaybookConfig.objects.filter(pk=playbook.pk)
-                .visible_for_user(user)
-                .exists()
-            ):
-                raise RuntimeError(
-                    f"User {user.username} do not have visibility to"
-                    f" playbook {playbook.pk}"
-                )
+            if not PlaybookConfig.objects.filter(pk=playbook.pk).visible_for_user(user).exists():
+                raise RuntimeError(f"User {user.username} do not have visibility to playbook {playbook.pk}")
 
     def _get_serializer(
         self,
@@ -123,9 +116,7 @@ class CreateJobsFromPlaybookInterface:
         return ObservableAnalysisSerializer(
             data={
                 "playbook_requested": playbook_to_execute.name,
-                "observables": [
-                    (None, value) for value in values
-                ],  # (classification, value)
+                "observables": [(None, value) for value in values],  # (classification, value)
                 # -> the classification=None it's just a placeholder
                 #    because it'll be calculated later
                 "tlp": tlp,
@@ -160,11 +151,7 @@ class CreateJobsFromPlaybookInterface:
         from tests.mock_utils import MockUpRequest
 
         files = [
-            (
-                data
-                if isinstance(data, File)
-                else File(io.BytesIO(data), name=f"{self.name}.{i}")
-            )
+            (data if isinstance(data, File) else File(io.BytesIO(data), name=f"{self.name}.{i}"))
             for i, data in enumerate(values)
         ]
         query_dict = QueryDict(mutable=True)
@@ -258,9 +245,7 @@ class OwnershipAbstractModel(models.Model):
             ValidationError: If `for_organization` is set without an owner, or if the owner does not have an organization.
         """
         if self.for_organization and not self.owner:
-            raise ValidationError(
-                "You can't set `for_organization` and not have an owner"
-            )
+            raise ValidationError("You can't set `for_organization` and not have an owner")
         if self.for_organization and not self.owner.has_membership():
             raise ValidationError(
                 f"You can't create `for_organization` {self.__class__.__name__}"

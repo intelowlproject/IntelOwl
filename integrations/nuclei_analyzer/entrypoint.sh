@@ -15,7 +15,7 @@ else
     echo "Nuclei templates successfully updated."
 fi
 echo "Templates downloaded successfully. Starting Flask API..."
-exec gunicorn 'app:app' \
+exec /app/venv/bin/gunicorn 'app:app' \
     --bind '0.0.0.0:4008' \
     --access-logfile "${LOG_PATH}"/gunicorn_access.log \
     --error-logfile "${LOG_PATH}"/gunicorn_errors.log

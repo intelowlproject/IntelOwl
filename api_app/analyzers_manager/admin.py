@@ -3,7 +3,13 @@
 from django.contrib import admin
 
 from api_app.admin import AbstractReportAdminView, PythonConfigAdminView
-from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
+from api_app.analyzers_manager.models import (
+    AnalyzerConfig,
+    AnalyzerReport,
+    PhishingArmyDomain,
+    TorDanMeUKNode,
+    TorExitNode,
+)
 
 
 # flake8: noqa
@@ -20,3 +26,18 @@ class AnalyzerConfigAdminView(PythonConfigAdminView):
     )
     list_filter = ["type", "maximum_tlp"] + PythonConfigAdminView.list_filter
     exclude = ["update_task"]
+
+
+@admin.register(TorExitNode)
+class TorExitNodeAdmin(admin.ModelAdmin):
+    list_display = ["ip", "updated_at"]
+
+
+@admin.register(TorDanMeUKNode)
+class TorDanMeUKNodeAdmin(admin.ModelAdmin):
+    list_display = ["ip", "updated_at"]
+
+
+@admin.register(PhishingArmyDomain)
+class PhishingArmyDomainAdmin(admin.ModelAdmin):
+    list_display = ["domain", "updated_at"]

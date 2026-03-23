@@ -27,9 +27,5 @@ def post_save_analyzable(sender, instance: Analyzable, created, **kwargs):
             UserIPWildCardEvent,
         )
 
-        instance.user_domain_wildcard_events.add(
-            *UserDomainWildCardEvent.objects.matches(instance)
-        )
-        instance.user_ip_wildcard_events.add(
-            *UserIPWildCardEvent.objects.matches(instance)
-        )
+        instance.user_domain_wildcard_events.add(*UserDomainWildCardEvent.objects.matches(instance))
+        instance.user_ip_wildcard_events.add(*UserIPWildCardEvent.objects.matches(instance))

@@ -3,6 +3,7 @@ from typing import Type
 from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import Classification
+from api_app.decorators import classproperty
 from api_app.models import Job, PythonModule
 from api_app.pivots_manager.models import PivotConfig, PivotMap
 from api_app.playbooks_manager.models import PlaybookConfig
@@ -15,8 +16,7 @@ from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
 class PivotMapViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
     URL = "/api/pivot_map"
 
-    @classmethod
-    @property
+    @classproperty
     def model_class(cls) -> Type[PivotMap]:
         return PivotMap
 
@@ -61,14 +61,10 @@ class PivotMapViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
         )
         self.pc = PivotConfig.objects.create(
             name="test",
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
+            python_module=PythonModule.objects.filter(base_path="api_app.pivots_manager.pivots").first(),
         )
         self.pc.playbooks_choice.add(PlaybookConfig.objects.first())
-        self.pivot = PivotMap.objects.create(
-            starting_job=self.j1, ending_job=self.j2, pivot_config=self.pc
-        )
+        self.pivot = PivotMap.objects.create(starting_job=self.j1, ending_job=self.j2, pivot_config=self.pc)
 
     def tearDown(self) -> None:
         super().tearDown()
@@ -86,9 +82,7 @@ class PivotMapViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
         self.assertEqual(response.status_code, 403, response.json())
 
 
-class PivotConfigViewSetTestCase(
-    AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase
-):
+class PivotConfigViewSetTestCase(AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase):
     fixtures = [
         "api_app/fixtures/0001_user.json",
     ]
@@ -99,9 +93,7 @@ class PivotConfigViewSetTestCase(
         super().setUp()
         self.pc = PivotConfig(
             name="test",
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
+            python_module=PythonModule.objects.filter(base_path="api_app.pivots_manager.pivots").first(),
         )
         self.pc.save()
         self.pc.playbooks_choice.add(PlaybookConfig.objects.first())
@@ -110,8 +102,7 @@ class PivotConfigViewSetTestCase(
         super().tearDown()
         self.pc.delete()
 
-    @classmethod
-    @property
+    @classproperty
     def model_class(cls) -> Type[PivotConfig]:
         return PivotConfig
 
@@ -149,9 +140,7 @@ class PivotConfigViewSetTestCase(
 
     def test_update(self):
         org1, _ = Organization.objects.get_or_create(name="test")
-        m_user, _ = Membership.objects.get_or_create(
-            user=self.user, organization=org1, is_owner=False
-        )
+        m_user, _ = Membership.objects.get_or_create(user=self.user, organization=org1, is_owner=False)
 
         # user not in org can't update pivot
         self.client.force_authenticate(self.guest)
@@ -177,14 +166,10 @@ class PivotConfigViewSetTestCase(
 
     def test_delete(self):
         org1, _ = Organization.objects.get_or_create(name="test")
-        m_user, _ = Membership.objects.get_or_create(
-            user=self.user, organization=org1, is_owner=False
-        )
+        m_user, _ = Membership.objects.get_or_create(user=self.user, organization=org1, is_owner=False)
         pc1 = PivotConfig(
             name="test1",
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
+            python_module=PythonModule.objects.filter(base_path="api_app.pivots_manager.pivots").first(),
         )
         pc1.save()
         pc1.playbooks_choice.add(PlaybookConfig.objects.first())
@@ -258,9 +243,7 @@ class PivotConfigViewSetTestCase(
         response = self.client.get(f"{self.URL}/AbuseIpToSubmission/plugin_config")
         self.assertEqual(response.status_code, 200, response.content)
         result = response.json()
-        result["user_config"][0].pop(
-            "updated_at"
-        )  # auto filled by the model and hard to mock
+        result["user_config"][0].pop("updated_at")  # auto filled by the model and hard to mock
         self.assertEqual(
             result,
             {

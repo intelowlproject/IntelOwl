@@ -11,6 +11,7 @@ from django.conf import settings
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.decorators import classproperty
 from api_app.mixins import AbuseCHMixin
 from api_app.models import PluginConfig
 
@@ -27,15 +28,13 @@ class Feodo_Tracker(AbuseCHMixin, classes.ObservableAnalyzer):
     use_recommended_url: bool
     update_on_run: bool = True
 
-    @classmethod
-    @property
+    @classproperty
     def recommend_locations(cls) -> Tuple[str, str]:
         db_name = "feodotracker_abuse_ipblocklist.json"
         url = "https://feodotracker.abuse.ch/downloads/ipblocklist_recommended.json"
         return f"{settings.MEDIA_ROOT}/{db_name}", url
 
-    @classmethod
-    @property
+    @classproperty
     def default_locations(cls) -> Tuple[str, str]:
         db_name = "feodotracker_abuse_ipblocklist_recommended.json"
         url = "https://feodotracker.abuse.ch/downloads/ipblocklist.json"
@@ -43,11 +42,7 @@ class Feodo_Tracker(AbuseCHMixin, classes.ObservableAnalyzer):
 
     def run(self):
         result = {"found": False}
-        db_location, _ = (
-            self.recommend_locations
-            if self.use_recommended_url
-            else self.default_locations
-        )
+        db_location, _ = self.recommend_locations if self.use_recommended_url else self.default_locations
         if self.update_on_run or not os.path.exists(db_location) and not self.update():
             raise AnalyzerRunException("Unable to update database")
         try:

@@ -36,15 +36,10 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
                     resolutions.append(hostname)
             except (socket.gaierror, socket.herror):
                 logger.info(f"No resolution for ip {self.observable_name}")
-                self.report.errors.append(
-                    f"No resolution for ip {self.observable_name}"
-                )
+                self.report.errors.append(f"No resolution for ip {self.observable_name}")
                 resolutions = []
             except socket.timeout:
-                message = (
-                    f"request for {self.observable_name} for classic"
-                    " DNS triggered timeout"
-                )
+                message = f"request for {self.observable_name} for classic DNS triggered timeout"
                 logger.warning(message)
                 self.report.errors.append(message)
                 timeout = True
@@ -73,15 +68,10 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
                 dns.resolver.NoAnswer,
                 dns.resolver.NoNameservers,
             ):
-                logger.info(
-                    "No resolution for "
-                    f"{self.observable_classification} {self.observable_name}"
-                )
+                logger.info(f"No resolution for {self.observable_classification} {self.observable_name}")
             except dns.resolver.LifetimeTimeout as e:
                 logger.warning(
-                    "No resolution for "
-                    f"{self.observable_classification} {self.observable_name}."
-                    f"Reason {e}",
+                    f"No resolution for {self.observable_classification} {self.observable_name}. Reason {e}",
                     stack_info=True,
                 )
                 self.report.errors.append(str(e))

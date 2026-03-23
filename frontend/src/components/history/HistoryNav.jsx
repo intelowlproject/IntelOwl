@@ -15,9 +15,9 @@ export function HistoryNav({ pageType, startTimeParam, endTimeParam }) {
   const navigate = useNavigate();
 
   let createButtonTitle = "New evaluation";
-  if (pageType === HistoryPages.JOBS) {
+  if (pageType === HistoryPages.JOB) {
     createButtonTitle = "Create job";
-  } else if (pageType === HistoryPages.INVESTIGAITONS) {
+  } else if (pageType === HistoryPages.INVESTIGAITON) {
     createButtonTitle = "Create Investigation";
   }
 
@@ -27,9 +27,9 @@ export function HistoryNav({ pageType, startTimeParam, endTimeParam }) {
   const [showUserEventModal, setShowUserEventModal] = React.useState(false);
 
   const onClick = async () => {
-    if (pageType === HistoryPages.JOBS) {
+    if (pageType === HistoryPages.JOB) {
       navigate("/scan");
-    } else if (pageType === HistoryPages.INVESTIGAITONS) {
+    } else if (pageType === HistoryPages.INVESTIGAITON) {
       try {
         const investigationId = await createInvestigation();
         if (investigationId) navigate(`/investigation/${investigationId}`);

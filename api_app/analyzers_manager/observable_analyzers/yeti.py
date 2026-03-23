@@ -16,13 +16,13 @@ class YETI(classes.ObservableAnalyzer):
     def run(self):
         # request payload
         payload = {
-            "filter": {"value": self._job.analyzable.name},
-            "params": {"regex": self.regex, "range": self.results_count},
+            "query": {"value": self._job.analyzable.name},
+            "count": self.results_count,
         }
         headers = {"Accept": "application/json", "X-Api-Key": self._api_key_name}
         if self._url_key_name and self._url_key_name.endswith("/"):
             self._url_key_name = self._url_key_name[:-1]
-        url = f"{self._url_key_name}/api/v2/observablesearch/"
+        url = f"{self._url_key_name}/api/v2/observables/search/"
 
         # search for observables
         resp = requests.post(

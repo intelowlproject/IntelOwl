@@ -59,8 +59,8 @@ def intercept_suricata_result(context, future: Future) -> None:
                 try:
                     res["report"]["data"].append(json.loads(line))
                 except json.JSONDecodeError as e:
-                    logger.debug(e)
-                    res["report"]["data"].append(fp.read())
+                    logger.warning(f"Skipping malformed JSON line in eve.json: {e}")
+                    continue
 
     # 3. set final result after modifications
     future._result = res  # skipcq PYL-W0212

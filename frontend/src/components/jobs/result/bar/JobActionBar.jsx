@@ -1,26 +1,41 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button } from "reactstrap";
+import {
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
+  UncontrolledDropdown,
+  Badge,
+} from "reactstrap";
 import { useNavigate } from "react-router-dom";
+import { TiThMenu } from "react-icons/ti";
+import { IoMdSave } from "react-icons/io";
+import { IconButton, addToast } from "@certego/certego-ui";
+import { MdDelete, MdOutlineRefresh, MdFileDownload } from "react-icons/md";
 import { FaFileDownload } from "react-icons/fa";
 
-import { ContentSection, IconButton, addToast } from "@certego/certego-ui";
-
-import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";
-
 import { downloadJobSample, deleteJob, rescanJob } from "../jobApi";
-import { JobResultSections } from "../../../../constants/miscConst";
 import {
-  DeleteIcon,
-  CommentIcon,
-  rescanIcon,
-  downloadReportIcon,
-} from "../../../common/icon/actionIcons";
+  JobResultSections,
+  Classifications,
+} from "../../../../constants/miscConst";
+import { CommentIcon } from "../../../common/icon/actionIcons";
 import { fileDownload } from "../../../../utils/files";
+import { PluginConfigModal } from "../../../plugins/PluginConfigModal";
+import { PluginsTypes } from "../../../../constants/pluginConst";
+import {
+  AnalyzableOverviewButton,
+  InvestigationOverviewButton,
+  RelatedInvestigationButton,
+} from "../utils/jobButtons";
 
-export function JobActionsBar({ job }) {
+export function JobActionsBar({ job, relatedInvestigationNumber }) {
+  console.debug(job);
   // routers
   const navigate = useNavigate();
+  // state
+  const [showModalCreatePlaybook, setShowModalCreatePlaybook] =
+    React.useState(false);
 
   // callbacks
   const onDeleteBtnClick = async () => {
@@ -62,65 +77,113 @@ export function JobActionsBar({ job }) {
 
   const commentIcon = () => <CommentIcon commentNumber={job.comments.length} />;
   return (
-    <ContentSection className="d-inline-flex me-2">
-      <IconButton
-        id="commentbtn"
-        Icon={commentIcon}
-        size="sm"
-        color="darker"
-        className="me-2"
-        onClick={() => navigate(`/jobs/${job.id}/comments`)}
-        title="Comments"
-        titlePlacement="top"
-      />
-      {job.permissions?.delete && (
-        <IconButton
-          id="deletejobbtn"
-          Icon={DeleteIcon}
-          size="sm"
-          color="darker"
-          className="me-2"
-          onClick={onDeleteBtnClick}
-          title="Delete Job"
-          titlePlacement="top"
+    <div className="d-inline-flex">
+      {job?.investigation_id && (
+        <InvestigationOverviewButton
+          id={job.investigation_id}
+          name={job.investigation_name}
         />
       )}
-      <IconButton
-        id="rescanbtn"
-        Icon={rescanIcon}
-        onClick={handleRetry}
-        color="light"
-        size="sm"
-        title="Force run the same analysis"
-        titlePlacement="top"
-        className="me-2"
-      />
-      <SaveAsPlaybookButton job={job} />
-      {job?.is_sample && (
-        <Button
+      <AnalyzableOverviewButton id={job.analyzable_id} />
+      <div>
+        <IconButton
+          id="commentbtn"
+          Icon={commentIcon}
           size="sm"
-          color="secondary"
-          className="ms-2"
-          onClick={onDownloadSampleBtnClick}
-        >
-          <FaFileDownload />
-          &nbsp;Sample
-        </Button>
-      )}
-      <IconButton
-        id="downloadreportbtn"
-        Icon={downloadReportIcon}
-        size="sm"
-        color="accent-2"
-        className="ms-2"
-        onClick={onDownloadReport}
-        title="Download report in json format"
-        titlePlacement="top"
-      />
-    </ContentSection>
+          color="gray"
+          className="me-1 text-light"
+          onClick={() => navigate(`/jobs/${job.id}/comments`)}
+        />
+        {job.comments.length > 0 && (
+          <Badge color="light" className="badge-top-end-corner text-black">
+            {job.comments.length}
+          </Badge>
+        )}
+      </div>
+      <UncontrolledDropdown inNavbar>
+        <DropdownToggle nav className="text-center">
+          <IconButton
+            id="jobActions"
+            Icon={TiThMenu}
+            size="sm"
+            color="light"
+            title="Job actions"
+            titlePlacement="top"
+          />
+        </DropdownToggle>
+        <DropdownMenu end className="bg-dark" data-bs-popper>
+          <RelatedInvestigationButton
+            name={job.is_sample ? job.file_name : job.observable_name}
+            relatedInvestigationNumber={relatedInvestigationNumber}
+          />
+          <DropdownItem divider />
+          <DropdownItem
+            onClick={onDownloadReport}
+            className="d-flex align-items-center text-light"
+          >
+            <MdFileDownload className="me-1 text-advisory" />
+            Download report
+          </DropdownItem>
+          {job?.is_sample && (
+            <DropdownItem
+              onClick={onDownloadSampleBtnClick}
+              className=" d-flex align-items-center text-light"
+            >
+              <FaFileDownload className="me-1 text-advisory" />
+              Download sample
+            </DropdownItem>
+          )}
+          <DropdownItem
+            onClick={() => setShowModalCreatePlaybook(true)}
+            className=" d-flex align-items-center text-light"
+          >
+            <IoMdSave className="me-1 text-advisory" />
+            Save as playbook
+            <PluginConfigModal
+              pluginConfig={{
+                analyzers: job?.analyzers_to_execute,
+                connectors: job?.connectors_to_execute,
+                pivots: job?.pivots_to_execute,
+                type: [
+                  job?.is_sample
+                    ? Classifications.FILE
+                    : job?.observable_classification,
+                ],
+                runtimeConfiguration: job?.runtime_configuration,
+                tags: job?.tags.map((tag) => tag?.label),
+                tlp: job?.tlp,
+                scan_mode: job?.scan_mode,
+                scan_check_time: job?.scan_check_time,
+              }}
+              pluginType={PluginsTypes.PLAYBOOK}
+              toggle={setShowModalCreatePlaybook}
+              isOpen={showModalCreatePlaybook}
+            />
+          </DropdownItem>
+          <DropdownItem divider />
+          <DropdownItem
+            onClick={handleRetry}
+            className=" d-flex align-items-center text-light"
+          >
+            <MdOutlineRefresh className="me-1 text-accent" />
+            Rescan
+          </DropdownItem>
+          {job.permissions?.delete && (
+            <DropdownItem
+              onClick={onDeleteBtnClick}
+              className=" d-flex align-items-center text-light"
+            >
+              <MdDelete className="text-danger me-1" />
+              Delete
+            </DropdownItem>
+          )}
+        </DropdownMenu>
+      </UncontrolledDropdown>
+    </div>
   );
 }
 
 JobActionsBar.propTypes = {
   job: PropTypes.object.isRequired,
+  relatedInvestigationNumber: PropTypes.number.isRequired,
 };

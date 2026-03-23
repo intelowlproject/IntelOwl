@@ -47,19 +47,15 @@ class BGPRanking(classes.ObservableAnalyzer):
         )
         response.raise_for_status()
         response = response.json()
-        final_response["asn_description"] = response["response"].get(
-            "asn_description", None
-        )
+        final_response["asn_description"] = response["response"].get("asn_description", None)
         final_response["asn_rank"] = response["response"]["ranking"].get("rank", None)
-        final_response["asn_position"] = response["response"]["ranking"].get(
-            "position", None
-        )
+        final_response["asn_position"] = response["response"]["ranking"].get("position", None)
         if final_response["asn_rank"] is None:
             raise AnalyzerRunException(f"ASN rank not found in {response}")
 
         logger.info(
-            f"""ASN rank: {final_response['asn_rank']},
-            position: {final_response['asn_position']},
+            f"""ASN rank: {final_response["asn_rank"]},
+            position: {final_response["asn_position"]},
             from {self.observable_name}"""
         )
 
@@ -73,13 +69,11 @@ class BGPRanking(classes.ObservableAnalyzer):
             )
             response.raise_for_status()
             response = response.json()
-            final_response["asn_history"] = response["response"].get(
-                "asn_history", None
-            )
+            final_response["asn_history"] = response["response"].get("asn_history", None)
             if final_response["asn_history"] is None:
                 raise AnalyzerRunException(f"ASN history not found in {response}")
             logger.info(
-                f"""ASN history: {final_response['asn_history']}
+                f"""ASN history: {final_response["asn_history"]}
                 for {self.observable_name}"""
             )
         # we are using the ASN in a variable

@@ -13,6 +13,7 @@ from rest_framework.test import APIClient
 from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import Classification
+from api_app.decorators import abstractclassproperty
 from api_app.models import AbstractReport, Job
 
 User = get_user_model()
@@ -54,17 +55,13 @@ class CustomTestCase(TestCase):
         except Exception as e:
             print(f"Error: {e}")
 
-    def _analyze_sample(
-        self, sample_name, sample_md5, sample_mimetype, analyzer_name, analyzer_class
-    ):
+    def _analyze_sample(self, sample_name, sample_md5, sample_mimetype, analyzer_name, analyzer_class):
         analyzer_config = AnalyzerConfig.objects.get(name=analyzer_name)
         analyzer = analyzer_class(analyzer_config)
         analyzer.md5 = sample_md5
         analyzer.filename = f"test_files/{sample_name}"
         analyzer.file_mimetype = sample_mimetype
-        job = self._create_job_from_file(
-            f"test_files/{sample_name}", sample_mimetype, analyzer_config
-        )
+        job = self._create_job_from_file(f"test_files/{sample_name}", sample_mimetype, analyzer_config)
         analyzer.start(job.id, {}, 1)
         return analyzer.report.report
 
@@ -73,28 +70,20 @@ class CustomTestCase(TestCase):
         try:
             cls.guest = User.objects.get(is_superuser=False, username="guest")
         except User.DoesNotExist:
-            cls.guest = User.objects.create(
-                username="guest", email="guest@intelowl.com", password="test"
-            )
+            cls.guest = User.objects.create(username="guest", email="guest@intelowl.com", password="test")
 
         try:
             cls.user = User.objects.get(is_superuser=False, username="user")
         except User.DoesNotExist:
-            cls.user = User.objects.create(
-                username="user", email="user@intelowl.com", password="test"
-            )
+            cls.user = User.objects.create(username="user", email="user@intelowl.com", password="test")
 
         try:
             cls.admin = User.objects.get(is_superuser=False, username="admin")
         except User.DoesNotExist:
-            cls.admin = User.objects.create(
-                username="admin", email="admin@intelowl.com", password="test"
-            )
+            cls.admin = User.objects.create(username="admin", email="admin@intelowl.com", password="test")
 
         try:
-            cls.superuser = User.objects.get(
-                is_superuser=True, username="superuser@intelowl.org"
-            )
+            cls.superuser = User.objects.get(is_superuser=True, username="superuser@intelowl.org")
         except User.DoesNotExist:
             cls.superuser = User.objects.create_superuser(
                 username="superuser@intelowl.org",
@@ -133,12 +122,8 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         raise NotImplementedError()
 
     def test_kill_204(self):
-        _report = self.init_report(
-            status=AbstractReport.STATUSES.PENDING, user=self.user
-        )
-        response = self.client.patch(
-            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/kill"
-        )
+        _report = self.init_report(status=AbstractReport.STATUSES.PENDING, user=self.user)
+        response = self.client.patch(f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/kill")
         _report.refresh_from_db()
 
         self.assertEqual(response.status_code, 204)
@@ -146,12 +131,8 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
 
     def test_kill_400(self):
         # create a new report whose status is not "running"/"pending"
-        _report = self.init_report(
-            status=AbstractReport.STATUSES.SUCCESS, user=self.user
-        )
-        response = self.client.patch(
-            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/kill"
-        )
+        _report = self.init_report(status=AbstractReport.STATUSES.SUCCESS, user=self.user)
+        response = self.client.patch(f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/kill")
         content = response.json()
         msg = (response, content)
 
@@ -165,9 +146,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
     def test_kill_403(self):
         # create a new report which does not belong to user
         _report = self.init_report(status=AbstractReport.STATUSES.PENDING, user=None)
-        response = self.client.patch(
-            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/kill"
-        )
+        response = self.client.patch(f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/kill")
 
         self.assertEqual(response.status_code, 403)
 
@@ -180,9 +159,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         from api_app.models import PluginConfig
 
         # create new report with status "FAILED"
-        _report = self.init_report(
-            status=AbstractReport.STATUSES.FAILED, user=self.superuser
-        )
+        _report = self.init_report(status=AbstractReport.STATUSES.FAILED, user=self.superuser)
         self.client.force_authenticate(self.superuser)
         pcs = []
         for param in _report.config.parameters.filter(required=True):
@@ -199,9 +176,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
                     **{_report.config.snake_case_name: _report.config},
                 )
             )
-        response = self.client.patch(
-            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/retry"
-        )
+        response = self.client.patch(f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/retry")
 
         self.assertEqual(response.status_code, 204)
         self.client.force_authenticate(self.user)
@@ -210,12 +185,8 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
 
     def test_retry_400(self):
         # create a new report whose status is not "FAILED"/"KILLED"
-        _report = self.init_report(
-            status=AbstractReport.STATUSES.SUCCESS, user=self.user
-        )
-        response = self.client.patch(
-            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/retry"
-        )
+        _report = self.init_report(status=AbstractReport.STATUSES.SUCCESS, user=self.user)
+        response = self.client.patch(f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/retry")
         content = response.json()
         msg = (response, content)
 
@@ -229,9 +200,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
     def test_retry_403(self):
         # create a new report which does not belong to user
         _report = self.init_report(status=AbstractReport.STATUSES.FAILED, user=None)
-        response = self.client.patch(
-            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/retry"
-        )
+        response = self.client.patch(f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/retry")
 
         self.assertEqual(response.status_code, 403)
 
@@ -242,9 +211,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
 
 
 class ViewSetTestCaseMixin:
-    @classmethod
-    @property
-    @abstractmethod
+    @abstractclassproperty
     def model_class(cls) -> Type[Model]:
         raise NotImplementedError()
 

@@ -58,7 +58,9 @@ describe("test History component", () => {
     const artifactsButton = screen.getByText("Artifacts evaluations");
     expect(artifactsButton).toBeInTheDocument();
     expect(artifactsButton.closest("a").className).not.toContain("active"); // not selected
-    expect(artifactsButton.closest("a").href).toContain("/history/user-events");
+    expect(artifactsButton.closest("a").href).toContain(
+      "/history/user-evaluations",
+    );
     expect(artifactsButton.closest("a").href).toContain("event_date__gte");
     expect(artifactsButton.closest("a").href).toContain("event_date__lte");
 
@@ -66,7 +68,7 @@ describe("test History component", () => {
     expect(ipWildcardButton).toBeInTheDocument();
     expect(ipWildcardButton.closest("a").className).not.toContain("active"); // not selected
     expect(ipWildcardButton.closest("a").href).toContain(
-      "/history/user-ip-wildcard-events",
+      "/history/user-ip-wildcard-evaluations",
     );
     expect(ipWildcardButton.closest("a").href).toContain("event_date__gte");
     expect(ipWildcardButton.closest("a").href).toContain("event_date__lte");
@@ -77,7 +79,7 @@ describe("test History component", () => {
     expect(domainWildcardButton).toBeInTheDocument();
     expect(domainWildcardButton.closest("a").className).not.toContain("active"); // not selected
     expect(domainWildcardButton.closest("a").href).toContain(
-      "/history/user-domain-wildcard-events",
+      "/history/user-domain-wildcard-evaluations",
     );
     expect(domainWildcardButton.closest("a").href).toContain("event_date__gte");
     expect(domainWildcardButton.closest("a").href).toContain("event_date__lte");

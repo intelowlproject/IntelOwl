@@ -4,9 +4,10 @@ import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import { AnalyzableOverview } from "../../../../src/components/analyzables/result/AnalyzableOverview";
-import { addToast } from "@certego/certego-ui";
 import axios from "axios";
+import { addToast } from "@certego/certego-ui";
+
+import { AnalyzableOverview } from "../../../../src/components/analyzables/result/AnalyzableOverview";
 import { useAuthStore } from "../../../../src/stores/useAuthStore";
 
 jest.mock("axios-hooks");
@@ -193,7 +194,7 @@ describe("test AnalyzableOverview", () => {
     expect(screen.getByText("scanner")).toBeInTheDocument();
     expect(screen.getByText("External References (1)")).toBeInTheDocument();
     expect(screen.getByText("test references")).toBeInTheDocument();
-    expect(screen.getByText("Reasons (1)")).toBeInTheDocument();
+    expect(screen.getByText("Related Artifacts (1)")).toBeInTheDocument();
     expect(screen.getAllByText("my comment")[0]).toBeInTheDocument();
 
     // History
@@ -320,7 +321,7 @@ describe("test AnalyzableOverview", () => {
     // visualizers - second row
     expect(screen.getByText("Tags (0)")).toBeInTheDocument();
     expect(screen.getByText("External References (0)")).toBeInTheDocument();
-    expect(screen.getByText("Reasons (0)")).toBeInTheDocument();
+    expect(screen.getByText("Related Artifacts (0)")).toBeInTheDocument();
 
     // History
     expect(

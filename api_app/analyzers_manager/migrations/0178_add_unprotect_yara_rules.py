@@ -53,7 +53,7 @@ def remove_unprotect_url(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('analyzers_manager', '0171_analyzer_config_hibpbreaches'),
+        ('analyzers_manager', '0177_update_urlscan_observable_supported'),
     ]
     operations = [
         migrations.RunPython(add_unprotect_url, remove_unprotect_url),

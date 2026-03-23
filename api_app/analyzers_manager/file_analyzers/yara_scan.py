@@ -152,6 +152,7 @@ class YaraRepo:
                 del os.environ["GIT_SSH"]
                 if settings.GIT_KEY_PATH.exists():
                     os.remove(settings.GIT_KEY_PATH)
+
     @staticmethod
     def _write_rule_to_temp(rule, temp_dir):
         """Helper to write an individual rule to the temp directory."""

@@ -107,13 +107,27 @@ export function UserEventForm({ initialFormValues, toggle }) {
     onSubmit: async () => {
       let exists = false;
       formik.values.analyzables.forEach((analyzable) => {
-        console.debug(Object.keys(userExistingEvents));
         if (Object.keys(userExistingEvents).includes(analyzable)) exists = true;
       });
       if (exists) {
-        const sure = await areYouSureConfirmDialog(
-          "You are evaluating one or more indicators that you've previously evaluated. All fields entered in the form (including empty ones) will overwrite existing ones.",
+        const text = (
+          <div>
+            <span>
+              You are evaluating one or more indicators that you have previously
+              evaluated. All fields entered in the form (including empty ones)
+              will overwrite existing ones.
+            </span>
+            <ul className="text-start mt-4">
+              {Object.entries(userExistingEvents).map(([analyzable, event]) => {
+                if (formik.values.analyzables.includes(analyzable)) {
+                  return <li key={`event__${event.id}`}>{analyzable}</li>;
+                }
+                return null;
+              })}
+            </ul>
+          </div>
         );
+        const sure = await areYouSureConfirmDialog(text);
         if (!sure) return null;
       }
 

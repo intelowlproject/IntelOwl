@@ -7,8 +7,9 @@ import { MdInfoOutline } from "react-icons/md";
 import {
   UserEventTypes,
   evaluationOptions,
-  basicEvaluationOptionValues,
+  basicEvaluationReliabilityOption,
   userEventTypesToApiMapping,
+  basicEvaluationOptions,
 } from "../../constants/userEventsConst";
 import {
   DataModelKillChainPhasesDescriptions,
@@ -87,13 +88,13 @@ export function BasicEvaluationWarning(props) {
     <div className="d-flex flex-column" id="basic-evaluation-warning">
       {((evaluation.toString() === DataModelEvaluations.MALICIOUS &&
         ![
-          basicEvaluationOptionValues.RELIABILITY_CONFIRMED_MALICIOUS,
-          basicEvaluationOptionValues.RELIABILITY_MALICIOUS,
+          basicEvaluationReliabilityOption.RELIABILITY_CONFIRMED_MALICIOUS,
+          basicEvaluationReliabilityOption.RELIABILITY_MALICIOUS,
         ].includes(reliability)) ||
         (evaluation.toString() === DataModelEvaluations.TRUSTED &&
           ![
-            basicEvaluationOptionValues.RELIABILITY_CURRENTLY_TRUSTED,
-            basicEvaluationOptionValues.RELIABILITY_TRUSTED,
+            basicEvaluationReliabilityOption.RELIABILITY_CURRENTLY_TRUSTED,
+            basicEvaluationReliabilityOption.RELIABILITY_TRUSTED,
           ].includes(reliability))) && (
         <strong className="d-flex align-items-center mb-0 py-1 text-warning">
           Warning: Manual reliability has been set and save correctly. Selecting
@@ -179,27 +180,29 @@ export function advancedToBasicEvaluation(props) {
   let basicEvaluation = null;
   if (
     evaluation === DataModelEvaluations.MALICIOUS &&
-    reliability === basicEvaluationOptionValues.RELIABILITY_CONFIRMED_MALICIOUS
+    reliability ===
+      basicEvaluationReliabilityOption.RELIABILITY_CONFIRMED_MALICIOUS
   ) {
-    basicEvaluation = "0";
+    basicEvaluation = basicEvaluationOptions.CONFIRMED_MALICIOUS;
   }
   if (
     evaluation === DataModelEvaluations.MALICIOUS &&
-    reliability === basicEvaluationOptionValues.RELIABILITY_MALICIOUS
+    reliability === basicEvaluationReliabilityOption.RELIABILITY_MALICIOUS
   ) {
-    basicEvaluation = "1";
+    basicEvaluation = basicEvaluationOptions.MALICIOUS;
   }
   if (
     evaluation === DataModelEvaluations.TRUSTED &&
-    reliability === basicEvaluationOptionValues.RELIABILITY_CURRENTLY_TRUSTED
+    reliability ===
+      basicEvaluationReliabilityOption.RELIABILITY_CURRENTLY_TRUSTED
   ) {
-    basicEvaluation = "2";
+    basicEvaluation = basicEvaluationOptions.CURRENTLY_TRUSTED;
   }
   if (
     evaluation === DataModelEvaluations.TRUSTED &&
-    reliability === basicEvaluationOptionValues.RELIABILITY_TRUSTED
+    reliability === basicEvaluationReliabilityOption.RELIABILITY_TRUSTED
   ) {
-    basicEvaluation = "3";
+    basicEvaluation = basicEvaluationOptions.TRUSTED;
   }
   return basicEvaluation;
 }

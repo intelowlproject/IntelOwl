@@ -1,6 +1,6 @@
 import requests
 
-from api_app.analyzers_manager.classes import BaseAnalyzer
+from api_app.analyzers_manager.classes import BaseAnalyzerMixin
 
 
 class FullHunt(BaseAnalyzer):

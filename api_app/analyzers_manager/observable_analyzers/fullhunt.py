@@ -43,3 +43,4 @@ class FullHunt(BaseAnalyzerMixin):
         Updates the analyzer configuration if necessary.
         """
         pass
+        

@@ -1,4 +1,5 @@
 import requests
+
 from api_app.analyzers_manager.analyzers import BaseAnalyzer
 
 

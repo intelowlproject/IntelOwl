@@ -9,6 +9,7 @@ import shutil
 import tempfile
 import zipfile
 from pathlib import PosixPath
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
@@ -153,32 +154,38 @@ class YaraRepo:
                 if settings.GIT_KEY_PATH.exists():
                     os.remove(settings.GIT_KEY_PATH)
 
-    def _write_rule_to_temp(self, rule, temp_dir, page_num):
-        """Helper to handle the logic of processing and writing a single rule."""
-        yara_rule = rule.get("yara_rule")
-        if not yara_rule:
+    def _write_rule_to_temp(self, rule, temp_dir):
+        """Helper to write an individual rule to the temp directory."""
+        try:
+            # Check for YARA rule content in multiple possible fields
+            yara_rule = rule.get("yara_rule") or rule.get("yara_rules") or rule.get("rule")
+            
+            if not yara_rule or not isinstance(yara_rule, str):
+                return False
+
+            # Sanitize filename: Remove spaces and non-alphanumeric chars
+            rule_name = rule.get("name") or "unprotect_rule"
+            clean_name = "".join(filter(str.isalnum, str(rule_name)))
+            rule_id = rule.get("id", "unknown")
+            
+            filename = f"{clean_name}_{rule_id}.yar"
+            # Ensure temp_dir is treated as a Path object
+            save_path = Path(temp_dir) / filename
+        
+            with open(save_path, "w", encoding="utf-8") as f:
+                f.write(yara_rule)
+            return True
+        except Exception as e:
+            logger.error(f"Error writing rule {rule.get('id')}: {e}")
             return False
-
-        # Fallback logic to ensure we always have a valid filename
-        rule_name = rule.get("name") or rule.get("id") or f"rule_{page_num}"
-        safe_name = "".join(c for c in str(rule_name) if c.isalnum() or c in ("_", "-", ".")).strip()
-
-        if not safe_name:
-            safe_name = f"unprotect_rule_{page_num}"
-
-        rule_id = rule.get("id", page_num)
-        file_path = temp_dir / f"{safe_name}_{rule_id}.yar"
-
-        with open(file_path, "w", encoding="utf-8") as f:
-            f.write(yara_rule)
-        return True
 
     def _update_unprotect_api(self):
         logger.info(f"Fetching Unprotect rules from {self.url}")
-
+    
         # Setup temporary workspace
         os.makedirs(self.directory.parent, exist_ok=True)
-        temp_dir_path = PosixPath(tempfile.mkdtemp(prefix="unprotect_tmp_", dir=str(self.directory.parent)))
+        temp_dir_raw = tempfile.mkdtemp(prefix="unprotect_tmp_", dir=str(self.directory.parent))
+        temp_dir_path = Path(temp_dir_raw)
 
         page = 1
         MAX_PAGES = 50
@@ -199,8 +206,8 @@ class YaraRepo:
                     break
 
                 for rule in results:
-                    # Increment counter only if file was actually written
-                    if self._write_rule_to_temp(rule, temp_dir_path, page):
+                    # Pass the correct temp_dir_path to the helper
+                    if self._write_rule_to_temp(rule, temp_dir_path):
                         rules_written += 1
 
                 if not data.get("next"):
@@ -211,6 +218,7 @@ class YaraRepo:
                 self._finalize_rules(temp_dir_path, rules_written)
             else:
                 logger.warning("No Unprotect rules were fetched; keeping existing local rules.")
+            
         finally:
             if temp_dir_path.exists():
                 shutil.rmtree(temp_dir_path, ignore_errors=True)
@@ -218,13 +226,14 @@ class YaraRepo:
     def _finalize_rules(self, temp_dir, count):
         """Moves rules from temp to final destination and cleans up old rules."""
         os.makedirs(self.directory, exist_ok=True)
-        # Remove old YARA rules to prevent duplicates/stale rules
+    
         for old_file in self.directory.glob("*.yar"):
             old_file.unlink(missing_ok=True)
-        # Move new rules in
+        
         for new_file in temp_dir.glob("*.yar"):
-            shutil.move(str(new_file), self.directory)
-        logger.info("Successfully updated Unprotect repository with %d rules", count)
+            shutil.move(str(new_file), str(self.directory / new_file.name))
+        
+        logger.info("Successfully updated Unprotect repository with %d rules in %s", count, self.directory)
 
     def delete_lock_file(self):
         lock_file_path = self.directory / ".git" / "index.lock"

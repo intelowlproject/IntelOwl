@@ -2,6 +2,7 @@ import requests
 
 from api_app.analyzers_manager.classes import BaseAnalyzer
 
+
 class FullHunt(BaseAnalyzer):
     """
     FullHunt Analyzer to enrich domains with attack surface data,

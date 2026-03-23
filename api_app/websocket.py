@@ -104,7 +104,7 @@ class JobConsumer(JsonWebsocketConsumer):
         job_id = self.scope["url_route"]["kwargs"]["job_id"]
         logger.info(f"user: {user} requested the analysis for the job {job_id}")
         try:
-            job = Job.objects.get(id=job_id)
+            job = Job.objects.visible_for_user(user).get(id=job_id)
         except Job.DoesNotExist:
             logger.error(f"user: {user} request the non-existing job: {job_id}")
             self.close(code=4040)
@@ -132,7 +132,7 @@ class JobConsumer(JsonWebsocketConsumer):
         user: User = self.scope["user"]
         job_id = self.scope["url_route"]["kwargs"]["job_id"]
         try:
-            job = Job.objects.get(id=job_id)
+            job = Job.objects.visible_for_user(user).get(id=job_id)
         except Job.DoesNotExist:
             logger.warning(
                 f"close ws by the user: {user} for a non-existing job "

@@ -183,14 +183,18 @@ class ChangePasswordView(APIView):
         old_password = request.data.get("old_password")
         new_password = request.data.get("new_password")
 
-        # Validate new password strength
+        # Check if new password is provided
+        if not new_password:
+            return Response({"error": "New password is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validate new password strength with user context for UserAttributeSimilarityValidator
+        user = request.user
         try:
-            validate_password_strength(new_password)
+            validate_password_strength(new_password, user=user)
         except ValidationError as e:
-            return Response({"error": e.message}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": str(e.message)}, status=status.HTTP_400_BAD_REQUEST)
 
         # Check if the old password matches the user's current password
-        user = request.user
         uname = user.username
         if not check_password(old_password, user.password):
             logger.info(f"'{uname}' has inputted invalid old password.")

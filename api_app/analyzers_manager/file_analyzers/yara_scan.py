@@ -152,8 +152,8 @@ class YaraRepo:
                 del os.environ["GIT_SSH"]
                 if settings.GIT_KEY_PATH.exists():
                     os.remove(settings.GIT_KEY_PATH)
-
-    def _write_rule_to_temp(self, rule, temp_dir):
+    @staticmethod
+    def _write_rule_to_temp(rule, temp_dir):
         """Helper to write an individual rule to the temp directory."""
         try:
             # Check for YARA rule content in multiple possible fields
@@ -205,8 +205,8 @@ class YaraRepo:
                     break
 
                 for rule in results:
-                    # Just call the function. Validation and counting happen later.
-                    self._write_rule_to_temp(rule, temp_dir_path)
+                    # Call it via the class name or just remove 'self.'
+                    YaraRepo._write_rule_to_temp(rule, temp_dir_path)
 
                 if not data.get("next"):
                     break

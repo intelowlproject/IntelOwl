@@ -2,7 +2,6 @@
 
 from api_app.analyzers_manager.observable_analyzers.fullhunt import FullHunt
 
-
 def test_fullhunt_analyzer(requests_mock):
     """Test successful domain enrichment from FullHunt."""
     analyzer = FullHunt(config={"api_key": "test_key"})

@@ -165,7 +165,7 @@ class YaraRepo:
 
             # Sanitize filename: Remove spaces and non-alphanumeric chars
             rule_name = rule.get("name") or "unprotect_rule"
-            clean_name = "".join(filter(str.isalnum, str(rule_name)))
+            clean_name = "".join(filter(str.isalnum, str(rule_name))) or "unprotect_rule"
             rule_id = rule.get("id", "unknown")
 
             filename = f"{clean_name}_{rule_id}.yar"
@@ -187,18 +187,17 @@ class YaraRepo:
         temp_dir_raw = tempfile.mkdtemp(prefix="unprotect_tmp_", dir=str(self.directory.parent))
         temp_dir_path = Path(temp_dir_raw)
 
-        page = 1
-        MAX_PAGES = 50
+        current_url = self.url
         valid_rules = 0
 
         try:
-            while page <= MAX_PAGES:
+            while current_url:
                 try:
-                    response = requests.get(self.url, params={"page": page}, timeout=30)
+                    response = requests.get(current_url, timeout=30)
                     response.raise_for_status()
                     data = response.json()
                 except (requests.RequestException, ValueError) as e:
-                    logger.error(f"Failed fetching/decoding Unprotect page {page}: {e}")
+                    logger.error(f"Failed fetching/decoding Unprotect page {current_url}: {e}")
                     break
 
                 results = data.get("results", [])
@@ -209,9 +208,7 @@ class YaraRepo:
                     # Call it via the class name or just remove 'self.'
                     YaraRepo._write_rule_to_temp(rule, temp_dir_path)
 
-                if not data.get("next"):
-                    break
-                page += 1
+                current_url = data.get("next")
 
             # --- VALIDATION BLOCK ---
             for rule_file in temp_dir_path.glob("*.yar"):

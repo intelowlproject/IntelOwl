@@ -7,11 +7,11 @@ import { useAuthStore } from "../stores/useAuthStore";
 
 export default function useQuotaBadge() {
   // auth store
-  const [access, fetchUserAccess] = useAuthStore(
-    React.useCallback(
-      (state) => [state.access, state.service.fetchUserAccess],
-      [],
-    ),
+  const access = useAuthStore(
+    React.useCallback((state) => state.access, []),
+  );
+  const fetchUserAccess = useAuthStore(
+    React.useCallback((state) => state.service.fetchUserAccess, []),
   );
 
   const quota = access; // alias for backwards compatibility

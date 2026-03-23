@@ -51,17 +51,20 @@ export function TagSelectInput(props) {
   }, [setTagToEdit, setSelectedTags]);
 
   // api
-  const [loading, error, allTags, fetchAll, createTag] = useTagsStore(
-    React.useCallback(
-      (state) => [
-        state.loading,
-        state.error,
-        state.tags,
-        state.list,
-        state.create,
-      ],
-      [],
-    ),
+  const loading = useTagsStore(
+    React.useCallback((state) => state.loading, []),
+  );
+  const error = useTagsStore(
+    React.useCallback((state) => state.error, []),
+  );
+  const allTags = useTagsStore(
+    React.useCallback((state) => state.tags, []),
+  );
+  const fetchAll = useTagsStore(
+    React.useCallback((state) => state.list, []),
+  );
+  const createTag = useTagsStore(
+    React.useCallback((state) => state.create, []),
   );
 
   // side-effecs
@@ -138,8 +141,11 @@ export function TagSelectInput(props) {
 function TagForm(props) {
   const { tagToEdit, onFormSuccess, ...rest } = props;
 
-  const [updateTag, createTag] = useTagsStore(
-    React.useCallback((state) => [state.update, state.create], []),
+  const updateTag = useTagsStore(
+    React.useCallback((state) => state.update, []),
+  );
+  const createTag = useTagsStore(
+    React.useCallback((state) => state.create, []),
   );
 
   const onFormSubmit = React.useCallback(

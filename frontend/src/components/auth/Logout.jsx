@@ -6,8 +6,11 @@ import { useAuthStore } from "../../stores/useAuthStore";
 
 export default function Logout() {
   // auth store
-  const [loading, logoutUser] = useAuthStore(
-    React.useCallback((state) => [state.loading, state.service.logoutUser], []),
+  const loading = useAuthStore(
+    React.useCallback((state) => state.loading, []),
+  );
+  const logoutUser = useAuthStore(
+    React.useCallback((state) => state.service.logoutUser, []),
   );
 
   React.useEffect(() => {

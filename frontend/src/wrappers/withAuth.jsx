@@ -22,8 +22,8 @@ function withAuth(WrappedComponent) {
     );
 
     // check if the data about plugins have been downloaded or not.
-    const [fetchPluginsConf] = usePluginConfigurationStore(
-      React.useCallback((state) => [state.hydrate], []),
+    const fetchPluginsConf = usePluginConfigurationStore(
+      React.useCallback((state) => state.hydrate, []),
     );
 
     React.useEffect(() => {

@@ -207,7 +207,8 @@ export function UserEventForm({ initialFormValues, toggle, onSubmitCallback }) {
           failed.length === 0 &&
           formik.values.analyzables.length === 1 &&
           userExistingEvents[formik.values.analyzables[0]]?.id !== undefined &&
-          inputTypes[formik.values.analyzables[0]] === UserEventTypes.ANALYZABLE
+          inputTypes[formik.values.analyzables[0]].type ===
+            UserEventTypes.ANALYZABLE
         ) {
           // casa A: single artifact with existing event (no wildcard)
           setTimeout(

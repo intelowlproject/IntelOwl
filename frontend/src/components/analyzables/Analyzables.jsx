@@ -104,8 +104,8 @@ export default function Analyzables() {
     (submittedAnalyzables) => {
       const firstAnalyzable = submittedAnalyzables[0];
       if (firstAnalyzable) {
-        formik.setFieldValue("analyzables", [firstAnalyzable], false);
-        doSearch([firstAnalyzable]);
+        formik.setFieldValue("analyzables", submittedAnalyzables, false);
+        doSearch(submittedAnalyzables);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

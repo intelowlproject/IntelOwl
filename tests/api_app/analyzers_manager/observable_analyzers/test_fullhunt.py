@@ -23,4 +23,3 @@ def test_fullhunt_not_found(requests_mock):
     result = analyzer.run("fake.com")
     assert result["message"] == "No data found for this domain."
     assert result["status"] == "empty"
-    

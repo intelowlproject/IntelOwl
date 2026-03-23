@@ -18,7 +18,6 @@ class FullHunt(BaseAnalyzerMixin):
         url = f"https://fullhunt.io/api/v1/domain/{observable}/details"
 
         try:
-            # proxy & SSL Verification support
             response = requests.get(
                 url,
                 headers=headers,
@@ -37,3 +36,10 @@ class FullHunt(BaseAnalyzerMixin):
 
         except requests.exceptions.RequestException as e:
             raise Exception(f"FullHunt API request failed: {str(e)}")
+
+    def update(self):
+        """
+        Required by BaseAnalyzerMixin/Plugin. 
+        Updates the analyzer configuration if necessary.
+        """
+        pass

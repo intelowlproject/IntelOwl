@@ -34,20 +34,17 @@ else:
 
     class S3Boto3StorageWrapper(S3Boto3Storage):
         def retrieve(self, file, analyzer):
-            # FIXME we can optimize this a lot.
-            #  Right now we are doing an http request FOR analyzer. We can have a
-            #  proxy that will store the content and then save it locally
-
-            # The idea is to download the file in MEDIA_ROOT/analyzer/namefile
-            # if it does not exist
-            path_dir = os.path.join(MEDIA_ROOT, analyzer)
-            name = file.name
+            # The idea is to download the file in MEDIA_ROOT/samples/filename
+            # once, and reuse it for all analyzers.
+            path_dir = os.path.join(MEDIA_ROOT, "samples")
+            name = os.path.basename(file.name)
             _path = os.path.join(path_dir, name)
+
             if not os.path.exists(_path):
                 os.makedirs(path_dir, exist_ok=True)
-                if not self.exists(name):
+                if not self.exists(file.name):
                     raise AssertionError
-                with self.open(name) as s3_file_object:
+                with self.open(file.name) as s3_file_object:
                     content = s3_file_object.read()
                     s3_file_object.seek(0)
                     with open(_path, "wb") as local_file_object:

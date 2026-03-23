@@ -218,7 +218,11 @@ class YaraRepo:
                     yara.compile(filepath=str(rule_file))
                     valid_rules += 1
                 except (yara.SyntaxError, yara.Error) as e:
-                    logger.error("Invalid YARA rule in temp file %s: %s. Discarding.", rule_file, e)
+                    logger.error(
+                        "Invalid YARA rule in temp file %s: %s. Discarding.",
+                        rule_file,
+                        e,
+                    )
                     rule_file.unlink(missing_ok=True)
 
             if valid_rules > 0:
@@ -241,7 +245,11 @@ class YaraRepo:
         for new_file in temp_dir.glob("*.yar"):
             shutil.move(str(new_file), str(self.directory / new_file.name))
 
-        logger.info("Successfully updated Unprotect repository with %d rules in %s", count, self.directory)
+        logger.info(
+            "Successfully updated Unprotect repository with %d rules in %s",
+            count,
+            self.directory,
+        )
 
     def delete_lock_file(self):
         lock_file_path = self.directory / ".git" / "index.lock"

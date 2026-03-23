@@ -1,0 +1,18 @@
+{
+  "name": "FullHunt",
+  "description": "FullHunt Analyzer to enrich domains with attack surface data, including open ports and hostnames.",
+  "author": "Niyati Jain",
+  "url": "https://fullhunt.io/",
+  "configuration": [
+    {
+      "name": "api_key",
+      "type": "str",
+      "required": true,
+      "description": "The API key for FullHunt."
+    }
+  ],
+  "supported_os": [
+    "domain"
+  ],
+  "icon": "https://fullhunt.io/static/img/logo.png"
+}

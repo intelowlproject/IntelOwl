@@ -39,8 +39,8 @@ class FullHunt(BaseAnalyzerMixin):
 
     def update(self):
         """
-        Required by BaseAnalyzerMixin/Plugin. 
+        Required by BaseAnalyzerMixin/Plugin.
         Updates the analyzer configuration if necessary.
         """
         pass
-        
+

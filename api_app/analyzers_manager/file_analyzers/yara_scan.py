@@ -188,7 +188,7 @@ class YaraRepo:
 
         page = 1
         MAX_PAGES = 50
-        rules_written = 0
+        valid_rules = 0  # Initialize this outside the loop
 
         try:
             while page <= MAX_PAGES:
@@ -205,22 +205,33 @@ class YaraRepo:
                     break
 
                 for rule in results:
-                    # Pass the correct temp_dir_path to the helper
                     if self._write_rule_to_temp(rule, temp_dir_path):
-                        rules_written += 1
+                        # We increment this later after validation
+                        pass
 
                 if not data.get("next"):
                     break
                 page += 1
 
-            if rules_written > 0:
-                self._finalize_rules(temp_dir_path, rules_written)
-            else:
-                logger.warning("No Unprotect rules were fetched; keeping existing local rules.")
+            # --- VALIDATION BLOCK ---
+            for rule_file in temp_dir_path.glob("*.yar"):
+                try:
+                    yara.compile(filepath=str(rule_file))
+                    valid_rules += 1  # Only count if it compiles
+                except (yara.SyntaxError, yara.Error) as e:
+                    logger.error("Invalid YARA rule in temp file %s: %s. Discarding.", rule_file, e)
+                    rule_file.unlink(missing_ok=True)
 
+            if valid_rules > 0:
+                self._finalize_rules(temp_dir_path, valid_rules)
+            else:
+                logger.warning("No valid YARA rules were fetched; keeping existing rules.")
+
+        except Exception:
+            logger.exception("Unexpected error during Unprotect rules ingestion")
         finally:
-            if temp_dir_path.exists():
-                shutil.rmtree(temp_dir_path, ignore_errors=True)
+            # Always clean up the temp directory to prevent disk bloat
+            shutil.rmtree(temp_dir_raw, ignore_errors=True)
 
     def _finalize_rules(self, temp_dir, count):
         """Moves rules from temp to final destination and cleans up old rules."""
@@ -317,11 +328,13 @@ class YaraRepo:
                 if rule.suffix in [".yara", ".yar", ".rule"]:
                     try:
                         yara.compile(str(rule))
-                    except (yara.SyntaxError, yara.Error):
-                        logger.warning(f"Syntax error in YARA rule: {rule}")
+                        valid_rules_path.append(rule)
+                    except yara.SyntaxError as e:
+                        logger.warning(f"Syntax error in YARA rule: {rule}: {e}")
                         continue
-                    else:
-                        valid_rules_path.append(str(rule))
+                    except yara.Error as e:
+                        logger.warning(f"Error compiling YARA rule: {rule}: {e}")
+                        continue
 
             if not valid_rules_path:
                 continue
@@ -339,8 +352,8 @@ class YaraRepo:
 
                 compiled_rules.append(compiled_rule)
                 logger.info(f"Rules for {self} compiled and saved to {save_path}")
-            except Exception as e:
-                logger.error(f"Failed to compile or save YARA rules in {directory}: {e}")
+            except Exception:
+                logger.exception("Failed to compile or save YARA rules in %s", directory)
 
         return compiled_rules
 

@@ -3,7 +3,7 @@ import requests
 from api_app.analyzers_manager.classes import BaseAnalyzerMixin
 
 
-class FullHunt(BaseAnalyzer):
+class FullHunt(BaseAnalyzerMixin):
     """
     FullHunt Analyzer to enrich domains with attack surface data,
     including open ports and hostnames.

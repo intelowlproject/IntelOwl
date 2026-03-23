@@ -188,7 +188,7 @@ class YaraRepo:
 
         page = 1
         MAX_PAGES = 50
-        valid_rules = 0  # Initialize this outside the loop
+        valid_rules = 0
 
         try:
             while page <= MAX_PAGES:
@@ -205,9 +205,8 @@ class YaraRepo:
                     break
 
                 for rule in results:
-                    if self._write_rule_to_temp(rule, temp_dir_path):
-                        # We increment this later after validation
-                        pass
+                    # Just call the function. Validation and counting happen later.
+                    self._write_rule_to_temp(rule, temp_dir_path)
 
                 if not data.get("next"):
                     break
@@ -217,7 +216,7 @@ class YaraRepo:
             for rule_file in temp_dir_path.glob("*.yar"):
                 try:
                     yara.compile(filepath=str(rule_file))
-                    valid_rules += 1  # Only count if it compiles
+                    valid_rules += 1
                 except (yara.SyntaxError, yara.Error) as e:
                     logger.error("Invalid YARA rule in temp file %s: %s. Discarding.", rule_file, e)
                     rule_file.unlink(missing_ok=True)
@@ -230,7 +229,6 @@ class YaraRepo:
         except Exception:
             logger.exception("Unexpected error during Unprotect rules ingestion")
         finally:
-            # Always clean up the temp directory to prevent disk bloat
             shutil.rmtree(temp_dir_raw, ignore_errors=True)
 
     def _finalize_rules(self, temp_dir, count):

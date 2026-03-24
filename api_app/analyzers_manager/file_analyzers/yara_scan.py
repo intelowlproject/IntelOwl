@@ -337,7 +337,7 @@ class YaraRepo:
                     continue
                 if rule.suffix in [".yara", ".yar", ".rule"]:
                     try:
-                        yara.compile(str(rule))
+                        yara.compile(filepath=str(rule))
                         valid_rules_path.append(rule)
                     except yara.SyntaxError as e:
                         logger.warning(f"Syntax error in YARA rule: {rule}: {e}")

@@ -6,18 +6,24 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0072_update_check_system'),
+        ("api_app", "0072_update_check_system"),
     ]
-
     operations = [
         migrations.AlterField(
-            model_name='updatecheckstatus',
-            name='last_checked_at',
-            field=models.DateTimeField(blank=True, help_text='Last time the update check was executed', null=True),
+            model_name="updatecheckstatus",
+            name="last_checked_at",
+            field=models.DateTimeField(
+                blank=True,
+                help_text="Last time the update check was executed",
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='updatecheckstatus',
-            name='notified',
-            field=models.BooleanField(default=False, help_text='Whether a notification has already been sent for this version'),
+            model_name="updatecheckstatus",
+            name="notified",
+            field=models.BooleanField(
+                default=False,
+                help_text="Whether a notification has already been sent for this version",
+            ),
         ),
     ]

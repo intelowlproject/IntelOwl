@@ -5,7 +5,7 @@
   "dependencies": {
     "@certego/certego-ui": "^0.1.19",
     "@dagrejs/dagre": "^1.1.4",
-    "ace-builds": "^1.38.0",
+    "ace-builds": "^1.43.6",
     "axios": "^1.8.3",
     "axios-hooks": "^3.1.5",
     "bootstrap": "^5.3.3",

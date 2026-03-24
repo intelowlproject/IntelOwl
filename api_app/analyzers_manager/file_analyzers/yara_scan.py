@@ -243,7 +243,7 @@ class YaraRepo:
             destination = self.directory / new_file.name
             shutil.move(str(new_file), str(destination))
             new_rule_names.add(new_file.name)
-            
+
         # Only after successfully moving new rules, remove any stale old rules.
         for old_file in self.directory.glob("*.yar"):
             if old_file.name not in new_rule_names:

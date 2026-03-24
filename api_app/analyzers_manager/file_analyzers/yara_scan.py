@@ -237,11 +237,17 @@ class YaraRepo:
         """Moves rules from temp to final destination and cleans up old rules."""
         os.makedirs(self.directory, exist_ok=True)
 
-        for old_file in self.directory.glob("*.yar"):
-            old_file.unlink(missing_ok=True)
-
+        # First, move all new rules into place, keeping track of their names.
+        new_rule_names = set()
         for new_file in temp_dir.glob("*.yar"):
-            shutil.move(str(new_file), str(self.directory / new_file.name))
+            destination = self.directory / new_file.name
+            shutil.move(str(new_file), str(destination))
+            new_rule_names.add(new_file.name)
+            
+        # Only after successfully moving new rules, remove any stale old rules.
+        for old_file in self.directory.glob("*.yar"):
+            if old_file.name not in new_rule_names:
+                old_file.unlink(missing_ok=True)
 
         logger.info(
             "Successfully updated Unprotect repository with %d rules in %s",

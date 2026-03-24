@@ -25,7 +25,7 @@ export default function Analyzers() {
     if (analyzers.length === 0 && !analyzersLoading) {
       retrieveAnalyzersConfiguration();
     }
-  }, []);
+  }, [analyzers, analyzersLoading, retrieveAnalyzersConfiguration]);
 
   return (
     <PluginWrapper

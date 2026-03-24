@@ -25,7 +25,7 @@ export default function Ingestors() {
     if (ingestors.length === 0 && !ingestorsLoading) {
       retrieveIngestorsConfiguration();
     }
-  }, []);
+  }, [ingestors, ingestorsLoading, retrieveIngestorsConfiguration]);
 
   return (
     <PluginWrapper

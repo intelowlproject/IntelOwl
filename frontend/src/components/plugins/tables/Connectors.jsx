@@ -25,7 +25,7 @@ export default function Connectors() {
     if (connectors.length === 0 && !connectorsLoading) {
       retrieveConnectorsConfiguration();
     }
-  }, []);
+  }, [connectors, connectorsLoading, retrieveConnectorsConfiguration]);
 
   return (
     <PluginWrapper

@@ -25,7 +25,7 @@ export default function Playbooks() {
     if (playbooks.length === 0 && !playbooksLoading) {
       retrievePlaybooksConfiguration();
     }
-  }, []);
+  }, [playbooks, playbooksLoading, retrievePlaybooksConfiguration]);
 
   return (
     <PluginWrapper

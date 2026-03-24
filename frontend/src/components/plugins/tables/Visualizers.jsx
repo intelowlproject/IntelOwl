@@ -25,7 +25,7 @@ export default function Visualizers() {
     if (visualizers.length === 0 && !visualizersLoading) {
       retrieveVisualizersConfiguration();
     }
-  }, []);
+  }, [visualizers, visualizersLoading, retrieveVisualizersConfiguration]);
 
   return (
     <PluginWrapper

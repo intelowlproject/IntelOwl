@@ -25,7 +25,7 @@ export default function Pivots() {
     if (pivots.length === 0 && !pivotsLoading) {
       retrievePivotsConfiguration();
     }
-  }, []);
+  }, [pivots, pivotsLoading, retrievePivotsConfiguration]);
 
   return (
     <PluginWrapper

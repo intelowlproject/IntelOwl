@@ -67,22 +67,22 @@ export const usePluginConfigurationStore = create((set, get) => ({
   playbooks: [],
   hydrate: () => {
     // this function is called to check if we need to download the data related to the plugins or not
-    if (get().analyzersLoading) {
+    if (!get().analyzersLoading && get().analyzers.length === 0) {
       get().retrieveAnalyzersConfiguration();
     }
-    if (get().connectorsLoading) {
+    if (!get().connectorsLoading && get().connectors.length === 0) {
       get().retrieveConnectorsConfiguration();
     }
-    if (get().pivotsLoading) {
+    if (!get().pivotsLoading && get().pivots.length === 0) {
       get().retrievePivotsConfiguration();
     }
-    if (get().visualizersLoading) {
+    if (!get().visualizersLoading && get().visualizers.length === 0) {
       get().retrieveVisualizersConfiguration();
     }
-    if (get().ingestorsLoading) {
+    if (!get().ingestorsLoading && get().ingestors.length === 0) {
       get().retrieveIngestorsConfiguration();
     }
-    if (get().playbooksLoading) {
+    if (!get().playbooksLoading && get().playbooks.length === 0) {
       get().retrievePlaybooksConfiguration();
     }
   },

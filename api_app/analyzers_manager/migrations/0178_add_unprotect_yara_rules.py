@@ -48,18 +48,22 @@ def remove_unprotect_url(apps, schema_editor):
     unprotect_url = "https://unprotect.it/api/detection_rules/"
     plugin_configs = PluginConfig.objects.filter(parameter=parameter)
     for pc in plugin_configs:
-
         existing_value = pc.value
-        if isinstance(existing_value, str):
-            value = [existing_value]
-        elif isinstance(existing_value, list):
-            value = existing_value
-        else:
-            value = []
-        if unprotect_url not in value:
-            value.append(unprotect_url)
-            pc.value = value
-            pc.save(update_fields=["value"])
+
+        # If the value is a list, remove the Unprotect URL if present,
+        # leaving all other repository entries untouched.
+        if isinstance(existing_value, list):
+            if unprotect_url in existing_value:
+                value = [v for v in existing_value if v != unprotect_url]
+                pc.value = value
+                pc.save(update_fields=["value"])
+
+        # If the value is a string and exactly matches the Unprotect URL,
+        # clear it. Do not modify other string values.
+        elif isinstance(existing_value, str):
+            if existing_value == unprotect_url:
+                pc.value = ""
+                pc.save(update_fields=["value"])
 
 class Migration(migrations.Migration):
 

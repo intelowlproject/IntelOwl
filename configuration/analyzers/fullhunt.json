@@ -1,0 +1,21 @@
+{
+  "name": "FullHunt",
+  "display_name": "FullHunt",
+  "description": "Enrich domains with attack surface data using FullHunt.io",
+  "author": "Niyati Jain",
+  "url": "https://fullhunt.io/",
+  "enabled": false,
+  "maximum_tlp": "AMBER",
+  "observable_supported": [
+    "domain"
+  ],
+  "config": [
+    {
+      "name": "api_key",
+      "type": "string",
+      "description": "e90c50e5-38aa-43da-9d6e-8bf4882513b1",
+      "required": true,
+      "is_secret": true
+    }
+  ]
+}

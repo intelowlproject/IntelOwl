@@ -4,127 +4,73 @@
 import logging
 import os
 
-import requests
 from django.conf import settings
+from greynoiselabs import GreyNoiseLabs
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.models import PluginConfig
 
 logger = logging.getLogger(__name__)
 
-url = "https://api.labs.greynoise.io/1/query"
+# This matches the storage location used by IntelOwl for local DBs
 db_name = "topc2s_ips.txt"
-db_location = f"{settings.MEDIA_ROOT}/{db_name}"
-
-queries = {
-    "noiserank": {
-        "query_string": "query NoiseRank($ip: String) { noiseRank(ip: $ip) \
-            { queryInfo { resultsAvailable resultsLimit } ips { ip noise_score \
-            sensor_pervasiveness country_pervasiveness payload_diversity \
-            port_diversity request_rate } } }",
-        "ip_required": True,
-    },
-    "topknocks": {
-        "query_string": "query TopKnocks($ip: String) { topKnocks(ip: $ip) \
-            { queryInfo { resultsAvailable resultsLimit } knock { last_crawled \
-            last_seen source_ip knock_port title favicon_mmh3_32 \
-            favicon_mmh3_128 jarm ips emails links tor_exit headers apps } } } ",
-        "ip_required": True,
-    },
-    "topc2s": {
-        "query_string": "query TopC2s { topC2s { queryInfo \
-        { resultsAvailable resultsLimit } c2s { source_ip c2_ips \
-        c2_domains payload hits pervasiveness } } } ",
-        "ip_required": False,
-        "db_location": db_location,
-    },
-}
+db_location = os.path.join(settings.MEDIA_ROOT, db_name)
 
 
 class GreynoiseLabs(ObservableAnalyzer):
-    _auth_token: str
-
     def run(self):
         result = {}
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {self._auth_token}",
-        }
+        auth_token = self._get_auth_token()
+        if not auth_token:
+            self.report.errors.append("Missing GreyNoise Labs API Token")
+            return result
 
-        for key, value in queries.items():
-            if not value["ip_required"]:
-                if not os.path.isfile(value["db_location"]) and not self.update():
-                    error_message = f"Failed extraction from {key} db"
-                    self.report.errors.append(error_message)
-                    self.report.save()
-                    logger.error(error_message)
-                    continue
+        client = GreyNoiseLabs(api_key=auth_token)
 
-                with open(value["db_location"], "r", encoding="utf-8") as f:
-                    db = f.read()
+        try:
+            # 1. NoiseRank
+            noise_rank = client.get_noise_rank(ip=self.observable_name)
+            result["noiserank"] = noise_rank if noise_rank else {"found": False}
 
-                db_list = db.split("\n")
-                if self.observable_name in db_list:
-                    result[key] = {"found": True}
-                else:
-                    result[key] = {"found": False}
-                continue
+            # 2. TopKnocks
+            top_knocks = client.get_knocks(ip=self.observable_name)
+            result["topknocks"] = top_knocks if top_knocks else {"found": False}
 
-            json_body = {
-                "query": value["query_string"],
-                "variables": {"ip": f"{self.observable_name}"},
-            }
-            response = requests.post(headers=headers, json=json_body, url=url)
-            response.raise_for_status()
-            result[key] = response.json()
+            # 3. TopC2s (Local DB Check)
+            if not os.path.isfile(db_location) and not self.update():
+                logger.error("Failed to update TopC2s database")
+
+            if os.path.isfile(db_location):
+                with open(db_location, encoding="utf-8") as f:
+                    db_list = f.read().splitlines()
+                result["topc2s"] = {"found": self.observable_name in db_list}
+
+        except Exception as e:
+            error_text = str(e).strip() or "Unknown GreyNoise Labs API Error"
+            self.report.errors.append(error_text)
+            logger.error("GreyNoise Labs Error: %s", error_text)
 
         return result
 
-    @classmethod
-    def _get_auth_token(cls):
-        for plugin in PluginConfig.objects.filter(
-            parameter__python_module=cls.python_module,
-            parameter__is_secret=True,
-            parameter__name="auth_token",
-        ):
-            if plugin.value:
-                return plugin.value
-        return None
+    def update(self):
+        auth_token = self._get_auth_token()
+        if auth_token:
+            return self._update_db(auth_token)
+        return False
 
     @classmethod
     def _update_db(cls, auth_token: str):
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {auth_token}",
-        }
-
+        client = GreyNoiseLabs(api_key=auth_token)
         try:
-            logger.info("Fetching data from greynoise API (Greynoise_Labs).....")
-            response = requests.post(
-                headers=headers,
-                json={"query": queries["topc2s"]["query_string"]},
-                url=url,
-            )
-            response.raise_for_status()
-            topc2s_data = response.json()
-
-            with open(db_location, "w", encoding="utf-8") as f:
-                for value in topc2s_data["data"]["topC2s"]["c2s"]:
-                    ip = value["source_ip"]
-                    if ip:
-                        f.write(f"{ip}\n")
-
-            if not os.path.exists(db_location):
-                return False
-
-            logger.info("Data fetched from greynoise API (Greynoise_Labs).....")
-            return True
+            logger.info("Fetching Top C2s from GreyNoise Labs SDK...")
+            c2_data = client.get_c2s()
+            if c2_data:
+                with open(db_location, "w", encoding="utf-8") as f:
+                    for entry in c2_data:
+                        ip = entry.get("source_ip")
+                        if ip:
+                            f.write(f"{ip}\n")
+                return True
+            return False
         except Exception as e:
-            logger.exception(e)
-
-    @classmethod
-    def update(cls):
-        auth_token = cls._get_auth_token()
-        if auth_token:
-            return cls._update_db(auth_token=auth_token)
-        return False
+            logger.exception("Failed to update GreyNoise Labs DB: %s", e)
+            return False

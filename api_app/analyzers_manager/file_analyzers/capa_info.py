@@ -31,7 +31,7 @@ CACHE_LOCATION = os.environ.get("XDG_CACHE_HOME", f"{settings.MEDIA_ROOT}/.cache
 class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
     shellcode: bool
     arch: str
-    timeout: float = 15
+    timeout: float = 120
     force_pull_signatures: bool = False
 
     @classmethod
@@ -202,6 +202,9 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
             raise AnalyzerRunException(
                 f" Analyzer for {self.filename} with hash: {self.md5} failed with error: {stderr}"
             )
+        except subprocess.TimeoutExpired:
+            logger.info(f"Capa Info timed out for {self.filename} with hash: {self.md5}")
+            raise AnalyzerRunException(f"Capa Info timed out after {self.timeout} seconds")
         finally:
             # Clean up temporary cache directory if a fallback was used
             if cache_dir != CACHE_LOCATION and os.path.isdir(cache_dir):

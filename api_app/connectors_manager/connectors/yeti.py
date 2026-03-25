@@ -14,6 +14,43 @@ class YETI(classes.Connector):
     _url_key_name: str
     _api_key_name: str
 
+    # health_check test taken from https://yeti-platform.io/docs/api/
+    def health_check(self, user=None):
+        params = self._config.parameters.annotate_configured(self._config, user).annotate_value_for_user(
+            self._config, user
+        )
+        url = None
+        api_key = None
+
+        for param in params:
+            if param.name == "url_key_name":
+                url = param.value
+            elif param.name == "api_key_name":
+                api_key = param.value
+            # no ssl cert validation in yeti found in docs
+
+        if not url:
+            raise RuntimeError("Missing config url")
+        if not api_key:
+            raise RuntimeError("Missing config api key")
+        token_resp = requests.post(
+            url=f"{url}/api/v2/auth/api-token",
+            headers={"x-yeti-apikey": api_key},
+            timeout=10,
+        )
+        token_resp.raise_for_status()
+        access_token = token_resp.json().get("access_token")
+        if not access_token:
+            raise RuntimeError("No access token from Yeti.")
+
+        resp = requests.get(
+            url=f"{url}/api/v2/auth/me",
+            headers={"Authorization": f"Bearer {access_token}"},
+            timeout=10,
+        )
+        resp.raise_for_status()
+        return True
+
     def run(self):
         # get observable value and type
         if self._job.is_sample:

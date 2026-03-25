@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import logging
 from typing import List
 
 import pymisp
@@ -11,6 +12,7 @@ from api_app.choices import Classification
 from api_app.connectors_manager.classes import Connector
 from tests.mock_utils import if_mock_connections, patch
 
+logger = logging.getLogger(__name__)
 INTELOWL_MISP_TYPE_MAP = {
     Classification.IP: "ip-src",
     Classification.DOMAIN: "domain",
@@ -93,6 +95,52 @@ class MISP(Connector):
 
         return obj
 
+    def health_check(self, user=None):
+        try:
+            params = self._config.parameters.annotate_configured(self._config, user).annotate_value_for_user(
+                self._config, user
+            )
+            url = None
+            api_key = None
+            ssl_check = False
+            self_signed_certificate = False
+
+            for param in params:
+                if param.name == "url_key_name":
+                    url = param.value
+                elif param.name == "api_key_name":
+                    api_key = param.value
+                elif param.name == "ssl_check":
+                    ssl_check = bool(param.value)
+                elif param.name == "self_signed_certificate":
+                    self_signed_certificate = bool(param.value)
+
+            if not url:
+                raise RuntimeError("Missing config url")
+            if not api_key:
+                raise RuntimeError("Missing config api key")
+
+            if ssl_check and self_signed_certificate:
+                ssl_param = f"{settings.PROJECT_LOCATION}/configuration/misp_ssl.crt"
+            elif ssl_check:
+                ssl_param = True
+            else:
+                ssl_param = False
+
+            misp = pymisp.PyMISP(
+                url=url,
+                key=api_key,
+                ssl=ssl_param,
+                debug=False,
+                timeout=10,
+            )
+            misp.version
+            return True
+
+        except Exception as e:
+            logger.error(f"MISP health check failed: {type(e).__name__}: {e}")
+            raise
+
     def run(self):
         ssl_param = (
             f"{settings.PROJECT_LOCATION}/configuration/misp_ssl.crt"
@@ -164,6 +212,10 @@ class MockPyMISP:
     @staticmethod
     def add_attribute(*args, **kwargs) -> MockUpMISPElement:
         return MockUpMISPElement()
+
+    @staticmethod
+    def version() -> dict:
+        return {"version": "2.4.146"}
 
     @staticmethod
     def get_event(event_id) -> dict:

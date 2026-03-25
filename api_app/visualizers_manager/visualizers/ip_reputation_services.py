@@ -364,8 +364,6 @@ class IPReputationServices(Visualizer):
 
         third_level_elements.append(self._tor())
 
-        third_level_elements.append(self._talos())
-
         page = self.Page(name="Reputation")
         page.add_level(
             self.Level(

@@ -11,4 +11,7 @@ class ApiAppConfig(AppConfig):
     name = "api_app"
 
     def ready(self):  # skipcq: PYL-R0201
+        from api_app.helpers import patch_requests_default_timeout
+
+        patch_requests_default_timeout()
         from . import signals  # noqa

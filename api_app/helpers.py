@@ -9,6 +9,8 @@ import logging
 import random
 import re
 import warnings
+from functools import wraps
+from os import environ
 
 from django.utils import timezone
 
@@ -84,3 +86,42 @@ def deprecated(message: str):
         return wrapper
 
     return decorator
+
+
+def get_default_requests_timeout() -> tuple[float, float]:
+    connect_timeout_default = 10.0
+    read_timeout_default = 30.0
+
+    try:
+        connect_timeout = float(
+            environ.get("INTELOWL_REQUESTS_CONNECT_TIMEOUT", connect_timeout_default)
+        )
+    except (TypeError, ValueError):
+        connect_timeout = connect_timeout_default
+
+    try:
+        read_timeout = float(
+            environ.get("INTELOWL_REQUESTS_READ_TIMEOUT", read_timeout_default)
+        )
+    except (TypeError, ValueError):
+        read_timeout = read_timeout_default
+
+    return connect_timeout, read_timeout
+
+
+def patch_requests_default_timeout() -> None:
+    import requests
+
+    session_request = requests.sessions.Session.request
+    if getattr(session_request, "_intelowl_default_timeout_patched", False):
+        return
+
+    @wraps(session_request)
+    def request(self, method, url, **kwargs):
+        if "timeout" not in kwargs or kwargs["timeout"] is None:
+            kwargs["timeout"] = get_default_requests_timeout()
+        return request._intelowl_original(self, method, url, **kwargs)
+
+    request._intelowl_default_timeout_patched = True
+    request._intelowl_original = session_request
+    requests.sessions.Session.request = request

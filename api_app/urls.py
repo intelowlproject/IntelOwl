@@ -59,6 +59,7 @@ urlpatterns = [
     path("data_model/", include("api_app.data_model_manager.urls")),
     path("user_event/", include("api_app.user_events_manager.urls")),
     path("", include("api_app.analyzables_manager.urls")),
+    path("", include("api_app.chatbot.urls")),
     # auth
     path("auth/", include("authentication.urls")),
     # certego_saas:

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "api_app.engines_manager",
     "api_app.analyzables_manager",
     "api_app.user_events_manager",
+    "api_app.chatbot",
     # auth
     "rest_email_auth",
     # performance debugging
@@ -86,3 +87,4 @@ from .rest import *  # lgtm [py/polluting-import]
 from .security import *  # lgtm [py/polluting-import]
 from .storage import *  # lgtm [py/polluting-import]
 from .websocket import *  # lgtm [py/polluting-import]
+from .chatbot import *  # lgtm [py/polluting-import]

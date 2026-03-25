@@ -51,6 +51,9 @@ export const NOTIFICATION_BASE_URI = `${API_BASE_URI}/notification`;
 export const AUTH_BASE_URI = `${API_BASE_URI}/auth`;
 export const APIACCESS_BASE_URI = `${AUTH_BASE_URI}/apiaccess`;
 
+// chatbot
+export const CHATBOT_SESSIONS_URI = `${API_BASE_URI}/chatbot/sessions`;
+
 // WEBSOCKETS
 const WEBSOCKET_BASE_URI = "ws";
 export const WEBSOCKET_JOBS_URI = `${WEBSOCKET_BASE_URI}/jobs`;

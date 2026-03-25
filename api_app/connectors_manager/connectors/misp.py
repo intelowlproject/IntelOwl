@@ -109,14 +109,15 @@ class MISP(Connector):
 
         # get event and attributes
         event = self._event_obj
+        base_attr = self._base_attr_obj
         attributes = [
-            self._base_attr_obj,
+            base_attr,
             *self._secondary_attr_objs,
             self._link_attr_obj,
         ]
 
         # append attribute name to event info
-        event.info += f": {self._base_attr_obj.value}"
+        event.info += f": {base_attr.value}"
 
         # add event to MISP Instance
         misp_event = misp_instance.add_event(event, pythonify=True)

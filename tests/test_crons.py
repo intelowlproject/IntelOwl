@@ -14,7 +14,6 @@ from api_app.analyzers_manager.observable_analyzers import (
     ja4_db,
     maxmind,
     phishing_army,
-    talos,
     tor,
     tor_nodes_danmeuk,
     tweetfeeds,
@@ -89,11 +88,6 @@ class CronTests(CustomTestCase):
         maxmind.Maxmind.update()
         for db in maxmind.Maxmind.get_db_names():
             self.assertTrue(os.path.exists(db))
-
-    @if_mock_connections(patch("requests.get", return_value=MockUpResponse({}, 200, text="91.192.100.61")))
-    def test_talos_updater(self, mock_get=None):
-        db_file_path = talos.Talos.update()
-        self.assertTrue(os.path.exists(db_file_path))
 
     @if_mock_connections(
         patch(

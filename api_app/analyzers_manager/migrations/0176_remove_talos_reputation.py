@@ -60,7 +60,19 @@ def remove_talos_forward(apps, schema_editor):
                             )
                         if not still_used:
                             schedule.delete()
+        # Capture modules own schedules before deletion
+        module_schedules = []
+        for attr in ("update_schedule", "health_check_schedule"):
+            sched = getattr(module, attr, None)
+            if sched is not None:
+                module_schedules.append(sched)
         module.delete()
+        # Clean up orphaned CrontabSchedules from the module
+        for sched in module_schedules:
+            if not PeriodicTask.objects.filter(crontab=sched).exists():
+                if not PythonModule.objects.filter(update_schedule=sched).exists():
+                    if not PythonModule.objects.filter(health_check_schedule=sched).exists():
+                        sched.delete()
 
 
 class Migration(migrations.Migration):

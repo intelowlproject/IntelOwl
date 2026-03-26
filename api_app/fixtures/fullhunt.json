@@ -1,0 +1,17 @@
+{
+    "name": "FullHunt",
+    "display_name": "FullHunt",
+    "description": "Enrich domains with attack surface data from FullHunt.io",
+    "author": "niy-ati",
+    "module": "FullHunt",
+    "supported_os": ["linux", "darwin", "windows"],
+    "configuration": [
+        {
+            "name": "api_key",
+            "type": "str",
+            "required": true,
+            "description": "Api key for Fullhunt.io"
+        }
+    ],
+    "run_outside_worker": false
+}

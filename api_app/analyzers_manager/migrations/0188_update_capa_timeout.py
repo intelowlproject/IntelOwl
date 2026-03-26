@@ -32,7 +32,7 @@ def update_capa_timeout(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("analyzers_manager", "0186_add_update_schedule_stratosphere_firehol"),
+        ("analyzers_manager", "0187_remove_dehashed_analyzer"),
     ]
 
     operations = [

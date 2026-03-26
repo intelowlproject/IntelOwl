@@ -24,6 +24,7 @@ def remove_talos_from_playbooks(apps, schema_editor):
         if isinstance(rc, dict) and "analyzers" in rc and "TalosReputation" in rc["analyzers"]:
             del rc["analyzers"]["TalosReputation"]
             playbook.runtime_configuration = rc
+            playbook.full_clean()
             playbook.save(update_fields=["runtime_configuration"])
 
 

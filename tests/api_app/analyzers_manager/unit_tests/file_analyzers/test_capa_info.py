@@ -79,7 +79,6 @@ class TestCapaInfoAnalyzer(BaseFileAnalyzerTest):
             setattr(analyzer, key, value)
 
         patches = self.get_mocked_response()
-        patches = [p for p in patches if not (hasattr(p, "target") and p.target == "subprocess.run")]
 
         with self._apply_patches(patches):
             with patch("api_app.analyzers_manager.file_analyzers.capa_info.subprocess.run") as mock_run:

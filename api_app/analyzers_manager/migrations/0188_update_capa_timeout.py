@@ -14,14 +14,13 @@ def update_capa_timeout(apps, schema_editor):
             base_path="api_app.analyzers_manager.file_analyzers",
         )
         param = Parameter.objects.get(name="timeout", python_module=pm)
-        for config in PluginConfig.objects.filter(parameter=param):
-            if config.value == 15:
-                config.value = 120
-                config.save(update_fields=["value"])
+        import re
+
+        PluginConfig.objects.filter(parameter=param, value=15).update(value=120)
 
         description = getattr(param, "description", None)
         if description:
-            new_description = description.replace("15", "120")
+            new_description = re.sub(r"\b15\b", "120", description)
             if new_description != description:
                 param.description = new_description
                 param.save(update_fields=["description"])

@@ -77,7 +77,7 @@ def remove_talos_forward(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("analyzers_manager", "0175_analyzer_config_cleanbrowsing_malicious_detector"),
+        ("analyzers_manager", "0176_analyzer_config_macho_info"),
     ]
 
     operations = [

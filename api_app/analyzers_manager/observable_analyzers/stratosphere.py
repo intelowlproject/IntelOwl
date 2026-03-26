@@ -3,7 +3,6 @@
 
 import logging
 
-from django.conf import settings
 from django.db import transaction
 
 from api_app import http_utils

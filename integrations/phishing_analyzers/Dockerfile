@@ -4,6 +4,7 @@ ENV PROJECT_PATH=/opt/deploy
 ENV LOG_PATH=/var/log/intel_owl/phishing_analyzers
 ENV USER=phishing-user
 ENV HOME=${PYTHONPATH}
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
 # Add a new low-privileged user
 RUN useradd -ms /bin/bash ${USER}
@@ -25,7 +26,9 @@ WORKDIR ${PROJECT_PATH}/phishing_analyzers
 COPY --chown=${USER}:${USER} app.py requirements.txt entrypoint.sh ./
 COPY --chown=${USER}:${USER} analyzers/* ./analyzers/
 RUN chmod u+x entrypoint.sh \
-    && pip3 install -r requirements.txt --no-cache-dir
+    && pip3 install -r requirements.txt --no-cache-dir \
+    && playwright install chromium --with-deps \
+    && chmod -R o+rX /ms-playwright
 
 # unprivileged user must run some commands as root to avoid conflicts with other volumes.
 # adding them to sudoers file to avoid running entrypoint as root usesr.

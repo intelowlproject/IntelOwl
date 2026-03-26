@@ -151,6 +151,41 @@ class TestUserAnalyzableEventQuerySet(CustomTestCase):
         ua.delete()
         an.delete()
 
+    def test_decay_performance(self):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        Analyzable.objects.create(
+            name="test_perf.com",
+            classification=Classification.DOMAIN,
+        )
+        N = 5
+        for i in range(N):
+            an_i = Analyzable.objects.create(
+                name=f"test_perf{i}.com",
+                classification=Classification.DOMAIN,
+            )
+            ue_ser = UserAnalyzableEventSerializer(
+                data={
+                    "analyzable": {"name": an_i.name},
+                    "decay_progression": DecayProgressionEnum.LINEAR.value,
+                    "decay_timedelta_days": 1,
+                    "data_model_content": {"evaluation": "malicious", "reliability": 8},
+                },
+                context={"request": MockUpRequest(self.user)},
+            )
+            ue_ser.is_valid()
+            ua = ue_ser.save()
+            ua.next_decay = now() - datetime.timedelta(days=1)
+            ua.save()
+
+        with CaptureQueriesContext(connection) as queries:
+            number = UserAnalyzableEvent.objects.decay()
+            self.assertEqual(number, N)
+
+        self.assertLessEqual(len(queries), 10)
+        Analyzable.objects.filter(name__startswith="test_perf").delete()
+
     def test_decay_multiple_events(self):
         analyzables = []
         events = []

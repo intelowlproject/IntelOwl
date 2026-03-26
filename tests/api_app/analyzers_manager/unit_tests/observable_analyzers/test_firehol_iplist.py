@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+from api_app.analyzers_manager.models import FireholIPEntry
 from api_app.analyzers_manager.observable_analyzers.firehol_iplist import FireHol_IPList
 from tests.api_app.analyzers_manager.unit_tests.observable_analyzers.base_test_class import (
     BaseAnalyzerTest,
@@ -24,5 +25,12 @@ class FireHolIPListTestCase(BaseAnalyzerTest):
                 json_data={},
                 status_code=200,
                 text=text_data,
+                content=text_data.encode(),
             ),
         )
+
+    def test_update_populates_db(self):
+        with self.get_mocked_response():
+            FireHol_IPList.update("example.ipset")
+        self.assertTrue(FireholIPEntry.objects.filter(list_name="example.ipset").exists())
+        self.assertEqual(FireholIPEntry.objects.filter(list_name="example.ipset").count(), 3)

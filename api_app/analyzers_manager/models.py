@@ -375,3 +375,58 @@ class PhishingArmyDomain(LocalAnalyzerDBEntry):
 
     def __str__(self):
         return self.domain
+
+
+class TweetFeedItem(LocalAnalyzerDBEntry):
+    value = models.CharField(max_length=512, db_index=True, unique=True)
+    details = models.JSONField(default=dict)
+
+    class Meta:
+        verbose_name = "TweetFeed Item"
+        verbose_name_plural = "TweetFeed Items"
+
+    def __str__(self):
+        return self.value
+
+
+class SpamhausDropItem(LocalAnalyzerDBEntry):
+    data_type = models.CharField(max_length=10, db_index=True)
+    value = models.CharField(max_length=50, db_index=True)
+    network_address = models.GenericIPAddressField(db_index=True, null=True, blank=True)
+    details = models.JSONField(default=dict)
+
+    class Meta:
+        verbose_name = "Spamhaus Drop Item"
+        verbose_name_plural = "Spamhaus Drop Items"
+        unique_together = (("data_type", "value"),)
+
+    def __str__(self):
+        return f"{self.data_type}: {self.value}"
+
+
+class StratosphereIPEntry(LocalAnalyzerDBEntry):
+    ip = models.GenericIPAddressField(db_index=True)
+    list_type = models.CharField(max_length=50, db_index=True)
+    rating = models.CharField(max_length=50, blank=True)
+
+    class Meta:
+        verbose_name = "Stratosphere IP Entry"
+        verbose_name_plural = "Stratosphere IP Entries"
+        unique_together = (("ip", "list_type"),)
+
+    def __str__(self):
+        return f"{self.ip} - {self.list_type}"
+
+
+class FireholIPEntry(LocalAnalyzerDBEntry):
+    list_name = models.CharField(max_length=50, db_index=True)
+    ip_or_subnet = models.CharField(max_length=50, db_index=True)
+    network_address = models.GenericIPAddressField(db_index=True, null=True, blank=True)
+
+    class Meta:
+        verbose_name = "FireHol IP Entry"
+        verbose_name_plural = "FireHol IP Entries"
+        unique_together = (("ip_or_subnet", "list_name"),)
+
+    def __str__(self):
+        return f"{self.ip_or_subnet} - {self.list_name}"

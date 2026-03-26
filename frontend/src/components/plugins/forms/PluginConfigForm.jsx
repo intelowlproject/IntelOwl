@@ -31,6 +31,7 @@ import {
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { JsonEditor } from "../../common/JsonEditor";
+import { markdownToHtml } from "../../common/markdownToHtml";
 
 function CustomInput({ formik, config, configType, disabledInputField }) {
   switch (config.type) {
@@ -417,7 +418,7 @@ export function PluginConfigForm({
               <Row>
                 <Col className="offset-2 col-9">
                   <small className="mt-1 fst-italic">
-                    {config.description}
+                    {markdownToHtml(config.description)}
                   </small>
                 </Col>
               </Row>

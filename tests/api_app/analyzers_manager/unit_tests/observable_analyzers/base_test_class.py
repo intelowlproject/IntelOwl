@@ -84,9 +84,11 @@ class BaseAnalyzerTest(TestCase):
         mock_job = SimpleNamespace()
         mock_job.analyzable = SimpleNamespace()
         mock_job.analyzable.name = observable_name
+        mock_job.analyzable.classification = observable_type
         mock_job.tlp = "clear"
         mock_job.TLP = mock_tlp_enum
         mock_job.user = ""
+        mock_job.is_sample = False
 
         return mock_job
 

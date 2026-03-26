@@ -21,7 +21,6 @@ ENV DJANGO_SETTINGS_MODULE=intel_owl.settings
 ENV PYTHONPATH=/opt/deploy/intel_owl
 ENV LOG_PATH=/var/log/intel_owl
 ARG REPO_DOWNLOADER_ENABLED=true
-ENV WATCHMAN=false
 ARG TARGETARCH
 ENV watch_logs_cmd="watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
 # This is required to allow compatibility with different OpenCTI instances
@@ -50,7 +49,6 @@ RUN apt-get update \
 
 COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
 COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
-COPY requirements/django-server-requirements.txt $PYTHONPATH/requirements/django-server-requirements.txt
 WORKDIR $PYTHONPATH
 
 RUN pip3 install --no-cache-dir --use-pep517 --compile -r project-requirements.txt \
@@ -58,7 +56,6 @@ RUN pip3 install --no-cache-dir --use-pep517 --compile -r project-requirements.t
     && pip3 install --no-cache-dir --compile -r certego-requirements.txt
 
 COPY api_app/analyzers_manager/repo_downloader.sh ${PYTHONPATH}/api_app/analyzers_manager/repo_downloader.sh
-COPY docker/scripts/watchman_install.sh ${PYTHONPATH}/docker/scripts/watchman_install.sh
 
 RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && touch ${LOG_PATH}/django/intel_owl.log ${LOG_PATH}/django/intel_owl_errors.log \
@@ -68,8 +65,8 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && touch ${LOG_PATH}/django/authentication.log ${LOG_PATH}/django/authentication_errors.log \
     && touch ${LOG_PATH}/asgi/daphne.log \
     && mkdir -p -m 755 ${PYTHONPATH}/.cache \
-    && ${PYTHONPATH}/api_app/analyzers_manager/repo_downloader.sh \
-    && ${PYTHONPATH}/docker/scripts/watchman_install.sh
+    # download github stuff
+    && ${PYTHONPATH}/api_app/analyzers_manager/repo_downloader.sh
 
 COPY . $PYTHONPATH
 

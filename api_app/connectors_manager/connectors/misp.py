@@ -62,8 +62,8 @@ class MISP(Connector):
             value = self._job.analyzable.name
             if _type == Classification.HASH:
                 matched_type = helpers.get_hash_type(value)
-                matched_type.replace("-", "")  # convert sha-x to shax
-                _type = matched_type if matched_type is not None else "text"
+                # convert sha-x to shax
+                _type = matched_type.replace("-", "") if matched_type is not None else "text"
             else:
                 _type = INTELOWL_MISP_TYPE_MAP[_type]
 

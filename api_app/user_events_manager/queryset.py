@@ -62,8 +62,9 @@ class UserEventQuerySet(QuerySet):
         # Atomic so partial failures don't leave inconsistent state.
         with transaction.atomic():
             for model_class, models_list in data_models_by_class.items():
-                model_class.objects.bulk_update(models_list, ["reliability"])
-            self.model.objects.bulk_update(events, ["decay_times", "next_decay"])
+                unique_models = {m.pk: m for m in models_list}.values()
+                model_class.objects.bulk_update(unique_models, ["reliability"], batch_size=1000)
+            self.model.objects.bulk_update(events, ["decay_times", "next_decay"], batch_size=1000)
 
         return len(events)
 

@@ -13,8 +13,8 @@ export const areYouSureConfirmDialog = (opName) =>
     ),
     message: (
       <div className="text-wrap">
-        <h6 className="text-muted">Operation:</h6>
-        <h6 className="text-center text-ul fst-italic">{opName}</h6>
+        <h6 className="text-accent">Operation:</h6>
+        <h6 className="text-center">{opName}</h6>
         <hr className="bg-dark" />
         <span className="">Are you sure ?</span>
       </div>

@@ -199,9 +199,11 @@ class CronTests(CustomTestCase):
         ),
     )
     def test_tweetfeed_updater(self, mock_get=None):
-        tweetfeeds.TweetFeeds.update()
-        location, _ = tweetfeeds.TweetFeeds.location()
-        self.assertTrue(os.path.exists(location))
+        from api_app.analyzers_manager.models import TweetFeedItem
+
+        result = tweetfeeds.TweetFeeds.update()
+        self.assertTrue(result)
+        self.assertTrue(TweetFeedItem.objects.exists())
 
     @if_mock_connections(
         patch(

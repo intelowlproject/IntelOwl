@@ -86,35 +86,32 @@ describe("test UserEventModal component", () => {
     expect(analyzablesInput.id).toBe("analyzables-0");
     expect(analyzablesInput.value).toBe(artifact);
     expect(screen.getByText("Type:")).toBeInTheDocument();
-    expect(screen.getByText("Matches:")).toBeInTheDocument();
-    await waitFor(() => {
-      expect(
-        screen.getByText("supported only for wildcard"),
-      ).toBeInTheDocument();
-    });
     expect(screen.getByText("Evaluation:")).toBeInTheDocument();
+    const excludeEvaluation = screen.getByRole("checkbox", {
+      id: "exclude-evaluation-flag",
+    });
+    expect(excludeEvaluation).toBeInTheDocument();
+    expect(excludeEvaluation).not.toBeChecked();
     const basicEvaluationTab = screen.getByText("Basic");
     expect(basicEvaluationTab).toBeInTheDocument();
     expect(basicEvaluationTab.closest("a").className).toContain("active"); // selected
-    const advancedEvaluationTab = screen.getByText("Advanced");
-    expect(advancedEvaluationTab).toBeInTheDocument();
-    expect(advancedEvaluationTab.closest("a").className).not.toContain(
-      "active",
-    ); // selected
-    const malicious10 = screen.getByRole("radio", {
+    const manualEvaluationTab = screen.getByText("Manual");
+    expect(manualEvaluationTab).toBeInTheDocument();
+    expect(manualEvaluationTab.closest("a").className).not.toContain("active"); // selected
+    const malicious10 = screen.getByRole("button", {
       name: "Confirmed malicious",
     });
     expect(malicious10).toBeInTheDocument();
-    expect(malicious10).toBeChecked();
-    const malicious7 = screen.getByRole("radio", { name: "Malicious" });
+    expect(malicious10.className).toContain("active"); // selected
+    const malicious7 = screen.getByRole("button", { name: "Malicious" });
     expect(malicious7).toBeInTheDocument();
-    expect(malicious7).not.toBeChecked();
-    const trusted8 = screen.getByRole("radio", { name: "Currently trusted" });
+    expect(malicious7.className).not.toContain("active");
+    const trusted8 = screen.getByRole("button", { name: "Currently trusted" });
     expect(trusted8).toBeInTheDocument();
-    expect(trusted8).not.toBeChecked();
-    const trusted10 = screen.getByRole("radio", { name: "Trusted" });
+    expect(trusted8.className).not.toContain("active");
+    const trusted10 = screen.getByRole("button", { name: "Trusted" });
     expect(trusted10).toBeInTheDocument();
-    expect(trusted10).not.toBeChecked();
+    expect(trusted10.className).not.toContain("active");
     const reasonInput = screen.getAllByRole("textbox")[1];
     expect(reasonInput).toBeInTheDocument();
     expect(reasonInput.id).toBe("reason");
@@ -133,14 +130,17 @@ describe("test UserEventModal component", () => {
     expect(screen.getByText("Kill chain phase:")).toBeInTheDocument();
     expect(screen.getByText("Tags:")).toBeInTheDocument();
 
-    // advanced evaluation
-    await user.click(advancedEvaluationTab);
-    const malicious = screen.getByRole("radio", { name: "malicious" });
+    // your evaluations section
+    expect(screen.getByText("Your evaluations:")).toBeInTheDocument();
+
+    // manual evaluation
+    await user.click(manualEvaluationTab);
+    const malicious = screen.getByRole("button", { name: "malicious" });
     expect(malicious).toBeInTheDocument();
-    expect(malicious).toBeChecked();
-    const trusted = screen.getByRole("radio", { name: "trusted" });
+    expect(malicious.className).toContain("active");
+    const trusted = screen.getByRole("button", { name: "trusted" });
     expect(trusted).toBeInTheDocument();
-    expect(trusted).not.toBeChecked();
+    expect(trusted.className).not.toContain("active");
     expect(screen.getByText("Reliability: 10")).toBeInTheDocument();
 
     // advanced fields
@@ -162,6 +162,16 @@ describe("test UserEventModal component", () => {
     expect(saveButton.className).toContain("disabled");
   });
 
+  const dataModelContent = {
+    evaluation: "malicious",
+    reliability: 10,
+    malware_family: "",
+    kill_chain_phase: "",
+    related_threats: [],
+    external_references: [],
+    tags: [],
+  };
+
   const testData = {
     artifact: {
       type: "artifact",
@@ -169,15 +179,7 @@ describe("test UserEventModal component", () => {
       getUrl: `${USER_EVENT_ANALYZABLE}?username=test&analyzable_name=google.com`,
       payload: {
         analyzable: { name: "google.com" },
-        data_model_content: {
-          evaluation: "malicious",
-          reliability: 10,
-          malware_family: "",
-          kill_chain_phase: "",
-          related_threats: [],
-          external_references: [],
-          tags: [],
-        },
+        data_model_content: dataModelContent,
         reason: "my reason",
         decay_progression: "0",
         decay_timedelta_days: 120,
@@ -189,15 +191,7 @@ describe("test UserEventModal component", () => {
       getUrl: `${USER_EVENT_IP_WILDCARD}?username=test&network=1.2.3.0/24`,
       payload: {
         network: "1.2.3.0/24",
-        data_model_content: {
-          evaluation: "malicious",
-          reliability: 10,
-          malware_family: "",
-          kill_chain_phase: "",
-          related_threats: [],
-          external_references: [],
-          tags: [],
-        },
+        data_model_content: dataModelContent,
         reason: "my reason",
         decay_progression: "0",
         decay_timedelta_days: 120,
@@ -209,20 +203,23 @@ describe("test UserEventModal component", () => {
       getUrl: `${USER_EVENT_DOMAIN_WILDCARD}?username=test&query=.*\\.test.com`,
       payload: {
         query: ".*\\.test.com",
-        data_model_content: {
-          evaluation: "malicious",
-          reliability: 10,
-          malware_family: "",
-          kill_chain_phase: "",
-          related_threats: [],
-          external_references: [],
-          tags: [],
-        },
+        data_model_content: dataModelContent,
         reason: "my reason",
         decay_progression: "0",
         decay_timedelta_days: 120,
       },
     },
+  };
+
+  const dataModelExistingEvent = {
+    evaluation: "trusted",
+    reliability: 8,
+    malware_family: "",
+    kill_chain_phase: "",
+    related_threats: [],
+    external_references: [],
+    tags: [],
+    date: "2026-03-17T15:01:13.054478Z",
   };
 
   test.each([
@@ -249,19 +246,34 @@ describe("test UserEventModal component", () => {
     {
       ...testData.artifact,
       url: `${USER_EVENT_ANALYZABLE}/2`,
-      responseData: { count: 1, results: [{ id: 2, name: "google.com" }] },
+      responseData: {
+        count: 1,
+        results: [
+          { id: 2, analyzable: { id: 1 }, data_model: dataModelExistingEvent },
+        ],
+      },
       eventType: "update",
     },
     {
       ...testData.ip_wildcard,
       url: `${USER_EVENT_IP_WILDCARD}/2`,
-      responseData: { count: 1, results: [{ id: 2, name: "google.com" }] },
+      responseData: {
+        count: 1,
+        results: [
+          { id: 2, analyzables: [2], data_model: dataModelExistingEvent },
+        ],
+      },
       eventType: "update",
     },
     {
       ...testData.domain_wildcard,
       url: `${USER_EVENT_DOMAIN_WILDCARD}/2`,
-      responseData: { count: 1, results: [{ id: 2, name: "google.com" }] },
+      responseData: {
+        count: 1,
+        results: [
+          { id: 2, analyzables: [1], data_model: dataModelExistingEvent },
+        ],
+      },
       eventType: "update",
     },
   ])(
@@ -281,65 +293,20 @@ describe("test UserEventModal component", () => {
         </BrowserRouter>,
       );
 
-      const modalTitle = screen.getByRole("heading", {
-        name: /Add your evaluation/i,
-      });
-      expect(modalTitle).toBeInTheDocument();
-
       const analyzablesInput = screen.getAllByRole("textbox")[0];
       expect(analyzablesInput).toBeInTheDocument();
       expect(analyzablesInput.id).toBe("analyzables-0");
       expect(analyzablesInput.value).toBe("");
-      expect(screen.getByText("Type:")).toBeInTheDocument();
-      expect(screen.getByText("Matches:")).toBeInTheDocument();
-      expect(
-        screen.getByText("supported only for wildcard"),
-      ).toBeInTheDocument();
-      expect(screen.getByText("Evaluation:")).toBeInTheDocument();
+
       const basicEvaluationTab = screen.getByText("Basic");
       expect(basicEvaluationTab).toBeInTheDocument();
       expect(basicEvaluationTab.closest("a").className).toContain("active"); // selected
-      const advancedEvaluationTab = screen.getByText("Advanced");
-      expect(advancedEvaluationTab).toBeInTheDocument();
-      expect(advancedEvaluationTab.closest("a").className).not.toContain(
-        "active",
-      ); // selected
-      const malicious10 = screen.getByRole("radio", {
-        name: "Confirmed malicious",
-      });
-      expect(malicious10).toBeInTheDocument();
-      expect(malicious10).toBeChecked(); // selected - default
-      const malicious7 = screen.getByRole("radio", { name: "Malicious" });
-      expect(malicious7).toBeInTheDocument();
-      expect(malicious7).not.toBeChecked();
-      const trusted8 = screen.getByRole("radio", { name: "Currently trusted" });
-      expect(trusted8).toBeInTheDocument();
-      expect(trusted8).not.toBeChecked();
-      const trusted10 = screen.getByRole("radio", { name: "Trusted" });
-      expect(trusted10).toBeInTheDocument();
-      expect(trusted10).not.toBeChecked();
+
       const reasonInput = screen.getAllByRole("textbox")[1];
       expect(reasonInput).toBeInTheDocument();
       expect(reasonInput.id).toBe("reason");
       expect(reasonInput.value).toBe("");
-      const malwareFamilyInput = screen.getAllByRole("textbox")[2];
-      expect(malwareFamilyInput).toBeInTheDocument();
-      expect(malwareFamilyInput.id).toBe("malware_family");
-      expect(malwareFamilyInput.value).toBe("");
-      const relatedThreatsInput = screen.getAllByRole("textbox")[3];
-      expect(relatedThreatsInput).toBeInTheDocument();
-      expect(relatedThreatsInput.id).toBe("related_threats-0");
-      expect(relatedThreatsInput.value).toBe("");
-      const externalReferencesInput = screen.getAllByRole("textbox")[4];
-      expect(externalReferencesInput).toBeInTheDocument();
-      expect(externalReferencesInput.id).toBe("external_references-0");
-      expect(externalReferencesInput.value).toBe("");
-      expect(screen.getByText("Kill chain phase:")).toBeInTheDocument();
-      expect(screen.getByText("Tags:")).toBeInTheDocument();
-      const advancedFields = screen.getByRole("button", {
-        name: /Advanced fields/i,
-      });
-      expect(advancedFields).toBeInTheDocument();
+
       const saveButton = screen.getByRole("button", { name: /Save/i });
       expect(saveButton).toBeInTheDocument();
 
@@ -352,12 +319,21 @@ describe("test UserEventModal component", () => {
 
       // IMPORTANT - wait for the state change
       await screen.findByText(type);
-
-      expect(saveButton.className).not.toContain("disabled");
-
-      await user.click(saveButton);
       await waitFor(() => {
         expect(axios.get).toHaveBeenCalledWith(`${getUrl}`);
+      });
+
+      expect(saveButton.className).not.toContain("disabled");
+      await user.click(saveButton);
+      if (eventType === "update") {
+        // confirm dialog
+        const confirmButton = screen.getByRole("button", {
+          name: "Ok",
+        });
+        await user.click(confirmButton);
+      }
+
+      await waitFor(() => {
         expect(axios[requestMethod]).toHaveBeenCalledWith(`${url}`, payload);
       });
     },
@@ -377,111 +353,82 @@ describe("test UserEventModal component", () => {
       </BrowserRouter>,
     );
 
-    const modalTitle = screen.getByRole("heading", {
-      name: /Add your evaluation/i,
-    });
-    expect(modalTitle).toBeInTheDocument();
-
-    const analyzablesInput = screen.getAllByRole("textbox")[0];
-    expect(analyzablesInput).toBeInTheDocument();
-    expect(analyzablesInput.id).toBe("analyzables-0");
-    expect(analyzablesInput.value).toBe("");
-    expect(screen.getByText("Type:")).toBeInTheDocument();
-    expect(screen.getByText("Matches:")).toBeInTheDocument();
-    expect(screen.getByText("supported only for wildcard")).toBeInTheDocument();
-    expect(screen.getByText("Evaluation:")).toBeInTheDocument();
-    const basicEvaluationTab = screen.getByText("Basic");
-    expect(basicEvaluationTab).toBeInTheDocument();
-    expect(basicEvaluationTab.closest("a").className).toContain("active"); // selected
-    const advancedEvaluationTab = screen.getByText("Advanced");
-    expect(advancedEvaluationTab).toBeInTheDocument();
-    expect(advancedEvaluationTab.closest("a").className).not.toContain(
-      "active",
-    ); // selected
-    const malicious10 = screen.getByRole("radio", {
-      name: "Confirmed malicious",
-    });
-    expect(malicious10).toBeInTheDocument();
-    expect(malicious10).toBeChecked(); // selected - default
-    const malicious7 = screen.getByRole("radio", { name: "Malicious" });
-    expect(malicious7).toBeInTheDocument();
-    expect(malicious7).not.toBeChecked();
-    const trusted8 = screen.getByRole("radio", { name: "Currently trusted" });
-    expect(trusted8).toBeInTheDocument();
-    expect(trusted8).not.toBeChecked();
-    const trusted10 = screen.getByRole("radio", { name: "Trusted" });
-    expect(trusted10).toBeInTheDocument();
-    expect(trusted10).not.toBeChecked();
-    const reasonInput = screen.getAllByRole("textbox")[1];
-    expect(reasonInput).toBeInTheDocument();
-    expect(reasonInput.id).toBe("reason");
-    expect(reasonInput.value).toBe("");
-    const malwareFamilyInput = screen.getAllByRole("textbox")[2];
-    expect(malwareFamilyInput).toBeInTheDocument();
-    expect(malwareFamilyInput.id).toBe("malware_family");
-    expect(malwareFamilyInput.value).toBe("");
-    const relatedThreatsInput = screen.getAllByRole("textbox")[3];
-    expect(relatedThreatsInput).toBeInTheDocument();
-    expect(relatedThreatsInput.id).toBe("related_threats-0");
-    expect(relatedThreatsInput.value).toBe("");
-    const externalReferencesInput = screen.getAllByRole("textbox")[4];
-    expect(externalReferencesInput).toBeInTheDocument();
-    expect(externalReferencesInput.id).toBe("external_references-0");
-    const killChainPhaseInput = screen.getAllByRole("combobox")[0];
-    expect(killChainPhaseInput).toBeInTheDocument();
-    expect(screen.getByText("Tags:")).toBeInTheDocument();
-    const tagsInput = screen.getAllByRole("combobox")[1];
-    expect(tagsInput).toBeInTheDocument();
-    const advancedFieldsButton = screen.getByRole("button", {
-      name: /Advanced fields/i,
-    });
-    expect(advancedFieldsButton).toBeInTheDocument();
-    await user.click(advancedEvaluationTab);
-    const malicious = screen.getByRole("radio", { name: "malicious" });
-    expect(malicious).toBeInTheDocument();
-    expect(malicious).toBeChecked();
-    const trusted = screen.getByRole("radio", { name: "trusted" });
-    expect(trusted).toBeInTheDocument();
-    expect(trusted).not.toBeChecked();
-    expect(screen.getByText("Reliability: 10")).toBeInTheDocument();
-
     const saveButton = screen.getByRole("button", { name: /Save/i });
     expect(saveButton).toBeInTheDocument();
     expect(saveButton.className).toContain("disabled");
 
     // add analyzable
+    const analyzablesInput = screen.getAllByRole("textbox")[0];
+    expect(analyzablesInput).toBeInTheDocument();
+    expect(analyzablesInput.id).toBe("analyzables-0");
+    expect(analyzablesInput.value).toBe("");
     fireEvent.change(analyzablesInput, { target: { value: "test.com" } });
     expect(analyzablesInput.value).toBe("test.com");
-    // add advanced evaluation
+
+    // add manual evaluation
+    const manualEvaluationTab = screen.getByText("Manual");
+    expect(manualEvaluationTab).toBeInTheDocument();
+    expect(manualEvaluationTab.closest("a").className).not.toContain("active");
+    await user.click(manualEvaluationTab);
+    const trusted = screen.getByRole("button", { name: "trusted" });
+    expect(trusted).toBeInTheDocument();
+    expect(trusted.className).not.toContain("active");
     await user.click(trusted);
+
     // change reliability
     const reliabilityInput = screen.getByRole("slider");
     expect(reliabilityInput).toBeInTheDocument();
     expect(reliabilityInput.value).toBe("10");
     fireEvent.change(reliabilityInput, { target: { value: "9" } });
     expect(screen.getByText("Reliability: 9")).toBeInTheDocument();
+
     // add reason
-    fireEvent.change(reasonInput, { target: { value: "my reason" } });
+    const reasonInput = screen.getAllByRole("textbox")[1];
+    expect(reasonInput).toBeInTheDocument();
+    expect(reasonInput.id).toBe("reason");
+    expect(reasonInput.value).toBe("");
+    await user.type(reasonInput, "my reason");
     expect(reasonInput.value).toBe("my reason");
+
     // add malware family
+    const malwareFamilyInput = screen.getAllByRole("textbox")[2];
+    expect(malwareFamilyInput).toBeInTheDocument();
+    expect(malwareFamilyInput.id).toBe("malware_family");
+    expect(malwareFamilyInput.value).toBe("");
     fireEvent.change(malwareFamilyInput, { target: { value: "ursnif" } });
     expect(malwareFamilyInput.value).toBe("ursnif");
+
     // add related artifacts
+    const relatedThreatsInput = screen.getAllByRole("textbox")[3];
+    expect(relatedThreatsInput).toBeInTheDocument();
+    expect(relatedThreatsInput.id).toBe("related_threats-0");
+    expect(relatedThreatsInput.value).toBe("");
     fireEvent.change(relatedThreatsInput, {
       target: { value: "anotherArtifact.com" },
     });
     expect(relatedThreatsInput.value).toBe("anotherArtifact.com");
+
     // add external references
+    const externalReferencesInput = screen.getAllByRole("textbox")[4];
+    expect(externalReferencesInput).toBeInTheDocument();
+    expect(externalReferencesInput.id).toBe("external_references-0");
     fireEvent.change(externalReferencesInput, {
       target: { value: "http://test.com" },
     });
     expect(externalReferencesInput.value).toBe("http://test.com");
+
     // add killchain phase
+    const killChainPhaseInput = screen.getAllByRole("combobox")[0];
+    expect(killChainPhaseInput).toBeInTheDocument();
     await userEvent.click(killChainPhaseInput);
     await userEvent.click(screen.getByText("action"));
     expect(screen.getByText("action")).toBeInTheDocument();
     expect(screen.queryByText("c2")).not.toBeInTheDocument(); // check other option are not visible
+
     // add tags (2 of them)
+    expect(screen.getAllByText("Tags:")[0]).toBeInTheDocument();
+    const tagsInput = screen.getAllByRole("combobox")[1];
+    expect(tagsInput).toBeInTheDocument();
     await userEvent.click(tagsInput);
     await userEvent.click(screen.getByText("phishing"));
     expect(screen.getByText("phishing")).toBeInTheDocument();
@@ -521,6 +468,75 @@ describe("test UserEventModal component", () => {
 
   test("UserEventModal - advanced --> basic evaluation", async () => {
     const user = userEvent.setup();
+    axios.get.mockImplementation(() =>
+      Promise.resolve({ status: 200, data: { count: 0 } }),
+    );
+    render(
+      <BrowserRouter>
+        <UserEventModal toggle={() => jest.fn()} isOpen />
+      </BrowserRouter>,
+    );
+
+    const basicEvaluationTab = screen.getByText("Basic");
+    expect(basicEvaluationTab).toBeInTheDocument();
+    expect(basicEvaluationTab.closest("a").className).toContain("active"); // selected
+    const manualEvaluationTab = screen.getByText("Manual");
+    expect(manualEvaluationTab).toBeInTheDocument();
+    expect(manualEvaluationTab.closest("a").className).not.toContain("active"); // selected
+    const malicious10 = screen.getByRole("button", {
+      name: "Confirmed malicious",
+    });
+    expect(malicious10).toBeInTheDocument();
+    expect(malicious10.className).toContain("active"); // selected
+    const malicious7 = screen.getByRole("button", { name: "Malicious" });
+    expect(malicious7).toBeInTheDocument();
+    expect(malicious7.className).not.toContain("active");
+    const trusted8 = screen.getByRole("button", { name: "Currently trusted" });
+    expect(trusted8).toBeInTheDocument();
+    expect(trusted8.className).not.toContain("active");
+    const trusted10 = screen.getByRole("button", { name: "Trusted" });
+    expect(trusted10).toBeInTheDocument();
+    expect(trusted10.className).not.toContain("active");
+    const reasonInput = screen.getAllByRole("textbox")[1];
+    expect(reasonInput).toBeInTheDocument();
+    expect(reasonInput.id).toBe("reason");
+    expect(reasonInput.value).toBe("");
+
+    await user.click(manualEvaluationTab);
+    const malicious = screen.getByRole("button", { name: "malicious" });
+    expect(malicious).toBeInTheDocument();
+    expect(malicious.className).toContain("active");
+    const trusted = screen.getByRole("button", { name: "trusted" });
+    expect(trusted).toBeInTheDocument();
+    expect(trusted.className).not.toContain("active");
+    expect(screen.getByText("Reliability: 10")).toBeInTheDocument();
+
+    const saveButton = screen.getByRole("button", { name: /Save/i });
+    expect(saveButton).toBeInTheDocument();
+    expect(saveButton.className).toContain("disabled");
+
+    // set advanced evaluation
+    await user.click(trusted);
+    // change reliability
+    const reliabilityInput = screen.getByRole("slider");
+    expect(reliabilityInput).toBeInTheDocument();
+    expect(reliabilityInput.value).toBe("10");
+    fireEvent.change(reliabilityInput, { target: { value: "9" } });
+    expect(screen.getByText("Reliability: 9")).toBeInTheDocument();
+    // basic evaluation tab
+    await user.click(basicEvaluationTab);
+    const manualEvalWarning = screen.getByText(
+      "Warning: Manual reliability has been set and save correctly. Selecting a new basic evaluation will overwrite the previous settings.",
+    );
+    expect(manualEvalWarning).toBeInTheDocument();
+    // set manual evaluation
+    await user.click(malicious7);
+    expect(manualEvalWarning).not.toBeInTheDocument();
+    expect(malicious7.className).toContain("active");
+  });
+
+  test("UserEventModal - exclude evaluation", async () => {
+    const user = userEvent.setup();
     axios.put.mockImplementation(() =>
       Promise.resolve({ status: 200, data: [""] }),
     );
@@ -533,101 +549,96 @@ describe("test UserEventModal component", () => {
       </BrowserRouter>,
     );
 
-    const modalTitle = screen.getByRole("heading", {
-      name: /Add your evaluation/i,
-    });
-    expect(modalTitle).toBeInTheDocument();
-
-    const analyzablesInput = screen.getAllByRole("textbox")[0];
-    expect(analyzablesInput).toBeInTheDocument();
-    expect(analyzablesInput.id).toBe("analyzables-0");
-    expect(analyzablesInput.value).toBe("");
-    expect(screen.getByText("Type:")).toBeInTheDocument();
-    expect(screen.getByText("Matches:")).toBeInTheDocument();
-    expect(screen.getByText("supported only for wildcard")).toBeInTheDocument();
-    expect(screen.getByText("Evaluation:")).toBeInTheDocument();
-    const basicEvaluationTab = screen.getByText("Basic");
-    expect(basicEvaluationTab).toBeInTheDocument();
-    expect(basicEvaluationTab.closest("a").className).toContain("active"); // selected
-    const advancedEvaluationTab = screen.getByText("Advanced");
-    expect(advancedEvaluationTab).toBeInTheDocument();
-    expect(advancedEvaluationTab.closest("a").className).not.toContain(
-      "active",
-    ); // selected
-    const malicious10 = screen.getByRole("radio", {
-      name: "Confirmed malicious",
-    });
-    expect(malicious10).toBeInTheDocument();
-    expect(malicious10).toBeChecked(); // selected - default
-    const malicious7 = screen.getByRole("radio", { name: "Malicious" });
-    expect(malicious7).toBeInTheDocument();
-    expect(malicious7).not.toBeChecked();
-    const trusted8 = screen.getByRole("radio", { name: "Currently trusted" });
-    expect(trusted8).toBeInTheDocument();
-    expect(trusted8).not.toBeChecked();
-    const trusted10 = screen.getByRole("radio", { name: "Trusted" });
-    expect(trusted10).toBeInTheDocument();
-    expect(trusted10).not.toBeChecked();
-    const reasonInput = screen.getAllByRole("textbox")[1];
-    expect(reasonInput).toBeInTheDocument();
-    expect(reasonInput.id).toBe("reason");
-    expect(reasonInput.value).toBe("");
-    const malwareFamilyInput = screen.getAllByRole("textbox")[2];
-    expect(malwareFamilyInput).toBeInTheDocument();
-    expect(malwareFamilyInput.id).toBe("malware_family");
-    expect(malwareFamilyInput.value).toBe("");
-    const relatedThreatsInput = screen.getAllByRole("textbox")[3];
-    expect(relatedThreatsInput).toBeInTheDocument();
-    expect(relatedThreatsInput.id).toBe("related_threats-0");
-    expect(relatedThreatsInput.value).toBe("");
-    const externalReferencesInput = screen.getAllByRole("textbox")[4];
-    expect(externalReferencesInput).toBeInTheDocument();
-    expect(externalReferencesInput.id).toBe("external_references-0");
-    const killChainPhaseInput = screen.getAllByRole("combobox")[0];
-    expect(killChainPhaseInput).toBeInTheDocument();
-    expect(screen.getByText("Tags:")).toBeInTheDocument();
-    const tagsInput = screen.getAllByRole("combobox")[1];
-    expect(tagsInput).toBeInTheDocument();
-    const advancedFieldsButton = screen.getByRole("button", {
-      name: /Advanced fields/i,
-    });
-    expect(advancedFieldsButton).toBeInTheDocument();
-    await user.click(advancedEvaluationTab);
-    const malicious = screen.getByRole("radio", { name: "malicious" });
-    expect(malicious).toBeInTheDocument();
-    expect(malicious).toBeChecked();
-    const trusted = screen.getByRole("radio", { name: "trusted" });
-    expect(trusted).toBeInTheDocument();
-    expect(trusted).not.toBeChecked();
-    expect(screen.getByText("Reliability: 10")).toBeInTheDocument();
-
     const saveButton = screen.getByRole("button", { name: /Save/i });
     expect(saveButton).toBeInTheDocument();
     expect(saveButton.className).toContain("disabled");
 
     // add analyzable
+    const analyzablesInput = screen.getAllByRole("textbox")[0];
+    expect(analyzablesInput).toBeInTheDocument();
+    expect(analyzablesInput.id).toBe("analyzables-0");
+    expect(analyzablesInput.value).toBe("");
     fireEvent.change(analyzablesInput, { target: { value: "test.com" } });
     expect(analyzablesInput.value).toBe("test.com");
-    // set advanced evaluation
-    await user.click(trusted);
-    // change reliability
-    const reliabilityInput = screen.getByRole("slider");
-    expect(reliabilityInput).toBeInTheDocument();
-    expect(reliabilityInput.value).toBe("10");
-    fireEvent.change(reliabilityInput, { target: { value: "9" } });
-    expect(screen.getByText("Reliability: 9")).toBeInTheDocument();
+
+    // set exclude evaluation flag
+    const excludeEvaluation = screen.getByRole("checkbox", {
+      id: "exclude-evaluation-flag",
+    });
+    expect(excludeEvaluation).toBeInTheDocument();
+    expect(excludeEvaluation).not.toBeChecked();
+    await user.click(excludeEvaluation);
+
+    const malicious10 = screen.getByRole("button", {
+      name: "Confirmed malicious",
+    });
+    expect(malicious10).toBeInTheDocument();
+    expect(malicious10.className).toContain("disabled");
+    const malicious7 = screen.getByRole("button", { name: "Malicious" });
+    expect(malicious7).toBeInTheDocument();
+    expect(malicious7.className).toContain("disabled");
+    const trusted8 = screen.getByRole("button", { name: "Currently trusted" });
+    expect(trusted8).toBeInTheDocument();
+    expect(trusted8.className).toContain("disabled");
+    const trusted10 = screen.getByRole("button", { name: "Trusted" });
+    expect(trusted10).toBeInTheDocument();
+    expect(trusted10.className).toContain("disabled");
+
     // add reason
-    fireEvent.change(reasonInput, { target: { value: "my reason" } });
+    const reasonInput = screen.getAllByRole("textbox")[1];
+    expect(reasonInput).toBeInTheDocument();
+    expect(reasonInput.id).toBe("reason");
+    expect(reasonInput.value).toBe("");
+    await user.type(reasonInput, "my reason");
     expect(reasonInput.value).toBe("my reason");
-    // basic evaluation tab
-    await user.click(basicEvaluationTab);
-    const advancedEvalWarning = screen.getByText(
-      "Advanced reliability has been set and save correctly. Selecting a new basic evaluation will overwrite the previous settings.",
-    );
-    expect(advancedEvalWarning).toBeInTheDocument();
-    // set advanced evaluation
-    await user.click(malicious7);
-    expect(advancedEvalWarning).not.toBeInTheDocument();
+
+    // add malware family
+    const malwareFamilyInput = screen.getAllByRole("textbox")[2];
+    expect(malwareFamilyInput).toBeInTheDocument();
+    expect(malwareFamilyInput.id).toBe("malware_family");
+    expect(malwareFamilyInput.value).toBe("");
+    fireEvent.change(malwareFamilyInput, { target: { value: "ursnif" } });
+    expect(malwareFamilyInput.value).toBe("ursnif");
+
+    // add related artifacts
+    const relatedThreatsInput = screen.getAllByRole("textbox")[3];
+    expect(relatedThreatsInput).toBeInTheDocument();
+    expect(relatedThreatsInput.id).toBe("related_threats-0");
+    expect(relatedThreatsInput.value).toBe("");
+    fireEvent.change(relatedThreatsInput, {
+      target: { value: "anotherArtifact.com" },
+    });
+    expect(relatedThreatsInput.value).toBe("anotherArtifact.com");
+
+    // add external references
+    const externalReferencesInput = screen.getAllByRole("textbox")[4];
+    expect(externalReferencesInput).toBeInTheDocument();
+    expect(externalReferencesInput.id).toBe("external_references-0");
+    fireEvent.change(externalReferencesInput, {
+      target: { value: "http://test.com" },
+    });
+    expect(externalReferencesInput.value).toBe("http://test.com");
+
+    // add killchain phase
+    const killChainPhaseInput = screen.getAllByRole("combobox")[0];
+    expect(killChainPhaseInput).toBeInTheDocument();
+    await userEvent.click(killChainPhaseInput);
+    await userEvent.click(screen.getByText("action"));
+    expect(screen.getByText("action")).toBeInTheDocument();
+    expect(screen.queryByText("c2")).not.toBeInTheDocument(); // check other option are not visible
+
+    // add tags (2 of them)
+    expect(screen.getAllByText("Tags:")[0]).toBeInTheDocument();
+    const tagsInput = screen.getAllByRole("combobox")[1];
+    expect(tagsInput).toBeInTheDocument();
+    await userEvent.click(tagsInput);
+    await userEvent.click(screen.getByText("phishing"));
+    expect(screen.getByText("phishing")).toBeInTheDocument();
+    expect(screen.queryByText("malware")).not.toBeInTheDocument(); // check other option are not visible
+    await userEvent.click(tagsInput);
+    await userEvent.click(screen.getByText("malware"));
+    expect(screen.getByText("malware")).toBeInTheDocument();
+    expect(screen.queryByText("scanner")).not.toBeInTheDocument(); // check other option are not visible
 
     // IMPORTANT - wait for the state change
     await screen.findByText("artifact");
@@ -642,13 +653,13 @@ describe("test UserEventModal component", () => {
       expect(axios.post).toHaveBeenCalledWith(`${USER_EVENT_ANALYZABLE}`, {
         analyzable: { name: "test.com" },
         data_model_content: {
-          evaluation: "malicious",
-          reliability: 7,
-          kill_chain_phase: "",
-          malware_family: "",
-          related_threats: [],
-          external_references: [],
-          tags: [],
+          evaluation: null,
+          reliability: "8",
+          malware_family: "ursnif",
+          related_threats: ["anotherArtifact.com"],
+          external_references: ["http://test.com"],
+          kill_chain_phase: "action",
+          tags: ["phishing", "malware"],
         },
         reason: "my reason",
         decay_progression: "0",

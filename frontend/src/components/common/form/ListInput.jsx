@@ -10,6 +10,7 @@ export function ListInput({
   formikSetFieldValue,
   placeholder,
   formikHandlerBlur,
+  disabled,
 }) {
   return (
     <FieldArray
@@ -34,6 +35,7 @@ export function ListInput({
                           attributevalues[index] = event.target.value;
                           formikSetFieldValue(`${id}`, attributevalues, true);
                         }}
+                        disabled={disabled}
                       />
                     </Col>
                     <Col sm={2} className="d-flex justify-content-start">
@@ -73,8 +75,10 @@ ListInput.propTypes = {
   formikSetFieldValue: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
   formikHandlerBlur: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
 };
 
 ListInput.defaultProps = {
   placeholder: "",
+  disabled: false,
 };

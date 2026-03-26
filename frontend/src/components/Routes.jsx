@@ -215,7 +215,7 @@ const authRoutesLazy = [
     ),
   },
   {
-    path: "/history/user-events",
+    path: "/history/user-evaluations",
     element: (
       <Suspense fallback={<FallBackLoading />}>
         <History />
@@ -223,7 +223,7 @@ const authRoutesLazy = [
     ),
   },
   {
-    path: "/history/user-domain-wildcard-events",
+    path: "/history/user-domain-wildcard-evaluations",
     element: (
       <Suspense fallback={<FallBackLoading />}>
         <History />
@@ -231,7 +231,7 @@ const authRoutesLazy = [
     ),
   },
   {
-    path: "/history/user-ip-wildcard-events",
+    path: "/history/user-ip-wildcard-evaluations",
     element: (
       <Suspense fallback={<FallBackLoading />}>
         <History />

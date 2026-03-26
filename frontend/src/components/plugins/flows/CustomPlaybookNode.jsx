@@ -4,6 +4,7 @@ import { Handle, Position, NodeToolbar } from "reactflow";
 import "reactflow/dist/style.css";
 import { Badge } from "reactstrap";
 import { IoMdWarning } from "react-icons/io";
+import { markdownToHtml } from "../../common/markdownToHtml";
 
 function CustomPlaybookNode({ data }) {
   return (
@@ -34,7 +35,7 @@ function CustomPlaybookNode({ data }) {
           }`}
           style={{ maxWidth: "25vh" }}
         >
-          <span>{data?.description}</span>
+          <span>{markdownToHtml(data?.description)}</span>
         </small>
       </NodeToolbar>
       <div

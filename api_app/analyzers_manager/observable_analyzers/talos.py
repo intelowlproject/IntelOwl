@@ -8,8 +8,7 @@ path during full_clean().  The analyzer itself is removed; migration
 0176_remove_talos_reputation deletes the DB rows.
 """
 
-from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.classes import ObservableAnalyzer, AnalyzerRunException
 
 
 class Talos(ObservableAnalyzer):

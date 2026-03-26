@@ -80,11 +80,15 @@ class TestCapaInfoAnalyzer(BaseFileAnalyzerTest):
 
         patches = self.get_mocked_response()
 
-        with self._apply_patches(patches):
-            with patch("api_app.analyzers_manager.file_analyzers.capa_info.subprocess.run") as mock_run:
-                mock_run.side_effect = subprocess.TimeoutExpired(cmd=["capa"], timeout=120)
-                with self.assertRaises(AnalyzerRunException) as context:
-                    analyzer.run()
+        with (
+            self._apply_patches(patches),
+            patch(
+                "api_app.analyzers_manager.file_analyzers.capa_info.subprocess.run",
+                side_effect=subprocess.TimeoutExpired(cmd=["capa"], timeout=120),
+            ),
+            self.assertRaises(AnalyzerRunException) as context,
+        ):
+            analyzer.run()
 
         self.assertIn("timed out after", str(context.exception))
 

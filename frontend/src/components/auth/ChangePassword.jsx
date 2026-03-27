@@ -8,6 +8,7 @@ import {
   Button,
 } from "reactstrap";
 import { Form, Formik } from "formik";
+import { useNavigate } from "react-router-dom";
 import useTitle from "react-use/lib/useTitle";
 
 import { addToast, ContentSection } from "@certego/certego-ui";
@@ -46,19 +47,23 @@ export default function ChangePassword() {
     React.useCallback((state) => state.service.changePassword, []),
   );
 
+  // routing
+  const navigate = useNavigate();
+
   // callback
   const onSubmit = React.useCallback(
     async (values, { setSubmitting }) => {
       try {
         await changePassword(values);
         addToast("Password changed successfully!", null, "success");
+        navigate("/");
       } catch (error) {
         addToast("Failed to change password", error.parsedMsg, "danger", true);
       } finally {
         setSubmitting(false);
       }
     },
-    [changePassword],
+    [changePassword, navigate],
   );
 
   return (

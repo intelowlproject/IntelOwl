@@ -29,9 +29,37 @@ class MISPTestCase(BaseAnalyzerTest):
             "enforce_warninglist": False,
             "filter_on_type": True,
             "strict_search": False,
-            "published": True,
+            "published": None,
+            "metadata": None,
+        }
+
+
+class MISPPublishedFalseTestCase(BaseAnalyzerTest):
+    """Verify that setting published=False actually gets passed to pymisp."""
+
+    analyzer_class = MISP
+
+    @staticmethod
+    def get_mocked_response():
+        return patch("pymisp.PyMISP", return_value=MockResponseNoOp({"response": "mocked"}, 200))
+
+    @classmethod
+    def get_extra_config(cls) -> dict:
+        return {
+            "_api_key_name": "test_api_key",
+            "_url_key_name": "https://misp.local",
+            "ssl_check": False,
+            "self_signed_certificate": False,
+            "debug": False,
+            "from_days": 30,
+            "limit": 10,
+            "enforce_warninglist": False,
+            "filter_on_type": True,
+            "strict_search": False,
+            "published": False,
             "metadata": False,
         }
+
 
     def test_restsearch_get_post_error(self):
         from api_app.analyzers_manager.models import AnalyzerConfig

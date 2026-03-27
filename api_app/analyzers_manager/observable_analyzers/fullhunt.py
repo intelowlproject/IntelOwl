@@ -8,11 +8,12 @@ class FullHunt(ObservableAnalyzer):
     """
 
     def run(self):
-        domain = self.observable_name
+        # Use self.observable as it is the standard attribute in the base class
+        domain = self.observable
         api_key = self.get_config("api_key")
 
         if not api_key:
-            raise Exception("FullHunt API Key is missing in configuration.")
+            return {"error": "FullHunt API Key is missing in configuration."}
 
         url = f"https://fullhunt.io/api/v1/domain/{domain}/details"
         headers = {
@@ -20,17 +21,21 @@ class FullHunt(ObservableAnalyzer):
             "User-Agent": "IntelOwl-Analyzer-FullHunt",
         }
 
+        # Use the built-in http_get helper
         response = self.http_get(url, headers=headers, timeout=20)
 
         if response.status_code == 200:
             return response.json()
         elif response.status_code == 401:
-            raise Exception("Invalid FullHunt API Key")
+            return {"error": "Invalid FullHunt API Key"}
         elif response.status_code == 404:
             return {"message": "No data found for this domain.", "status": "empty"}
 
-        response.raise_for_status()
-        return response.json()
+        # Fallback for other status codes
+        return {
+            "error": f"FullHunt API returned status code {response.status_code}",
+            "raw_response": response.text,
+        }
 
     def update(self):
         """

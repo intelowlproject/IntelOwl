@@ -132,6 +132,7 @@ class Ja4DBTestCase(BaseAnalyzerTest):
 
     def test_run_returns_error_when_initial_update_fails(self):
         analyzer = self._setup_analyzer(None, "generic", "missing-fingerprint")
+        Ja4DBEntry.objects.all().delete()
 
         with patch.object(Ja4DB, "update", side_effect=requests.RequestException("network down")):
             response = analyzer.run()

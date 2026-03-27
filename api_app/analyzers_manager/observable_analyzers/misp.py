@@ -2,7 +2,6 @@
 # See the file 'LICENSE' for copying permission.
 
 import datetime
-from typing import Optional
 
 import pymisp
 from django.conf import settings
@@ -28,8 +27,8 @@ class MISP(classes.ObservableAnalyzer):
     filter_on_type: bool
     strict_search: bool
     timeout: int = 5
-    published: Optional[bool] = None
-    metadata: Optional[bool] = None
+    published: bool = False
+    metadata: bool = False
 
     def update(self):
         pass
@@ -72,10 +71,10 @@ class MISP(classes.ObservableAnalyzer):
         if self.enforce_warninglist:
             params["enforce_warninglist"] = self.enforce_warninglist
 
-        if self.published is not None:
+        if isinstance(self.published, bool):
             params["published"] = self.published
 
-        if self.metadata is not None:
+        if isinstance(self.metadata, bool):
             params["metadata"] = self.metadata
 
         if self.strict_search:

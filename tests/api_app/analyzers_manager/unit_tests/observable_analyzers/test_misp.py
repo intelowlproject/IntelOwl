@@ -29,8 +29,8 @@ class MISPTestCase(BaseAnalyzerTest):
             "enforce_warninglist": False,
             "filter_on_type": True,
             "strict_search": False,
-            "published": None,
-            "metadata": None,
+            "published": True,
+            "metadata": False,
         }
 
 

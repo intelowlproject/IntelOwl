@@ -1,88 +1,77 @@
 import json
 import logging
-import os
 
 import requests
-from django.conf import settings
+from django.db import transaction
 
 from api_app.analyzers_manager import classes
+from api_app.analyzers_manager.models import Ja4DBEntry
 
 logger = logging.getLogger(__name__)
 
 
 class Ja4DB(classes.ObservableAnalyzer):
-    """
-    We are only checking JA4 "traditional" fingerprints here
-    We should support all the JAX types as well but it is difficult
-     to add them considering that
-    it is not easy to understand the format and how to avoid
-     to run this analyzer even in cases
-    where a ja4x has not been submitted.
-    This should probably require a rework where those fingerprints
-     are saved in a table/collection
-    """
-
-    class NotJA4Exception(Exception):
-        pass
-
-    url = " https://ja4db.com/api/read/"
+    url = "https://ja4db.com/api/read/"
+    fingerprint_fields = (
+        "ja4_fingerprint",
+        "ja4s_fingerprint",
+        "ja4h_fingerprint",
+        "ja4x_fingerprint",
+        "ja4t_fingerprint",
+        "ja4ts_fingerprint",
+        "ja4tscan_fingerprint",
+    )
 
     @classmethod
-    def location(cls) -> str:
-        db_name = "ja4_db.json"
-        return f"{settings.MEDIA_ROOT}/{db_name}"
-
-    def check_ja4_fingerprint(self, observable: str) -> str:
-        message = ""
-        try:
-            # https://github.com/FoxIO-LLC/ja4/blob/main/technical_details/README.md
-            if observable[0] not in ["t", "q"]:
-                # checks for protocol,
-                # TCP(t) and QUIC(q) are the only supported protocols
-                raise self.NotJA4Exception("only TCP and QUIC protocols are supported")
-            if observable[1:3] not in ["12", "13"]:
-                # checks for the version of the protocol
-                raise self.NotJA4Exception("procotol version wrong")
-            if observable[3] not in ["d", "i"]:
-                # SNI or no SNI
-                raise self.NotJA4Exception("SNI value not valid")
-            if not observable[4:8].isdigit():
-                # number of cipher suits and extensions
-                raise self.NotJA4Exception("cipher suite must be a number")
-            if len(observable) > 70 or len(observable) < 20:
-                raise self.NotJA4Exception("invalid length")
-            if not observable.count("_") >= 2:
-                raise self.NotJA4Exception("missing underscores")
-        except self.NotJA4Exception as e:
-            message = f"{self.observable_name} is not valid JA4 because {e}"
-            logger.info(message)
-
-        return message
-
-    @classmethod
-    def update(cls):
+    def update(cls) -> bool:
         logger.info(f"Updating database from {cls.url}")
-        response = requests.get(url=cls.url)
+        response = requests.get(url=cls.url, timeout=30)
         response.raise_for_status()
         data = response.json()
-        database_location = cls.location()
 
-        with open(database_location, "w", encoding="utf-8") as f:
-            json.dump(data, f)
-        logger.info(f"Database updated at {database_location}")
+        db_entries = []
+        for item in data:
+            for fingerprint_type in cls.fingerprint_fields:
+                fingerprint_value = item.get(fingerprint_type)
+                if fingerprint_value:
+                    db_entries.append(
+                        Ja4DBEntry(
+                            fingerprint_type=fingerprint_type,
+                            fingerprint_value=fingerprint_value,
+                            details=item,
+                        )
+                    )
+
+        with transaction.atomic():
+            Ja4DBEntry.objects.all().delete()
+            Ja4DBEntry.objects.bulk_create(db_entries, batch_size=1000)
+
+        logger.info(f"Updated {len(db_entries)} JA4 DB fingerprint entries")
+        return True
 
     def run(self):
-        reason = self.check_ja4_fingerprint(self.observable_name)
-        if reason:
-            return {"not_supported": reason}
+        if not Ja4DBEntry.objects.exists():
+            logger.info("Ja4DBEntry table is empty, triggering update...")
+            try:
+                self.update()
+            except requests.RequestException as exc:
+                logger.exception("Failed to update JA4 DB entries from %s: %s", self.url, exc)
+                return {"error": f"Unable to update JA4 DB: {exc}"}
+            except Exception as exc:
+                logger.exception("Unexpected error while updating JA4 DB entries from %s: %s", self.url, exc)
+                return {"error": f"Unexpected JA4 DB update failure: {exc}"}
 
-        database_location = self.location()
-        if not os.path.exists(database_location):
-            logger.info(f"Database does not exist in {database_location}, initialising...")
-            self.update()
-        with open(database_location, "r") as f:
-            db = json.load(f)
-        for application in db:
-            if application["ja4_fingerprint"] == self.observable_name:
-                return application
+        matches = []
+        seen = set()
+        for details in Ja4DBEntry.objects.filter(fingerprint_value=self.observable_name).values_list(
+            "details", flat=True
+        ):
+            serialized = json.dumps(details, sort_keys=True)
+            if serialized not in seen:
+                seen.add(serialized)
+                matches.append(details)
+        if len(matches) == 1:
+            return matches[0]
+        if matches:
+            return matches
         return {"found": False}

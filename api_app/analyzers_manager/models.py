@@ -430,3 +430,16 @@ class FireholIPEntry(LocalAnalyzerDBEntry):
 
     def __str__(self):
         return f"{self.ip_or_subnet} - {self.list_name}"
+
+
+class Ja4DBEntry(LocalAnalyzerDBEntry):
+    fingerprint_type = models.CharField(max_length=20, db_index=True)
+    fingerprint_value = models.CharField(max_length=1024, db_index=True)
+    details = models.JSONField(default=dict)
+
+    class Meta:
+        verbose_name = "JA4 DB Entry"
+        verbose_name_plural = "JA4 DB Entries"
+
+    def __str__(self):
+        return f"{self.fingerprint_type}: {self.fingerprint_value}"

@@ -1,5 +1,8 @@
 from unittest.mock import patch
 
+import requests
+
+from api_app.analyzers_manager.models import Ja4DBEntry
 from api_app.analyzers_manager.observable_analyzers.ja4_db import Ja4DB
 from tests.api_app.analyzers_manager.unit_tests.observable_analyzers.base_test_class import (
     BaseAnalyzerTest,
@@ -53,3 +56,84 @@ class Ja4DBTestCase(BaseAnalyzerTest):
             },
         ]
         return patch("requests.get", return_value=MockUpResponse(sample_data, 200))
+
+    def test_run_matches_ja4h_fingerprint(self):
+        Ja4DBEntry.objects.create(
+            fingerprint_type="ja4h_fingerprint",
+            fingerprint_value="ge11cn20enus_60ca1bd65281_ac95b44401d9_8df6a44f726c",
+            details={
+                "application": "Chrome",
+                "ja4h_fingerprint": "ge11cn20enus_60ca1bd65281_ac95b44401d9_8df6a44f726c",
+            },
+        )
+
+        analyzer = self._setup_analyzer(
+            None,
+            "generic",
+            "ge11cn20enus_60ca1bd65281_ac95b44401d9_8df6a44f726c",
+        )
+
+        response = analyzer.run()
+
+        self.assertEqual(response["application"], "Chrome")
+
+    def test_run_matches_ja4t_fingerprint(self):
+        Ja4DBEntry.objects.create(
+            fingerprint_type="ja4t_fingerprint",
+            fingerprint_value="1024_2_1460_00",
+            details={"application": "Nmap", "ja4t_fingerprint": "1024_2_1460_00"},
+        )
+
+        analyzer = self._setup_analyzer(None, "generic", "1024_2_1460_00")
+
+        response = analyzer.run()
+
+        self.assertEqual(response["application"], "Nmap")
+
+    def test_run_matches_ja4x_fingerprint(self):
+        Ja4DBEntry.objects.create(
+            fingerprint_type="ja4x_fingerprint",
+            fingerprint_value="3082024b308201b3a00302010202143d0f5c",
+            details={
+                "application": "Example TLS Cert",
+                "ja4x_fingerprint": "3082024b308201b3a00302010202143d0f5c",
+            },
+        )
+
+        analyzer = self._setup_analyzer(None, "generic", "3082024b308201b3a00302010202143d0f5c")
+
+        response = analyzer.run()
+
+        self.assertEqual(response["application"], "Example TLS Cert")
+
+    def test_run_returns_all_matching_records(self):
+        fingerprint_value = "shared-fingerprint"
+        Ja4DBEntry.objects.create(
+            fingerprint_type="ja4h_fingerprint",
+            fingerprint_value=fingerprint_value,
+            details={"application": "Chrome", "ja4h_fingerprint": fingerprint_value},
+        )
+        Ja4DBEntry.objects.create(
+            fingerprint_type="ja4tscan_fingerprint",
+            fingerprint_value=fingerprint_value,
+            details={"application": "Scanner", "ja4tscan_fingerprint": fingerprint_value},
+        )
+
+        analyzer = self._setup_analyzer(None, "generic", fingerprint_value)
+
+        response = analyzer.run()
+
+        self.assertIsInstance(response, list)
+        self.assertEqual(len(response), 2)
+        self.assertEqual(
+            {item["application"] for item in response},
+            {"Chrome", "Scanner"},
+        )
+
+    def test_run_returns_error_when_initial_update_fails(self):
+        analyzer = self._setup_analyzer(None, "generic", "missing-fingerprint")
+
+        with patch.object(Ja4DB, "update", side_effect=requests.RequestException("network down")):
+            response = analyzer.run()
+
+        self.assertEqual(response, {"error": "Unable to update JA4 DB: network down"})

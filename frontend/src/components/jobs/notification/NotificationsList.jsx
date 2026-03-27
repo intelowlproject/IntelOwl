@@ -76,9 +76,7 @@ export default function NotificationsList({ notifications, refetchFn }) {
             </small>
           </div>
           <ListGroupItemText className="text-light">
-            <ReactMarkdown components={markdownComponents}>
-              {notif?.body}
-            </ReactMarkdown>
+            <div dangerouslySetInnerHTML={{ __html: notif?.body }} />
           </ListGroupItemText>
           <div className="d-flex">
             {notif?.read === false && (

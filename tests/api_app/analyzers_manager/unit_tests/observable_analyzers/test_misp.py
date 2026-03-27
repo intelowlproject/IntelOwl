@@ -60,7 +60,6 @@ class MISPPublishedFalseTestCase(BaseAnalyzerTest):
             "metadata": False,
         }
 
-
     def test_restsearch_get_post_error(self):
         from api_app.analyzers_manager.models import AnalyzerConfig
 

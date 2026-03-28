@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 from django.db import migrations
 
 
@@ -31,7 +34,6 @@ def reverse_migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("api_app", "0062_alter_parameter_type"),
         ("analyzers_manager", "0175_analyzer_config_cleanbrowsing_malicious_detector"),
     ]
 

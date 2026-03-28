@@ -93,16 +93,12 @@ def get_default_requests_timeout() -> tuple[float, float]:
     read_timeout_default = 30.0
 
     try:
-        connect_timeout = float(
-            environ.get("INTELOWL_REQUESTS_CONNECT_TIMEOUT", connect_timeout_default)
-        )
+        connect_timeout = float(environ.get("INTELOWL_REQUESTS_CONNECT_TIMEOUT", connect_timeout_default))
     except (TypeError, ValueError):
         connect_timeout = connect_timeout_default
 
     try:
-        read_timeout = float(
-            environ.get("INTELOWL_REQUESTS_READ_TIMEOUT", read_timeout_default)
-        )
+        read_timeout = float(environ.get("INTELOWL_REQUESTS_READ_TIMEOUT", read_timeout_default))
     except (TypeError, ValueError):
         read_timeout = read_timeout_default
 
@@ -112,16 +108,16 @@ def get_default_requests_timeout() -> tuple[float, float]:
 def patch_requests_default_timeout() -> None:
     import requests
 
-    session_request = requests.sessions.Session.request
-    if getattr(session_request, "_intelowl_default_timeout_patched", False):
+    api_request = requests.api.request
+    if getattr(api_request, "_intelowl_default_timeout_patched", False):
         return
 
-    @wraps(session_request)
-    def request(self, method, url, **kwargs):
+    @wraps(api_request)
+    def wrapped(method, url, **kwargs):
         if "timeout" not in kwargs or kwargs["timeout"] is None:
             kwargs["timeout"] = get_default_requests_timeout()
-        return request._intelowl_original(self, method, url, **kwargs)
+        return wrapped._intelowl_original(method, url, **kwargs)
 
-    request._intelowl_default_timeout_patched = True
-    request._intelowl_original = session_request
-    requests.sessions.Session.request = request
+    wrapped._intelowl_default_timeout_patched = True
+    wrapped._intelowl_original = api_request
+    requests.api.request = wrapped

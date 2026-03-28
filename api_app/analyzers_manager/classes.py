@@ -279,6 +279,16 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     key_not_found_max_retries: int = 10
 
     @staticmethod
+    def __get_response_json(resp: requests.Response) -> dict:
+        try:
+            data = resp.json()
+        except ValueError:
+            return {}
+        if isinstance(data, dict):
+            return data
+        return {}
+
+    @staticmethod
     def __raise_in_case_bad_request(name, resp, params_to_check=None) -> bool:
         """
         Raises:
@@ -289,14 +299,15 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         # different error messages for different cases
         if resp.status_code == 404:
             raise AnalyzerConfigurationException(f"{name} docker container is not running.")
+        resp_json = DockerBasedAnalyzer.__get_response_json(resp)
         if resp.status_code == 400:
-            err = resp.json().get("error", "")
+            err = resp_json.get("error") or resp.text or "Bad Request"
             raise AnalyzerRunException(err)
         if resp.status_code == 500:
             raise AnalyzerRunException(f"Internal Server Error in {name} docker container")
         # check to make sure there was a valid params in response
         for param in params_to_check:
-            param_value = resp.json().get(param, None)
+            param_value = resp_json.get(param, None)
             if not param_value:
                 raise AnalyzerRunException(
                     f"Unexpected Error. Please check log files under /var/log/intel_owl/{name.lower()}/"
@@ -308,14 +319,14 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
 
     @staticmethod
     def __query_for_result(url: str, key: str) -> Tuple[int, dict]:
-        headers = {"Accept": "application/json"}
+        headers = {"Accept": "application/json", "Host": "localhost"}
         resp = requests.get(f"{url}?key={key}", headers=headers)
-        return resp.status_code, resp.json()
+        return resp.status_code, DockerBasedAnalyzer.__get_response_json(resp)
 
     def __polling(self, req_key: str, chance: int, re_poll_try: int = 0):
         try:
             status_code, json_data = self.__query_for_result(self.url, req_key)
-        except (requests.RequestException, json.JSONDecodeError) as e:
+        except (requests.RequestException, ValueError) as e:
             raise AnalyzerRunException(e)
         if status_code == 404:
             # This happens when they key does not exist.
@@ -392,23 +403,36 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         try:
             if req_files:
                 form_data = {"request_json": json.dumps(req_data)}
-                resp1 = requests.post(self.url, files=req_files, data=form_data)
+                normalized_files = {}
+                for field_name, value in req_files.items():
+                    if isinstance(value, (bytes, bytearray)):
+                        normalized_files[field_name] = (field_name, value)
+                    else:
+                        normalized_files[field_name] = value
+                resp1 = requests.post(
+                    self.url,
+                    files=normalized_files,
+                    data=form_data,
+                    headers={"Host": "localhost"},
+                )
             else:
-                resp1 = requests.post(self.url, json=req_data)
+                resp1 = requests.post(self.url, json=req_data, headers={"Host": "localhost"})
         except requests.exceptions.ConnectionError:
             self._raise_container_not_running()
+
+        resp1_json = DockerBasedAnalyzer.__get_response_json(resp1)
 
         # step #2: raise AnalyzerRunException in case of error
         # Modified to support synchronous analyzers that return results directly in the initial response, avoiding unnecessary polling.
         if avoid_polling:
-            report = resp1.json().get("report", None)
-            err = resp1.json().get("error", None)
+            report = resp1_json.get("report", None)
+            err = resp1_json.get("error", None)
         else:
             if not self.__raise_in_case_bad_request(self.name, resp1):
                 raise AssertionError
 
             # step #3: if no error, continue and try to fetch result
-            key = resp1.json().get("key")
+            key = resp1_json.get("key")
             final_resp = self.__poll_for_result(key)
             err = final_resp.get("error", None)
             report = final_resp.get("report", None)
@@ -440,7 +464,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
 
         # step #1: request new analysis
         try:
-            resp = requests.get(url=self.url)
+            resp = requests.get(url=self.url, headers={"Host": "localhost"})
         except requests.exceptions.ConnectionError:
             self._raise_container_not_running()
 
@@ -454,7 +478,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         basic health check: if instance is up or not (timeout - 10s)
         """
         try:
-            requests.head(self.url, timeout=10)
+            requests.head(self.url, timeout=10, headers={"Host": "localhost"})
         except requests.exceptions.RequestException:
             health_status = False
         else:

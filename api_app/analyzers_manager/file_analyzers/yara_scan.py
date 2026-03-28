@@ -5,8 +5,10 @@ import io
 import logging
 import math
 import os
+import shutil
+import tempfile
 import zipfile
-from pathlib import PosixPath
+from pathlib import Path, PosixPath
 from typing import Dict, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
@@ -86,8 +88,10 @@ class YaraRepo:
 
     def update(self):
         logger.info(f"Starting update of {self.url}")
-        if self.is_zip():
-            # private url not supported at the moment for private
+
+        if self.is_unprotect_api():
+            self._update_unprotect_api()
+        elif self.is_zip():
             self._update_zip()
         else:
             self._update_git()
@@ -149,9 +153,111 @@ class YaraRepo:
                 if settings.GIT_KEY_PATH.exists():
                     os.remove(settings.GIT_KEY_PATH)
 
+    @staticmethod
+    def _write_rule_to_temp(rule, temp_dir):
+        """Helper to write an individual rule to the temp directory."""
+        try:
+            # Check for YARA rule content in multiple possible fields
+            yara_rule = rule.get("yara_rule") or rule.get("yara_rules") or rule.get("rule")
+
+            if not yara_rule or not isinstance(yara_rule, str):
+                return False
+
+            # Sanitize filename: Remove spaces and non-alphanumeric chars
+            rule_name = rule.get("name") or "unprotect_rule"
+            clean_name = "".join(filter(str.isalnum, str(rule_name))) or "unprotect_rule"
+            rule_id = rule.get("id", "unknown")
+
+            filename = f"{clean_name}_{rule_id}.yar"
+            # Ensure temp_dir is treated as a Path object
+            save_path = Path(temp_dir) / filename
+
+            with open(save_path, "w", encoding="utf-8") as f:
+                f.write(yara_rule)
+            return True
+        except Exception as e:
+            logger.error(f"Error writing rule {rule.get('id')}: {e}")
+            return False
+
+    def _update_unprotect_api(self):
+        logger.info(f"Fetching Unprotect rules from {self.url}")
+
+        # Setup temporary workspace
+        os.makedirs(self.directory.parent, exist_ok=True)
+        temp_dir_raw = tempfile.mkdtemp(prefix="unprotect_tmp_", dir=str(self.directory.parent))
+        temp_dir_path = Path(temp_dir_raw)
+
+        current_url = self.url
+        valid_rules = 0
+
+        try:
+            while current_url:
+                try:
+                    response = requests.get(current_url, timeout=30)
+                    response.raise_for_status()
+                    data = response.json()
+                except (requests.RequestException, ValueError) as e:
+                    logger.error(f"Failed fetching/decoding Unprotect page {current_url}: {e}")
+                    break
+
+                results = data.get("results", [])
+                if not results:
+                    break
+
+                for rule in results:
+                    # Call it via the class name or just remove 'self.'
+                    YaraRepo._write_rule_to_temp(rule, temp_dir_path)
+
+                current_url = data.get("next")
+
+            # --- VALIDATION BLOCK ---
+            for rule_file in temp_dir_path.glob("*.yar"):
+                try:
+                    yara.compile(filepath=str(rule_file))
+                    valid_rules += 1
+                except (yara.SyntaxError, yara.Error) as e:
+                    logger.error(
+                        "Invalid YARA rule in temp file %s: %s. Discarding.",
+                        rule_file,
+                        e,
+                    )
+                    rule_file.unlink(missing_ok=True)
+
+            if valid_rules > 0:
+                self._finalize_rules(temp_dir_path, valid_rules)
+            else:
+                logger.warning("No valid YARA rules were fetched; keeping existing rules.")
+
+        except Exception:
+            logger.exception("Unexpected error during Unprotect rules ingestion")
+        finally:
+            shutil.rmtree(temp_dir_raw, ignore_errors=True)
+
+    def _finalize_rules(self, temp_dir, count):
+        """Moves rules from temp to final destination and cleans up old rules."""
+        os.makedirs(self.directory, exist_ok=True)
+
+        # First, move all new rules into place, keeping track of their names.
+        new_rule_names = set()
+        for new_file in temp_dir.glob("*.yar"):
+            destination = self.directory / new_file.name
+            shutil.move(str(new_file), str(destination))
+            new_rule_names.add(new_file.name)
+
+        # Only after successfully moving new rules, remove any stale old rules.
+        for old_file in self.directory.glob("*.yar"):
+            if old_file.name not in new_rule_names:
+                old_file.unlink(missing_ok=True)
+
+        logger.info(
+            "Successfully updated Unprotect repository with %d rules in %s",
+            count,
+            self.directory,
+        )
+
     def delete_lock_file(self):
         lock_file_path = self.directory / ".git" / "index.lock"
-        lock_file_path.unlink(missing_ok=False)
+        lock_file_path.unlink(missing_ok=True)
 
     @property
     def compiled_file_name(self):
@@ -172,6 +278,18 @@ class YaraRepo:
 
     def is_zip(self):
         return self.url.endswith(".zip")
+
+    def is_unprotect_api(self):
+        """
+        Return True if the configured URL points to the Unprotect.it
+        detection rules API endpoint.
+        """
+        parsed = urlparse(self.url)
+        netloc = parsed.netloc.lower()
+
+        # Normalize path to handle optional leading/trailing slash
+        path = parsed.path.strip("/")
+        return netloc == "unprotect.it" and path.startswith("api/detection_rules")
 
     @cached_property
     def head_branch(self) -> str:
@@ -206,29 +324,47 @@ class YaraRepo:
         logger.info(f"Starting compile for {self}")
         compiled_rules = []
 
+        # We check the specific repo directory and any first-level subdirectories
         for directory in self.first_level_directories + [self.directory]:
             if directory != self.directory:
-                # recursive
-                rules = directory.rglob("*")
+                rules = directory.rglob("*")  # recursive for subfolders
             else:
-                # not recursive
-                rules = directory.glob("*")
+                rules = directory.glob("*")  # non-recursive for main folder
+
             valid_rules_path = []
             for rule in rules:
-                if rule.stem.endswith("index") or rule.stem.startswith("index"):
+                if rule.stem.lower().startswith("index") or rule.stem.lower().endswith("index"):
                     continue
                 if rule.suffix in [".yara", ".yar", ".rule"]:
                     try:
-                        yara.compile(str(rule))
-                    except yara.SyntaxError:
+                        yara.compile(filepath=str(rule))
+                        valid_rules_path.append(rule)
+                    except yara.SyntaxError as e:
+                        logger.warning(f"Syntax error in YARA rule: {rule}: {e}")
                         continue
-                    else:
-                        valid_rules_path.append(str(rule))
+                    except yara.Error as e:
+                        logger.warning(f"Error compiling YARA rule: {rule}: {e}")
+                        continue
+
+            if not valid_rules_path:
+                continue
+
             logger.info(f"Compiling {len(valid_rules_path)} rules for {self} at {directory}")
-            compiled_rule = yara.compile(filepaths={str(path): str(path) for path in valid_rules_path})
-            compiled_rule.save(str(directory / self.compiled_file_name))
-            compiled_rules.append(compiled_rule)
-            logger.info(f"Rules {self} saved on file")
+
+            try:
+                compiled_rule = yara.compile(filepaths={str(path): str(path) for path in valid_rules_path})
+
+                # Ensure the path exists before saving to avoid "could not open file" error
+                directory.mkdir(parents=True, exist_ok=True)
+
+                save_path = str(directory / self.compiled_file_name)
+                compiled_rule.save(save_path)
+
+                compiled_rules.append(compiled_rule)
+                logger.info(f"Rules for {self} compiled and saved to {save_path}")
+            except Exception:
+                logger.exception("Failed to compile or save YARA rules in %s", directory)
+
         return compiled_rules
 
     def analyze(self, file_path: str, filename: str) -> List[Dict]:

@@ -1,6 +1,8 @@
-from unittest.mock import patch
+import tempfile
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
-from api_app.analyzers_manager.file_analyzers.yara_scan import YaraScan
+from api_app.analyzers_manager.file_analyzers.yara_scan import YaraRepo, YaraScan
 
 from .base_test_class import BaseFileAnalyzerTest
 
@@ -32,3 +34,69 @@ class TestYaraScan(BaseFileAnalyzerTest):
                 ],
             )
         ]
+
+    def setUp(self):
+        super().setUp()
+
+        self.analyzer = YaraScan(
+            {
+                "repositories": [],
+                "local_rules": "",
+                "_private_repositories": {},
+            }
+        )
+
+    @patch("api_app.analyzers_manager.file_analyzers.yara_scan.requests.get")
+    def test_unprotect_update_downloads_yara_rules(self, mock_get):
+        """
+        Ensure Unprotect API repository downloads YARA rules with a non-empty
+        yara_rule field and creates .yar files correctly.
+        """
+
+        # Mock API response
+        mock_response = MagicMock()
+        mock_response.raise_for_status.return_value = None
+        mock_response.json.return_value = {
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Test Rule",
+                    "yara_rule": "rule test_rule { condition: true }",
+                },
+                {
+                    "id": 2,
+                    "name": "CAPA Rule",
+                    "yara_rule": None,
+                },
+            ],
+            "next": None,
+        }
+
+        mock_get.return_value = mock_response
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            base_dir = Path(tmpdir)
+
+            unprotect_repo = YaraRepo(url="https://unprotect.it/api/detection_rules/", directory=base_dir)
+
+            # Call update on the correct repo
+            unprotect_repo.update()
+
+            # Verify HTTP request was made correctly
+            mock_get.assert_called()
+            called_url = mock_get.call_args[0][0]
+            self.assertIn("unprotect.it/api/detection_rules/", called_url)
+
+            # Verify .yar file was created
+            created_files = list(base_dir.iterdir())
+            self.assertEqual(len(created_files), 1)
+
+            created_file = created_files[0]
+            self.assertEqual(created_file.suffix, ".yar")
+            self.assertEqual(created_file.name, "TestRule_1.yar")
+
+            #  Verify file content
+            with open(created_file, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            self.assertEqual(content, "rule test_rule { condition: true }")

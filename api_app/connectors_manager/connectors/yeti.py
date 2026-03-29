@@ -109,8 +109,14 @@ class YETI(classes.Connector):
             if_mock_connections(
                 patch(
                     "requests.post",
-                    return_value=MockUpResponse({}, 200),
+                    return_value=MockUpResponse({"access_token": "test_token"}, 200),
                 )
-            )
+            ),
+            if_mock_connections(
+                patch(
+                    "requests.get",
+                    return_value=MockUpResponse({"username": "admin"}, 200),
+                )
+            ),
         ]
         return super()._monkeypatch(patches=patches)

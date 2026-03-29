@@ -134,9 +134,10 @@ class MISP(Connector):
                 debug=False,
                 timeout=10,
             )
-            misp.version
+            version = misp.version
+            if not version or "version" not in version:
+                raise RuntimeError("Unable to get MISP version")
             return True
-
         except Exception as e:
             logger.error(f"MISP health check failed: {type(e).__name__}: {e}")
             raise
@@ -212,10 +213,6 @@ class MockPyMISP:
     @staticmethod
     def add_attribute(*args, **kwargs) -> MockUpMISPElement:
         return MockUpMISPElement()
-
-    @staticmethod
-    def version() -> dict:
-        return {"version": "2.4.146"}
 
     @staticmethod
     def get_event(event_id) -> dict:

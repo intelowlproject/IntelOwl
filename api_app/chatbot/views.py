@@ -25,6 +25,14 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     http_method_names = ["get", "post", "delete"]
 
+    def dispatch(self, request, *args, **kwargs):
+        if not getattr(settings, "CHATBOT_ENABLED", False):
+            return JsonResponse(
+                {"detail": "Chatbot is not enabled."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        return super().dispatch(request, *args, **kwargs)
+
     def get_queryset(self):
         return ChatSession.objects.filter(user=self.request.user)
 
@@ -40,11 +48,49 @@ def _get_token_from_request(request) -> str | None:
     return None
 
 
+async def _authenticate(request):
+    """Resolve (user, token_key) from Token header or Django session cookie.
+
+    Tries the Authorization: Token header first; if absent, falls back to the
+    session-authenticated request.user and looks up their Durin token so that
+    the tool-calling layer can make authenticated internal API requests.
+
+    Returns (None, None) when authentication fails.
+    """
+    from durin.models import AuthToken
+
+    token_key = _get_token_from_request(request)
+    if token_key:
+        try:
+            obj = await sync_to_async(
+                AuthToken.objects.select_related("user").get
+            )(token=token_key)
+            return obj.user, token_key
+        except AuthToken.DoesNotExist:
+            return None, None
+
+    # Session authentication fallback — the frontend sends credentials: "include".
+    user = await sync_to_async(lambda: request.user)()
+    if not user or not user.is_authenticated:
+        return None, None
+
+    # Retrieve the user's Durin token for internal API calls made by tools.
+    try:
+        obj = await sync_to_async(AuthToken.objects.filter(user=user).first)()
+        if obj is None:
+            return None, None
+        return user, obj.token
+    except Exception:
+        logger.exception("Failed to retrieve Durin token for session user")
+        return None, None
+
+
 async def send_message(request, session_pk):
     """Send a message and stream the assistant's response via SSE.
 
     This is an async Django view (not DRF) to support StreamingHttpResponse.
-    Auth is handled manually by extracting the Durin token from the header.
+    Auth is handled manually: Token header takes priority, session cookie is
+    the fallback (matching the frontend's credentials: "include" behaviour).
     """
     if not getattr(settings, "CHATBOT_ENABLED", False):
         return JsonResponse(
@@ -58,24 +104,10 @@ async def send_message(request, session_pk):
             status=status.HTTP_405_METHOD_NOT_ALLOWED,
         )
 
-    # Manual token auth for the async view.
-    token_key = _get_token_from_request(request)
-    if not token_key:
+    user, token_key = await _authenticate(request)
+    if user is None:
         return JsonResponse(
             {"detail": "Authentication credentials were not provided."},
-            status=status.HTTP_401_UNAUTHORIZED,
-        )
-
-    from durin.models import AuthToken
-
-    try:
-        auth_token_obj = await sync_to_async(
-            AuthToken.objects.select_related("user").get
-        )(token=token_key)
-        user = auth_token_obj.user
-    except AuthToken.DoesNotExist:
-        return JsonResponse(
-            {"detail": "Invalid token."},
             status=status.HTTP_401_UNAUTHORIZED,
         )
 
@@ -91,10 +123,8 @@ async def send_message(request, session_pk):
         )
 
     # Parse request body.
-    import json as _json
-
     try:
-        body = _json.loads(request.body)
+        body = json.loads(request.body)
     except (ValueError, TypeError):
         return JsonResponse(
             {"detail": "Invalid JSON."},

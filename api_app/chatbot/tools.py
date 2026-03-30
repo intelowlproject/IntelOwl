@@ -181,9 +181,12 @@ async def execute_tool(
             resp.raise_for_status()
             result = resp.json()
             # Truncate large reports to fit context window.
-            result_str = json.dumps(result)
+            result_str = json.dumps(result, separators=(",", ":"))
             if len(result_str) > MAX_TOOL_RESULT_CHARS:
-                return json.loads(_truncate(json.dumps(result, indent=None)))
+                return {
+                    "_truncated": True,
+                    "data": result_str[:MAX_TOOL_RESULT_CHARS],
+                }
             return result
 
         elif name == "get_analyzer_config":

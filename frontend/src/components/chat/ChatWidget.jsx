@@ -134,6 +134,10 @@ export default function ChatWidget() {
         body: JSON.stringify({ message: text }),
       });
 
+      if (!resp.ok) {
+        throw new Error(`Server error: ${resp.status}`);
+      }
+
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
       let assistantContent = "";

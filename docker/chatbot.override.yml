@@ -10,7 +10,7 @@ services:
         condition: service_started
 
   ollama:
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.3.12
     container_name: intelowl_ollama
     restart: unless-stopped
     volumes:

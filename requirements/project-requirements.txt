@@ -120,4 +120,3 @@ Faker==36.1.0
 beautifulsoup4==4.14.2
 # chatbot LLM abstraction layer
 litellm==1.67.2
-httpx==0.28.1

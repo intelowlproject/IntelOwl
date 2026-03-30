@@ -45,9 +45,9 @@ async def run_agent(
                 stream=True,
                 api_base=api_base,
             )
-        except Exception as e:
+        except Exception:
             logger.exception("LLM API call failed")
-            yield {"type": "error", "message": f"LLM request failed: {e}"}
+            yield {"type": "error", "message": "LLM request failed."}
             return
 
         async for chunk in response:

@@ -70,8 +70,6 @@ class Ja4DB(classes.ObservableAnalyzer):
             if serialized not in seen:
                 seen.add(serialized)
                 matches.append(details)
-        if len(matches) == 1:
-            return matches[0]
         if matches:
-            return matches
+            return {"found": True, "results": matches}
         return {"found": False}

@@ -75,7 +75,11 @@ class Ja4DBTestCase(BaseAnalyzerTest):
 
         response = analyzer.run()
 
-        self.assertEqual(response["application"], "Chrome")
+        self.assertTrue(response["found"])
+        self.assertIn(
+            "Chrome",
+            {item["application"] for item in response["results"]},
+        )
 
     def test_run_matches_ja4t_fingerprint(self):
         Ja4DBEntry.objects.create(
@@ -88,7 +92,11 @@ class Ja4DBTestCase(BaseAnalyzerTest):
 
         response = analyzer.run()
 
-        self.assertEqual(response["application"], "Nmap")
+        self.assertTrue(response["found"])
+        self.assertIn(
+            "Nmap",
+            {item["application"] for item in response["results"]},
+        )
 
     def test_run_matches_ja4x_fingerprint(self):
         Ja4DBEntry.objects.create(
@@ -104,7 +112,11 @@ class Ja4DBTestCase(BaseAnalyzerTest):
 
         response = analyzer.run()
 
-        self.assertEqual(response["application"], "Example TLS Cert")
+        self.assertTrue(response["found"])
+        self.assertIn(
+            "Example TLS Cert",
+            {item["application"] for item in response["results"]},
+        )
 
     def test_run_returns_all_matching_records(self):
         fingerprint_value = "shared-fingerprint"
@@ -123,10 +135,10 @@ class Ja4DBTestCase(BaseAnalyzerTest):
 
         response = analyzer.run()
 
-        self.assertIsInstance(response, list)
-        self.assertEqual(len(response), 2)
+        self.assertTrue(response["found"])
+        self.assertEqual(len(response["results"]), 2)
         self.assertEqual(
-            {item["application"] for item in response},
+            {item["application"] for item in response["results"]},
             {"Chrome", "Scanner"},
         )
 

@@ -7,6 +7,7 @@ from api_app.analyzers_manager.models import (
     AnalyzerConfig,
     AnalyzerReport,
     PhishingArmyDomain,
+    Ja4DBEntry,
     TorDanMeUKNode,
     TorExitNode,
     TweetFeedItem,
@@ -71,3 +72,10 @@ class FireholIPEntryAdmin(admin.ModelAdmin):
     list_display = ["ip_or_subnet", "list_name", "network_address", "updated_at"]
     list_filter = ["list_name"]
     search_fields = ["ip_or_subnet", "network_address"]
+
+
+@admin.register(Ja4DBEntry)
+class Ja4DBEntryAdmin(admin.ModelAdmin):
+    list_display = ["fingerprint_type", "fingerprint_value", "updated_at"]
+    list_filter = ["fingerprint_type"]
+    search_fields = ["fingerprint_value"]

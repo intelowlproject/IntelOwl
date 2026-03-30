@@ -1,8 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 
 
@@ -25,7 +24,7 @@ class YETI(classes.ObservableAnalyzer):
         url = f"{self._url_key_name}/api/v2/observables/search/"
 
         # search for observables
-        resp = requests.post(
+        resp = http_utils.post(
             url=url,
             headers=headers,
             json=payload,

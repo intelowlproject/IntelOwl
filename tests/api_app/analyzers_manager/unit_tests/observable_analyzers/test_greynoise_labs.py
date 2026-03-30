@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from api_app.analyzers_manager.observable_analyzers.greynoise_labs import GreynoiseLabs
@@ -12,7 +13,10 @@ class GreynoiseLabsTestCase(BaseAnalyzerTest):
 
     @classmethod
     def get_extra_config(cls):
-        return {"_auth_token": "demo_token", "report": {"errors": []}}
+        return {
+            "_auth_token": "demo_token",
+            "report": SimpleNamespace(errors=[], save=lambda: None),
+        }
 
     @staticmethod
     def get_mocked_response():

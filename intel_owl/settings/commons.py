@@ -58,3 +58,10 @@ UPDATE_CHECK_URL = get_secret(
     "https://api.github.com/repos/intelowlproject/IntelOwl/releases/latest",
 )
 INTEL_OWL_VERSION = VERSION
+try:
+    HTTP_TIMEOUT = int(get_secret("HTTP_TIMEOUT", 90))
+    if HTTP_TIMEOUT <= 0:
+        HTTP_TIMEOUT = 90
+except (ValueError, TypeError):
+    # fallback to default if the environment variable is not a valid integer
+    HTTP_TIMEOUT = 90

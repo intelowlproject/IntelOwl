@@ -3,9 +3,9 @@
 
 from urllib.parse import quote_plus
 
-import requests
 from requests.auth import HTTPBasicAuth
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
@@ -36,7 +36,7 @@ class XForce(classes.ObservableAnalyzer):
             else:
                 observable_to_check = self.observable_name
             url = f"{self.url}/{endpoint}/{observable_to_check}"
-            response = requests.get(url, auth=auth, headers=headers, timeout=self.timeout)
+            response = http_utils.get(url, auth=auth, headers=headers, timeout=self.timeout)
             if response.status_code == 404:
                 result["found"] = False
             else:

@@ -2,8 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 import logging
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.choices import Classification
 from api_app.mixins import AbuseCHMixin
@@ -30,7 +29,7 @@ class YARAify(AbuseCHMixin, ObservableAnalyzer):
         if getattr(self, "_api_key_name", None):
             data["malpedia-token"] = self._api_key_name
 
-        response = requests.post(self.url, json=data, headers=self.authentication_header)
+        response = http_utils.post(self.url, json=data, headers=self.authentication_header)
         response.raise_for_status()
 
         result = response.json()

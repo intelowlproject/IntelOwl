@@ -1,8 +1,7 @@
 import logging
 import re
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 from api_app.choices import Classification
@@ -71,7 +70,7 @@ class HudsonRock(classes.ObservableAnalyzer):
                     ]
                 )
             )
-            response = requests.post(url, headers=headers, json={"ip": self.observable_name})
+            response = http_utils.post(url, headers=headers, json={"ip": self.observable_name})
 
         elif self.observable_classification == Classification.DOMAIN:
             url = (
@@ -91,7 +90,7 @@ class HudsonRock(classes.ObservableAnalyzer):
                     ]
                 )
             )
-            response = requests.post(url, headers=headers, json={"domains": [self.observable_name]})
+            response = http_utils.post(url, headers=headers, json={"domains": [self.observable_name]})
 
         elif self.observable_classification == Classification.GENERIC:
             # checking for email
@@ -102,7 +101,7 @@ class HudsonRock(classes.ObservableAnalyzer):
                     + "/search-by-login"
                     + self.get_param_url(["sortby", "page", "installed_software"])
                 )
-                response = requests.post(url, headers=headers, json={"login": self.observable_name})
+                response = http_utils.post(url, headers=headers, json={"login": self.observable_name})
         else:
             raise AnalyzerConfigurationException(
                 f"Invalid observable type {self.observable_classification}"

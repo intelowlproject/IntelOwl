@@ -4,8 +4,7 @@
 import json
 from urllib.parse import urlparse
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
@@ -38,7 +37,7 @@ class Robtex(classes.ObservableAnalyzer):
 
         loaded_results = []
         for uri in uris:
-            response = requests.get(self.url + uri)
+            response = http_utils.get(self.url + uri)
             response.raise_for_status()
             result = response.text.split("\r\n")
             for item in result:

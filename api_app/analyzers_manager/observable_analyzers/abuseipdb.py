@@ -1,8 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.models import AnalyzerReport
 
@@ -26,7 +25,7 @@ class AbuseIPDB(ObservableAnalyzer):
             "maxAgeInDays": self.max_age,
             "verbose": self.verbose,
         }
-        response = requests.get(self.url, params=params_, headers=headers)
+        response = http_utils.get(self.url, params=params_, headers=headers)
         response.raise_for_status()
 
         result = response.json()

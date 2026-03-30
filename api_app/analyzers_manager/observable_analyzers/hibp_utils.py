@@ -1,8 +1,9 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import requests
 from requests.exceptions import RequestException
+
+from api_app import http_utils
 
 # Constants
 BASE_URL = "https://haveibeenpwned.com/api/v3/"
@@ -37,7 +38,7 @@ def make_hibp_request(
     :raises AnalyzerRunException: On errors with details.
     """
     try:
-        response = requests.get(
+        response = http_utils.get(
             url,
             params=params or {},
             headers=get_headers(api_key),

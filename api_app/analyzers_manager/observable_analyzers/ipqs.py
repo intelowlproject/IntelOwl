@@ -3,6 +3,7 @@ import re
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -127,7 +128,7 @@ class IPQualityScore(classes.ObservableAnalyzer):
 
         try:
             if calling_endpoint and payload is not None:
-                response = requests.get(
+                response = http_utils.get(
                     calling_endpoint + self.observable_name,
                     headers=ipqs_headers,
                     params=payload,

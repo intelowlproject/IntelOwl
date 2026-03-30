@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from requests import HTTPError
 
+from api_app import http_utils
 from api_app.decorators import abstractclassproperty, classproperty
 from api_app.models import AbstractReport, Job, PythonConfig, PythonModule
 from certego_saas.apps.user.models import User
@@ -373,7 +374,7 @@ class Plugin(metaclass=ABCMeta):
             try:
                 # momentarily set this to False to
                 # avoid fails for https services
-                response = requests.head(url, timeout=10, verify=False)
+                response = http_utils.head(url, timeout=10, verify=False)
                 # This may happen when even the HEAD request is protected by authentication
                 # We cannot create a generic health check that consider auth too
                 # because every analyzer has its own way to authenticate

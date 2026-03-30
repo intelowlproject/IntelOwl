@@ -5,8 +5,7 @@ import logging
 import time
 from typing import Dict
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
@@ -53,7 +52,7 @@ class Pulsedive(ObservableAnalyzer):
         params = f"indicator={self.observable_name}"
         if hasattr(self, "_api_key_name"):
             params += self.default_param
-        resp = requests.get(f"{self.url}/info.php?{params}")
+        resp = http_utils.get(f"{self.url}/info.php?{params}")
 
         # handle 404 case, submit for analysis
         if resp.status_code == 404 and self.scan_mode != "basic":
@@ -70,7 +69,7 @@ class Pulsedive(ObservableAnalyzer):
         if hasattr(self, "_api_key_name"):
             params += self.default_param
         headers = {"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}
-        resp = requests.post(f"{self.url}/analyze.php", data=params, headers=headers)
+        resp = http_utils.post(f"{self.url}/analyze.php", data=params, headers=headers)
         resp.raise_for_status()
         qid = resp.json().get("qid", None)
         # 3. retrieve result using qid after waiting for 10 seconds
@@ -90,7 +89,7 @@ class Pulsedive(ObservableAnalyzer):
         for chance in range(self.max_tries):
             logger.info(f"polling request #{chance + 1} for observable: {self.observable_name} <- {obj_repr}")
             time.sleep(self.poll_distance)
-            resp = requests.get(url)
+            resp = http_utils.get(url)
             resp.raise_for_status()
             resp_json = resp.json()
             status = resp_json.get("status", None)

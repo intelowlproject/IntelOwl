@@ -3,8 +3,7 @@
 
 import time
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -28,7 +27,7 @@ class CheckPhish(classes.ObservableAnalyzer):
             "urlInfo": {"url": self.observable_name},
         }
 
-        response = requests.post(CheckPhish.url, json=json_data)
+        response = http_utils.post(CheckPhish.url, json=json_data)
         response.raise_for_status()
 
         job_id = response.json().get("jobID")
@@ -49,7 +48,7 @@ class CheckPhish(classes.ObservableAnalyzer):
         for chance in range(self.polling_tries):
             if chance != 0:
                 time.sleep(self.polling_time)
-            response = requests.post(CheckPhish.status_url, json=json_data)
+            response = http_utils.post(CheckPhish.status_url, json=json_data)
             response.raise_for_status()
             result = response.json()
             status_json = result.get("status", "")

@@ -5,8 +5,7 @@
 
 import logging
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 
 from ..dns_responses import malicious_detector_response
@@ -66,7 +65,7 @@ class Quad9MaliciousDetector(Quad9Base, classes.ObservableAnalyzer):
         :rtype: bool
         """
         params = {"name": observable}
-        google_response = requests.get(self.google_url, params=params)
+        google_response = http_utils.get(self.google_url, params=params)
         google_response.raise_for_status()
         data = google_response.json()
         # the DNS server encountered an internal error

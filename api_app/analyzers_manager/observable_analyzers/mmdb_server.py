@@ -1,7 +1,7 @@
 import logging
+from urllib.parse import quote, urljoin
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 
 logger = logging.getLogger(__name__)
@@ -19,6 +19,8 @@ class MmdbServer(classes.ObservableAnalyzer):
     observable_name: str
 
     def run(self):
-        response = requests.get(self.url + self.observable_name)
+        encoded_name = quote(self.observable_name, safe="")
+        url = urljoin(self.url, encoded_name)
+        response = http_utils.get(url)
         response.raise_for_status()
         return response.json()

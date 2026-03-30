@@ -3,6 +3,7 @@
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
@@ -38,7 +39,7 @@ class Stalkphish(classes.ObservableAnalyzer):
             )
 
         try:
-            response = requests.get(self.url + uri, headers=headers)
+            response = http_utils.get(self.url + uri, headers=headers)
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

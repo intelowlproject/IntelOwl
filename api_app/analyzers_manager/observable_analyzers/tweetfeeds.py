@@ -3,6 +3,7 @@ import logging
 import requests
 from django.db import transaction
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.models import TweetFeedItem
 
@@ -54,7 +55,7 @@ class TweetFeeds(ObservableAnalyzer):
             logger.info(f"TweetFeeds extending using {run_url}")
 
             # simply make api call and search for observable
-            response = requests.get(run_url)
+            response = http_utils.get(run_url)
             response.raise_for_status()
             db = response.json()
             for tweet in db:
@@ -73,7 +74,7 @@ class TweetFeeds(ObservableAnalyzer):
         logger.info(f"Updating TweetFeeds from {cls.db_url}")
 
         try:
-            response = requests.get(cls.db_url)
+            response = http_utils.get(cls.db_url)
             response.raise_for_status()
         except requests.RequestException as e:
             logger.error(f"TweetFeeds failed to update: {e}")

@@ -1,7 +1,6 @@
 import logging
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -24,7 +23,7 @@ class MalprobScan(FileAnalyzer):
 
         if self._job.tlp == self._job.TLP.CLEAR.value:
             logger.info(f"uploading {file_name}:{self.md5} to MalProb.io for analysis")
-            scan = requests.post(
+            scan = http_utils.post(
                 f"{self.url}/scan/",
                 files={"file": binary_file},
                 data={"name": file_name, "private": self.private},
@@ -41,7 +40,7 @@ class MalprobScan(FileAnalyzer):
                 return scan.json()
 
         logger.info(f"rescanning {file_name} using {self.md5} on MalProb.io")
-        rescan = requests.post(
+        rescan = http_utils.post(
             f"{self.url}/rescan/",
             data={"hashcode": self.md5},
             headers=headers,

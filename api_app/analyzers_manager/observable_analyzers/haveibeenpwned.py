@@ -1,8 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 
 
@@ -28,7 +27,7 @@ class HaveIBeenPwned(classes.ObservableAnalyzer):
 
         headers = {"hibp-api-key": self._api_key_name}
 
-        response = requests.get(self.url + self.observable_name, params=params, headers=headers)
+        response = http_utils.get(self.url + self.observable_name, params=params, headers=headers)
         response.raise_for_status()
 
         result = response.json()

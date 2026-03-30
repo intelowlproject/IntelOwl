@@ -14,7 +14,7 @@ class SpamhausWQSTestCase(BaseAnalyzerTest):
 
     @staticmethod
     def get_mocked_response():
-        def mock_get(url, headers):
+        def mock_get(url, headers=None, **kwargs):
             if "example.com" in url:
                 # simulate a positive detection
                 return MockUpResponse({}, 200)

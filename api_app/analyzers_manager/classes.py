@@ -11,6 +11,7 @@ from typing import Dict, Tuple
 import requests
 from django.conf import settings
 
+from api_app import http_utils
 from api_app.decorators import classproperty
 from certego_saas.apps.user.models import User
 
@@ -309,7 +310,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     @staticmethod
     def __query_for_result(url: str, key: str) -> Tuple[int, dict]:
         headers = {"Accept": "application/json"}
-        resp = requests.get(f"{url}?key={key}", headers=headers)
+        resp = http_utils.get(f"{url}?key={key}", headers=headers)
         return resp.status_code, resp.json()
 
     def __polling(self, req_key: str, chance: int, re_poll_try: int = 0):
@@ -392,9 +393,9 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         try:
             if req_files:
                 form_data = {"request_json": json.dumps(req_data)}
-                resp1 = requests.post(self.url, files=req_files, data=form_data)
+                resp1 = http_utils.post(self.url, files=req_files, data=form_data)
             else:
-                resp1 = requests.post(self.url, json=req_data)
+                resp1 = http_utils.post(self.url, json=req_data)
         except requests.exceptions.ConnectionError:
             self._raise_container_not_running()
 
@@ -440,7 +441,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
 
         # step #1: request new analysis
         try:
-            resp = requests.get(url=self.url)
+            resp = http_utils.get(url=self.url)
         except requests.exceptions.ConnectionError:
             self._raise_container_not_running()
 
@@ -454,7 +455,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         basic health check: if instance is up or not (timeout - 10s)
         """
         try:
-            requests.head(self.url, timeout=10)
+            http_utils.head(self.url, timeout=10)
         except requests.exceptions.RequestException:
             health_status = False
         else:

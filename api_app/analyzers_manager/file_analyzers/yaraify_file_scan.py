@@ -7,6 +7,7 @@ import time
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
@@ -72,7 +73,7 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
                 "file": (name_to_send, file),
             }
             logger.info(f"yara file scan md5 {self.md5} sending sample for analysis")
-            response = requests.post(self.url, files=files_, headers=self.authentication_header)
+            response = http_utils.post(self.url, files=files_, headers=self.authentication_header)
             response.raise_for_status()
             scan_response = response.json()
             scan_query_status = scan_response.get("query_status")
@@ -90,7 +91,7 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
                             f"task_id: {task_id}"
                         )
                         data = {"query": "get_results", "task_id": task_id}
-                        response = requests.post(self.url, json=data, headers=self.authentication_header)
+                        response = http_utils.post(self.url, json=data, headers=self.authentication_header)
                         response.raise_for_status()
                         task_response = response.json()
                         logger.debug(task_response)

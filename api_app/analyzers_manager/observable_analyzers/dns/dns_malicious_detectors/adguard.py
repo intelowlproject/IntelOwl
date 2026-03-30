@@ -1,9 +1,9 @@
 import logging
 
 import dns.message
-import requests
 from dns.rrset import RRset
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 
 from ..dns_responses import malicious_detector_response
@@ -22,7 +22,7 @@ class AdGuard(DoHMixin, classes.ObservableAnalyzer):
 
     def filter_query(self, observable: str) -> list[RRset]:
         logger.info(f"Sending filtered request to AdGuard DNS API for query: {observable}")
-        r_filtered = requests.get(
+        r_filtered = http_utils.get(
             url=self.build_query_url(observable),
             headers=self.headers,
         )

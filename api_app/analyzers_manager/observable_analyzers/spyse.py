@@ -3,8 +3,7 @@
 
 import re
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
@@ -48,7 +47,7 @@ class Spyse(classes.ObservableAnalyzer):
             "Authorization": f"Bearer {self._api_key_name}",
         }
         api_uri = self.__build_spyse_api_uri()
-        response = requests.get(api_uri, headers=headers)
+        response = http_utils.get(api_uri, headers=headers)
         response.raise_for_status()
 
         result = response.json()

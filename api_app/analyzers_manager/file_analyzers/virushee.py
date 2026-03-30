@@ -5,8 +5,7 @@ import logging
 import time
 from typing import Dict, Optional
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -24,7 +23,7 @@ class VirusheeFileUpload(FileAnalyzer):
 
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
-        self.__session = requests.Session()
+        self.__session = http_utils.Session()
         if not hasattr(self, "_api_key_name"):
             logger.info(f"{self.__repr__()} -> Continuing w/o API key..")
         else:

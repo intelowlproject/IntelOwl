@@ -11,7 +11,7 @@ class TestHfinger(BaseFileAnalyzerTest):
     def get_mocked_response(self):
         return [
             patch(
-                "hfinger.analysis.hfinger_analyze",
+                "api_app.analyzers_manager.file_analyzers.hfinger.hfinger_analyze",
                 return_value=[
                     {
                         "epoch_time": "1388111476.787707000",

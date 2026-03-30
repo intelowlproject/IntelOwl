@@ -1,7 +1,6 @@
 import logging
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.choices import Classification
 
@@ -21,7 +20,7 @@ class OrklSearch(classes.ObservableAnalyzer):
             "accept": "application/json",
         }
         if self.observable_classification == Classification.HASH.value:
-            response = requests.get(
+            response = http_utils.get(
                 url=f"{self.url}/library/entry/sha1/{self.observable_name}",
                 headers=headers,
             )
@@ -30,7 +29,7 @@ class OrklSearch(classes.ObservableAnalyzer):
                     "message": "No LibraryEntry found with SHA1 hash",
                 }
         else:
-            response = requests.get(
+            response = http_utils.get(
                 url=f"""{self.url}/library/search?query={self.observable_name}
                 &full={self.full}&limit={self.limit}""",
                 headers=headers,

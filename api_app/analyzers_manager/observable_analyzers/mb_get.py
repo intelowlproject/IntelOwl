@@ -2,8 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 import logging
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.mixins import AbuseCHMixin
 
@@ -33,7 +32,7 @@ class MB_GET(AbuseCHMixin, classes.ObservableAnalyzer):
         if headers is None:
             headers = {}
 
-        response = requests.post(cls.url, data=post_data, headers=headers)
+        response = http_utils.post(cls.url, data=post_data, headers=headers)
         response.raise_for_status()
 
         result = response.json()

@@ -3,12 +3,12 @@ from datetime import date, timedelta
 from typing import Dict
 from urllib.parse import urljoin
 
-import requests
 from faker import Faker  # skipcq: BAN-B410
 from lxml.etree import HTMLParser  # skipcq: BAN-B410
 from lxml.html import document_fromstring
 from requests import HTTPError, Response
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.models import PythonConfig
 
@@ -183,7 +183,7 @@ class PhishingFormCompiler(FileAnalyzer):
         headers = {
             "User-Agent": self.user_agent,
         }
-        response = requests.post(
+        response = http_utils.post(
             url=dest_url,
             data=params,
             headers=headers,

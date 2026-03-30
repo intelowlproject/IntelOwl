@@ -6,9 +6,9 @@ import time
 from abc import ABCMeta
 from typing import Dict
 
-import requests
 from requests.exceptions import ChunkedEncodingError
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import BaseAnalyzerMixin
 from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
@@ -46,7 +46,7 @@ class TriageMixin(BaseAnalyzerMixin, metaclass=ABCMeta):
     @property
     def session(self):
         if not hasattr(self, "_session"):
-            session = requests.Session()
+            session = http_utils.Session()
             session.headers = {
                 "Authorization": f"Bearer {self._api_key_name}",
                 "User-Agent": "IntelOwl",

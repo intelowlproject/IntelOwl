@@ -31,7 +31,7 @@ class MnemonicPassiveDNSTestCase(BaseAnalyzerTest):
             '{"rrtype": "A", "rdata": "5.6.7.8", "time_first": "2023-02-01", "time_last": "2023-02-02"}'
         )
 
-        def side_effect(url, data=None):
+        def side_effect(url, data=None, **kwargs):
             if "cof" in url:
                 return MockUpResponse(cof_response, 200)
             return MockUpResponse(json_response, 200)

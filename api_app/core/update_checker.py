@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.utils.timezone import now
 
+from api_app import http_utils
 from api_app.models import UpdateCheckStatus
 
 logger = logging.getLogger(__name__)
@@ -39,7 +40,7 @@ def fetch_latest_version() -> Tuple[Optional[str], Optional[str]]:
         return None, "UPDATE_CHECK_URL not configured"
 
     try:
-        resp = requests.get(url, headers={"User-Agent": "IntelOwl-Update-Checker"}, timeout=5)
+        resp = http_utils.get(url, headers={"User-Agent": "IntelOwl-Update-Checker"}, timeout=5)
     except requests.RequestException as exc:
         logger.error("Update check HTTP request failed: %s", exc)
         return None, "Failed to fetch release information"

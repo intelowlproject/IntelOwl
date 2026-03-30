@@ -4,8 +4,7 @@
 import json
 import logging
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.mixins import AbuseCHMixin
 
@@ -25,7 +24,7 @@ class ThreatFox(AbuseCHMixin, classes.ObservableAnalyzer):
 
         payload = {"query": "search_ioc", "search_term": self.observable_name}
 
-        response = requests.post(
+        response = http_utils.post(
             self.url,
             data=json.dumps(payload),
             headers=self.authentication_header,

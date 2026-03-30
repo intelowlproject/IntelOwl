@@ -5,8 +5,7 @@ import logging
 import re
 from typing import Dict
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException, AnalyzerRunException
 from api_app.choices import Classification
@@ -138,7 +137,7 @@ class InQuest(ObservableAnalyzer):
                 "Supported are: 'dfi_search', 'iocdb_search', 'repdb_search'."
             )
 
-        response = requests.get(self.url + uri, headers=headers, timeout=30)
+        response = http_utils.get(self.url + uri, headers=headers, timeout=30)
         response.raise_for_status()
         result = response.json()
         if self.inquest_analysis == "dfi_search" and self.observable_classification == Classification.HASH:

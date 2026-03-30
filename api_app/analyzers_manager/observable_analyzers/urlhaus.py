@@ -2,8 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 import logging
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
@@ -36,7 +35,7 @@ class URLHaus(AbuseCHMixin, ObservableAnalyzer):
         else:
             raise AnalyzerRunException(f"not supported observable type {self.observable_classification}.")
 
-        response = requests.post(
+        response = http_utils.post(
             self.url + uri,
             data=post_data,
             headers=self.authentication_header | headers,

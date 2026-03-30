@@ -1,9 +1,9 @@
 import logging
 import time
 
-import requests
 from requests import HTTPError
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -25,7 +25,7 @@ class CriminalIpScan(classes.ObservableAnalyzer, CriminalIpBase):
     def run(self):
         HEADER = self.getHeaders()
         poll_distance = 5  # seconds
-        resp = requests.post(
+        resp = http_utils.post(
             url=f"{self.url}{self.scan_endpoint}",
             headers=HEADER,
             data={"query": self.observable_name},
@@ -39,7 +39,7 @@ class CriminalIpScan(classes.ObservableAnalyzer, CriminalIpBase):
         logger.debug(f"{resp=}")
         scan_id = resp["data"]["scan_id"]
         while True:
-            resp = requests.get(url=f"{self.url}{self.status_endpoint}{scan_id}", headers=HEADER)
+            resp = http_utils.get(url=f"{self.url}{self.status_endpoint}{scan_id}", headers=HEADER)
             resp.raise_for_status()
 
             scan_percent = resp.json()["data"]["scan_percentage"]
@@ -49,7 +49,7 @@ class CriminalIpScan(classes.ObservableAnalyzer, CriminalIpBase):
             self.timeout -= poll_distance
             if self.timeout <= 0:
                 raise AnalyzerRunException(f"Timeout with scan percentage: {scan_percent}")
-        resp = requests.get(url=f"{self.url}{self.report_endpoint}{scan_id}", headers=HEADER)
+        resp = http_utils.get(url=f"{self.url}{self.report_endpoint}{scan_id}", headers=HEADER)
         resp.raise_for_status()
         resp = resp.json()
         logger.info(f"response from CriminalIp_scan for {self.observable_name} -> {resp}")

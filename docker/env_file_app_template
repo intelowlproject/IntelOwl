@@ -12,6 +12,8 @@ DB_NAME=intel_owl_db
 OLD_JOBS_RETENTION_DAYS=14
 # used for generating links to web client e.g. job results page; Default: localhost
 INTELOWL_WEB_CLIENT_DOMAIN=localhost
+# used for the default timeout of HTTP requests performed by analyzers; Default: 90 seconds
+HTTP_TIMEOUT=90
 # used for automated correspondence from the site manager
 DEFAULT_FROM_EMAIL=
 # used for correspondence with users

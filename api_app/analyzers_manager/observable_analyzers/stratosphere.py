@@ -3,9 +3,9 @@
 
 import logging
 
-import requests
 from django.db import transaction
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.models import StratosphereIPEntry
@@ -54,7 +54,7 @@ class Stratos(classes.ObservableAnalyzer):
         try:
             for list_type, url in cls.lists.items():
                 # Dataset website certificates are not correctly configured.
-                response = requests.get(url, verify=False)  # lgtm [py/request-without-cert-validation]
+                response = http_utils.get(url, verify=False)  # lgtm [py/request-without-cert-validation]
                 response.raise_for_status()
 
                 lines = response.content.decode("utf-8").split("\n")

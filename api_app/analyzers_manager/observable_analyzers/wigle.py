@@ -1,8 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 
@@ -50,7 +49,7 @@ class WiGLE(classes.ObservableAnalyzer):
                 "'Bluetooth Network', 'GSM/LTE/WCDMA Network'"
             )
 
-        response = requests.get(
+        response = http_utils.get(
             self.url + uri,
             headers={"Authorization": "Basic " + self._api_key_name},
         )

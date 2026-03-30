@@ -15,6 +15,7 @@ from django.utils import timezone
 from jbxapi import ApiError, JoeSandbox
 from rest_framework.response import Response
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import BaseAnalyzerMixin
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.models import AnalyzerRulesFileVersion, PythonModule
@@ -107,17 +108,17 @@ class VirusTotalv3BaseMixin(metaclass=abc.ABCMeta):
                     logger.debug(
                         f"about to send get request to url {url} with headers {self.headers} and kwargs: {kwargs}"
                     )
-                    response = requests.get(url, headers=self.headers, **kwargs)
+                    response = http_utils.get(url, headers=self.headers, **kwargs)
                 else:
                     logger.debug(
                         f"about to send get request to url {url} with headers {self.headers} and no kwargs"
                     )
-                    response = requests.get(url, headers=self.headers)
+                    response = http_utils.get(url, headers=self.headers)
             elif method == "POST":
                 logger.debug(
                     f"about to send post request to url {url} with headers {self.headers} and kwargs: {kwargs}"
                 )
-                response = requests.post(url, headers=self.headers, **kwargs)
+                response = http_utils.post(url, headers=self.headers, **kwargs)
             else:
                 raise NotImplementedError()
             logger.info(f"requests done to: {response.request.url} ")
@@ -250,7 +251,7 @@ class VirusTotalv3BaseMixin(metaclass=abc.ABCMeta):
         try:
             endpoint = self.url + f"files/{file_hash}/download"
             logger.info(f"Requesting file from {endpoint}")
-            response = requests.get(endpoint, headers=self.headers)
+            response = http_utils.get(endpoint, headers=self.headers)
             if not isinstance(response.content, bytes):
                 raise ValueError("VT downloaded file is not instance of bytes")
         except Exception as e:
@@ -370,7 +371,7 @@ class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, BaseAnalyzerMixin, metacl
                                 uri + f"/{relationship}?limit={self._get_relationship_limit(relationship)}"
                             )
                             logger.debug(f"requesting uri: {rel_uri}")
-                            response = requests.get(self.url + rel_uri, headers=self.headers)
+                            response = http_utils.get(self.url + rel_uri, headers=self.headers)
                             result[relationship] = response.json()
         except Exception as e:
             logger.error(
@@ -798,7 +799,7 @@ class RulesUtiliyMixin:
         os.makedirs(rule_set_directory)
         logger.info(f"Created fresh rules directory at {rule_set_directory}")
 
-        response = requests.get(rule_set_download_url, stream=True)
+        response = http_utils.get(rule_set_download_url, stream=True)
         logger.info(f"Started downloading rules with version: {latest_version} from {rule_set_download_url}")
 
         try:

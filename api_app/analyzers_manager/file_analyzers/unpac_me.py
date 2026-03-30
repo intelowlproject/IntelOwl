@@ -7,6 +7,7 @@ from typing import Dict
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -52,10 +53,10 @@ class UnpacMe(FileAnalyzer):
     def _req_with_checks(self, url, files=None, post=False):
         try:
             if post:
-                r = requests.post(self.url + url, files=files, headers=self.headers)
+                r = http_utils.post(self.url + url, files=files, headers=self.headers)
             else:
                 headers = self.headers if self.private == "private" else {}
-                r = requests.get(self.url + url, files=files, headers=headers)
+                r = http_utils.get(self.url + url, files=files, headers=headers)
             r.raise_for_status()
         except requests.exceptions.HTTPError as e:
             logger.error(f"md5 {self.md5} job {self.job_id} url {url} has http error {str(e)}")

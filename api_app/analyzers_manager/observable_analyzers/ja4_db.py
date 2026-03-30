@@ -2,9 +2,9 @@ import json
 import logging
 import os
 
-import requests
 from django.conf import settings
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 
 logger = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ class Ja4DB(classes.ObservableAnalyzer):
     @classmethod
     def update(cls):
         logger.info(f"Updating database from {cls.url}")
-        response = requests.get(url=cls.url)
+        response = http_utils.get(url=cls.url)
         response.raise_for_status()
         data = response.json()
         database_location = cls.location()

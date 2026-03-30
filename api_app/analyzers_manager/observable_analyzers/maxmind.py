@@ -8,12 +8,12 @@ import shutil
 import tarfile
 
 import maxminddb
-import requests
 from django.conf import settings
 from geoip2.database import Reader
 from geoip2.errors import AddressNotFoundError, GeoIP2Error
 from geoip2.models import ASN, City, Country
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
@@ -119,7 +119,7 @@ class MaxmindDBManager:
             "https://download.maxmind.com/app/geoip_download?edition_id="
             f"{db_name}&license_key={api_key}&suffix=tar.gz"
         )
-        response = requests.get(url)
+        response = http_utils.get(url)
         if response.status_code >= 300:
             raise AnalyzerRunException(
                 f"failed request for new maxmind db {db_name}."

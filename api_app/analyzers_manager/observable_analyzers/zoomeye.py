@@ -3,6 +3,7 @@
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
@@ -56,7 +57,7 @@ class ZoomEye(classes.ObservableAnalyzer):
         self.__build_zoomeye_url()
 
         try:
-            response = requests.get(self.final_url, headers={"API-KEY": self._api_key_name})
+            response = http_utils.get(self.final_url, headers={"API-KEY": self._api_key_name})
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

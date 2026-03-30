@@ -3,6 +3,7 @@
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -15,7 +16,7 @@ class Ip2whois(classes.ObservableAnalyzer):
         pass
 
     def get_response(self, payload):
-        return requests.get(self.url, params=payload)
+        return http_utils.get(self.url, params=payload)
 
     def run(self):
         try:

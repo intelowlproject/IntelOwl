@@ -9,6 +9,7 @@ from typing import Dict
 import requests
 from billiard.exceptions import SoftTimeLimitExceeded
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -73,7 +74,7 @@ class CAPEsandbox(FileAnalyzer):
         self.__cert_file = NamedTemporaryFile(mode="w")
         self.__cert_file.write(self._clean_certificate(self._certificate))
         self.__cert_file.flush()
-        self.__session = requests.Session()
+        self.__session = http_utils.Session()
         self.__session.verify = self.__cert_file.name
         self.__session.headers = {
             "Authorization": f"Token {self._api_key_name}",

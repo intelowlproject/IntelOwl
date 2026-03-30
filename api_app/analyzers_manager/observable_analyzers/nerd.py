@@ -4,6 +4,7 @@
 import requests
 from requests.exceptions import HTTPError
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
@@ -38,7 +39,7 @@ class NERD(ObservableAnalyzer):
                 )
 
         try:
-            response = requests.get(self.url + uri, headers=headers)
+            response = http_utils.get(self.url + uri, headers=headers)
             response.raise_for_status()
             result = response.json()
         except requests.RequestException as e:

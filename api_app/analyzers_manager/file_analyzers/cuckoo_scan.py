@@ -6,8 +6,7 @@ import re
 import time
 from typing import Dict
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -24,7 +23,7 @@ class CuckooAnalysis(FileAnalyzer):
         super().config(runtime_configuration)
         # cuckoo installation can be with or without the api_token
         # it depends on version and configuration
-        self.session = requests.Session()
+        self.session = http_utils.Session()
         if not hasattr(self, "_api_key_name"):
             logger.info(f"{self.__repr__()}, (md5: {self.md5}) -> Continuing w/o API key..")
         else:

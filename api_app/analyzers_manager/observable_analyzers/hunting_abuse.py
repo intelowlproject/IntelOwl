@@ -9,6 +9,7 @@ import os
 import requests
 from django.conf import settings
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
@@ -44,7 +45,7 @@ class HuntingAbuseAPI(AbuseCHMixin, ObservableAnalyzer):
         data = {"query": "get_fplist", "format": "json"}
 
         try:
-            response = requests.post(cls.url, json=data, headers=headers)
+            response = http_utils.post(cls.url, json=data, headers=headers)
             response.raise_for_status()
 
             with open(database_location, "w", encoding="utf-8") as f:

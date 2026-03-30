@@ -4,8 +4,7 @@
 import logging
 import time
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -29,7 +28,7 @@ class FileScanUpload(FileAnalyzer):
         binary = self.read_file_bytes()
         if not binary:
             raise AnalyzerRunException("File is empty")
-        response = requests.post(
+        response = http_utils.post(
             self.url + "/scan/file",
             files={"file": (self.filename, binary)},
             headers={"X-Api-Key": self._api_key},
@@ -56,7 +55,7 @@ class FileScanUpload(FileAnalyzer):
 
         for chance in range(self.max_tries):
             logger.info(f"[POLLING] {obj_repr} -> #{chance + 1}/{self.max_tries}")
-            response = requests.get(url, params=params, headers={"X-Api-Key": self._api_key})
+            response = http_utils.get(url, params=params, headers={"X-Api-Key": self._api_key})
             report = response.json()
             if report["allFinished"]:
                 break

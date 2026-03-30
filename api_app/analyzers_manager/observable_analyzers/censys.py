@@ -1,8 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -30,7 +29,7 @@ class Censys(classes.ObservableAnalyzer):
             raise AnalyzerRunException(
                 f"not supported observable type {self.observable_classification}. Supported is IP."
             )
-        response = requests.get(
+        response = http_utils.get(
             self.url + uri,
             auth=(self._api_id_name, self._api_secret_name),
             headers={

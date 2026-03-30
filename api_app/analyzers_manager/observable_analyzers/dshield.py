@@ -5,6 +5,7 @@ import logging
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 
 logger = logging.getLogger(__name__)
@@ -26,7 +27,7 @@ class DShield(ObservableAnalyzer):
 
         for query_type, values in result.items():
             try:
-                response = requests.get(self.url + values["uri"], headers=headers)
+                response = http_utils.get(self.url + values["uri"], headers=headers)
                 response.raise_for_status()
             except requests.RequestException as e:
                 logger.warning(e, stack_info=True)

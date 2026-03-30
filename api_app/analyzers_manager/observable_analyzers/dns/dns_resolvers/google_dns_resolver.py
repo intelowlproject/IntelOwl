@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 
 import requests
 
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
@@ -33,7 +34,7 @@ class GoogleDNSResolver(classes.ObservableAnalyzer):
                 "name": observable,
                 "type": self.query_type,
             }
-            response = requests.get("https://dns.google.com/resolve", params=params)
+            response = http_utils.get("https://dns.google.com/resolve", params=params)
             response.raise_for_status()
             data = response.json()
             resolutions = data.get("Answer", None)

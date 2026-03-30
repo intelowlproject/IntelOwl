@@ -3,8 +3,7 @@
 import base64
 import logging
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -35,7 +34,7 @@ class DownloadFileFromUri(ObservableAnalyzer):
         }
 
         try:
-            r = requests.get(
+            r = http_utils.get(
                 self.observable_name,
                 headers=headers,
                 proxies=proxies,

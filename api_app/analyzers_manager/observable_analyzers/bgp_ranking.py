@@ -1,8 +1,7 @@
 import json
 import logging
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
@@ -27,7 +26,7 @@ class BGPRanking(classes.ObservableAnalyzer):
         # get ASN from ip
 
         logger.info(f"Extracting ASN from IP: {self.observable_name}")
-        response = requests.get(
+        response = http_utils.get(
             self.url + "/ipasn_history/?ip=" + self.observable_name,
             timeout=self.timeout,
         )
@@ -40,7 +39,7 @@ class BGPRanking(classes.ObservableAnalyzer):
 
         # get ASN rank from extracted ASN
         logger.info(f"Extracting ASN rank and position from ASN: {asn}")
-        response = requests.post(
+        response = http_utils.post(
             self.url + "/json/asn",
             data=json.dumps({"asn": asn}),
             timeout=self.timeout,
@@ -62,7 +61,7 @@ class BGPRanking(classes.ObservableAnalyzer):
         if self.period:
             # get ASN history from extracted ASN
             logger.info(f"Extracting ASN history for period: {self.period}")
-            response = requests.post(
+            response = http_utils.post(
                 self.url + "/json/asn_history",
                 data=json.dumps({"asn": asn, "period": self.period}),
                 timeout=self.timeout,

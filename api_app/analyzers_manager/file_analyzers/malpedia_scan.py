@@ -1,8 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import requests
-
+from api_app import http_utils
 from api_app.analyzers_manager.classes import FileAnalyzer
 
 
@@ -22,7 +21,7 @@ class MalpediaScan(FileAnalyzer):
         # construct req
         headers = {"Authorization": f"APIToken {self._api_key_name}"}
         files = {"file": binary}
-        response = requests.post(self.binary_url, headers=headers, files=files)
+        response = http_utils.post(self.binary_url, headers=headers, files=files)
         response.raise_for_status()
 
         result = response.json()

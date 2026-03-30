@@ -51,7 +51,7 @@ describe("test Search component", () => {
     expect(errorsField).toBeInTheDocument();
     // third row
     const fullTextField = screen.getByRole("textbox", {
-      name: /Text search:/i,
+      name: /Report search:/i,
     });
     expect(fullTextField).toBeInTheDocument();
     const searchButton = screen.getByRole("button", { name: /Search/i });
@@ -166,7 +166,7 @@ describe("test Search component", () => {
     expect(errorsField).toBeInTheDocument();
     // third row
     const fullTextField = screen.getByRole("textbox", {
-      name: /Text search:/i,
+      name: /Report search:/i,
     });
     expect(fullTextField).toBeInTheDocument();
     const searchButton = screen.getByRole("button", { name: /Search/i });

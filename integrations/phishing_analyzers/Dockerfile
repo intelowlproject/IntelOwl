@@ -1,41 +1,42 @@
-FROM python:3.12.3
+FROM python:3.11.11-slim-bookworm
 
-ENV PROJECT_PATH=/opt/deploy
-ENV LOG_PATH=/var/log/intel_owl/phishing_analyzers
-ENV USER=phishing-user
-ENV HOME=${PYTHONPATH}
+ENV USER=intelowl
+ENV GROUP=intelowl
+ENV PROJECT_PATH=/home/${USER}
 
-# Add a new low-privileged user
-RUN useradd -ms /bin/bash ${USER}
+RUN groupadd -r ${GROUP} && useradd -r -g ${GROUP} ${USER}
 
-# Install Google Chrome and Chromium
-RUN DEBIAN_FRONTEND=noninteractive apt-get update -qq \
-    && apt-get install -y --no-install-recommends \
-    libvulkan1 libu2f-udev fonts-liberation sudo \
-    && pip3 install --no-cache-dir --upgrade pip \
-    # Cleanup
-    && apt-get remove --purge -y gcc \
-    && apt-get clean \
-    && apt-get autoclean \
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /usr/share/doc/* /usr/share/man/* > /dev/null 2>&1
+# avoid writing to __pycache__
+ENV PYTHONDONTWRITEBYTECODE=1
+# force stdout and stderr to be unbuffered
+ENV PYTHONUNBUFFERED=1
 
-# Create application environment and files
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl sudo git \
+    && apt-get clean && apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /usr/share/doc/* /usr/share/man/*
+
+# Add uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.1 /uv /uvx /bin/
+
+# Set up project directory
 WORKDIR ${PROJECT_PATH}/phishing_analyzers
+
+# Copy application files and requirements
 COPY --chown=${USER}:${USER} app.py requirements.txt entrypoint.sh ./
 COPY --chown=${USER}:${USER} analyzers/* ./analyzers/
 RUN chmod u+x entrypoint.sh \
-    && pip3 install -r requirements.txt --no-cache-dir
+    && uv pip install --system --no-cache-dir -r requirements.txt \
+    && playwright install chromium --with-deps \
+    && chmod -R o+rX /ms-playwright
 
 # unprivileged user must run some commands as root to avoid conflicts with other volumes.
 # adding them to sudoers file to avoid running entrypoint as root usesr.
-RUN echo "${USER} ALL=(root) NOPASSWD: /usr/bin/mkdir -p ${LOG_PATH}" > /etc/sudoers.d/create_log_directory \
-  && echo "${USER} ALL=(root) NOPASSWD: /usr/bin/touch ${LOG_PATH}/gunicorn_access.log ${LOG_PATH}/gunicorn_errors.log" > /etc/sudoers.d/create_log_files \
-  && echo "${USER} ALL=(root) NOPASSWD: /usr/bin/chown -R ${USER}\:${USER} ${PROJECT_PATH}/phishing_analyzers ${LOG_PATH}" > /etc/sudoers.d/chown_log_and_workdir_unprivileged
+RUN echo "${USER} ALL=(ALL) NOPASSWD: /usr/bin/chown -R ${USER}\:${GROUP} ${PROJECT_PATH}/phishing_analyzers/results" >> /etc/sudoers
 
-# use a unprivileged user to run flask
+# Set ownership and switch to unprivileged user
+RUN chown -R ${USER}:${GROUP} ${PROJECT_PATH}
 USER ${USER}
 
-# Serve Flask application using gunicorn as low-privileged user
-EXPOSE 4005
 ENTRYPOINT ["./entrypoint.sh"]

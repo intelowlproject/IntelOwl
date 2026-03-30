@@ -12,10 +12,11 @@ WORKDIR /app
 # Copy requirements file and app.py to the working directory
 COPY requirements.txt app.py ./
 
+# Add uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.1 /uv /uvx /bin/
+
 # Upgrade pip and install Python packages
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir -r /app/Phunter/requirements.txt
+RUN uv pip install --system --no-cache-dir -r requirements.txt -r /app/Phunter/requirements.txt
 
 # Expose port
 EXPOSE 5612

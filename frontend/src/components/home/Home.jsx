@@ -6,6 +6,7 @@ import { Container } from "reactstrap";
 import { ContentSection } from "@certego/certego-ui";
 
 import { PUBLIC_URL, VERSION } from "../../constants/environment";
+import SystemUpdatePanel from "../common/SystemUpdatePanel";
 
 // constants
 const versionText = VERSION;
@@ -64,6 +65,10 @@ export default function Home() {
           file or observable.
         </ContentSection>
         <br />
+        {/* System update notification */}
+        <div className="home-update-notice">
+          <SystemUpdatePanel compact />
+        </div>
         {/* blogposts */}
         <h5 className="text-gradient">IntelOwl News</h5>
         <ContentSection>

@@ -1,0 +1,23 @@
+FROM python:3.11-slim-bookworm
+
+# Install system dependencies for compilation
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ssdeep libfuzzy-dev libldap2-dev libsasl2-dev build-essential curl git \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Add uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.1 /uv /uvx /bin/
+
+# Set project environment
+ENV UV_PROJECT_ENVIRONMENT=/usr/local
+WORKDIR /app
+
+# Copy dependency files
+COPY pyproject.toml uv.lock ./
+
+# Attempt sync (same as CI)
+RUN uv sync --frozen --group lint --group dev
+
+# Copy everything for ruff check
+COPY . .
+RUN uv run ruff check .

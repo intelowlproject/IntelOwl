@@ -244,6 +244,7 @@ export function JobOverview({
   // state
   const navigate = useNavigate();
   const location = useLocation();
+  const searchSuffix = location.search || "";
   const [UIElements, setUIElements] = useState([]);
   console.debug(
     `location pathname: ${
@@ -281,7 +282,7 @@ export function JobOverview({
         navigate(
           `/jobs/${job.id}/${JobResultSections.VISUALIZER}/${encodeURIComponent(
             visualizerSections[0],
-          )}`,
+          )}${searchSuffix}`,
           { replace: true },
         );
       } else if (
@@ -297,14 +298,14 @@ export function JobOverview({
         navigate(
           `/jobs/${job.id}/${JobResultSections.VISUALIZER}/${encodeURIComponent(
             visualizerSections[0],
-          )}`,
+          )}${searchSuffix}`,
           { replace: true },
         );
       } else if (subSection === NO_VISUALIZER_UI_ELEMENT_CODE) {
         console.debug("[AUTO REDIRECT] navigate to raw data - analyzer");
         // in case there is no visualizer redirect to raw data
         navigate(
-          `/jobs/${job.id}/${JobResultSections.RAW}/${rawElements[0].name}`,
+          `/jobs/${job.id}/${JobResultSections.RAW}/${rawElements[0].name}${searchSuffix}`,
           { replace: true },
         );
       }

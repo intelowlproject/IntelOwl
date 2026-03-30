@@ -8,9 +8,56 @@ import ipaddress
 import logging
 import random
 import re
+import typing
 import warnings
 
 from django.utils import timezone
+
+SENSITIVE_KEYS = {
+    "password",
+    "token",
+    "auth",
+    "secret",
+    "key",
+    "credential",
+    "signature",
+}
+
+
+def mask_sensitive_data(value: typing.Any, is_secret: bool = True) -> typing.Any:
+    """
+    Returns "<redacted>" if is_secret is True, otherwise returns the value.
+    """
+    if is_secret:
+        return "<redacted>"
+    return value
+
+
+def mask_recursive(data: typing.Any) -> typing.Any:
+    """
+    Recursively masks sensitive keys in dictionaries and lists.
+    Uses word-boundary/camelCase aware matching to avoid false positives.
+    """
+    if isinstance(data, dict):
+        masked_dict = {}
+        for k, v in data.items():
+            if isinstance(k, str):
+                # Tokenize key to handle camelCase, snake_case, and kebab-case
+                # Split on camelCase boundaries and non-alphanumeric delimiters
+                tokens = re.sub("([a-z0-9])([A-Z])", r"\1 \2", k).lower()
+                tokens = re.split(r"[^a-z0-9]", tokens)
+
+                if any(tk in SENSITIVE_KEYS for tk in tokens):
+                    masked_dict[k] = "<redacted>"
+                else:
+                    masked_dict[k] = mask_recursive(v)
+            else:
+                masked_dict[k] = mask_recursive(v)
+        return masked_dict
+    elif isinstance(data, list):
+        return [mask_recursive(item) for item in data]
+    return data
+
 
 logger = logging.getLogger(__name__)
 

@@ -46,6 +46,31 @@ markdownComponents.a.propTypes = {
   children: PropTypes.node,
 };
 
+export const convertHtmlToMarkdown = (htmlString) => {
+  if (!htmlString) return "";
+
+  const markdown = htmlString
+    .replace(
+      /<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi,
+      (match, level, content) =>
+        `${"#".repeat(Number(level))} ${content.trim()}\n\n`,
+    )
+    .replace(
+      /<a[^>]*href=["']([\s\S]*?)["'][^>]*>([\s\S]*?)<\/a>/gi,
+      "[$2]($1)",
+    )
+    .replace(/<strong[^>]*>([\s\S]*?)<\/strong>/gi, "**$1**")
+    .replace(/<b[^>]*>([\s\S]*?)<\/b>/gi, "**$1**")
+    .replace(/<em[^>]*>([\s\S]*?)<\/em>/gi, "*$1*")
+    .replace(/<i[^>]*>([\s\S]*?)<\/i>/gi, "*$1*")
+    .replace(/<code[^>]*>([\s\S]*?)<\/code>/gi, "`$1`")
+    .replace(/<\/?[uo]l[^>]*>/gi, "")
+    .replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, "- $1\n")
+    .replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, "$1\n\n")
+    .replace(/<br\s*\/?>/gi, "\n");
+  return markdown.replace(/<[^>]*>?/gm, "");
+};
+
 export default function NotificationsList({ notifications, refetchFn }) {
   const markAsReadCb = React.useCallback(
     async (notifId) => {
@@ -77,7 +102,7 @@ export default function NotificationsList({ notifications, refetchFn }) {
           </div>
           <ListGroupItemText className="text-light">
             <ReactMarkdown components={markdownComponents}>
-              {notif?.body}
+              {convertHtmlToMarkdown(notif?.body)}
             </ReactMarkdown>
           </ListGroupItemText>
           <div className="d-flex">

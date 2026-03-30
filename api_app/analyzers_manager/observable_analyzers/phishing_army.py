@@ -2,62 +2,55 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-import os
 from urllib.parse import urlparse
 
 import requests
-from django.conf import settings
+from django.db import transaction
 
 from api_app.analyzers_manager import classes
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.models import PhishingArmyDomain
 from api_app.choices import Classification
 
 logger = logging.getLogger(__name__)
-
-db_name = "phishing_army.txt"
-database_location = f"{settings.MEDIA_ROOT}/{db_name}"
 
 
 class PhishingArmy(classes.ObservableAnalyzer):
     url = "https://phishing.army/download/phishing_army_blocklist.txt"
 
     def run(self):
-        result = {"found": False}
-        if not os.path.isfile(database_location) and not self.update():
-            raise AnalyzerRunException("Failed extraction of Phishing Army db")
+        if not PhishingArmyDomain.objects.exists():
+            logger.info("PhishingArmyDomain table is empty, triggering update...")
+            self.update()
 
-        if not os.path.exists(database_location):
-            raise AnalyzerRunException(f"database location {database_location} does not exist")
-
-        with open(database_location, "r", encoding="utf-8") as f:
-            db = f.read()
-
-        db_list = db.split("\n")
         to_analyze_observable = self.observable_name
         if self.observable_classification == Classification.URL:
             to_analyze_observable = urlparse(self.observable_name).hostname
 
-        if to_analyze_observable in db_list:
-            result["found"] = True
-
-        result["link"] = self.url
-
-        return result
+        found = PhishingArmyDomain.objects.filter(domain=to_analyze_observable).exists()
+        return {"found": found, "link": self.url}
 
     @classmethod
-    def update(cls):
+    def update(cls) -> bool:
         try:
             logger.info("starting download of db from Phishing Army")
-            r = requests.get(cls.url)
-            r.raise_for_status()
+            response = requests.get(cls.url)
+            response.raise_for_status()
 
-            with open(database_location, "w", encoding="utf-8") as f:
-                f.write(r.content.decode())
+            unique_domains = {
+                domain
+                for domain in response.content.decode().split("\n")
+                if domain.strip() and not domain.startswith("#")
+            }
 
-            if not os.path.exists(database_location):
-                return False
+            with transaction.atomic():
+                PhishingArmyDomain.objects.all().delete()
+                PhishingArmyDomain.objects.bulk_create(
+                    [PhishingArmyDomain(domain=domain) for domain in unique_domains],
+                    batch_size=1000,
+                    ignore_conflicts=True,
+                )
 
-            logger.info("ended download of db from Phishing Army")
+            logger.info(f"Updated {len(unique_domains)} PhishingArmyDomain entries")
             return True
         except Exception as e:
             logger.exception(e)

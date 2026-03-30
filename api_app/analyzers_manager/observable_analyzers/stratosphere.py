@@ -2,46 +2,34 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-import os
-from datetime import date, datetime
 
 import requests
-from django.conf import settings
+from django.db import transaction
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.models import StratosphereIPEntry
 
 logger = logging.getLogger(__name__)
 
-db_name0 = "stratos_ip_blacklist_last24hrs.csv"
-db_name1 = "stratos_ip_blacklist_new_attacker.csv"
-db_name2 = "stratos_ip_blacklist_repeated_attacker.csv"
-
-db_loc0 = f"{settings.MEDIA_ROOT}/{db_name0}"
-db_loc1 = f"{settings.MEDIA_ROOT}/{db_name1}"
-db_loc2 = f"{settings.MEDIA_ROOT}/{db_name2}"
-
 
 class Stratos(classes.ObservableAnalyzer):
-    @staticmethod
-    def check_in_list(dataset_loc, ip):
-        # Checks the IP in a list(S.No,IP,Rating).
-        with open(dataset_loc, "r", encoding="utf-8") as f:
-            db = f.read()
+    base_url = "https://mcfp.felk.cvut.cz"
+    mid_url = "/publicDatasets/CTU-AIPP-BlackList/Todays-Blacklists/"
+    priority_url = "AIP_historical_blacklist_prioritized_by_"
 
-        db_list = db.split("\n")
-
-        for ip_tuple in db_list[2:]:
-            if ip in ip_tuple:
-                split_tuple = ip_tuple.split(",")
-                if split_tuple == 3:
-                    ip_rating = (split_tuple[2]).strip()
-                else:
-                    ip_rating = "found"
-                return ip_rating
-        return ""
+    lists = {
+        "last24hrs": base_url + mid_url + "AIP_blacklist_for_IPs_seen_last_24_hours.csv",
+        "new_attacker": base_url + mid_url + priority_url + "newest_attackers.csv",
+        "repeated_attacker": base_url + mid_url + priority_url + "repeated_attackers.csv",
+    }
 
     def run(self):
+        if not StratosphereIPEntry.objects.exists():
+            logger.info("StratosphereIPEntry table is empty, triggering update...")
+            if not self.update():
+                raise AnalyzerRunException("Failed to update Stratosphere datasets")
+
         ip = self.observable_name
         result = {
             "last24hrs_rating": "",
@@ -49,70 +37,58 @@ class Stratos(classes.ObservableAnalyzer):
             "repeated_attacker_rating": "",
         }
 
-        self.check_dataset_status()
-
-        # Checks the IP in last24hrs attacker list.
-        result["last24hrs_rating"] = self.check_in_list(db_loc0, ip)
-        # Checks the IP in new attacker list.
-        result["new_attacker_rating"] = self.check_in_list(db_loc1, ip)
-        # Checks the IP in repeated attacker list.
-        result["repeated_attacker_rating"] = self.check_in_list(db_loc2, ip)
+        qs = StratosphereIPEntry.objects.filter(ip=ip)
+        for entry in qs:
+            key = f"{entry.list_type}_rating"
+            if key in result:
+                result[key] = entry.rating or "found"
 
         return result
 
-    @staticmethod
-    def download_dataset(url, db_loc):
-        # Dataset website certificates are not correctly configured.
-        p = requests.get(url, verify=False)  # lgtm [py/request-without-cert-validation]
-        p.raise_for_status()
+    @classmethod
+    def update(cls) -> bool:
+        logger.info("starting download of dataset from stratosphere")
 
-        with open(db_loc, "w", encoding="utf-8") as f:
-            f.write(p.content.decode())
+        entries_to_create = []
 
-    def updater(self):
         try:
-            logger.info("starting download of dataset from stratosphere")
+            for list_type, url in cls.lists.items():
+                # Dataset website certificates are not correctly configured.
+                response = requests.get(url, verify=False)  # lgtm [py/request-without-cert-validation]
+                response.raise_for_status()
 
-            base_url = "https://mcfp.felk.cvut.cz"
-            mid_url = "/publicDatasets/CTU-AIPP-BlackList/Todays-Blacklists/"
-            url0 = base_url + mid_url + "AIP_blacklist_for_IPs_seen_last_24_hours.csv"
-            priority_url = "AIP_historical_blacklist_prioritized_by_"
-            url1 = base_url + mid_url + priority_url + "newest_attackers.csv"
-            url2 = base_url + mid_url + priority_url + "repeated_attackers.csv"
+                lines = response.content.decode("utf-8").split("\n")
 
-            self.download_dataset(url0, db_loc0)
-            self.download_dataset(url1, db_loc1)
-            self.download_dataset(url2, db_loc2)
+                # Formats vary:
+                # - 'attacker' (1 column: IP)
+                # - 'ip,score' (2 columns: IP, rating)
+                for line in lines[1:]:  # skip header
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
 
-            if not os.path.exists(db_loc0 or db_loc1 or db_loc2):
-                raise AnalyzerRunException("failed extraction of stratosphere dataset")
+                    split_tuple = line.split(",")
+                    ip = split_tuple[0].strip()
+                    rating = split_tuple[1].strip() if len(split_tuple) >= 2 else "found"
 
-            logger.info("ended download of dataset from stratosphere")
+                    try:
+                        rating = f"{float(rating):.3f}"
+                    except (ValueError, TypeError):
+                        pass
+
+                    entries_to_create.append(StratosphereIPEntry(ip=ip, list_type=list_type, rating=rating))
+
+            with transaction.atomic():
+                StratosphereIPEntry.objects.all().delete()
+                StratosphereIPEntry.objects.bulk_create(
+                    entries_to_create,
+                    batch_size=1000,
+                    ignore_conflicts=True,
+                )
+
+            logger.info(f"Updated {len(entries_to_create)} StratosphereIPEntry entries")
+            return True
 
         except Exception as e:
-            logger.exception(e)
-
-        db_location = [db_loc0, db_loc1, db_loc2]
-
-        return db_location
-
-    def check_dataset_status(self):
-        if not os.path.isfile(db_loc0 and db_loc1 and db_loc2):
-            self.updater()
-        today = date.today()
-
-        timestamp = os.path.getctime(db_loc0)
-        dt_object = datetime.fromtimestamp(timestamp)
-
-        if (
-            dt_object.hour > 3
-            and today.day == dt_object.day
-            and today.month == dt_object.month
-            and today.year == dt_object.year
-        ):
-            logger.info("Dataset is up to date")
-        else:
-            os.remove(db_loc0)
-            os.remove(db_loc1)
-            os.remove(db_loc2)
-            self.updater()
+            logger.exception(f"Stratosphere failed to update: {e}")
+            return False

@@ -1,3 +1,0 @@
-ruff==0.14.10
-pre-commit==4.0.1
-coverage==7.6.1

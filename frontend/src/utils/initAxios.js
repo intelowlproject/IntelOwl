@@ -1,17 +1,20 @@
 import axios from "axios";
+import Cookies from "js-cookie";
 
 import { isObject, objToString } from "@certego/certego-ui";
-import { useAuthStore } from "../stores/useAuthStore";
+import { useAuthStore, CSRF_TOKEN } from "../stores/useAuthStore";
 
 export default function initAxios() {
   // base config
   axios.defaults.headers.common["Content-Type"] = "application/json";
-  axios.defaults.withCredentials = false;
+  axios.defaults.withCredentials = true;
   axios.defaults.certegoUIenableProgressBar = true;
   // request interceptor
   axios.interceptors.request.use((req) => {
-    const { CSRFToken } = useAuthStore.getState();
-    req.headers["X-CSRFToken"] = CSRFToken;
+    const CSRFToken = Cookies.get(CSRF_TOKEN);
+    if (CSRFToken) {
+      req.headers["X-CSRFToken"] = CSRFToken;
+    }
     return req;
   });
   // response interceptor

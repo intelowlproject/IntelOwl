@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from api_app.analyzers_manager.observable_analyzers.dnstwist import DNStwist
 from tests.api_app.analyzers_manager.unit_tests.observable_analyzers.base_test_class import (
@@ -33,3 +33,41 @@ class DNStwistTestCase(BaseAnalyzerTest):
             "user_agent": "IntelOwl-Test",
             "nameservers": "8.8.8.8,8.8.4.4",
         }
+
+    def test_run_with_ssl_error(self):
+        import ssl
+
+        from api_app.analyzers_manager.models import AnalyzerConfig
+        from api_app.choices import Classification
+
+        config = AnalyzerConfig.objects.filter(python_module=self.analyzer_class.python_module).first()
+        if not config:
+            self.skipTest("No AnalyzerConfig found")
+        analyzer = self._setup_analyzer(config, Classification.DOMAIN, "example.com")
+        analyzer.report = MagicMock()
+        analyzer.report.errors = []
+
+        with patch("dnstwist.run", side_effect=ssl.SSLEOFError("EOF occurred in violation of protocol")):
+            analyzer.run()
+            self.assertEqual(len(analyzer.report.errors), 1)
+            error = analyzer.report.errors[0]
+            self.assertIn(f"Analysis failed for domain '{analyzer.observable_name}'", error)
+
+    def test_run_with_dns_error(self):
+        import socket
+
+        from api_app.analyzers_manager.models import AnalyzerConfig
+        from api_app.choices import Classification
+
+        config = AnalyzerConfig.objects.filter(python_module=self.analyzer_class.python_module).first()
+        if not config:
+            self.skipTest("No AnalyzerConfig found")
+        analyzer = self._setup_analyzer(config, Classification.DOMAIN, "example.com")
+        analyzer.report = MagicMock()
+        analyzer.report.errors = []
+
+        with patch("dnstwist.run", side_effect=socket.gaierror(-2, "Name or service not known")):
+            analyzer.run()
+            self.assertEqual(len(analyzer.report.errors), 1)
+            error = analyzer.report.errors[0]
+            self.assertIn(f"Analysis failed for domain '{analyzer.observable_name}'", error)

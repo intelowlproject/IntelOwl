@@ -290,6 +290,7 @@ class JobViewSetTests(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(content["id"], self.job.id, msg=msg)
         self.assertEqual(content["status"], self.job.status, msg=msg)
+        self.assertEqual(content["tlp"], self.job.tlp, msg=msg)
         self.assertEqual(content["investigation_id"], self.investigation1.pk)
         self.assertEqual(content["investigation_name"], self.investigation1.name)
         self.assertEqual(content["analyzable_id"], self.analyzable.pk)

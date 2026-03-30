@@ -11,6 +11,7 @@ Please delete options that are not relevant.
 - [ ] Bug fix (non-breaking change which fixes an issue).
 - [ ] New feature (non-breaking change which adds functionality).
 - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected).
+- [ ] Chore (refactoring, dependency updates, CI/CD changes, code cleanup, docs-only changes).
 
 # Checklist
 
@@ -38,6 +39,8 @@ Please delete options that are not relevant.
     - [ ] I have a provided a screenshot of the result in the PR.
     - [ ] I have created new frontend tests for the new component or updated existing ones.
 - [ ] After you had submitted the PR, if `DeepSource`, `Django Doctors` or other third-party linters have triggered any alerts during the CI checks, I have solved those alerts.
+- [ ] I have addressed raised Copilot issues. In case of FPs, I have commented the Copilot issue and proved that it is wrong before having the comment resolved.
+- [ ] I have reviewed and verified any LLM-generated code included in this PR. Also, I have explicitly stated that I have used LLMs in this PR.
 
 ### Important Rules
 - If you miss to compile the Checklist properly, your PR won't be reviewed by the maintainers.

@@ -15,6 +15,9 @@
 [![DeepSource](https://app.deepsource.com/gh/intelowlproject/IntelOwl.svg/?label=resolved+issues&token=BSvKHrnk875Y0Bykb79GNo8w)](https://app.deepsource.com/gh/intelowlproject/IntelOwl/?ref=repository-badge)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/intelowlproject/IntelOwl/badge)](https://api.securityscorecards.dev/projects/github.com/intelowlproject/IntelOwl)
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7120/badge)](https://bestpractices.coreinfrastructure.org/projects/7120)
+
+<a href="https://trendshift.io/repositories/11483" target="_blank"><img src="https://trendshift.io/api/badge/repositories/11483" alt="intelowlproject%2FIntelOwl | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+
 # Intel Owl
 
 Do you want to get **threat intelligence data** about a malware, an IP address or a domain? Do you want to get this kind of data from multiple sources at the same time using **a single API request**?
@@ -39,6 +42,8 @@ It provides:
   - *ingestors* that allow to automatically ingest stream of observables or files to IntelOwl itself
   - *playbooks* that are meant to make analysis easily repeatable
   - *data models* to map the different data extracted from analyzers to a single common schema
+  - *artifacts* that are representations of observables or files that can be analyzed multiple times for different evaluations
+  - *user events* that allow users to add custom evaluation or additional info to any artifact
 - A starting point for analysts' **Investigations**: users can register their findings, correlate the information found, and collaborate...all in a single place
 
 

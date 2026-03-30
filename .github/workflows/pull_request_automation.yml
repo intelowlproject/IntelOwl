@@ -26,7 +26,7 @@ jobs:
         run: |
           git branch -a --list | cat
           FRONTEND_CHANGES=$(git diff --compact-summary origin/${{ github.base_ref }} -- frontend/* | wc -l)
-          echo "::set-output name=frontend::$FRONTEND_CHANGES"
+          echo "frontend=$FRONTEND_CHANGES" >> $GITHUB_OUTPUT
         id: diff_check
 
   linters:
@@ -41,21 +41,33 @@ jobs:
         with:
           python-version: 3.11
 
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ssdeep libfuzzy-dev libldap2-dev libsasl2-dev build-essential
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.11.1"
+          enable-cache: true
+
       - name: Install Dependencies
         run: |
-          pip3 install --upgrade pip
-          pip3 install -r requirements/test-requirements.txt
+          uv sync --frozen --group lint --group dev
 
       - name: Lint with Ruff
         run: |
-          ruff check . --output-format=github
+          uv run ruff check . --output-format=github
 
       - name: Check formatting with Ruff
         run: |
-          ruff format . --check --diff
+          uv run ruff format . --check --diff
 
       - name: Perform ShellCheck Analysis
-        run: bash <(curl -s https://raw.githubusercontent.com/CICDToolbox/shellcheck/master/pipeline.sh)
+        run: |
+          # Use uv run if shellcheck is in dependencies, otherwise keep curl
+          bash <(curl -s https://raw.githubusercontent.com/CICDToolbox/shellcheck/master/pipeline.sh)
 
   backend-tests:
     runs-on: ubuntu-latest
@@ -75,6 +87,16 @@ jobs:
           unzip -P intelowl tests/test_files.zip -d test_files
           cp docker/env_file_app_template docker/env_file_app
           cp docker/env_file_postgres_template docker/env_file_postgres
+
+      - name: Set image repo
+        run: echo "IMAGE_REPO=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Startup script launch (Slow)
         if: contains(github.base_ref, 'master')
@@ -96,7 +118,7 @@ jobs:
           BUILDKIT_PROGRESS: "plain"
           STAGE: "ci"
           REPO_DOWNLOADER_ENABLED: false
-
+          
       - name: Docker debug
         if: always()
         run: |
@@ -106,7 +128,7 @@ jobs:
 
       - name: Setup coverage
         run: |
-          docker exec intelowl_uwsgi pip3 install coverage
+          docker exec intelowl_uwsgi uv sync --frozen --group dev
 
       - name: Run test
         run: |

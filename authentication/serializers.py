@@ -7,11 +7,9 @@ registration, email verification, login, and token generation.
 """
 
 import logging
-import re
 
 import rest_email_auth.serializers
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from django.db import DatabaseError, transaction
 from rest_framework import serializers as rfs
 from rest_framework.authtoken.models import Token
@@ -26,7 +24,7 @@ from certego_saas.apps.user.serializers import UserSerializer
 from certego_saas.ext.upload import Slack
 from certego_saas.models import User
 from certego_saas.settings import certego_apps_settings
-from intel_owl.consts import REGEX_PASSWORD
+from intel_owl.consts import validate_password_strength
 
 from .models import UserProfile
 
@@ -207,11 +205,8 @@ class RegistrationSerializer(rest_email_auth.serializers.RegistrationSerializer)
             ValidationError: If the password does not match the regex pattern.
         """
         super().validate_password(password)
-
-        if re.match(REGEX_PASSWORD, password):
-            return password
-        else:
-            raise ValidationError("Invalid password")
+        validate_password_strength(password)
+        return password
 
     def create(self, validated_data):
         """

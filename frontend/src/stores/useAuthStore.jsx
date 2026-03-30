@@ -7,12 +7,13 @@ import Cookies from "js-cookie";
 import { USERACCESS_URI, AUTH_BASE_URI } from "../constants/apiURLs";
 
 // constants
-const CSRF_TOKEN = "csrftoken";
+export const CSRF_TOKEN = "csrftoken";
 
 // hook/ store see: https://github.com/pmndrs/zustand
 export const useAuthStore = create((set, get) => ({
   loading: false,
-  CSRFToken: Cookies.get(CSRF_TOKEN) || "",
+
+  CSRFToken: "",
   user: {
     username: "",
     full_name: "",
@@ -31,11 +32,15 @@ export const useAuthStore = create((set, get) => ({
         const resp = await axios.get(USERACCESS_URI, {
           certegoUIenableProgressBar: false,
         });
+        get().updateToken();
         set({
           user: resp.data.user,
           access: resp.data.access,
         });
       } catch (err) {
+        if (err?.response?.status === 401) {
+          return;
+        }
         addToast(
           "Error fetching user access information!",
           err.parsedMsg,
@@ -76,6 +81,10 @@ export const useAuthStore = create((set, get) => ({
         .catch(onLogoutCb);
     },
     forceLogout: () => {
+      if (get().loading) {
+        return;
+      }
+      set({ loading: true });
       addToast(
         "Invalid token. You will be logged out shortly",
         null,
@@ -83,7 +92,7 @@ export const useAuthStore = create((set, get) => ({
         true,
         1000,
       );
-      return setTimeout(get().service.logoutUser, 500);
+      setTimeout(get().service.logoutUser, 500);
     },
     changePassword: async (values) => {
       try {

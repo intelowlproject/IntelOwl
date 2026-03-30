@@ -73,7 +73,7 @@ class Ja4DB(classes.ObservableAnalyzer):
 
     def run(self):
         reason = self.check_ja4_fingerprint(self.observable_name)
-        if not reason:
+        if reason:
             return {"not_supported": reason}
 
         database_location = self.location()

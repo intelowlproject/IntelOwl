@@ -2,62 +2,50 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-import os
 import re
 
 import requests
-from django.conf import settings
+from django.db import transaction
 
 from api_app.analyzers_manager import classes
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.models import TorExitNode
 
 logger = logging.getLogger(__name__)
 
-db_name = "tor_exit_addresses.txt"
-database_location = f"{settings.MEDIA_ROOT}/{db_name}"
-
 
 class Tor(classes.ObservableAnalyzer):
-    def _do_create_data_model(self) -> bool:
-        return super()._do_create_data_model() and self.report.report["found"]
+    url: str = "https://check.torproject.org/exit-addresses"
 
     def run(self):
-        result = {"found": False}
-        if not os.path.isfile(database_location) and not self.update():
-            raise AnalyzerRunException("Failed extraction of tor db")
-
-        if not os.path.exists(database_location):
-            raise AnalyzerRunException(f"database location {database_location} does not exist")
-
-        with open(database_location, "r", encoding="utf-8") as f:
-            db = f.read()
-
-        db_list = db.split("\n")
-        if self.observable_name in db_list:
-            result["found"] = True
-
-        return result
+        if not TorExitNode.objects.exists():
+            logger.info("TorExitNode table is empty, triggering update...")
+            self.update()
+        found = TorExitNode.objects.filter(ip=self.observable_name).exists()
+        return {"found": found}
 
     @classmethod
-    def update(cls):
+    def update(cls) -> bool:
         try:
             logger.info("starting download of db from tor project")
-            url = "https://check.torproject.org/exit-addresses"
-            r = requests.get(url)
-            r.raise_for_status()
+            response = requests.get(cls.url)
+            response.raise_for_status()
 
-            data_extracted = r.content.decode()
-            findings = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", data_extracted)
+            unique_ips = set(
+                re.findall(
+                    r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}",
+                    response.content.decode(),
+                )
+            )
 
-            with open(database_location, "w", encoding="utf-8") as f:
-                for ip in findings:
-                    if ip:
-                        f.write(f"{ip}\n")
+            with transaction.atomic():
+                TorExitNode.objects.all().delete()
+                TorExitNode.objects.bulk_create(
+                    [TorExitNode(ip=ip) for ip in unique_ips],
+                    batch_size=1000,
+                    ignore_conflicts=True,
+                )
 
-            if not os.path.exists(database_location):
-                return False
-
-            logger.info("ended download of db from tor project")
+            logger.info(f"Updated {len(unique_ips)} TorExitNode entries")
             return True
         except Exception as e:
             logger.exception(e)

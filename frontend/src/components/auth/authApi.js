@@ -18,7 +18,7 @@ export async function verifyEmail(body) {
   try {
     const resp = await axios.post(`${AUTH_BASE_URI}/verify-email`, body);
     addToast(
-      "Your email has been succesfully verified!",
+      "Your email has been successfully verified!",
       null,
       "success",
       true,
@@ -75,7 +75,7 @@ export async function checkConfiguration(body) {
     }
     return resp;
   } catch (err) {
-    // this API always return 200, this catch should never ne triggered, but it's better to be safe
+    // this API always return 200, this catch should never be triggered, but it's better to be safe
     return Promise.reject(err);
   }
 }

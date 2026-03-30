@@ -1,7 +1,9 @@
 import React from "react";
 import "@testing-library/jest-dom";
 import { render, screen, fireEvent } from "@testing-library/react";
-import NotificationsList from "../../../../src/components/jobs/notification/NotificationsList";
+import NotificationsList, {
+  convertHtmlToMarkdown,
+} from "../../../../src/components/jobs/notification/NotificationsList";
 import { notificationMarkAsRead } from "../../../../src/components/jobs/notification/notificationApi";
 
 // Mock the API calls
@@ -270,5 +272,45 @@ describe("NotificationsList Component - Security & XSS Prevention", () => {
 
       expect(screen.getByText("No items")).toBeInTheDocument();
     });
+  });
+});
+
+describe("convertHtmlToMarkdown", () => {
+  test.each([
+    [null, ""],
+    ["", ""],
+    ["plain text", "plain text"],
+    ["<h1>Title</h1>", "# Title\n\n"],
+    ["<h6>Small</h6>", "###### Small\n\n"],
+    ['<a href="https://example.com">Link</a>', "[Link](https://example.com)"],
+    ["<strong>bold</strong>", "**bold**"],
+    ["<em>italic</em>", "*italic*"],
+    ["<code>x=1</code>", "`x=1`"],
+    ["<p>text</p>", "text\n\n"],
+    ["A<br>B", "A\nB"],
+    ["<div>content</div>", "content"],
+  ])("converts %s", (input, expected) => {
+    expect(convertHtmlToMarkdown(input)).toBe(expected);
+  });
+
+  test("converts lists", () => {
+    expect(convertHtmlToMarkdown("<ul><li>A</li><li>B</li></ul>")).toBe(
+      "- A\n- B\n",
+    );
+  });
+
+  test("handles nested / mixed HTML", () => {
+    const result = convertHtmlToMarkdown(
+      "<p>File <code>mal.exe</code> is <strong>done</strong>.</p><ul><li>Clean</li></ul>",
+    );
+    expect(result).toContain("`mal.exe`");
+    expect(result).toContain("**done**");
+    expect(result).toContain("- Clean");
+  });
+
+  test("strips dangerous tags", () => {
+    ['<script>alert("x")</script>', '<img src="x" onerror="alert(1)">'].forEach(
+      (v) => expect(convertHtmlToMarkdown(v)).not.toMatch(/<\w/),
+    );
   });
 });

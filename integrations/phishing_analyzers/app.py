@@ -36,3 +36,8 @@ shell2http.register_command(
     endpoint="phishing_extractor",
     command_name="/usr/local/bin/python3 /opt/deploy/phishing_analyzers/analyzers/extract_phishing_site.py",
 )
+
+shell2http.register_command(
+    endpoint="phishing_extractor_playwright",
+    command_name="/usr/local/bin/python3 /opt/deploy/phishing_analyzers/analyzers/extract_phishing_site_playwright.py",
+)

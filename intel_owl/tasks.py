@@ -21,6 +21,7 @@ from django_celery_beat.models import PeriodicTask
 from elasticsearch.helpers import bulk
 
 from api_app.choices import ReportStatus, Status
+from api_app.helpers import mask_recursive
 from intel_owl import secrets
 from intel_owl.celery import app, get_queue_name
 from intel_owl.settings._util import get_environment
@@ -38,7 +39,7 @@ class FailureLoggedRequest(Request):
     def on_failure(self, exc_info, send_failed_event=True, return_ok=False):
         logger.critical(
             f"Failure detected for task {self.task.name}"
-            f" with exception {exc_info} and request {self._request_dict}"
+            f" with exception {exc_info} and request {mask_recursive(self._request_dict)}"
         )
         return super().on_failure(exc_info, send_failed_event=send_failed_event, return_ok=return_ok)
 

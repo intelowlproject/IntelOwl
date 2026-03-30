@@ -1,13 +1,10 @@
-import json
 import logging
-import os
-from typing import Tuple
 
 import requests
-from django.conf import settings
+from django.db import transaction
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.models import TweetFeedItem
 
 logger = logging.getLogger(__name__)
 
@@ -21,11 +18,7 @@ class TweetFeeds(ObservableAnalyzer):
     filter1: str = ""
     time: str = ""
 
-    @classmethod
-    def location(cls) -> Tuple[str, str]:
-        db_name = "tweetfeed_month.json"
-        url = "https://api.tweetfeed.live/v1/month"
-        return f"{settings.MEDIA_ROOT}/{db_name}", url
+    db_url: str = "https://api.tweetfeed.live/v1/month"
 
     def run_url(self) -> str:
         if self.filter1:
@@ -35,23 +28,23 @@ class TweetFeeds(ObservableAnalyzer):
         return url
 
     def run(self):
-        # update logic for first time run
-        default_db, default_url = self.location()
-        if not os.path.exists(default_db) and not self.update():
-            raise AnalyzerRunException(f"Could not find or update db at {default_db} using {default_url}")
+        if not TweetFeedItem.objects.exists():
+            logger.info("TweetFeedItem table is empty, triggering update...")
+            self.update()
 
-        with open(default_db, "r", encoding="utf-8") as f:
-            logger.info(f"TweetFeeds running with {default_db}")
-            db = json.load(f)
-            for tweet in db:
-                if tweet["value"] == self.observable_name:
-                    if self.filter1 and (self.filter1 in tweet["tags"] or self.filter1 == tweet["user"]):
-                        # this checks if our user has demanded for a
-                        # specific filter and return data based on the
-                        # filter in default db
-                        return tweet
-                    elif not self.filter1:
-                        return tweet
+        qs = TweetFeedItem.objects.filter(value=self.observable_name)
+        if self.filter1:
+            # filter by tag or user stored in details
+            for item in qs:
+                details = item.details
+                tags = details.get("tags", []) or []
+                user = details.get("user", "")
+                if self.filter1 in tags or self.filter1 == user:
+                    return details
+        else:
+            item = qs.first()
+            if item:
+                return item.details
 
         if self.time == "year":
             # we already have the updated data for the month
@@ -77,21 +70,28 @@ class TweetFeeds(ObservableAnalyzer):
         Our default DB gets data with
         no filter for the past month
         """
-
-        db_location, db_url = cls.location()
-        logger.info(f"Updating TweetFeeds {db_url} at {db_location}")
+        logger.info(f"Updating TweetFeeds from {cls.db_url}")
 
         try:
-            response = requests.get(db_url)
+            response = requests.get(cls.db_url)
             response.raise_for_status()
         except requests.RequestException as e:
-            logger.error(f"TweetFeeds failed to update {db_url}: {e}")
+            logger.error(f"TweetFeeds failed to update: {e}")
             return False
-        with open(db_location, "w", encoding="utf-8") as f:
-            try:
-                json.dump(response.json(), f)
-            except json.JSONDecodeError as e:
-                logger.error(f"TweetFeeds failed to update {db_url}: {e}")
-                return False
-            logger.info(f"TweetFeeds updated {db_url}")
+
+        try:
+            data = response.json()
+        except Exception as e:
+            logger.error(f"TweetFeeds failed to parse response: {e}")
+            return False
+
+        with transaction.atomic():
+            TweetFeedItem.objects.all().delete()
+            TweetFeedItem.objects.bulk_create(
+                [TweetFeedItem(value=item["value"], details=item) for item in data if item.get("value")],
+                batch_size=1000,
+                ignore_conflicts=True,
+            )
+
+        logger.info(f"Updated {len(data)} TweetFeedItem entries")
         return True

@@ -12,5 +12,18 @@ jobs:
     steps:
       - name: 'Checkout Repository'
         uses: actions/checkout@v6.0.2
+
+      - name: 'Install uv'
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.11.1"
+
       - name: 'Dependency Review'
         uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          config-file: .github/dependency-review-config.yml
+          base-ref: ${{ github.base_ref }}
+          head-ref: ${{ github.head_ref }}
+          # This helps GitHub find the new uv files
+          comment-summary-in-pr: always

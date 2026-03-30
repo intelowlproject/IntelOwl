@@ -507,6 +507,7 @@ class JobSerializer(_AbstractJobViewSerializer):
             "tags",
             "comments",
             "status",
+            "tlp",
             "pivots_to_execute",
             "analyzers_to_execute",
             "analyzers_requested",

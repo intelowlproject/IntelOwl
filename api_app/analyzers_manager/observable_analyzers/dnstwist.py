@@ -55,6 +55,20 @@ class DNStwist(classes.ObservableAnalyzer):
         if self.user_agent:
             params["useragent"] = self.user_agent
 
-        report = dnstwist.run(**params)
+        try:
+            report = dnstwist.run(**params)
+        except OSError as e:
+            error_domain = domain or self.observable_name
+            error_msg = (
+                f"Analysis failed for domain '{error_domain}'. "
+                "Please verify that the domain is valid and reachable."
+            )
+            logger.error(
+                f"DNStwist analysis failed for domain '{error_domain}'. Exception: {e}",
+                exc_info=True,
+            )
+
+            self.report.errors.append(error_msg)
+            return []
 
         return report

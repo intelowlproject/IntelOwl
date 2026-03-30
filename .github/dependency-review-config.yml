@@ -1,0 +1,13 @@
+# Config for Dependency Review
+# See: https://github.com/actions/dependency-review-action#configuration
+fail-on-severity: high
+allow-licenses:
+  - MIT
+  - Apache-2.0
+  - BSD-3-Clause
+  - PSF-2.0
+  - LGPL-2.1
+  - LGPL-3.0
+  - MPL-2.0
+  - ISC
+  - Unlicense

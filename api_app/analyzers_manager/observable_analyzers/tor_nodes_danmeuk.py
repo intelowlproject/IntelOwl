@@ -2,59 +2,47 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-import os
 
 import requests
-from django.conf import settings
+from django.db import transaction
 
 from api_app.analyzers_manager import classes
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.models import TorDanMeUKNode
 
 logger = logging.getLogger(__name__)
 
-db_name = "tor_nodes_addresses.txt"
-database_location = f"{settings.MEDIA_ROOT}/{db_name}"
-
 
 class TorNodesDanMeUK(classes.ObservableAnalyzer):
+    url: str = "https://www.dan.me.uk/torlist/?full"
+
     def run(self):
+        if not TorDanMeUKNode.objects.exists():
+            logger.info("TorDanMeUKNode table is empty, triggering update...")
+            self.update()
         result = {"found": False}
-        if not os.path.isfile(database_location) and not self.update():
-            raise AnalyzerRunException("Failed extraction of tor db")
-
-        if not os.path.exists(database_location):
-            raise AnalyzerRunException(f"database location {database_location} does not exist")
-
-        with open(database_location, "r", encoding="utf-8") as f:
-            db = f.read()
-
-        db_list = db.split("\n")
-        if self.observable_name in db_list:
+        if TorDanMeUKNode.objects.filter(ip=self.observable_name).exists():
             result["found"] = True
-            result["nodes_info"] = "https://www.dan.me.uk/torlist/?full"
-
+            result["nodes_info"] = self.url
         return result
 
     @classmethod
-    def update(cls):
+    def update(cls) -> bool:
         try:
             logger.info("starting download of tor nodes from https://dan.me.uk")
-            url = "https://www.dan.me.uk/torlist/?full"
-            r = requests.get(url)
-            r.raise_for_status()
+            response = requests.get(cls.url)
+            response.raise_for_status()
 
-            data_extracted = r.content.decode()
-            tor_nodes_list = data_extracted.split("\n")
+            unique_ips = {ip for ip in response.content.decode().split("\n") if ip.strip()}
 
-            with open(database_location, "w", encoding="utf-8") as f:
-                for ip in tor_nodes_list:
-                    if ip:
-                        f.write(f"{ip}\n")
+            with transaction.atomic():
+                TorDanMeUKNode.objects.all().delete()
+                TorDanMeUKNode.objects.bulk_create(
+                    [TorDanMeUKNode(ip=ip) for ip in unique_ips],
+                    batch_size=1000,
+                    ignore_conflicts=True,
+                )
 
-            if not os.path.exists(database_location):
-                return False
-
-            logger.info("ended download of tor nodes from https://dan.me.uk")
+            logger.info(f"Updated {len(unique_ips)} TorDanMeUKNode entries")
             return True
         except Exception as e:
             logger.exception(e)

@@ -2,13 +2,13 @@ import bisect
 import ipaddress
 import json
 import logging
-import os
 
 import requests
-from django.conf import settings
+from django.db import transaction
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.models import SpamhausDropItem
 from api_app.choices import Classification
 
 logger = logging.getLogger(__name__)
@@ -19,18 +19,6 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
     ipv4_url = url + "/drop_v4.json"
     ipv6_url = url + "/drop_v6.json"
     asn_url = url + "/asndrop.json"
-
-    @classmethod
-    def location(cls, data_type: str) -> str:
-        if data_type == "ipv4":
-            db_name = "drop_v4.json"
-        elif data_type == "ipv6":
-            db_name = "drop_v6.json"
-        elif data_type == "asn":
-            db_name = "asndrop.json"
-        else:
-            raise AnalyzerRunException(f"Invalid data_type: {data_type}")
-        return f"{settings.MEDIA_ROOT}/{db_name}"
 
     def run(self):
         if self.observable_classification == Classification.IP:
@@ -44,18 +32,18 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
         else:
             raise AnalyzerRunException(f"Invalid observable: {self.observable_name}")
 
-        database_location = self.location(data_type)
-
-        if not os.path.exists(database_location):
-            logger.info(f"Database does not exist in {database_location}, initialising...")
+        if not SpamhausDropItem.objects.exists():
+            logger.info("SpamhausDrop database is empty, initialising...")
             self.update()
-        with open(database_location, "r") as f:
-            db = json.load(f)
 
         matches = []
 
         if data_type in ["ipv4", "ipv6"]:
             # IP Matching
+            qs = SpamhausDropItem.objects.filter(data_type=data_type)
+            db = [item.details for item in qs]
+            db.sort(key=lambda x: ipaddress.ip_network(x["cidr"]).network_address)
+
             insertion = bisect.bisect_left(
                 db, ip, key=lambda x: ipaddress.ip_network(x["cidr"]).network_address
             )
@@ -68,9 +56,9 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
                     break
         elif data_type == "asn":
             # ASN Matching
-            for entry in db[:-1]:
-                if int(entry["asn"]) == asn:
-                    matches.append(entry)
+            qs_asn = SpamhausDropItem.objects.filter(data_type="asn", value=str(asn))
+            for item in qs_asn:
+                matches.append(item.details)
         else:
             raise AnalyzerRunException(f"Invalid data_type: {data_type}")
 
@@ -82,6 +70,7 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
     @classmethod
     def update(cls):
         data_types = ["ipv4", "ipv6", "asn"]
+        db_entries = []
         for data_type in data_types:
             if data_type == "ipv4":
                 logger.info(f"Updating database from {cls.ipv4_url}")
@@ -97,13 +86,32 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
             response = requests.get(url=db_url)
             response.raise_for_status()
             data = cls.convert_to_json(response.text)
-            database_location = cls.location(data_type)
-            with open(database_location, "w", encoding="utf-8") as f:
-                json.dump(data, f)
-            logger.info(f"Database updated at {database_location}")
+
+            for item in data:
+                val = item.get("cidr") if data_type in ["ipv4", "ipv6"] else item.get("asn")
+
+                nw_addr = None
+                if data_type in ["ipv4", "ipv6"] and item.get("cidr"):
+                    try:
+                        nw_addr = str(ipaddress.ip_network(item.get("cidr")).network_address)
+                    except ValueError:
+                        pass
+
+                if val is not None:
+                    db_entries.append(
+                        SpamhausDropItem(
+                            data_type=data_type, value=str(val), network_address=nw_addr, details=item
+                        )
+                    )
+
+        with transaction.atomic():
+            SpamhausDropItem.objects.all().delete()
+            SpamhausDropItem.objects.bulk_create(db_entries, batch_size=1000, ignore_conflicts=True)
+
+        logger.info(f"SpamhausDropItem database updated with {len(db_entries)} items.")
 
     @staticmethod
-    def convert_to_json(input_string) -> dict:
+    def convert_to_json(input_string) -> list:
         lines = input_string.strip().split("\n")
         json_objects = []
         for line in lines:

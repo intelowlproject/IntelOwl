@@ -3,7 +3,17 @@
 from django.contrib import admin
 
 from api_app.admin import AbstractReportAdminView, PythonConfigAdminView
-from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
+from api_app.analyzers_manager.models import (
+    AnalyzerConfig,
+    AnalyzerReport,
+    PhishingArmyDomain,
+    TorDanMeUKNode,
+    TorExitNode,
+    TweetFeedItem,
+    SpamhausDropItem,
+    StratosphereIPEntry,
+    FireholIPEntry,
+)
 
 
 # flake8: noqa
@@ -20,3 +30,44 @@ class AnalyzerConfigAdminView(PythonConfigAdminView):
     )
     list_filter = ["type", "maximum_tlp"] + PythonConfigAdminView.list_filter
     exclude = ["update_task"]
+
+
+@admin.register(TorExitNode)
+class TorExitNodeAdmin(admin.ModelAdmin):
+    list_display = ["ip", "updated_at"]
+
+
+@admin.register(TorDanMeUKNode)
+class TorDanMeUKNodeAdmin(admin.ModelAdmin):
+    list_display = ["ip", "updated_at"]
+
+
+@admin.register(PhishingArmyDomain)
+class PhishingArmyDomainAdmin(admin.ModelAdmin):
+    list_display = ["domain", "updated_at"]
+
+
+@admin.register(TweetFeedItem)
+class TweetFeedItemAdmin(admin.ModelAdmin):
+    list_display = ["value", "updated_at"]
+
+
+@admin.register(SpamhausDropItem)
+class SpamhausDropItemAdmin(admin.ModelAdmin):
+    list_display = ["data_type", "value", "network_address", "updated_at"]
+    list_filter = ["data_type"]
+    search_fields = ["value", "network_address"]
+
+
+@admin.register(StratosphereIPEntry)
+class StratosphereIPEntryAdmin(admin.ModelAdmin):
+    list_display = ["ip", "list_type", "rating", "updated_at"]
+    list_filter = ["list_type"]
+    search_fields = ["ip"]
+
+
+@admin.register(FireholIPEntry)
+class FireholIPEntryAdmin(admin.ModelAdmin):
+    list_display = ["ip_or_subnet", "list_name", "network_address", "updated_at"]
+    list_filter = ["list_name"]
+    search_fields = ["ip_or_subnet", "network_address"]

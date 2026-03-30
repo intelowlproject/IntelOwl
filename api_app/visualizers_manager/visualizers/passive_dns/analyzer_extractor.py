@@ -89,7 +89,7 @@ def extract_threatminer_reports(analyzer_reports: QuerySet, job: Job) -> List[PD
 def extract_validin_reports(analyzer_reports: QuerySet, job: Job) -> List[PDNSReport]:
     validin_analyzer = _extract_analyzer(analyzer_reports, Validin.python_module, job)
     if validin_analyzer:
-        records = validin_analyzer.report.get("records", [])
+        records = validin_analyzer.report.get("records", {})
         validin_reports = []
         if records:
             for [records_type, values] in records.items():
@@ -137,17 +137,18 @@ def extract_circlpdns_reports(analyzer_reports: QuerySet, job: Job) -> List[PDNS
     if circlpdns_analyzer:
         circlpdns_reports = circlpdns_analyzer.report
         pdns_reports = []
-        for report in circlpdns_reports:
-            pdns_report = PDNSReport(
-                datetime.datetime.fromtimestamp(report.get("time_last")).strftime("%Y-%m-%d"),
-                datetime.datetime.fromtimestamp(report.get("time_first")).strftime("%Y-%m-%d"),
-                report.get("rrtype"),
-                report.get("rdata"),
-                report.get("rrname"),
-                circlpdns_analyzer.config.name.replace("_", " "),
-                circlpdns_analyzer.config.description,
-            )
-            pdns_reports.append(pdns_report)
+        if isinstance(circlpdns_reports, list):
+            for report in circlpdns_reports:
+                pdns_report = PDNSReport(
+                    datetime.datetime.fromtimestamp(report.get("time_last")).strftime("%Y-%m-%d"),
+                    datetime.datetime.fromtimestamp(report.get("time_first")).strftime("%Y-%m-%d"),
+                    report.get("rrtype"),
+                    report.get("rdata"),
+                    report.get("rrname"),
+                    circlpdns_analyzer.config.name.replace("_", " "),
+                    circlpdns_analyzer.config.description,
+                )
+                pdns_reports.append(pdns_report)
         return pdns_reports
     return []
 
@@ -157,18 +158,19 @@ def extract_robtex_reports(analyzer_reports: QuerySet, job: Job) -> List[PDNSRep
     if robtex_analyzer:
         robtex_reports = robtex_analyzer.report
         pdns_reports = []
-        for report in robtex_reports:
-            if "rrdata" in report.keys():
-                pdns_report = PDNSReport(
-                    datetime.datetime.fromtimestamp(report.get("time_last")).strftime("%Y-%m-%d"),
-                    datetime.datetime.fromtimestamp(report.get("time_first")).strftime("%Y-%m-%d"),
-                    report.get("rrtype"),
-                    report.get("rrdata"),
-                    report.get("rrname"),
-                    robtex_analyzer.config.name.replace("_", " "),
-                    robtex_analyzer.config.description,
-                )
-                pdns_reports.append(pdns_report)
+        if isinstance(robtex_reports, list):
+            for report in robtex_reports:
+                if isinstance(report, dict) and "rrdata" in report:
+                    pdns_report = PDNSReport(
+                        datetime.datetime.fromtimestamp(report.get("time_last")).strftime("%Y-%m-%d"),
+                        datetime.datetime.fromtimestamp(report.get("time_first")).strftime("%Y-%m-%d"),
+                        report.get("rrtype"),
+                        report.get("rrdata"),
+                        report.get("rrname"),
+                        robtex_analyzer.config.name.replace("_", " "),
+                        robtex_analyzer.config.description,
+                    )
+                    pdns_reports.append(pdns_report)
         return pdns_reports
     return []
 
@@ -178,16 +180,23 @@ def extract_mnemonicpdns_reports(analyzer_reports: QuerySet, job: Job) -> List[P
     if mnemonicpdns_analyzer:
         mnemonicpdns_reports = mnemonicpdns_analyzer.report
         pdns_reports = []
-        for report in mnemonicpdns_reports:
-            pdns_report = PDNSReport(
-                datetime.datetime.fromtimestamp(report.get("time_last")).strftime("%Y-%m-%d"),
-                datetime.datetime.fromtimestamp(report.get("time_first")).strftime("%Y-%m-%d"),
-                report.get("rrtype"),
-                report.get("rdata"),
-                report.get("rrname"),
-                mnemonicpdns_analyzer.config.name.replace("_", " "),
-                mnemonicpdns_analyzer.config.description,
-            )
-            pdns_reports.append(pdns_report)
+        if isinstance(mnemonicpdns_reports, dict):
+            records = mnemonicpdns_reports.get("data", [])
+        elif isinstance(mnemonicpdns_reports, list):
+            records = mnemonicpdns_reports
+        else:
+            records = []
+        for report in records:
+            if isinstance(report, dict):
+                pdns_report = PDNSReport(
+                    datetime.datetime.fromtimestamp(report.get("time_last")).strftime("%Y-%m-%d"),
+                    datetime.datetime.fromtimestamp(report.get("time_first")).strftime("%Y-%m-%d"),
+                    report.get("rrtype"),
+                    report.get("rdata"),
+                    report.get("rrname"),
+                    mnemonicpdns_analyzer.config.name.replace("_", " "),
+                    mnemonicpdns_analyzer.config.description,
+                )
+                pdns_reports.append(pdns_report)
         return pdns_reports
     return []

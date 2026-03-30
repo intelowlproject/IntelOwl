@@ -17,8 +17,7 @@ TOOL_SCHEMAS = [
         "function": {
             "name": "search_jobs",
             "description": (
-                "Search IntelOwl analysis jobs. "
-                "Returns a list of jobs matching the given filters."
+                "Search IntelOwl analysis jobs. Returns a list of jobs matching the given filters."
             ),
             "parameters": {
                 "type": "object",
@@ -52,8 +51,7 @@ TOOL_SCHEMAS = [
         "function": {
             "name": "get_job_report",
             "description": (
-                "Get the full analysis report for a specific job, "
-                "including all analyzer results."
+                "Get the full analysis report for a specific job, including all analyzer results."
             ),
             "parameters": {
                 "type": "object",
@@ -88,10 +86,7 @@ TOOL_SCHEMAS = [
         "type": "function",
         "function": {
             "name": "search_observables",
-            "description": (
-                "Search for previously analyzed observables "
-                "(IPs, domains, hashes, URLs)."
-            ),
+            "description": ("Search for previously analyzed observables (IPs, domains, hashes, URLs)."),
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -132,9 +127,7 @@ TOOL_SCHEMAS = [
                     "analyzers_requested": {
                         "type": "array",
                         "items": {"type": "string"},
-                        "description": (
-                            "Specific analyzers to run. Empty means use defaults."
-                        ),
+                        "description": ("Specific analyzers to run. Empty means use defaults."),
                     },
                 },
                 "required": ["observable_name", "observable_classification"],
@@ -175,9 +168,7 @@ async def execute_tool(
             return {"jobs": results[:limit]}
 
         elif name == "get_job_report":
-            resp = await client.get(
-                f"/api/jobs/{args['job_id']}", headers=headers
-            )
+            resp = await client.get(f"/api/jobs/{args['job_id']}", headers=headers)
             resp.raise_for_status()
             result = resp.json()
             # Truncate large reports to fit context window.
@@ -213,9 +204,7 @@ async def execute_tool(
                 "observable_classification": args["observable_classification"],
                 "analyzers_requested": args.get("analyzers_requested", []),
             }
-            resp = await client.post(
-                "/api/analyze_observable", json=payload, headers=headers
-            )
+            resp = await client.post("/api/analyze_observable", json=payload, headers=headers)
             resp.raise_for_status()
             return resp.json()
 

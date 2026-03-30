@@ -69,9 +69,16 @@ const CHAT_WIDGET_STYLES = {
   },
 };
 
+const makeMsg = (role, content, extras = {}) => ({
+  id: `${role}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+  role,
+  content,
+  ...extras,
+});
+
 export default function ChatWidget() {
   const isAuthenticated = useAuthStore(
-    React.useCallback((s) => s.isAuthenticated(), []),
+    React.useCallback((store) => store.isAuthenticated(), []),
   );
   const [isOpen, setIsOpen] = React.useState(false);
   const [messages, setMessages] = React.useState([]);
@@ -110,7 +117,7 @@ export default function ChatWidget() {
     if (!text || loading) return;
 
     setInput("");
-    setMessages((prev) => [...prev, { role: "user", content: text }]);
+    setMessages((prev) => [...prev, makeMsg("user", text)]);
     setLoading(true);
 
     let sid = sessionId;
@@ -119,7 +126,7 @@ export default function ChatWidget() {
       if (!sid) {
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", content: "Failed to create chat session." },
+          makeMsg("assistant", "Failed to create chat session."),
         ]);
         setLoading(false);
         return;
@@ -140,77 +147,70 @@ export default function ChatWidget() {
 
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
-      let assistantContent = "";
 
       // eslint-disable-next-line no-constant-condition
       while (true) {
+        // eslint-disable-next-line no-await-in-loop
         const { done, value } = await reader.read();
         if (done) break;
 
         const chunk = decoder.decode(value);
-        const lines = chunk.split("\n");
-
-        for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          try {
-            const event = JSON.parse(line.slice(6));
-
-            if (event.type === "token") {
-              assistantContent += event.content;
-              setMessages((prev) => {
-                const updated = [...prev];
-                const last = updated[updated.length - 1];
-                if (last && last.role === "assistant" && last.streaming) {
-                  updated[updated.length - 1] = {
-                    ...last,
-                    content: assistantContent,
-                  };
-                } else {
-                  updated.push({
-                    role: "assistant",
-                    content: assistantContent,
-                    streaming: true,
-                  });
-                }
-                return updated;
-              });
-            } else if (event.type === "tool_call") {
-              setMessages((prev) => [
-                ...prev,
-                { role: "tool", content: `Calling ${event.name}...` },
-              ]);
-            } else if (event.type === "error") {
-              setMessages((prev) => [
-                ...prev,
-                { role: "assistant", content: `Error: ${event.message}` },
-              ]);
+        chunk
+          .split("\n")
+          .filter((line) => line.startsWith("data: "))
+          .forEach((line) => {
+            try {
+              const event = JSON.parse(line.slice(6));
+              if (event.type === "token") {
+                setMessages((prev) => {
+                  const updated = [...prev];
+                  const last = updated[updated.length - 1];
+                  if (last && last.role === "assistant" && last.streaming) {
+                    updated[updated.length - 1] = {
+                      ...last,
+                      content: last.content + event.content,
+                    };
+                  } else {
+                    updated.push(
+                      makeMsg("assistant", event.content, { streaming: true }),
+                    );
+                  }
+                  return updated;
+                });
+              } else if (event.type === "tool_call") {
+                setMessages((prev) => [
+                  ...prev,
+                  makeMsg("tool", `Calling ${event.name}...`),
+                ]);
+              } else if (event.type === "error") {
+                setMessages((prev) => [
+                  ...prev,
+                  makeMsg("assistant", `Error: ${event.message}`),
+                ]);
+              }
+            } catch {
+              /* ignore parse errors for incomplete chunks */
             }
-          } catch {
-            /* ignore parse errors for incomplete chunks */
-          }
-        }
+          });
       }
 
       // Mark streaming complete.
       setMessages((prev) =>
-        prev.map((m) => (m.streaming ? { ...m, streaming: false } : m)),
+        prev.map((msg) => (msg.streaming ? { ...msg, streaming: false } : msg)),
       );
     } catch {
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: "Connection error. Please try again.",
-        },
+        makeMsg("assistant", "Connection error. Please try again."),
       ]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
       sendMessage();
     }
   };
@@ -236,17 +236,17 @@ export default function ChatWidget() {
                   Ask me about your threat intelligence data.
                 </p>
               )}
-              {messages.map((msg, i) => {
+              {messages.map((msg) => {
                 if (msg.role === "tool") {
                   return (
-                    <div key={i} style={CHAT_WIDGET_STYLES.toolIndicator}>
+                    <div key={msg.id} style={CHAT_WIDGET_STYLES.toolIndicator}>
                       {msg.content}
                     </div>
                   );
                 }
                 return (
                   <div
-                    key={i}
+                    key={msg.id}
                     style={
                       msg.role === "user"
                         ? CHAT_WIDGET_STYLES.userMsg
@@ -264,7 +264,7 @@ export default function ChatWidget() {
               <InputGroup>
                 <Input
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  onChange={(event) => setInput(event.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Ask about an observable..."
                   disabled={loading}

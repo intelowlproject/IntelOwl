@@ -62,9 +62,7 @@ async def _authenticate(request):
     token_key = _get_token_from_request(request)
     if token_key:
         try:
-            obj = await sync_to_async(
-                AuthToken.objects.select_related("user").get
-            )(token=token_key)
+            obj = await sync_to_async(AuthToken.objects.select_related("user").get)(token=token_key)
             return obj.user, token_key
         except AuthToken.DoesNotExist:
             return None, None
@@ -113,9 +111,7 @@ async def send_message(request, session_pk):
 
     # Load session and verify ownership.
     try:
-        session = await sync_to_async(ChatSession.objects.get)(
-            id=session_pk, user=user
-        )
+        session = await sync_to_async(ChatSession.objects.get)(id=session_pk, user=user)
     except ChatSession.DoesNotExist:
         return JsonResponse(
             {"detail": "Session not found."},
@@ -151,9 +147,7 @@ async def send_message(request, session_pk):
         await sync_to_async(session.save)(update_fields=["title", "updated_at"])
 
     # Build conversation history from DB.
-    db_messages = await sync_to_async(list)(
-        session.messages.order_by("created_at").values("role", "content")
-    )
+    db_messages = await sync_to_async(list)(session.messages.order_by("created_at").values("role", "content"))
     messages = [build_system_prompt(user)] + list(db_messages)
 
     model = getattr(settings, "CHATBOT_MODEL", "ollama/llama3.1")

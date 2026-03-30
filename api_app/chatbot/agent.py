@@ -72,9 +72,7 @@ async def run_agent(
                     if tc.function.name:
                         tool_calls_in_progress[idx]["name"] = tc.function.name
                     if tc.function.arguments:
-                        tool_calls_in_progress[idx]["arguments"] += (
-                            tc.function.arguments
-                        )
+                        tool_calls_in_progress[idx]["arguments"] += tc.function.arguments
 
             # Check if stream finished.
             finish_reason = chunk.choices[0].finish_reason

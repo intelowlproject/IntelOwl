@@ -14,12 +14,8 @@ CHATBOT_MAX_TOKENS = int(get_secret("CHATBOT_MAX_TOKENS", "4096"))
 CHATBOT_TEMPERATURE = float(get_secret("CHATBOT_TEMPERATURE", "0.1"))
 
 # Internal base URL for IntelOwl API self-calls from tools.
-CHATBOT_INTELOWL_BASE_URL = get_secret(
-    "CHATBOT_INTELOWL_BASE_URL", "http://uwsgi:8001"
-)
+CHATBOT_INTELOWL_BASE_URL = get_secret("CHATBOT_INTELOWL_BASE_URL", "http://uwsgi:8001")
 
 # Session management.
 CHATBOT_SESSION_TTL_HOURS = int(get_secret("CHATBOT_SESSION_TTL_HOURS", "72"))
-CHATBOT_MAX_MESSAGES_PER_SESSION = int(
-    get_secret("CHATBOT_MAX_MESSAGES_PER_SESSION", "100")
-)
+CHATBOT_MAX_MESSAGES_PER_SESSION = int(get_secret("CHATBOT_MAX_MESSAGES_PER_SESSION", "100"))

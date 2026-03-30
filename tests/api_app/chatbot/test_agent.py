@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from django.test import TestCase
@@ -119,9 +118,7 @@ class TestRunAgent(TestCase):
         self.assertIn("tool_result", types)
         self.assertIn("token", types)
         self.assertIn("done", types)
-        mock_execute.assert_called_once_with(
-            "search_jobs", {"limit": 5}, "test-token"
-        )
+        mock_execute.assert_called_once_with("search_jobs", {"limit": 5}, "test-token")
 
     @patch("api_app.chatbot.agent.execute_tool", new_callable=AsyncMock)
     @patch("api_app.chatbot.agent.litellm.acompletion")

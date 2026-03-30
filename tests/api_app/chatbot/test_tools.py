@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import json
 from unittest.mock import AsyncMock, patch
 
 from django.test import TestCase, override_settings
@@ -30,13 +29,9 @@ class TestExecuteTool(TestCase):
         mock_client_cls.return_value.__aenter__ = AsyncMock(return_value=client)
         mock_client_cls.return_value.__aexit__ = AsyncMock(return_value=False)
 
-        client.get.return_value = _mock_response(
-            {"results": [{"id": 1}, {"id": 2}, {"id": 3}]}
-        )
+        client.get.return_value = _mock_response({"results": [{"id": 1}, {"id": 2}, {"id": 3}]})
 
-        result = await execute_tool(
-            "search_jobs", {"observable_name": "evil.com", "limit": 2}, "test-token"
-        )
+        result = await execute_tool("search_jobs", {"observable_name": "evil.com", "limit": 2}, "test-token")
 
         self.assertEqual(len(result["jobs"]), 2)
         client.get.assert_called_once()
@@ -71,9 +66,7 @@ class TestExecuteTool(TestCase):
             [{"name": "VirusTotal", "type": "observable"}, {"name": "Yara", "type": "file"}]
         )
 
-        result = await execute_tool(
-            "get_analyzer_config", {"analyzer_name": "VirusTotal"}, "test-token"
-        )
+        result = await execute_tool("get_analyzer_config", {"analyzer_name": "VirusTotal"}, "test-token")
 
         self.assertEqual(result["name"], "VirusTotal")
 
@@ -85,9 +78,7 @@ class TestExecuteTool(TestCase):
 
         client.get.return_value = _mock_response([{"name": "Yara"}])
 
-        result = await execute_tool(
-            "get_analyzer_config", {"analyzer_name": "NonExistent"}, "test-token"
-        )
+        result = await execute_tool("get_analyzer_config", {"analyzer_name": "NonExistent"}, "test-token")
 
         self.assertIn("error", result)
 
@@ -97,9 +88,7 @@ class TestExecuteTool(TestCase):
         mock_client_cls.return_value.__aenter__ = AsyncMock(return_value=client)
         mock_client_cls.return_value.__aexit__ = AsyncMock(return_value=False)
 
-        client.post.return_value = _mock_response(
-            {"job_id": 99, "status": "accepted"}
-        )
+        client.post.return_value = _mock_response({"job_id": 99, "status": "accepted"})
 
         result = await execute_tool(
             "create_scan",

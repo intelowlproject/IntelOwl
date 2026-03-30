@@ -1,5 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import tomllib
 from pathlib import Path, PosixPath
 
 from ._util import get_secret
@@ -8,11 +9,11 @@ from ._util import get_secret
 DEBUG = get_secret("DEBUG", False) == "True" or get_secret("DEBUG", False) is True
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = Path(__file__).parent.parent.parent.parent
-PROJECT_LOCATION = BASE_DIR / "intel_owl"
-BASE_STATIC_PATH = PROJECT_LOCATION / "static"
+BASE_DIR = Path(__file__).parent.parent.parent
+PROJECT_LOCATION = BASE_DIR
+BASE_STATIC_PATH = PROJECT_LOCATION / "intel_owl" / "static"
 MEDIA_ROOT = BASE_DIR / "files_required"
-CONFIG_ROOT = PROJECT_LOCATION / "configuration"
+CONFIG_ROOT = PROJECT_LOCATION / "intel_owl" / "configuration"
 BLINT_REPORTS_PATH = MEDIA_ROOT / "blint"
 YARA_RULES_PATH = MEDIA_ROOT / "yara"  # path for manual yara rules
 
@@ -28,7 +29,13 @@ STAGE_CI = STAGE == "ci"
 # Overridden in test_custom_config
 FORCE_SCHEDULE_JOBS = True
 
-VERSION = get_secret("REACT_APP_INTELOWL_VERSION", "").replace("v", "")
+# VERSION is read from pyproject.toml
+try:
+    with open(PROJECT_LOCATION / "pyproject.toml", "rb") as f:
+        VERSION = tomllib.load(f)["project"]["version"]
+except (FileNotFoundError, KeyError, tomllib.TOMLDecodeError):
+    VERSION = get_secret("REACT_APP_INTELOWL_VERSION", "").replace("v", "")
+
 PUBLIC_DEPLOYMENT = get_secret("PUBLIC_DEPLOYMENT", "True") == "True"
 
 # used for generating links to web client e.g. job results page

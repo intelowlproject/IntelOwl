@@ -6,7 +6,7 @@ echo "$WATCHMAN"
 # This script can be disabled during development using WATCHMAN=false env variable
 if [ "$WATCHMAN" = "false" ]; then echo "Skipping WATCHMAN installation because we are not in test mode"; exit 0;  fi
 
-pip3 install --compile -r requirements/django-server-requirements.txt
+uv pip install --system --compile ".[watchman]"
 
 # install Watchman to enhance performance on the Django development Server
 # https://docs.djangoproject.com/en/3.2/ref/django-admin/#runserver

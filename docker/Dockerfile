@@ -5,8 +5,11 @@ FROM node:lts-alpine3.21 AS frontend-build
 WORKDIR /
 # copy react source code
 COPY frontend/ .
-# copy version file as an env file
-COPY docker/.env .env.local
+# copy pyproject.toml to extract version
+COPY pyproject.toml .
+# extract version using uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.1 /uv /bin/uv
+RUN echo "REACT_APP_INTELOWL_VERSION=v$(uv version --short)" > .env.local
 # install and build
 RUN npm install npm@latest --location=global \
     && npm install \
@@ -14,6 +17,9 @@ RUN npm install npm@latest --location=global \
 
 # Stage 2: Backend
 FROM python:3.11.7 AS backend-build
+
+# Add uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.1 /uv /uvx /bin/
 
 ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE=intel_owl.settings
@@ -23,8 +29,8 @@ ARG REPO_DOWNLOADER_ENABLED=true
 ARG WATCHMAN=false
 ARG TARGETARCH
 ENV watch_logs_cmd="watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
-# This is required to allow compatibility with different OpenCTI instances
-ARG PYCTI_VERSION=6.8.8
+# Use the system python for uv sync
+ENV UV_PROJECT_ENVIRONMENT=/usr/local
 # this is required for if/else statements
 SHELL ["/bin/bash", "-c"]
 
@@ -44,16 +50,12 @@ RUN apt-get update \
     vim libldap2-dev libfuzzy-dev net-tools python3-psycopg2 git apache2-utils tshark  \
     libemail-outlook-message-perl libemail-address-perl \
     && apt-get clean && apt-get autoclean && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/* \
-    && pip3 install --no-cache-dir --upgrade pip
+    && rm -rf /var/lib/apt/lists/*
 
-COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
-COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
+COPY pyproject.toml uv.lock $PYTHONPATH/
 WORKDIR $PYTHONPATH
 
-RUN pip3 install --no-cache-dir --use-pep517 --compile -r project-requirements.txt \
-    && pip3 install --no-cache-dir pycti==${PYCTI_VERSION} \
-    && pip3 install --no-cache-dir --compile -r certego-requirements.txt
+RUN uv sync --frozen --no-dev
 
 COPY . $PYTHONPATH
 

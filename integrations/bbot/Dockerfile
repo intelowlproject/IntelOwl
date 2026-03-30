@@ -11,15 +11,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-get clean && apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/* /tmp/* /usr/share/doc/* /usr/share/man/*
 
+# Add uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.1 /uv /uvx /bin/
+
 # Set up project directory
 WORKDIR ${PROJECT_PATH}
 
 # Copy application files and requirements
 COPY requirements.txt app.py ./
 
-# Upgrade pip and install Python packages
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+# Use uv for faster dependency installation
+RUN uv pip install --system --no-cache-dir -r requirements.txt
 
 # Pre-install BBOT dependencies & Make script executable
 RUN bbot --install-all-deps -y --force && \

@@ -6,11 +6,14 @@ USER root
 ENV PROJECT_PATH=/opt/deploy
 ENV LOG_PATH=/var/log/intel_owl/thug
 
+# Add uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.1 /uv /uvx /bin/
+
 # 2. Build Flask REST API
 WORKDIR ${PROJECT_PATH}/flask
 COPY app.py requirements.txt entrypoint.sh ./
 
-RUN pip3 install -r requirements.txt --no-cache-dir \
+RUN uv pip install --system --no-cache-dir -r requirements.txt \
     && mkdir -p ${PROJECT_PATH}/thug \
     && chown -R ${USER}:${USER} . ${PROJECT_PATH}/thug \
     && chmod +x entrypoint.sh

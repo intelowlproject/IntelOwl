@@ -10,16 +10,15 @@ RUN adduser -D -h /home/${USER} ${USER}
 # Install required packages using apk and clean cache in the same layer
 RUN apk add --no-cache python3 py3-pip
 
+# Add uv
+
+
 # Create working directory and set ownership
 WORKDIR /app
 
 # Copy and install requirements first (better layer caching)
 COPY app.py requirements.txt entrypoint.sh ./
-RUN python3 -m venv venv \
-    && . venv/bin/activate \
-    && pip3 install --no-cache-dir --upgrade pip \
-    && pip3 install --no-cache-dir -r requirements.txt \
-    && rm -rf ~/.cache/pip/*
+RUN uv pip install --system --no-cache-dir -r requirements.txt
 
 # Create log directory with proper permissions
 RUN mkdir -p ${LOG_PATH} \

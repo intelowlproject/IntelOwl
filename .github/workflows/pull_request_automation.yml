@@ -41,10 +41,15 @@ jobs:
         with:
           python-version: 3.11
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.11.1"
+          enable-cache: true
+
       - name: Install Dependencies
         run: |
-          pip3 install --upgrade pip
-          pip3 install -r requirements/test-requirements.txt
+          uv sync --system --frozen --group lint --group dev
 
       - name: Lint with Ruff
         run: |
@@ -106,7 +111,7 @@ jobs:
 
       - name: Setup coverage
         run: |
-          docker exec intelowl_uwsgi pip3 install coverage
+          docker exec intelowl_uwsgi uv sync --frozen --group dev
 
       - name: Run test
         run: |

@@ -24,11 +24,14 @@ RUN apt-get remove --purge -y git gcc \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/* /tmp/* /usr/share/doc/* /usr/share/man/* > /dev/null 2>&1
 
+# Add uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.1 /uv /uvx /bin/
+
 # 2. Build Flask REST API
 WORKDIR ${PROJECT_PATH}/tor-flask
 COPY app.py requirements.txt entrypoint.sh ./
 
-RUN pip3 install -r requirements.txt --no-cache-dir \
+RUN uv pip install --system --no-cache-dir -r requirements.txt \
     && chown -R ${USER}:${USER} . \
     && chmod +x entrypoint.sh
 

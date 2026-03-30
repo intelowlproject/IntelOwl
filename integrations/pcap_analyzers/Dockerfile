@@ -6,6 +6,9 @@ ENV LOG_PATH=/var/log/intel_owl/pcap_analyzers
 ENV USER=pcap_analyzers-user
 RUN dnf -y install python3-pip && dnf clean all && useradd -ms /bin/bash ${USER}
 
+# Add uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.1 /uv /uvx /bin/
+
 # Build Flask REST API
 WORKDIR ${PROJECT_PATH}/pcap_analyzers-flask
 COPY app.py requirements.txt entrypoint.sh ./
@@ -16,7 +19,7 @@ COPY crontab /etc/cron.d/suricata
 COPY config/suricata/etc/* /etc/suricata
 COPY config/suricata/rules/* /var/lib/suricata/rules
 
-RUN pip3 install -r requirements.txt --no-cache-dir \
+RUN uv pip install --system --no-cache-dir -r requirements.txt \
     && chown -R ${USER}:${USER} . /etc/suricata /var/lib/suricata \
     && mkdir -p ${LOG_PATH}/suricata/ \
     && touch /var/log/cron.log ${LOG_PATH}/suricata/suricata.log \

@@ -9,7 +9,6 @@ import {
 import { IoCheckmarkDoneSharp } from "react-icons/io5";
 
 import { ContentSection, IconButton, DateHoverable } from "@certego/certego-ui";
-import ReactMarkdown from "react-markdown";
 
 import { notificationMarkAsRead } from "./notificationApi";
 

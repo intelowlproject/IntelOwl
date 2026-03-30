@@ -156,8 +156,18 @@ def extract_robtex_reports(analyzer_reports: QuerySet, job: Job) -> List[PDNSRep
     robtex_analyzer = _extract_analyzer(analyzer_reports, Robtex.python_module, job)
     if robtex_analyzer:
         robtex_reports = robtex_analyzer.report
-        pdns_reports = []
+        
+        # Normalize the incoming JSON to handle intermittent array responses.
+        # The API can return a dict or a list directly. We flatten it to a list of dicts.
+        normalized_reports = []
         for report in robtex_reports:
+            if isinstance(report, list):
+                normalized_reports.extend(report)
+            elif isinstance(report, dict):
+                normalized_reports.append(report)
+
+        pdns_reports = []
+        for report in normalized_reports:
             if "rrdata" in report.keys():
                 pdns_report = PDNSReport(
                     datetime.datetime.fromtimestamp(report.get("time_last")).strftime("%Y-%m-%d"),

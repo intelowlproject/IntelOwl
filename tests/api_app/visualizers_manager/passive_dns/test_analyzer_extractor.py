@@ -448,6 +448,54 @@ class TestRobtex(CustomTestCase):
             report,
         )
 
+    def test_array_response_bug(self):
+        # Edge case: The API returns a nested JSON array instead of a JSON object/list of objects
+        self.robtex_report = AnalyzerReport.objects.create(
+            parameters={},
+            report=[
+                [
+                    {
+                        "count": 2,
+                        "rrdata": "mx.spamexperts.com",
+                        "rrname": "test.com",
+                        "rrtype": "MX",
+                        "time_last": 1582215078,
+                        "time_first": 1441363932,
+                    }
+                ]
+            ],
+            job=self.job,
+            task_id=uuid(),
+            config=AnalyzerConfig.objects.get(name="Robtex"),
+        )
+        report = extract_robtex_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        self.assertEqual(
+            [
+                PDNSReport(
+                    last_view="2020-02-20",
+                    first_view="2015-09-04",
+                    rrtype="MX",
+                    rdata="mx.spamexperts.com",
+                    rrname="test.com",
+                    source="Robtex",
+                    source_description="scan a domain/IP against the Robtex Passive DNS DB",  # noqa: E501
+                ),
+            ],
+            report,
+        )
+
+    def test_empty_array_response_bug(self):
+        # Edge case: The API returns an empty nested array
+        self.robtex_report = AnalyzerReport.objects.create(
+            parameters={},
+            report=[[]],
+            job=self.job,
+            task_id=uuid(),
+            config=AnalyzerConfig.objects.get(name="Robtex"),
+        )
+        report = extract_robtex_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        self.assertEqual([], report)
+
 
 class TestMnemonicPDNS(CustomTestCase):
     @classmethod

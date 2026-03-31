@@ -26,7 +26,7 @@ jobs:
         run: |
           git branch -a --list | cat
           FRONTEND_CHANGES=$(git diff --compact-summary origin/${{ github.base_ref }} -- frontend/* | wc -l)
-          echo "::set-output name=frontend::$FRONTEND_CHANGES"
+          echo "frontend=$FRONTEND_CHANGES" >> "$GITHUB_OUTPUT"
         id: diff_check
 
   linters:

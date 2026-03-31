@@ -218,7 +218,7 @@ export function JobInfoCard({ job }) {
               </ListGroupItem>
             ))}
           </ListGroup>
-          {Object.values(JobFinalStatuses).includes(job.status) && (
+          {!Object.values(JobFinalStatuses).includes(job.status) && (
             <div
               className="my-4 d-flex justify-content-center"
               style={{ width: "100%" }}

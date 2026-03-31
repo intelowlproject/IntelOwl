@@ -295,8 +295,12 @@ class GoogleLoginCallbackView(LoginView):
             # Not giving out the actual error as we risk exposing the client secret
             raise AuthenticationFailed("OAuth authentication error.")
         user = token.get("userinfo")
+        if not isinstance(user, dict):
+            raise AuthenticationFailed("OAuth authentication error.")
         user_email = user.get("email")
-        user_name = user.get("name")
+        if not user_email:
+            raise AuthenticationFailed("OAuth authentication error.")
+        user_name = user.get("name") or user_email
         try:
             return User.objects.get(email=user_email)
         except User.DoesNotExist:

@@ -72,3 +72,19 @@ class TestOAuth(CustomOAuthTestCase):
         self.assertIsNotNone(session_data)
         self.assertIn("_auth_user_id", session_data.keys())
         self.assertEqual(str(self.user.pk), session_data["_auth_user_id"])
+
+    @patch("authentication.views.oauth.google.authorize_access_token")
+    def test_google_callback_missing_userinfo(self, mock_authorize_access_token: Mock):
+        mock_authorize_access_token.return_value = {}
+        response = self.client.get(self.google_auth_callback_uri, follow=False)
+        msg = response.content
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, msg)
+        self.assertEqual(response.json(), {"detail": "OAuth authentication error."}, msg)
+
+    @patch("authentication.views.oauth.google.authorize_access_token")
+    def test_google_callback_missing_email(self, mock_authorize_access_token: Mock):
+        mock_authorize_access_token.return_value = {"userinfo": {"name": "No Email User"}}
+        response = self.client.get(self.google_auth_callback_uri, follow=False)
+        msg = response.content
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, msg)
+        self.assertEqual(response.json(), {"detail": "OAuth authentication error."}, msg)

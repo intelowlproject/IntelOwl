@@ -230,6 +230,20 @@ class JobViewSetTests(CustomViewSetTestCase):
         j1.delete()
         j2.delete()
 
+    def test_recent_scan_user_invalid_limit(self):
+        response = self.client.post(self.jobs_recent_scans_user_uri, data={"is_sample": False, "limit": "x"})
+        content = response.json()
+        msg = (response, content)
+        self.assertEqual(400, response.status_code, msg=msg)
+        self.assertIn("limit must be an integer", str(content), msg=msg)
+
+    def test_recent_scan_user_invalid_is_sample(self):
+        response = self.client.post(self.jobs_recent_scans_user_uri, data={"is_sample": "maybe"})
+        content = response.json()
+        msg = (response, content)
+        self.assertEqual(400, response.status_code, msg=msg)
+        self.assertIn("is_sample must be a boolean", str(content), msg=msg)
+
     def test_list_200(self):
         response = self.client.get(self.jobs_list_uri)
         content = response.json()

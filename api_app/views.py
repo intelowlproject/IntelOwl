@@ -431,9 +431,25 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         - List of recent jobs for the user.
         """
         limit = request.data.get("limit", 5)
+        try:
+            limit = int(limit)
+        except (TypeError, ValueError):
+            raise ValidationError({"detail": "limit must be an integer"})
+        if limit <= 0:
+            raise ValidationError({"detail": "limit must be > 0"})
         if "is_sample" not in request.data:
             raise ValidationError({"detail": "is_sample is required"})
         is_sample = request.data["is_sample"]
+        if isinstance(is_sample, str):
+            value = is_sample.strip().lower()
+            if value in {"true", "1"}:
+                is_sample = True
+            elif value in {"false", "0"}:
+                is_sample = False
+            else:
+                raise ValidationError({"detail": "is_sample must be a boolean"})
+        elif not isinstance(is_sample, bool):
+            raise ValidationError({"detail": "is_sample must be a boolean"})
         jobs = Job.objects.filter(user__pk=request.user.pk)
         if is_sample is True:
             jobs = jobs.filter(analyzable__classification=Classification.FILE)

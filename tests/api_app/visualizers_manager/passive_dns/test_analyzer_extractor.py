@@ -448,6 +448,86 @@ class TestRobtex(CustomTestCase):
             report,
         )
 
+    def test_dict_report_not_list(self):
+        """When report is a bare dict (not a list), the isinstance(list) guard
+        should cause the function to return an empty list."""
+        self.robtex_report = AnalyzerReport.objects.create(
+            parameters={},
+            report={
+                "rrdata": "mx.spamexperts.com",
+                "rrname": "test.com",
+                "rrtype": "MX",
+                "time_last": 1582215078,
+                "time_first": 1441363932,
+            },
+            job=self.job,
+            task_id=uuid(),
+            config=AnalyzerConfig.objects.get(name="Robtex"),
+        )
+        report = extract_robtex_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        self.assertEqual([], report)
+
+    def test_mixed_items_skips_non_dicts(self):
+        """When the report list contains non-dict items (empty list, string, int)
+        alongside valid dicts, only valid dicts with 'rrdata' should be extracted."""
+        self.robtex_report = AnalyzerReport.objects.create(
+            parameters={},
+            report=[
+                {
+                    "rrdata": "mx.spamexperts.com",
+                    "rrname": "test.com",
+                    "rrtype": "MX",
+                    "time_last": 1582215078,
+                    "time_first": 1441363932,
+                },
+                [],
+                "unexpected_string",
+                42,
+            ],
+            job=self.job,
+            task_id=uuid(),
+            config=AnalyzerConfig.objects.get(name="Robtex"),
+        )
+        report = extract_robtex_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        self.assertEqual(
+            [
+                PDNSReport(
+                    last_view="2020-02-20",
+                    first_view="2015-09-04",
+                    rrtype="MX",
+                    rdata="mx.spamexperts.com",
+                    rrname="test.com",
+                    source="Robtex",
+                    source_description="scan a domain/IP against the Robtex Passive DNS DB",  # noqa: E501
+                ),
+            ],
+            report,
+        )
+
+    def test_production_crash_scenario(self):
+        """Reproduce the exact production crash: a list containing a dict WITHOUT
+        'rrdata' key followed by an empty list from the pdns/reverse endpoint.
+        Both items should be skipped, returning an empty result."""
+        self.robtex_report = AnalyzerReport.objects.create(
+            parameters={},
+            report=[
+                {
+                    "as": 1406,
+                    "asname": "EJEMPLO",
+                    "city": "Unknown",
+                    "country": "US",
+                    "ip": "159.65.101.136",
+                    "whoisdesc": "DIGITALOCEAN-ASN",
+                },
+                [],
+            ],
+            job=self.job,
+            task_id=uuid(),
+            config=AnalyzerConfig.objects.get(name="Robtex"),
+        )
+        report = extract_robtex_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        self.assertEqual([], report)
+
 
 class TestMnemonicPDNS(CustomTestCase):
     @classmethod
@@ -502,6 +582,44 @@ class TestMnemonicPDNS(CustomTestCase):
                     "time_first": 1712319486,
                 }
             ],
+            job=self.job,
+            task_id=uuid(),
+            config=AnalyzerConfig.objects.get(name="Mnemonic_PassiveDNS"),
+        )
+        report = extract_mnemonicpdns_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        self.assertEqual(
+            [
+                PDNSReport(
+                    last_view="2024-05-02",
+                    first_view="2024-04-05",
+                    rrtype="a",
+                    rdata="34.224.149.186",
+                    rrname="test.com",
+                    source="Mnemonic PassiveDNS",
+                    source_description="Look up a domain or IP using the [Mnemonic PassiveDNS public API](https://docs.mnemonic.no/display/public/API/Passive+DNS+Overview).",  # noqa: E501
+                ),
+            ],
+            report,
+        )
+
+    def test_dict_report_with_data_key(self):
+        """When the Mnemonic API returns a dict (non-COF format) with a 'data' key,
+        the isinstance(dict) branch should extract records from report['data']."""
+        self.mnemonicpdns_report = AnalyzerReport.objects.create(
+            parameters={},
+            report={
+                "responseCode": 200,
+                "data": [
+                    {
+                        "count": 4477,
+                        "rdata": "34.224.149.186",
+                        "rrname": "test.com",
+                        "rrtype": "a",
+                        "time_last": 1714654257,
+                        "time_first": 1712319486,
+                    }
+                ],
+            },
             job=self.job,
             task_id=uuid(),
             config=AnalyzerConfig.objects.get(name="Mnemonic_PassiveDNS"),
@@ -595,3 +713,16 @@ class TestCIRCLPassiveDNS(CustomTestCase):
             ],
             report,
         )
+
+    def test_string_report_returns_empty(self):
+        """When the CIRCL API returns a string error message instead of a list,
+        the isinstance(list) guard should skip processing and return empty."""
+        self.circlpdns_report = AnalyzerReport.objects.create(
+            parameters={},
+            report="Authentication required",
+            job=self.job,
+            task_id=uuid(),
+            config=AnalyzerConfig.objects.get(name="CIRCLPassiveDNS"),
+        )
+        report = extract_circlpdns_reports(AnalyzerReport.objects.filter(job=self.job), self.job)
+        self.assertEqual([], report)

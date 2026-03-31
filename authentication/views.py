@@ -312,7 +312,7 @@ class GoogleLoginCallbackView(LoginView):
         login(request, user)
         # Uncomment this for local testing
         # return redirect("http://localhost/login")
-        return redirect(self.request.build_absolute_uri("/login"))
+        return redirect(f"{settings.WEB_CLIENT_URL}/login")
 
 
 @api_view(["get"])

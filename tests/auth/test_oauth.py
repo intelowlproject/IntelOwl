@@ -4,6 +4,7 @@
 from unittest.mock import Mock, patch
 from urllib.parse import parse_qs, urlparse
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sessions.models import Session
 from django.test import tag
@@ -65,7 +66,7 @@ class TestOAuth(CustomOAuthTestCase):
         response = self.client.get(self.google_auth_callback_uri, follow=False)
         msg = response.url
         self.assertEqual(response.status_code, 302, msg)
-        urlparse(response.url)
+        self.assertEqual(response.url, f"{settings.WEB_CLIENT_URL}/login", msg)
         self.assertEqual(Session.objects.count(), 1)
         session = Session.objects.all().first()
         session_data = session.get_decoded()

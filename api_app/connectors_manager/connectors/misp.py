@@ -118,11 +118,16 @@ class MISP(Connector):
         # append attribute name to event info
         event.info += f": {self._base_attr_obj.value}"
 
-        # add event to MISP Instance
-        misp_event = misp_instance.add_event(event, pythonify=True)
-        # add attributes to event on MISP Instance
+        # bulk: attach all attributes to the event object before sending
         for attr in attributes:
-            misp_instance.add_attribute(misp_event.id, attr)
+            event.add_attribute(
+                attr.type,
+                attr.value,
+                **{k: v for k, v in attr.to_dict().items() if k not in ("type", "value", "uuid")},
+            )
+
+        # single request — event + all attributes sent together
+        misp_event = misp_instance.add_event(event, pythonify=True)
 
         return misp_instance.get_event(misp_event.id)
 

@@ -409,6 +409,12 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         if "md5" not in request.data:
             raise ValidationError({"detail": "md5 is required"})
         max_temporal_distance = request.data.get("max_temporal_distance", 14)
+        try:
+            max_temporal_distance = int(max_temporal_distance)
+        except (TypeError, ValueError):
+            raise ValidationError({"detail": "max_temporal_distance must be an integer"})
+        if max_temporal_distance < 0:
+            raise ValidationError({"detail": "max_temporal_distance must be >= 0"})
         jobs = (
             Job.objects.filter(analyzable__md5=request.data["md5"])
             .visible_for_user(self.request.user)

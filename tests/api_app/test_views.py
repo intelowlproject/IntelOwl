@@ -203,6 +203,16 @@ class JobViewSetTests(CustomViewSetTestCase):
         j1.delete()
         j2.delete()
 
+    def test_recent_scan_invalid_temporal_distance(self):
+        response = self.client.post(
+            self.jobs_recent_scans_uri,
+            data={"md5": self.analyzable.md5, "max_temporal_distance": "not-an-int"},
+        )
+        content = response.json()
+        msg = (response, content)
+        self.assertEqual(400, response.status_code, msg=msg)
+        self.assertIn("max_temporal_distance must be an integer", str(content), msg=msg)
+
     def test_recent_scan_user(self):
         j1 = Job.objects.create(
             **{

@@ -2,6 +2,7 @@ import base64
 import logging
 import traceback
 import typing
+from billiard.exceptions import SoftTimeLimitExceeded
 from abc import ABCMeta, abstractmethod
 from pathlib import PosixPath
 
@@ -279,6 +280,11 @@ class Plugin(metaclass=ABCMeta):
             self.config(runtime_configuration)
             self.before_run()
             _result = self.run()
+     except SoftTimeLimitExceeded:
+            self.report.status = AbstractReport.STATUSES.FAILED.value
+            self.report.errors.append("Soft time limit exceeded")
+            self.report.save(update_fields=["status", "errors"])
+            raise   
         except Exception as e:
             self.after_run_failed(e)
         else:

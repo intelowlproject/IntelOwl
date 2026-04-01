@@ -16,7 +16,7 @@ def update_capa_timeout(apps, schema_editor):
         param = Parameter.objects.get(name="timeout", python_module=pm)
         import re
 
-        PluginConfig.objects.filter(parameter=param, value=15).update(value=120)
+        PluginConfig.objects.filter(parameter=param, value__in=["15", 15]).update(value=120)
 
         description = getattr(param, "description", None)
         if description:

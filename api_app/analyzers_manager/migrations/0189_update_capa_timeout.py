@@ -31,7 +31,7 @@ def update_capa_timeout(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("analyzers_manager", "0187_remove_dehashed_analyzer"),
+        ("analyzers_manager", "0188_ja4dbentry"),
     ]
 
     operations = [

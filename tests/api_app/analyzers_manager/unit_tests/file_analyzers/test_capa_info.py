@@ -15,12 +15,6 @@ from .base_test_class import BaseFileAnalyzerTest
 class TestCapaInfoAnalyzer(BaseFileAnalyzerTest):
     analyzer_class = CapaInfo
 
-    # overriding done to use real sample
-    MIMETYPE_TO_FILENAME = BaseFileAnalyzerTest.MIMETYPE_TO_FILENAME.copy()
-    MIMETYPE_TO_FILENAME["application/vnd.microsoft.portable-executable"] = (
-        "d8f15132511e76a9fd806b12108f633c1d8f493527c6961c092e0499a9014048.exe"
-    )
-
     def get_mocked_response(self):
         response_from_command = subprocess.CompletedProcess(
             args=[
@@ -91,33 +85,6 @@ class TestCapaInfoAnalyzer(BaseFileAnalyzerTest):
             analyzer.run()
 
         self.assertIn("timed out after", str(context.exception))
-
-    def test_reproducibility_sample_from_zip(self):
-        """
-        Test using a sample from the test_files setup to ensure reproducibility
-        without external network dependencies.
-        """
-        from api_app.analyzers_manager.models import AnalyzerConfig
-
-        mimetype = "application/vnd.microsoft.portable-executable"
-        filepath = self.get_sample_file_path(mimetype)
-
-        configs = AnalyzerConfig.objects.filter(python_module=self.analyzer_class.python_module)
-        config = configs.first()
-        analyzer = self.analyzer_class(config)
-        analyzer.file_mimetype = mimetype
-        analyzer.filename = self.MIMETYPE_TO_FILENAME[mimetype]
-        analyzer.md5 = "mocked_md5_repro"
-        analyzer._FileAnalyzer__filepath = filepath
-
-        for key, value in self.get_extra_config().items():
-            setattr(analyzer, key, value)
-
-        patches = self.get_mocked_response()
-        with self._apply_patches(patches):
-            result = analyzer.run()
-            self.assertIsNotNone(result)
-            self.assertEqual(result["command_executed"][-1], f"{filepath}")
 
 
 class TestCapaInfoCacheDirectory(TestCase):

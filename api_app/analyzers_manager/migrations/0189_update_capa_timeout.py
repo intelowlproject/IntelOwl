@@ -32,6 +32,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("analyzers_manager", "0188_ja4dbentry"),
+        ("api_app", "0001_initial"),
     ]
 
     operations = [

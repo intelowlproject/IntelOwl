@@ -202,9 +202,16 @@ class CapaInfo(FileAnalyzer, RulesUtiliyMixin):
             raise AnalyzerRunException(
                 f" Analyzer for {self.filename} with hash: {self.md5} failed with error: {stderr}"
             )
-        except subprocess.TimeoutExpired:
-            logger.info(f"Capa Info timed out for {self.filename} with hash: {self.md5}")
-            raise AnalyzerRunException(f"Capa Info timed out after {self.timeout} seconds")
+        except subprocess.TimeoutExpired as e:
+            logger.info(
+                "Capa Info timed out for %s with hash: %s (cmd=%s, timeout=%s)",
+                self.filename,
+                self.md5,
+                getattr(e, "cmd", None),
+                getattr(e, "timeout", None),
+                exc_info=True,
+            )
+            raise AnalyzerRunException(f"Capa Info timed out after {self.timeout} seconds") from e
         finally:
             # Clean up temporary cache directory if a fallback was used
             if cache_dir != CACHE_LOCATION and os.path.isdir(cache_dir):

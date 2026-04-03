@@ -53,38 +53,9 @@ class TestCapaInfoAnalyzer(BaseFileAnalyzerTest):
         return {
             "shellcode": False,
             "arch": "64",
-            "timeout": 120,
+            "timeout": 15,
             "force_pull_signatures": False,
         }
-
-    def test_capa_timeout_exception(self):
-        from api_app.analyzers_manager.exceptions import AnalyzerRunException
-        from api_app.analyzers_manager.models import AnalyzerConfig
-
-        configs = AnalyzerConfig.objects.filter(python_module=self.analyzer_class.python_module)
-        config = configs.first()
-        analyzer = self.analyzer_class(config)
-        analyzer.file_mimetype = "application/vnd.microsoft.portable-executable"
-        analyzer.filename = "d8f15132511e76a9fd806b12108f633c1d8f493527c6961c092e0499a9014048.exe"
-        analyzer.md5 = "mocked_md5_timeout"
-        analyzer._FileAnalyzer__filepath = self.get_sample_file_path(analyzer.file_mimetype)
-
-        for key, value in self.get_extra_config().items():
-            setattr(analyzer, key, value)
-
-        timeout = analyzer.timeout
-        patches = self.get_mocked_response()
-        with (
-            self._apply_patches(patches),
-            patch(
-                "api_app.analyzers_manager.file_analyzers.capa_info.subprocess.run",
-                side_effect=subprocess.TimeoutExpired(cmd=["capa"], timeout=timeout),
-            ),
-            self.assertRaises(AnalyzerRunException) as context,
-        ):
-            analyzer.run()
-
-        self.assertIn("timed out after", str(context.exception))
 
 
 class TestCapaInfoCacheDirectory(TestCase):

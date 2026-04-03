@@ -241,17 +241,9 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
 
     def after_run(self):
         super().after_run()
-        # We delete the file only if we have single copy for analyzer
-        # and the file has been saved locally.
-        # Otherwise we would remove the single file that we have on the server
-        if not settings.LOCAL_STORAGE and self.filepath is not None:
-            import os
-
-            try:
-                os.remove(self.filepath)
-            except OSError:
-                logger.warning(f"Filepath {self.filepath} does not exists")
-
+        # When using S3 storage, cached files are now stored in a shared
+        # directory and reused by all analyzers, so we must NOT delete them
+        # here — another analyzer may still be reading the same file.
         logger.info(f"FINISHED analyzer: {self.__repr__()} -> File: ({self.filename}, md5: {self.md5})")
 
 

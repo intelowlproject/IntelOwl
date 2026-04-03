@@ -33,25 +33,26 @@ else:
     from storages.backends.s3boto3 import S3Boto3Storage
 
     class S3Boto3StorageWrapper(S3Boto3Storage):
-        def retrieve(self, file, analyzer):
-            # FIXME we can optimize this a lot.
-            #  Right now we are doing an http request FOR analyzer. We can have a
-            #  proxy that will store the content and then save it locally
+        # Shared cache directory where files are downloaded once and
+        # reused by every analyzer that needs them.
+        _CACHE_DIR = os.path.join(MEDIA_ROOT, "_s3_cache")
 
-            # The idea is to download the file in MEDIA_ROOT/analyzer/namefile
-            # if it does not exist
-            path_dir = os.path.join(MEDIA_ROOT, analyzer)
+        def retrieve(self, file, analyzer):
             name = file.name
-            _path = os.path.join(path_dir, name)
+            _path = os.path.join(self._CACHE_DIR, name)
             if not os.path.exists(_path):
-                os.makedirs(path_dir, exist_ok=True)
+                os.makedirs(os.path.dirname(_path), exist_ok=True)
                 if not self.exists(name):
                     raise AssertionError
+                # Write to a temp file first, then rename for atomicity.
+                # This prevents a concurrent worker from reading a half-written file.
+                tmp_path = _path + ".tmp"
                 with self.open(name) as s3_file_object:
                     content = s3_file_object.read()
-                    s3_file_object.seek(0)
-                    with open(_path, "wb") as local_file_object:
+                    with open(tmp_path, "wb") as local_file_object:
                         local_file_object.write(content)
+                # atomic on the same filesystem
+                os.replace(tmp_path, _path)
             return _path
 
     DEFAULT_FILE_STORAGE = "intel_owl.settings.S3Boto3StorageWrapper"

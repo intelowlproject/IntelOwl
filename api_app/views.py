@@ -24,7 +24,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from api_app.choices import Classification, ScanMode
 from api_app.decorators import abstractclassproperty
-from api_app.exceptions import NotImplementedException
+from api_app.exceptions import HealthCheckException, NotImplementedException
 from api_app.models import UpdateCheckStatus
 from api_app.serializers.system import SystemUpdateStatusSerializer
 from api_app.websocket import JobConsumer
@@ -1315,6 +1315,8 @@ class PythonConfigViewSet(AbstractConfigViewSet):
         python_obj = config.python_module.python_class(config)
         try:
             health_status = python_obj.health_check(request.user)
+        except HealthCheckException:
+            raise
         except NotImplementedError as e:
             logger.info(f"NotImplementedError {e}, user {request.user}, name {name}")
             raise ValidationError({"detail": "No healthcheck implemented"})

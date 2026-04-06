@@ -20,3 +20,9 @@ class NotImplementedException(APIException):
     status_code = 501
     default_detail = "Service not supported."
     default_code = "service_not_implemented"
+
+
+class HealthCheckException(APIException):
+    status_code = 503
+    default_detail = "Health check failed."
+    default_code = "health_check_failed"

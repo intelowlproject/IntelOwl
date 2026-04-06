@@ -10,6 +10,7 @@ from pycti.api.opencti_api_client import File
 from api_app import helpers
 from api_app.choices import Classification
 from api_app.connectors_manager import classes
+from api_app.exceptions import HealthCheckException
 
 INTELOWL_OPENCTI_TYPE_MAP = {
     Classification.IP: {
@@ -200,12 +201,26 @@ class OpenCTI(classes.Connector):
         if not api_key:
             raise RuntimeError("Missing config api key")
 
-        client = pycti.OpenCTIApiClient(
-            url=url,
-            token=api_key,
-            ssl_verify=ssl_verify,
-        )
-        client.health_check()
+        try:
+            client = pycti.OpenCTIApiClient(
+                url=url,
+                token=api_key,
+                ssl_verify=ssl_verify,
+            )
+            if not client.health_check():
+                raise HealthCheckException("Cannot reach OpenCTI: check the configured URL and port.")
+        except HealthCheckException:
+            raise
+        except ValueError as e:
+            msg = str(e).lower()
+            if "not reachable" in msg or "waiting for opencti" in msg:
+                raise HealthCheckException("Cannot reach OpenCTI: check the configured URL and port.")
+            raise HealthCheckException("OpenCTI authentication failed: check your API key.")
+        except Exception:
+            raise HealthCheckException(
+                "OpenCTI health check failed: check the configured URL, port, and API key."
+            )
+
         return True
 
     def run(self):

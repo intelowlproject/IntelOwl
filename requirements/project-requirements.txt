@@ -18,7 +18,7 @@ django-watchfiles==1.4.0
 jsonschema==4.25.1
 # django rest framework libs
 Authlib==1.6.5
-djangorestframework==3.15.2
+djangorestframework==3.17.1
 djangorestframework-filters==1.0.0.dev2
 drf-spectacular==0.28.0
 django-rest-email-auth==4.0.0

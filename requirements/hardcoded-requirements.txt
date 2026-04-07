@@ -4,7 +4,7 @@
 # So please add a comment for each dependency explaining where the related code must be updated.
 
 # docker/Dockerfile
-pycti==6.8.8
+pycti==7.260401.0
 
 # other unmanaged versions
 # droydlys - they make no new versions, we pin the commit

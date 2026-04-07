@@ -1,4 +1,5 @@
 FROM python:3.12-slim
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # Environment variables
 ENV PROJECT_PATH=/opt/deploy/bbot
@@ -17,9 +18,8 @@ WORKDIR ${PROJECT_PATH}
 # Copy application files and requirements
 COPY requirements.txt app.py ./
 
-# Upgrade pip and install Python packages
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+# Install Python packages
+RUN --mount=type=cache,target=/root/.cache/uv uv pip install --system -r requirements.txt
 
 # Pre-install BBOT dependencies & Make script executable
 RUN bbot --install-all-deps -y --force && \

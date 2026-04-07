@@ -1,4 +1,5 @@
 FROM python:3.14-slim
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 ENV PROJECT_PATH=/opt/deploy
 ENV LOG_PATH=/var/log/intel_owl/tor_analyzers
@@ -28,7 +29,7 @@ RUN apt-get remove --purge -y git gcc \
 WORKDIR ${PROJECT_PATH}/tor-flask
 COPY app.py requirements.txt entrypoint.sh ./
 
-RUN pip3 install -r requirements.txt --no-cache-dir \
+RUN --mount=type=cache,target=/root/.cache/uv uv pip install --system -r requirements.txt \
     && chown -R ${USER}:${USER} . \
     && chmod +x entrypoint.sh
 

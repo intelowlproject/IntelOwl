@@ -24,5 +24,5 @@ then
     python3 manage.py celery_reload -c "$ARGUMENTS"
 else
   # shellcheck disable=SC2086
-  /usr/local/bin/celery $ARGUMENTS
+  celery $ARGUMENTS
 fi

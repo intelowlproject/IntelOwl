@@ -1,4 +1,5 @@
 FROM python:3.12.3
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 ENV PROJECT_PATH=/opt/deploy
 ENV LOG_PATH=/var/log/intel_owl/phishing_analyzers
@@ -13,7 +14,6 @@ RUN useradd -ms /bin/bash ${USER}
 RUN DEBIAN_FRONTEND=noninteractive apt-get update -qq \
     && apt-get install -y --no-install-recommends \
     libvulkan1 libu2f-udev fonts-liberation gosu \
-    && pip3 install --no-cache-dir --upgrade pip \
     # Cleanup
     && apt-get remove --purge -y gcc \
     && apt-get clean \
@@ -25,8 +25,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update -qq \
 WORKDIR ${PROJECT_PATH}/phishing_analyzers
 COPY --chown=${USER}:${USER} app.py requirements.txt entrypoint.sh ./
 COPY --chown=${USER}:${USER} analyzers/* ./analyzers/
-RUN chmod u+x entrypoint.sh \
-    && pip3 install -r requirements.txt --no-cache-dir \
+RUN --mount=type=cache,target=/root/.cache/uv chmod u+x entrypoint.sh \
+    && uv pip install --system -r requirements.txt \
     && playwright install chromium --with-deps \
     && chmod -R o+rX /ms-playwright
 

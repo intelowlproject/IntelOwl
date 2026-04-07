@@ -1,6 +1,7 @@
 # This base image is the one currently (02/2025) updated by the maintainer
 # but it does not support ARM
 FROM thughoneyclient/thug:v6.20
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 USER root
 ENV PROJECT_PATH=/opt/deploy
@@ -16,7 +17,7 @@ RUN apt-get update -qq \
 WORKDIR ${PROJECT_PATH}/flask
 COPY app.py requirements.txt entrypoint.sh ./
 
-RUN pip3 install -r requirements.txt --no-cache-dir \
+RUN --mount=type=cache,target=/root/.cache/uv uv pip install --system -r requirements.txt \
     && mkdir -p ${PROJECT_PATH}/thug \
     && chown -R ${USER}:${USER} . ${PROJECT_PATH}/thug \
     && chmod +x entrypoint.sh

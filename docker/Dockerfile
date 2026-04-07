@@ -44,16 +44,23 @@ RUN apt-get update \
     vim libldap2-dev libfuzzy-dev net-tools python3-psycopg2 git apache2-utils tshark  \
     libemail-outlook-message-perl libemail-address-perl \
     && apt-get clean && apt-get autoclean && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/* \
-    && pip3 install --no-cache-dir --upgrade pip
+    && rm -rf /var/lib/apt/lists/*
 
-COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
-COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
+# install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+# use uv to manage dependencies
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_LINK_MODE=copy
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv
+
 WORKDIR $PYTHONPATH
+ENV PATH="/opt/venv/bin:$PATH"
+COPY pyproject.toml uv.lock ./
 
-RUN pip3 install --no-cache-dir --use-pep517 --compile -r project-requirements.txt \
-    && pip3 install --no-cache-dir pycti==${PYCTI_VERSION} \
-    && pip3 install --no-cache-dir --compile -r certego-requirements.txt
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --group certego \
+    && uv pip install pycti==${PYCTI_VERSION}
 
 COPY api_app/analyzers_manager/repo_downloader.sh ${PYTHONPATH}/api_app/analyzers_manager/repo_downloader.sh
 

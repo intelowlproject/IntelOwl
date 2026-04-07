@@ -1,5 +1,6 @@
 # https://github.com/jasonish/docker-suricata/tree/master/7.0
 FROM jasonish/suricata:7.0
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 ENV PROJECT_PATH=/opt/deploy
 ENV LOG_PATH=/var/log/intel_owl/pcap_analyzers
@@ -18,7 +19,7 @@ COPY crontab /etc/cron.d/suricata
 COPY config/suricata/etc/* /etc/suricata/
 COPY config/suricata/rules/* /var/lib/suricata/rules/
 
-RUN pip3 install -r requirements.txt --no-cache-dir \
+RUN --mount=type=cache,target=/root/.cache/uv uv pip install --system -r requirements.txt \
     && chown -R ${USER}:${USER} . /etc/suricata /var/lib/suricata \
     && mkdir -p ${LOG_PATH}/suricata/ \
     && touch /var/log/cron.log ${LOG_PATH}/suricata/suricata.log \

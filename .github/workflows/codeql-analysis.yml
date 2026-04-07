@@ -43,25 +43,23 @@ jobs:
         # a pull request then we can checkout the head.
         fetch-depth: 2
 
-    - name: Set up Python
-      uses: actions/setup-python@v6.2.0
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v5
       with:
-        python-version: '3.11'
+        enable-cache: true
+        cache-dependency-glob: "uv.lock"
+
+    - name: Set up Python
+      run: uv python install 3.11
 
     - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev libldap2-dev python-dev-is-python3 libfuzzy-dev net-tools git libcurl4-openssl-dev
-        python -m pip install --upgrade pip
-        if [ -f requirements/project-requirements.txt ];
-        then pip install -r requirements/project-requirements.txt;
-        fi
-        if [ -f requirements/certego-requirements.txt ];
-        then pip install -r requirements/certego-requirements.txt;
-        fi
+        uv sync --frozen --group certego
         # Set the `CODEQL-PYTHON` environment variable to the Python executable
         # that includes the dependencies
-        echo "CODEQL_PYTHON=$(which python)" >> $GITHUB_ENV
+        echo "CODEQL_PYTHON=$(uv run python -c 'import sys; print(sys.executable)')" >> $GITHUB_ENV
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL

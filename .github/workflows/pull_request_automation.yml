@@ -36,26 +36,33 @@ jobs:
       - name: Checkout IntelOwl
         uses: actions/checkout@v6.0.2
 
-      - name: Set up Python
-        uses: actions/setup-python@v6.2.0
+      - name: Perform ShellCheck Analysis
+        run: bash <(curl -s https://raw.githubusercontent.com/CICDToolbox/shellcheck/master/pipeline.sh)
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: 3.11
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libfuzzy-dev libldap2-dev libsasl2-dev
 
       - name: Install Dependencies
-        run: |
-          pip3 install --upgrade pip
-          pip3 install -r requirements/test-requirements.txt
+        run: uv sync --only-group dev
 
       - name: Lint with Ruff
         run: |
-          ruff check . --output-format=github
+          uv run ruff check . --output-format=github
 
       - name: Check formatting with Ruff
         run: |
-          ruff format . --check --diff
-
-      - name: Perform ShellCheck Analysis
-        run: bash <(curl -s https://raw.githubusercontent.com/CICDToolbox/shellcheck/master/pipeline.sh)
+          uv run ruff format . --check --diff
 
   backend-tests:
     runs-on: ubuntu-latest
@@ -116,7 +123,7 @@ jobs:
 
       - name: Setup coverage
         run: |
-          docker exec intelowl_uwsgi pip3 install coverage
+          docker exec intelowl_uwsgi uv pip install coverage
 
       - name: Run test
         run: |

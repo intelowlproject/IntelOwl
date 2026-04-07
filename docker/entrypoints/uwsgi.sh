@@ -49,5 +49,5 @@ then
 else
     $CHANGELOG_NOTIFICATION_COMMAND
     $ELASTIC_TEMPLATE_COMMAND
-    /usr/local/bin/uwsgi --ini /etc/uwsgi/sites/intel_owl.ini --stats 127.0.0.1:1717 --stats-http
+    uwsgi --ini /etc/uwsgi/sites/intel_owl.ini --stats 127.0.0.1:1717 --stats-http
 fi

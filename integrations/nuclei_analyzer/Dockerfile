@@ -1,4 +1,5 @@
 FROM projectdiscovery/nuclei:v3.7.0
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 ENV LOG_PATH=/var/log/intel_owl/nuclei_analyzer
 ENV USER=nuclei-user
@@ -15,10 +16,9 @@ WORKDIR /app
 
 # Copy and install requirements first (better layer caching)
 COPY app.py requirements.txt entrypoint.sh ./
-RUN python3 -m venv venv \
+RUN --mount=type=cache,target=/root/.cache/uv python3 -m venv venv \
     && . venv/bin/activate \
-    && pip3 install --no-cache-dir --upgrade pip \
-    && pip3 install --no-cache-dir -r requirements.txt \
+    && uv pip install -r requirements.txt \
     && rm -rf ~/.cache/pip/*
 
 # Create log directory with proper permissions

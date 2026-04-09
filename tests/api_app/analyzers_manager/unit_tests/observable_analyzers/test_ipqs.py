@@ -3,8 +3,9 @@
 from unittest.mock import patch
 
 from api_app.analyzers_manager.observable_analyzers import ipqs
-from tests.api_app.analyzers_manager.unit_tests.observable_analyzers import \
-    base_test_class
+from tests.api_app.analyzers_manager.unit_tests.observable_analyzers import (
+    base_test_class,
+)
 from tests.mock_utils import MockUpResponse
 
 

@@ -862,20 +862,14 @@ class IPQualityScoreMixin:
 
             # IPQS often returns 200 OK even if the API logic failed
             if not result.get("success", True):
-                raise AnalyzerRunException(
-                    f"IPQS API Error: {result.get('message', 'Unknown Error')}"
-                )
+                raise AnalyzerRunException(f"IPQS API Error: {result.get('message', 'Unknown Error')}")
 
             return result
 
         except requests.exceptions.Timeout:
-            raise AnalyzerRunException(
-                "Request timed out after 60s. File might be too large for sync scan."
-            )
+            raise AnalyzerRunException("Request timed out after 60s. File might be too large for sync scan.")
         except requests.exceptions.JSONDecodeError:
-            raise AnalyzerRunException(
-                f"Failed to decode JSON. Raw response: {response.text}"
-            )
+            raise AnalyzerRunException(f"Failed to decode JSON. Raw response: {response.text}")
 
     def _poll_for_report(self, endpoint: str, _api_key: str, request_id: str) -> Dict:
         """
@@ -887,13 +881,8 @@ class IPQualityScoreMixin:
         params = {"request_id": request_id}
 
         for attempt in range(self.max_retries):
-            logger.info(
-                f"Polling attempt {attempt + 1}/{self.max_retries} for ID: {request_id}"
-            )
-
-            result = self._make_request(
-                endpoint, "GET", _api_key=_api_key, params=params
-            )
+            logger.info(f"Polling attempt {attempt + 1}/{self.max_retries} for ID: {request_id}")
+            result = self._make_request(endpoint, "GET", _api_key=_api_key, params=params)
 
             # Check if processing is finished
             if result.get("status") != "pending":

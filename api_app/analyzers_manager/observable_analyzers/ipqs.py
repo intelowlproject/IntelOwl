@@ -8,6 +8,7 @@ import logging
 import re
 
 import requests
+
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 

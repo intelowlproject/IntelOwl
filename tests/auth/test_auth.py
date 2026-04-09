@@ -27,13 +27,16 @@ change_password_uri = reverse("auth_changepassword")
 @tag("api", "user")
 class TestUserAuth(CustomOAuthTestCase):
     def setUp(self):
+        # Reset user password before each test to ensure independence
+        self.user.set_password("verySecureTestPassword123")
+        self.user.save()
         # test data
         self.testregisteruser = {
             "email": "testregisteruser@test.com",
             "username": "testregisteruser",
             "first_name": "testregisteruser",
             "last_name": "testregisteruser",
-            "password": "testregisteruser",
+            "password": "MyComplexP@ssw0rd!",
             "profile": {
                 "company_name": "companytest",
                 "company_role": "intelowl test",
@@ -41,8 +44,6 @@ class TestUserAuth(CustomOAuthTestCase):
                 "discover_from": "other",
             },
         }
-        self.user.set_password("hunter2")
-        self.user.save()
         mail.outbox = []
 
     def tearDown(self):  # skipcq: PYL-R0201
@@ -233,7 +234,7 @@ class TestUserAuth(CustomOAuthTestCase):
         self.assertTrue(user.check_password(new_password), msg=msg)
 
     def test_change_password_200(self):
-        new_password = "veryStrongPassword123"
+        new_password = "veryStrongPassword456"
         from rest_framework.authtoken.models import Token
 
         # Setup token
@@ -252,7 +253,7 @@ class TestUserAuth(CustomOAuthTestCase):
         response = self.client.post(
             change_password_uri,
             {
-                "old_password": "hunter2",
+                "old_password": "verySecureTestPassword123",
                 "new_password": new_password,
             },
         )
@@ -279,12 +280,16 @@ class TestUserAuth(CustomOAuthTestCase):
         protected_url = reverse("system-update-check")
 
         # 1. Log in with Client 1 (Session 1)
-        response1 = self.client.post(login_url, {"username": self.user.username, "password": "hunter2"})
+        response1 = self.client.post(
+            login_url, {"username": self.user.username, "password": "verySecureTestPassword123"}
+        )
         self.assertEqual(200, response1.status_code, msg="Client 1 should log in successfully")
 
         # 2. Log in with Client 2 (Session 2) - simulate another device
         client2 = APIClient()
-        response2 = client2.post(login_url, {"username": self.user.username, "password": "hunter2"})
+        response2 = client2.post(
+            login_url, {"username": self.user.username, "password": "verySecureTestPassword123"}
+        )
         self.assertEqual(200, response2.status_code, msg="Client 2 should log in successfully")
 
         # 2b. Verify Client 2 is authenticated before password change
@@ -299,7 +304,7 @@ class TestUserAuth(CustomOAuthTestCase):
         response = self.client.post(
             change_password_uri,
             {
-                "old_password": "hunter2",
+                "old_password": "verySecureTestPassword123",
                 "new_password": new_password,
             },
         )
@@ -318,7 +323,7 @@ class TestUserAuth(CustomOAuthTestCase):
         response = self.client.post(
             change_password_uri,
             {
-                "old_password": "hunter2",
+                "old_password": "verySecureTestPassword123",
                 "new_password": "weak",
             },
         )
@@ -326,27 +331,62 @@ class TestUserAuth(CustomOAuthTestCase):
         msg = (response, content)
 
         self.assertEqual(400, response.status_code, msg=msg)
-        self.assertIn("Invalid password", content["error"], msg=msg)
+        self.assertIn("too short", content["error"], msg=msg)
 
-    def test_change_password_special_chars_400(self):
+    def test_change_password_special_chars_200(self):
+        """Test that passwords with special characters are now allowed."""
         self.client.force_authenticate(user=self.user)
         response = self.client.post(
             change_password_uri,
             {
-                "old_password": "hunter2",
+                "old_password": "verySecureTestPassword123",
                 "new_password": "intelowlintelowl$",
             },
         )
         content = response.json()
         msg = (response, content)
 
+        self.assertEqual(200, response.status_code, msg=msg)
+        self.user.refresh_from_db()
+        self.assertTrue(
+            self.user.check_password("intelowlintelowl$"),
+            msg="Password with special characters should be accepted",
+        )
+
+    def test_change_password_missing_new_password_400(self):
+        """Test that missing new_password returns 400."""
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(
+            change_password_uri,
+            {
+                "old_password": "verySecureTestPassword123",
+            },
+        )
+        content = response.json()
+        msg = (response, content)
+
         self.assertEqual(400, response.status_code, msg=msg)
-        self.assertIn("Invalid password", content["error"], msg=msg)
+        self.assertIn("New password is required", content["error"], msg=msg)
+
+    def test_change_password_missing_old_password_400(self):
+        """Test that missing old_password returns 400."""
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(
+            change_password_uri,
+            {
+                "new_password": "veryStrongPassword456",
+            },
+        )
+        content = response.json()
+        msg = (response, content)
+
+        self.assertEqual(400, response.status_code, msg=msg)
+        self.assertIn("Old password is required", content["error"], msg=msg)
 
     def test_min_password_lenght_400(self):
         current_users = User.objects.count()
 
-        # register new user with invalid password
+        # register new user with invalid password (too short)
         body = {
             **self.creds,
             "email": self.testregisteruser["email"],
@@ -362,35 +402,78 @@ class TestUserAuth(CustomOAuthTestCase):
         # response assertions
         self.assertEqual(400, response.status_code)
         self.assertIn(
-            "Invalid password",
-            content["errors"]["password"],
+            "too short",
+            content["errors"]["password"][0],
         )
 
         # db assertions
         self.assertEqual(User.objects.count(), current_users, msg="no new user was created")
 
-    def test_special_characters_password_400(self):
+    def test_special_characters_password_201(self):
+        """Test that passwords with special characters are now allowed during registration."""
         current_users = User.objects.count()
 
-        # register new user with invalid password
         body = {
-            **self.creds,
-            "email": self.testregisteruser["email"],
-            "username": "blahblah",
-            "first_name": "blahblah",
-            "last_name": "blahblah",
+            "email": "specialchars@test.com",
+            "username": "specialcharsuser",
+            "first_name": "SpecialChars",
+            "last_name": "User",
             "password": "intelowlintelowl$",
+            "profile": self.testregisteruser["profile"],
         }
 
-        response = self.client.post(register_uri, body)
+        response = self.client.post(register_uri, body, format="json")
         content = response.json()
 
-        # response assertions
+        # response assertions - special characters should now be allowed
+        self.assertEqual(201, response.status_code)
+        self.assertEqual(content["username"], body["username"])
+
+        # db assertions
+        self.assertEqual(User.objects.count(), current_users + 1, msg="new user was created")
+
+    def test_password_similar_to_username_400(self):
+        """Test that passwords too similar to username are rejected."""
+        current_users = User.objects.count()
+
+        body = {
+            "email": "similarpass@test.com",
+            "username": "mysecureusername",
+            "first_name": "Test",
+            "last_name": "User",
+            "password": "mysecureusername",  # Same as username
+            "profile": self.testregisteruser["profile"],
+        }
+
+        response = self.client.post(register_uri, body, format="json")
+        content = response.json()
+
+        # response assertions - password too similar to username should be rejected
         self.assertEqual(400, response.status_code)
-        self.assertIn(
-            "Invalid password",
-            content["errors"]["password"],
-        )
+        self.assertIn("too similar", content["errors"]["password"][0])
+
+        # db assertions
+        self.assertEqual(User.objects.count(), current_users, msg="no new user was created")
+
+    def test_common_password_400(self):
+        """Test that common passwords are rejected."""
+        current_users = User.objects.count()
+
+        body = {
+            "email": "commonpass@test.com",
+            "username": "commonpassuser",
+            "first_name": "Test",
+            "last_name": "User",
+            "password": "password1234",  # Common password
+            "profile": self.testregisteruser["profile"],
+        }
+
+        response = self.client.post(register_uri, body, format="json")
+        content = response.json()
+
+        # response assertions - common password should be rejected
+        self.assertEqual(400, response.status_code)
+        self.assertIn("too common", content["errors"]["password"][0])
 
         # db assertions
         self.assertEqual(User.objects.count(), current_users, msg="no new user was created")

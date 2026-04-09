@@ -193,7 +193,7 @@ class RegistrationSerializer(rest_email_auth.serializers.RegistrationSerializer)
 
     def validate_password(self, password):
         """
-        Validate the user's password against a regex pattern.
+        Validate the user's password using Django's built-in validators.
 
         Args:
             password (str): The password to validate.
@@ -202,10 +202,18 @@ class RegistrationSerializer(rest_email_auth.serializers.RegistrationSerializer)
             str: The validated password.
 
         Raises:
-            ValidationError: If the password does not match the regex pattern.
+            ValidationError: If the password fails validation.
         """
         super().validate_password(password)
-        validate_password_strength(password)
+        # Create a temporary user instance with initial data for UserAttributeSimilarityValidator
+        # This allows checking if password is too similar to username, email, etc.
+        temp_user = User(
+            username=self.initial_data.get("username", ""),
+            email=self.initial_data.get("email", ""),
+            first_name=self.initial_data.get("first_name", ""),
+            last_name=self.initial_data.get("last_name", ""),
+        )
+        validate_password_strength(password, user=temp_user)
         return password
 
     def create(self, validated_data):

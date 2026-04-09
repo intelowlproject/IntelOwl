@@ -10,7 +10,7 @@ class CustomOAuthTestCase(APITestCase):
         # test data
         username = "john.doe"
         email = "john.doe@example.com"
-        password = "hunter2"
+        password = "verySecureTestPassword123"
         try:
             cls.user = User.objects.get(
                 username=username,

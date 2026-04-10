@@ -1,0 +1,114 @@
+[
+  {
+    "number": 3623,
+    "title": "Cross-organization data leakage in plugin_state_viewer endpoint",
+    "url": "https://github.com/intelowlproject/IntelOwl/issues/3623",
+    "labels": []
+  },
+  {
+    "number": 3622,
+    "title": "History artifacts tabs are broken",
+    "url": "https://github.com/intelowlproject/IntelOwl/issues/3622",
+    "labels": [
+      "bug",
+      "frontend"
+    ]
+  },
+  {
+    "number": 3621,
+    "title": "PeFrame analyzer error",
+    "url": "https://github.com/intelowlproject/IntelOwl/issues/3621",
+    "labels": [
+      "bug"
+    ]
+  },
+  {
+    "number": 3571,
+    "title": "## MISP Connector Makes N+1 HTTP Requests When Adding Attributes",
+    "url": "https://github.com/intelowlproject/IntelOwl/issues/3571",
+    "labels": [
+      "bug"
+    ]
+  },
+  {
+    "number": 3567,
+    "title": "Consider substitute pip with uv",
+    "url": "https://github.com/intelowlproject/IntelOwl/issues/3567",
+    "labels": [
+      "dependencies",
+      "github_actions",
+      "maintenance"
+    ]
+  },
+  {
+    "number": 3566,
+    "title": "MISP Analyzer: Unable to filter for unpublished events due to boolean logic flaw",
+    "url": "https://github.com/intelowlproject/IntelOwl/issues/3566",
+    "labels": [
+      "bug"
+    ]
+  },
+  {
+    "number": 3540,
+    "title": "Deprecate and remove Feodo_Tracker analyzer as discontinued",
+    "url": "https://github.com/intelowlproject/IntelOwl/issues/3540",
+    "labels": [
+      "maintenance"
+    ]
+  },
+  {
+    "number": 3497,
+    "title": "Deprecate and remove analyzers/Greynoise_Labs: analyzer broken due to unavailable Labs API",
+    "url": "https://github.com/intelowlproject/IntelOwl/issues/3497",
+    "labels": [
+      "bug"
+    ]
+  },
+  {
+    "number": 3495,
+    "title": "[STABILITY] Potential Worker Starvation due to Missing Request Timeouts",
+    "url": "https://github.com/intelowlproject/IntelOwl/issues/3495",
+    "labels": [
+      "bug"
+    ]
+  },
+  {
+    "number": 3483,
+    "title": "GSoC 2026: Slack invite link expired",
+    "url": "https://github.com/intelowlproject/IntelOwl/issues/3483",
+    "labels": []
+  },
+  {
+    "number": 3459,
+    "title": "[Performance] S3Boto3StorageWrapper caches file per-analyzer instead of sharing a single cached copy",
+    "url": "https://github.com/intelowlproject/IntelOwl/issues/3459",
+    "labels": [
+      "bug"
+    ]
+  },
+  {
+    "number": 3451,
+    "title": "Deprecate and remove TalosReputation analyzer",
+    "url": "https://github.com/intelowlproject/IntelOwl/issues/3451",
+    "labels": [
+      "bug"
+    ]
+  },
+  {
+    "number": 3450,
+    "title": "Reusing identical Data Models to prevent Data Bloat (Found a # TODO)",
+    "url": "https://github.com/intelowlproject/IntelOwl/issues/3450",
+    "labels": [
+      "bug"
+    ]
+  },
+  {
+    "number": 3403,
+    "title": "Continuous rerendering of components using frontend/src/wrapper/*",
+    "url": "https://github.com/intelowlproject/IntelOwl/issues/3403",
+    "labels": [
+      "bug",
+      "stale"
+    ]
+  }
+]

@@ -103,6 +103,10 @@ class HudsonRock(classes.ObservableAnalyzer):
                     + self.get_param_url(["sortby", "page", "installed_software"])
                 )
                 response = requests.post(url, headers=headers, json={"login": self.observable_name})
+            else:
+                raise AnalyzerConfigurationException(
+                    f"Invalid GENERIC observable (not an email): {self.observable_name}" + " for HudsonRock"
+                )
         else:
             raise AnalyzerConfigurationException(
                 f"Invalid observable type {self.observable_classification}"

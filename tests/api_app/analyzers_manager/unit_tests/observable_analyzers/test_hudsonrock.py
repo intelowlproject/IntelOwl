@@ -1,3 +1,4 @@
+from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 from api_app.analyzers_manager.observable_analyzers.hudsonrock import HudsonRock
 from tests.api_app.analyzers_manager.unit_tests.observable_analyzers.base_test_class import (
     BaseAnalyzerTest,
@@ -37,3 +38,11 @@ class HudsonRockTestCase(BaseAnalyzerTest):
                 200,
             ),
         )
+
+    def test_invalid_generic_raises_exception(self):
+        config = self.get_extra_config()
+        config["observable_name"] = "johndoe123"
+
+        analyzer = self.analyzer_class(**config)
+        with self.assertRaises(AnalyzerConfigurationException):
+            analyzer.run()

@@ -1,0 +1,41 @@
+[
+  {
+    "number": 3653,
+    "title": "[BUG] job_pipeline task does not set job's final status on exception jobs get stuck in RUNNING forever",
+    "url": "https://github.com/intelowlproject/IntelOwl/issues/3653",
+    "labels": [
+      "bug"
+    ]
+  },
+  {
+    "number": 3647,
+    "title": "[Bug] HudsonRock analyzer crashes when GENERIC observable is not an email",
+    "url": "https://github.com/intelowlproject/IntelOwl/issues/3647",
+    "labels": [
+      "bug"
+    ]
+  },
+  {
+    "number": 3639,
+    "title": "Race condition in Job creation causes data loss",
+    "url": "https://github.com/intelowlproject/IntelOwl/issues/3639",
+    "labels": [
+      "bug"
+    ]
+  },
+  {
+    "number": 3623,
+    "title": "Cross-organization data leakage in plugin_state_viewer endpoint",
+    "url": "https://github.com/intelowlproject/IntelOwl/issues/3623",
+    "labels": []
+  },
+  {
+    "number": 3622,
+    "title": "History artifacts tabs are broken",
+    "url": "https://github.com/intelowlproject/IntelOwl/issues/3622",
+    "labels": [
+      "bug",
+      "frontend"
+    ]
+  }
+]

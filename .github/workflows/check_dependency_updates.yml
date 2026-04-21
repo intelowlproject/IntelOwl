@@ -51,7 +51,7 @@ jobs:
 
       - name: Create Pull Request for pycti
         if: steps.check.outputs.update_available == 'true'
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Update pycti from ${{ steps.check.outputs.current_version }} to ${{ steps.check.outputs.latest_version }}"
@@ -109,7 +109,7 @@ jobs:
 
       - name: Create Pull Request for droidlysis
         if: steps.check.outputs.update_available == 'true'
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Update droidlysis from ${{ steps.check.outputs.current_commit }} to ${{ steps.check.outputs.latest_commit }}"
@@ -170,7 +170,7 @@ jobs:
 
       - name: Create Pull Request for GoReSym
         if: steps.check.outputs.update_available == 'true'
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Update GoReSym from v${{ steps.check.outputs.current_version }} to v${{ steps.check.outputs.latest_version }}"
@@ -227,7 +227,7 @@ jobs:
 
       - name: Create Pull Request for box-js
         if: steps.check.outputs.update_available == 'true'
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Update box-js from ${{ steps.check.outputs.current_version }} to ${{ steps.check.outputs.latest_version }}"

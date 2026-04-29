@@ -819,3 +819,75 @@ class RulesUtiliyMixin:
         logger.info(
             f"Rules with version: {latest_version} have been successfully downloaded at {rule_set_directory}"
         )
+
+
+class IPQualityScoreMixin:
+    base_url: str = "https://www.ipqualityscore.com/api/json"  # Ensure correct API base
+    _ipqs_api_key: str
+    polling_interval: int
+    max_retries: int
+    scan_endpoint: str = "/malware/scan/"
+    lookup_endpoint: str = "/malware/lookup/"
+    postback_endpoint: str = "/postback/"
+
+    def _make_request(
+        self,
+        endpoint: str,
+        method: str,
+        _api_key: str = None,
+        data: Dict = None,
+        params: Dict = None,
+        files: Dict = None,
+    ) -> Dict:
+        """
+        A streamlined request handler with proper timeout management.
+        """
+        url = f"{self.base_url}{endpoint}"
+        headers = {"IPQS-KEY": _api_key}
+
+        try:
+            if method.upper() == "POST":
+                response = requests.post(
+                    url,
+                    headers=headers,
+                    data=data,
+                    files=files,
+                    timeout=60,
+                )
+            else:
+                response = requests.get(url, headers=headers, json=params, timeout=60)
+
+            response.raise_for_status()
+            result = response.json()
+
+            # IPQS often returns 200 OK even if the API logic failed
+            if not result.get("success", True):
+                raise AnalyzerRunException(f"IPQS API Error: {result.get('message', 'Unknown Error')}")
+
+            return result
+
+        except requests.exceptions.Timeout:
+            raise AnalyzerRunException("Request timed out after 60s. File might be too large for sync scan.")
+        except requests.exceptions.JSONDecodeError:
+            raise AnalyzerRunException(f"Failed to decode JSON. Raw response: {response.text}")
+
+    def _poll_for_report(self, endpoint: str, _api_key: str, request_id: str) -> Dict:
+        """
+        Standardized polling logic for asynchronous retrieval.
+        """
+        if not request_id:
+            raise AnalyzerRunException("Cannot poll without a valid request_id.")
+
+        params = {"request_id": request_id}
+
+        for attempt in range(self.max_retries):
+            logger.info(f"Polling attempt {attempt + 1}/{self.max_retries} for ID: {request_id}")
+            result = self._make_request(endpoint, "GET", _api_key=_api_key, params=params)
+
+            # Check if processing is finished
+            if result.get("status") != "pending":
+                break
+
+            logger.info(f"Report pending. Retrying in {self.polling_interval}s...")
+            time.sleep(self.polling_interval)
+        return result

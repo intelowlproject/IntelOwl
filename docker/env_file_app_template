@@ -84,3 +84,7 @@ WEBSOCKETS_URL=redis://redis:6379/0
 
 FLOWER_USER=flower
 FLOWER_PWD=flower
+
+# LLM Chatbot (GSoC 2026)
+OLLAMA_BASE_URL=http://ollama:11434
+OLLAMA_MODEL=mistral

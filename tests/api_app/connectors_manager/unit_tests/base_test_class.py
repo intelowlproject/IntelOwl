@@ -65,6 +65,9 @@ class BaseConnectorTest(TestCase):
 
         return patches
 
+    # different connectors may require different job setups so
+    # we create a mock job here that can be customized as needed
+    # pylint: disable=no-self-use
     def _create_mock_job(self, observable_name, observable_type):
         mock_tlp_enum = SimpleNamespace()
         mock_tlp_enum.CLEAR = SimpleNamespace(value="clear")
@@ -87,12 +90,8 @@ class BaseConnectorTest(TestCase):
 
         return mock_job
 
-    def test_connector_run_execution(self):
-        if self.connector_class is None:
-            self.skipTest(f"{self.__class__.__name__} does not specify a connector_class")
-
-        logger.info(f"Starting generic connector test for {self.connector_class.__name__}")
-
+    def _setup_connector(self):
+        logger.info(f"Setting up connector {self.connector_class.__name__} for testing")
         mock_config = MagicMock()
         connector = self.connector_class(mock_config)
         connector._job = self._create_mock_job("1.1.1.1", "ip")
@@ -100,6 +99,15 @@ class BaseConnectorTest(TestCase):
         for key, value in self.get_extra_config().items():
             setattr(connector, key, value)
 
+        return connector
+
+    def test_connector_run_execution(self):
+        if self.connector_class is None:
+            self.skipTest(f"{self.__class__.__name__} does not specify a connector_class")
+
+        logger.info(f"Starting generic connector test for {self.connector_class.__name__}")
+
+        connector = self._setup_connector()
         patches = self.get_mocked_response()
         with self._apply_patches(patches):
             try:

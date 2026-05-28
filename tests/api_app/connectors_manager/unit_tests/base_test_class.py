@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class BaseConnectorTest(TestCase):
-    connector_class = None
+    connector_class: type = None
     suppress_connector_logs = True
 
     def setUp(self):

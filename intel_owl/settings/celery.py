@@ -18,7 +18,9 @@ DEFAULT_QUEUE = "default"
 BROADCAST_QUEUE = "broadcast"
 CONFIG_QUEUE = "config"
 
+CHATBOT_QUEUE = "chatbot"
+
 CELERY_QUEUES = get_secret("CELERY_QUEUES", DEFAULT_QUEUE).split(",")
-for queue in [DEFAULT_QUEUE, CONFIG_QUEUE]:
+for queue in [DEFAULT_QUEUE, CONFIG_QUEUE, CHATBOT_QUEUE]:
     if queue not in CELERY_QUEUES:
         CELERY_QUEUES.append(queue)

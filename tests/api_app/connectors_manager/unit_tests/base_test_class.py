@@ -93,6 +93,10 @@ class BaseConnectorTest(TestCase):
     def _setup_connector(self):
         logger.info(f"Setting up connector {self.connector_class.__name__} for testing")
         mock_config = MagicMock()
+
+        # we have already handled connector_class being None in
+        # the test method, so we can safely assume it's set here
+        # pylint: disable=not-callable
         connector = self.connector_class(mock_config)
         connector._job = self._create_mock_job("1.1.1.1", "ip")
 

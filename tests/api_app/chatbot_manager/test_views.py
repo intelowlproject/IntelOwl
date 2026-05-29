@@ -1,8 +1,10 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from datetime import timedelta
 from unittest.mock import MagicMock, patch
 
+from django.utils.timezone import now
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -92,3 +94,81 @@ class ChatSessionViewSetTestCase(APITestCase):
 
     def tearDown(self):
         ChatSession.objects.filter(user=self.user).delete()
+
+
+class ChatSessionMessagesActionTestCase(APITestCase):
+    """Tests for GET /api/chatbot/sessions/{id}/messages."""
+
+    def setUp(self):
+        self.user, _ = User.objects.get_or_create(username="chatbot_messages_user")
+        self.client.force_authenticate(user=self.user)
+        self.session = ChatSession.objects.create(user=self.user)
+
+    @staticmethod
+    def _url(pk):
+        return f"/api/chatbot/sessions/{pk}/messages"
+
+    def test_returns_messages_ordered_by_timestamp(self):
+        # Persist in reverse chronological order to prove the endpoint sorts by
+        # timestamp ascending rather than echoing insertion order.
+        base = now()
+        ChatMessage.objects.create(
+            session=self.session,
+            role=ChatMessage.Role.ASSISTANT,
+            content="second",
+            timestamp=base + timedelta(seconds=2),
+        )
+        ChatMessage.objects.create(
+            session=self.session,
+            role=ChatMessage.Role.USER,
+            content="first",
+            timestamp=base + timedelta(seconds=1),
+        )
+        response = self.client.get(self._url(self.session.pk))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        results = response.json()["results"]
+        self.assertEqual([m["content"] for m in results], ["first", "second"])
+        self.assertEqual([m["role"] for m in results], ["user", "assistant"])
+
+    def test_paginated_shape_and_page_size(self):
+        base = now()
+        for i in range(12):
+            ChatMessage.objects.create(
+                session=self.session,
+                role=ChatMessage.Role.USER,
+                content=f"m{i}",
+                timestamp=base + timedelta(seconds=i),
+            )
+        response = self.client.get(self._url(self.session.pk))
+        content = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("count", content)
+        self.assertIn("total_pages", content)
+        self.assertIn("results", content)
+        self.assertEqual(content["count"], 12)
+        self.assertEqual(content["total_pages"], 2)
+        self.assertEqual(len(content["results"]), 10)  # PAGE_SIZE default
+
+        page2 = self.client.get(self._url(self.session.pk), {"page": 2}).json()
+        self.assertEqual(len(page2["results"]), 2)
+
+    def test_empty_session_returns_empty_results(self):
+        response = self.client.get(self._url(self.session.pk))
+        content = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(content["count"], 0)
+        self.assertEqual(content["results"], [])
+
+    def test_returns_404_for_other_users_session(self):
+        other_user, _ = User.objects.get_or_create(username="chatbot_messages_other_user")
+        other_session = ChatSession.objects.create(user=other_user)
+        response = self.client.get(self._url(other_session.pk))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_requires_authentication(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.get(self._url(self.session.pk))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def tearDown(self):
+        ChatSession.objects.filter(user__username__startswith="chatbot_messages_").delete()

@@ -12,6 +12,7 @@ from .agent.agent import build_agent_executor, format_history
 from .agent.memory import DjangoChatMessageHistory
 from .models import ChatMessage, ChatSession
 from .serializers import (
+    ChatMessageSerializer,
     ChatSessionSerializer,
     MessageRequestSerializer,
     MessageResponseSerializer,
@@ -67,3 +68,29 @@ class ChatSessionViewSet(ModelViewSet):
             MessageResponseSerializer(ai_msg).data,
             status=status.HTTP_200_OK,
         )
+
+    @action(detail=True, methods=["get"], url_path="messages")
+    def messages(self, request, pk=None):
+        """Return a chat session's messages, oldest first, paginated.
+
+        `self.get_object()` resolves the session through `get_queryset()`, which is
+        already scoped to `request.user`, so another user's session yields a 404 for
+        free (no manual ownership check). Messages are ordered by `timestamp` ascending
+        so the frontend can render the conversation top-to-bottom when a chat is reopened.
+
+        Pagination is not automatic inside a custom @action (DRF only paginates the
+        default `list`), so it is driven explicitly via `paginate_queryset` /
+        `get_paginated_response`, mirroring the project's CustomPageNumberPagination
+        default. The `page is None` branch is the idiomatic fallback for when pagination
+        is disabled.
+        """
+        session = self.get_object()
+        queryset = session.messages.order_by("timestamp")
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = ChatMessageSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = ChatMessageSerializer(queryset, many=True)
+        return Response(serializer.data)

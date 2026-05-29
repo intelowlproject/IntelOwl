@@ -13,5 +13,5 @@ from intel_owl.tasks import FailureLoggedTask
 # and it bounds a hung Ollama call so it can't occupy a worker indefinitely.
 @shared_task(base=FailureLoggedTask, soft_time_limit=300)
 def process_chat_message(session_id: int, user_message: str, user_id: int) -> str:
-    # TODO: full async implementation added in W6 with the WebSocket consumer.
+    # TODO: full async implementation via the WebSocket consumer + Celery task.
     raise NotImplementedError

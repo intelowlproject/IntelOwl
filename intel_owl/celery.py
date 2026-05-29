@@ -180,6 +180,15 @@ app.conf.beat_schedule = {
             "MessageGroupId": str(uuid.uuid4()),
         },
     },
+    "delete_old_chat_sessions": {
+        "task": "api_app.chatbot_manager.tasks.delete_old_chat_sessions",
+        # daily at 04:00, clear of the 02-03 cleanup cluster above
+        "schedule": crontab(minute="0", hour="4"),
+        "options": {
+            "queue": get_queue_name(settings.DEFAULT_QUEUE),
+            "MessageGroupId": str(uuid.uuid4()),
+        },
+    },
 }
 app.autodiscover_tasks()
 

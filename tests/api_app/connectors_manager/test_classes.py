@@ -138,3 +138,52 @@ class ConnectorTestCase(CustomTestCase):
                     signal.alarm(0)
         job.delete()
         an1.delete()
+
+    def test_before_run_partial_failure(self):
+        # run_on_failure=False + partial failure (mix of FAILED and SUCCESS) should raise ConnectorRunException
+        class MockUpConnector(Connector):
+            def run(self) -> dict:
+                return {}
+
+        an = Analyzable.objects.create(
+            name="test.com",
+            classification=Classification.DOMAIN,
+        )
+
+        job = Job.objects.create(
+            analyzable=an,
+            status=Job.STATUSES.CONNECTORS_RUNNING.value,
+        )
+        AnalyzerReport.objects.create(
+            report={},
+            job=job,
+            config=AnalyzerConfig.objects.first(),
+            status=AnalyzerReport.STATUSES.FAILED.value,
+            task_id=str(uuid()),
+            parameters={},
+        )
+        AnalyzerReport.objects.create(
+            report={},
+            job=job,
+            config=AnalyzerConfig.objects.last(),
+            status=AnalyzerReport.STATUSES.SUCCESS.value,
+            task_id=str(uuid()),
+            parameters={},
+        )
+        cc = ConnectorConfig.objects.create(
+            name="test",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP"
+            ),
+            description="test",
+            disabled=True,
+            maximum_tlp="CLEAR",
+            run_on_failure=False,
+        )
+        with self.assertRaises(ConnectorRunException):
+            muc = MockUpConnector(cc)
+            muc.job_id = job.pk
+            muc.before_run()
+        cc.delete()
+        job.delete()
+        an.delete()

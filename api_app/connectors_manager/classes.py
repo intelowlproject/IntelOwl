@@ -51,7 +51,7 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
         if (
             self._config.run_on_failure
             or not self._job.analyzerreports.count()
-            or self._job.analyzerreports.exclude(status=ReportStatus.FAILED.value).exists()
+            or not self._job.analyzerreports.filter(status=ReportStatus.FAILED.value).exists()
         ):
             logger.info(
                 f"Running connector {self.__class__.__name__} "

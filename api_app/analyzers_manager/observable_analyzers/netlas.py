@@ -32,5 +32,9 @@ class Netlas(classes.ObservableAnalyzer):
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
 
-        result = response.json()["items"][0]["data"]
-        return result
+        # an IP with no whois record returns an empty "items" list, which must
+        # not crash with an IndexError when accessing the first element
+        items = response.json().get("items")
+        if not items:
+            raise AnalyzerRunException(f"No Netlas whois data found for {self.observable_name}")
+        return items[0]["data"]

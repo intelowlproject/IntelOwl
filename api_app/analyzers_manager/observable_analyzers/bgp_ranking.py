@@ -33,7 +33,11 @@ class BGPRanking(classes.ObservableAnalyzer):
         )
         response.raise_for_status()
         response = response.json()
-        asn = response.get("response", {}).popitem()[1].get("asn", None)
+        asn_history = response.get("response", {})
+        # an IP with no ASN history returns an empty "response"; peek the latest
+        # entry without mutating it (popitem() would crash on the empty dict and,
+        # when populated, drop the entry from the error message below)
+        asn = list(asn_history.values())[-1].get("asn", None) if asn_history else None
         if not asn:
             raise AnalyzerRunException(f"ASN not found in {response}")
         logger.info(f"ASN {asn} extracted from {self.observable_name}")

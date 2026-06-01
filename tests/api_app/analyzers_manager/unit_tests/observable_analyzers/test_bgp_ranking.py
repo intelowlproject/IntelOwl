@@ -1,5 +1,8 @@
+from types import SimpleNamespace
 from unittest.mock import patch
 
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.observable_analyzers import bgp_ranking as bgp_ranking_module
 from api_app.analyzers_manager.observable_analyzers.bgp_ranking import BGPRanking
 from tests.api_app.analyzers_manager.unit_tests.observable_analyzers.base_test_class import (
     BaseAnalyzerTest,
@@ -9,6 +12,26 @@ from tests.mock_utils import MockUpResponse
 
 class BGPRankingTestCase(BaseAnalyzerTest):
     analyzer_class = BGPRanking
+
+    def test_run_raises_clean_exception_on_empty_asn_history(self):
+        # An IP with no ASN history returns an empty "response" object. The
+        # analyzer must raise a clean AnalyzerRunException instead of crashing
+        # with "KeyError: 'popitem(): dictionary is empty'". The analyzer is
+        # built with a stand-in config so the test runs deterministically and is
+        # not skipped when no AnalyzerConfig is loaded in the DB.
+        analyzer = BGPRanking(SimpleNamespace(name="BGPRanking"))
+        analyzer.observable_name = "8.8.8.8"
+        analyzer.url = "https://bgp-ranking.circl.lu"
+        analyzer.timeout = 30
+        with (
+            patch.object(
+                bgp_ranking_module.requests,
+                "get",
+                return_value=MockUpResponse({"meta": {"ip": "8.8.8.8"}, "response": {}}, 200),
+            ),
+            self.assertRaises(AnalyzerRunException),
+        ):
+            analyzer.run()
 
     @staticmethod
     def get_mocked_response():

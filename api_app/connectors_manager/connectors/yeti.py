@@ -40,18 +40,44 @@ class YETI(classes.Connector):
 
         # request payload
         payload = {
-            "value": obs_value,
-            "source": "IntelOwl",
             "tags": tags,
-            "context": context,
+            "observable": {
+                # there are type mismatches between YETI and IntelOwl
+                # so for now we are not senging the type to YETI
+                # "type": obs_type,
+                "value": obs_value,
+                "context": [context],
+            },
         }
-        headers = {"Accept": "application/json", "X-Api-Key": self._api_key_name}
+
         if self._url_key_name and self._url_key_name.endswith("/"):
             self._url_key_name = self._url_key_name[:-1]
-        url = f"{self._url_key_name}/api/v2/observables/"
+
+        # auth
+        auth_url = f"{self._url_key_name}/api/v2/auth/api-token"
+        auth_headers = {"x-yeti-apikey": self._api_key_name}
+
+        try:
+            auth_resp = requests.post(
+                url=auth_url,
+                headers=auth_headers,
+                verify=self.verify_ssl,
+                timeout=60,
+            )
+            auth_resp.raise_for_status()
+            access_token = auth_resp.json().get("access_token")
+
+            if not access_token:
+                raise ConnectorRunException("Failed to obtain access token from YETI.")
+        except requests.RequestException as e:
+            raise ConnectorRunException(f"YETI Auth Request failed: {e}")
 
         # create observable with `obs_value` if it doesn't exists
         # new context, tags, source are appended with existing ones
+
+        url = f"{self._url_key_name}/api/v2/observables/extended"
+        headers = {"Accept": "application/json", "Authorization": f"Bearer {access_token}"}
+
         try:
             resp = requests.post(
                 url=url,

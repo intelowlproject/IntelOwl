@@ -1,6 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import ipaddress
+
 import requests
 from django.conf import settings
 
@@ -23,6 +25,24 @@ class YETI(classes.Connector):
             obs_value = self._job.analyzable.name
             obs_type = self._job.analyzable.classification
 
+        # convert obs_type to YETI's expected types if possible
+        if obs_type == "ip":
+            # mark whether the IP is ipv4 or ipv6, fallback to generic on error
+            try:
+                ip_obj = ipaddress.ip_address(obs_value)
+                if ip_obj.version == 4:
+                    obs_type = "ipv4"
+                elif ip_obj.version == 6:
+                    obs_type = "ipv6"
+                else:
+                    obs_type = "generic"
+            except Exception:
+                obs_type = "generic"
+        elif obs_type == "domain":
+            obs_type = "hostname"
+        elif obs_type == "hash":
+            obs_type = "generic"
+
         # create context
         context = {
             "source": "IntelOwl",
@@ -42,9 +62,7 @@ class YETI(classes.Connector):
         payload = {
             "tags": tags,
             "observable": {
-                # there are type mismatches between YETI and IntelOwl
-                # so for now we are not senging the type to YETI
-                # "type": obs_type,
+                "type": obs_type,
                 "value": obs_value,
                 "context": [context],
             },

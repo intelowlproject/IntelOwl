@@ -5,9 +5,10 @@ import json
 
 from rest_framework import serializers
 
-from api_app.analyzers_manager.models import AnalyzerReport
+from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.investigations_manager.models import Investigation
 from api_app.models import Job
+from api_app.playbooks_manager.models import PlaybookConfig
 
 from .models import ChatMessage, ChatSession
 
@@ -128,6 +129,46 @@ class DataModelResultSerializer(ToolResultSerializer):
     # (`BaseDataModel.serialize()`, polymorphic across Domain/IP/File), so the envelope
     # just carries that dict (empty `{}` when the job has no data model).
     data_model = serializers.DictField(read_only=True)
+
+
+class AnalyzerConfigToolSerializer(serializers.ModelSerializer):
+    """Compact, LLM-facing AnalyzerConfig view for list_analyzers (no owner/PII fields).
+
+    `runnable` is read from a per-user queryset annotation (`annotate_runnable`): True means
+    ready to run for the requesting user, False means org-disabled or not fully configured. It
+    is a readiness flag, not a visibility filter -- the analyzer is listed either way.
+    """
+
+    # `observable_supported` is a ChoiceArrayField; DRF's ModelSerializer does not auto-map it,
+    # so declare it explicitly (same approach as the heavy PlaybookConfigSerializer's `type`).
+    observable_supported = serializers.ListField(child=serializers.CharField(), read_only=True)
+    runnable = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = AnalyzerConfig
+        fields = ["name", "description", "type", "observable_supported", "maximum_tlp", "runnable"]
+
+
+class PlaybookConfigToolSerializer(serializers.ModelSerializer):
+    """Compact, LLM-facing PlaybookConfig view for recommend_playbook (no owner/PII fields)."""
+
+    # `type` is a ChoiceArrayField of classifications; declare it explicitly (DRF doesn't auto-map
+    # it). `analyzers`/`connectors` are M2M relations rendered as their names.
+    type = serializers.ListField(child=serializers.CharField(), read_only=True)
+    analyzers = serializers.SlugRelatedField(slug_field="name", many=True, read_only=True)
+    connectors = serializers.SlugRelatedField(slug_field="name", many=True, read_only=True)
+
+    class Meta:
+        model = PlaybookConfig
+        fields = ["name", "description", "type", "analyzers", "connectors"]
+
+
+class ListAnalyzersResultSerializer(ToolResultSerializer):
+    analyzers = AnalyzerConfigToolSerializer(many=True)
+
+
+class RecommendPlaybookResultSerializer(ToolResultSerializer):
+    playbooks = PlaybookConfigToolSerializer(many=True)
 
 
 class ChatSessionSerializer(serializers.ModelSerializer):

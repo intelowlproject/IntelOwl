@@ -7,12 +7,15 @@ from uuid import uuid4
 from django.test import TestCase
 
 from api_app.analyzables_manager.models import Analyzable
+from api_app.analyzers_manager.constants import TypeChoices
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.chatbot_manager.agent.tools import build_tools
-from api_app.choices import Classification
+from api_app.chatbot_manager.agent.tools.list_analyzers import _MAX_RESULTS
+from api_app.choices import Classification, ScanMode
 from api_app.data_model_manager.models import DomainDataModel
 from api_app.investigations_manager.models import Investigation
-from api_app.models import Job
+from api_app.models import Job, OrganizationPluginConfiguration
+from api_app.playbooks_manager.models import PlaybookConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.user.models import User
@@ -308,3 +311,199 @@ class DataModelToolTestCase(TestCase):
         self.assertEqual(data["data_model"], {})
         self.assertTrue(data["errors"])
         self.assertIn("not found or not accessible", data["errors"][0])
+
+
+class ListAnalyzersToolTestCase(TestCase):
+    def setUp(self):
+        self.org_user, _ = User.objects.get_or_create(username="list_analyzers_org_user")
+        self.outsider, _ = User.objects.get_or_create(username="list_analyzers_outsider")
+        self.org, _ = Organization.objects.get_or_create(name="list analyzers organization")
+        Membership.objects.get_or_create(user=self.org_user, organization=self.org, is_owner=True)
+
+        # A real seeded observable analyzer (constructing one would need a PythonModule FK).
+        self.analyzer = (
+            AnalyzerConfig.objects.filter(
+                type=TypeChoices.OBSERVABLE,
+                observable_supported__contains=["domain"],
+                disabled=False,
+            )
+            .order_by("name")
+            .first()
+        )
+        self.assertIsNotNone(self.analyzer, "expected a seeded observable analyzer supporting 'domain'")
+
+        # Disable it for self.org: the per-user `runnable` flag must flip to False, but the
+        # analyzer must still be listed (analyzer configs are global, non-sensitive).
+        self.org_disable = OrganizationPluginConfiguration.objects.create(
+            config=self.analyzer, organization=self.org, disabled=True
+        )
+
+        self.list_analyzers = {t.name: t for t in build_tools(user=self.org_user)}["list_analyzers"]
+
+    def tearDown(self):
+        self.org_disable.delete()
+        Membership.objects.filter(organization=self.org).delete()
+        self.org.delete()
+
+    def test_list_analyzers_filters_by_observable_type(self):
+        data = json.loads(self.list_analyzers.invoke({"observable_type": "domain"}))
+        self.assertEqual(data["errors"], [])
+        self.assertTrue(data["analyzers"])
+        # every returned analyzer supports the requested observable type
+        for analyzer in data["analyzers"]:
+            self.assertIn("domain", analyzer["observable_supported"])
+        names = [a["name"] for a in data["analyzers"]]
+        self.assertIn(self.analyzer.name, names)
+
+    def test_list_analyzers_unknown_observable_type(self):
+        data = json.loads(self.list_analyzers.invoke({"observable_type": "bogus"}))
+        # invalid type is reported and the filter is ignored (results still returned)
+        self.assertTrue(data["errors"])
+        self.assertIn("Unknown observable_type", data["errors"][0])
+        self.assertTrue(data["analyzers"])
+
+    def test_list_analyzers_limit(self):
+        data = json.loads(self.list_analyzers.invoke({"limit": 1}))
+        self.assertEqual(len(data["analyzers"]), 1)
+
+    def test_list_analyzers_limit_clamps_to_max(self):
+        # An over-cap limit from the LLM is clamped to _MAX_RESULTS (untrusted arg): the seeded
+        # observable analyzers exceed the cap, so the result is capped, never the requested 999.
+        data = json.loads(self.list_analyzers.invoke({"limit": 999}))
+        self.assertLessEqual(len(data["analyzers"]), _MAX_RESULTS)
+
+    def test_list_analyzers_org_disabled_runnable_flag(self):
+        # Deterministic, one-directional isolation check: an analyzer disabled for the user's
+        # organization comes back with runnable=False AND is still present in the list (it is
+        # not hidden -- list_analyzers lists, it does not filter on runnable). We do NOT assert
+        # the contrasting runnable=True for an outsider, because `runnable` also folds in
+        # configured+healthy, which a key-based analyzer lacks on a test deploy without keys.
+        rows = {
+            a["name"]: a
+            for a in json.loads(self.list_analyzers.invoke({"observable_type": "domain"}))["analyzers"]
+        }
+        self.assertIn(self.analyzer.name, rows)
+        self.assertFalse(rows[self.analyzer.name]["runnable"])
+
+        # The same analyzer is still listed for an unaffiliated user (global, non-sensitive).
+        outsider_tool = {t.name: t for t in build_tools(user=self.outsider)}["list_analyzers"]
+        outsider_names = [
+            a["name"] for a in json.loads(outsider_tool.invoke({"observable_type": "domain"}))["analyzers"]
+        ]
+        self.assertIn(self.analyzer.name, outsider_names)
+
+
+class RecommendPlaybookToolTestCase(TestCase):
+    def setUp(self):
+        self.user, _ = User.objects.get_or_create(username="recommend_pb_user")
+        # Another member of the same org: used to test org-shared vs private visibility.
+        self.org_member, _ = User.objects.get_or_create(username="recommend_pb_org_member")
+        self.org, _ = Organization.objects.get_or_create(name="recommend pb organization")
+        Membership.objects.get_or_create(user=self.user, organization=self.org, is_owner=True)
+        Membership.objects.get_or_create(user=self.org_member, organization=self.org, is_owner=False)
+
+        self.pb_owned = PlaybookConfig.objects.create(
+            name="recommend_pb_owned", description="t", type=["ip"], owner=self.user, starting=True
+        )
+        # Owned by another member of the same org and shared at org level -> visible.
+        self.pb_org_shared = PlaybookConfig.objects.create(
+            name="recommend_pb_org_shared",
+            description="t",
+            type=["ip"],
+            owner=self.org_member,
+            for_organization=True,
+            starting=True,
+        )
+        # Owned by another member but NOT shared -> must stay invisible to self.user.
+        self.pb_private_other = PlaybookConfig.objects.create(
+            name="recommend_pb_private_other",
+            description="t",
+            type=["ip"],
+            owner=self.org_member,
+            for_organization=False,
+            starting=True,
+        )
+        # Not directly launchable -> must not be recommended. A non-starting playbook must force
+        # new analysis with no check time (model clean()), which create() enforces.
+        self.pb_not_starting = PlaybookConfig.objects.create(
+            name="recommend_pb_not_starting",
+            description="t",
+            type=["ip"],
+            owner=self.user,
+            starting=False,
+            scan_mode=ScanMode.FORCE_NEW_ANALYSIS.value,
+            scan_check_time=None,
+        )
+        # Disabled -> must not be recommended.
+        self.pb_disabled = PlaybookConfig.objects.create(
+            name="recommend_pb_disabled",
+            description="t",
+            type=["ip"],
+            owner=self.user,
+            starting=True,
+            disabled=True,
+        )
+        # Different classification -> must not match an ip observable.
+        self.pb_domain = PlaybookConfig.objects.create(
+            name="recommend_pb_domain", description="t", type=["domain"], owner=self.user, starting=True
+        )
+
+        self.recommend_playbook = {t.name: t for t in build_tools(user=self.user)}["recommend_playbook"]
+
+    def tearDown(self):
+        PlaybookConfig.objects.filter(owner__in=[self.user, self.org_member]).delete()
+        Membership.objects.filter(organization=self.org).delete()
+        self.org.delete()
+
+    def test_recommend_playbook_derives_classification_from_observable(self):
+        data = json.loads(self.recommend_playbook.invoke({"observable_name": "8.8.8.8"}))
+        self.assertEqual(data["errors"], [])
+        names = [p["name"] for p in data["playbooks"]]
+        # 8.8.8.8 is classified as ip -> the ip playbook matches, the domain one does not
+        self.assertIn(self.pb_owned.name, names)
+        self.assertNotIn(self.pb_domain.name, names)
+
+    def test_recommend_playbook_explicit_classification(self):
+        data = json.loads(self.recommend_playbook.invoke({"classification": "ip"}))
+        self.assertEqual(data["errors"], [])
+        names = [p["name"] for p in data["playbooks"]]
+        self.assertIn(self.pb_owned.name, names)
+
+    def test_recommend_playbook_invalid_classification(self):
+        data = json.loads(self.recommend_playbook.invoke({"classification": "bogus"}))
+        self.assertTrue(data["errors"])
+        self.assertIn("Unknown classification", data["errors"][0])
+        self.assertEqual(data["playbooks"], [])
+
+    def test_recommend_playbook_requires_input(self):
+        data = json.loads(self.recommend_playbook.invoke({}))
+        self.assertTrue(data["errors"])
+        self.assertEqual(data["playbooks"], [])
+
+    def test_recommend_playbook_only_starting_and_enabled(self):
+        names = [
+            p["name"]
+            for p in json.loads(self.recommend_playbook.invoke({"classification": "ip"}))["playbooks"]
+        ]
+        self.assertIn(self.pb_owned.name, names)
+        self.assertNotIn(self.pb_not_starting.name, names)
+        self.assertNotIn(self.pb_disabled.name, names)
+
+    def test_recommend_playbook_visibility_isolation(self):
+        names = [
+            p["name"]
+            for p in json.loads(self.recommend_playbook.invoke({"classification": "ip"}))["playbooks"]
+        ]
+        # owned + org-shared are visible
+        self.assertIn(self.pb_owned.name, names)
+        self.assertIn(self.pb_org_shared.name, names)
+        # another member's private playbook is NOT visible
+        self.assertNotIn(self.pb_private_other.name, names)
+
+    def test_recommend_playbook_limit(self):
+        # Two visible, starting, enabled ip playbooks match (owned + org-shared); the cap must
+        # trim the result to the requested size.
+        all_matches = json.loads(self.recommend_playbook.invoke({"classification": "ip"}))["playbooks"]
+        self.assertGreaterEqual(len(all_matches), 2)
+        capped = json.loads(self.recommend_playbook.invoke({"classification": "ip", "limit": 1}))
+        self.assertEqual(len(capped["playbooks"]), 1)

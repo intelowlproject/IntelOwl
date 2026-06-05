@@ -56,8 +56,15 @@ def make_recommend_playbook_tool(user):
             classification = Classification.calculate_observable(observable_name)
 
         # Clamp the LLM-supplied limit into [1, _MAX_RESULTS] (treat tool args as untrusted) and
-        # cap the queryset so a broadly-supported classification can't flood the prompt.
-        limit = max(1, min(int(limit), _MAX_RESULTS))
+        # cap the queryset so a broadly-supported classification can't flood the prompt; tell the
+        # caller when the requested value was capped, so a truncated list isn't silent.
+        requested_limit = int(limit)
+        limit = max(1, min(requested_limit, _MAX_RESULTS))
+        if requested_limit > _MAX_RESULTS:
+            errors.append(
+                f"Requested limit {requested_limit} exceeds the maximum {_MAX_RESULTS}; "
+                f"returning at most {_MAX_RESULTS} results."
+            )
         # `type` is a ChoiceArrayField of classifications: `__contains` matches playbooks declaring
         # support for this one. `starting=True` = launchable on its own (not pivot-only).
         # `prefetch_related` avoids the per-row N+1 from the analyzers/connectors SlugRelatedFields.

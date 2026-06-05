@@ -12,10 +12,6 @@ from api_app.choices import Classification
 # single call can't pull an unbounded list into the prompt.
 _MAX_RESULTS = 50
 
-# Observable analyzers never apply to the `file` classification (that's the file-analysis path),
-# so the accepted/advertised observable types are all classifications except FILE.
-_VALID_OBSERVABLE_TYPES = [c for c in Classification.values if c != Classification.FILE.value]
-
 
 def make_list_analyzers_tool(user):
     # Built per-request and closed over `user`. Unlike the job/investigation tools, analyzer
@@ -55,20 +51,30 @@ def make_list_analyzers_tool(user):
             user
         )
 
+        # The accepted observable types are an IntelOwl-core notion (every classification except
+        # FILE, which is the file-analysis path), so reuse the core helper instead of a local copy.
+        valid_types = Classification.observable_classifications()
         if observable_type:
             # The type string comes from the LLM; validate it against the enum so an invalid
             # value surfaces a message instead of silently returning 0 results.
             normalized = observable_type.strip().lower()
-            if normalized in set(_VALID_OBSERVABLE_TYPES):
+            if normalized in set(valid_types):
                 # `observable_supported` is a ChoiceArrayField: `__contains` matches rows whose
                 # array includes the requested type.
                 qs = qs.filter(observable_supported__contains=[normalized])
             else:
-                valid = ", ".join(_VALID_OBSERVABLE_TYPES)
+                valid = ", ".join(valid_types)
                 errors.append(f"Unknown observable_type '{observable_type}'; valid values are: {valid}.")
 
-        # Clamp the LLM-supplied limit into [1, _MAX_RESULTS] (treat tool args as untrusted).
-        limit = max(1, min(int(limit), _MAX_RESULTS))
+        # Clamp the LLM-supplied limit into [1, _MAX_RESULTS] (treat tool args as untrusted) and
+        # tell the caller when the requested value was capped, so a truncated list isn't silent.
+        requested_limit = int(limit)
+        limit = max(1, min(requested_limit, _MAX_RESULTS))
+        if requested_limit > _MAX_RESULTS:
+            errors.append(
+                f"Requested limit {requested_limit} exceeds the maximum {_MAX_RESULTS}; "
+                f"returning at most {_MAX_RESULTS} results."
+            )
         qs = qs.order_by("name")[:limit]
 
         return ListAnalyzersResultSerializer({"errors": errors, "analyzers": qs}).to_json()

@@ -369,8 +369,10 @@ class ListAnalyzersToolTestCase(TestCase):
     def test_list_analyzers_limit_clamps_to_max(self):
         # An over-cap limit from the LLM is clamped to _MAX_RESULTS (untrusted arg): the seeded
         # observable analyzers exceed the cap, so the result is capped, never the requested 999.
+        # The clamp is surfaced in `errors` so a truncated list isn't silent.
         data = json.loads(self.list_analyzers.invoke({"limit": 999}))
         self.assertLessEqual(len(data["analyzers"]), _MAX_RESULTS)
+        self.assertTrue(any("exceeds the maximum" in e for e in data["errors"]))
 
     def test_list_analyzers_org_disabled_runnable_flag(self):
         # Deterministic, one-directional isolation check: an analyzer disabled for the user's
@@ -507,3 +509,9 @@ class RecommendPlaybookToolTestCase(TestCase):
         self.assertGreaterEqual(len(all_matches), 2)
         capped = json.loads(self.recommend_playbook.invoke({"classification": "ip", "limit": 1}))
         self.assertEqual(len(capped["playbooks"]), 1)
+
+    def test_recommend_playbook_limit_clamp_warns(self):
+        # An over-cap limit is clamped to _MAX_RESULTS and the clamp is surfaced in `errors`,
+        # regardless of how many playbooks actually match (999 > 50 always warns).
+        data = json.loads(self.recommend_playbook.invoke({"classification": "ip", "limit": 999}))
+        self.assertTrue(any("exceeds the maximum" in e for e in data["errors"]))

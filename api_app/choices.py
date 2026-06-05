@@ -157,6 +157,14 @@ class Classification(models.TextChoices):
         return classification
 
     @classmethod
+    def observable_classifications(cls) -> typing.List["Classification"]:
+        """Classifications that apply to observables: every value except ``FILE``, which is the
+        file-analysis path rather than an observable type. Single source of truth for the code
+        that enumerates observable types (e.g. the observable-analyzer listing and the
+        observable-classification job aggregation)."""
+        return [c for c in cls if c != cls.FILE]
+
+    @classmethod
     def get_data_model_class(cls, classification: str) -> typing.Type:
         from api_app.data_model_manager.models import (
             DomainDataModel,

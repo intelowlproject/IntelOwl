@@ -626,13 +626,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         """
         annotations = {
             oc.lower(): Count("analyzable__classification", filter=Q(analyzable__classification=oc))
-            for oc in [
-                Classification.DOMAIN,
-                Classification.IP,
-                Classification.HASH,
-                Classification.URL,
-                Classification.GENERIC,
-            ]
+            for oc in Classification.observable_classifications()
         }
         return self.__aggregation_response_static(annotations, users=self.get_org_members(request))
 

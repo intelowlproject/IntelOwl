@@ -73,7 +73,7 @@ class YETI(classes.Connector):
 
         # auth
         auth_url = f"{self._url_key_name}/api/v2/auth/api-token"
-        auth_headers = {"x-yeti-apikey": self._api_key_name}
+        auth_headers = {"x-yeti-apikey": self._api_key_name, "User-Agent": "IntelOwl"}
 
         try:
             auth_resp = requests.post(
@@ -94,7 +94,11 @@ class YETI(classes.Connector):
         # new context, tags, source are appended with existing ones
 
         url = f"{self._url_key_name}/api/v2/observables/extended"
-        headers = {"Accept": "application/json", "Authorization": f"Bearer {access_token}"}
+        headers = {
+            "Accept": "application/json",
+            "User-Agent": "IntelOwl",
+            "Authorization": f"Bearer {access_token}",
+        }
 
         try:
             resp = requests.post(

@@ -5,12 +5,9 @@ from langchain_core.tools import tool
 
 from api_app.analyzers_manager.constants import TypeChoices
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.chatbot_manager.agent.tools._common import clamp_limit
 from api_app.chatbot_manager.serializers import ListAnalyzersResultSerializer
 from api_app.choices import Classification
-
-# Hard cap on the number of results returned to the LLM (mirrors the other tools), so a
-# single call can't pull an unbounded list into the prompt.
-_MAX_RESULTS = 50
 
 
 def make_list_analyzers_tool(user):
@@ -66,15 +63,8 @@ def make_list_analyzers_tool(user):
                 valid = ", ".join(valid_types)
                 errors.append(f"Unknown observable_type '{observable_type}'; valid values are: {valid}.")
 
-        # Clamp the LLM-supplied limit into [1, _MAX_RESULTS] (treat tool args as untrusted) and
-        # tell the caller when the requested value was capped, so a truncated list isn't silent.
-        requested_limit = int(limit)
-        limit = max(1, min(requested_limit, _MAX_RESULTS))
-        if requested_limit > _MAX_RESULTS:
-            errors.append(
-                f"Requested limit {requested_limit} exceeds the maximum {_MAX_RESULTS}; "
-                f"returning at most {_MAX_RESULTS} results."
-            )
+        # Treat the LLM-supplied limit as untrusted: clamp it and surface any capping in `errors`.
+        limit = clamp_limit(limit, errors)
         qs = qs.order_by("name")[:limit]
 
         return ListAnalyzersResultSerializer({"errors": errors, "analyzers": qs}).to_json()

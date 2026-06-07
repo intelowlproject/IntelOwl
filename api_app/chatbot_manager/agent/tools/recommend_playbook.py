@@ -3,13 +3,10 @@
 
 from langchain_core.tools import tool
 
+from api_app.chatbot_manager.agent.tools._common import clamp_limit
 from api_app.chatbot_manager.serializers import RecommendPlaybookResultSerializer
 from api_app.choices import Classification
 from api_app.playbooks_manager.models import PlaybookConfig
-
-# Hard cap on the number of results returned to the LLM (mirrors the other tools), so a
-# single call can't pull an unbounded list into the prompt.
-_MAX_RESULTS = 50
 
 
 def make_recommend_playbook_tool(user):
@@ -55,16 +52,9 @@ def make_recommend_playbook_tool(user):
             # recommendation matches what an actual scan would pick.
             classification = Classification.calculate_observable(observable_name)
 
-        # Clamp the LLM-supplied limit into [1, _MAX_RESULTS] (treat tool args as untrusted) and
-        # cap the queryset so a broadly-supported classification can't flood the prompt; tell the
-        # caller when the requested value was capped, so a truncated list isn't silent.
-        requested_limit = int(limit)
-        limit = max(1, min(requested_limit, _MAX_RESULTS))
-        if requested_limit > _MAX_RESULTS:
-            errors.append(
-                f"Requested limit {requested_limit} exceeds the maximum {_MAX_RESULTS}; "
-                f"returning at most {_MAX_RESULTS} results."
-            )
+        # Treat the LLM-supplied limit as untrusted: clamp it (so a broadly-supported
+        # classification can't flood the prompt) and surface any capping in `errors`.
+        limit = clamp_limit(limit, errors)
         # `type` is a ChoiceArrayField of classifications: `__contains` matches playbooks declaring
         # support for this one. `starting=True` = launchable on its own (not pivot-only).
         # `prefetch_related` avoids the per-row N+1 from the analyzers/connectors SlugRelatedFields.

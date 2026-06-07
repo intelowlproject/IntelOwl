@@ -10,7 +10,7 @@ from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.constants import TypeChoices
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.chatbot_manager.agent.tools import build_tools
-from api_app.chatbot_manager.agent.tools.list_analyzers import _MAX_RESULTS
+from api_app.chatbot_manager.agent.tools._common import MAX_RESULTS, clamp_limit
 from api_app.choices import Classification, ScanMode
 from api_app.data_model_manager.models import DomainDataModel
 from api_app.investigations_manager.models import Investigation
@@ -367,11 +367,11 @@ class ListAnalyzersToolTestCase(TestCase):
         self.assertEqual(len(data["analyzers"]), 1)
 
     def test_list_analyzers_limit_clamps_to_max(self):
-        # An over-cap limit from the LLM is clamped to _MAX_RESULTS (untrusted arg): the seeded
+        # An over-cap limit from the LLM is clamped to MAX_RESULTS (untrusted arg): the seeded
         # observable analyzers exceed the cap, so the result is capped, never the requested 999.
         # The clamp is surfaced in `errors` so a truncated list isn't silent.
         data = json.loads(self.list_analyzers.invoke({"limit": 999}))
-        self.assertLessEqual(len(data["analyzers"]), _MAX_RESULTS)
+        self.assertLessEqual(len(data["analyzers"]), MAX_RESULTS)
         self.assertTrue(any("exceeds the maximum" in e for e in data["errors"]))
 
     def test_list_analyzers_org_disabled_runnable_flag(self):
@@ -511,7 +511,28 @@ class RecommendPlaybookToolTestCase(TestCase):
         self.assertEqual(len(capped["playbooks"]), 1)
 
     def test_recommend_playbook_limit_clamp_warns(self):
-        # An over-cap limit is clamped to _MAX_RESULTS and the clamp is surfaced in `errors`,
+        # An over-cap limit is clamped to MAX_RESULTS and the clamp is surfaced in `errors`,
         # regardless of how many playbooks actually match (999 > 50 always warns).
         data = json.loads(self.recommend_playbook.invoke({"classification": "ip", "limit": 999}))
         self.assertTrue(any("exceeds the maximum" in e for e in data["errors"]))
+
+
+class ClampLimitHelperTestCase(TestCase):
+    """Unit tests for the shared `clamp_limit` helper used by the analyzer/playbook tools."""
+
+    def test_within_range_passes_through(self):
+        errors = []
+        self.assertEqual(clamp_limit(10, errors), 10)
+        self.assertEqual(errors, [])
+
+    def test_over_cap_clamps_and_warns(self):
+        errors = []
+        self.assertEqual(clamp_limit(999, errors), MAX_RESULTS)
+        self.assertTrue(any("exceeds the maximum" in e for e in errors))
+
+    def test_below_one_clamps_up_silently(self):
+        # A non-positive limit is bounded up to 1 without a warning (only over-cap is worth one).
+        errors = []
+        self.assertEqual(clamp_limit(0, errors), 1)
+        self.assertEqual(clamp_limit(-5, errors), 1)
+        self.assertEqual(errors, [])

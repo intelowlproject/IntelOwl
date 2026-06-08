@@ -85,6 +85,7 @@ class AnalyzeObservableToolTestCase(TestCase):
         self.assertIsNone(data["plan"])
         self.assertIsNotNone(data["job"])
         self.assertEqual(data["job"]["observable_name"], "example.com")
+        self.assertFalse(data["reused"])  # fresh observable -> a new job, not a reused one
         mock_apply.assert_called_once()
 
     @patch(_APPLY_ASYNC)
@@ -99,13 +100,17 @@ class AnalyzeObservableToolTestCase(TestCase):
         self.assertEqual(job.user, self.user)
 
     @patch(_APPLY_ASYNC)
-    def test_force_new_analysis_skips_dedup(self, mock_apply):
-        # FORCE_NEW_ANALYSIS: two confirmed calls for the same observable each start a fresh job
-        # (no CHECK_PREVIOUS short-circuit), so the trigger fires both times.
+    def test_dedup_reuses_recent_job_on_second_confirm(self, mock_apply):
+        # Default scan_mode (CHECK_PREVIOUS_ANALYSIS): a second confirmed call for the same observable
+        # reuses the recent job instead of launching a duplicate -> apply_async fires only once and the
+        # second result is flagged `reused` with the same job id.
         args = {"observable_name": "example.com", "analyzers": "Tranco", "confirm": True}
-        self.analyze_observable.invoke(args)
-        self.analyze_observable.invoke(args)
-        self.assertEqual(mock_apply.call_count, 2)
+        first = json.loads(self.analyze_observable.invoke(args))
+        second = json.loads(self.analyze_observable.invoke(args))
+        self.assertFalse(first["reused"])
+        self.assertTrue(second["reused"])
+        self.assertEqual(first["job"]["id"], second["job"]["id"])
+        mock_apply.assert_called_once()
 
     @patch(_APPLY_ASYNC)
     def test_private_ip_refused(self, mock_apply):

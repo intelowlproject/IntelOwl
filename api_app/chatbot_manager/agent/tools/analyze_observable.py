@@ -1,33 +1,16 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from dataclasses import asdict, dataclass, field
 from types import SimpleNamespace
-from typing import List, Optional
+from typing import List
 
+from django.utils.timezone import now
 from langchain_core.tools import tool
 
 from api_app.chatbot_manager.serializers.analyze_observable import AnalyzeObservableResultSerializer
-from api_app.choices import TLP, ScanMode
+from api_app.choices import TLP
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers.job import ObservableAnalysisSerializer
-
-
-@dataclass
-class _AnalysisPlan:
-    """Preview of what a confirmed analyze_observable call would launch.
-
-    Computed (non-model) data, so it is a typed dataclass rather than a free-form dict (Matteo's
-    rule); `asdict()` converts it only at the serializer boundary.
-    """
-
-    observable_name: str
-    classification: str
-    tlp: str
-    playbook: Optional[str]
-    analyzers: List[str]
-    connectors: List[str]
-    skipped: List[str] = field(default_factory=list)
 
 
 def _flatten_errors(errors) -> List[str]:
@@ -63,14 +46,15 @@ def make_analyze_observable_tool(user):
         tlp: str = TLP.CLEAR.value,
         confirm: bool = False,
     ) -> str:
-        """Start a new IntelOwl analysis of an observable (IP, domain, URL, hash, ...).
+        """Start an IntelOwl analysis of an observable (IP, domain, URL, hash, ...).
 
         This tool ACTUALLY launches an analysis, so it is two-phase and must be confirmed:
         1. Call it first with confirm=false -> it validates the request and returns a `plan` (the
            analyzers/connectors that would run, the ones skipped, the resolved classification)
            WITHOUT starting anything. Show that plan to the user.
         2. Only after the user explicitly approves, call it again with the same arguments and
-           confirm=true -> this starts the job.
+           confirm=true -> this starts the analysis. If the same observable was already analyzed
+           recently the existing job is returned instead of launching a duplicate (`reused=true`).
 
         Args:
             observable_name: The observable to analyze (an IP, domain, URL or hash).
@@ -83,18 +67,19 @@ def make_analyze_observable_tool(user):
             confirm: Must be true to actually start the analysis. Defaults to false (preview only).
 
         Returns:
-            JSON string with shape {"errors": [...], "confirmation_required": bool,
+            JSON string with shape {"errors": [...], "confirmation_required": bool, "reused": bool,
             "plan": {...} | null, "job": {...} | null}.
         """
         # The reused serializer reads the requesting user from `context["request"].user`; a shim is
         # enough since the create path only ever reads `.user`.
         shim = SimpleNamespace(user=user)
-        # FORCE_NEW_ANALYSIS (not the platform default CHECK_PREVIOUS_ANALYSIS): confirm=True always
-        # starts a fresh job rather than possibly returning a cached one -> deterministic contract.
+        # No scan_mode override -> the serializer applies the platform default
+        # (CHECK_PREVIOUS_ANALYSIS): a confirmed request reuses a matching analysis from the last 24h
+        # instead of always launching a duplicate (saves analyzer quota; same behaviour as the REST
+        # analyze_observable endpoint). `reused` in the result reports whether that happened.
         data = {
             "observable_name": observable_name,
             "tlp": tlp,
-            "scan_mode": ScanMode.FORCE_NEW_ANALYSIS.value,
         }
 
         if playbook:
@@ -109,6 +94,7 @@ def make_analyze_observable_tool(user):
                     {
                         "errors": [f"Playbook '{playbook}' not found or not visible to you."],
                         "confirmation_required": False,
+                        "reused": False,
                         "plan": None,
                         "job": None,
                     }
@@ -127,6 +113,7 @@ def make_analyze_observable_tool(user):
                 {
                     "errors": _flatten_errors(serializer.errors),
                     "confirmation_required": False,
+                    "reused": False,
                     "plan": None,
                     "job": None,
                 }
@@ -134,28 +121,32 @@ def make_analyze_observable_tool(user):
 
         validated = serializer.validated_data
         if not confirm:
-            # Preview path: report exactly what a confirmed call would run; trigger nothing.
-            plan = _AnalysisPlan(
-                observable_name=validated["observable_name"],
-                classification=validated["observable_classification"],
-                tlp=validated["tlp"],
-                playbook=validated["playbook_requested"].name
+            # Preview path: report exactly what a confirmed call would run; trigger nothing. The plan
+            # dict is shaped/validated by AnalysisPlanSerializer (the envelope's `plan` field).
+            plan = {
+                "observable_name": validated["observable_name"],
+                "classification": validated["observable_classification"],
+                "tlp": validated["tlp"],
+                "playbook": validated["playbook_requested"].name
                 if validated.get("playbook_requested")
                 else None,
-                analyzers=[analyzer.name for analyzer in validated["analyzers_to_execute"]],
-                connectors=[connector.name for connector in validated["connectors_to_execute"]],
+                "analyzers": [analyzer.name for analyzer in validated["analyzers_to_execute"]],
+                "connectors": [connector.name for connector in validated["connectors_to_execute"]],
                 # the committed copy of the serializer's filter_warnings (skipped/unrunnable plugins)
-                skipped=list(validated.get("warnings", [])),
-            )
+                "skipped": list(validated.get("warnings", [])),
+            }
             return AnalyzeObservableResultSerializer(
-                {"errors": [], "confirmation_required": True, "plan": asdict(plan), "job": None}
+                {"errors": [], "confirmation_required": True, "reused": False, "plan": plan, "job": None}
             ).to_json()
 
-        # confirm=True: the ONLY path that triggers the analysis (job_pipeline.apply_async, via
-        # save(send_task=True)).
+        # confirm=True: the only path that may trigger the analysis (job_pipeline.apply_async, via
+        # save(send_task=True)). With the default scan_mode the serializer may instead return a matching
+        # recent job WITHOUT launching anything (dedup); a request time older than this call means reuse.
+        started = now()
         job = serializer.save(send_task=True)
+        reused = job.received_request_time < started
         return AnalyzeObservableResultSerializer(
-            {"errors": [], "confirmation_required": False, "plan": None, "job": job}
+            {"errors": [], "confirmation_required": False, "reused": reused, "plan": None, "job": job}
         ).to_json()
 
     return analyze_observable

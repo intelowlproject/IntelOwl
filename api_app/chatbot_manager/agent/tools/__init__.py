@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from .analyze_observable import make_analyze_observable_tool
 from .get_data_model import make_get_data_model_tool
 from .get_investigation_tree import make_get_investigation_tree_tool
 from .get_job_details import make_get_job_details_tool
@@ -21,9 +22,10 @@ def build_tools(user) -> list:
     investigation tools scope on `visible_for_user` (owned + organization-shared); the
     playbook tool also scopes on `visible_for_user`. Analyzer configs are global plugin
     definitions, so `list_analyzers` does not scope by owner -- it lists the enabled
-    analyzers and exposes per-user readiness through a `runnable` flag instead. Every tool
-    returns a string (LangChain feeds it back as the ReAct "Observation"); see each tool
-    for its shape.
+    analyzers and exposes per-user readiness through a `runnable` flag instead. The single
+    action tool `analyze_observable` can launch a real analysis; it is confirm-gated (a preview
+    unless `confirm=True`) and creates jobs owned by `user`. Every tool returns a string
+    (LangChain feeds it back as the ReAct "Observation"); see each tool for its shape.
     """
     return [
         make_search_jobs_tool(user),
@@ -35,4 +37,5 @@ def build_tools(user) -> list:
         make_get_data_model_tool(user),
         make_list_analyzers_tool(user),
         make_recommend_playbook_tool(user),
+        make_analyze_observable_tool(user),
     ]

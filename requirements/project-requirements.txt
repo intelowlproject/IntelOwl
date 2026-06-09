@@ -113,7 +113,7 @@ pyzipper==0.3.6
 
 # others
 dateparser==1.2.0
-DeepDiff==8.6.1
+DeepDiff==9.1.0
 # phishing form compiler module
 lxml==6.0.2
 Faker==36.1.0

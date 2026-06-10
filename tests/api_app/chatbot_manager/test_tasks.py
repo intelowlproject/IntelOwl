@@ -6,8 +6,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 from django.test import TestCase, override_settings
 from django.utils.timezone import now
+from langchain_core.messages import AIMessage, HumanMessage
 
 from api_app.chatbot_manager import events
+from api_app.chatbot_manager.agent.agent import AGENT_STOPPED_OUTPUT
 from api_app.chatbot_manager.models import ChatMessage, ChatSession
 from api_app.chatbot_manager.tasks import delete_old_chat_sessions, process_chat_message
 from certego_saas.apps.user.models import User
@@ -139,6 +141,28 @@ class ProcessChatMessageTestCase(TestCase):
 
     @patch("api_app.chatbot_manager.tasks.get_channel_layer")
     @patch("api_app.chatbot_manager.agent.agent.build_agent_executor")
+    def test_prior_turns_reach_the_agent_as_messages(self, mock_build, mock_get_layer):
+        self._patched_layer(mock_get_layer)
+        ChatMessage.objects.create(session=self.session, role=ChatMessage.Role.USER, content="prev q")
+        ChatMessage.objects.create(session=self.session, role=ChatMessage.Role.ASSISTANT, content="prev a")
+        executor = MagicMock()
+        executor.invoke.return_value = {"output": "ok"}
+        mock_build.return_value = executor
+
+        process_chat_message(self.session.id, "hello", self.user.id)
+
+        # history feeds the prompt's chat_history MessagesPlaceholder directly: LangChain
+        # message objects (not pre-rendered text), snapshotted before this turn is persisted
+        # so the current message is not part of it.
+        invoke_input = executor.invoke.call_args.args[0]
+        self.assertEqual(invoke_input["input"], "hello")
+        self.assertEqual(
+            [(type(m), m.content) for m in invoke_input["chat_history"]],
+            [(HumanMessage, "prev q"), (AIMessage, "prev a")],
+        )
+
+    @patch("api_app.chatbot_manager.tasks.get_channel_layer")
+    @patch("api_app.chatbot_manager.agent.agent.build_agent_executor")
     def test_agent_failure_streams_error_and_drops_the_turn(self, mock_build, mock_get_layer):
         layer = self._patched_layer(mock_get_layer)
         executor = MagicMock()
@@ -155,6 +179,26 @@ class ProcessChatMessageTestCase(TestCase):
         )
         error_payload = layer.group_send.call_args_list[-1].args[1]["payload"]
         self.assertEqual(error_payload["detail"], events.ChatErrorDetail.UNAVAILABLE.value)
+
+    @patch("api_app.chatbot_manager.tasks.get_channel_layer")
+    @patch("api_app.chatbot_manager.agent.agent.build_agent_executor")
+    def test_iteration_cap_streams_error_and_drops_the_turn(self, mock_build, mock_get_layer):
+        layer = self._patched_layer(mock_get_layer)
+        executor = MagicMock()
+        # what AgentExecutor returns when max_iterations force-stops the run
+        executor.invoke.return_value = {"output": AGENT_STOPPED_OUTPUT}
+        mock_build.return_value = executor
+
+        process_chat_message(self.session.id, "hello", self.user.id)
+
+        # the canned framework string must never be persisted as an assistant message
+        self.assertFalse(ChatMessage.objects.filter(session=self.session).exists())
+        self.assertEqual(
+            self._event_types(layer),
+            [events.ChatEventType.START.value, events.ChatEventType.ERROR.value],
+        )
+        error_payload = layer.group_send.call_args_list[-1].args[1]["payload"]
+        self.assertEqual(error_payload["detail"], events.ChatErrorDetail.ITERATION_LIMIT.value)
 
     @patch("api_app.chatbot_manager.tasks.get_channel_layer")
     @patch("api_app.chatbot_manager.agent.agent.build_agent_executor")

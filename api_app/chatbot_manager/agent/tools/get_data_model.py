@@ -10,8 +10,8 @@ from api_app.models import Job
 def make_get_data_model_tool(user):
     # Built per-request and closed over `user`, so the lookup is hard-scoped to that user's
     # jobs (multi-tenancy enforced here), matching the other job tools' `user=user` scope.
-    # LangChain feeds a tool's return value back as the ReAct "Observation", so it must be a
-    # string: we return a JSON-serialized envelope.
+    # LangChain feeds a tool's return value back as the tool-call observation, so it must be
+    # a string: we return a JSON-serialized envelope.
     @tool("get_data_model")
     def get_data_model(job_id: int) -> str:
         """Get the aggregated data model of an IntelOwl job by its numeric ID.

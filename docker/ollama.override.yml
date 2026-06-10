@@ -1,6 +1,9 @@
 services:
   ollama:
-    image: ollama/ollama:0.5.0
+    # 0.8.0+ is required to stream responses while tools are bound (older servers return the
+    # whole message in one chunk, breaking token-by-token chat streaming); 0.30.7 is the
+    # latest stable at the time of writing.
+    image: ollama/ollama:0.30.7
     container_name: intelowl_ollama
     hostname: ollama
     restart: unless-stopped

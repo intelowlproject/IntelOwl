@@ -18,7 +18,7 @@ def make_list_investigations_tool(user):
     # with their organization (`for_organization=True`). This is wider than the job tools'
     # `user=user` scope on purpose -- investigations have an explicit org-sharing flag --
     # and the LLM can never widen it. LangChain feeds a tool's return value back as the
-    # ReAct "Observation", so it must be a string: we return a JSON-serialized envelope.
+    # tool-call observation, so it must be a string: we return a JSON-serialized envelope.
     @tool("list_investigations")
     def list_investigations(query: str = "", status: str = "", limit: int = 10) -> str:
         """List IntelOwl investigations visible to you (owned or shared with your org).

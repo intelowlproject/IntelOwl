@@ -90,8 +90,8 @@ def _build_tree(investigation) -> _InvestigationTree:
 def make_get_investigation_tree_tool(user):
     # Built per-request and closed over `user`. The lookup is scoped with
     # `visible_for_user` (owned + organization-shared investigations), so the LLM cannot
-    # reach an investigation the user can't see. Returns a string for the ReAct
-    # "Observation": a JSON-serialized envelope.
+    # reach an investigation the user can't see. Returns a string (the tool-call
+    # observation): a JSON-serialized envelope.
     @tool("get_investigation_tree")
     def get_investigation_tree(investigation_id: int) -> str:
         """Get the job tree of an IntelOwl investigation by its numeric ID.

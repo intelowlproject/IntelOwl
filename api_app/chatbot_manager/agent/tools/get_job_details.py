@@ -7,7 +7,7 @@ from langchain_core.tools import tool
 def make_get_job_details_tool(user):
     # Built per-request and closed over `user`, so the lookup is hard-scoped to that
     # user's jobs (multi-tenancy enforced here). LangChain requires a tool to return a
-    # string for the ReAct "Observation" step, so we return a JSON-serialized envelope.
+    # string (the tool-call observation), so we return a JSON-serialized envelope.
     @tool("get_job_details")
     def get_job_details(job_id: int) -> str:
         """Get full details of an IntelOwl job by its numeric ID.

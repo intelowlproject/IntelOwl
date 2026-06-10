@@ -8,8 +8,8 @@ from langchain_core.tools import tool
 def make_search_jobs_tool(user):
     # The tool is built per-request and closes over `user`: every query is hard-scoped
     # to that user's jobs, so multi-tenancy is enforced here and the LLM can never widen
-    # it. LangChain feeds a tool's return value back to the model as the ReAct
-    # "Observation" step, so it must be a string; we return a JSON-serialized envelope.
+    # it. LangChain feeds a tool's return value back to the model as the tool-call
+    # observation, so it must be a string; we return a JSON-serialized envelope.
     @tool("search_jobs")
     def search_jobs(query: str = "", status: str = "", limit: int = 10) -> str:
         """Search IntelOwl jobs by observable name, MD5, or status.

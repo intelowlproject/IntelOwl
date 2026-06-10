@@ -25,7 +25,8 @@ def build_tools(user) -> list:
     analyzers and exposes per-user readiness through a `runnable` flag instead. The single
     action tool `analyze_observable` can launch a real analysis; it is confirm-gated (a preview
     unless `confirm=True`) and creates jobs owned by `user`. Every tool returns a string
-    (LangChain feeds it back as the ReAct "Observation"); see each tool for its shape.
+    (LangChain feeds it back to the model as the tool-call observation); see each tool
+    for its shape.
     """
     return [
         make_search_jobs_tool(user),

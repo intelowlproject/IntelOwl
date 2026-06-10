@@ -5,9 +5,12 @@ from datetime import timedelta
 from unittest.mock import MagicMock, patch
 
 from django.utils.timezone import now
+from langchain_core.messages import AIMessage, HumanMessage
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from api_app.chatbot_manager.agent.agent import AGENT_STOPPED_OUTPUT
+from api_app.chatbot_manager.events import ChatErrorDetail
 from api_app.chatbot_manager.models import ChatMessage, ChatSession
 from certego_saas.apps.user.models import User
 
@@ -72,6 +75,53 @@ class ChatSessionViewSetTestCase(APITestCase):
         self.assertEqual(msgs[0].content, "Hello")
         self.assertEqual(msgs[1].role, ChatMessage.Role.ASSISTANT)
         self.assertEqual(msgs[1].content, MOCK_AGENT_OUTPUT["output"])
+
+    @patch("api_app.chatbot_manager.views.build_agent_executor")
+    def test_message_passes_prior_turns_as_messages(self, mock_build):
+        executor = MagicMock()
+        executor.invoke.return_value = MOCK_AGENT_OUTPUT
+        mock_build.return_value = executor
+        session = ChatSession.objects.create(user=self.user)
+        ChatMessage.objects.create(session=session, role=ChatMessage.Role.USER, content="prev q")
+        ChatMessage.objects.create(session=session, role=ChatMessage.Role.ASSISTANT, content="prev a")
+
+        response = self.client.post(
+            self.MESSAGE_URL,
+            data={"message": "Hello", "session_id": session.pk},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # history reaches the agent as LangChain message objects (the prompt's chat_history
+        # MessagesPlaceholder), read before this turn is persisted.
+        invoke_input = executor.invoke.call_args.args[0]
+        self.assertEqual(invoke_input["input"], "Hello")
+        self.assertEqual(
+            [(type(m), m.content) for m in invoke_input["chat_history"]],
+            [(HumanMessage, "prev q"), (AIMessage, "prev a")],
+        )
+
+    @patch("api_app.chatbot_manager.views.build_agent_executor")
+    def test_message_iteration_cap_returns_error_and_drops_the_turn(self, mock_build):
+        executor = MagicMock()
+        # what AgentExecutor returns when max_iterations force-stops the run
+        executor.invoke.return_value = {"output": AGENT_STOPPED_OUTPUT}
+        mock_build.return_value = executor
+        session = ChatSession.objects.create(user=self.user)
+
+        response = self.client.post(
+            self.MESSAGE_URL,
+            data={"message": "Hello", "session_id": session.pk},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_503_SERVICE_UNAVAILABLE)
+        content = response.json()
+        self.assertEqual(content["detail"], ChatErrorDetail.ITERATION_LIMIT.value)
+        # the session id rides the error so a session created by this request stays usable
+        self.assertEqual(content["session_id"], session.pk)
+        # the canned framework string must never be persisted as an assistant message
+        self.assertFalse(ChatMessage.objects.filter(session=session).exists())
 
     def test_message_returns_404_for_other_users_session(self):
         other_user, _ = User.objects.get_or_create(username="chatbot_other_view_user")

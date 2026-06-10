@@ -87,6 +87,7 @@ FLOWER_PWD=flower
 
 # LLM Chatbot
 OLLAMA_BASE_URL=http://ollama:11434
-OLLAMA_MODEL=mistral
+# must be a model that supports Ollama tool calling
+OLLAMA_MODEL=qwen2.5:3b
 # chat sessions whose last activity is older than this are flushed periodically. Default: 90 days
 CHATBOT_MESSAGE_RETENTION_DAYS=90

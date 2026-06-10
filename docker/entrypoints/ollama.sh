@@ -4,7 +4,9 @@
 
 set -e
 
-DEFAULT_MODEL="mistral:7b-instruct-v0.3-q4_K_M"
+# Must stay in sync with the OLLAMA_MODEL defaults in intel_owl/settings/chatbot.py and
+# docker/env_file_app_template; must be a model that supports Ollama tool calling.
+DEFAULT_MODEL="qwen2.5:3b"
 MODEL="${OLLAMA_MODEL:-$DEFAULT_MODEL}"
 
 echo "[ollama] Starting server..."

@@ -1,6 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import logging
+
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
@@ -8,8 +10,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from .agent.agent import build_agent_executor, format_history
+from .agent.agent import AGENT_STOPPED_OUTPUT, build_agent_executor
 from .agent.memory import DjangoChatMessageHistory
+from .events import ChatErrorDetail
 from .models import ChatMessage, ChatSession
 from .serializers.chat import (
     ChatMessageSerializer,
@@ -17,6 +20,8 @@ from .serializers.chat import (
     MessageRequestSerializer,
     MessageResponseSerializer,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ChatSessionViewSet(ModelViewSet):
@@ -36,8 +41,8 @@ class ChatSessionViewSet(ModelViewSet):
 
         Flow: validate the request, resolve the target session (or create a new one),
         load the prior turns from the DB as the agent's conversation history, invoke the
-        ReAct agent with the user's message, then persist both the user message and the
-        assistant reply and return the reply. Persistence goes through
+        tool-calling agent with the user's message, then persist both the user message and
+        the assistant reply and return the reply. Persistence goes through
         DjangoChatMessageHistory so the ORM stays the single source of truth for history.
         """
         req = MessageRequestSerializer(data=request.data)
@@ -52,11 +57,22 @@ class ChatSessionViewSet(ModelViewSet):
             session = ChatSession.objects.create(user=request.user)
 
         history = DjangoChatMessageHistory(session=session)
-        chat_history_text = format_history(history.messages)
 
         executor = build_agent_executor(user=request.user)
-        result = executor.invoke({"input": user_message, "chat_history": chat_history_text})
+        # history.messages are LangChain message objects, fed straight into the prompt's
+        # chat_history MessagesPlaceholder; read before this turn is persisted below.
+        result = executor.invoke({"input": user_message, "chat_history": history.messages})
         response_text = result.get("output", "")
+        if response_text == AGENT_STOPPED_OUTPUT:
+            # max_iterations force-stopped a looping model: return an error and drop the turn
+            # rather than persisting LangChain's canned string as the assistant's answer
+            # (mirrors the WebSocket path's chat.error semantics, session_id included so the
+            # client can keep using a session created by this very request).
+            logger.warning(f"chatbot message: iteration cap hit for session {session.pk}")
+            return Response(
+                {"detail": ChatErrorDetail.ITERATION_LIMIT.value, "session_id": session.pk},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
 
         history.add_user_message(user_message)
         history.add_ai_message(response_text)

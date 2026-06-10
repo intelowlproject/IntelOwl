@@ -26,8 +26,8 @@ from intel_owl.tasks import FailureLoggedTask
 logger = logging.getLogger(__name__)
 
 
-# soft_time_limit is 300s on purpose: a single chat turn can chain several ReAct
-# iterations, each one an Ollama inference on a local model, so it can legitimately take
+# soft_time_limit is 300s on purpose: a single chat turn can chain several tool-calling
+# rounds, each one an Ollama inference on a local model, so it can legitimately take
 # tens of seconds to a couple of minutes. A *soft* limit raises SoftTimeLimitExceeded
 # (catchable, lets us clean up) rather than a hard time_limit that SIGKILLs the worker,
 # and it bounds a hung Ollama call so it can't occupy a worker indefinitely.
@@ -48,7 +48,7 @@ def process_chat_message(session_id: int, user_message: str, user_id: int) -> No
     # The agent/LLM stack (langchain + ChatOllama) is imported lazily so the other Celery
     # workers that load this module never pay for that heavy import — only the chatbot worker,
     # which actually runs this task, does.
-    from api_app.chatbot_manager.agent.agent import build_agent_executor, format_history
+    from api_app.chatbot_manager.agent.agent import AGENT_STOPPED_OUTPUT, build_agent_executor
     from api_app.chatbot_manager.agent.memory import DjangoChatMessageHistory
     from api_app.chatbot_manager.agent.streaming import ChatStreamingCallbackHandler
     from api_app.chatbot_manager.models import ChatMessage, ChatSession
@@ -70,7 +70,10 @@ def process_chat_message(session_id: int, user_message: str, user_id: int) -> No
 
     user = get_user_model().objects.get(pk=user_id)
     history = DjangoChatMessageHistory(session=session)
-    chat_history_text = format_history(history.messages)
+    # LangChain message objects, fed straight into the prompt's chat_history
+    # MessagesPlaceholder (no text pre-rendering). Evaluated here, before this turn is
+    # written, so the current message is not double-counted.
+    chat_history = history.messages
 
     emit(StartEvent(session_id))
     try:
@@ -83,7 +86,7 @@ def process_chat_message(session_id: int, user_message: str, user_id: int) -> No
             tool_names={tool.name for tool in executor.tools},
         )
         result = executor.invoke(
-            {"input": user_message, "chat_history": chat_history_text},
+            {"input": user_message, "chat_history": chat_history},
             config={"callbacks": [handler]},
         )
     except SoftTimeLimitExceeded:
@@ -96,6 +99,13 @@ def process_chat_message(session_id: int, user_message: str, user_id: int) -> No
         return
 
     response_text = result.get("output", "")
+    if response_text == AGENT_STOPPED_OUTPUT:
+        # max_iterations force-stopped a looping model: surface a real error and drop the
+        # turn rather than persisting LangChain's canned string as the assistant's answer.
+        logger.warning(f"process_chat_message: iteration cap hit for session {session_id}")
+        emit(ErrorEvent(session_id, ChatErrorDetail.ITERATION_LIMIT.value))
+        return
+
     history.add_user_message(user_message)
     # Create the assistant row directly (rather than add_ai_message + a latest("timestamp")
     # re-query) so chat.end carries its exact id, without a lookup two overlapping turns of the

@@ -10,36 +10,31 @@ no event loop, so ``async_to_sync`` is the right bridge to the async channel lay
 pattern ``JobConsumer.serialize_and_send_job`` already uses.
 """
 
-import logging
-
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from langchain_core.callbacks.base import BaseCallbackHandler
 
 from api_app.chatbot_manager.events import (
-    ANSWER_MARKER,
     ChatEvent,
     StatusEvent,
     TokenEvent,
     chat_group_for_user,
 )
 
-logger = logging.getLogger(__name__)
-
 
 class ChatStreamingCallbackHandler(BaseCallbackHandler):
-    """Streams the agent's *final answer* token-by-token, plus a status event per tool.
+    """Streams the answer text token-by-token, plus a status event per tool call.
 
-    A ReAct turn is several LLM calls (Thought/Action/Observation loops); only the last one
-    emits the ``Final Answer:`` line. Streaming every token would leak that scaffolding, so the
-    handler buffers tokens and starts forwarding only once ``ANSWER_MARKER`` appears in the
-    buffer. The marker is matched as a *substring* (not a fixed token tuple) because a local
-    model's tokenization of ``"Final Answer:"`` is not guaranteed. ``on_llm_start`` re-arms the
-    gate for each call so a non-final iteration never streams.
+    With a tool-calling agent there is no ``Final Answer:`` marker to gate on: when the model
+    decides to call a tool, the streamed chunks carry structured tool-call deltas whose *text*
+    is empty (the call itself rides ``tool_call_chunks``), and when it answers it streams plain
+    text. Forwarding only non-empty text therefore streams the answer while keeping tool-call
+    payloads off the wire.
 
-    This is a best-effort live view: the worker persists ``result["output"]`` and sends it in the
-    ``chat.end`` event, which the client treats as the source of truth, so a tokenization miss
-    can never corrupt the stored/displayed answer.
+    This is a best-effort live view: a model may emit a short text preamble before a tool call,
+    which streams and is then superseded by the actual answer. The worker persists
+    ``result["output"]`` and sends it in the ``chat.end`` event, which the client treats as the
+    source of truth, so the stored/displayed answer is always correct.
     """
 
     def __init__(self, user_id: int, session_id: int, tool_names: set[str] | None = None):
@@ -47,41 +42,22 @@ class ChatStreamingCallbackHandler(BaseCallbackHandler):
         self._session_id = session_id
         # Only these tool names produce a chat.status; None means "emit any" (unit tests).
         # Filtering by the real registry suppresses LangChain's internal "_Exception" pseudo-tool
-        # (and the raw parse-error text) that handle_parsing_errors surfaces as agent actions.
+        # (and the raw error text) that handle_parsing_errors surfaces as agent actions.
         self._tool_names = tool_names
         self._channel_layer = get_channel_layer()
-        self._buffer = ""
-        self._answer_reached = False
 
     def _emit(self, event: ChatEvent) -> None:
         async_to_sync(self._channel_layer.group_send)(self._group, event.as_channel_message())
 
-    def on_llm_start(self, *args, **kwargs) -> None:
-        # Each ReAct iteration is a fresh LLM call; re-arm so only the call that produces the
-        # Final Answer streams, and drop the previous iteration's buffered scaffolding.
-        self._buffer = ""
-        self._answer_reached = False
-
     def on_llm_new_token(self, token: str, **kwargs) -> None:
-        if self._answer_reached:
+        # Tool-call deltas surface here with empty text; only real answer text is forwarded.
+        if token:
             self._emit(TokenEvent(self._session_id, token))
-            return
-        self._buffer += token
-        marker_index = self._buffer.find(ANSWER_MARKER)
-        if marker_index == -1:
-            return
-        self._answer_reached = True
-        # Stream whatever already trails the marker in this same chunk; lstrip so the answer
-        # doesn't open with the space/newline that usually follows "Final Answer:".
-        tail = self._buffer[marker_index + len(ANSWER_MARKER) :].lstrip()
-        self._buffer = ""
-        if tail:
-            self._emit(TokenEvent(self._session_id, tail))
 
     def on_agent_action(self, action, **kwargs) -> None:
-        # Fired when the ReAct agent picks a tool; action.tool is the clean tool name. Skip
-        # anything that isn't a registered tool (e.g. the "_Exception" parse-error pseudo-tool,
-        # whose "tool" is the raw malformed model output) so internals don't leak as chat.status.
+        # Fired when the agent picks a tool; action.tool is the clean tool name. Skip anything
+        # that isn't a registered tool (e.g. the "_Exception" parse-error pseudo-tool, whose
+        # "tool" is the raw malformed model output) so internals don't leak as chat.status.
         tool_name = getattr(action, "tool", "") or ""
         if not tool_name or (self._tool_names is not None and tool_name not in self._tool_names):
             return

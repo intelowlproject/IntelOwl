@@ -23,10 +23,6 @@ from typing import ClassVar, Optional
 
 CHAT_GROUP_PREFIX = "chat-"
 
-# The ReAct prompt ends every turn with a "Final Answer:" line (see REACT_PROMPT). The streaming
-# callback streams only what follows this marker, hiding the Thought/Action scaffolding.
-ANSWER_MARKER = "Final Answer:"
-
 # Inbound guardrail: mirrors MessageRequestSerializer(message=CharField(max_length=4096)).
 MAX_INBOUND_MESSAGE_LEN = 4096
 
@@ -49,6 +45,7 @@ class ChatErrorDetail(StrEnum):
     INVALID_MESSAGE = "Invalid message payload."
     TIMEOUT = "The assistant took too long to respond. Please try again."
     UNAVAILABLE = "The assistant is currently unavailable. Please try again."
+    ITERATION_LIMIT = "The assistant could not complete this request. Please try rephrasing."
 
 
 def chat_group_for_user(user_id: int) -> str:

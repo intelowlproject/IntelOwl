@@ -101,8 +101,9 @@ def make_analyze_observable_tool(user):
                 ).to_json()
             data["playbook_requested"] = playbook
 
-        # The agent is the string-based ReAct agent (one `Action Input` string), so `analyzers` is a
-        # comma-separated string split here rather than a JSON list (unreliable for a small model).
+        # `analyzers` stays a comma-separated string rather than a list[str]: a flat string is
+        # the simplest schema for a small local model to emit reliably, and splitting here keeps
+        # the tool signature stable regardless of how the agent encodes its arguments.
         analyzers_list = [a.strip() for a in analyzers.split(",") if a.strip()]
         if analyzers_list:
             data["analyzers_requested"] = analyzers_list

@@ -91,3 +91,5 @@ OLLAMA_BASE_URL=http://ollama:11434
 OLLAMA_MODEL=qwen2.5:3b
 # chat sessions whose last activity is older than this are flushed periodically. Default: 90 days
 CHATBOT_MESSAGE_RETENTION_DAYS=90
+CHATBOT_RATE_LIMIT=5
+CHATBOT_RATE_LIMIT_WINDOW=60

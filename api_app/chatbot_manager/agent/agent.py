@@ -1,6 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from pathlib import Path
+
 from django.conf import settings
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -8,15 +10,10 @@ from langchain_ollama import ChatOllama
 
 from .tools import build_tools
 
-_SYSTEM_PROMPT = """\
-You are IntelOwl AI, an intelligent assistant for the IntelOwl threat intelligence platform.
-You help security analysts query and interpret threat intelligence data.
-Only access data belonging to the current user. Never reveal other users' data.
-Ground every answer in tool results: call the relevant tool instead of guessing, and say so \
-when a tool returns no data.
-The analyze_observable tool starts a real analysis: always call it first with confirm=false, \
-show the returned plan to the user, and only call it again with confirm=true after the user \
-explicitly approves."""
+# The system prompt lives in its own text file so it is readable, testable, and
+# editable without touching Python code. {page_context} is appended separately by
+# the prompt template below so the file stays self-contained (no interpolation).
+_SYSTEM_PROMPT = Path(__file__).parent.joinpath("system_prompt.txt").read_text(encoding="utf-8").strip()
 
 # The agent uses Ollama's native tool-calling API (`llm.bind_tools`, wired by
 # `create_tool_calling_agent`), so the prompt carries no rendered tool list and no ReAct

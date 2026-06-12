@@ -39,13 +39,20 @@ class ChatEventType(StrEnum):
 
 
 class ChatErrorDetail(StrEnum):
-    """User-facing error texts (kept generic on purpose: never leak internals to the client)."""
+    """Error identifiers for the chat WebSocket.
+
+    Most members carry human-readable text values (sent directly to the client);
+    a few carry machine-oriented wire discriminators whose user-facing text is
+    generated server-side (e.g. RATE_LIMITED, whose detail is built by the REST
+    view with a dynamic ``retry_after`` count).
+    """
 
     SESSION_NOT_FOUND = "Chat session not found."
     INVALID_MESSAGE = "Invalid message payload."
     TIMEOUT = "The assistant took too long to respond. Please try again."
     UNAVAILABLE = "The assistant is currently unavailable. Please try again."
     ITERATION_LIMIT = "The assistant could not complete this request. Please try rephrasing."
+    RATE_LIMITED = "rate_limited"  # machine-readable code; REST view builds user-facing detail
 
 
 def chat_group_for_user(user_id: int) -> str:
@@ -113,4 +120,5 @@ class EndEvent(ChatEvent):
 @dataclass(frozen=True)
 class ErrorEvent(ChatEvent):
     detail: str
+    retry_after: Optional[int] = None
     type: ClassVar[ChatEventType] = ChatEventType.ERROR

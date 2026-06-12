@@ -16,6 +16,7 @@ import { useChatWebSocket } from "./useChatWebSocket";
 import { ChatMessageList } from "./ChatMessageList";
 import { ChatComposer } from "./ChatComposer";
 import { ChatSessionList } from "./ChatSessionList";
+import { QuickActions } from "./QuickActions";
 
 // Connection-state badge shown in the drawer header.
 const CONNECTION_BADGE = {
@@ -45,10 +46,16 @@ export function ChatPanel() {
   const isOpen = useChatStore((state) => state.isOpen);
   const close = useChatStore((state) => state.close);
   const connectionState = useChatStore((state) => state.connectionState);
+  const isStreaming = useChatStore((state) => state.isStreaming);
   const assistantUnavailable = useChatStore(
     (state) => state.assistantUnavailable,
   );
   const error = useChatStore((state) => state.error);
+
+  // Disable the composer and quick actions while a turn is streaming or the socket is not
+  // connected. ChatComposer computes this internally; QuickActions receives it as a prop.
+  const inputDisabled =
+    isStreaming || connectionState !== ConnectionState.CONNECTED;
   const checkHealth = useChatStore((state) => state.checkHealth);
   const { sendMessage } = useChatWebSocket();
 
@@ -129,6 +136,7 @@ export function ChatPanel() {
         ) : (
           <>
             <ChatMessageList />
+            <QuickActions onSend={sendMessage} disabled={inputDisabled} />
             <ChatComposer onSend={sendMessage} />
           </>
         )}

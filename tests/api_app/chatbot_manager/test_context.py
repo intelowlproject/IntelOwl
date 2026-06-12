@@ -53,9 +53,12 @@ class DerivePageContextTestCase(SimpleTestCase):
         """The regexes mirror React Router paths in frontend/src/components/Routes.jsx.
 
         When a frontend route changes (e.g. /jobs/:id → /analysis/:id), this test MUST
-        fail so the developer updates the regexes in context.py. The coupling is
-        explicit: the comment above _JOB_RE / _INVESTIGATION_RE lists the exact
-        Routes.jsx line numbers that define these paths.
+        fail so the developer updates the regexes in context.py AND in
+        frontend/src/components/chat/QuickActions.jsx (the frontend copy). The coupling
+        is explicit: the comments above the regexes in both files list the exact
+        Routes.jsx line numbers. Both sides have their own coupling test:
+          - backend: this test (test_context.py)
+          - frontend: tests/components/chat/QuickActions.test.jsx
         """
         # Job detail routes (Routes.jsx:157,166,178,186) — /jobs/:id[/...]
         for path in (

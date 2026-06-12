@@ -11,8 +11,19 @@ from urllib.parse import urlparse
 _JOB_CONTEXT = "The user is currently viewing job #{id} in the IntelOwl UI."
 _INVESTIGATION_CONTEXT = "The user is currently viewing investigation #{id} in the IntelOwl UI."
 
-# Frontend detail routes (frontend/src/components/Routes.jsx): job is /jobs/<id>[/...],
-# investigation is /investigation/<id> (singular). Match the id, ignore any trailing segments.
+# These regexes mirror React Router path definitions in
+# frontend/src/components/Routes.jsx. When those routes change, these patterns
+# must be updated in lockstep — otherwise context injection silently stops
+# recognising job/investigation pages. The coupling is enforced by
+# test_regexes_match_frontend_route_definitions in test_context.py.
+#
+#   /jobs/:id                                   (Routes.jsx:157)
+#   /jobs/:id/:section                          (Routes.jsx:166)
+#   /jobs/:id/:section/:subSection              (Routes.jsx:178)
+#   /jobs/:id/comments                          (Routes.jsx:186)
+#   /investigation/:id                          (Routes.jsx:243)
+#
+# Only the numeric id is captured; any trailing segments are ignored.
 _JOB_RE = re.compile(r"^/jobs/(\d+)(?:/|$)")
 _INVESTIGATION_RE = re.compile(r"^/investigation/(\d+)(?:/|$)")
 

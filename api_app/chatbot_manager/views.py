@@ -18,6 +18,7 @@ from .agent.memory import DjangoChatMessageHistory
 from .events import ChatErrorDetail
 from .health import chatbot_health
 from .models import ChatMessage, ChatSession
+from .rate_limit import _build_rate_limiter
 from .serializers.chat import (
     ChatMessageSerializer,
     ChatSessionSerializer,
@@ -63,37 +64,51 @@ class ChatSessionViewSet(ModelViewSet):
     def message(self, request):
         """Run one synchronous chat turn against the agent.
 
-        Flow: validate the request, resolve the target session (or create a new one),
-        load the prior turns from the DB as the agent's conversation history, invoke the
-        tool-calling agent with the user's message, then persist both the user message and
-        the assistant reply and return the reply. Persistence goes through
-        DjangoChatMessageHistory so the ORM stays the single source of truth for history.
+        Flow: validate the request, rate-limit per user, resolve the target
+        session (or create a new one), load the prior turns from the DB as the
+        agent's conversation history, invoke the tool-calling agent with the
+        user's message, then persist both the user message and the assistant
+        reply and return the reply. Persistence goes through
+        DjangoChatMessageHistory so the ORM stays the single source of truth
+        for history.
         """
         req = MessageRequestSerializer(data=request.data)
         req.is_valid(raise_exception=True)
 
-        session_id = req.validated_data.get("session_id")
         user_message = req.validated_data["message"]
 
+        limiter = _build_rate_limiter()
+        allowed, retry_after = limiter.allow(str(request.user.id))
+        if not allowed:
+            return Response(
+                {
+                    "errors": [
+                        {
+                            "detail": (f"Too many messages. Please wait {retry_after} seconds."),
+                            "code": ChatErrorDetail.RATE_LIMITED.value,
+                            "retry_after": retry_after,
+                        }
+                    ]
+                },
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
+        session_id = req.validated_data.get("session_id")
         if session_id:
             session = get_object_or_404(ChatSession, pk=session_id, user=request.user)
         else:
             session = ChatSession.objects.create(user=request.user)
 
+        limiter.increment(str(request.user.id))
+
         history = DjangoChatMessageHistory(session=session)
 
         executor = build_agent_executor(user=request.user)
-        # history.messages are LangChain message objects, fed straight into the prompt's
-        # chat_history MessagesPlaceholder; read before this turn is persisted below.
         result = executor.invoke(
             {"input": user_message, "chat_history": history.messages, "page_context": ""}
         )
         response_text = result.get("output", "")
         if response_text == AGENT_STOPPED_OUTPUT:
-            # max_iterations force-stopped a looping model: return an error and drop the turn
-            # rather than persisting LangChain's canned string as the assistant's answer
-            # (mirrors the WebSocket path's chat.error semantics, session_id included so the
-            # client can keep using a session created by this very request).
             logger.warning(f"chatbot message: iteration cap hit for session {session.pk}")
             return Response(
                 {"detail": ChatErrorDetail.ITERATION_LIMIT.value, "session_id": session.pk},

@@ -49,6 +49,7 @@ export function ChatPanel() {
     (state) => state.assistantUnavailable,
   );
   const error = useChatStore((state) => state.error);
+  const checkHealth = useChatStore((state) => state.checkHealth);
   const { sendMessage } = useChatWebSocket();
 
   // Master-detail mode: "conversation" (messages + composer) or "sessions" (the session list).
@@ -58,6 +59,12 @@ export function ChatPanel() {
   React.useEffect(() => {
     if (!isOpen) setView("conversation");
   }, [isOpen]);
+
+  // Proactively probe availability each time the drawer opens, so a down chatbot worker / Ollama is
+  // obvious immediately instead of after the post-ack watchdog.
+  React.useEffect(() => {
+    if (isOpen) checkHealth();
+  }, [isOpen, checkHealth]);
 
   // The badge reflects assistant availability, not just transport: a connected socket whose worker
   // isn't serving turns (assistantUnavailable) must not keep reading green "Connected".

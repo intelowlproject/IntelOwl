@@ -315,3 +315,52 @@ describe("useChatStore session management", () => {
     expect(state.sessions).toEqual([{ id: 1 }]);
   });
 });
+
+describe("useChatStore checkHealth", () => {
+  beforeEach(() => {
+    useChatStore.setState(initialState);
+    jest.clearAllMocks();
+  });
+
+  test("flags unavailable and shows the detail banner", async () => {
+    axios.get.mockResolvedValueOnce({
+      data: { available: false, detail: "down" },
+    });
+    await useChatStore.getState().checkHealth();
+    const state = useChatStore.getState();
+    expect(state.assistantUnavailable).toBe(true);
+    expect(state.error).toBe("down");
+  });
+
+  test("clears the unavailable banner when recovering", async () => {
+    useChatStore.setState({ assistantUnavailable: true, error: "down" });
+    axios.get.mockResolvedValueOnce({
+      data: { available: true, detail: "" },
+    });
+    await useChatStore.getState().checkHealth();
+    const state = useChatStore.getState();
+    expect(state.assistantUnavailable).toBe(false);
+    expect(state.error).toBeNull();
+  });
+
+  test("preserves an unrelated turn error when already available", async () => {
+    useChatStore.setState({
+      assistantUnavailable: false,
+      error: "turn failed",
+    });
+    axios.get.mockResolvedValueOnce({
+      data: { available: true, detail: "" },
+    });
+    await useChatStore.getState().checkHealth();
+    expect(useChatStore.getState().error).toBe("turn failed");
+  });
+
+  test("does nothing when the health request fails", async () => {
+    useChatStore.setState({ assistantUnavailable: false, error: null });
+    axios.get.mockRejectedValueOnce(new Error("boom"));
+    await useChatStore.getState().checkHealth();
+    const state = useChatStore.getState();
+    expect(state.assistantUnavailable).toBe(false);
+    expect(state.error).toBeNull();
+  });
+});

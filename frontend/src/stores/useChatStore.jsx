@@ -2,7 +2,7 @@ import { create } from "zustand";
 import axios from "axios";
 import { format } from "date-fns-tz";
 
-import { CHATBOT_SESSIONS_URI } from "../constants/apiURLs";
+import { CHATBOT_HEALTH_URI, CHATBOT_SESSIONS_URI } from "../constants/apiURLs";
 
 /**
  * Connection states for the chat WebSocket, surfaced in the UI as a status badge.
@@ -243,4 +243,25 @@ export const useChatStore = create((set, get) => ({
 
   // --- connection ---
   setConnectionState: (connectionState) => set({ connectionState }),
+
+  // Proactive availability probe, run when the drawer opens: if the chatbot worker or Ollama isn't
+  // up, surface the "Unavailable" badge + a banner at once instead of after the ~20s post-ack
+  // watchdog. A failed request is ignored (no false alarm); composer stays usable either way.
+  checkHealth: async () => {
+    let health;
+    try {
+      ({ data: health } = await axios.get(CHATBOT_HEALTH_URI));
+    } catch (error) {
+      return;
+    }
+    set((state) =>
+      health.available
+        ? {
+            assistantUnavailable: false,
+            // clear only the unavailable banner (on recovery), never an unrelated turn error
+            error: state.assistantUnavailable ? null : state.error,
+          }
+        : { assistantUnavailable: true, error: health.detail },
+    );
+  },
 }));

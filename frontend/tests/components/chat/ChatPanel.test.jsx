@@ -55,8 +55,13 @@ describe("ChatPanel", () => {
   beforeEach(() => {
     global.WebSocket = StubWebSocket;
     useChatStore.setState(baseState);
-    // the sessions view fetches the list on mount
-    axios.get.mockResolvedValue({ data: { total_pages: 1, results: [] } });
+    // the drawer-open effect probes /health (assistant healthy by default) and the sessions view
+    // fetches the list on mount; route by URL so the open-probe never reads a sessions payload.
+    axios.get.mockImplementation((url) =>
+      url.includes("/health")
+        ? Promise.resolve({ data: { available: true, detail: "" } })
+        : Promise.resolve({ data: { total_pages: 1, results: [] } }),
+    );
   });
 
   test("renders the composer and the connection badge when open", async () => {
@@ -67,6 +72,12 @@ describe("ChatPanel", () => {
   });
 
   test("shows an Unavailable badge when the assistant is unavailable while connected", async () => {
+    // the open-probe reports the assistant down, so the flag stays set once it resolves
+    axios.get.mockImplementation((url) =>
+      url.includes("/health")
+        ? Promise.resolve({ data: { available: false, detail: "down" } })
+        : Promise.resolve({ data: { total_pages: 1, results: [] } }),
+    );
     useChatStore.setState({ assistantUnavailable: true });
     render(<ChatPanel />);
     // the socket is connected (transport fine) but the assistant can't serve a turn: the badge must
@@ -122,5 +133,18 @@ describe("ChatPanel", () => {
       screen.getByRole("button", { name: /Back to conversation/i }),
     );
     expect(screen.getByPlaceholderText(/Ask about/i)).toBeInTheDocument();
+  });
+
+  test("probes health when the drawer opens and surfaces an unavailable result", async () => {
+    axios.get.mockImplementation((url) =>
+      url.includes("/health")
+        ? Promise.resolve({
+            data: { available: false, detail: "Services down" },
+          })
+        : Promise.resolve({ data: { total_pages: 1, results: [] } }),
+    );
+    render(<ChatPanel />); // baseState has isOpen: true -> the open effect fires checkHealth
+    expect(await screen.findByText("Services down")).toBeInTheDocument();
+    expect(await screen.findByText("Unavailable")).toBeInTheDocument();
   });
 });

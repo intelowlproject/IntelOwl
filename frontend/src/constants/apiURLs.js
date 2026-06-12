@@ -54,6 +54,7 @@ export const APIACCESS_BASE_URI = `${AUTH_BASE_URI}/apiaccess`;
 // chatbot (router uses trailing_slash=False, so these paths carry no trailing slash)
 export const CHATBOT_BASE_URI = `${API_BASE_URI}/chatbot`;
 export const CHATBOT_SESSIONS_URI = `${CHATBOT_BASE_URI}/sessions`;
+export const CHATBOT_HEALTH_URI = `${CHATBOT_BASE_URI}/health`;
 
 // WEBSOCKETS
 const WEBSOCKET_BASE_URI = "ws";

@@ -23,6 +23,7 @@ from api_app.chatbot_manager.events import (
     chat_group_for_user,
 )
 from api_app.chatbot_manager.models import ChatSession
+from api_app.chatbot_manager.rate_limit import _build_rate_limiter
 from api_app.chatbot_manager.serializers.chat import MessageRequestSerializer
 from api_app.chatbot_manager.tasks import process_chat_message
 
@@ -56,14 +57,24 @@ class ChatConsumer(JsonWebsocketConsumer):
     def receive_json(self, content, **kwargs) -> None:
         """Validate one inbound message, resolve its session, and enqueue the agent turn.
 
-        The frame is untrusted: it is validated/length-capped by MessageRequestSerializer, and
-        any supplied session_id is resolved scoped to the connected user, so a client cannot
-        drive another user's session.
+        The frame is untrusted: it is validated/length-capped by
+        MessageRequestSerializer, and any supplied session_id is resolved scoped
+        to the connected user, so a client cannot drive another user's session.
+        Rate limiting is enforced before session resolution so a rate-limited
+        client cannot create sessions by sending messages that are then dropped.
         """
         user = self.scope["user"]
         serializer = MessageRequestSerializer(data=content)
         if not serializer.is_valid():
             self.send_json(ErrorEvent(None, ChatErrorDetail.INVALID_MESSAGE.value).to_client())
+            return
+
+        limiter = _build_rate_limiter()
+        allowed, retry_after = limiter.allow(str(user.id))
+        if not allowed:
+            self.send_json(
+                ErrorEvent(None, ChatErrorDetail.RATE_LIMITED.value, retry_after=retry_after).to_client()
+            )
             return
 
         session_id = serializer.validated_data.get("session_id")
@@ -73,6 +84,8 @@ class ChatConsumer(JsonWebsocketConsumer):
         except ChatSession.DoesNotExist:
             self.send_json(ErrorEvent(session_id, ChatErrorDetail.SESSION_NOT_FOUND.value).to_client())
             return
+
+        limiter.increment(str(user.id))
 
         # Ack the (possibly newly created) session id before the asynchronous stream begins.
         self.send_json(AckEvent(session.id).to_client())

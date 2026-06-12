@@ -82,7 +82,9 @@ class ChatSessionViewSet(ModelViewSet):
         executor = build_agent_executor(user=request.user)
         # history.messages are LangChain message objects, fed straight into the prompt's
         # chat_history MessagesPlaceholder; read before this turn is persisted below.
-        result = executor.invoke({"input": user_message, "chat_history": history.messages})
+        result = executor.invoke(
+            {"input": user_message, "chat_history": history.messages, "page_context": ""}
+        )
         response_text = result.get("output", "")
         if response_text == AGENT_STOPPED_OUTPUT:
             # max_iterations force-stopped a looping model: return an error and drop the turn

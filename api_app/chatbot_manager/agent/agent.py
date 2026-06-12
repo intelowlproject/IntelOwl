@@ -25,7 +25,7 @@ explicitly approves."""
 # are message lists (MessagesPlaceholder), not pre-rendered text.
 PROMPT = ChatPromptTemplate.from_messages(
     [
-        ("system", _SYSTEM_PROMPT),
+        ("system", _SYSTEM_PROMPT + "\n\n{page_context}"),
         MessagesPlaceholder("chat_history"),
         ("human", "{input}"),
         MessagesPlaceholder("agent_scratchpad"),

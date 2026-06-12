@@ -77,6 +77,6 @@ class BuildAgentExecutorTestCase(TestCase):
         with patch("api_app.chatbot_manager.agent.agent.ChatOllama", return_value=llm):
             executor = build_agent_executor(user=self.user)
 
-        result = executor.invoke({"input": "loop forever", "chat_history": []})
+        result = executor.invoke({"input": "loop forever", "chat_history": [], "page_context": ""})
 
         self.assertEqual(result["output"], AGENT_STOPPED_OUTPUT)

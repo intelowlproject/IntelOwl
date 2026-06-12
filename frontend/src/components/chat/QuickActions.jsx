@@ -12,8 +12,9 @@ export const INVESTIGATION_DETAIL_RE = /^\/investigation\/(\d+)(?:\/|$)/;
 
 const JOB_ACTIONS = [
   { label: "Summarize this job", message: "Summarize job #{id}" },
-  { label: "What analyzers ran?", message: "What analyzers ran on job #{id}?" },
+  { label: "Which plugins ran?", message: "Which plugins ran on job #{id}?" },
   { label: "Show job details", message: "Show me the details of job #{id}" },
+  { label: "Evaluate results", message: "Evaluate the results of job #{id}" },
 ];
 
 const INVESTIGATION_ACTIONS = [
@@ -24,6 +25,10 @@ const INVESTIGATION_ACTIONS = [
   {
     label: "Show investigation tree",
     message: "Show the tree for investigation #{id}",
+  },
+  {
+    label: "Analyze this investigation",
+    message: "What can you tell me about investigation #{id}?",
   },
 ];
 

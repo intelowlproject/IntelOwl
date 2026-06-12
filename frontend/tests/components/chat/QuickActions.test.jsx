@@ -30,8 +30,9 @@ describe("QuickActions", () => {
     render(<QuickActions onSend={jest.fn()} />);
 
     expect(screen.getByText("Summarize this job")).toBeInTheDocument();
-    expect(screen.getByText("What analyzers ran?")).toBeInTheDocument();
+    expect(screen.getByText("Which plugins ran?")).toBeInTheDocument();
     expect(screen.getByText("Show job details")).toBeInTheDocument();
+    expect(screen.getByText("Evaluate results")).toBeInTheDocument();
     // generic chips must not appear
     expect(screen.queryByText("Show my recent jobs")).not.toBeInTheDocument();
   });
@@ -50,6 +51,7 @@ describe("QuickActions", () => {
       screen.getByText("Summarize this investigation"),
     ).toBeInTheDocument();
     expect(screen.getByText("Show investigation tree")).toBeInTheDocument();
+    expect(screen.getByText("Analyze this investigation")).toBeInTheDocument();
   });
 
   it("shows generic chips on non-entity pages", () => {
@@ -73,6 +75,15 @@ describe("QuickActions", () => {
 
     await userEvent.click(screen.getByText("Summarize this job"));
     expect(onSend).toHaveBeenCalledWith("Summarize job #42");
+  });
+
+  it("calls onSend with resolved id on Evaluate results click", async () => {
+    mockLocation("/jobs/42");
+    const onSend = jest.fn();
+    render(<QuickActions onSend={onSend} />);
+
+    await userEvent.click(screen.getByText("Evaluate results"));
+    expect(onSend).toHaveBeenCalledWith("Evaluate the results of job #42");
   });
 
   it("calls onSend with the raw message on generic pages", async () => {

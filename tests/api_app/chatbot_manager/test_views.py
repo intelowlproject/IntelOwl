@@ -175,7 +175,11 @@ class ChatSessionViewSetTestCase(APITestCase):
             "chatbot_rate_limit": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"},
         }
     )
-    def test_rate_limit_returns_429_envelope(self):
+    @patch(
+        "api_app.chatbot_manager.views.build_agent_executor",
+        return_value=MagicMock(invoke=MagicMock(return_value=MOCK_AGENT_OUTPUT)),
+    )
+    def test_rate_limit_returns_429_envelope(self, mock_executor):
         """6th message in the same window returns 429 with IntelOwl error envelope."""
         limit = 5
         with self.settings(CHATBOT_RATE_LIMIT=limit, CHATBOT_RATE_LIMIT_WINDOW=60):

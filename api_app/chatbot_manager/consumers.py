@@ -76,7 +76,7 @@ class ChatConsumer(JsonWebsocketConsumer):
 
         # Ack the (possibly newly created) session id before the asynchronous stream begins.
         self.send_json(AckEvent(session.id).to_client())
-        process_chat_message.delay(session.id, message, user.id)
+        process_chat_message.delay(session.id, message, user.id, self.context_url)
 
     @staticmethod
     def _resolve_session(user, session_id) -> ChatSession:

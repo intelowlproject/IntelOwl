@@ -14,6 +14,7 @@ from django.db.models import Max
 from django.db.models.functions import Coalesce
 from django.utils.timezone import now
 
+from api_app.chatbot_manager.agent.context import derive_page_context
 from api_app.chatbot_manager.events import (
     ChatErrorDetail,
     EndEvent,
@@ -32,7 +33,7 @@ logger = logging.getLogger(__name__)
 # (catchable, lets us clean up) rather than a hard time_limit that SIGKILLs the worker,
 # and it bounds a hung Ollama call so it can't occupy a worker indefinitely.
 @shared_task(base=FailureLoggedTask, soft_time_limit=300)
-def process_chat_message(session_id: int, user_message: str, user_id: int) -> None:
+def process_chat_message(session_id: int, user_message: str, user_id: int, context_url: str = "") -> None:
     """Run one chat turn off-request and stream it to the user's WebSocket group.
 
     Enqueued by ChatConsumer.receive_json. The agent runs synchronously here (so token and
@@ -86,7 +87,11 @@ def process_chat_message(session_id: int, user_message: str, user_id: int) -> No
             tool_names={tool.name for tool in executor.tools},
         )
         result = executor.invoke(
-            {"input": user_message, "chat_history": chat_history},
+            {
+                "input": user_message,
+                "chat_history": chat_history,
+                "page_context": derive_page_context(context_url),
+            },
             config={"callbacks": [handler]},
         )
     except SoftTimeLimitExceeded:

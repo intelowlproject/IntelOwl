@@ -34,6 +34,7 @@ def _make_consumer(user):
     consumer.channel_layer.group_discard = AsyncMock()
     consumer.accept = MagicMock()
     consumer.send_json = MagicMock()
+    consumer.context_url = ""  # connect() sets this from the scope; receive_json tests skip connect()
     return consumer
 
 
@@ -69,7 +70,7 @@ class ChatConsumerTestCase(TestCase):
 
         session = ChatSession.objects.get(user=self.user)
         consumer.send_json.assert_called_once_with(events.AckEvent(session.id).to_client())
-        mock_task.delay.assert_called_once_with(session.id, "hello", self.user.id)
+        mock_task.delay.assert_called_once_with(session.id, "hello", self.user.id, "")
 
     @patch("api_app.chatbot_manager.consumers.process_chat_message")
     def test_existing_owned_session_is_reused(self, mock_task):
@@ -80,7 +81,19 @@ class ChatConsumerTestCase(TestCase):
         # no new session is created when a valid owned id is supplied
         self.assertEqual(ChatSession.objects.filter(user=self.user).count(), 1)
         consumer.send_json.assert_called_once_with(events.AckEvent(session.id).to_client())
-        mock_task.delay.assert_called_once_with(session.id, "again", self.user.id)
+        mock_task.delay.assert_called_once_with(session.id, "again", self.user.id, "")
+
+    @patch("api_app.chatbot_manager.consumers.process_chat_message")
+    def test_context_url_is_forwarded_to_the_task(self, mock_task):
+        consumer = _make_consumer(self.user)
+        consumer.context_url = "https://intelowl.test/jobs/42"
+        consumer.receive_json({"message": "summarize this"})
+
+        session = ChatSession.objects.get(user=self.user)
+        # the consumer forwards the raw context_url; the task derives the hint
+        mock_task.delay.assert_called_once_with(
+            session.id, "summarize this", self.user.id, "https://intelowl.test/jobs/42"
+        )
 
     @patch("api_app.chatbot_manager.consumers.process_chat_message")
     def test_oversized_message_is_rejected(self, mock_task):

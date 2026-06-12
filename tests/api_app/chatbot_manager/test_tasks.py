@@ -202,6 +202,34 @@ class ProcessChatMessageTestCase(TestCase):
 
     @patch("api_app.chatbot_manager.tasks.get_channel_layer")
     @patch("api_app.chatbot_manager.agent.agent.build_agent_executor")
+    def test_context_url_is_injected_as_page_context(self, mock_build, mock_get_layer):
+        self._patched_layer(mock_get_layer)
+        executor = MagicMock()
+        executor.invoke.return_value = {"output": "ok"}
+        mock_build.return_value = executor
+
+        process_chat_message(self.session.id, "summarize this", self.user.id, "https://intelowl.test/jobs/42")
+
+        invoke_input = executor.invoke.call_args.args[0]
+        self.assertEqual(
+            invoke_input["page_context"],
+            "The user is currently viewing job #42 in the IntelOwl UI.",
+        )
+
+    @patch("api_app.chatbot_manager.tasks.get_channel_layer")
+    @patch("api_app.chatbot_manager.agent.agent.build_agent_executor")
+    def test_missing_context_url_yields_empty_page_context(self, mock_build, mock_get_layer):
+        self._patched_layer(mock_get_layer)
+        executor = MagicMock()
+        executor.invoke.return_value = {"output": "ok"}
+        mock_build.return_value = executor
+
+        process_chat_message(self.session.id, "hello", self.user.id)  # no context_url
+
+        self.assertEqual(executor.invoke.call_args.args[0]["page_context"], "")
+
+    @patch("api_app.chatbot_manager.tasks.get_channel_layer")
+    @patch("api_app.chatbot_manager.agent.agent.build_agent_executor")
     def test_session_not_owned_by_user_is_rejected(self, mock_build, mock_get_layer):
         layer = self._patched_layer(mock_get_layer)
         other = User.objects.create(username="chatbot_task_other")

@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 from asgiref.sync import async_to_sync
 from django.contrib.auth.models import AnonymousUser
-from django.test import SimpleTestCase, TestCase
+from django.test import SimpleTestCase, TestCase, override_settings
 
 from api_app.chatbot_manager import events
 from api_app.chatbot_manager.consumers import ChatConsumer
@@ -119,6 +119,36 @@ class ChatConsumerTestCase(TestCase):
             events.ErrorEvent(foreign_session.id, events.ChatErrorDetail.SESSION_NOT_FOUND.value).to_client()
         )
         mock_task.delay.assert_not_called()
+
+    @override_settings(
+        CACHES={
+            "default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"},
+            "chatbot_rate_limit": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"},
+        }
+    )
+    @patch("api_app.chatbot_manager.consumers.process_chat_message")
+    def test_rate_limit_emits_error_event(self, mock_task):
+        """Messages over the per-user limit emit RATE_LIMITED and are dropped."""
+        with self.settings(CHATBOT_RATE_LIMIT=2, CHATBOT_RATE_LIMIT_WINDOW=60):
+            consumer = _make_consumer(self.user)
+
+            # Two messages within the limit — both enqueued.
+            consumer.receive_json({"message": "first"})
+            self.assertTrue(mock_task.delay.called)
+            mock_task.reset_mock()
+
+            consumer.receive_json({"message": "second"})
+            self.assertTrue(mock_task.delay.called)
+            mock_task.reset_mock()
+
+            # Third message — rate-limited, not enqueued.
+            consumer.receive_json({"message": "too many"})
+            mock_task.delay.assert_not_called()
+            sent = consumer.send_json.call_args[0][0]
+            self.assertEqual(sent["type"], "error")
+            self.assertEqual(sent["detail"], "rate_limited")
+            self.assertIsInstance(sent["retry_after"], int)
+            self.assertGreater(sent["retry_after"], 0)
 
 
 class ChatConsumerRelayTestCase(SimpleTestCase):

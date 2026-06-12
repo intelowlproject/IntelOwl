@@ -10,11 +10,13 @@ from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
 from .agent.agent import AGENT_STOPPED_OUTPUT, build_agent_executor
 from .agent.memory import DjangoChatMessageHistory
 from .events import ChatErrorDetail
+from .health import chatbot_health
 from .models import ChatMessage, ChatSession
 from .serializers.chat import (
     ChatMessageSerializer,
@@ -22,6 +24,7 @@ from .serializers.chat import (
     MessageRequestSerializer,
     MessageResponseSerializer,
 )
+from .serializers.health import ChatHealthSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -131,3 +134,12 @@ class ChatSessionViewSet(ModelViewSet):
 
         serializer = ChatMessageSerializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class ChatHealthView(APIView):
+    """Proactive availability probe for the chat panel (chatbot worker + Ollama)."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response(ChatHealthSerializer(chatbot_health()).data)

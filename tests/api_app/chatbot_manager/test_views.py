@@ -4,6 +4,7 @@
 from datetime import timedelta
 from unittest.mock import MagicMock, patch
 
+from django.test import override_settings
 from django.utils.timezone import now
 from langchain_core.messages import AIMessage, HumanMessage
 from rest_framework import status
@@ -167,6 +168,45 @@ class ChatSessionViewSetTestCase(APITestCase):
         response = self.client.get(self.URL)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNone(response.json()["results"][0]["title"])
+
+    @override_settings(
+        CACHES={
+            "default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"},
+            "chatbot_rate_limit": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"},
+        }
+    )
+    def test_rate_limit_returns_429_envelope(self):
+        """6th message in the same window returns 429 with IntelOwl error envelope."""
+        limit = 5
+        with self.settings(CHATBOT_RATE_LIMIT=limit, CHATBOT_RATE_LIMIT_WINDOW=60):
+            # Send 5 messages first — the mock agent returns success, so the first 5
+            # pass through to the executor (200, not 429).
+            for i in range(limit):
+                response = self.client.post(
+                    self.MESSAGE_URL,
+                    data={"message": f"msg {i}"},
+                    format="json",
+                )
+                self.assertNotEqual(
+                    response.status_code,
+                    status.HTTP_429_TOO_MANY_REQUESTS,
+                    f"request {i} should not be rate-limited",
+                )
+
+            # 6th message — rate-limited.
+            response = self.client.post(
+                self.MESSAGE_URL,
+                data={"message": "one too many"},
+                format="json",
+            )
+            self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
+            data = response.json()
+            self.assertIn("errors", data)
+            self.assertEqual(len(data["errors"]), 1)
+            error = data["errors"][0]
+            self.assertIn("Too many messages", error["detail"])
+            self.assertEqual(error["code"], "rate_limited")
+            self.assertGreater(error["retry_after"], 0)
 
     def tearDown(self):
         ChatSession.objects.filter(user=self.user).delete()

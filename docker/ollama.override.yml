@@ -42,6 +42,8 @@ services:
     env_file:
       - env_file_app
     depends_on:
+      redis:
+        condition: service_started
       uwsgi:
         condition: service_healthy
       ollama:

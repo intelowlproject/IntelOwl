@@ -104,9 +104,19 @@ class ChatSessionViewSet(ModelViewSet):
         history = DjangoChatMessageHistory(session=session)
 
         executor = build_agent_executor(user=request.user)
-        result = executor.invoke(
-            {"input": user_message, "chat_history": history.messages, "page_context": ""}
-        )
+        try:
+            result = executor.invoke(
+                {"input": user_message, "chat_history": history.messages, "page_context": ""}
+            )
+        except Exception:  # noqa: BLE001 - any agent/Ollama failure must reach the client cleanly
+            # Mirror the Celery path (tasks.py): a model/Ollama failure is surfaced as a clean
+            # 503 envelope instead of an unhandled 500. session_id is included so a client that
+            # created the session via this very request can keep using it.
+            logger.exception(f"chatbot message: agent run failed for session {session.pk}")
+            return Response(
+                {"detail": ChatErrorDetail.UNAVAILABLE.value, "session_id": session.pk},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
         response_text = result.get("output", "")
         if response_text == AGENT_STOPPED_OUTPUT:
             logger.warning(f"chatbot message: iteration cap hit for session {session.pk}")

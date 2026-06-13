@@ -212,6 +212,19 @@ class ChatSessionViewSetTestCase(APITestCase):
             self.assertEqual(error["code"], "rate_limited")
             self.assertGreater(error["retry_after"], 0)
 
+    @patch(
+        "api_app.chatbot_manager.views.build_agent_executor",
+        return_value=MagicMock(invoke=MagicMock(side_effect=RuntimeError("ollama down"))),
+    )
+    def test_message_returns_503_when_agent_unavailable(self, mock_executor):
+        response = self.client.post(
+            self.MESSAGE_URL,
+            data={"message": "Hello"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_503_SERVICE_UNAVAILABLE)
+        self.assertEqual(response.json()["detail"], ChatErrorDetail.UNAVAILABLE.value)
+
     def tearDown(self):
         ChatSession.objects.filter(user=self.user).delete()
 

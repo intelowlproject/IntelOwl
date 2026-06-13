@@ -119,6 +119,11 @@ class InvestigationToolsTestCase(TestCase):
         ids = [i["id"] for i in data["investigations"]]
         self.assertIn(self.inv_created.pk, ids)
 
+    def test_list_investigations_limit_over_cap_reports_error(self):
+        result = self.list_investigations.invoke({"limit": 100})
+        data = json.loads(result)
+        self.assertTrue(any("maximum 50" in e for e in data["errors"]))
+
     def test_get_investigation_tree_structure(self):
         data = json.loads(self.get_investigation_tree.invoke({"investigation_id": self.inv_created.pk}))
         self.assertEqual(data["errors"], [])

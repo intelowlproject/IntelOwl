@@ -3,13 +3,10 @@
 
 from langchain_core.tools import tool
 
+from api_app.chatbot_manager.agent.tools._common import clamp_limit
 from api_app.chatbot_manager.serializers.investigation import InvestigationsResultSerializer
 from api_app.investigations_manager.choices import InvestigationStatusChoices
 from api_app.investigations_manager.models import Investigation
-
-# Hard cap on the number of results returned to the LLM (mirrors the job tools), so a
-# single call can't pull an unbounded list into the prompt.
-_MAX_RESULTS = 50
 
 
 def make_list_investigations_tool(user):
@@ -47,7 +44,7 @@ def make_list_investigations_tool(user):
                 valid = ", ".join(InvestigationStatusChoices.values)
                 errors.append(f"Unknown status '{status}'; valid values are: {valid}.")
 
-        limit = min(int(limit), _MAX_RESULTS)
+        limit = clamp_limit(limit, errors)
         qs = qs.order_by("-start_time")[:limit]
 
         return InvestigationsResultSerializer({"errors": errors, "investigations": qs}).to_json()

@@ -40,8 +40,8 @@ class ChatConsumer(JsonWebsocketConsumer):
 
     def connect(self) -> None:
         user = self.scope["user"]
-        # context_url (the page the user is on) is captured for later context injection (W9);
-        # it is intentionally unused for now.
+        # context_url (the page the user is on) is captured and forwarded to the chat turn so the
+        # agent can resolve "this job/investigation" references (see derive_page_context in tasks.py).
         self.context_url = self._parse_context_url()
         self.group_name = chat_group_for_user(user.id)
         self.accept()

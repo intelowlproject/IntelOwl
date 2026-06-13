@@ -4,6 +4,9 @@
 from django.db import models
 from langchain_core.tools import tool
 
+from api_app.chatbot_manager.agent.tools._common import clamp_limit
+from api_app.choices import Status
+
 
 def make_search_jobs_tool(user):
     # The tool is built per-request and closes over `user`: every query is hard-scoped
@@ -16,8 +19,8 @@ def make_search_jobs_tool(user):
 
         Args:
             query: Observable name or MD5 hash to search for (partial match supported).
-            status: Filter by job status. Valid values: pending, running,
-                    reported_without_fails, reported_with_fails, failed, killed.
+            status: Filter by job status (see api_app.choices.Status for valid values).
+                    An unknown value is ignored and reported in `errors`.
             limit: Maximum number of results to return (default 10, max 50).
 
         Returns:
@@ -26,7 +29,8 @@ def make_search_jobs_tool(user):
         from api_app.chatbot_manager.serializers.job import SearchJobsResultSerializer
         from api_app.models import Job
 
-        limit = min(int(limit), 50)
+        errors = []
+        limit = clamp_limit(limit, errors)
         qs = (
             Job.objects.select_related("analyzable")
             .prefetch_related("analyzers_to_execute")
@@ -38,10 +42,18 @@ def make_search_jobs_tool(user):
                 models.Q(analyzable__name__icontains=query) | models.Q(analyzable__md5__iexact=query)
             )
         if status:
-            qs = qs.filter(status=status)
+            # The status string comes from the LLM; validate it against the enum so an
+            # invalid value surfaces a message instead of silently returning 0 results
+            # (mirrors list_investigations).
+            normalized = status.strip().lower()
+            if normalized in set(Status.values):
+                qs = qs.filter(status=normalized)
+            else:
+                valid = ", ".join(Status.values)
+                errors.append(f"Unknown status '{status}'; valid values are: {valid}.")
 
         qs = qs.order_by("-received_request_time")[:limit]
 
-        return SearchJobsResultSerializer({"errors": [], "jobs": qs}).to_json()
+        return SearchJobsResultSerializer({"errors": errors, "jobs": qs}).to_json()
 
     return search_jobs

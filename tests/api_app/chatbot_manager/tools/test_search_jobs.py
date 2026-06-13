@@ -109,5 +109,21 @@ class SearchJobsToolTestCase(TestCase):
         self.assertIn(config_ko.name, summary)
         self.assertNotIn(config_ok.name, summary)
 
+    def test_search_jobs_invalid_status_reports_error(self):
+        result = self.search_jobs.invoke({"status": "not_a_status"})
+        data = json.loads(result)
+        self.assertTrue(any("Unknown status" in e for e in data["errors"]))
+
+    def test_search_jobs_valid_status_filters(self):
+        result = self.search_jobs.invoke({"status": "reported_without_fails"})
+        data = json.loads(result)
+        self.assertEqual(data["errors"], [])
+        self.assertEqual([d["id"] for d in data["jobs"]], [self.job.pk])
+
+    def test_search_jobs_limit_over_cap_reports_error(self):
+        result = self.search_jobs.invoke({"limit": 100})
+        data = json.loads(result)
+        self.assertTrue(any("maximum 50" in e for e in data["errors"]))
+
     def tearDown(self):
         Job.objects.filter(user__in=[self.user, self.other_user]).delete()

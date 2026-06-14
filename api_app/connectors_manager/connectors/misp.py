@@ -9,6 +9,7 @@ from django.conf import settings
 from api_app import helpers
 from api_app.choices import Classification
 from api_app.connectors_manager.classes import Connector
+from api_app.connectors_manager.exceptions import ConnectorRunException
 from tests.mock_utils import if_mock_connections, patch
 
 INTELOWL_MISP_TYPE_MAP = {
@@ -93,19 +94,43 @@ class MISP(Connector):
 
         return obj
 
+    def _handle_misp_errors(self, errors):
+        error_str = str(errors)
+
+        debug_info = (
+            f" [debug: PyMISP version={pymisp.__version__},"
+            f" ssl_check={self.ssl_check},"
+            f" url={self._url_key_name}]"
+            if self.debug
+            else ""
+        )
+
+        if "The plain HTTP request was sent to HTTPS port" in error_str:
+            raise ConnectorRunException(
+                "MISP connection failed: You are trying to send a plain HTTP request to an HTTPS port. "
+                "Please change your MISP URL in the plugin configuration from 'http://' to 'https://'."
+                f"{debug_info}"
+            )
+        else:
+            raise ConnectorRunException(f"{errors}{debug_info}")
+
     def run(self):
         ssl_param = (
             f"{settings.PROJECT_LOCATION}/configuration/misp_ssl.crt"
             if self.ssl_check and self.self_signed_certificate
             else self.ssl_check
         )
-        misp_instance = pymisp.PyMISP(
-            url=self._url_key_name,
-            key=self._api_key_name,
-            ssl=ssl_param,
-            debug=self.debug,
-            timeout=5,
-        )
+
+        try:
+            misp_instance = pymisp.PyMISP(
+                url=self._url_key_name,
+                key=self._api_key_name,
+                ssl=ssl_param,
+                debug=self.debug,
+                timeout=5,
+            )
+        except Exception as e:
+            self._handle_misp_errors(f"MISP initialization failed: {str(e)}")
 
         # get event and attributes
         event = self._event_obj
@@ -127,7 +152,15 @@ class MISP(Connector):
             )
 
         # single request — event + all attributes sent together
-        misp_event = misp_instance.add_event(event, pythonify=True)
+        try:
+            misp_event = misp_instance.add_event(event, pythonify=True)
+        except Exception as e:
+            self._handle_misp_errors(f"MISP add event failed: {str(e)}")
+
+        if isinstance(misp_event, dict):
+            errors = misp_event.get("errors", [])
+            if errors:
+                self._handle_misp_errors(errors)
 
         return misp_instance.get_event(misp_event.id)
 

@@ -4,6 +4,7 @@
 from unittest.mock import MagicMock, patch
 
 from api_app.connectors_manager.connectors.misp import MISP
+from api_app.connectors_manager.exceptions import ConnectorRunException
 from tests.api_app.connectors_manager.unit_tests.base_test_class import BaseConnectorTest
 
 
@@ -127,5 +128,18 @@ class MISPConnectorTestCase(BaseConnectorTest):
 
             mock_instance.add_event.side_effect = Exception("MISP unreachable")
 
-            with self.assertRaisesRegex(Exception, "MISP unreachable"):
+            with self.assertRaisesRegex(ConnectorRunException, "MISP unreachable"):
                 connector.run()
+
+    def test_misp_initialisation_http_failure_raises_exception(self):
+        connector = self._setup_connector()
+
+        with patch("api_app.connectors_manager.connectors.misp.pymisp.PyMISP") as mock_misp_cls:
+            mock_misp_cls.side_effect = Exception(
+                "<html>The plain HTTP request was sent to HTTPS port</html>"
+            )
+
+            with self.assertRaises(ConnectorRunException) as context:
+                connector.run()
+
+            self.assertIn("plain HTTP request to an HTTPS port", str(context.exception))

@@ -7,8 +7,9 @@ from api_app.choices import ReportStatus
 
 
 def make_summarize_job_tool(user):
-    # Built per-request and closed over `user`, so the lookup is hard-scoped to that
-    # user's jobs (multi-tenancy enforced here). The payload is human-readable prose
+    # Built per-request and closed over `user`: the lookup is scoped with visible_for_user
+    # (owner + same-org AMBER/RED + globally-visible CLEAR/GREEN), matching the REST
+    # JobViewSet / UI (multi-tenancy enforced here). The payload is human-readable prose
     # (meant to be relayed to the user) wrapped in the same envelope as the other tools.
     @tool("summarize_job")
     def summarize_job(job_id: int) -> str:
@@ -27,7 +28,8 @@ def make_summarize_job_tool(user):
             job = (
                 Job.objects.select_related("analyzable")
                 .prefetch_related("analyzerreports__config", "analyzers_to_execute")
-                .get(pk=job_id, user=user)
+                .visible_for_user(user)
+                .get(pk=job_id)
             )
         except Job.DoesNotExist:
             return SummarizeJobResultSerializer(

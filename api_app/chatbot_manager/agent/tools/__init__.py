@@ -18,9 +18,9 @@ def build_tools(user) -> list:
 
     Each tool is produced by a factory that closes over `user`, so every ORM query the
     agent can run is hard-scoped to that user's data: multi-tenancy is enforced at build
-    time and cannot be widened by anything the LLM emits. Job tools scope on `user=user`;
-    investigation tools scope on `visible_for_user` (owned + organization-shared); the
-    playbook tool also scopes on `visible_for_user`. Analyzer configs are global plugin
+    time and cannot be widened by anything the LLM emits. Job, investigation, and playbook
+    tools scope on `visible_for_user` (owner + same-org AMBER/RED + globally-visible
+    CLEAR/GREEN), matching the REST viewsets / UI. Analyzer configs are global plugin
     definitions, so `list_analyzers` does not scope by owner -- it lists the enabled
     analyzers and exposes per-user readiness through a `runnable` flag instead. The single
     action tool `analyze_observable` can launch a real analysis; it is confirm-gated (a preview

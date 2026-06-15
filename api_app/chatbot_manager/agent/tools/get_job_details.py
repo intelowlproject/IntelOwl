@@ -5,8 +5,9 @@ from langchain_core.tools import tool
 
 
 def make_get_job_details_tool(user):
-    # Built per-request and closed over `user`, so the lookup is hard-scoped to that
-    # user's jobs (multi-tenancy enforced here). LangChain requires a tool to return a
+    # Built per-request and closed over `user`: the lookup is scoped with visible_for_user
+    # (owner + same-org AMBER/RED + globally-visible CLEAR/GREEN), matching the REST
+    # JobViewSet / UI (multi-tenancy enforced here). LangChain requires a tool to return a
     # string (the tool-call observation), so we return a JSON-serialized envelope.
     @tool("get_job_details")
     def get_job_details(job_id: int) -> str:
@@ -25,7 +26,8 @@ def make_get_job_details_tool(user):
             job = (
                 Job.objects.select_related("analyzable")
                 .prefetch_related("analyzerreports__config", "analyzers_to_execute", "tags")
-                .get(pk=job_id, user=user)
+                .visible_for_user(user)
+                .get(pk=job_id)
             )
         except Job.DoesNotExist:
             return JobDetailResultSerializer(

@@ -9,10 +9,11 @@ from api_app.choices import Status
 
 
 def make_search_jobs_tool(user):
-    # The tool is built per-request and closes over `user`: every query is hard-scoped
-    # to that user's jobs, so multi-tenancy is enforced here and the LLM can never widen
-    # it. LangChain feeds a tool's return value back to the model as the tool-call
-    # observation, so it must be a string; we return a JSON-serialized envelope.
+    # Built per-request and closed over `user`: scoped with visible_for_user (owner +
+    # same-org AMBER/RED + globally-visible CLEAR/GREEN), matching the REST JobViewSet / UI.
+    # The LLM can never widen it. LangChain feeds a tool's return value back to the model
+    # as the tool-call observation, so it must be a string; we return a JSON-serialized
+    # envelope.
     @tool("search_jobs")
     def search_jobs(query: str = "", status: str = "", limit: int = 10) -> str:
         """Search IntelOwl jobs by observable name, MD5, or status.
@@ -34,7 +35,7 @@ def make_search_jobs_tool(user):
         qs = (
             Job.objects.select_related("analyzable")
             .prefetch_related("analyzers_to_execute")
-            .filter(user=user)
+            .visible_for_user(user)
         )
 
         if query:

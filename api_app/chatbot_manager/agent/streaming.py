@@ -11,6 +11,7 @@ pattern ``JobConsumer.serialize_and_send_job`` already uses.
 """
 
 import json
+import logging
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -23,6 +24,8 @@ from api_app.chatbot_manager.events import (
     TokenEvent,
     chat_group_for_user,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ChatStreamingCallbackHandler(BaseCallbackHandler):
@@ -74,6 +77,9 @@ class ChatStreamingCallbackHandler(BaseCallbackHandler):
         try:
             data = json.loads(text)
         except (TypeError, ValueError):
+            logger.warning("on_tool_end: cannot parse tool output as JSON (%s)", type(output).__name__)
             return
         if isinstance(data, dict) and data.get("pending_id"):
             self._emit(ActionRequiredEvent(self._session_id, data["pending_id"], data.get("plan") or {}))
+        else:
+            logger.debug("on_tool_end: no pending_id in tool output")

@@ -8,10 +8,10 @@ from api_app.models import Job
 
 
 def make_get_data_model_tool(user):
-    # Built per-request and closed over `user`, so the lookup is hard-scoped to that user's
-    # jobs (multi-tenancy enforced here), matching the other job tools' `user=user` scope.
-    # LangChain feeds a tool's return value back as the tool-call observation, so it must be
-    # a string: we return a JSON-serialized envelope.
+    # Built per-request and closed over `user`: scoped with visible_for_user (owner +
+    # same-org AMBER/RED + globally-visible CLEAR/GREEN), matching the other job tools and
+    # the UI (multi-tenancy enforced here). LangChain feeds a tool's return value back as
+    # the tool-call observation, so it must be a string: we return a JSON-serialized envelope.
     @tool("get_data_model")
     def get_data_model(job_id: int) -> str:
         """Get the aggregated data model of an IntelOwl job by its numeric ID.
@@ -28,7 +28,7 @@ def make_get_data_model_tool(user):
             JSON string with shape {"errors": [...], "data_model": {...}}.
         """
         try:
-            job = Job.objects.get(pk=job_id, user=user)
+            job = Job.objects.visible_for_user(user).get(pk=job_id)
         except Job.DoesNotExist:
             return DataModelResultSerializer(
                 {"errors": [f"Job with ID {job_id} not found or not accessible."], "data_model": {}}

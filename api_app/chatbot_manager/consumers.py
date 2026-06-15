@@ -118,3 +118,6 @@ class ChatConsumer(JsonWebsocketConsumer):
 
     def chat_error(self, event) -> None:
         self.send_json(event["payload"])
+
+    def chat_action_required(self, event) -> None:
+        self.send_json(event["payload"])

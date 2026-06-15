@@ -36,6 +36,7 @@ class ChatEventType(StrEnum):
     TOKEN = "token"
     END = "end"
     ERROR = "error"
+    ACTION_REQUIRED = "action_required"
 
 
 class ChatErrorDetail(StrEnum):
@@ -122,3 +123,15 @@ class ErrorEvent(ChatEvent):
     detail: str
     retry_after: Optional[int] = None
     type: ClassVar[ChatEventType] = ChatEventType.ERROR
+
+
+@dataclass(frozen=True)
+class ActionRequiredEvent(ChatEvent):
+    """A tool produced something the user must act on out-of-band (e.g. confirm an analysis).
+
+    Carries the pending id the frontend posts to the confirm endpoint, plus the plan to display.
+    """
+
+    pending_id: str
+    plan: dict
+    type: ClassVar[ChatEventType] = ChatEventType.ACTION_REQUIRED

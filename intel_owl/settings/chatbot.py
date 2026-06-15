@@ -28,3 +28,12 @@ CACHES["chatbot_rate_limit"] = {
     "BACKEND": "django.core.cache.backends.redis.RedisCache",
     "LOCATION": "redis://redis:6379/2",
 }
+
+# Pending analyze_observable confirmations (human-in-the-loop guardrail): a preview mints a
+# short-lived record; the confirm endpoint consumes it. Same Redis db as the rate limiter (2);
+# keys are namespaced by prefix so they never collide.
+CHATBOT_PENDING_ACTION_TTL = int(secrets.get_secret("CHATBOT_PENDING_ACTION_TTL", 600))
+CACHES["chatbot_pending_action"] = {
+    "BACKEND": "django.core.cache.backends.redis.RedisCache",
+    "LOCATION": "redis://redis:6379/2",
+}

@@ -5,6 +5,7 @@ import logging
 
 from django.db.models import OuterRef, Subquery
 from django.db.models.functions import Substr
+from django.utils.timezone import now
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
@@ -13,12 +14,17 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
+from api_app.playbooks_manager.models import PlaybookConfig
+from api_app.serializers.job import ObservableAnalysisSerializer
+
 from .agent.agent import AGENT_STOPPED_OUTPUT, build_agent_executor
 from .agent.memory import DjangoChatMessageHistory
 from .events import ChatErrorDetail
 from .health import chatbot_health
 from .models import ChatMessage, ChatSession
+from .pending_action import consume_pending_analysis
 from .rate_limit import _build_rate_limiter
+from .serializers.analyze_observable import ConfirmAnalysisResultSerializer, flatten_errors
 from .serializers.chat import (
     ChatMessageSerializer,
     ChatSessionSerializer,
@@ -170,3 +176,66 @@ class ChatHealthView(APIView):
 
     def get(self, request):
         return Response(ChatHealthSerializer(chatbot_health()).data)
+
+
+class ChatAnalysisConfirmView(APIView):
+    """Launch a previously previewed analysis. This is the ONLY path that starts an
+    analyze_observable run: the agent can only preview (mint a pending id); a real user action
+    (the Confirm button) posts that id here, so the model can never launch on its own (M-1)."""
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        pending_id = request.data.get("pending_id")
+        record = consume_pending_analysis(request.user.id, pending_id) if pending_id else None
+        if record is None:
+            return Response(
+                {
+                    "errors": ["This confirmation has expired or is invalid. Ask for the analysis again."],
+                    "reused": False,
+                    "job": None,
+                },
+                status=status.HTTP_410_GONE,
+            )
+
+        # Re-apply the playbook visibility guard the preview tool uses: ObservableAnalysisSerializer
+        # resolves playbook_requested via PlaybookConfig.objects.all() (no visibility filter), so
+        # without this a playbook that became invisible to the user between preview and confirm could
+        # still be launched.
+        if (
+            record.get("playbook")
+            and not PlaybookConfig.objects.visible_for_user(request.user)
+            .filter(name=record["playbook"])
+            .exists()
+        ):
+            return Response(
+                {
+                    "errors": [f"Playbook '{record['playbook']}' is no longer visible to you."],
+                    "reused": False,
+                    "job": None,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        data = {"observable_name": record["observable_name"], "tlp": record["tlp"]}
+        if record.get("playbook"):
+            data["playbook_requested"] = record["playbook"]
+        analyzers_list = [a.strip() for a in record.get("analyzers", "").split(",") if a.strip()]
+        if analyzers_list:
+            data["analyzers_requested"] = analyzers_list
+
+        # Re-validate the observable/analyzers at launch time; playbook visibility is re-checked above.
+        serializer = ObservableAnalysisSerializer(data=data, context={"request": request})
+        if not serializer.is_valid(raise_exception=False):
+            return Response(
+                {"errors": flatten_errors(serializer.errors), "reused": False, "job": None},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        started = now()
+        job = serializer.save(send_task=True)
+        reused = job.received_request_time < started  # platform dedup returned a recent job
+        return Response(
+            ConfirmAnalysisResultSerializer({"errors": [], "reused": reused, "job": job}).data,
+            status=status.HTTP_200_OK,
+        )

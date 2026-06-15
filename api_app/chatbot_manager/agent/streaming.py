@@ -10,11 +10,14 @@ no event loop, so ``async_to_sync`` is the right bridge to the async channel lay
 pattern ``JobConsumer.serialize_and_send_job`` already uses.
 """
 
+import json
+
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from langchain_core.callbacks.base import BaseCallbackHandler
 
 from api_app.chatbot_manager.events import (
+    ActionRequiredEvent,
     ChatEvent,
     StatusEvent,
     TokenEvent,
@@ -62,3 +65,15 @@ class ChatStreamingCallbackHandler(BaseCallbackHandler):
         if not tool_name or (self._tool_names is not None and tool_name not in self._tool_names):
             return
         self._emit(StatusEvent(self._session_id, tool_name))
+
+    def on_tool_end(self, output, **kwargs) -> None:
+        # analyze_observable returns an envelope carrying a one-time pending_id; surface it as a
+        # structured action so the frontend can render a Confirm button. Other tools have no
+        # pending_id, so this is a no-op for them.
+        text = getattr(output, "content", output)
+        try:
+            data = json.loads(text)
+        except (TypeError, ValueError):
+            return
+        if isinstance(data, dict) and data.get("pending_id"):
+            self._emit(ActionRequiredEvent(self._session_id, data["pending_id"], data.get("plan") or {}))

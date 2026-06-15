@@ -4,7 +4,7 @@
 import json
 from unittest.mock import patch
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.chatbot_manager.agent.tools import build_tools
@@ -20,6 +20,7 @@ from certego_saas.apps.user.models import User
 _APPLY_ASYNC = "intel_owl.tasks.job_pipeline.apply_async"
 
 
+@override_settings(CHATBOT_PENDING_ACTION_TTL=600)
 class AnalyzeObservableToolTestCase(TestCase):
     def setUp(self):
         self.user, _ = User.objects.get_or_create(username="analyze_obs_user")
@@ -59,106 +60,68 @@ class AnalyzeObservableToolTestCase(TestCase):
         self.org.delete()
 
     @patch(_APPLY_ASYNC)
-    def test_preview_does_not_trigger(self, mock_apply):
-        # confirm defaults to False -> preview only: a plan is returned and NOTHING is launched.
-        # This is the core safety guarantee of the action tool.
+    def test_preview_returns_plan_and_pending_id_without_launching(self, mock_apply):
         data = json.loads(
             self.analyze_observable.invoke({"observable_name": "example.com", "analyzers": "Tranco"})
         )
         self.assertEqual(data["errors"], [])
-        self.assertTrue(data["confirmation_required"])
         self.assertIsNotNone(data["plan"])
-        self.assertIsNone(data["job"])
         self.assertEqual(data["plan"]["classification"], "domain")
         self.assertIn("Tranco", data["plan"]["analyzers"])
+        self.assertTrue(data["pending_id"])
+        mock_apply.assert_not_called()  # the tool NEVER launches
+
+    @patch(_APPLY_ASYNC)
+    def test_preview_mints_a_consumable_pending_record(self, mock_apply):
+        from api_app.chatbot_manager.pending_action import consume_pending_analysis
+
+        data = json.loads(
+            self.analyze_observable.invoke({"observable_name": "example.com", "analyzers": "Tranco"})
+        )
+        payload = consume_pending_analysis(self.user.id, data["pending_id"])
+        self.assertEqual(payload["observable_name"], "example.com")
+        self.assertEqual(payload["analyzers"], "Tranco")
         mock_apply.assert_not_called()
 
     @patch(_APPLY_ASYNC)
-    def test_confirm_triggers_once(self, mock_apply):
+    def test_private_ip_refused_at_preview(self, mock_apply):
         data = json.loads(
-            self.analyze_observable.invoke(
-                {"observable_name": "example.com", "analyzers": "Tranco", "confirm": True}
-            )
+            self.analyze_observable.invoke({"observable_name": "10.0.0.1", "analyzers": "Classic_DNS"})
         )
-        self.assertEqual(data["errors"], [])
-        self.assertFalse(data["confirmation_required"])
+        self.assertTrue(data["errors"])
         self.assertIsNone(data["plan"])
-        self.assertIsNotNone(data["job"])
-        self.assertEqual(data["job"]["observable_name"], "example.com")
-        self.assertFalse(data["reused"])  # fresh observable -> a new job, not a reused one
-        mock_apply.assert_called_once()
-
-    @patch(_APPLY_ASYNC)
-    def test_created_job_owned_by_requesting_user(self, mock_apply):
-        # Multi-tenancy: the launched Job is created under the closured user, never widened.
-        data = json.loads(
-            self.analyze_observable.invoke(
-                {"observable_name": "example.com", "analyzers": "Tranco", "confirm": True}
-            )
-        )
-        job = Job.objects.get(pk=data["job"]["id"])
-        self.assertEqual(job.user, self.user)
-
-    @patch(_APPLY_ASYNC)
-    def test_dedup_reuses_recent_job_on_second_confirm(self, mock_apply):
-        # Default scan_mode (CHECK_PREVIOUS_ANALYSIS): a second confirmed call for the same observable
-        # reuses the recent job instead of launching a duplicate -> apply_async fires only once and the
-        # second result is flagged `reused` with the same job id.
-        args = {"observable_name": "example.com", "analyzers": "Tranco", "confirm": True}
-        first = json.loads(self.analyze_observable.invoke(args))
-        second = json.loads(self.analyze_observable.invoke(args))
-        self.assertFalse(first["reused"])
-        self.assertTrue(second["reused"])
-        self.assertEqual(first["job"]["id"], second["job"]["id"])
-        mock_apply.assert_called_once()
-
-    @patch(_APPLY_ASYNC)
-    def test_private_ip_refused(self, mock_apply):
-        # The serializer's IP guardrail rejects a private IP during validation -> even with
-        # confirm=True the request never reaches the trigger.
-        data = json.loads(
-            self.analyze_observable.invoke(
-                {"observable_name": "10.0.0.1", "analyzers": "Classic_DNS", "confirm": True}
-            )
-        )
-        self.assertTrue(data["errors"])
-        self.assertIsNone(data["job"])
+        self.assertIsNone(data["pending_id"])
         mock_apply.assert_not_called()
 
     @patch(_APPLY_ASYNC)
-    def test_unknown_analyzer_refused(self, mock_apply):
-        # An analyzer name the serializer can't resolve -> validation error, nothing triggered.
+    def test_unknown_analyzer_refused_at_preview(self, mock_apply):
         data = json.loads(
             self.analyze_observable.invoke(
-                {"observable_name": "example.com", "analyzers": "NotARealAnalyzer", "confirm": True}
+                {"observable_name": "example.com", "analyzers": "NotARealAnalyzer"}
             )
         )
         self.assertTrue(data["errors"])
-        self.assertIsNone(data["job"])
+        self.assertIsNone(data["pending_id"])
         mock_apply.assert_not_called()
 
     @patch(_APPLY_ASYNC)
     def test_playbook_not_visible_refused(self, mock_apply):
-        # Isolation must-fix: another member's PRIVATE playbook must never resolve. The reused
-        # serializer would look it up via PlaybookConfig.objects.all(); the tool's visible_for_user
-        # guard rejects it first, so its existence/composition is never leaked into a plan.
         data = json.loads(
             self.analyze_observable.invoke(
-                {"observable_name": "example.com", "playbook": self.pb_private_other.name, "confirm": True}
+                {"observable_name": "example.com", "playbook": self.pb_private_other.name}
             )
         )
         self.assertTrue(any("not found or not visible" in e for e in data["errors"]))
         self.assertIsNone(data["plan"])
-        self.assertIsNone(data["job"])
+        self.assertIsNone(data["pending_id"])
         mock_apply.assert_not_called()
 
     @patch(_APPLY_ASYNC)
     def test_visible_playbook_preview(self, mock_apply):
-        # A playbook owned by the user passes the guard and previews with its name in the plan.
         data = json.loads(
             self.analyze_observable.invoke({"observable_name": "example.com", "playbook": self.pb_owned.name})
         )
         self.assertEqual(data["errors"], [])
-        self.assertTrue(data["confirmation_required"])
         self.assertEqual(data["plan"]["playbook"], self.pb_owned.name)
+        self.assertTrue(data["pending_id"])
         mock_apply.assert_not_called()

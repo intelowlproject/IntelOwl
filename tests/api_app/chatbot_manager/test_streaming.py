@@ -1,7 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from django.test import SimpleTestCase
 
@@ -88,3 +88,24 @@ class ChatStreamingCallbackHandlerTestCase(SimpleTestCase):
         real_action.tool = "search_jobs"
         handler.on_agent_action(real_action)
         layer.group_send.assert_called_once()
+
+    def test_tool_output_with_pending_id_emits_action_required(self):
+        import json as _json
+
+        handler = ChatStreamingCallbackHandler(user_id=1, session_id=42)
+        with patch.object(handler, "_emit") as mock_emit:
+            handler.on_tool_end(
+                _json.dumps({"errors": [], "plan": {"observable_name": "x"}, "pending_id": "abc"}),
+                run_id="fake-run-id",
+            )
+        mock_emit.assert_called_once()
+        event = mock_emit.call_args.args[0]
+        self.assertEqual(event.pending_id, "abc")
+
+    def test_plain_tool_output_emits_nothing(self):
+        import json as _json
+
+        handler = ChatStreamingCallbackHandler(user_id=1, session_id=42)
+        with patch.object(handler, "_emit") as mock_emit:
+            handler.on_tool_end(_json.dumps({"errors": [], "jobs": []}), run_id="fake-run-id")
+        mock_emit.assert_not_called()

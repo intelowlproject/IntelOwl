@@ -3,6 +3,7 @@ import axios from "axios";
 import { format } from "date-fns-tz";
 
 import { CHATBOT_HEALTH_URI, CHATBOT_SESSIONS_URI } from "../constants/apiURLs";
+import { confirmAnalysis } from "../components/chat/chatApi";
 
 /**
  * Connection states for the chat WebSocket, surfaced in the UI as a status badge.
@@ -31,6 +32,8 @@ const HISTORY_LOAD_ERROR =
   "Could not load this conversation. Please try again.";
 const SESSION_DELETE_ERROR =
   "Could not delete this conversation. Please try again.";
+const CONFIRM_ERROR =
+  "Could not start the analysis. The confirmation may have expired — ask again.";
 
 // Fetch every page of a session's messages. The backend orders by timestamp asc and returns pages
 // in order, so concatenation preserves chronological (oldest-first) order. Mirrors the paginated
@@ -87,6 +90,10 @@ export const useChatStore = create((set, get) => ({
   // is still up, so this — not connectionState — is what tells the badge the assistant itself can't
   // serve a turn right now. Cleared on the next `start` (the worker proving it is alive again).
   assistantUnavailable: false,
+  // A single previewed analysis awaiting the user's explicit Confirm/Cancel (HITL guardrail M-1).
+  // Deliberately NOT part of initialTurnState: the `action_required` frame arrives before `end`, so
+  // it must survive applyEnd and persist until the user acts or a new turn supersedes it.
+  pendingAction: null,
 
   // --- session list (serializable; the WS hook is untouched — these only change
   // sessionId/messages, which the hook reads live for demux and send) ---
@@ -114,6 +121,8 @@ export const useChatStore = create((set, get) => ({
       ...initialTurnState,
       isStreaming: true,
       error: null,
+      // a new user turn supersedes any stale confirmation card
+      pendingAction: null,
     })),
 
   // --- inbound frame reducers (called by the hook; demux/filtering happens upstream there) ---
@@ -148,6 +157,43 @@ export const useChatStore = create((set, get) => ({
   // produced nothing, so the assistant is unavailable — flag the badge in addition to the banner.
   applyUnavailable: (detail) =>
     set({ ...initialTurnState, error: detail, assistantUnavailable: true }),
+
+  // --- pending action (analyze confirm; HITL guardrail M-1) ---
+  // Set when a tool (analyze_observable) previews an action the user must confirm out-of-band.
+  // Persists past `end` (the action_required frame arrives before it) until the user acts or a
+  // new turn supersedes it.
+  applyActionRequired: (event) =>
+    set({ pendingAction: { pendingId: event.pending_id, plan: event.plan } }),
+
+  // Launch the previewed analysis as an explicit user action (the only path that starts it).
+  confirmPendingAction: async () => {
+    const pending = get().pendingAction;
+    if (!pending) return;
+    try {
+      const { errors, reused, job } = await confirmAnalysis(pending.pendingId);
+      // The envelope always carries `errors`; a 2xx with no job (or surfaced errors) shouldn't throw
+      // on job.id — clear the card and show the message instead.
+      if (!job) {
+        set({ pendingAction: null, error: errors?.[0] || CONFIRM_ERROR });
+        return;
+      }
+      const verb = reused ? "Reused recent analysis" : "Started analysis";
+      set((state) => ({
+        pendingAction: null,
+        messages: [
+          ...state.messages,
+          {
+            role: MessageRole.ASSISTANT,
+            content: `${verb} — job #${job.id} (${job.status}).`,
+          },
+        ],
+      }));
+    } catch (error) {
+      set({ pendingAction: null, error: CONFIRM_ERROR });
+    }
+  },
+
+  cancelPendingAction: () => set({ pendingAction: null }),
 
   // --- session management (REST) ---
   // Load the user's sessions (every page) for the list view; the queryset is user-scoped server-side.
@@ -185,6 +231,7 @@ export const useChatStore = create((set, get) => ({
       messages: [],
       ...initialTurnState,
       error: null,
+      pendingAction: null,
       historyLoading: true,
       navEpoch: state.navEpoch + 1,
     });
@@ -207,6 +254,7 @@ export const useChatStore = create((set, get) => ({
       messages: [],
       ...initialTurnState,
       error: null,
+      pendingAction: null,
       navEpoch: state.navEpoch + 1,
     })),
 
@@ -234,6 +282,7 @@ export const useChatStore = create((set, get) => ({
               messages: [],
               ...initialTurnState,
               error: null,
+              pendingAction: null,
               navEpoch: current.navEpoch + 1,
             }
           : {}),

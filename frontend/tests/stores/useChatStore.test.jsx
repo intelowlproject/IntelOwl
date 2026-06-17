@@ -7,8 +7,10 @@ import {
   deriveSessionLabel,
 } from "../../src/stores/useChatStore";
 import { CHATBOT_SESSIONS_URI } from "../../src/constants/apiURLs";
+import { confirmAnalysis } from "../../src/components/chat/chatApi";
 
 jest.mock("axios");
+jest.mock("../../src/components/chat/chatApi");
 
 const initialState = {
   isOpen: false,
@@ -25,6 +27,7 @@ const initialState = {
   historyLoading: false,
   navEpoch: 0,
   assistantUnavailable: false,
+  pendingAction: null,
 };
 
 describe("useChatStore reducers", () => {
@@ -362,5 +365,70 @@ describe("useChatStore checkHealth", () => {
     const state = useChatStore.getState();
     expect(state.assistantUnavailable).toBe(false);
     expect(state.error).toBeNull();
+  });
+});
+
+describe("pending action (analyze confirm)", () => {
+  beforeEach(() => {
+    useChatStore.setState({ pendingAction: null, messages: [], error: null });
+    confirmAnalysis.mockReset();
+  });
+
+  test("applyActionRequired stores the pending plan", () => {
+    useChatStore.getState().applyActionRequired({
+      pending_id: "abc",
+      plan: { observable_name: "x" },
+    });
+    expect(useChatStore.getState().pendingAction).toEqual({
+      pendingId: "abc",
+      plan: { observable_name: "x" },
+    });
+  });
+
+  test("confirmPendingAction posts, clears, and appends a result message", async () => {
+    useChatStore.setState({ pendingAction: { pendingId: "abc", plan: {} } });
+    confirmAnalysis.mockResolvedValue({
+      errors: [],
+      reused: false,
+      job: { id: 7, status: "running" },
+    });
+    await useChatStore.getState().confirmPendingAction();
+    expect(confirmAnalysis).toHaveBeenCalledWith("abc");
+    expect(useChatStore.getState().pendingAction).toBeNull();
+    const last = useChatStore.getState().messages.at(-1);
+    expect(last.content).toContain("#7");
+  });
+
+  test("confirmPendingAction clears the card and surfaces errors when no job is returned", async () => {
+    useChatStore.setState({ pendingAction: { pendingId: "abc", plan: {} } });
+    confirmAnalysis.mockResolvedValue({
+      errors: ["could not launch"],
+      reused: false,
+      job: null,
+    });
+    await useChatStore.getState().confirmPendingAction();
+    expect(useChatStore.getState().pendingAction).toBeNull();
+    expect(useChatStore.getState().error).toBe("could not launch");
+    expect(useChatStore.getState().messages).toEqual([]);
+  });
+
+  test("confirmPendingAction surfaces an error and clears the card on failure", async () => {
+    useChatStore.setState({ pendingAction: { pendingId: "abc", plan: {} } });
+    confirmAnalysis.mockRejectedValue(new Error("gone"));
+    await useChatStore.getState().confirmPendingAction();
+    expect(useChatStore.getState().pendingAction).toBeNull();
+    expect(useChatStore.getState().error).toBeTruthy();
+  });
+
+  test("cancelPendingAction clears it", () => {
+    useChatStore.setState({ pendingAction: { pendingId: "abc", plan: {} } });
+    useChatStore.getState().cancelPendingAction();
+    expect(useChatStore.getState().pendingAction).toBeNull();
+  });
+
+  test("sending a new message supersedes a pending action", () => {
+    useChatStore.setState({ pendingAction: { pendingId: "abc", plan: {} } });
+    useChatStore.getState().enqueueUserMessage("hi");
+    expect(useChatStore.getState().pendingAction).toBeNull();
   });
 });

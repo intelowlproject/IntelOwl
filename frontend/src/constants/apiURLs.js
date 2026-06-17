@@ -51,10 +51,15 @@ export const NOTIFICATION_BASE_URI = `${API_BASE_URI}/notification`;
 export const AUTH_BASE_URI = `${API_BASE_URI}/auth`;
 export const APIACCESS_BASE_URI = `${AUTH_BASE_URI}/apiaccess`;
 
-// chatbot (router uses trailing_slash=False, so these paths carry no trailing slash)
+// chatbot (router uses trailing_slash=False, so these paths carry no trailing slash).
+// These path suffixes mirror the canonical Django routes in
+// api_app/chatbot_manager/urls.py; they can't be imported across the JS/Python boundary, so a
+// coupling test (tests/components/chat/chatbotRouteCoupling.test.js) reads that file and fails
+// loudly if a route is renamed on either side. Keep both in sync.
 export const CHATBOT_BASE_URI = `${API_BASE_URI}/chatbot`;
 export const CHATBOT_SESSIONS_URI = `${CHATBOT_BASE_URI}/sessions`;
 export const CHATBOT_HEALTH_URI = `${CHATBOT_BASE_URI}/health`;
+export const CHATBOT_ANALYSIS_CONFIRM_URI = `${CHATBOT_BASE_URI}/analysis/confirm`;
 
 // WEBSOCKETS
 const WEBSOCKET_BASE_URI = "ws";

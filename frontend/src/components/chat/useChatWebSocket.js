@@ -11,6 +11,7 @@ const ChatEventType = Object.freeze({
   TOKEN: "token",
   END: "end",
   ERROR: "error",
+  ACTION_REQUIRED: "action_required",
 });
 
 // Normal WebSocket close code: a clean close must NOT trigger a reconnect.
@@ -135,6 +136,13 @@ export function useChatWebSocket() {
           if (event.session_id !== activeSession) return;
           clearTurnTimers();
           store.applyEnd(event);
+          break;
+        case ChatEventType.ACTION_REQUIRED:
+          // A tool previewed an analysis the user must confirm. Demuxed like the streaming frames so
+          // another tab's preview never raises this tab's card; it does NOT end the turn (prose still
+          // streams), so the turn watchdogs are left untouched.
+          if (event.session_id !== activeSession) return;
+          store.applyActionRequired(event);
           break;
         case ChatEventType.ERROR:
           // Looser guard than the streaming frames: the consumer's *direct* errors arrive only on

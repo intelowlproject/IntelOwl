@@ -69,6 +69,7 @@ const initialState = {
   error: null,
   navEpoch: 0,
   assistantUnavailable: false,
+  pendingAction: null,
 };
 
 describe("useChatWebSocket", () => {
@@ -177,6 +178,33 @@ describe("useChatWebSocket", () => {
       });
     });
     expect(useChatStore.getState().streamingText).toBe("");
+  });
+
+  test("dispatches action_required to the store, demuxed by session", () => {
+    connectAndOpen();
+    act(() => {
+      useChatStore.setState({ sessionId: 5 });
+    });
+    // a frame for another tab's session must not raise this tab's confirmation card
+    act(() => {
+      lastSocket().mockMessage({
+        type: "action_required",
+        session_id: 999,
+        pending_id: "other",
+        plan: { observable_name: "y" },
+      });
+    });
+    expect(useChatStore.getState().pendingAction).toBeNull();
+    // the active session's frame is stored as the pending action
+    act(() => {
+      lastSocket().mockMessage({
+        type: "action_required",
+        session_id: 5,
+        pending_id: "abc",
+        plan: { observable_name: "x" },
+      });
+    });
+    expect(useChatStore.getState().pendingAction.pendingId).toBe("abc");
   });
 
   test("surfaces a null-session error but ignores another session's error", () => {

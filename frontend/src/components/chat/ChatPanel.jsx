@@ -17,6 +17,7 @@ import { ChatMessageList } from "./ChatMessageList";
 import { ChatComposer } from "./ChatComposer";
 import { ChatSessionList } from "./ChatSessionList";
 import { QuickActions } from "./QuickActions";
+import { ChatActionConfirm } from "./ChatActionConfirm";
 
 // Connection-state badge shown in the drawer header.
 const CONNECTION_BADGE = {
@@ -136,6 +137,7 @@ export function ChatPanel() {
         ) : (
           <>
             <ChatMessageList />
+            <ChatActionConfirm />
             <QuickActions onSend={sendMessage} disabled={inputDisabled} />
             <ChatComposer onSend={sendMessage} />
           </>

@@ -226,38 +226,3 @@ class OpenCTI(classes.Connector):
             except Exception:
                 pass
             raise
-
-    @classmethod
-    def _monkeypatch(cls):
-        """Install pycti stubs when connection mocking is enabled."""
-        if not getattr(settings, "MOCK_CONNECTIONS", False):
-            return
-
-        def _configure(start_fn):
-            def inner(self, job_id, runtime_configuration, task_id, *args, **kwargs):
-                # Avoid real OpenCTI network calls
-                pycti.OpenCTIApiClient = lambda *a, **k: None
-
-                def _fake_create(*_args, **_kwargs):
-                    return {"id": 1}
-
-                def _noop(*_args, **_kwargs):
-                    return None
-
-                # Ensure core entities always return a dict with an id in CI generic tests.
-                pycti.Identity.create = _fake_create
-                pycti.MarkingDefinition.create = _fake_create
-                pycti.StixCyberObservable.create = _fake_create
-                pycti.Label.create = _fake_create
-                pycti.Report.create = _fake_create
-                pycti.ExternalReference.create = _fake_create
-
-                # No-op the linking methods that would otherwise dereference opencti/app_logger.
-                pycti.StixDomainObject.add_external_reference = _noop
-                pycti.Report.add_stix_object_or_stix_relationship = _noop
-
-                return start_fn(self, job_id, runtime_configuration, task_id, *args, **kwargs)
-
-            return inner
-
-        return super()._monkeypatch(patches=[_configure])

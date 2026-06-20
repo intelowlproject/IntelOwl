@@ -8,7 +8,6 @@ from django.conf import settings
 
 from api_app.connectors_manager import classes
 from api_app.connectors_manager.exceptions import ConnectorRunException
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class YETI(classes.Connector):
@@ -113,15 +112,3 @@ class YETI(classes.Connector):
             raise ConnectorRunException(e)
 
         return resp.json()
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.post",
-                    return_value=MockUpResponse({}, 200),
-                )
-            )
-        ]
-        return super()._monkeypatch(patches=patches)

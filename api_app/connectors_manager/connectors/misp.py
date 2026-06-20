@@ -10,7 +10,6 @@ from api_app import helpers
 from api_app.choices import Classification
 from api_app.connectors_manager.classes import Connector
 from api_app.connectors_manager.exceptions import ConnectorRunException
-from tests.mock_utils import if_mock_connections, patch
 
 INTELOWL_MISP_TYPE_MAP = {
     Classification.IP: "ip-src",
@@ -163,46 +162,3 @@ class MISP(Connector):
                 self._handle_misp_errors(errors)
 
         return misp_instance.get_event(misp_event.id)
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "pymisp.PyMISP",
-                    side_effect=MockPyMISP,
-                )
-            )
-        ]
-        return super()._monkeypatch(patches=patches)
-
-
-# Mocks
-class MockUpMISPElement:
-    """
-    Mock element(event/attribute) for testing
-    """
-
-    id: int = 1
-
-
-class MockPyMISP:
-    """
-    Mock PyMISP instance for testing
-     methods which require connection to a MISP instance
-    """
-
-    def __init__(self, *args, **kwargs) -> None:
-        pass
-
-    @staticmethod
-    def add_event(*args, **kwargs) -> MockUpMISPElement:
-        return MockUpMISPElement()
-
-    @staticmethod
-    def add_attribute(*args, **kwargs) -> MockUpMISPElement:
-        return MockUpMISPElement()
-
-    @staticmethod
-    def get_event(event_id) -> dict:
-        return {"Event": {"id": event_id}}

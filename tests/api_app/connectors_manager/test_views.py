@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 from typing import Type
+from unittest.mock import patch
 
 from api_app.analyzables_manager.models import Analyzable
 from api_app.choices import Classification
@@ -34,12 +35,15 @@ class ConnectorConfigViewSetTestCase(AbstractConfigViewSetTestCaseMixin, CustomV
             owner=None,
             connector_config=connector,
         )
-        response = self.client.get(f"{self.URL}/{connector.name}/health_check")
-        self.assertEqual(response.status_code, 200)
 
-        self.client.force_authenticate(self.superuser)
-        response = self.client.get(f"{self.URL}/{connector.name}/health_check")
-        self.assertEqual(response.status_code, 200)
+        with patch("api_app.connectors_manager.connectors.yeti.YETI.health_check", return_value=True):
+            response = self.client.get(f"{self.URL}/{connector.name}/health_check")
+            self.assertEqual(response.status_code, 200)
+
+            self.client.force_authenticate(self.superuser)
+            response = self.client.get(f"{self.URL}/{connector.name}/health_check")
+            self.assertEqual(response.status_code, 200)
+
         result = response.json()
         self.assertIn("status", result)
         self.assertTrue(result["status"])

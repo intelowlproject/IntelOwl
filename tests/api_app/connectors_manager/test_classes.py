@@ -42,13 +42,16 @@ class ConnectorTestCase(CustomTestCase):
             parameter=Parameter.objects.get(name="url_key_name", python_module=pm),
             connector_config=cc,
         )
-        with patch("requests.head"):
+
+        with patch("requests.head") as mock_head:
+            mock_head.return_value.status_code = 200
             result = MockUpConnector(cc).health_check(self.user)
-        self.assertTrue(result)
-        cc.disabled = False
-        cc.save()
-        result = MockUpConnector(cc).health_check(self.user)
-        self.assertTrue(result)
+            self.assertTrue(result)
+            cc.disabled = False
+            cc.save()
+            result = MockUpConnector(cc).health_check(self.user)
+            self.assertTrue(result)
+
         cc.delete()
         pc.delete()
 
@@ -131,7 +134,10 @@ class ConnectorTestCase(CustomTestCase):
                 )
                 signal.alarm(timeout_seconds)
                 try:
-                    sub.start(job.pk, {}, uuid())
+                    with patch(
+                        "api_app.connectors_manager.models.ConnectorConfig._get_params", return_value={}
+                    ):
+                        sub.start(job.pk, {}, uuid())
                 except Exception as e:
                     self.fail(f"Connector {subclass.__name__} with config {config.name} failed {e}")
                 finally:

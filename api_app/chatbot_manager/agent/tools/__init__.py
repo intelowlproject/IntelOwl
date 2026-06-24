@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from ._common import on_invalid_tool_args
 from .analyze_observable import make_analyze_observable_tool
 from .get_data_model import make_get_data_model_tool
 from .get_investigation_tree import make_get_investigation_tree_tool
@@ -27,8 +28,12 @@ def build_tools(user) -> list:
     unless `confirm=True`) and creates jobs owned by `user`. Every tool returns a string
     (LangChain feeds it back to the model as the tool-call observation); see each tool
     for its shape.
+
+    Every tool also gets `handle_validation_error` set so that a schema-invalid argument the model
+    emits (e.g. the literal placeholder `<job_id>`) becomes a recoverable observation instead of an
+    exception that kills the turn (see `on_invalid_tool_args`).
     """
-    return [
+    tools = [
         make_search_jobs_tool(user),
         make_get_job_details_tool(user),
         make_summarize_job_tool(user),
@@ -40,3 +45,11 @@ def build_tools(user) -> list:
         make_recommend_playbook_tool(user),
         make_analyze_observable_tool(user),
     ]
+    # A schema-invalid tool argument (e.g. the model passing the literal "<job_id>" instead of a
+    # real id) raises a pydantic ValidationError inside BaseTool.run, before the tool body -- and is
+    # NOT covered by the executor's handle_parsing_errors (model output only). Returning it as an
+    # observation makes a bad argument recoverable (the agent retries with the real value) instead
+    # of killing the turn. Set centrally so every tool shares the behavior.
+    for chatbot_tool in tools:
+        chatbot_tool.handle_validation_error = on_invalid_tool_args
+    return tools

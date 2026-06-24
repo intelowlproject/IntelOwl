@@ -11,9 +11,11 @@ from langchain_core.runnables import RunnableLambda
 from api_app.chatbot_manager.agent.agent import (
     _MAX_AGENT_ITERATIONS,
     _NUM_CTX,
+    _SYSTEM_PROMPT,
     AGENT_STOPPED_OUTPUT,
     build_agent_executor,
 )
+from api_app.chatbot_manager.agent.tools._common import on_invalid_tool_args
 from certego_saas.apps.user.models import User
 
 # The full tool registry the agent must expose (one factory per module in agent/tools/).
@@ -80,3 +82,65 @@ class BuildAgentExecutorTestCase(TestCase):
         result = executor.invoke({"input": "loop forever", "chat_history": [], "page_context": ""})
 
         self.assertEqual(result["output"], AGENT_STOPPED_OUTPUT)
+
+
+class OnInvalidToolArgsTestCase(TestCase):
+    """The observation returned on a bad tool argument names the error and steers a retry."""
+
+    def test_message_surfaces_error_and_forbids_placeholders(self):
+        msg = on_invalid_tool_args(ValueError("job_id: not an integer"))
+        self.assertIsInstance(msg, str)
+        self.assertIn("job_id: not an integer", msg)  # the underlying error reaches the model
+        self.assertIn("placeholder", msg.lower())  # tell it not to pass a placeholder
+
+
+def _scripted_llm(responses):
+    """Fake ChatOllama whose bound runnable replays `responses`, one AIMessage per agent round."""
+    replies = iter(responses)
+    llm = MagicMock()
+    llm.bind_tools.return_value = RunnableLambda(lambda _: next(replies))
+    return llm
+
+
+class ToolArgRecoveryTestCase(TestCase):
+    """A schema-invalid tool argument is recoverable, never a turn-killing exception."""
+
+    def setUp(self):
+        self.user, _ = User.objects.get_or_create(username="chatbot_arg_recovery_user")
+
+    def test_all_tools_handle_validation_errors(self):
+        with patch("api_app.chatbot_manager.agent.agent.ChatOllama"):
+            executor = build_agent_executor(user=self.user)
+        for tool in executor.tools:
+            self.assertEqual(tool.handle_validation_error, on_invalid_tool_args)
+
+    def test_invalid_tool_arg_is_recoverable_not_fatal(self):
+        # round 1: model passes the literal placeholder -> ValidationError on job_id (an int).
+        # round 2: model answers in plain text. The turn must complete, not raise.
+        bad = AIMessage(
+            content="", tool_calls=[{"name": "summarize_job", "args": {"job_id": "<job_id>"}, "id": "c1"}]
+        )
+        answer = AIMessage(content="Here is the summary.")
+        llm = _scripted_llm([bad, answer])
+        with patch("api_app.chatbot_manager.agent.agent.ChatOllama", return_value=llm):
+            executor = build_agent_executor(user=self.user)
+        result = executor.invoke({"input": "summarize my latest job", "chat_history": [], "page_context": ""})
+        self.assertEqual(result["output"], "Here is the summary.")
+
+    def test_persistent_invalid_arg_degrades_to_forced_stop(self):
+        # The model emits the bad placeholder on every round: instead of crashing it must
+        # force-stop at max_iterations (the sentinel the caller maps to ITERATION_LIMIT).
+        bad = AIMessage(
+            content="", tool_calls=[{"name": "summarize_job", "args": {"job_id": "<job_id>"}, "id": "c1"}]
+        )
+        llm = MagicMock()
+        llm.bind_tools.return_value = RunnableLambda(lambda _: bad)
+        with patch("api_app.chatbot_manager.agent.agent.ChatOllama", return_value=llm):
+            executor = build_agent_executor(user=self.user)
+        result = executor.invoke({"input": "summarize my latest job", "chat_history": [], "page_context": ""})
+        self.assertEqual(result["output"], AGENT_STOPPED_OUTPUT)
+
+    def test_system_prompt_warns_against_placeholder_args(self):
+        # guard the specific rule, not just the word: the <job_id> token appears only in it
+        self.assertIn("<job_id>", _SYSTEM_PROMPT)
+        self.assertIn("placeholder", _SYSTEM_PROMPT.lower())

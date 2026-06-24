@@ -98,7 +98,9 @@ def _scripted_llm(responses):
     """Fake ChatOllama whose bound runnable replays `responses`, one AIMessage per agent round."""
     replies = iter(responses)
     llm = MagicMock()
-    llm.bind_tools.return_value = RunnableLambda(lambda _: next(replies))
+    # next() takes a default so an exhausted script can't raise StopIteration (DeepSource PTC-W0063):
+    # returning a plain-text AIMessage ends the agent loop benignly instead of crashing the test.
+    llm.bind_tools.return_value = RunnableLambda(lambda _: next(replies, AIMessage(content="")))
     return llm
 
 

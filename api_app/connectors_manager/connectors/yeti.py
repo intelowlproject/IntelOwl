@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import ipaddress
+import logging
 
 import requests
 from django.conf import settings
@@ -9,11 +10,66 @@ from django.conf import settings
 from api_app.connectors_manager import classes
 from api_app.connectors_manager.exceptions import ConnectorRunException
 
+logger = logging.getLogger(__name__)
+
 
 class YETI(classes.Connector):
     verify_ssl: bool
     _url_key_name: str
     _api_key_name: str
+
+    def health_check(self, user=None) -> bool:
+        params = self._config.parameters.annotate_configured(self._config, user).annotate_value_for_user(
+            self._config, user
+        )
+        url = None
+        api_key = None
+
+        for param in params:
+            if param.name == "url_key_name":
+                url = param.value
+            elif param.name == "api_key_name":
+                api_key = param.value
+
+        if not url:
+            logger.info("Healthcheck failed: Missing config url")
+            return False
+        if not api_key:
+            logger.info("Healthcheck failed: Missing config api key")
+            return False
+
+        if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
+            return True
+
+        base_url = url.rstrip("/")
+        auth_url = f"{base_url}/api/v2/auth/api-token"
+
+        auth_headers = {"x-yeti-apikey": api_key, "User-Agent": "IntelOwl"}
+
+        try:
+            verify_ssl = getattr(self, "verify_ssl", False)
+
+            auth_resp = requests.post(
+                url=auth_url,
+                headers=auth_headers,
+                verify=verify_ssl,
+                timeout=10,
+            )
+            auth_resp.raise_for_status()
+            access_token = auth_resp.json().get("access_token")
+
+            if access_token:
+                return True
+            else:
+                logger.info(f"Healthcheck failed for {self}: No access token in response.")
+                return False
+
+        except requests.RequestException as e:
+            logger.info(f"Healthcheck failed: YETI Auth Request failed for {self}. Error: {e}")
+            return False
+        except Exception as e:
+            logger.exception(f"Unexpected error in YETI health_check: {e}")
+            return False
 
     def run(self):
         # get observable value and type

@@ -3,6 +3,8 @@
 
 from unittest.mock import MagicMock, patch
 
+import requests
+from django.test import override_settings
 from requests.exceptions import HTTPError
 
 from api_app.connectors_manager.connectors.yeti import YETI
@@ -138,3 +140,60 @@ class YETITestCase(BaseConnectorTest):
 
             with self.assertRaisesRegex(ConnectorRunException, "Failed to obtain access token from YETI"):
                 connector.run()
+
+    @override_settings(STAGE_CI=False, MOCK_CONNECTIONS=False)
+    def test_yeti_health_check_success(self):
+        connector = self._setup_connector()
+
+        mock_url_param = MagicMock()
+        mock_url_param.name = "url_key_name"
+        mock_url_param.value = "http://yeti.local/"
+
+        mock_api_param = MagicMock()
+        mock_api_param.name = "api_key_name"
+        mock_api_param.value = "dummy_api_key"
+
+        connector._config = MagicMock()
+        connector._config.parameters.annotate_configured.return_value.annotate_value_for_user.return_value = [
+            mock_url_param,
+            mock_api_param,
+        ]
+
+        with patch(
+            "api_app.connectors_manager.connectors.yeti.requests.post", side_effect=mock_yeti_api_flow
+        ):
+            self.assertTrue(connector.health_check())
+
+    @override_settings(STAGE_CI=False, MOCK_CONNECTIONS=False)
+    def test_yeti_health_check_failures(self):
+        connector = self._setup_connector()
+
+        mock_url_param = MagicMock()
+        mock_url_param.name = "url_key_name"
+        mock_url_param.value = "http://yeti.local/"
+
+        mock_api_param = MagicMock()
+        mock_api_param.name = "api_key_name"
+        mock_api_param.value = "dummy_api_key"
+
+        connector._config = MagicMock()
+        connector._config.parameters.annotate_configured.return_value.annotate_value_for_user.return_value = [
+            mock_url_param,
+            mock_api_param,
+        ]
+
+        with self.subTest("Network Exception"):
+            with patch(
+                "api_app.connectors_manager.connectors.yeti.requests.post",
+                side_effect=requests.exceptions.Timeout,
+            ):
+                self.assertFalse(connector.health_check())
+
+        with self.subTest("Authentication Failure"):
+            with patch("api_app.connectors_manager.connectors.yeti.requests.post") as mock_post:
+                mock_post.return_value = MockResponse({"error": "Unauthorized"}, 401)
+                self.assertFalse(connector.health_check())
+
+        with self.subTest("Missing Configuration"):
+            connector._config.parameters.annotate_configured.return_value.annotate_value_for_user.return_value = []
+            self.assertFalse(connector.health_check())

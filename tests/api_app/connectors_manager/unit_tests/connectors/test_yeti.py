@@ -182,17 +182,21 @@ class YETITestCase(BaseConnectorTest):
             mock_api_param,
         ]
 
-        with self.subTest("Network Exception"):
-            with patch(
+        with (
+            self.subTest("Network Exception"),
+            patch(
                 "api_app.connectors_manager.connectors.yeti.requests.post",
                 side_effect=requests.exceptions.Timeout,
-            ):
-                self.assertFalse(connector.health_check())
+            ),
+        ):
+            self.assertFalse(connector.health_check())
 
-        with self.subTest("Authentication Failure"):
-            with patch("api_app.connectors_manager.connectors.yeti.requests.post") as mock_post:
-                mock_post.return_value = MockResponse({"error": "Unauthorized"}, 401)
-                self.assertFalse(connector.health_check())
+        with (
+            self.subTest("Authentication Failure"),
+            patch("api_app.connectors_manager.connectors.yeti.requests.post") as mock_post,
+        ):
+            mock_post.return_value = MockResponse({"error": "Unauthorized"}, 401)
+            self.assertFalse(connector.health_check())
 
         with self.subTest("Missing Configuration"):
             connector._config.parameters.annotate_configured.return_value.annotate_value_for_user.return_value = []

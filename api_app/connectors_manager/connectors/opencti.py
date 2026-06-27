@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import logging
 from typing import Dict
 
 import pycti
@@ -10,6 +11,8 @@ from pycti.api.opencti_api_client import File
 from api_app import helpers
 from api_app.choices import Classification
 from api_app.connectors_manager import classes
+
+logger = logging.getLogger(__name__)
 
 INTELOWL_OPENCTI_TYPE_MAP = {
     Classification.IP: {
@@ -179,6 +182,38 @@ class OpenCTI(classes.Connector):
             pycti.Report(self.opencti_instance).add_stix_object_or_stix_relationship(
                 id=report_id, stixObjectOrStixRelationshipId=observable_id
             )
+
+    def health_check(self, user=None) -> bool:
+        if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
+            return True
+
+        params = self._config.parameters.annotate_configured(self._config, user).annotate_value_for_user(
+            self._config, user
+        )
+
+        url = None
+        token = None
+
+        for param in params:
+            if param.name == "url_key_name":
+                url = param.value
+            elif param.name == "api_key_name":
+                token = param.value
+
+        if not url:
+            logger.info("Healthcheck failed: Missing config url")
+            return False
+        if not token:
+            logger.info("Healthcheck failed: Missing config api key")
+            return False
+
+        try:
+            client = pycti.OpenCTIApiClient(url, token)
+            resp = client.health_check()
+            return resp
+        except Exception as e:
+            logger.info(f"OpenCTI health check failed: {e}")
+            return False
 
     def run(self):
         # Initialize OpenCTI client for this run.

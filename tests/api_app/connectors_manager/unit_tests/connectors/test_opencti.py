@@ -4,6 +4,8 @@
 from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
+from django.test import override_settings
+
 from api_app.connectors_manager.connectors.opencti import OpenCTI
 from tests.api_app.connectors_manager.unit_tests.base_test_class import BaseConnectorTest
 
@@ -275,3 +277,65 @@ class OpenCTIConnectorTestCase(BaseConnectorTest):
             self.assertIn("id", result["observable"])
             self.assertIn("report", result)
             self.assertIn("id", result["report"])
+
+    @override_settings(STAGE_CI=False, MOCK_CONNECTIONS=False)
+    def test_opencti_health_check_success(self):
+        connector = self._setup_connector()
+
+        mock_url_param = MagicMock()
+        mock_url_param.name = "url_key_name"
+        mock_url_param.value = "http://opencti.test/"
+
+        mock_api_param = MagicMock()
+        mock_api_param.name = "api_key_name"
+        mock_api_param.value = "dummy_api_key"
+
+        connector._config = MagicMock()
+        connector._config.parameters.annotate_configured.return_value.annotate_value_for_user.return_value = [
+            mock_url_param,
+            mock_api_param,
+        ]
+
+        with patch("api_app.connectors_manager.connectors.opencti.pycti.OpenCTIApiClient") as mock_client_cls:
+            mock_instance = mock_client_cls.return_value
+            mock_instance.health_check.return_value = True
+
+            self.assertTrue(connector.health_check())
+
+    @override_settings(STAGE_CI=False, MOCK_CONNECTIONS=False)
+    def test_opencti_health_check_failures(self):
+        connector = self._setup_connector()
+
+        mock_url_param = MagicMock()
+        mock_url_param.name = "url_key_name"
+        mock_url_param.value = "http://opencti.test/"
+
+        mock_api_param = MagicMock()
+        mock_api_param.name = "api_key_name"
+        mock_api_param.value = "dummy_api_key"
+
+        connector._config = MagicMock()
+        connector._config.parameters.annotate_configured.return_value.annotate_value_for_user.return_value = [
+            mock_url_param,
+            mock_api_param,
+        ]
+
+        with (
+            self.subTest("OpenCTI Connection Exception"),
+            patch("api_app.connectors_manager.connectors.opencti.pycti.OpenCTIApiClient") as mock_client_cls,
+        ):
+            mock_instance = mock_client_cls.return_value
+            mock_instance.health_check.side_effect = Exception("Connection refused")
+            self.assertFalse(connector.health_check())
+
+        with (
+            self.subTest("OpenCTI Reports Unhealthy"),
+            patch("api_app.connectors_manager.connectors.opencti.pycti.OpenCTIApiClient") as mock_client_cls,
+        ):
+            mock_instance = mock_client_cls.return_value
+            mock_instance.health_check.return_value = False
+            self.assertFalse(connector.health_check())
+
+        with self.subTest("Missing Configuration"):
+            connector._config.parameters.annotate_configured.return_value.annotate_value_for_user.return_value = []
+            self.assertFalse(connector.health_check())

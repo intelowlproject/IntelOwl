@@ -193,12 +193,18 @@ class OpenCTI(classes.Connector):
 
         url = None
         token = None
+        ssl_verify = False
+        proxies = None
 
         for param in params:
             if param.name == "url_key_name":
                 url = param.value
             elif param.name == "api_key_name":
                 token = param.value
+            elif param.name == "ssl_verify":
+                ssl_verify = str(param.value).lower() == "true"
+            elif param.name == "proxies":
+                proxies = param.value
 
         if not url:
             logger.info("Healthcheck failed: Missing config url")
@@ -208,7 +214,7 @@ class OpenCTI(classes.Connector):
             return False
 
         try:
-            client = pycti.OpenCTIApiClient(url, token)
+            client = pycti.OpenCTIApiClient(url, token, ssl_verify=ssl_verify, proxies=proxies)
             resp = client.health_check()
             return resp
         except Exception as e:

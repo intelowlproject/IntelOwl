@@ -290,10 +290,20 @@ class OpenCTIConnectorTestCase(BaseConnectorTest):
         mock_api_param.name = "api_key_name"
         mock_api_param.value = "dummy_api_key"
 
+        mock_ssl_param = MagicMock()
+        mock_ssl_param.name = "ssl_verify"
+        mock_ssl_param.value = "false"
+
+        mock_proxies_param = MagicMock()
+        mock_proxies_param.name = "proxies"
+        mock_proxies_param.value = None
+
         connector._config = MagicMock()
         connector._config.parameters.annotate_configured.return_value.annotate_value_for_user.return_value = [
             mock_url_param,
             mock_api_param,
+            mock_ssl_param,
+            mock_proxies_param,
         ]
 
         with patch("api_app.connectors_manager.connectors.opencti.pycti.OpenCTIApiClient") as mock_client_cls:

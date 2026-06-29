@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import logging
 from typing import List
 
 import pymisp
@@ -10,6 +11,8 @@ from api_app import helpers
 from api_app.choices import Classification
 from api_app.connectors_manager.classes import Connector
 from api_app.connectors_manager.exceptions import ConnectorRunException
+
+logger = logging.getLogger(__name__)
 
 INTELOWL_MISP_TYPE_MAP = {
     Classification.IP: "ip-src",
@@ -112,6 +115,59 @@ class MISP(Connector):
             )
         else:
             raise ConnectorRunException(f"{errors}{debug_info}")
+
+    def health_check(self, user=None) -> bool:
+        if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
+            return True
+
+        params = self._config.parameters.annotate_configured(self._config, user).annotate_value_for_user(
+            self._config, user
+        )
+
+        url = None
+        key = None
+
+        ssl_check = True
+        self_signed_certificate = False
+
+        for param in params:
+            if param.name == "url_key_name":
+                url = param.value
+            elif param.name == "api_key_name":
+                key = param.value
+            elif param.name == "ssl_check":
+                ssl_check = param.value
+            elif param.name == "self_signed_certificate":
+                self_signed_certificate = param.value
+
+        if not url:
+            logger.info("Healthcheck failed: Missing config url")
+            return False
+        if not key:
+            logger.info("Healthcheck failed: Missing config api key")
+            return False
+
+        ssl_param = (
+            f"{settings.PROJECT_LOCATION}/configuration/misp_ssl.crt"
+            if ssl_check and self_signed_certificate
+            else ssl_check
+        )
+
+        try:
+            misp = pymisp.PyMISP(
+                url=url,
+                key=key,
+                ssl=ssl_param,
+                debug=False,
+                timeout=5,
+            )
+
+            misp.misp_instance_version
+            return True
+
+        except Exception as e:
+            logger.info(f"MISP health check failed: {e}")
+            return False
 
     def run(self):
         ssl_param = (

@@ -3,6 +3,8 @@
 
 from unittest.mock import MagicMock, patch
 
+from django.test import override_settings
+
 from api_app.connectors_manager.connectors.misp import MISP
 from api_app.connectors_manager.exceptions import ConnectorRunException
 from tests.api_app.connectors_manager.unit_tests.base_test_class import BaseConnectorTest
@@ -143,3 +145,68 @@ class MISPConnectorTestCase(BaseConnectorTest):
                 connector.run()
 
             self.assertIn("plain HTTP request to an HTTPS port", str(context.exception))
+
+    @override_settings(STAGE_CI=False, MOCK_CONNECTIONS=False)
+    def test_misp_health_check_success(self):
+        connector = self._setup_connector()
+
+        mock_url_param = MagicMock()
+        mock_url_param.name = "url_key_name"
+        mock_url_param.value = "http://misp.test/"
+
+        mock_api_param = MagicMock()
+        mock_api_param.name = "api_key_name"
+        mock_api_param.value = "dummy_api_key"
+
+        mock_ssl_param = MagicMock()
+        mock_ssl_param.name = "ssl_check"
+        mock_ssl_param.value = "false"
+
+        mock_cert_param = MagicMock()
+        mock_cert_param.name = "self_signed_certificate"
+        mock_cert_param.value = ""
+
+        connector._config = MagicMock()
+        connector._config.parameters.annotate_configured.return_value.annotate_value_for_user.return_value = [
+            mock_url_param,
+            mock_api_param,
+            mock_ssl_param,
+            mock_cert_param,
+        ]
+
+        with patch("api_app.connectors_manager.connectors.misp.pymisp.PyMISP") as mock_client_cls:
+            mock_instance = mock_client_cls.return_value
+            mock_instance.health_check.return_value = True
+
+            self.assertTrue(connector.health_check())
+
+    @override_settings(STAGE_CI=False, MOCK_CONNECTIONS=False)
+    def test_misp_health_check_failures(self):
+        connector = self._setup_connector()
+
+        mock_url_param = MagicMock()
+        mock_url_param.name = "url_key_name"
+        mock_url_param.value = "http://misp.test/"
+
+        mock_api_param = MagicMock()
+        mock_api_param.name = "api_key_name"
+        mock_api_param.value = "dummy_api_key"
+
+        connector._config = MagicMock()
+        connector._config.parameters.annotate_configured.return_value.annotate_value_for_user.return_value = [
+            mock_url_param,
+            mock_api_param,
+        ]
+
+        with (
+            self.subTest("MISP Connection Exception"),
+            patch(
+                "api_app.connectors_manager.connectors.misp.pymisp.PyMISP",
+                side_effect=Exception("Connection refused"),
+            ),
+        ):
+            self.assertFalse(connector.health_check())
+
+        with self.subTest("Missing Configuration"):
+            connector._config.parameters.annotate_configured.return_value.annotate_value_for_user.return_value = []
+            self.assertFalse(connector.health_check())

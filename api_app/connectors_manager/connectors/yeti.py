@@ -49,6 +49,9 @@ class YETI(classes.Connector):
         try:
             verify_ssl = getattr(self, "verify_ssl", False)
 
+            # Posting the API key to YETI's authentication endpoint returns an
+            # access token on success (YETI API v2). A valid access token confirms
+            # that the API key is valid and the YETI instance is reachable.
             auth_resp = requests.post(
                 url=auth_url,
                 headers=auth_headers,

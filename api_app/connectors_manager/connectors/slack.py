@@ -57,6 +57,11 @@ class Slack(Connector):
 
         try:
             client = slack_sdk.WebClient(token=token)
+
+            # slack sdk has a built-in method (auth_test) to
+            # test the authentication and connectivity to Slack
+            # (auth_test returns identity information of the
+            # authenticated user if the token is valid)
             client.auth_test()
             return True
         except Exception as e:

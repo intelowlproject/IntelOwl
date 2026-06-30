@@ -162,6 +162,10 @@ class MISP(Connector):
                 timeout=5,
             )
 
+            # PyMISP has a property misp_instance_version
+            # that makes a GET request to servers/getVersion
+            # using valid API key and returns the version of
+            # the MISP instance if the connection is successful
             misp.misp_instance_version
             return True
 

@@ -215,6 +215,10 @@ class OpenCTI(classes.Connector):
 
         try:
             client = pycti.OpenCTIApiClient(url, token, ssl_verify=ssl_verify, proxies=proxies)
+
+            # pycti has a built-in method (health_check) that
+            # returns boolean True/False based on validity of
+            # API key and reachability of the OpenCTI instance
             resp = client.health_check()
             return resp
         except Exception as e:

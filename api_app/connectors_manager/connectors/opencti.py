@@ -219,6 +219,7 @@ class OpenCTI(classes.Connector):
             # pycti has a built-in method (health_check) that
             # returns boolean True/False based on validity of
             # API key and reachability of the OpenCTI instance
+            # Ref: https://opencti-python-client.readthedocs.io/en/latest/pycti/pycti.api.opencti_api_client.html#pycti.api.opencti_api_client.OpenCTIApiClient.health_check
             resp = client.health_check()
             return resp
         except Exception as e:

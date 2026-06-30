@@ -62,6 +62,7 @@ class Slack(Connector):
             # test the authentication and connectivity to Slack
             # (auth_test returns identity information of the
             # authenticated user if the token is valid)
+            # Ref: https://docs.slack.dev/tools/python-slack-sdk/reference/#slack_sdk.WebClient.auth_test
             client.auth_test()
             return True
         except Exception as e:

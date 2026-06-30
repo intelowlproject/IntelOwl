@@ -166,6 +166,7 @@ class MISP(Connector):
             # that makes a GET request to servers/getVersion
             # using valid API key and returns the version of
             # the MISP instance if the connection is successful
+            # Refs: https://pymisp.readthedocs.io/en/latest/modules.html?#pymisp.PyMISP.misp_instance_version
             misp.misp_instance_version
             return True
 

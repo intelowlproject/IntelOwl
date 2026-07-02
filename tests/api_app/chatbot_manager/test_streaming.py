@@ -50,7 +50,8 @@ def _values_payload(final_text):
 class ChatStreamConsumerTestCase(SimpleTestCase):
     """The consumer streams answer text, one status per tool call, and the guardrail action."""
 
-    def _make_consumer(self, tool_names=None):
+    @staticmethod
+    def _make_consumer(tool_names=None):
         consumer = ChatStreamConsumer(user_id=USER_ID, session_id=SESSION_ID, tool_names=tool_names)
         layer = MagicMock()
         layer.group_send = AsyncMock()

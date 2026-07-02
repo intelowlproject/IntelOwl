@@ -233,8 +233,10 @@ class ToolArgRecoveryTestCase(TestCase):
             config={"recursion_limit": RECURSION_LIMIT},
         )
         self.assertEqual(final_answer(result["messages"]), "Here is the summary.")
-        observation = next(m for m in result["messages"] if isinstance(m, ToolMessage))
-        self.assertIn("Invalid tool arguments", observation.content)
+        # index (not next()) so a missing observation fails loudly here, not with a bare StopIteration
+        observations = [m for m in result["messages"] if isinstance(m, ToolMessage)]
+        self.assertTrue(observations)
+        self.assertIn("Invalid tool arguments", observations[0].content)
 
     def test_persistent_invalid_arg_degrades_to_forced_stop(self):
         # The model emits the bad placeholder on every round: instead of crashing it must

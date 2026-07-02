@@ -263,7 +263,8 @@ class ChatTaskQueryCountTestCase(TestCase):
         class _FakeRunnable:
             # streams only the terminal state (no real tools / DB work), so the query count
             # reflects the task's own history load + persistence, not the agent internals.
-            def stream(self, inputs, stream_mode=None, config=None):
+            @staticmethod
+            def stream(inputs, stream_mode=None, config=None):
                 yield ("values", {"messages": [AIMessage(content="ok")]})
 
         mock_build.return_value = SimpleNamespace(runnable=_FakeRunnable(), tool_names=frozenset())

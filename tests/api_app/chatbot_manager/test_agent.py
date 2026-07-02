@@ -1,19 +1,26 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from unittest.mock import MagicMock, patch
+from typing import Any, Optional
+from unittest.mock import patch
 
 from django.conf import settings
 from django.test import TestCase
-from langchain_core.messages import AIMessage
-from langchain_core.runnables import RunnableLambda
+from langchain_core.callbacks import CallbackManagerForLLMRun
+from langchain_core.language_models.chat_models import BaseChatModel
+from langchain_core.messages import AIMessage, BaseMessage
+from langchain_core.outputs import ChatGeneration, ChatResult
+from langgraph.errors import GraphRecursionError
+from pydantic import PrivateAttr
 
 from api_app.chatbot_manager.agent.agent import (
     _MAX_AGENT_ITERATIONS,
     _NUM_CTX,
     _SYSTEM_PROMPT,
-    AGENT_STOPPED_OUTPUT,
-    build_agent_executor,
+    RECURSION_LIMIT,
+    ChatAgent,
+    build_agent,
+    final_answer,
 )
 from api_app.chatbot_manager.agent.tools._common import on_invalid_tool_args
 from certego_saas.apps.user.models import User
@@ -33,55 +40,218 @@ EXPECTED_TOOL_NAMES = {
 }
 
 
-class BuildAgentExecutorTestCase(TestCase):
-    """The executor wires the full user-scoped tool registry and bounds the agent loop."""
+class _ScriptedChatModel(BaseChatModel):
+    """Fake chat model that replays a scripted list of AIMessages, one per agent round.
+
+    Stands in for ChatOllama inside ``create_agent`` without Ollama: ``bind_tools`` is a no-op
+    (the responses are scripted, not derived from the bound tools) and each ``_generate`` returns
+    the next scripted message (the last one repeats once the script is exhausted). Distinct message
+    ids per round keep LangGraph's ``add_messages`` reducer appending rather than de-duplicating.
+    """
+
+    responses: list
+    _i: int = PrivateAttr(default=0)
+
+    @property
+    def _llm_type(self) -> str:
+        return "scripted-test"
+
+    def bind_tools(self, tools, **kwargs):
+        return self
+
+    def _generate(
+        self,
+        messages: list[BaseMessage],
+        stop: Optional[list[str]] = None,
+        run_manager: Optional[CallbackManagerForLLMRun] = None,
+        **kwargs: Any,
+    ) -> ChatResult:
+        message = self.responses[min(self._i, len(self.responses) - 1)]
+        self._i += 1
+        return ChatResult(generations=[ChatGeneration(message=message)])
+
+
+class _LoopingChatModel(BaseChatModel):
+    """Fake chat model that NEVER stops: it re-calls one tool every round with a FRESH tool-call
+    id (like a real model), so the run is a genuine runaway that force-stops at ``recursion_limit``
+    rather than being collapsed by the id-deduping reducer.
+    """
+
+    tool_name: str
+    tool_args: dict
+    _i: int = PrivateAttr(default=0)
+
+    @property
+    def _llm_type(self) -> str:
+        return "looping-test"
+
+    def bind_tools(self, tools, **kwargs):
+        return self
+
+    def _generate(
+        self,
+        messages: list[BaseMessage],
+        stop: Optional[list[str]] = None,
+        run_manager: Optional[CallbackManagerForLLMRun] = None,
+        **kwargs: Any,
+    ) -> ChatResult:
+        self._i += 1
+        message = AIMessage(
+            content="",
+            tool_calls=[{"name": self.tool_name, "args": self.tool_args, "id": f"call_{self._i}"}],
+        )
+        return ChatResult(generations=[ChatGeneration(message=message)])
+
+
+class BuildAgentTestCase(TestCase):
+    """``build_agent`` wires the full user-scoped tool registry and configures the local LLM."""
 
     def setUp(self):
         self.user, _ = User.objects.get_or_create(username="chatbot_agent_user")
 
     def _build(self, **kwargs):
-        # ChatOllama is mocked so no Ollama/network is ever touched; create_tool_calling_agent
-        # only needs the mock's bind_tools() result to be composable into its runnable chain.
+        # ChatOllama is mocked so no Ollama/network is ever touched; create_agent only needs the
+        # mock's bind_tools() result to assemble the graph (it is not invoked here).
         with patch("api_app.chatbot_manager.agent.agent.ChatOllama") as mock_llm_cls:
-            executor = build_agent_executor(user=self.user, **kwargs)
-        return executor, mock_llm_cls
+            chat_agent = build_agent(user=self.user, **kwargs)
+        return chat_agent, mock_llm_cls
 
-    def test_executor_has_all_tools_and_a_bounded_loop(self):
-        executor, _ = self._build()
+    def test_agent_exposes_the_full_tool_registry(self):
+        chat_agent, _ = self._build()
+        self.assertIsInstance(chat_agent, ChatAgent)
+        self.assertEqual(set(chat_agent.tool_names), EXPECTED_TOOL_NAMES)
 
-        self.assertEqual({tool.name for tool in executor.tools}, EXPECTED_TOOL_NAMES)
-        # max_iterations is the only bound that force-stops a looping model
-        self.assertEqual(executor.max_iterations, _MAX_AGENT_ITERATIONS)
-        self.assertTrue(executor.handle_parsing_errors)
+    def test_llm_is_configured_for_local_ollama(self):
+        _, mock_llm_cls = self._build()
+        llm_kwargs = mock_llm_cls.call_args.kwargs
+        self.assertEqual(llm_kwargs["model"], settings.OLLAMA_MODEL)
+        self.assertEqual(llm_kwargs["base_url"], settings.OLLAMA_BASE_URL)
+        self.assertEqual(llm_kwargs["temperature"], 0)
+        # without an explicit context window Ollama truncates the multi-tool prompt
+        self.assertEqual(llm_kwargs["num_ctx"], _NUM_CTX)
 
-    def test_streaming_flag_reaches_the_llm(self):
-        for streaming in (False, True):
-            with self.subTest(streaming=streaming):
-                _, mock_llm_cls = self._build(streaming=streaming)
-                llm_kwargs = mock_llm_cls.call_args.kwargs
-                self.assertEqual(llm_kwargs["streaming"], streaming)
-                self.assertEqual(llm_kwargs["model"], settings.OLLAMA_MODEL)
-                self.assertEqual(llm_kwargs["base_url"], settings.OLLAMA_BASE_URL)
-                # without an explicit context window Ollama truncates the multi-tool prompt
-                self.assertEqual(llm_kwargs["num_ctx"], _NUM_CTX)
+    def test_recursion_limit_maps_from_agent_rounds(self):
+        # LangGraph counts supersteps, not agent rounds: one tool round is model->tools->model
+        # (2 supersteps) plus the terminal model reply, plus LangGraph's boundary off-by-one.
+        self.assertEqual(RECURSION_LIMIT, 2 * _MAX_AGENT_ITERATIONS + 2)
 
-    def test_forced_stop_output_matches_the_sentinel(self):
-        # Ties AGENT_STOPPED_OUTPUT to the real framework behavior: the executor is the real
-        # tool-calling pipeline, only the LLM is faked to request a tool on every round, so
-        # max_iterations force-stops it. A langchain bump that changes the canned stop message
-        # must fail here rather than silently persist it as an assistant answer.
-        tool_call_forever = AIMessage(
-            content="",
-            tool_calls=[{"name": "search_jobs", "args": {"query": ""}, "id": "call_1"}],
+    def test_page_context_is_baked_into_the_system_prompt(self):
+        with (
+            patch("api_app.chatbot_manager.agent.agent.ChatOllama"),
+            patch("api_app.chatbot_manager.agent.agent.create_agent") as mock_create,
+        ):
+            build_agent(user=self.user, page_context="The user is viewing job #42.")
+            with_ctx = mock_create.call_args.kwargs["system_prompt"]
+            build_agent(user=self.user)
+            without_ctx = mock_create.call_args.kwargs["system_prompt"]
+        self.assertIn(_SYSTEM_PROMPT, with_ctx)
+        self.assertIn("The user is viewing job #42.", with_ctx)
+        # no context -> exactly the base prompt (no dangling separator)
+        self.assertEqual(without_ctx, _SYSTEM_PROMPT)
+
+
+class AgentRunTestCase(TestCase):
+    """End-to-end runs of the real create_agent graph with a scripted (Ollama-free) model."""
+
+    def setUp(self):
+        self.user, _ = User.objects.get_or_create(username="chatbot_run_user")
+
+    def _agent_with_model(self, fake_model):
+        with patch("api_app.chatbot_manager.agent.agent.ChatOllama", return_value=fake_model):
+            return build_agent(user=self.user)
+
+    def _run(self, fake_model, message="hello"):
+        chat_agent = self._agent_with_model(fake_model)
+        return chat_agent.runnable.invoke(
+            {"messages": [{"role": "user", "content": message}]},
+            config={"recursion_limit": RECURSION_LIMIT},
         )
-        llm = MagicMock()
-        llm.bind_tools.return_value = RunnableLambda(lambda _: tool_call_forever)
-        with patch("api_app.chatbot_manager.agent.agent.ChatOllama", return_value=llm):
-            executor = build_agent_executor(user=self.user)
 
-        result = executor.invoke({"input": "loop forever", "chat_history": [], "page_context": ""})
+    def test_legit_conversation_completes_under_the_limit(self):
+        # one tool round then a plain-text answer -> the run terminates well within RECURSION_LIMIT.
+        call = AIMessage(content="", tool_calls=[{"name": "search_jobs", "args": {"limit": 5}, "id": "c1"}])
+        answer = AIMessage(content="You have no recent jobs. (used: search_jobs)")
+        result = self._run(_ScriptedChatModel(responses=[call, answer]), message="show my recent jobs")
+        self.assertEqual(final_answer(result["messages"]), "You have no recent jobs. (used: search_jobs)")
 
-        self.assertEqual(result["output"], AGENT_STOPPED_OUTPUT)
+    def test_runaway_model_force_stops_at_recursion_limit(self):
+        # Authoritative bound for RECURSION_LIMIT: a model that keeps calling a tool must raise
+        # GraphRecursionError (the caller maps it to ITERATION_LIMIT) instead of looping forever.
+        looping = _LoopingChatModel(tool_name="search_jobs", tool_args={"limit": 5})
+        chat_agent = self._agent_with_model(looping)
+        with self.assertRaises(GraphRecursionError):
+            chat_agent.runnable.invoke(
+                {"messages": [{"role": "user", "content": "loop"}]},
+                config={"recursion_limit": RECURSION_LIMIT},
+            )
+
+
+class FinalAnswerTestCase(TestCase):
+    """`final_answer` returns the terminal assistant text, and only that."""
+
+    def test_returns_last_ai_message_text(self):
+        messages = [
+            AIMessage(content="", tool_calls=[{"name": "x", "args": {}, "id": "1"}]),
+            AIMessage(content="done"),
+        ]
+        self.assertEqual(final_answer(messages), "done")
+
+    def test_empty_when_terminal_message_still_has_tool_calls(self):
+        # defensive: a terminal message with tool calls is not a real answer.
+        messages = [AIMessage(content="partial", tool_calls=[{"name": "x", "args": {}, "id": "1"}])]
+        self.assertEqual(final_answer(messages), "")
+
+
+class ToolArgRecoveryTestCase(TestCase):
+    """A schema-invalid tool argument is recoverable, never a turn-killing exception."""
+
+    def setUp(self):
+        self.user, _ = User.objects.get_or_create(username="chatbot_arg_recovery_user")
+
+    def test_all_tools_handle_validation_errors(self):
+        from api_app.chatbot_manager.agent.tools import build_tools
+
+        for tool in build_tools(user=self.user):
+            self.assertEqual(tool.handle_validation_error, on_invalid_tool_args)
+
+    def test_invalid_tool_arg_is_recoverable_not_fatal(self):
+        # round 1: model passes the literal placeholder -> ValidationError on job_id (an int),
+        # surfaced as an on_invalid_tool_args observation. round 2: model answers in plain text.
+        from langchain_core.messages import ToolMessage
+
+        bad = AIMessage(
+            content="", tool_calls=[{"name": "summarize_job", "args": {"job_id": "<job_id>"}, "id": "c1"}]
+        )
+        answer = AIMessage(content="Here is the summary.")
+        with patch(
+            "api_app.chatbot_manager.agent.agent.ChatOllama",
+            return_value=_ScriptedChatModel(responses=[bad, answer]),
+        ):
+            chat_agent = build_agent(user=self.user)
+        result = chat_agent.runnable.invoke(
+            {"messages": [{"role": "user", "content": "summarize my latest job"}]},
+            config={"recursion_limit": RECURSION_LIMIT},
+        )
+        self.assertEqual(final_answer(result["messages"]), "Here is the summary.")
+        observation = next(m for m in result["messages"] if isinstance(m, ToolMessage))
+        self.assertIn("Invalid tool arguments", observation.content)
+
+    def test_persistent_invalid_arg_degrades_to_forced_stop(self):
+        # The model emits the bad placeholder on every round: instead of crashing it must
+        # force-stop at recursion_limit (GraphRecursionError -> ITERATION_LIMIT for the caller).
+        looping = _LoopingChatModel(tool_name="summarize_job", tool_args={"job_id": "<job_id>"})
+        with patch("api_app.chatbot_manager.agent.agent.ChatOllama", return_value=looping):
+            chat_agent = build_agent(user=self.user)
+        with self.assertRaises(GraphRecursionError):
+            chat_agent.runnable.invoke(
+                {"messages": [{"role": "user", "content": "summarize my latest job"}]},
+                config={"recursion_limit": RECURSION_LIMIT},
+            )
+
+    def test_system_prompt_warns_against_placeholder_args(self):
+        # guard the specific rule, not just the word: the <job_id> token appears only in it
+        self.assertIn("<job_id>", _SYSTEM_PROMPT)
+        self.assertIn("placeholder", _SYSTEM_PROMPT.lower())
 
 
 class OnInvalidToolArgsTestCase(TestCase):
@@ -92,57 +262,3 @@ class OnInvalidToolArgsTestCase(TestCase):
         self.assertIsInstance(msg, str)
         self.assertIn("job_id: not an integer", msg)  # the underlying error reaches the model
         self.assertIn("placeholder", msg.lower())  # tell it not to pass a placeholder
-
-
-def _scripted_llm(responses):
-    """Fake ChatOllama whose bound runnable replays `responses`, one AIMessage per agent round."""
-    replies = iter(responses)
-    llm = MagicMock()
-    # next() takes a default so an exhausted script can't raise StopIteration (DeepSource PTC-W0063):
-    # returning a plain-text AIMessage ends the agent loop benignly instead of crashing the test.
-    llm.bind_tools.return_value = RunnableLambda(lambda _: next(replies, AIMessage(content="")))
-    return llm
-
-
-class ToolArgRecoveryTestCase(TestCase):
-    """A schema-invalid tool argument is recoverable, never a turn-killing exception."""
-
-    def setUp(self):
-        self.user, _ = User.objects.get_or_create(username="chatbot_arg_recovery_user")
-
-    def test_all_tools_handle_validation_errors(self):
-        with patch("api_app.chatbot_manager.agent.agent.ChatOllama"):
-            executor = build_agent_executor(user=self.user)
-        for tool in executor.tools:
-            self.assertEqual(tool.handle_validation_error, on_invalid_tool_args)
-
-    def test_invalid_tool_arg_is_recoverable_not_fatal(self):
-        # round 1: model passes the literal placeholder -> ValidationError on job_id (an int).
-        # round 2: model answers in plain text. The turn must complete, not raise.
-        bad = AIMessage(
-            content="", tool_calls=[{"name": "summarize_job", "args": {"job_id": "<job_id>"}, "id": "c1"}]
-        )
-        answer = AIMessage(content="Here is the summary.")
-        llm = _scripted_llm([bad, answer])
-        with patch("api_app.chatbot_manager.agent.agent.ChatOllama", return_value=llm):
-            executor = build_agent_executor(user=self.user)
-        result = executor.invoke({"input": "summarize my latest job", "chat_history": [], "page_context": ""})
-        self.assertEqual(result["output"], "Here is the summary.")
-
-    def test_persistent_invalid_arg_degrades_to_forced_stop(self):
-        # The model emits the bad placeholder on every round: instead of crashing it must
-        # force-stop at max_iterations (the sentinel the caller maps to ITERATION_LIMIT).
-        bad = AIMessage(
-            content="", tool_calls=[{"name": "summarize_job", "args": {"job_id": "<job_id>"}, "id": "c1"}]
-        )
-        llm = MagicMock()
-        llm.bind_tools.return_value = RunnableLambda(lambda _: bad)
-        with patch("api_app.chatbot_manager.agent.agent.ChatOllama", return_value=llm):
-            executor = build_agent_executor(user=self.user)
-        result = executor.invoke({"input": "summarize my latest job", "chat_history": [], "page_context": ""})
-        self.assertEqual(result["output"], AGENT_STOPPED_OUTPUT)
-
-    def test_system_prompt_warns_against_placeholder_args(self):
-        # guard the specific rule, not just the word: the <job_id> token appears only in it
-        self.assertIn("<job_id>", _SYSTEM_PROMPT)
-        self.assertIn("placeholder", _SYSTEM_PROMPT.lower())

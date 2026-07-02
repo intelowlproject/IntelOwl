@@ -6,6 +6,8 @@ import logging
 from django.db.models import OuterRef, Subquery
 from django.db.models.functions import Substr
 from django.utils.timezone import now
+from langchain_core.messages import HumanMessage
+from langgraph.errors import GraphRecursionError
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
@@ -17,7 +19,7 @@ from rest_framework.viewsets import ModelViewSet
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers.job import ObservableAnalysisSerializer
 
-from .agent.agent import AGENT_STOPPED_OUTPUT, build_agent_executor
+from .agent.agent import RECURSION_LIMIT, build_agent, final_answer
 from .agent.memory import DjangoChatMessageHistory
 from .events import ChatErrorDetail
 from .health import chatbot_health
@@ -109,10 +111,20 @@ class ChatSessionViewSet(ModelViewSet):
 
         history = DjangoChatMessageHistory(session=session)
 
-        executor = build_agent_executor(user=request.user)
+        chat_agent = build_agent(user=request.user)
+        # No page_context on the REST path (unchanged): the browser chat panel drives page context
+        # over the WebSocket. History + the new user message feed the agent as a messages list.
+        inputs = {"messages": [*history.messages, HumanMessage(content=user_message)]}
         try:
-            result = executor.invoke(
-                {"input": user_message, "chat_history": history.messages, "page_context": ""}
+            result = chat_agent.runnable.invoke(inputs, config={"recursion_limit": RECURSION_LIMIT})
+        except GraphRecursionError:
+            # A looping model hit the recursion limit; surface a clean 503 instead of persisting a
+            # partial run. session_id rides the error so a client that created the session here can
+            # keep using it.
+            logger.warning(f"chatbot message: iteration cap hit for session {session.pk}")
+            return Response(
+                {"detail": ChatErrorDetail.ITERATION_LIMIT.value, "session_id": session.pk},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
         except Exception:  # noqa: BLE001 - any agent/Ollama failure must reach the client cleanly
             # Mirror the Celery path (tasks.py): a model/Ollama failure is surfaced as a clean
@@ -123,13 +135,7 @@ class ChatSessionViewSet(ModelViewSet):
                 {"detail": ChatErrorDetail.UNAVAILABLE.value, "session_id": session.pk},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
-        response_text = result.get("output", "")
-        if response_text == AGENT_STOPPED_OUTPUT:
-            logger.warning(f"chatbot message: iteration cap hit for session {session.pk}")
-            return Response(
-                {"detail": ChatErrorDetail.ITERATION_LIMIT.value, "session_id": session.pk},
-                status=status.HTTP_503_SERVICE_UNAVAILABLE,
-            )
+        response_text = final_answer(result["messages"])
 
         history.add_user_message(user_message)
         history.add_ai_message(response_text)

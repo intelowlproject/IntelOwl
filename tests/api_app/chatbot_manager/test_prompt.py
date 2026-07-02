@@ -8,10 +8,11 @@ and covers all registered tools — no LLM inference is performed.
 """
 
 from pathlib import Path
+from unittest.mock import patch
 
 from django.test import TestCase
 
-from api_app.chatbot_manager.agent.agent import _SYSTEM_PROMPT, PROMPT
+from api_app.chatbot_manager.agent.agent import _SYSTEM_PROMPT, build_agent
 from api_app.chatbot_manager.agent.tools import build_tools
 from certego_saas.apps.user.models import User
 
@@ -78,15 +79,17 @@ class SystemPromptTestCase(TestCase):
                 f"Tool '{name}' not found in system_prompt.txt — add it to the [Tools] section",
             )
 
-    def test_prompt_is_part_of_the_chat_template(self):
-        """The loaded prompt content is embedded in the ChatPromptTemplate's
-        system message, so the agent actually sees the file content at runtime.
+    def test_prompt_is_passed_to_the_agent(self):
+        """build_agent hands the file content to create_agent as the system prompt, so the agent
+        actually sees it at runtime (ChatOllama/create_agent are mocked — no Ollama is touched).
         """
-        # PROMPT.messages[0] is a SystemMessagePromptTemplate; its .prompt.template
-        # carries the system text (with {page_context} appended).
-        system_msg = PROMPT.messages[0]
-        template = system_msg.prompt.template
-        self.assertIn(_SYSTEM_PROMPT, template)
+        user, _ = User.objects.get_or_create(username="prompt_build_user")
+        with (
+            patch("api_app.chatbot_manager.agent.agent.ChatOllama"),
+            patch("api_app.chatbot_manager.agent.agent.create_agent") as mock_create,
+        ):
+            build_agent(user=user)
+        self.assertIn(_SYSTEM_PROMPT, mock_create.call_args.kwargs["system_prompt"])
 
     def test_prompt_sections_are_present(self):
         """Each planned section header appears so the structure is enforced."""

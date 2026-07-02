@@ -4,8 +4,8 @@
 """End-to-end tests of the chatbot chat pipeline.
 
 These wire the *real* components together — ChatConsumer, the process_chat_message Celery task,
-ChatStreamingCallbackHandler, the analyze_observable tool, the pending-action store and the
-confirm endpoint — and mock only the external boundaries: the LLM (via build_agent_executor) and
+ChatStreamConsumer, the analyze_observable tool, the pending-action store and the
+confirm endpoint — and mock only the external boundaries: the LLM (via build_agent) and
 the job pipeline (apply_async). Ollama and the network are never touched.
 
 Transport: the consumer leg does NOT use WebsocketCommunicator. A synchronous JsonWebsocketConsumer
@@ -21,6 +21,7 @@ from unittest.mock import MagicMock, patch
 
 from django.core.cache import caches
 from django.test import TestCase, override_settings
+from langchain_core.messages import AIMessage, AIMessageChunk, HumanMessage, ToolMessage
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -62,33 +63,61 @@ class _CapturingChannelLayer:
         pass
 
 
-def _fake_tool_calling_executor(user):
-    """A stand-in AgentExecutor whose .invoke() drives the REAL streaming callbacks exactly as a
-    tool-calling turn would: a tool action (chat.status), the real analyze_observable tool output
-    (chat.action_required, carrying a real one-time pending_id), a streamed answer token
-    (chat.token), then the final output. Keeps the handler, the tool and the pending-action store
-    real while Ollama is never reached."""
+def _fake_agent(user):
+    """A stand-in ChatAgent whose runnable.stream() drives the REAL stream consumer exactly as a
+    tool-calling turn would: a tool-call chunk (chat.status), the real analyze_observable tool output
+    as a ToolMessage (chat.action_required, carrying a real one-time pending_id), a streamed answer
+    token (chat.token), then the terminal state (persisted answer). Keeps the consumer, the tool and
+    the pending-action store real while Ollama is never reached."""
     real_tools = build_tools(user=user)
     # dict lookup (not next()) so a missing tool fails loudly with a KeyError naming it
     analyze_tool = {tool.name: tool for tool in real_tools}["analyze_observable"]
 
-    class _FakeExecutor:
-        # The task derives handler.tool_names from this real registry, so the chat.status filter
-        # (which suppresses the _Exception pseudo-tool) is exercised against real tool names.
-        tools = real_tools
-
+    class _FakeRunnable:
         @staticmethod
-        def invoke(payload, config=None):
-            handler = config["callbacks"][0]
-            # SimpleNamespace mirrors a langchain AgentAction's .tool attribute.
-            handler.on_agent_action(SimpleNamespace(tool="analyze_observable", tool_input={}, log=""))
+        def stream(inputs, stream_mode=None, config=None):
+            # tool decision -> chat.status (tool_call_chunks carry the name)
+            yield (
+                "messages",
+                (
+                    AIMessageChunk(
+                        content="",
+                        id="m1",
+                        tool_call_chunks=[
+                            {
+                                "name": "analyze_observable",
+                                "args": "",
+                                "id": "c1",
+                                "index": 0,
+                                "type": "tool_call_chunk",
+                            }
+                        ],
+                    ),
+                    {"langgraph_node": "model"},
+                ),
+            )
             # Real tool run: validates the observable and mints a real pending_id in the cache.
             tool_output = analyze_tool.invoke({"observable_name": "example.com", "analyzers": "Tranco"})
-            handler.on_tool_end(tool_output)
-            handler.on_llm_new_token("Prepared the analysis plan. ")
-            return {"output": _ASSISTANT_OUTPUT}
+            yield (
+                "messages",
+                (ToolMessage(content=tool_output, name="analyze_observable", tool_call_id="c1"), {}),
+            )
+            # streamed answer token -> chat.token
+            yield ("messages", (AIMessageChunk(content="Prepared the analysis plan. ", id="m2"), {}))
+            # terminal state -> the persisted answer sent in chat.end
+            yield (
+                "values",
+                {
+                    "messages": [
+                        HumanMessage(content="analyze example.com"),
+                        AIMessage(content=_ASSISTANT_OUTPUT),
+                    ]
+                },
+            )
 
-    return _FakeExecutor()
+    # The task derives the chat.status filter from this real registry, so it is exercised against
+    # real tool names.
+    return SimpleNamespace(runnable=_FakeRunnable(), tool_names=frozenset(tool.name for tool in real_tools))
 
 
 def _connected_consumer(user, channel_layer):
@@ -132,8 +161,8 @@ class ChatPipelineE2ETestCase(TestCase):
         consumer = _connected_consumer(self.user, layer)
         with (
             patch(
-                "api_app.chatbot_manager.agent.agent.build_agent_executor",
-                return_value=_fake_tool_calling_executor(self.user),
+                "api_app.chatbot_manager.agent.agent.build_agent",
+                return_value=_fake_agent(self.user),
             ),
             patch("api_app.chatbot_manager.tasks.get_channel_layer", return_value=layer),
             patch("api_app.chatbot_manager.agent.streaming.get_channel_layer", return_value=layer),

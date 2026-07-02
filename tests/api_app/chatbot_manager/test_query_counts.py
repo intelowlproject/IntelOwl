@@ -14,6 +14,7 @@ validation (platform code resolving analyzers/playbooks/connectors), not the cha
 so a guard there would be a brittle measure of someone else's query plan.
 """
 
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
@@ -251,15 +252,21 @@ class ChatTaskQueryCountTestCase(TestCase):
         self.session = ChatSession.objects.create(user=self.user)
 
     @patch("api_app.chatbot_manager.tasks.get_channel_layer")
-    @patch("api_app.chatbot_manager.agent.agent.build_agent_executor")
+    @patch("api_app.chatbot_manager.agent.agent.build_agent")
     def test_process_chat_message_query_count_is_constant_in_history(self, mock_build, mock_get_layer):
+        from langchain_core.messages import AIMessage
+
         layer = MagicMock()
         layer.group_send = AsyncMock()
         mock_get_layer.return_value = layer
-        executor = MagicMock()
-        executor.invoke.return_value = {"output": "ok"}
-        executor.tools = []  # handler.tool_names = set(); no real tools needed
-        mock_build.return_value = executor
+
+        class _FakeRunnable:
+            # streams only the terminal state (no real tools / DB work), so the query count
+            # reflects the task's own history load + persistence, not the agent internals.
+            def stream(self, inputs, stream_mode=None, config=None):
+                yield ("values", {"messages": [AIMessage(content="ok")]})
+
+        mock_build.return_value = SimpleNamespace(runnable=_FakeRunnable(), tool_names=frozenset())
 
         # Each call persists one user + one assistant message, so history grows naturally.
         process_chat_message(self.session.id, "hi", self.user.id)  # warm up

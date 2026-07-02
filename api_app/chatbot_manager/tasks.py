@@ -36,22 +36,25 @@ logger = logging.getLogger(__name__)
 def process_chat_message(session_id: int, user_message: str, user_id: int, context_url: str = "") -> None:
     """Run one chat turn off-request and stream it to the user's WebSocket group.
 
-    Enqueued by ChatConsumer.receive_json. The agent runs synchronously here (so token and
-    tool callbacks can bridge to the async channel layer via async_to_sync) and pushes
+    Enqueued by ChatConsumer.receive_json. The agent runs synchronously here (so the stream can
+    bridge to the async channel layer via async_to_sync) and pushes
     chat.start -> chat.status/chat.token* -> chat.end onto the per-user group, which the
     consumer relays to the browser. On any failure a single chat.error is emitted instead and
     the turn is dropped (no assistant message persisted), mirroring the sync REST path.
 
-    Persistence is the source of truth: the streamed tokens are a live preview, while
-    result["output"] is what gets stored and sent in chat.end. History is snapshotted before
-    this turn is written so the current message is not double-counted.
+    Persistence is the source of truth: the streamed tokens are a live preview, while the run's
+    terminal message (returned by the stream consumer) is what gets stored and sent in chat.end.
+    History is snapshotted before this turn is written so the current message is not double-counted.
     """
     # The agent/LLM stack (langchain + ChatOllama) is imported lazily so the other Celery
     # workers that load this module never pay for that heavy import — only the chatbot worker,
     # which actually runs this task, does.
-    from api_app.chatbot_manager.agent.agent import AGENT_STOPPED_OUTPUT, build_agent_executor
+    from langchain_core.messages import HumanMessage
+    from langgraph.errors import GraphRecursionError
+
+    from api_app.chatbot_manager.agent.agent import RECURSION_LIMIT, build_agent
     from api_app.chatbot_manager.agent.memory import DjangoChatMessageHistory
-    from api_app.chatbot_manager.agent.streaming import ChatStreamingCallbackHandler
+    from api_app.chatbot_manager.agent.streaming import ChatStreamConsumer
     from api_app.chatbot_manager.models import ChatMessage, ChatSession
 
     channel_layer = get_channel_layer()
@@ -78,37 +81,30 @@ def process_chat_message(session_id: int, user_message: str, user_id: int, conte
 
     emit(StartEvent(session_id))
     try:
-        executor = build_agent_executor(user=user, streaming=True)
-        # Scope streamed tool-status events to the agent's real tools (drops the internal
-        # "_Exception" pseudo-tool that handle_parsing_errors raises on malformed model output).
-        handler = ChatStreamingCallbackHandler(
+        chat_agent = build_agent(user=user, page_context=derive_page_context(context_url))
+        # Stream the run to the WebSocket. tool_names scopes which tool calls become a chat.status.
+        consumer = ChatStreamConsumer(
             user_id=user_id,
             session_id=session_id,
-            tool_names={tool.name for tool in executor.tools},
+            tool_names=chat_agent.tool_names,
         )
-        result = executor.invoke(
-            {
-                "input": user_message,
-                "chat_history": chat_history,
-                "page_context": derive_page_context(context_url),
-            },
-            config={"callbacks": [handler]},
-        )
+        # History (snapshotted before this turn is persisted) + the new user message feed the agent
+        # as a messages list, the create_agent input shape.
+        inputs = {"messages": [*chat_history, HumanMessage(content=user_message)]}
+        response_text = consumer.run(chat_agent.runnable, inputs, {"recursion_limit": RECURSION_LIMIT})
     except SoftTimeLimitExceeded:
         logger.warning(f"process_chat_message: timed out for session {session_id}")
         emit(ErrorEvent(session_id, ChatErrorDetail.TIMEOUT.value))
         return
+    except GraphRecursionError:
+        # A looping model hit the recursion limit: surface a real error and drop the turn rather
+        # than persisting a partial/looping run as the assistant's answer.
+        logger.warning(f"process_chat_message: iteration cap hit for session {session_id}")
+        emit(ErrorEvent(session_id, ChatErrorDetail.ITERATION_LIMIT.value))
+        return
     except Exception as exc:  # noqa: BLE001 - any agent/Ollama failure must still reach the client
         logger.exception(f"process_chat_message: agent run failed for session {session_id}: {exc}")
         emit(ErrorEvent(session_id, ChatErrorDetail.UNAVAILABLE.value))
-        return
-
-    response_text = result.get("output", "")
-    if response_text == AGENT_STOPPED_OUTPUT:
-        # max_iterations force-stopped a looping model: surface a real error and drop the
-        # turn rather than persisting LangChain's canned string as the assistant's answer.
-        logger.warning(f"process_chat_message: iteration cap hit for session {session_id}")
-        emit(ErrorEvent(session_id, ChatErrorDetail.ITERATION_LIMIT.value))
         return
 
     history.add_user_message(user_message)

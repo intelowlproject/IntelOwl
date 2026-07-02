@@ -1,87 +1,99 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from dataclasses import dataclass
 from pathlib import Path
 
 from django.conf import settings
-from langchain.agents import AgentExecutor, create_tool_calling_agent
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain.agents import create_agent
+from langchain_core.messages import AIMessage, BaseMessage
+from langchain_core.runnables import Runnable
 from langchain_ollama import ChatOllama
 
 from .tools import build_tools
 
-# The system prompt lives in its own text file so it is readable, testable, and
-# editable without touching Python code. {page_context} is appended separately by
-# the prompt template below so the file stays self-contained (no interpolation).
+# The system prompt lives in its own text file so it is readable, testable, and editable without
+# touching Python code. The page context (if any) is appended by build_agent at build time so the
+# file stays self-contained (no interpolation).
 _SYSTEM_PROMPT = Path(__file__).parent.joinpath("system_prompt.txt").read_text(encoding="utf-8").strip()
 
-# The agent uses Ollama's native tool-calling API (`llm.bind_tools`, wired by
-# `create_tool_calling_agent`), so the prompt carries no rendered tool list and no ReAct
-# Thought/Action/Final Answer text scaffolding: the model emits structured tool calls and the
-# executor loops tool call -> observation under the hood. `chat_history` and `agent_scratchpad`
-# are message lists (MessagesPlaceholder), not pre-rendered text.
-PROMPT = ChatPromptTemplate.from_messages(
-    [
-        ("system", _SYSTEM_PROMPT + "\n\n{page_context}"),
-        MessagesPlaceholder("chat_history"),
-        ("human", "{input}"),
-        MessagesPlaceholder("agent_scratchpad"),
-    ]
-)
-
-# One iteration = one round of tool calls + observation. Real questions resolve in 1-3 rounds
-# (analyze_observable's confirm flow spans two turns, not two iterations), so 6 leaves room for
+# One "round" = one model turn that calls a tool + its observation. Real questions resolve in 1-3
+# rounds (analyze_observable's confirm flow spans two turns, not two rounds), so 6 leaves room for
 # a retry after a failed call while force-stopping a looping model well before the Celery task's
 # 300s soft time limit would on CPU.
 _MAX_AGENT_ITERATIONS = 6
 
-# What AgentExecutor returns as "output" when max_iterations force-stops the run (the
-# multi-action agent's return_stopped_response, langchain 0.3.25). Callers compare against this
-# to turn a forced stop into a user-facing error instead of persisting the canned framework
-# string as an assistant message.
-AGENT_STOPPED_OUTPUT = "Agent stopped due to max iterations."
+# LangGraph bounds a run by supersteps (its recursion_limit), not by agent rounds, and the count is
+# not 1:1 with rounds: one tool round is model -> tools -> model (2 supersteps), the run then ends
+# with a terminal model reply (+1), and LangGraph raises when the *next* superstep would reach the
+# limit (a boundary +1). So N rounds needs 2*N + 2 (measured: a single tool round completes only at
+# recursion_limit >= 4). This preserves the old max_iterations=6 force-stop budget under the new
+# runtime; a run that keeps calling tools raises GraphRecursionError, which the callers map to
+# ChatErrorDetail.ITERATION_LIMIT (there is no canned "stopped" string to compare against anymore).
+RECURSION_LIMIT = 2 * _MAX_AGENT_ITERATIONS + 2
 
-# The rendered prompt (system prompt + the 10 bound tool schemas) is already ~2.2k tokens
-# before any history: Ollama's default 2048-token context window silently truncates it from
-# the start (observed live: "truncating input prompt" limit=2048 prompt=2174), dropping the
-# system prompt and most tool schemas and wrecking tool selection. 8192 fits prompt + history
-# + tool observations comfortably and keeps the prompt prefix stable across iterations, so
-# follow-up rounds hit Ollama's KV prefix cache instead of re-evaluating everything.
+# The rendered prompt (system prompt + the 10 bound tool schemas) is already ~2.2k tokens before any
+# history: Ollama's default 2048-token context window silently truncates it from the start (observed
+# live: "truncating input prompt" limit=2048 prompt=2174), dropping the system prompt and most tool
+# schemas and wrecking tool selection. 8192 fits prompt + history + tool observations comfortably and
+# keeps the prompt prefix stable across rounds, so follow-ups hit Ollama's KV prefix cache.
 _NUM_CTX = 8192
 
 
-def build_agent_executor(user, streaming: bool = False) -> AgentExecutor:
-    """Build a tool-calling agent executor scoped to `user`.
+@dataclass(frozen=True)
+class ChatAgent:
+    """A user-scoped chat agent: the compiled LangGraph runnable plus its tool-name registry.
 
-    `ChatOllama` is the local LLM; `create_tool_calling_agent` binds the tools to the model
-    through the native tool-calling API — there is no text format to parse, which is what made
-    the previous string-ReAct loop unreliable on small local models (they rarely emit a
-    parseable `Final Answer:` line). `AgentExecutor` runs the tool-call -> observation loop
-    until the model replies with plain text. `handle_parsing_errors=True` feeds an unparseable
-    model output back as an observation instead of raising (it does NOT cover schema-invalid
-    tool *arguments*, which raise from the tool itself and surface through the caller's generic
-    error handling); `max_iterations` bounds a looping model (`early_stopping_method` stays at
-    its default "force" — runnable agents support no other value in langchain 0.3, "generate"
-    raises ValueError).
+    ``tool_names`` is carried alongside the runnable so the streaming consumer can gate which tool
+    calls become a ``chat.status`` event without re-deriving the registry from the compiled graph.
+    """
 
-    `streaming=True` makes `ChatOllama` emit token-level callbacks so the WebSocket path can
-    stream the answer live. No callbacks are bound to the model here: the caller attaches them
-    per run (`executor.invoke(..., config={"callbacks": [...]})`) so they also receive the
-    agent's tool actions, which originate from the executor and not from the LLM.
+    runnable: Runnable
+    tool_names: frozenset[str]
+
+
+def build_agent(user, page_context: str = "") -> ChatAgent:
+    """Build a tool-calling agent scoped to ``user``.
+
+    ``ChatOllama`` is the local LLM; ``create_agent`` (the LangGraph agent runtime that replaced the
+    deprecated ``AgentExecutor`` + ``create_tool_calling_agent``) binds the tools to the model via
+    Ollama's native tool-calling API and runs the model -> tools -> model loop as a graph. The input
+    is a ``{"messages": [...]}`` list (prior turns + the new user message), not the old
+    ``{input, chat_history, agent_scratchpad}`` template dict.
+
+    The system prompt is a plain string, so ``page_context`` (the compact "user is viewing job #N"
+    hint) is appended here at build time rather than interpolated through a prompt template; when it
+    is empty the base prompt is used verbatim. Streaming is chosen at call time (``runnable.stream``
+    vs ``runnable.invoke``), so ``ChatOllama`` needs no ``streaming`` flag.
+
+    Each built tool keeps ``handle_validation_error = on_invalid_tool_args`` (set in ``build_tools``):
+    a schema-invalid argument the model emits becomes a recoverable observation instead of an
+    exception that kills the turn — ``create_agent``'s tool node honors it because ``BaseTool``
+    swallows the ``ValidationError`` before the node sees one.
     """
     llm = ChatOllama(
         model=settings.OLLAMA_MODEL,
         base_url=settings.OLLAMA_BASE_URL,
         temperature=0,
         num_ctx=_NUM_CTX,
-        streaming=streaming,
     )
     tools = build_tools(user=user)
-    agent = create_tool_calling_agent(llm, tools, PROMPT)
-    return AgentExecutor(
-        agent=agent,
-        tools=tools,
-        verbose=False,
-        handle_parsing_errors=True,
-        max_iterations=_MAX_AGENT_ITERATIONS,
-    )
+    system_prompt = _SYSTEM_PROMPT if not page_context else f"{_SYSTEM_PROMPT}\n\n{page_context}"
+    agent = create_agent(model=llm, tools=tools, system_prompt=system_prompt)
+    return ChatAgent(runnable=agent, tool_names=frozenset(tool.name for tool in tools))
+
+
+def final_answer(messages: list[BaseMessage]) -> str:
+    """Return the assistant's terminal reply text from a finished run's ``messages``.
+
+    ``create_agent`` ends when the model returns an ``AIMessage`` with no tool calls, so the final
+    answer is the text of the last message when it carries no tool calls (otherwise the run did not
+    reach a plain answer and there is nothing to persist). This is the source of truth the WebSocket
+    ``chat.end`` and the REST reply both use.
+    """
+    if not messages:
+        return ""
+    last = messages[-1]
+    if isinstance(last, AIMessage) and not last.tool_calls:
+        return last.text
+    return ""

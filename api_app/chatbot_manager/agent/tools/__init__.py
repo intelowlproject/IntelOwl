@@ -46,10 +46,10 @@ def build_tools(user) -> list:
         make_analyze_observable_tool(user),
     ]
     # A schema-invalid tool argument (e.g. the model passing the literal "<job_id>" instead of a
-    # real id) raises a pydantic ValidationError inside BaseTool.run, before the tool body -- and is
-    # NOT covered by the executor's handle_parsing_errors (model output only). Returning it as an
-    # observation makes a bad argument recoverable (the agent retries with the real value) instead
-    # of killing the turn. Set centrally so every tool shares the behavior.
+    # real id) raises a pydantic ValidationError inside BaseTool.run, before the tool body. Setting
+    # handle_validation_error makes BaseTool swallow it and return the message as an observation
+    # (create_agent's tool node surfaces it), so a bad argument is recoverable (the agent retries
+    # with the real value) instead of killing the turn. Set centrally so every tool shares it.
     for chatbot_tool in tools:
         chatbot_tool.handle_validation_error = on_invalid_tool_args
     return tools

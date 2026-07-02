@@ -29,13 +29,13 @@ def on_invalid_tool_args(error: Exception) -> str:
     """Observation returned when an LLM tool call fails the tool's argument schema.
 
     Set as ``handle_validation_error`` on every built tool (see ``build_tools``). The pydantic
-    ``ValidationError`` is raised in ``BaseTool._parse_input`` *before* the tool body runs, so it is
-    not covered by ``AgentExecutor(handle_parsing_errors=...)`` (which only feeds back the model's
-    unparseable *output*). Returning the error as an observation -- instead of letting it propagate
-    and kill the whole turn as ``UNAVAILABLE`` -- lets the agent retry with the real value; if it
-    keeps emitting a bad value the run force-stops at ``max_iterations`` rather than crashing. The
-    message surfaces the failure and steers the model to substitute the actual value from a previous
-    tool result, not a placeholder.
+    ``ValidationError`` is raised in ``BaseTool._parse_input`` *before* the tool body runs; setting
+    ``handle_validation_error`` makes ``BaseTool`` swallow it and return this message as the tool
+    observation (``create_agent``'s tool node surfaces it) instead of letting it propagate and kill
+    the whole turn as ``UNAVAILABLE``. That lets the agent retry with the real value; if it keeps
+    emitting a bad value the run force-stops at the recursion limit rather than crashing. The message
+    surfaces the failure and steers the model to substitute the actual value from a previous tool
+    result, not a placeholder.
     """
     return (
         f"Invalid tool arguments: {error}. "

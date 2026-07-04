@@ -1,6 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from typing import Optional
+
 from langchain_core.tools import tool
 
 from api_app.chatbot_manager.agent.tools._common import clamp_limit
@@ -17,7 +19,9 @@ def make_list_investigations_tool(user):
     # and the LLM can never widen it. LangChain feeds a tool's return value back as the
     # tool-call observation, so it must be a string: we return a JSON-serialized envelope.
     @tool("list_investigations")
-    def list_investigations(query: str = "", status: str = "", limit: int = 10) -> str:
+    def list_investigations(
+        query: Optional[str] = None, status: Optional[str] = None, limit: int = 10
+    ) -> str:
         """List IntelOwl investigations visible to you (owned or shared with your org).
 
         Args:

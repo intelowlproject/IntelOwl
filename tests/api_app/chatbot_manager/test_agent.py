@@ -264,3 +264,20 @@ class OnInvalidToolArgsTestCase(TestCase):
         self.assertIsInstance(msg, str)
         self.assertIn("job_id: not an integer", msg)  # the underlying error reaches the model
         self.assertIn("placeholder", msg.lower())  # tell it not to pass a placeholder
+
+
+class SystemPromptToolRoutingTestCase(TestCase):
+    """String-level guard for the #3843 jobs-vs-investigations routing cues.
+
+    The behavioral evidence is the tool-selection reliability harness re-run (documented in the
+    benchmark report), not this test; it only locks the specific prompt cues and rule the harness
+    validated so a later prompt edit can't silently drop them. It never touches Ollama.
+    """
+
+    def test_jobs_questions_are_anchored_to_search_jobs(self):
+        lower = _SYSTEM_PROMPT.lower()
+        # the phrasing that mis-routed to list_investigations 0/10 is now an explicit search_jobs cue
+        self.assertIn("what jobs do i have?", lower)
+        # the directional rule steering "own jobs" questions to search_jobs (not list_investigations)
+        self.assertIn("jobs vs investigations", lower)
+        self.assertIn("search_jobs", _SYSTEM_PROMPT)

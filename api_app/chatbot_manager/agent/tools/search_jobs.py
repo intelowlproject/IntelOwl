@@ -1,6 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from typing import Optional
+
 from django.db import models
 from langchain_core.tools import tool
 
@@ -15,7 +17,7 @@ def make_search_jobs_tool(user):
     # as the tool-call observation, so it must be a string; we return a JSON-serialized
     # envelope.
     @tool("search_jobs")
-    def search_jobs(query: str = "", status: str = "", limit: int = 10) -> str:
+    def search_jobs(query: Optional[str] = None, status: Optional[str] = None, limit: int = 10) -> str:
         """Search IntelOwl jobs by observable name, MD5, or status.
 
         Args:

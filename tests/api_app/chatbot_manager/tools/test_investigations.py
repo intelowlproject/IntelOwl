@@ -119,6 +119,16 @@ class InvestigationToolsTestCase(TestCase):
         ids = [i["id"] for i in data["investigations"]]
         self.assertIn(self.inv_created.pk, ids)
 
+    def test_list_investigations_accepts_null_query_and_status(self):
+        # Mirror the search_jobs null-arg fix: the model may emit query=None/status=None; the
+        # widened Optional[str] signature must treat them as "no filter" and list the visible
+        # investigations without error. Scoping is unchanged -- a non-shared one stays hidden.
+        data = json.loads(self.list_investigations.invoke({"query": None, "status": None}))
+        self.assertEqual(data["errors"], [])
+        ids = [i["id"] for i in data["investigations"]]
+        self.assertIn(self.inv_created.pk, ids)
+        self.assertNotIn(self.inv_private.pk, ids)
+
     def test_list_investigations_limit_over_cap_reports_error(self):
         result = self.list_investigations.invoke({"limit": 100})
         data = json.loads(result)

@@ -153,6 +153,18 @@ class SearchJobsToolTestCase(TestCase):
         self.assertEqual(data["errors"], [])
         self.assertEqual([d["id"] for d in data["jobs"]], [self.job.pk])
 
+    def test_search_jobs_accepts_null_query_and_status(self):
+        # The 3B model emits explicit nulls (query=None, status=None) for "what jobs do I have?";
+        # the widened Optional[str] signature must accept them as "no filter" (falsy) and list the
+        # user's recent jobs instead of raising a validation error. Scoping is unchanged -- another
+        # user's RED job stays hidden.
+        result = self.search_jobs.invoke({"query": None, "status": None})
+        data = json.loads(result)
+        self.assertEqual(data["errors"], [])
+        ids = [d["id"] for d in data["jobs"]]
+        self.assertIn(self.job.pk, ids)
+        self.assertNotIn(self.other_job.pk, ids)
+
     def test_search_jobs_limit_over_cap_reports_error(self):
         result = self.search_jobs.invoke({"limit": 100})
         data = json.loads(result)

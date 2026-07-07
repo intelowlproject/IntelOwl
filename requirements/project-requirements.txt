@@ -10,7 +10,7 @@ django-celery-results==2.5.0
 django-ses == 4.6.0
 django-iam-dbauth==0.2.1
 django-prettyjson==0.4.1
-django-silk==5.4.3
+django-silk==5.5.0
 django-treebeard==4.7
 django-solo==2.4.0
 django_extensions==3.2.3

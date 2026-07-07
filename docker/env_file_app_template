@@ -89,6 +89,9 @@ FLOWER_PWD=flower
 OLLAMA_BASE_URL=http://ollama:11434
 # must be a model that supports Ollama tool calling
 OLLAMA_MODEL=qwen2.5:3b
+# how long Ollama keeps the model in memory after a request: -1 keeps it resident (no cold reload
+# after idle), a duration like 5m frees memory after inactivity, 0 unloads immediately. Default: -1
+OLLAMA_KEEP_ALIVE=-1
 # chat sessions whose last activity is older than this are flushed periodically. Default: 90 days
 CHATBOT_MESSAGE_RETENTION_DAYS=90
 CHATBOT_RATE_LIMIT=5

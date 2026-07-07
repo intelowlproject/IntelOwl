@@ -40,6 +40,19 @@ RECURSION_LIMIT = 2 * _MAX_AGENT_ITERATIONS + 2
 _NUM_CTX = 8192
 
 
+def _parse_keep_alive(value: str) -> int | str:
+    """Normalize the OLLAMA_KEEP_ALIVE setting to what ChatOllama/Ollama expect.
+
+    Ollama's keep_alive is either an integer number of seconds (-1 keeps the model resident
+    indefinitely, 0 unloads it immediately) or a Go-duration string like "5m"/"1h". The setting
+    arrives as a string, so coerce a numeric value to int and pass any duration string through.
+    """
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return value
+
+
 @dataclass(frozen=True)
 class ChatAgent:
     """A user-scoped chat agent: the compiled LangGraph runnable plus its tool-name registry.
@@ -76,6 +89,7 @@ def build_agent(user, page_context: str = "") -> ChatAgent:
         base_url=settings.OLLAMA_BASE_URL,
         temperature=0,
         num_ctx=_NUM_CTX,
+        keep_alive=_parse_keep_alive(settings.OLLAMA_KEEP_ALIVE),
     )
     tools = build_tools(user=user)
     system_prompt = _SYSTEM_PROMPT if not page_context else f"{_SYSTEM_PROMPT}\n\n{page_context}"

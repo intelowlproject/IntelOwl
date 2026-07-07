@@ -5,7 +5,7 @@ from typing import Any, Optional
 from unittest.mock import patch
 
 from django.conf import settings
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from langchain_core.callbacks import CallbackManagerForLLMRun
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage
@@ -19,6 +19,7 @@ from api_app.chatbot_manager.agent.agent import (
     _SYSTEM_PROMPT,
     RECURSION_LIMIT,
     ChatAgent,
+    _parse_keep_alive,
     build_agent,
     final_answer,
 )
@@ -129,6 +130,19 @@ class BuildAgentTestCase(TestCase):
         self.assertEqual(llm_kwargs["temperature"], 0)
         # without an explicit context window Ollama truncates the multi-tool prompt
         self.assertEqual(llm_kwargs["num_ctx"], _NUM_CTX)
+
+    def test_keep_alive_is_threaded_from_settings(self):
+        _, mock_llm_cls = self._build()
+        # default OLLAMA_KEEP_ALIVE "-1" is parsed to int -1 so Ollama keeps the model resident
+        self.assertEqual(
+            mock_llm_cls.call_args.kwargs["keep_alive"],
+            _parse_keep_alive(settings.OLLAMA_KEEP_ALIVE),
+        )
+
+    @override_settings(OLLAMA_KEEP_ALIVE="5m")
+    def test_keep_alive_duration_string_is_passed_through(self):
+        _, mock_llm_cls = self._build()
+        self.assertEqual(mock_llm_cls.call_args.kwargs["keep_alive"], "5m")
 
     def test_recursion_limit_maps_from_agent_rounds(self):
         # LangGraph counts supersteps, not agent rounds: one tool round is model->tools->model
@@ -281,3 +295,16 @@ class SystemPromptToolRoutingTestCase(TestCase):
         # the directional rule steering "own jobs" questions to search_jobs (not list_investigations)
         self.assertIn("jobs vs investigations", lower)
         self.assertIn("search_jobs", _SYSTEM_PROMPT)
+
+
+class ParseKeepAliveTestCase(TestCase):
+    """OLLAMA_KEEP_ALIVE is coerced to what Ollama expects: int seconds or a duration string."""
+
+    def test_numeric_strings_become_ints(self):
+        self.assertEqual(_parse_keep_alive("-1"), -1)
+        self.assertEqual(_parse_keep_alive("300"), 300)
+        self.assertEqual(_parse_keep_alive("0"), 0)
+
+    def test_duration_strings_pass_through(self):
+        self.assertEqual(_parse_keep_alive("5m"), "5m")
+        self.assertEqual(_parse_keep_alive("1h"), "1h")

@@ -49,61 +49,68 @@ jest.mock("../../../../src/stores/useAuthStore", () => ({
 
 describe("PluginHealthCheckButton test", () => {
   test.each([
-    // healthcheck true
+    // healthcheck true with fallback message
     {
       pluginName: "Plugin1",
       responseData: {
         status: 200,
         data: { status: true },
       },
+      expectedMessage: "It is up and running",
     },
-    // healthcheck false
+    // healthcheck false with custom message
     {
       pluginName: "Plugin2",
       responseData: {
         status: 200,
-        data: { status: false },
+        data: { status: false, message: "Missing API Key" },
       },
+      expectedMessage: "Missing API Key",
     },
-  ])("Health check - status 200 (%s)", async ({ pluginName, responseData }) => {
-    const userAction = userEvent.setup();
-    axios.get.mockImplementation(() => Promise.resolve(responseData));
+  ])(
+    "Health check - status 200 (%s)",
+    async ({ pluginName, responseData, expectedMessage }) => {
+      const userAction = userEvent.setup();
+      axios.get.mockImplementation(() => Promise.resolve(responseData));
 
-    const { container } = render(
-      <BrowserRouter>
-        <PluginHealthCheckButton
-          pluginName={pluginName}
-          pluginType_="analyzer"
-        />
-        <Toast />
-      </BrowserRouter>,
-    );
-
-    const healthCheckIcon = container.querySelector(
-      `#table-pluginhealthcheckbtn__${pluginName}`,
-    );
-    expect(healthCheckIcon).toBeInTheDocument();
-
-    await userAction.click(healthCheckIcon);
-
-    await waitFor(() => {
-      expect(axios.get).toHaveBeenCalledWith(
-        `${API_BASE_URI}/analyzer/${pluginName}/health_check`,
+      const { container } = render(
+        <BrowserRouter>
+          <PluginHealthCheckButton
+            pluginName={pluginName}
+            pluginType_="analyzer"
+          />
+          <Toast />
+        </BrowserRouter>,
       );
-      // toast
-      if (responseData.data.status) {
-        // status: true
-        expect(
-          screen.getByText(`${pluginName} - health check: success`),
-        ).toBeInTheDocument();
-      } else {
-        // status: false
-        expect(
-          screen.getByText(`${pluginName} - health check: warning`),
-        ).toBeInTheDocument();
-      }
-    });
-  });
+
+      const healthCheckIcon = container.querySelector(
+        `#table-pluginhealthcheckbtn__${pluginName}`,
+      );
+      expect(healthCheckIcon).toBeInTheDocument();
+
+      await userAction.click(healthCheckIcon);
+
+      await waitFor(() => {
+        expect(axios.get).toHaveBeenCalledWith(
+          `${API_BASE_URI}/analyzer/${pluginName}/health_check`,
+        );
+        // toast
+        if (responseData.data.status) {
+          // status: true
+          expect(
+            screen.getByText(`${pluginName} - health check: success`),
+          ).toBeInTheDocument();
+        } else {
+          // status: false
+          expect(
+            screen.getByText(`${pluginName} - health check: warning`),
+          ).toBeInTheDocument();
+        }
+        // verify the specific error or success message displays
+        expect(screen.getByText(expectedMessage)).toBeInTheDocument();
+      });
+    },
+  );
 });
 
 describe("PluginDeletionButton test", () => {

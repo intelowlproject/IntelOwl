@@ -162,7 +162,7 @@ class YETITestCase(BaseConnectorTest):
         with patch(
             "api_app.connectors_manager.connectors.yeti.requests.post", side_effect=mock_yeti_api_flow
         ):
-            self.assertTrue(connector.health_check())
+            self.assertTrue(connector.health_check()[0])
 
     @override_settings(STAGE_CI=False, MOCK_CONNECTIONS=False)
     def test_yeti_health_check_failures(self):
@@ -189,15 +189,15 @@ class YETITestCase(BaseConnectorTest):
                 side_effect=requests.exceptions.Timeout,
             ),
         ):
-            self.assertFalse(connector.health_check())
+            self.assertFalse(connector.health_check()[0])
 
         with (
             self.subTest("Authentication Failure"),
             patch("api_app.connectors_manager.connectors.yeti.requests.post") as mock_post,
         ):
             mock_post.return_value = MockResponse({"error": "Unauthorized"}, 401)
-            self.assertFalse(connector.health_check())
+            self.assertFalse(connector.health_check()[0])
 
         with self.subTest("Missing Configuration"):
             connector._config.parameters.annotate_configured.return_value.annotate_value_for_user.return_value = []
-            self.assertFalse(connector.health_check())
+            self.assertFalse(connector.health_check()[0])

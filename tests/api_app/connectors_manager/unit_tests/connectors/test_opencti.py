@@ -310,7 +310,7 @@ class OpenCTIConnectorTestCase(BaseConnectorTest):
             mock_instance = mock_client_cls.return_value
             mock_instance.health_check.return_value = True
 
-            self.assertTrue(connector.health_check())
+            self.assertTrue(connector.health_check()[0])
 
     @override_settings(STAGE_CI=False, MOCK_CONNECTIONS=False)
     def test_opencti_health_check_failures(self):
@@ -336,7 +336,7 @@ class OpenCTIConnectorTestCase(BaseConnectorTest):
         ):
             mock_instance = mock_client_cls.return_value
             mock_instance.health_check.side_effect = Exception("Connection refused")
-            self.assertFalse(connector.health_check())
+            self.assertFalse(connector.health_check()[0])
 
         with (
             self.subTest("OpenCTI Reports Unhealthy"),
@@ -344,8 +344,8 @@ class OpenCTIConnectorTestCase(BaseConnectorTest):
         ):
             mock_instance = mock_client_cls.return_value
             mock_instance.health_check.return_value = False
-            self.assertFalse(connector.health_check())
+            self.assertFalse(connector.health_check()[0])
 
         with self.subTest("Missing Configuration"):
             connector._config.parameters.annotate_configured.return_value.annotate_value_for_user.return_value = []
-            self.assertFalse(connector.health_check())
+            self.assertFalse(connector.health_check()[0])

@@ -36,7 +36,10 @@ class ConnectorConfigViewSetTestCase(AbstractConfigViewSetTestCaseMixin, CustomV
             connector_config=connector,
         )
 
-        with patch("api_app.connectors_manager.connectors.yeti.YETI.health_check", return_value=True):
+        with patch(
+            "api_app.connectors_manager.connectors.yeti.YETI.health_check",
+            return_value=(True, "Connected successfully"),
+        ):
             response = self.client.get(f"{self.URL}/{connector.name}/health_check")
             self.assertEqual(response.status_code, 200)
 
@@ -47,6 +50,47 @@ class ConnectorConfigViewSetTestCase(AbstractConfigViewSetTestCaseMixin, CustomV
         result = response.json()
         self.assertIn("status", result)
         self.assertTrue(result["status"])
+        self.assertEqual(result["message"], "Connected successfully")
+        pc1.delete()
+        pc2.delete()
+
+    def test_health_check_legacy_boolean_return(self):
+        connector: ConnectorConfig = ConnectorConfig.objects.get(name="YETI")
+        pc1 = PluginConfig.objects.create(
+            parameter=connector.parameters.get(name="api_key_name"),
+            value="test",
+            for_organization=False,
+            owner=None,
+            connector_config=connector,
+        )
+        pc2 = PluginConfig.objects.create(
+            parameter=connector.parameters.get(name="url_key_name"),
+            value="https://test",
+            for_organization=False,
+            owner=None,
+            connector_config=connector,
+        )
+
+        with patch("api_app.connectors_manager.connectors.yeti.YETI.health_check", return_value=True):
+            self.client.force_authenticate(self.superuser)
+            response = self.client.get(f"{self.URL}/{connector.name}/health_check")
+            self.assertEqual(response.status_code, 200)
+
+        result = response.json()
+        self.assertIn("status", result)
+        self.assertTrue(result["status"])
+        self.assertEqual(result["message"], "It is up and running")
+
+        with patch("api_app.connectors_manager.connectors.yeti.YETI.health_check", return_value=False):
+            self.client.force_authenticate(self.superuser)
+            response = self.client.get(f"{self.URL}/{connector.name}/health_check")
+            self.assertEqual(response.status_code, 200)
+
+        result = response.json()
+        self.assertIn("status", result)
+        self.assertFalse(result["status"])
+        self.assertEqual(result["message"], "It is NOT up")
+
         pc1.delete()
         pc2.delete()
 

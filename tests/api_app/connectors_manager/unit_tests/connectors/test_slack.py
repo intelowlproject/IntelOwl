@@ -44,7 +44,7 @@ class SlackTestCase(BaseConnectorTest):
             mock_instance = mock_webclient_cls.return_value
             mock_instance.auth_test.return_value = {"ok": True}
 
-            self.assertTrue(connector.health_check())
+            self.assertTrue(connector.health_check()[0])
 
     @override_settings(STAGE_CI=False, MOCK_CONNECTIONS=False)
     def test_slack_health_check_failures(self):
@@ -65,8 +65,8 @@ class SlackTestCase(BaseConnectorTest):
         ):
             mock_instance = mock_webclient_cls.return_value
             mock_instance.auth_test.side_effect = Exception("invalid_auth")
-            self.assertFalse(connector.health_check())
+            self.assertFalse(connector.health_check()[0])
 
         with self.subTest("Missing Token Configuration"):
             connector._config.parameters.annotate_configured.return_value.annotate_value_for_user.return_value = []
-            self.assertFalse(connector.health_check())
+            self.assertFalse(connector.health_check()[0])

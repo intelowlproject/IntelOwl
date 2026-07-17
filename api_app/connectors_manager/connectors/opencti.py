@@ -183,9 +183,9 @@ class OpenCTI(classes.Connector):
                 id=report_id, stixObjectOrStixRelationshipId=observable_id
             )
 
-    def health_check(self, user=None) -> bool:
+    def health_check(self, user=None) -> tuple:
         if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
-            return True
+            return True, "Mock connection successful"
 
         params = self._config.parameters.annotate_configured(self._config, user).annotate_value_for_user(
             self._config, user
@@ -208,10 +208,10 @@ class OpenCTI(classes.Connector):
 
         if not url:
             logger.info("Healthcheck failed: Missing config url")
-            return False
+            return False, "Missing config url"
         if not token:
             logger.info("Healthcheck failed: Missing config api key")
-            return False
+            return False, "Missing config api key"
 
         try:
             client = pycti.OpenCTIApiClient(url, token, ssl_verify=ssl_verify, proxies=proxies)
@@ -221,10 +221,13 @@ class OpenCTI(classes.Connector):
             # API key and reachability of the OpenCTI instance
             # Ref: https://opencti-python-client.readthedocs.io/en/latest/pycti/pycti.api.opencti_api_client.html#pycti.api.opencti_api_client.OpenCTIApiClient.health_check
             resp = client.health_check()
-            return resp
+            if resp:
+                return True, "Connected successfully"
+            else:
+                return False, "OpenCTI health check returned False"
         except Exception as e:
             logger.info(f"OpenCTI health check failed: {e}")
-            return False
+            return False, f"Connection failed: {e}"
 
     def run(self):
         # Initialize OpenCTI client for this run.

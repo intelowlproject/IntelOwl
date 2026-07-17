@@ -198,14 +198,14 @@ export const usePluginConfigurationStore = create((set, get) => ({
       if (resp.data?.status)
         addToast(
           `${PluginName} - health check: success`,
-          "It is up and running",
+          resp.data?.message || "It is up and running",
           "success",
           true,
         );
       else
         addToast(
           `${PluginName} - health check: warning`,
-          "It is NOT up",
+          resp.data?.message || "It is NOT up",
           "warning",
           true,
         );

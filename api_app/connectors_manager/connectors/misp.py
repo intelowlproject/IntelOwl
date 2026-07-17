@@ -116,9 +116,9 @@ class MISP(Connector):
         else:
             raise ConnectorRunException(f"{errors}{debug_info}")
 
-    def health_check(self, user=None) -> bool:
+    def health_check(self, user=None) -> tuple:
         if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
-            return True
+            return True, "Mock connection successful"
 
         params = self._config.parameters.annotate_configured(self._config, user).annotate_value_for_user(
             self._config, user
@@ -142,10 +142,10 @@ class MISP(Connector):
 
         if not url:
             logger.info("Healthcheck failed: Missing config url")
-            return False
+            return False, "Missing config url"
         if not key:
             logger.info("Healthcheck failed: Missing config api key")
-            return False
+            return False, "Missing config api key"
 
         ssl_param = (
             f"{settings.PROJECT_LOCATION}/configuration/misp_ssl.crt"
@@ -168,11 +168,11 @@ class MISP(Connector):
             # the MISP instance if the connection is successful
             # Refs: https://pymisp.readthedocs.io/en/latest/modules.html?#pymisp.PyMISP.misp_instance_version
             misp.misp_instance_version
-            return True
+            return True, "Connected successfully"
 
         except Exception as e:
             logger.info(f"MISP health check failed: {e}")
-            return False
+            return False, f"Connection failed: {e}"
 
     def run(self):
         ssl_param = (

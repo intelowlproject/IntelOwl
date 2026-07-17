@@ -18,7 +18,7 @@ class YETI(classes.Connector):
     _url_key_name: str
     _api_key_name: str
 
-    def health_check(self, user=None) -> bool:
+    def health_check(self, user=None) -> tuple:
         params = self._config.parameters.annotate_configured(self._config, user).annotate_value_for_user(
             self._config, user
         )
@@ -33,13 +33,13 @@ class YETI(classes.Connector):
 
         if not url:
             logger.info("Healthcheck failed: Missing config url")
-            return False
+            return False, "Missing config url"
         if not api_key:
             logger.info("Healthcheck failed: Missing config api key")
-            return False
+            return False, "Missing config api key"
 
         if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
-            return True
+            return True, "Mock connection successful"
 
         base_url = url.rstrip("/")
         auth_url = f"{base_url}/api/v2/auth/api-token"
@@ -63,17 +63,17 @@ class YETI(classes.Connector):
             access_token = auth_resp.json().get("access_token")
 
             if access_token:
-                return True
+                return True, "Connected successfully"
             else:
                 logger.info(f"Healthcheck failed for {self}: No access token in response.")
-                return False
+                return False, "No access token in response"
 
         except requests.RequestException as e:
             logger.info(f"Healthcheck failed: YETI Auth Request failed for {self}. Error: {e}")
-            return False
+            return False, f"Auth Request failed: {e}"
         except Exception as e:
             logger.exception(f"Unexpected error in YETI health_check: {e}")
-            return False
+            return False, f"Unexpected error: {e}"
 
     def run(self):
         # get observable value and type

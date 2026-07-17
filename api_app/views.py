@@ -1311,15 +1311,22 @@ class PythonConfigViewSet(AbstractConfigViewSet):
         config: PythonConfig = self.get_object()
         python_obj = config.python_module.python_class(config)
         try:
-            health_status = python_obj.health_check(request.user)
+            health_result = python_obj.health_check(request.user)
+            if isinstance(health_result, tuple):
+                health_status, health_message = health_result
+            else:
+                health_status = health_result
+                health_message = "It is up and running" if health_status else "It is NOT up"
         except NotImplementedError as e:
             logger.info(f"NotImplementedError {e}, user {request.user}, name {name}")
             raise ValidationError({"detail": "No healthcheck implemented"})
         except Exception as e:
             logger.exception(e)
-            raise ValidationError({"detail": "Unexpected exception raised. Check the code."})
+            raise ValidationError({"detail": str(e) or "Unexpected exception raised. Check the code."})
         else:
-            return Response(data={"status": health_status}, status=status.HTTP_200_OK)
+            return Response(
+                data={"status": health_status, "message": health_message}, status=status.HTTP_200_OK
+            )
 
     @action(
         methods=["post"],

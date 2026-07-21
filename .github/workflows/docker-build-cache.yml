@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout IntelOwl
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v7.0.1
 
       - name: Set image repo
         run: echo "IMAGE_REPO=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"

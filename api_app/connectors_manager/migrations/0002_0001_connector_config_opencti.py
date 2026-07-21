@@ -11,7 +11,7 @@ plugin = {
         "module": "opencti.OpenCTI",
         "base_path": "api_app.connectors_manager.connectors",
     },
-    "description": "Automatically creates an observable and a linked report on your OpenCTI instance, linking the successful analysis on IntelOwl. CARE! This may require additional advanced configuration. Check the docs [here](https://intelowl.readthedocs.io/en/latest/Advanced-Configuration.html#opencti)",
+    "description": "Automatically creates an observable and a linked report on your OpenCTI instance, linking the successful analysis on IntelOwl. CARE! This may require additional advanced configuration. Check the docs [here](https://intelowlproject.github.io/docs/IntelOwl/advanced_configuration/#opencti)",
     "disabled": False,
     "soft_time_limit": 30,
     "routing_key": "default",

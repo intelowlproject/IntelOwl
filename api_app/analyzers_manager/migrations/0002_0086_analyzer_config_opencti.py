@@ -11,7 +11,7 @@ plugin = {
         "module": "opencti.OpenCTI",
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },
-    "description": "scan an observable on a custom OpenCTI instance. CARE! This may require additional advanced configuration. Check the docs [here](https://intelowl.readthedocs.io/en/latest/Advanced-Configuration.html#opencti)",
+    "description": "scan an observable on a custom OpenCTI instance. CARE! This may require additional advanced configuration. Check the docs [here](https://intelowlproject.github.io/docs/IntelOwl/advanced_configuration/#opencti)",
     "disabled": False,
     "soft_time_limit": 30,
     "routing_key": "default",

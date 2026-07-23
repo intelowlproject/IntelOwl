@@ -125,3 +125,49 @@ class AnalyzeObservableToolTestCase(TestCase):
         self.assertEqual(data["plan"]["playbook"], self.pb_owned.name)
         self.assertTrue(data["pending_id"])
         mock_apply.assert_not_called()
+
+    @patch(_APPLY_ASYNC)
+    def test_explicit_request_has_no_default_reason(self, mock_apply):
+        # `reason` is populated ONLY when the plan defaults a playbook the user did not name.
+        data = json.loads(
+            self.analyze_observable.invoke({"observable_name": "example.com", "analyzers": "Tranco"})
+        )
+        self.assertEqual(data["errors"], [])
+        self.assertIsNone(data["plan"]["reason"])
+        mock_apply.assert_not_called()
+
+    @patch(_APPLY_ASYNC)
+    def test_no_plugins_defaults_to_free_to_use_playbook(self, mock_apply):
+        # A1: neither playbook nor analyzers -> default to the curated FREE_TO_USE_ANALYZERS playbook
+        # instead of failing with "No Analyzers and Connectors can be run after filtering".
+        data = json.loads(self.analyze_observable.invoke({"observable_name": "example.com"}))
+        self.assertEqual(data["errors"], [])
+        self.assertEqual(data["plan"]["playbook"], "FREE_TO_USE_ANALYZERS")
+        self.assertTrue(data["plan"]["analyzers"])  # the default playbook contributes real plugins
+        self.assertIsNotNone(data["plan"]["reason"])  # explains WHY that playbook was chosen
+        self.assertIn("FREE_TO_USE_ANALYZERS", data["plan"]["reason"])
+        self.assertTrue(data["pending_id"])
+        mock_apply.assert_not_called()
+
+    @patch(_APPLY_ASYNC)
+    def test_no_plugins_pending_stores_resolved_playbook(self, mock_apply):
+        # The pending must persist the RESOLVED default, or the confirm endpoint would re-validate an
+        # empty request and dead-end on "No Analyzers ...".
+        from api_app.chatbot_manager.pending_action import consume_pending_analysis
+
+        data = json.loads(self.analyze_observable.invoke({"observable_name": "example.com"}))
+        payload = consume_pending_analysis(self.user.id, data["pending_id"])
+        self.assertEqual(payload["playbook"], "FREE_TO_USE_ANALYZERS")
+        mock_apply.assert_not_called()
+
+    @patch(_APPLY_ASYNC)
+    def test_no_plugins_without_default_returns_actionable_error(self, mock_apply):
+        # When FREE_TO_USE_ANALYZERS is not resolvable, the error must name the playbooks the user can
+        # pick from -- not the current dead end.
+        PlaybookConfig.objects.filter(name="FREE_TO_USE_ANALYZERS").update(disabled=True)
+        data = json.loads(self.analyze_observable.invoke({"observable_name": "example.com"}))
+        self.assertIsNone(data["plan"])
+        self.assertIsNone(data["pending_id"])
+        self.assertTrue(any("Pick one of the playbooks" in e for e in data["errors"]))
+        self.assertTrue(any(self.pb_owned.name in e for e in data["errors"]))
+        mock_apply.assert_not_called()

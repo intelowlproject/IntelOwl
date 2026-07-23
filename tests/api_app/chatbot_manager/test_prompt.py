@@ -96,6 +96,23 @@ class SystemPromptTestCase(TestCase):
         for section in ("[Role]", "[Tools", "[Rules]", "[Response style]"):
             self.assertIn(section, _SYSTEM_PROMPT, f"Missing section: {section}")
 
+    def test_prompt_forbids_placeholder_names(self):
+        """A2: the [Rules] section must tell the model to copy analyzer/playbook/job names verbatim
+        and never emit bracketed placeholders like [Analyzer 1] — the qwen2.5:3b failure @mlodic hit.
+        """
+        lowered = _SYSTEM_PROMPT.lower()
+        self.assertIn("verbatim", lowered)
+        self.assertIn("placeholder", lowered)
+
+    def test_prompt_tells_model_to_surface_plan_reason(self):
+        """F2: the plan carries a `reason` when analyze_observable defaults a playbook, but the model
+        only narrates it if the prompt says to. The [Rules] section must instruct it to report the
+        reason in the confirmation message.
+        """
+        lowered = _SYSTEM_PROMPT.lower()
+        self.assertIn("reason", lowered)
+        self.assertIn("why that playbook was chosen", lowered)
+
     def test_page_context_not_in_the_file(self):
         """The file must NOT contain {page_context} — interpolation is the prompt
         template's job, not the static file's.

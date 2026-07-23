@@ -10,9 +10,16 @@ from api_app.chatbot_manager.serializers.analyze_observable import (
     AnalyzeObservableResultSerializer,
     flatten_errors,
 )
-from api_app.choices import TLP
+from api_app.choices import TLP, Classification
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers.job import ObservableAnalysisSerializer
+
+# IntelOwl actively curates this playbook for plugins that need no API key (many migrations add
+# analyzers to it), so it is the safe default when the user names neither a playbook nor analyzers.
+FREE_TO_USE_PLAYBOOK = "FREE_TO_USE_ANALYZERS"
+# Cap the playbook list in the fallback error so the LLM-facing message stays compact and actionable
+# (visible_for_user includes every public playbook, so a classification can match dozens).
+_MAX_PLAYBOOKS_IN_ERROR = 20
 
 
 def make_analyze_observable_tool(user):
@@ -63,6 +70,45 @@ def make_analyze_observable_tool(user):
         if analyzers_list:
             data["analyzers_requested"] = analyzers_list
 
+        plan_reason = None
+        if not playbook and not analyzers_list:
+            # Neither a playbook nor analyzers were named -- the natural shape of "analyze X". Without a
+            # default this validates to zero plugins and the core raises "No Analyzers and Connectors can
+            # be run after filtering", which the model paraphrases into "no analyzers available" and the
+            # user reads as a broken deploy. Default to the curated FREE_TO_USE_ANALYZERS playbook when it
+            # is visible, applicable to the classification and enabled; otherwise return an actionable
+            # error naming the playbooks the user can pick from.
+            classification = Classification.calculate_observable(observable_name)
+            # The playbooks that WOULD qualify for this observable: visible, enabled, applicable. Both
+            # the default lookup and the fallback list derive from this single queryset so the error
+            # names exactly the playbooks that could have run.
+            applicable_playbooks = PlaybookConfig.objects.visible_for_user(user).filter(
+                disabled=False, type__contains=[classification]
+            )
+            default_playbook = applicable_playbooks.filter(name=FREE_TO_USE_PLAYBOOK).first()
+            if default_playbook is not None:
+                data["playbook_requested"] = default_playbook.name
+                plan_reason = (
+                    f"No playbook or analyzers were specified, so IntelOwl's curated "
+                    f"'{FREE_TO_USE_PLAYBOOK}' playbook (key-free plugins) was selected for this "
+                    f"{classification} observable."
+                )
+            else:
+                names = list(applicable_playbooks.order_by("name").values_list("name", flat=True))
+                shown = ", ".join(names[:_MAX_PLAYBOOKS_IN_ERROR])
+                if len(names) > _MAX_PLAYBOOKS_IN_ERROR:
+                    shown += f" (and {len(names) - _MAX_PLAYBOOKS_IN_ERROR} more)"
+                message = (
+                    f"No playbook or analyzers were specified. Pick one of the playbooks available to you "
+                    f"for {classification} observables: {shown}."
+                    if names
+                    else f"No playbook or analyzers were specified and no playbook is available to you for "
+                    f"{classification} observables; specify analyzers explicitly."
+                )
+                return AnalyzeObservableResultSerializer(
+                    {"errors": [message], "plan": None, "pending_id": None}
+                ).to_json()
+
         serializer = ObservableAnalysisSerializer(data=data, context={"request": shim})
         if not serializer.is_valid(raise_exception=False):
             return AnalyzeObservableResultSerializer(
@@ -78,12 +124,21 @@ def make_analyze_observable_tool(user):
             "analyzers": [analyzer.name for analyzer in validated["analyzers_to_execute"]],
             "connectors": [connector.name for connector in validated["connectors_to_execute"]],
             "skipped": list(validated.get("warnings", [])),
+            # Non-null only when the plan defaulted to FREE_TO_USE_ANALYZERS, so the model can tell
+            # the user WHY that playbook was chosen instead of silently picking one.
+            "reason": plan_reason,
         }
-        # Store the RAW inputs (re-validated at confirm time); the model cannot launch -- only a
-        # user POST of this pending_id to the confirm endpoint can.
+        # Store the inputs re-validated at confirm time; the model cannot launch -- only a user POST of
+        # this pending_id can. Persist the RESOLVED playbook (may be the defaulted FREE_TO_USE_ANALYZERS)
+        # so the confirm endpoint re-validates and launches exactly the previewed plan.
         pending_id = create_pending_analysis(
             user.id,
-            {"observable_name": observable_name, "tlp": tlp, "playbook": playbook, "analyzers": analyzers},
+            {
+                "observable_name": observable_name,
+                "tlp": tlp,
+                "playbook": data.get("playbook_requested", ""),
+                "analyzers": analyzers,
+            },
         )
         return AnalyzeObservableResultSerializer(
             {"errors": [], "plan": plan, "pending_id": pending_id}

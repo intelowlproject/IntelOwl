@@ -39,6 +39,9 @@ class AnalysisPlanSerializer(serializers.Serializer):
     analyzers = serializers.ListField(child=serializers.CharField())
     connectors = serializers.ListField(child=serializers.CharField())
     skipped = serializers.ListField(child=serializers.CharField())
+    # Human-readable justification, set only when the plan defaulted to a playbook the user did not
+    # name (so the confirmation response can explain the choice); null for explicit requests.
+    reason = serializers.CharField(allow_null=True)
 
 
 class AnalyzeObservableResultSerializer(ToolResultSerializer):

@@ -7,9 +7,8 @@ from typing import List
 import pymisp
 from django.conf import settings
 
-from api_app import helpers
 from api_app.choices import Classification
-from api_app.connectors_manager.classes import Connector
+from api_app.connectors_manager.classes import CTIConnector
 from api_app.connectors_manager.exceptions import ConnectorRunException
 
 logger = logging.getLogger(__name__)
@@ -18,7 +17,7 @@ INTELOWL_MISP_TYPE_MAP = {
     Classification.IP: "ip-src",
     Classification.DOMAIN: "domain",
     Classification.URL: "url",
-    # "hash" (checked from helpers.get_hash_type)
+    # "hash" (checked from self.hash_type)
     Classification.GENERIC: "text",  # misc field, so keeping text
     "file": "filename|md5",
 }
@@ -31,7 +30,7 @@ def create_misp_attribute(misp_type, misp_value) -> pymisp.MISPAttribute:
     return obj
 
 
-class MISP(Connector):
+class MISP(CTIConnector):
     tlp: str
     ssl_check: bool
     self_signed_certificate: str
@@ -50,29 +49,37 @@ class MISP(Connector):
         obj.add_tag(f"tlp:{self.tlp}")  # tlp tag for sharing
 
         # Add tags from Job
-        for tag in self._job.tags.all():
-            obj.add_tag(f"intelowl-tag:{tag.label}")
+        for label in self.tag_labels:
+            obj.add_tag(f"intelowl-tag:{label}")
+
+        # Add enrichment tags from data model when available
+        if self.has_data_model:
+            if self.evaluation:
+                obj.add_tag(f"evaluation:{self.evaluation}")
+            if self.malware_family:
+                obj.add_tag(f"malware-family:{self.malware_family}")
+            if self.kill_chain_phase:
+                obj.add_tag(f"kill-chain:{self.kill_chain_phase}")
+            if self.reliability:
+                obj.add_tag(f"reliability:{self.reliability}")
 
         return obj
 
     @property
     def _base_attr_obj(self) -> pymisp.MISPAttribute:
-        if self._job.is_sample:
+        if self.classification == "file":
             _type = INTELOWL_MISP_TYPE_MAP["file"]
-            value = f"{self._job.analyzable.name}|{self._job.analyzable.md5}"
+            value = f"{self.observable_name}|{self._job.analyzable.md5}"
         else:
-            _type = self._job.analyzable.classification
-            value = self._job.analyzable.name
-            if _type == Classification.HASH:
-                matched_type = helpers.get_hash_type(value)
+            value = self.observable_name
+            if self.hash_type is not None:
                 # convert sha-x to shax
-                _type = matched_type.replace("-", "") if matched_type is not None else "text"
+                _type = self.hash_type.replace("-", "")
             else:
-                _type = INTELOWL_MISP_TYPE_MAP[_type]
+                _type = INTELOWL_MISP_TYPE_MAP.get(self.classification, "text")
 
         obj = create_misp_attribute(_type, value)
-        analyzers_names = self._job.analyzers_to_execute.all().values_list("name", flat=True)
-        obj.comment = f"Analyzers Executed: {', '.join(analyzers_names)}"
+        obj.comment = f"Analyzers Executed: {', '.join(self.analyzer_names)}"
         return obj
 
     @property
@@ -90,7 +97,7 @@ class MISP(Connector):
         """
         obj = pymisp.MISPAttribute()
         obj.type = "link"
-        obj.value = f"{settings.WEB_CLIENT_URL}/jobs/{self.job_id}"
+        obj.value = self.analysis_url
         obj.comment = "View Analysis on IntelOwl"
         obj.disable_correlation = True
 

@@ -8,9 +8,8 @@ import pycti
 from django.conf import settings
 from pycti.api.opencti_api_client import File
 
-from api_app import helpers
 from api_app.choices import Classification
-from api_app.connectors_manager import classes
+from api_app.connectors_manager.classes import CTIConnector
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +27,7 @@ INTELOWL_OPENCTI_TYPE_MAP = {
 }
 
 
-class OpenCTI(classes.Connector):
+class OpenCTI(CTIConnector):
     ssl_verify: bool
     tlp: dict
     proxies: str
@@ -36,11 +35,10 @@ class OpenCTI(classes.Connector):
     _api_key_name: str
 
     def get_observable_type(self) -> str:
-        if self._job.is_sample:
+        if self.classification == "file":
             obs_type = INTELOWL_OPENCTI_TYPE_MAP["file"]
-        elif self._job.analyzable.classification == Classification.HASH:
-            matched_hash_type = helpers.get_hash_type(self._job.analyzable.name)
-            if matched_hash_type in [
+        elif self.classification == Classification.HASH:
+            if self.hash_type in [
                 "md5",
                 "sha-1",
                 "sha-256",
@@ -48,10 +46,10 @@ class OpenCTI(classes.Connector):
                 obs_type = INTELOWL_OPENCTI_TYPE_MAP["file"]
             else:
                 obs_type = INTELOWL_OPENCTI_TYPE_MAP[Classification.GENERIC]  # text
-        elif self._job.analyzable.classification == Classification.IP:
-            ip_version = helpers.get_ip_version(self._job.analyzable.name)
-            if ip_version in [4, 6]:
-                obs_type = INTELOWL_OPENCTI_TYPE_MAP[Classification.IP][f"v{ip_version}"]  # v4/v6
+        elif self.classification == Classification.IP:
+            ip_ver = self.ip_version
+            if ip_ver in [4, 6]:
+                obs_type = INTELOWL_OPENCTI_TYPE_MAP[Classification.IP][f"v{ip_ver}"]  # v4/v6
             else:
                 obs_type = INTELOWL_OPENCTI_TYPE_MAP[Classification.GENERIC]  # text
         else:
@@ -62,18 +60,17 @@ class OpenCTI(classes.Connector):
     def generate_observable_data(self) -> dict:
         observable_data = {"type": self.get_observable_type()}
         if self._job.is_sample:
-            observable_data["name"] = self._job.analyzable.name
+            observable_data["name"] = self.observable_name
             observable_data["hashes"] = {
                 "md5": self._job.analyzable.md5,
                 "sha-1": self._job.analyzable.sha1,
                 "sha-256": self._job.analyzable.sha256,
             }
-        elif self._job.analyzable.classification == Classification.HASH and observable_data["type"] == "file":
+        elif self.classification == Classification.HASH and observable_data["type"] == "file":
             # add hash instead of value
-            matched_type = helpers.get_hash_type(self._job.analyzable.name)
-            observable_data["hashes"] = {matched_type: self._job.analyzable.name}
+            observable_data["hashes"] = {self.hash_type: self.observable_name}
         else:
-            observable_data["value"] = self._job.analyzable.name
+            observable_data["value"] = self.observable_name
 
         return observable_data
 
@@ -127,25 +124,55 @@ class OpenCTI(classes.Connector):
     def _create_labels(self, created):
         label_ids = []
         for tag in self._job.tags.all():
-            label = pycti.Label(self.opencti_instance).create(
+            opencti_label = pycti.Label(self.opencti_instance).create(
                 value=f"intelowl-tag:{tag.label}",
                 color=tag.color,
             )
-            if not isinstance(label, dict) or "id" not in label:
+            if not isinstance(opencti_label, dict) or "id" not in opencti_label:
                 raise ValueError("Invalid response from OpenCTI Label.create")
-            label_id = label["id"]
+            label_id = opencti_label["id"]
             created["labels"].append(label_id)
             label_ids.append(label_id)
+
+        # Add enrichment labels from data model when available
+        if self.has_data_model:
+            enrichment_labels = []
+            if self.evaluation:
+                enrichment_labels.append(f"evaluation:{self.evaluation}")
+            if self.malware_family:
+                enrichment_labels.append(f"malware-family:{self.malware_family}")
+            if self.kill_chain_phase:
+                enrichment_labels.append(f"kill-chain:{self.kill_chain_phase}")
+            if self.reliability:
+                enrichment_labels.append(f"reliability:{self.reliability}")
+
+            for enrichment_value in enrichment_labels:
+                enrichment_label = pycti.Label(self.opencti_instance).create(
+                    value=enrichment_value,
+                )
+                if isinstance(enrichment_label, dict) and "id" in enrichment_label:
+                    label_id = enrichment_label["id"]
+                    created["labels"].append(label_id)
+                    label_ids.append(label_id)
+
         return label_ids
 
     def _create_report(self, created, org_id, marking_id, label_ids):
+        description = (
+            f"This is IntelOwl's analysis report for Job: {self.job_id}."
+            f" Analyzers Executed: {', '.join(self.analyzer_names)}"
+        )
+
+        # Append enrichment summary to report description when available
+        if self.has_data_model:
+            enrichment = self.get_enrichment_summary()
+            if enrichment:
+                enrichment_lines = [f"  - {k}: {v}" for k, v in enrichment.items()]
+                description += "\n\nEnrichment Data:\n" + "\n".join(enrichment_lines)
+
         report = pycti.Report(self.opencti_instance).create(
             name=f"IntelOwl Job-{self.job_id}",
-            description=(
-                f"This is IntelOwl's analysis report for Job: {self.job_id}."
-                " Analyzers Executed:"
-                f" {', '.join(list(self._job.analyzers_to_execute.all().values_list('name', flat=True)))}"
-            ),
+            description=description,
             published=self._job.received_request_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
             report_types=["internal-report"],
             createdBy=org_id,
@@ -164,7 +191,7 @@ class OpenCTI(classes.Connector):
         external_reference = pycti.ExternalReference(self.opencti_instance, None).create(
             source_name="IntelOwl Analysis",
             description="View analysis report on the IntelOwl instance",
-            url=f"{settings.WEB_CLIENT_URL}/jobs/{self.job_id}",
+            url=self.analysis_url,
         )
         if not isinstance(external_reference, dict) or "id" not in external_reference:
             created["external_reference"] = None

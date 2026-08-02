@@ -1,19 +1,18 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import ipaddress
 import logging
 
 import requests
 from django.conf import settings
 
-from api_app.connectors_manager import classes
+from api_app.connectors_manager.classes import CTIConnector
 from api_app.connectors_manager.exceptions import ConnectorRunException
 
 logger = logging.getLogger(__name__)
 
 
-class YETI(classes.Connector):
+class YETI(CTIConnector):
     verify_ssl: bool
     _url_key_name: str
     _api_key_name: str
@@ -75,47 +74,49 @@ class YETI(classes.Connector):
             logger.exception(f"Unexpected error in YETI health_check: {e}")
             return False, f"Unexpected error: {e}"
 
-    def run(self):
-        # get observable value and type
-        if self._job.is_sample:
-            obs_value = self._job.analyzable.md5
-            obs_type = "file"
-        else:
-            obs_value = self._job.analyzable.name
-            obs_type = self._job.analyzable.classification
+    def _get_yeti_observable_type(self) -> str:
+        """
+        Convert IntelOwl classification to YETI's expected observable type.
+        """
+        obs_classification = self.classification
 
-        # convert obs_type to YETI's expected types if possible
-        if obs_type == "ip":
-            # mark whether the IP is ipv4 or ipv6, fallback to generic on error
-            try:
-                ip_obj = ipaddress.ip_address(obs_value)
-                if ip_obj.version == 4:
-                    obs_type = "ipv4"
-                elif ip_obj.version == 6:
-                    obs_type = "ipv6"
-                else:
-                    obs_type = "generic"
-            except Exception:
-                obs_type = "generic"
-        elif obs_type == "domain":
-            obs_type = "hostname"
-        elif obs_type == "hash":
-            obs_type = "generic"
+        if obs_classification == "ip":
+            ip_ver = self.ip_version
+            if ip_ver == 4:
+                return "ipv4"
+            elif ip_ver == 6:
+                return "ipv6"
+            else:
+                return "generic"
+        elif obs_classification == "domain":
+            return "hostname"
+        elif obs_classification == "hash":
+            return "generic"
+        else:
+            return obs_classification
+
+    def run(self):
+        obs_value = self.observable_value
+        obs_type = self._get_yeti_observable_type()
 
         # create context
         context = {
             "source": "IntelOwl",
-            "report": f"{settings.WEB_CLIENT_URL}/jobs/{self.job_id}",
+            "report": self.analysis_url,
             "status": "analyzed",
             "date": str(self._job.received_request_time),
             "description": f"IntelOwl's analysis report for Job: {self.job_id} | {obs_value} | {obs_type}",
-            "analyzers executed": ", ".join(
-                list(self._job.analyzers_to_execute.all().values_list("name", flat=True))
-            ),
+            "analyzers executed": ", ".join(self.analyzer_names),
         }
 
+        # Add enrichment data to context when available
+        if self.has_data_model:
+            enrichment = self.get_enrichment_summary()
+            for key, value in enrichment.items():
+                context[key] = str(value) if not isinstance(value, str) else value
+
         # get job tags
-        tags = list(self._job.tags.all().values_list("label", flat=True))
+        tags = self.tag_labels
 
         # request payload
         payload = {

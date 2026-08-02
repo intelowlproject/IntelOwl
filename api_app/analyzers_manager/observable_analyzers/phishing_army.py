@@ -29,6 +29,11 @@ class PhishingArmy(classes.ObservableAnalyzer):
         found = PhishingArmyDomain.objects.filter(domain=to_analyze_observable).exists()
         return {"found": found, "link": self.url}
 
+    # Gate on a real listing hit: the $malicious mapping constant would otherwise
+    # stamp MALICIOUS on every clean lookup.
+    def _do_create_data_model(self) -> bool:
+        return super()._do_create_data_model() and self.report.report.get("found") is True
+
     @classmethod
     def update(cls) -> bool:
         try:

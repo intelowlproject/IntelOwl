@@ -22,6 +22,11 @@ class PhishStats(ObservableAnalyzer):
     def update(cls) -> bool:
         pass
 
+    # Gate on a real listing hit: the $malicious mapping constant would otherwise
+    # stamp MALICIOUS on every clean lookup.
+    def _do_create_data_model(self) -> bool:
+        return super()._do_create_data_model() and bool(self.report.report.get("results"))
+
     def __build_phishstats_url(self) -> str:
         to_analyze_observable_classification = self.observable_classification
         to_analyze_observable_name = self.observable_name

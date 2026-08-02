@@ -1,6 +1,14 @@
 from logging import getLogger
 from typing import Dict, List
 
+from api_app.data_model_manager.classify import (
+    BUCKET_CLEAN,
+    BUCKET_MALICIOUS,
+    BUCKET_NO_EVALUATION,
+    BUCKET_SUSPICIOUS,
+    BUCKET_TRUSTED,
+    classify,
+)
 from api_app.data_model_manager.enums import DataModelEvaluations
 from api_app.data_model_manager.models import (
     DomainDataModel,
@@ -296,21 +304,14 @@ class DataModel(Visualizer):
             printable_analyzer_name = data_model.analyzers_report.all().first().config.name.replace("_", " ")
             logger.debug(f"{printable_analyzer_name}, {data_model}")
 
-            evaluation = data_model.evaluation or ""
-            reliability = data_model.reliability
-
-            if evaluation == DataModelEvaluations.TRUSTED.value:
-                if reliability >= 8:
-                    trusted_data_models.append(data_model)
-                else:
-                    clean_data_models.append(data_model)
-            elif evaluation == DataModelEvaluations.MALICIOUS.value:
-                if reliability >= 6:
-                    malicious_data_models.append(data_model)
-                else:
-                    suspicious_data_models.append(data_model)
-            else:
-                noeval_data_models.append(data_model)
+            bucket = classify(data_model.evaluation, data_model.reliability)
+            {
+                BUCKET_TRUSTED: trusted_data_models,
+                BUCKET_CLEAN: clean_data_models,
+                BUCKET_MALICIOUS: malicious_data_models,
+                BUCKET_SUSPICIOUS: suspicious_data_models,
+                BUCKET_NO_EVALUATION: noeval_data_models,
+            }[bucket].append(data_model)
 
         evals_vlists = []
         for evaluation, color, icon, eval_data_models in [

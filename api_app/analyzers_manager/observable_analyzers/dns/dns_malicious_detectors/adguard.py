@@ -8,11 +8,12 @@ from api_app.analyzers_manager import classes
 
 from ..dns_responses import malicious_detector_response
 from ..doh_mixin import DoHMixin
+from .data_model import MaliciousDetectorResponseDataModelMixin
 
 logger = logging.getLogger(__name__)
 
 
-class AdGuard(DoHMixin, classes.ObservableAnalyzer):
+class AdGuard(MaliciousDetectorResponseDataModelMixin, DoHMixin, classes.ObservableAnalyzer):
     """Check if a domain is malicious by AdGuard public resolver."""
 
     url: str = "https://dns.adguard-dns.com/dns-query"

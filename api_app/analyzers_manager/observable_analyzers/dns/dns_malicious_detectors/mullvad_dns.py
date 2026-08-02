@@ -14,10 +14,12 @@ from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
 )
 from api_app.analyzers_manager.observable_analyzers.dns.doh_mixin import DoHMixin
 
+from .data_model import MaliciousDetectorResponseDataModelMixin
+
 logger = logging.getLogger(__name__)
 
 
-class MullvadDNSAnalyzer(DoHMixin, ObservableAnalyzer):
+class MullvadDNSAnalyzer(MaliciousDetectorResponseDataModelMixin, DoHMixin, ObservableAnalyzer):
     """
     MullvadDNSAnalyzer:
 

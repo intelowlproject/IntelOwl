@@ -11,11 +11,12 @@ from api_app.analyzers_manager import classes
 
 from ..dns_responses import malicious_detector_response
 from ..quad9_base import Quad9Base
+from .data_model import MaliciousDetectorResponseDataModelMixin
 
 logger = logging.getLogger(__name__)
 
 
-class Quad9MaliciousDetector(Quad9Base, classes.ObservableAnalyzer):
+class Quad9MaliciousDetector(MaliciousDetectorResponseDataModelMixin, Quad9Base, classes.ObservableAnalyzer):
     """Check if a domain is malicious by Quad9 public resolver.
     Quad9 does not answer in the case a malicious domain is queried.
     However, we need to perform another check to understand if that domain was blocked

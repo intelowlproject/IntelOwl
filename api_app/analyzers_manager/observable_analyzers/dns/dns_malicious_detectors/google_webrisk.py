@@ -16,10 +16,12 @@ from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
 )
 from api_app.choices import Classification
 
+from .data_model import MaliciousDetectorResponseDataModelMixin
+
 logger = logging.getLogger(__name__)
 
 
-class WebRisk(classes.ObservableAnalyzer):
+class WebRisk(MaliciousDetectorResponseDataModelMixin, classes.ObservableAnalyzer):
     """Check if observable analyzed is marked as malicious by Google WebRisk API
 
     Get these secrets from a Service Account valid file.

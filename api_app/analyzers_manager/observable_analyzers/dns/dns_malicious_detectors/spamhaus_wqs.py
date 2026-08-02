@@ -7,11 +7,12 @@ from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
 
 from ..dns_responses import malicious_detector_response
+from .data_model import MaliciousDetectorResponseDataModelMixin
 
 logger = logging.getLogger(__name__)
 
 
-class SpamhausWQS(classes.ObservableAnalyzer):
+class SpamhausWQS(MaliciousDetectorResponseDataModelMixin, classes.ObservableAnalyzer):
     url: str = "https://apibl.spamhaus.net/lookup/v1"
     _api_key: str = None
 

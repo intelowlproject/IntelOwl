@@ -12,9 +12,10 @@ from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
 
 from ..dns_responses import malicious_detector_response
+from .data_model import MaliciousDetectorResponseDataModelMixin
 
 
-class CloudFlareMaliciousDetector(classes.ObservableAnalyzer):
+class CloudFlareMaliciousDetector(MaliciousDetectorResponseDataModelMixin, classes.ObservableAnalyzer):
     """Resolve a DNS query with CloudFlare security endpoint,
     if response is 0.0.0.0 the domain in DNS query is malicious.
     """

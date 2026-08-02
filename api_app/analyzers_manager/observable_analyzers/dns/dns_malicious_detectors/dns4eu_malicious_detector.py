@@ -9,11 +9,12 @@ import dns.message
 
 from ..dns4eu_base import DNS4EUBase
 from ..dns_responses import malicious_detector_response
+from .data_model import MaliciousDetectorResponseDataModelMixin
 
 logger = logging.getLogger(__name__)
 
 
-class DNS4EUMaliciousDetector(DNS4EUBase):
+class DNS4EUMaliciousDetector(MaliciousDetectorResponseDataModelMixin, DNS4EUBase):
     url = "https://protective.joindns4.eu/dns-query"
 
     # DNS4EU blocks by returning 0.0.0.0 or specific sinkhole IPs.

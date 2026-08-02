@@ -13,9 +13,10 @@ from api_app.analyzers_manager import classes
 from api_app.choices import Classification
 
 from ..dns_responses import malicious_detector_response
+from .data_model import MaliciousDetectorResponseDataModelMixin
 
 
-class CleanBrowsingMaliciousDetector(classes.ObservableAnalyzer):
+class CleanBrowsingMaliciousDetector(MaliciousDetectorResponseDataModelMixin, classes.ObservableAnalyzer):
     """Resolve a DNS query with CleanBrowsing security endpoint,
     Blocked domains return NXDOMAIN with SOA from cleanbrowsing.rpz.noc.org.
     """

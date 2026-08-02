@@ -8,9 +8,10 @@ from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import Classification
 
 from ..dns_responses import malicious_detector_response
+from .data_model import MaliciousDetectorResponseDataModelMixin
 
 
-class UltraDNSMaliciousDetector(classes.ObservableAnalyzer):
+class UltraDNSMaliciousDetector(MaliciousDetectorResponseDataModelMixin, classes.ObservableAnalyzer):
     """Resolve a DNS query with UltraDNS servers,
     if the response falls within the sinkhole range, the domain is malicious.
     """

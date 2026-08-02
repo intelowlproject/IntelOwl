@@ -11,6 +11,7 @@ from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
 from ..dns_responses import malicious_detector_response
+from .data_model import MaliciousDetectorResponseDataModelMixin
 
 
 class MockUpSafeBrowsing:
@@ -27,7 +28,7 @@ class MockUpSafeBrowsing:
         }
 
 
-class GoogleSF(classes.ObservableAnalyzer):
+class GoogleSF(MaliciousDetectorResponseDataModelMixin, classes.ObservableAnalyzer):
     """Check if observable analyzed is marked as malicious for Google SafeBrowsing"""
 
     _api_key_name: str

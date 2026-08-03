@@ -2,6 +2,11 @@
  * For a detailed explanation regarding each configuration property, visit:
  * https://jestjs.io/docs/en/configuration.html
  */
+// Pin the timezone so date rendering is deterministic: tests assert UTC-formatted timestamps,
+// while date-fns-tz `format` renders in local time. Set here (not in setupFilesAfterEnv) so the
+// workers inherit it before their Date is initialised.
+process.env.TZ = "UTC";
+
 const coverageReporters = [["text", { skipFull: true, skipEmpty: true }]];
 if (!process.env.CI) {
   // show HTML coverage only locally

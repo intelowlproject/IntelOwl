@@ -74,5 +74,35 @@ class JobDetailResultSerializer(ToolResultSerializer):
     job = JobDetailToolSerializer(allow_null=True)
 
 
+class AnalyzerVerdictSerializer(serializers.Serializer):
+    """One analyzer's own evaluation, read from the DataModel its report produced."""
+
+    name = serializers.CharField(read_only=True)
+    evaluation = serializers.CharField(read_only=True)
+    reliability = serializers.IntegerField(read_only=True)
+
+
+class JobVerdictSerializer(serializers.Serializer):
+    """IntelOwl's reconciled verdict on a job plus the evidence behind it.
+
+    Mirrors the `JobEvaluation` dataclass (`chatbot_manager/evaluation.py`). `bucket` is the same
+    word the DataModel visualizer badge shows; `reason` is set only when there is no verdict, so
+    the model can explain the absence instead of inventing one.
+    """
+
+    bucket = serializers.CharField(read_only=True)
+    evaluation = serializers.CharField(read_only=True, allow_null=True)
+    reliability = serializers.IntegerField(read_only=True)
+    headline = serializers.CharField(read_only=True)
+    analyst_override = serializers.BooleanField(read_only=True)
+    reason = serializers.CharField(read_only=True, allow_null=True)
+    supporting = AnalyzerVerdictSerializer(many=True, read_only=True)
+    contradicting = AnalyzerVerdictSerializer(many=True, read_only=True)
+    silent = serializers.ListField(child=serializers.CharField(), read_only=True)
+    silent_count = serializers.IntegerField(read_only=True)
+    analyzers_considered = serializers.IntegerField(read_only=True)
+
+
 class SummarizeJobResultSerializer(ToolResultSerializer):
     summary = serializers.CharField(allow_null=True)
+    verdict = JobVerdictSerializer(allow_null=True)

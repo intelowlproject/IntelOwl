@@ -9,11 +9,18 @@ from api_app.analyzers_manager import classes
 from api_app.choices import Classification
 from api_app.data_model_manager.enums import DataModelEvaluations
 
-# Popularity is weak positive evidence, so Tranco's reliability caps at 4 —
-# strictly below the malicious detectors (6–8) so a popular-but-flagged domain
-# still reconciles to malicious, and it never reaches the "trusted" bucket (>=8).
+# A top-1000 rank is treated as a reliable allowlist rather than as weak popularity
+# evidence: reaching the "trusted" bucket (>=8) means such a domain outranks a
+# malicious detector instead of reconciling to malicious. That is deliberate — in daily
+# incident response, false positives are the expensive failure mode, because the
+# analyst time they burn costs more than the rare true positive they hide.
+# Below the top 1000 popularity really is weak evidence, so reliability stays capped at
+# 4, strictly under the malicious detectors (6-8), and a flagged domain still
+# reconciles to malicious.
+_RANK_HIGHLY_TRUSTED = 1_000
 _RANK_TOP = 10_000
 _RANK_POPULAR = 100_000
+_RELIABILITY_HIGHLY_TRUSTED = 9
 _RELIABILITY_TOP = 4
 _RELIABILITY_POPULAR = 3
 _RELIABILITY_RANKED = 2
@@ -45,7 +52,9 @@ class Tranco(classes.ObservableAnalyzer):
         super()._update_data_model(data_model)
         rank = self.report.report.get("rank")
         data_model.evaluation = DataModelEvaluations.TRUSTED.value
-        if rank <= _RANK_TOP:
+        if rank <= _RANK_HIGHLY_TRUSTED:
+            data_model.reliability = _RELIABILITY_HIGHLY_TRUSTED
+        elif rank <= _RANK_TOP:
             data_model.reliability = _RELIABILITY_TOP
         elif rank <= _RANK_POPULAR:
             data_model.reliability = _RELIABILITY_POPULAR

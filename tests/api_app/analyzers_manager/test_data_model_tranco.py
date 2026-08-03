@@ -26,7 +26,17 @@ class TrancoDataModelTestCase(CustomTestCase):
         self.assertFalse(self._tranco({})._do_create_data_model())
 
     def test_rank_bands(self):
-        for rank, expected in [(1, 4), (10000, 4), (10001, 3), (100000, 3), (100001, 2)]:
+        # The top-1000 band is the only one that reaches the "trusted" bucket (floor 8); every
+        # boundary is pinned on both sides so a band edit cannot silently widen or shrink it.
+        for rank, expected in [
+            (1, 9),
+            (1000, 9),
+            (1001, 4),
+            (10000, 4),
+            (10001, 3),
+            (100000, 3),
+            (100001, 2),
+        ]:
             dm = DomainDataModel()
             self._tranco({"rank": rank})._update_data_model(dm)
             self.assertEqual(dm.evaluation, "trusted")

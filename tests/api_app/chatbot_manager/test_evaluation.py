@@ -50,7 +50,8 @@ class JobEvaluationTestCase(TestCase):
             tlp=TLP.CLEAR.value,
         )
 
-    def _data_model(self, evaluation, reliability):
+    @staticmethod
+    def _data_model(evaluation, reliability):
         return DomainDataModel.objects.create(evaluation=evaluation, reliability=reliability)
 
     def _add_report(self, config, data_model=None, job=None):

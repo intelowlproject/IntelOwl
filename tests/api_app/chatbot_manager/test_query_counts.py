@@ -109,7 +109,8 @@ class ToolQueryCountTestCase(TestCase):
                 parameters={},
             )
 
-    def _add_reports_with_data_models(self, job, configs):
+    @staticmethod
+    def _add_reports_with_data_models(job, configs):
         # Same as _add_reports but each report carries an evaluated DataModel, which is the
         # dimension the verdict reader walks.
         for config in configs:

@@ -307,7 +307,12 @@ class SystemPromptVerdictRoutingTestCase(TestCase):
 
     def test_summarize_and_evaluate_intents_share_one_tool(self):
         lower = _SYSTEM_PROMPT.lower()
-        summarize_cue = next(line for line in lower.splitlines() if line.startswith("- summarize_job:"))
+        # Collected rather than `next()`-ed: a bare next() raises StopIteration if the cue is ever
+        # renamed, which reads as a crash instead of a failed assertion. The count is asserted too,
+        # since a second summarize_job cue would make the routing ambiguous.
+        summarize_cues = [line for line in lower.splitlines() if line.startswith("- summarize_job:")]
+        self.assertEqual(len(summarize_cues), 1, f"expected one summarize_job cue, got {summarize_cues}")
+        summarize_cue = summarize_cues[0]
         self.assertIn("summarize job #n", summarize_cue)
         self.assertIn("evaluate the results of job #n", summarize_cue)
         self.assertIn("is job #n malicious?", summarize_cue)

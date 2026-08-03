@@ -65,10 +65,8 @@ class MISPConnectorTestCase(BaseConnectorTest):
     def _setup_connector(self):
         connector = super()._setup_connector()
 
-        mock_tag = MagicMock()
-        mock_tag.label = "source:intelowl"
         connector._job.tags = MagicMock()
-        connector._job.tags.all.return_value = [mock_tag]
+        connector._job.tags.all.return_value.values_list.return_value = ["source:intelowl"]
 
         connector._job.analyzers_to_execute = MagicMock()
         connector._job.analyzers_to_execute.all.return_value.values_list.return_value = ["FireHol_IPList"]

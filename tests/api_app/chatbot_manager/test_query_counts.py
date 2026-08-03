@@ -28,6 +28,8 @@ from api_app.chatbot_manager.agent.tools import build_tools
 from api_app.chatbot_manager.models import ChatMessage, ChatSession
 from api_app.chatbot_manager.tasks import process_chat_message
 from api_app.choices import TLP, Classification
+from api_app.data_model_manager.enums import DataModelEvaluations
+from api_app.data_model_manager.models import DomainDataModel
 from api_app.investigations_manager.models import Investigation
 from api_app.models import Job
 from api_app.playbooks_manager.models import PlaybookConfig
@@ -107,6 +109,24 @@ class ToolQueryCountTestCase(TestCase):
                 parameters={},
             )
 
+    def _add_reports_with_data_models(self, job, configs):
+        # Same as _add_reports but each report carries an evaluated DataModel, which is the
+        # dimension the verdict reader walks.
+        for config in configs:
+            data_model = DomainDataModel.objects.create(
+                evaluation=DataModelEvaluations.MALICIOUS.value, reliability=8
+            )
+            report = AnalyzerReport.objects.create(
+                report={},
+                job=job,
+                config=config,
+                status=AnalyzerReport.STATUSES.SUCCESS.value,
+                task_id=str(uuid4()),
+                parameters={},
+            )
+            report.data_model = data_model
+            report.save()
+
     def _make_playbook(self, name):
         # A user-owned starting playbook supporting DOMAIN, so recommend_playbook("domain") returns it.
         return PlaybookConfig.objects.create(
@@ -175,6 +195,20 @@ class ToolQueryCountTestCase(TestCase):
         self.summarize_job.invoke({"job_id": job.pk})  # warm up
         small = _count_queries(lambda: self.summarize_job.invoke({"job_id": job.pk}))
         self._add_reports(job, configs[1:6])
+        large = _count_queries(lambda: self.summarize_job.invoke({"job_id": job.pk}))
+        self.assertEqual(small, large)
+
+    def test_summarize_job_query_count_is_constant_in_data_models(self):
+        # The verdict reader adds a fixed set of queries (live reconciliation + one queryset for
+        # the analyzer DataModels + one for the user events). Attribution goes through
+        # data_model_object_id instead of the report's GenericForeignKey precisely so this stays
+        # flat: resolving the FK per report would be a textbook N+1.
+        job = self._make_job()
+        configs = list(AnalyzerConfig.objects.all()[:6])
+        self._add_reports_with_data_models(job, configs[:1])
+        self.summarize_job.invoke({"job_id": job.pk})  # warm up
+        small = _count_queries(lambda: self.summarize_job.invoke({"job_id": job.pk}))
+        self._add_reports_with_data_models(job, configs[1:6])
         large = _count_queries(lambda: self.summarize_job.invoke({"job_id": job.pk}))
         self.assertEqual(small, large)
 

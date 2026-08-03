@@ -53,11 +53,17 @@ class SystemPromptTestCase(TestCase):
         )
 
     def test_prompt_under_token_limit(self):
-        """System prompt must stay under 500 tokens to leave room for tool schemas
-        and conversation history within Ollama's 8192 context window.
+        """Cap the prompt so the tool schemas and the conversation history still fit in
+        Ollama's 8192-token context window.
+
+        The bound counts whitespace-separated WORDS, not tokens — for this text roughly 1.3-1.4
+        tokens per word, so 600 words is about 850 tokens, near a tenth of the window. The
+        original 500 was set when the prompt was 430 words; it had shrunk to 8 words of headroom
+        and was rejecting further rules rather than protecting the window, so it is raised here
+        together with the rule that needed the room.
         """
-        tokens = len(_SYSTEM_PROMPT.split())
-        self.assertLess(tokens, 500, f"system prompt is {tokens} tokens — exceeds 500")
+        words = len(_SYSTEM_PROMPT.split())
+        self.assertLess(words, 600, f"system prompt is {words} words — exceeds 600")
 
     def test_prompt_includes_all_tool_names(self):
         """Every registered tool appears in the [Tools] section, and the hardcoded

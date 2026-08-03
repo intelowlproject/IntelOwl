@@ -297,6 +297,35 @@ class SystemPromptToolRoutingTestCase(TestCase):
         self.assertIn("search_jobs", _SYSTEM_PROMPT)
 
 
+class SystemPromptVerdictRoutingTestCase(TestCase):
+    """Both former quick-action intents ("summarize" and "evaluate") must land on summarize_job.
+
+    The verdict was folded into summarize_job instead of getting its own tool, so there is no
+    routing decision left for the model to get wrong; this test only guarantees the prompt keeps
+    advertising both phrasings on that one tool. It never touches Ollama.
+    """
+
+    def test_summarize_and_evaluate_intents_share_one_tool(self):
+        lower = _SYSTEM_PROMPT.lower()
+        summarize_cue = next(line for line in lower.splitlines() if line.startswith("- summarize_job:"))
+        self.assertIn("summarize job #n", summarize_cue)
+        self.assertIn("evaluate the results of job #n", summarize_cue)
+        self.assertIn("is job #n malicious?", summarize_cue)
+        # no evaluate_job tool exists: the fold is the whole point
+        self.assertNotIn("evaluate_job", lower)
+
+    def test_prompt_tells_the_model_what_to_relay_from_the_verdict(self):
+        """The narration contract the live smoke (Task 5) measures: headline first, then counts.
+
+        A structured `verdict` object only helps if the model actually reads the fields; the
+        prompt is the only lever for that, so the three field names are pinned here.
+        """
+        lower = _SYSTEM_PROMPT.lower()
+        self.assertIn("headline", lower)
+        self.assertIn("supporting", lower)
+        self.assertIn("silent", lower)
+
+
 class ParseKeepAliveTestCase(TestCase):
     """OLLAMA_KEEP_ALIVE is coerced to what Ollama expects: int seconds or a duration string."""
 

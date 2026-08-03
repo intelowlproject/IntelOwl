@@ -10,11 +10,13 @@ import { Button } from "reactstrap";
 export const JOB_DETAIL_RE = /^\/jobs\/(\d+)(?:\/|$)/;
 export const INVESTIGATION_DETAIL_RE = /^\/investigation\/(\d+)(?:\/|$)/;
 
+// One chip covers both intents: summarize_job now returns IntelOwl's verdict alongside the
+// metadata, so a separate "Evaluate results" chip would send a different phrasing to the same
+// tool and get the same answer. The message keeps the exact wording the prompt routes on.
 const JOB_ACTIONS = [
-  { label: "Summarize this job", message: "Summarize job #{id}" },
+  { label: "Summarize & evaluate", message: "Summarize job #{id}" },
   { label: "Which plugins ran?", message: "Which plugins ran on job #{id}?" },
   { label: "Show job details", message: "Show me the details of job #{id}" },
-  { label: "Evaluate results", message: "Evaluate the results of job #{id}" },
 ];
 
 const INVESTIGATION_ACTIONS = [

@@ -29,10 +29,11 @@ describe("QuickActions", () => {
     mockLocation("/jobs/42");
     render(<QuickActions onSend={jest.fn()} />);
 
-    expect(screen.getByText("Summarize this job")).toBeInTheDocument();
+    expect(screen.getByText("Summarize & evaluate")).toBeInTheDocument();
     expect(screen.getByText("Which plugins ran?")).toBeInTheDocument();
     expect(screen.getByText("Show job details")).toBeInTheDocument();
-    expect(screen.getByText("Evaluate results")).toBeInTheDocument();
+    // the verdict now ships inside summarize_job, so the separate evaluate chip is gone
+    expect(screen.queryByText("Evaluate results")).not.toBeInTheDocument();
     // generic chips must not appear
     expect(screen.queryByText("Show my recent jobs")).not.toBeInTheDocument();
   });
@@ -40,7 +41,7 @@ describe("QuickActions", () => {
   it("shows job-specific chips on a job sub-page", () => {
     mockLocation("/jobs/42/visualizer/DNS");
     render(<QuickActions onSend={jest.fn()} />);
-    expect(screen.getByText("Summarize this job")).toBeInTheDocument();
+    expect(screen.getByText("Summarize & evaluate")).toBeInTheDocument();
   });
 
   it("shows investigation-specific chips on an investigation page", () => {
@@ -73,17 +74,8 @@ describe("QuickActions", () => {
     const onSend = jest.fn();
     render(<QuickActions onSend={onSend} />);
 
-    await userEvent.click(screen.getByText("Summarize this job"));
+    await userEvent.click(screen.getByText("Summarize & evaluate"));
     expect(onSend).toHaveBeenCalledWith("Summarize job #42");
-  });
-
-  it("calls onSend with resolved id on Evaluate results click", async () => {
-    mockLocation("/jobs/42");
-    const onSend = jest.fn();
-    render(<QuickActions onSend={onSend} />);
-
-    await userEvent.click(screen.getByText("Evaluate results"));
-    expect(onSend).toHaveBeenCalledWith("Evaluate the results of job #42");
   });
 
   it("calls onSend with the raw message on generic pages", async () => {
@@ -100,7 +92,7 @@ describe("QuickActions", () => {
     const onSend = jest.fn();
     render(<QuickActions onSend={onSend} disabled />);
 
-    await userEvent.click(screen.getByText("Summarize this job"));
+    await userEvent.click(screen.getByText("Summarize & evaluate"));
     expect(onSend).not.toHaveBeenCalled();
   });
 

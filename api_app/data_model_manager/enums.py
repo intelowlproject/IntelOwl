@@ -23,6 +23,24 @@ class DataModelEvaluations(Choices):
     MALICIOUS = "malicious"
 
 
+class DataModelVerdictBuckets(Choices):
+    """Presentation buckets shared by the DataModel visualizer and the chatbot.
+
+    Only two of the five are evaluations: TRUSTED and MALICIOUS take their values from
+    DataModelEvaluations so the two vocabularies cannot drift apart. The other three have no
+    evaluation counterpart and are deliberately not added to DataModelEvaluations — CLEAN and
+    SUSPICIOUS mean "that evaluation, but below its reliability floor", and NO_EVALUATION means
+    no analyzer expressed an opinion at all. They describe how a verdict is *shown*, not what an
+    analyzer *concluded*.
+    """
+
+    TRUSTED = DataModelEvaluations.TRUSTED.value
+    CLEAN = "clean"
+    MALICIOUS = DataModelEvaluations.MALICIOUS.value
+    SUSPICIOUS = "suspicious"
+    NO_EVALUATION = "no evaluation"
+
+
 class DataModelKillChainPhases(Choices):
     RECONNAISSANCE = "reconnaissance"
     WEAPONIZATION = "weaponization"

@@ -1,15 +1,8 @@
 from logging import getLogger
 from typing import Dict, List
 
-from api_app.data_model_manager.classify import (
-    BUCKET_CLEAN,
-    BUCKET_MALICIOUS,
-    BUCKET_NO_EVALUATION,
-    BUCKET_SUSPICIOUS,
-    BUCKET_TRUSTED,
-    classify,
-)
-from api_app.data_model_manager.enums import DataModelEvaluations
+from api_app.data_model_manager.classify import classify
+from api_app.data_model_manager.enums import DataModelEvaluations, DataModelVerdictBuckets
 from api_app.data_model_manager.models import (
     DomainDataModel,
     FileDataModel,
@@ -306,11 +299,11 @@ class DataModel(Visualizer):
 
             bucket = classify(data_model.evaluation, data_model.reliability)
             {
-                BUCKET_TRUSTED: trusted_data_models,
-                BUCKET_CLEAN: clean_data_models,
-                BUCKET_MALICIOUS: malicious_data_models,
-                BUCKET_SUSPICIOUS: suspicious_data_models,
-                BUCKET_NO_EVALUATION: noeval_data_models,
+                DataModelVerdictBuckets.TRUSTED.value: trusted_data_models,
+                DataModelVerdictBuckets.CLEAN.value: clean_data_models,
+                DataModelVerdictBuckets.MALICIOUS.value: malicious_data_models,
+                DataModelVerdictBuckets.SUSPICIOUS.value: suspicious_data_models,
+                DataModelVerdictBuckets.NO_EVALUATION.value: noeval_data_models,
             }[bucket].append(data_model)
 
         evals_vlists = []

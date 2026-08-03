@@ -74,7 +74,12 @@ class Plugin(metaclass=ABCMeta):
             __import__(package)
         classes = cls.__subclasses__()
         return sorted(
-            [class_ for class_ in classes if not class_.__name__.startswith("MockUp")],
+            [
+                class_
+                for class_ in classes
+                if not class_.__name__.startswith("MockUp")
+                and class_.__module__.startswith(str(cls.python_base_path))
+            ],
             key=lambda x: x.__name__,
         )
 

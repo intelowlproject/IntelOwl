@@ -104,7 +104,7 @@ class CTIConnector(Connector):
     @property
     def classification(self) -> str:
         if self._job.is_sample:
-            return "file"
+            return Classification.FILE
         return self._job.analyzable.classification
 
     @property

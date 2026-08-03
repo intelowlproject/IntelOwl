@@ -19,7 +19,7 @@ INTELOWL_MISP_TYPE_MAP = {
     Classification.URL: "url",
     # "hash" (checked from self.hash_type)
     Classification.GENERIC: "text",  # misc field, so keeping text
-    "file": "filename|md5",
+    Classification.FILE: "filename|md5",
 }
 
 
@@ -67,8 +67,8 @@ class MISP(CTIConnector):
 
     @property
     def _base_attr_obj(self) -> pymisp.MISPAttribute:
-        if self.classification == "file":
-            _type = INTELOWL_MISP_TYPE_MAP["file"]
+        if self.classification == Classification.FILE:
+            _type = INTELOWL_MISP_TYPE_MAP[Classification.FILE]
             value = f"{self.observable_name}|{self._job.analyzable.md5}"
         else:
             value = self.observable_name

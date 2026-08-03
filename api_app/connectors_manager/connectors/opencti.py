@@ -23,7 +23,7 @@ INTELOWL_OPENCTI_TYPE_MAP = {
     # type hash is missing because it is combined with "file"
     # "generic" is misc field, so keeping text
     Classification.GENERIC: "x-opencti-text",
-    "file": "file",  # hashes: md5, sha-1, sha-256
+    Classification.FILE: "file",  # hashes: md5, sha-1, sha-256
 }
 
 
@@ -35,20 +35,19 @@ class OpenCTI(CTIConnector):
     _api_key_name: str
 
     def get_observable_type(self) -> str:
-        if self.classification == "file":
-            obs_type = INTELOWL_OPENCTI_TYPE_MAP["file"]
+        if self.classification == Classification.FILE:
+            obs_type = INTELOWL_OPENCTI_TYPE_MAP[Classification.FILE]
         elif self.classification == Classification.HASH:
             if self.hash_type in [
                 "md5",
                 "sha-1",
                 "sha-256",
             ]:  # sha-512 not supported
-                obs_type = INTELOWL_OPENCTI_TYPE_MAP["file"]
+                obs_type = INTELOWL_OPENCTI_TYPE_MAP[Classification.FILE]
             else:
                 obs_type = INTELOWL_OPENCTI_TYPE_MAP[Classification.GENERIC]  # text
         elif self.classification == Classification.IP:
-            ip_ver = self.ip_version
-            if ip_ver in [4, 6]:
+            if (ip_ver := self.ip_version) in (4, 6):
                 obs_type = INTELOWL_OPENCTI_TYPE_MAP[Classification.IP][f"v{ip_ver}"]  # v4/v6
             else:
                 obs_type = INTELOWL_OPENCTI_TYPE_MAP[Classification.GENERIC]  # text
@@ -66,7 +65,7 @@ class OpenCTI(CTIConnector):
                 "sha-1": self._job.analyzable.sha1,
                 "sha-256": self._job.analyzable.sha256,
             }
-        elif self.classification == Classification.HASH and observable_data["type"] == "file":
+        elif self.classification == Classification.HASH and observable_data["type"] == Classification.FILE:
             # add hash instead of value
             observable_data["hashes"] = {self.hash_type: self.observable_name}
         else:

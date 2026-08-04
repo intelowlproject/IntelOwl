@@ -9,7 +9,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/stale@v9
+    - uses: actions/stale@v11
       with:
         # PRs
         stale-pr-message: "This pull request has been marked as stale because it has had no activity for 10 days. If you are still working on this, please provide some updates or it will be closed in 5 days."

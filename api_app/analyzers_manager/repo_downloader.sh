@@ -50,8 +50,12 @@ echo "$version" >> exiftool_version.txt
 
 # 3. Handle wget errors
 # -q: quiet, -O: output file.
+# The tarball is no longer served from exiftool.org (that path now 404s);
+# exiftool.org itself links downloads to SourceForge. That URL ends in
+# "/download" and redirects to a mirror, so -O pins the expected filename
+# for the extraction step below.
 # Checking if the file actually exists after the command
-if ! wget -q "https://exiftool.org/Image-ExifTool-$version.tar.gz"; then
+if ! wget -q -O "Image-ExifTool-$version.tar.gz" "https://sourceforge.net/projects/exiftool/files/Image-ExifTool-$version.tar.gz/download"; then
     echo "Error: Failed to download ExifTool version $version."
     exit 1
 fi

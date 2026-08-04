@@ -163,7 +163,8 @@ class CTIConnectorTestCase(CustomTestCase):
         "api_app/fixtures/0001_user.json",
     ]
 
-    def _create_job(self, name, classification):
+    @staticmethod
+    def _create_job(name, classification):
         an = Analyzable.objects.create(
             name=name,
             classification=classification,
@@ -174,7 +175,8 @@ class CTIConnectorTestCase(CustomTestCase):
         )
         return job, an
 
-    def _create_cti_connector(self, job):
+    @staticmethod
+    def _create_cti_connector(job):
         from api_app.connectors_manager.classes import CTIConnector
 
         pm = PythonModule.objects.get(base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP")

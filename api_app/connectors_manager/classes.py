@@ -89,6 +89,10 @@ class CTIConnector(Connector):
     in its platform-specific payload.
     """
 
+    @abc.abstractmethod
+    def run(self) -> dict:
+        raise NotImplementedError()
+
     # ── Observable Metadata ──────────────────────────────────────
 
     @property

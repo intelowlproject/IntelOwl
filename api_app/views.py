@@ -1311,12 +1311,7 @@ class PythonConfigViewSet(AbstractConfigViewSet):
         config: PythonConfig = self.get_object()
         python_obj = config.python_module.python_class(config)
         try:
-            health_result = python_obj.health_check(request.user)
-            if isinstance(health_result, tuple):
-                health_status, health_message = health_result
-            else:
-                health_status = health_result
-                health_message = "It is up and running" if health_status else "It is NOT up"
+            health_status, health_message = python_obj.health_check(request.user)
         except NotImplementedError as e:
             logger.info(f"NotImplementedError {e}, user {request.user}, name {name}")
             raise ValidationError({"detail": "No healthcheck implemented"})

@@ -360,7 +360,7 @@ class Plugin(metaclass=ABCMeta):
             return self.url
         return None
 
-    def health_check(self, user: User = None) -> bool:
+    def health_check(self, user: User = None) -> typing.Tuple[bool, str]:
         """
         Perform a health check for the plugin.
 
@@ -368,12 +368,12 @@ class Plugin(metaclass=ABCMeta):
             user (User): The user instance.
 
         Returns:
-            bool: Whether the health check was successful.
+            typing.Tuple[bool, str]: A tuple of (status, message).
         """
         url = self._get_health_check_url(user)
         if url and url.startswith("http"):
             if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
-                return True
+                return True, "It is up and running"
             logger.info(f"healthcheck url {url} for {self}")
             try:
                 # momentarily set this to False to
@@ -385,7 +385,7 @@ class Plugin(metaclass=ABCMeta):
                 # So, in this case, we will consider it as check passed because we got an answer
                 # For ex 405 code is when HEADs are not allowed. But it is the same. The service answered.
                 if 400 <= response.status_code <= 408:
-                    return True
+                    return True, "It is up and running"
                 response.raise_for_status()
             except (
                 requests.exceptions.ConnectionError,
@@ -393,9 +393,9 @@ class Plugin(metaclass=ABCMeta):
                 requests.exceptions.HTTPError,
             ) as e:
                 logger.info(f"healthcheck failed: url {url} for {self}. Error: {e}")
-                return False
+                return False, "It is NOT up"
             else:
-                return True
+                return True, "It is up and running"
         raise NotImplementedError()
 
     def disable_for_rate_limit(self):

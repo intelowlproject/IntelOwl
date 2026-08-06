@@ -17,7 +17,7 @@ class StringsInfoTestCase(CustomTestCase):
         Job.objects.all().delete()
 
     @skipIf(
-        not StringsInfo(None).health_check(),
+        not StringsInfo(None).health_check()[0],
         "malware tools analyzer container not active",
     )
     def test_urls(self):

@@ -46,12 +46,12 @@ class ConnectorTestCase(CustomTestCase):
 
         with patch("requests.head") as mock_head:
             mock_head.return_value.status_code = 200
-            result = MockUpConnector(cc).health_check(self.user)
-            self.assertTrue(result)
+            status, message = MockUpConnector(cc).health_check(self.user)
+            self.assertTrue(status)
             cc.disabled = False
             cc.save()
-            result = MockUpConnector(cc).health_check(self.user)
-            self.assertTrue(result)
+            status, message = MockUpConnector(cc).health_check(self.user)
+            self.assertTrue(status)
 
         cc.delete()
         pc.delete()

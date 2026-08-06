@@ -452,15 +452,13 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             raise AssertionError
         return resp
 
-    def health_check(self, user: User = None) -> bool:
+    def health_check(self, user: User = None) -> Tuple[bool, str]:
         """
         basic health check: if instance is up or not (timeout - 10s)
         """
         try:
             requests.head(self.url, timeout=10)
         except requests.exceptions.RequestException:
-            health_status = False
+            return False, "It is NOT up"
         else:
-            health_status = True
-
-        return health_status
+            return True, "It is up and running"

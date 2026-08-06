@@ -197,7 +197,7 @@ def health_check(python_module_pk: int, plugin_config_pk: str):
     )
     if not config.disabled:
         try:
-            enabled = plugin.health_check(user=None)
+            enabled, _ = plugin.health_check(user=None)
         except NotImplementedError:
             logger.error(f"Unable to check healthcheck for {config.name}")
         else:

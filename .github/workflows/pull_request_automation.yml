@@ -55,7 +55,7 @@ jobs:
           ruff format . --check --diff
 
       - name: Perform ShellCheck Analysis
-        run: bash <(curl -s https://raw.githubusercontent.com/CICDToolbox/shellcheck/master/pipeline.sh)
+        run: bash <(curl -s https://raw.githubusercontent.com/lupaxa-cicd-toolbox/shellcheck/master/src/pipeline.sh)
 
   backend-tests:
     runs-on: ubuntu-latest

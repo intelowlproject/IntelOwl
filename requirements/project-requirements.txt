@@ -11,7 +11,7 @@ django-ses == 4.6.0
 django-iam-dbauth==0.2.1
 django-prettyjson==0.4.1
 django-silk==5.4.3
-django-treebeard==4.7
+django-treebeard==7.0.0
 django-solo==2.4.0
 django_extensions==3.2.3
 django-watchfiles==1.4.0

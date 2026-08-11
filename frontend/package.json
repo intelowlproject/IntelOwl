@@ -14,7 +14,7 @@
     "date-fns-tz": "^3.2.0",
     "flag-icons": "^7.2.3",
     "formik": "^2.4.6",
-    "http-proxy-middleware": "^2.0.6",
+    "http-proxy-middleware": "^4.2.0",
     "js-cookie": "^3.0.5",
     "md5": "^2.3.0",
     "prop-types": "^15.8.1",

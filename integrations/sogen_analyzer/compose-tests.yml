@@ -1,0 +1,6 @@
+services:
+  sogen_analyzer:
+    build:
+      context: ../integrations/sogen_analyzer
+      dockerfile: Dockerfile
+    image: intelowlproject/sogen_analyzer:test

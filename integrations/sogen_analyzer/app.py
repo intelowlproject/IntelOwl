@@ -1,7 +1,6 @@
 import logging
 import os
 import tempfile
-import traceback
 
 import sogen
 from flask import Flask, jsonify, request
@@ -91,7 +90,7 @@ def analyze():
                 "module_loads": module_loads,
                 "entry_point_hit": entry_hit["value"],
                 "exit_status": None,
-                "error": f"{e}\n{traceback.format_exc()}",
+                "error": str(e),
             }
         ), 200
     finally:

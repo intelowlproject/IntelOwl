@@ -96,7 +96,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ('api_app', '0073_alter_updatecheckstatus_last_checked_at_and_more'),
-        ('analyzers_manager', '0194_analyzer_config_rdap'),
+        ('analyzers_manager', '0196_data_model_phishing_lists'),
     ]
 
     operations = [

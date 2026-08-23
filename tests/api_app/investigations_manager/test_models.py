@@ -103,6 +103,28 @@ class InvestigationTestCase(CustomTestCase):
         self.assertEqual(an.total_jobs, 0)
         an.delete()
 
+    def test_total_jobs_constant_queries(self):
+        # total_jobs must not run one query per job (N+1):
+        # it should count all descendant jobs in a constant number
+        # of queries regardless of how many jobs the investigation holds
+        an: Investigation = Investigation.objects.create(name="Test", owner=self.user)
+        for _ in range(3):
+            job = Job.objects.create(
+                analyzable=self.an,
+                user=self.user,
+                status="killed",
+            )
+            job.add_child(
+                analyzable=self.an,
+                user=self.user,
+                status="killed",
+            )
+            an.jobs.add(job)
+        an.refresh_from_db()
+        with self.assertNumQueries(2):
+            self.assertEqual(an.total_jobs, 6)
+        an.delete()
+
     def test_tlp(self):
         job = Job.objects.create(
             analyzable=self.an,

@@ -97,6 +97,32 @@ class InvestigationTestCase(CustomTestCase):
         an.jobs.add(job)
         an.refresh_from_db()
         self.assertEqual(an.total_jobs, 2)
+        # a second root job with its own pivoted child must not add one
+        # COUNT query per pivoted job
+        # https://github.com/intelowlproject/IntelOwl/issues/3955
+        job2 = Job.objects.create(
+            analyzable=self.an,
+            user=self.user,
+            status="killed",
+        )
+        job2.add_child(
+            analyzable=self.an,
+            user=self.user,
+            status="killed",
+        )
+        an.jobs.add(job2)
+        an.refresh_from_db()
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        with CaptureQueriesContext(connection) as ctx:
+            self.assertEqual(an.total_jobs, 4)
+        # the CI test runner EXPLAINs every query, so count only the real ones
+        real_queries = [q for q in ctx.captured_queries if not q["sql"].startswith("EXPLAIN")]
+        self.assertEqual(len(real_queries), 2)
+        job2.refresh_from_db()
+        job2.delete()
+        self.assertEqual(an.total_jobs, 2)
         j2.delete()
         self.assertEqual(an.total_jobs, 1)
         job.delete()

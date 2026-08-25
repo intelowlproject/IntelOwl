@@ -124,4 +124,21 @@ class Investigation(OwnershipAbstractModel, ListCachable):
 
     @property
     def total_jobs(self) -> int:
-        return sum(job.get_descendant_count() for job in self.jobs.all()) + self.jobs.count()
+        from functools import reduce
+        from operator import or_
+
+        from django.db.models import Q
+
+        # self.jobs are the root jobs; their descendants live only in the
+        # job tree. Count all descendants in a single query instead of one
+        # COUNT per pivoted job: treebeard stores the materialized path, so
+        # the descendants of a job share its path prefix.
+        paths = list(self.jobs.values_list("path", flat=True))
+        if not paths:
+            return 0
+        descendants = (
+            Job.objects.filter(reduce(or_, (Q(path__startswith=path) for path in paths)))
+            .exclude(path__in=paths)
+            .count()
+        )
+        return descendants + len(paths)

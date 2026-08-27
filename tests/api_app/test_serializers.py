@@ -7,7 +7,7 @@ from django.utils.timezone import now
 from rest_framework.exceptions import ValidationError
 
 from api_app.analyzables_manager.models import Analyzable
-from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.analyzers_manager.models import AnalyzerConfig, MimeTypes
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 from api_app.choices import Classification, PythonModuleBasePaths
 from api_app.connectors_manager.models import ConnectorConfig
@@ -494,6 +494,82 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
         )
         self.assertCountEqual(analyzers, [a])
         a.delete()
+
+    def test_zip_disambiguation_extension_matching(self):
+        apk_analyzer = AnalyzerConfig.objects.create(
+            name="test_apk",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.FileAnalyzer.value,
+                module="yara_scan.YaraScan",
+            ),
+            description="test apk",
+            disabled=False,
+            supported_filetypes=[MimeTypes.APK.value],
+            type="file",
+            run_hash=False,
+        )
+        zip_analyzer = AnalyzerConfig.objects.create(
+            name="test_zip",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.FileAnalyzer.value,
+                module="yara_scan.YaraScan",
+            ),
+            description="test zip",
+            disabled=False,
+            supported_filetypes=[MimeTypes.ZIP1.value],
+            type="file",
+            run_hash=False,
+        )
+        word_analyzer = AnalyzerConfig.objects.create(
+            name="test_word",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.FileAnalyzer.value,
+                module="yara_scan.YaraScan",
+            ),
+            description="test word",
+            disabled=False,
+            supported_filetypes=[MimeTypes.WORD2.value],
+            type="file",
+            run_hash=False,
+        )
+
+        all_analyzers = [apk_analyzer, zip_analyzer, word_analyzer]
+
+        # 1. APK file in zip container matches APK analyzer
+        apk_selected = FileJobSerializer.set_analyzers_to_execute(
+            self.fas, all_analyzers, tlp="CLEAR", file_mimetype=MimeTypes.ZIP1.value, file_name="app.apk"
+        )
+        self.assertCountEqual(apk_selected, [apk_analyzer])
+
+        # 2. DOCX file matches Word analyzer
+        word_selected = FileJobSerializer.set_analyzers_to_execute(
+            self.fas,
+            all_analyzers,
+            tlp="CLEAR",
+            file_mimetype=MimeTypes.ZIP1.value,
+            file_name="document.docx",
+        )
+        self.assertCountEqual(word_selected, [word_analyzer])
+
+        # 3. DLL or LOG files inside zip container retain ZIP mimetype and do not trigger Word/Excel/APK false positives
+        dll_selected = FileJobSerializer.set_analyzers_to_execute(
+            self.fas, all_analyzers, tlp="CLEAR", file_mimetype=MimeTypes.ZIP1.value, file_name="library.dll"
+        )
+        self.assertCountEqual(dll_selected, [zip_analyzer])
+
+        log_selected = FileJobSerializer.set_analyzers_to_execute(
+            self.fas, all_analyzers, tlp="CLEAR", file_mimetype=MimeTypes.ZIP1.value, file_name="server.log"
+        )
+        self.assertCountEqual(log_selected, [zip_analyzer])
+
+        generic_zip_selected = FileJobSerializer.set_analyzers_to_execute(
+            self.fas, all_analyzers, tlp="CLEAR", file_mimetype=MimeTypes.ZIP1.value, file_name="archive.zip"
+        )
+        self.assertCountEqual(generic_zip_selected, [zip_analyzer])
+
+        apk_analyzer.delete()
+        zip_analyzer.delete()
+        word_analyzer.delete()
 
 
 class ObservableJobCreateSerializerTestCase(CustomTestCase):

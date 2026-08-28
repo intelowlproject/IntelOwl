@@ -143,11 +143,7 @@ class BaseDataModel(models.Model):
             if not other_attr:
                 continue
             if append:
-                if isinstance(field, SetField):
-                    if not result_attr:
-                        result_attr = []
-                    result_attr = list(dict.fromkeys(result_attr + other_attr))
-                elif isinstance(field, ArrayField):
+                if isinstance(field, ArrayField):
                     if not result_attr:
                         result_attr = []
                     result_attr.extend(other_attr)

@@ -90,12 +90,3 @@ class BaseDataModelTestCase(CustomTestCase):
             },
         )
         ip.delete()
-
-    def test_merge_set_field_deduplication(self):
-        ip1 = IPDataModel.objects.create(resolutions=["1.1.1.1", "2.2.2.2"])
-        ip2 = IPDataModel.objects.create(resolutions=["2.2.2.2", "3.3.3.3"])
-
-        ip1.merge(ip2, append=True)
-        self.assertEqual(ip1.resolutions, ["1.1.1.1", "2.2.2.2", "3.3.3.3"])
-        ip1.delete()
-        ip2.delete()

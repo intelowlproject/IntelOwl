@@ -99,4 +99,3 @@ class BaseDataModelTestCase(CustomTestCase):
         self.assertEqual(ip1.resolutions, ["1.1.1.1", "2.2.2.2", "3.3.3.3"])
         ip1.delete()
         ip2.delete()
-

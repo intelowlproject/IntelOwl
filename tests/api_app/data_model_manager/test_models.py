@@ -49,3 +49,54 @@ class BaseDataModelTestCase(CustomTestCase):
         self.assertEqual(ip.asn, 4)
         self.assertCountEqual(ip.resolutions, ["1.1.1.1"])
         ip.delete()
+
+    def test_merge_json_field_obj(self):
+        ip1 = IPDataModel.objects.create(
+            additional_info={"shodan": {"ports": [80]}},
+            certificates={"cert1": "fingerprint1"},
+        )
+        ip2 = IPDataModel.objects.create(
+            additional_info={"censys": {"ports": [443]}},
+            certificates={"cert2": "fingerprint2"},
+        )
+        ip1.merge(ip2, append=True)
+
+        self.assertEqual(
+            ip1.additional_info,
+            {
+                "shodan": {"ports": [80]},
+                "censys": {"ports": [443]},
+            },
+        )
+        self.assertEqual(
+            ip1.certificates,
+            {
+                "cert1": "fingerprint1",
+                "cert2": "fingerprint2",
+            },
+        )
+        ip1.delete()
+        ip2.delete()
+
+    def test_merge_json_field_dict(self):
+        ip = IPDataModel.objects.create(additional_info={"shodan": {"ports": [80]}})
+        ip.merge({"additional_info": {"censys": {"ports": [443]}}}, append=True)
+
+        self.assertEqual(
+            ip.additional_info,
+            {
+                "shodan": {"ports": [80]},
+                "censys": {"ports": [443]},
+            },
+        )
+        ip.delete()
+
+    def test_merge_set_field_deduplication(self):
+        ip1 = IPDataModel.objects.create(resolutions=["1.1.1.1", "2.2.2.2"])
+        ip2 = IPDataModel.objects.create(resolutions=["2.2.2.2", "3.3.3.3"])
+
+        ip1.merge(ip2, append=True)
+        self.assertEqual(ip1.resolutions, ["1.1.1.1", "2.2.2.2", "3.3.3.3"])
+        ip1.delete()
+        ip2.delete()
+

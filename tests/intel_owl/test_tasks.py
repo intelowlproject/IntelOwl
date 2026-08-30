@@ -15,10 +15,43 @@ from api_app.visualizers_manager.models import VisualizerConfig, VisualizerRepor
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.user.models import User
-from intel_owl.tasks import send_plugin_report_to_elastic
+from intel_owl.tasks import job_pipeline, send_plugin_report_to_elastic
 from tests import CustomTestCase
 
 _now = datetime.datetime(2024, 10, 29, 11, tzinfo=datetime.UTC)
+
+
+@patch("intel_owl.tasks.now", return_value=_now)
+class JobPipelineTestCase(CustomTestCase):
+    def test_job_status_failed_when_execute_raises(self, *args, **kwargs):
+        analyzable = Analyzable.objects.create(name="dns.google.com", classification=Classification.DOMAIN)
+        job = Job.objects.create(
+            tlp="AMBER",
+            user=self.user,
+            analyzable=analyzable,
+            status=Job.STATUSES.PENDING,
+        )
+        report = AnalyzerReport.objects.create(
+            config=AnalyzerConfig.objects.get(name="Classic_DNS"),
+            job=job,
+            status=AnalyzerReport.STATUSES.PENDING,
+            task_id=uuid(),
+            parameters={},
+        )
+
+        with (
+            patch.object(Job, "execute", side_effect=RuntimeError("pipeline failed")),
+            patch("api_app.websocket.JobConsumer.serialize_and_send_job") as mocked_send_job,
+        ):
+            job_pipeline(job.pk)
+
+        job.refresh_from_db()
+        report.refresh_from_db()
+        self.assertEqual(job.status, Job.STATUSES.FAILED)
+        self.assertEqual(job.errors, ["RuntimeError: pipeline failed"])
+        self.assertEqual(job.finished_analysis_time, _now)
+        self.assertEqual(report.status, AnalyzerReport.STATUSES.FAILED)
+        mocked_send_job.assert_called_once_with(job)
 
 
 @patch("intel_owl.tasks.get_environment", return_value="unittest")

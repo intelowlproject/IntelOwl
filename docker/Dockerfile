@@ -24,7 +24,7 @@ ARG REPO_DOWNLOADER_ENABLED=true
 ARG TARGETARCH
 ENV watch_logs_cmd="watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
 # This is required to allow compatibility with different OpenCTI instances
-ARG PYCTI_VERSION=6.8.8
+ARG PYCTI_VERSION=7.260828.0
 # this is required for if/else statements
 SHELL ["/bin/bash", "-c"]
 

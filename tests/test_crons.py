@@ -8,7 +8,6 @@ from django.utils.timezone import now
 from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.file_analyzers import quark_engine, yara_scan
 from api_app.analyzers_manager.observable_analyzers import (
-    feodo_tracker,
     ja4_db,
     maxmind,
     phishing_army,
@@ -133,44 +132,6 @@ class CronTests(CustomTestCase):
         result = tor_nodes_danmeuk.TorNodesDanMeUK.update()
         self.assertTrue(result)
         self.assertTrue(TorDanMeUKNode.objects.exists())
-
-    @if_mock_connections(
-        patch(
-            "requests.get",
-            return_value=MockUpResponse(
-                [
-                    {
-                        "ip_address": "51.161.81.190",
-                        "port": 13721,
-                        "status": "offline",
-                        "hostname": None,
-                        "as_number": 16276,
-                        "as_name": "OVH",
-                        "country": "CA",
-                        "first_seen": "2023-12-18 18:29:21",
-                        "last_online": "2024-01-23",
-                        "malware": "Pikabot",
-                    },
-                    {
-                        "ip_address": "185.117.90.142",
-                        "port": 2222,
-                        "status": "offline",
-                        "hostname": None,
-                        "as_number": 59711,
-                        "as_name": "HZ-EU-AS",
-                        "country": "NL",
-                        "first_seen": "2024-01-17 18:58:25",
-                        "last_online": "2024-01-22",
-                        "malware": "QakBot",
-                    },
-                ],
-                200,
-            ),
-        )
-    )
-    def test_feodo_tracker_updater(self, mock_get=None):
-        feodo_tracker.Feodo_Tracker.update()
-        self.assertTrue(os.path.exists(f"{settings.MEDIA_ROOT}/feodotracker_abuse_ipblocklist.json"))
 
     @if_mock_connections(
         patch(

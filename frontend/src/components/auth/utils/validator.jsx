@@ -22,7 +22,7 @@ export function PasswordValidator(password) {
     errors.password = "Must be 12 characters or more";
   } else if (!PASSWORD_REGEX.test(password)) {
     errors.password =
-      "The password is entirely numeric or contains special characters";
+      "Must contain at least one uppercase letter, one lowercase letter, and one digit or special character";
   }
   return errors;
 }

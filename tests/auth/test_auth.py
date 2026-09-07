@@ -33,7 +33,7 @@ class TestUserAuth(CustomOAuthTestCase):
             "username": "testregisteruser",
             "first_name": "testregisteruser",
             "last_name": "testregisteruser",
-            "password": "testregisteruser",
+            "password": "secureTestPass12",
             "profile": {
                 "company_name": "companytest",
                 "company_role": "intelowl test",
@@ -116,7 +116,7 @@ class TestUserAuth(CustomOAuthTestCase):
             "username": "blahblah",
             "first_name": "blahblah",
             "last_name": "blahblah",
-            "password": "averystrongpassword",
+            "password": "Averystrongpass1",
         }
         self.__register_user(body=body)
 
@@ -215,7 +215,7 @@ class TestUserAuth(CustomOAuthTestCase):
         self.assertEqual(self.testregisteruser["email"], content["email"], msg=msg)
 
         pwd_reset_obj = PasswordResetToken.objects.get(email=email_obj)
-        new_password = "new_password_for_test_1234"
+        new_password = "NewPassword_1234"
 
         # step 2: reset-password submission
         response = self.client.post(
@@ -246,7 +246,11 @@ class TestUserAuth(CustomOAuthTestCase):
         token_client = APIClient()
         token_client.credentials(HTTP_AUTHORIZATION=f"Token {token_key}")
         pre_response = token_client.get(protected_url)
-        self.assertEqual(200, pre_response.status_code, msg="Token should be valid before password change")
+        self.assertEqual(
+            200,
+            pre_response.status_code,
+            msg="Token should be valid before password change",
+        )
 
         self.client.force_authenticate(user=self.user)
         response = self.client.post(
@@ -260,7 +264,10 @@ class TestUserAuth(CustomOAuthTestCase):
 
         # Verify token is deleted from DB
         self.user.refresh_from_db()
-        self.assertTrue(self.user.check_password(new_password), msg="Password should be changed successfully")
+        self.assertTrue(
+            self.user.check_password(new_password),
+            msg="Password should be changed successfully",
+        )
         self.assertEqual(
             Token.objects.filter(user=self.user).count(),
             0,
@@ -270,7 +277,9 @@ class TestUserAuth(CustomOAuthTestCase):
         # Verify token returns 401 after password change
         post_response = token_client.get(protected_url)
         self.assertEqual(
-            401, post_response.status_code, msg="Old token should return 401 after password change"
+            401,
+            post_response.status_code,
+            msg="Old token should return 401 after password change",
         )
 
     def test_change_password_session_invalidation(self):
@@ -326,27 +335,24 @@ class TestUserAuth(CustomOAuthTestCase):
         msg = (response, content)
 
         self.assertEqual(400, response.status_code, msg=msg)
-        self.assertIn("Invalid password", content["error"], msg=msg)
+        self.assertIn("error", content, msg=msg)
 
-    def test_change_password_special_chars_400(self):
+    def test_change_password_special_chars_200(self):
+        """Special characters in passwords should now be accepted."""
         self.client.force_authenticate(user=self.user)
         response = self.client.post(
             change_password_uri,
             {
                 "old_password": "hunter2",
-                "new_password": "intelowlintelowl$",
+                "new_password": "securePass123!@#",
             },
         )
-        content = response.json()
-        msg = (response, content)
-
-        self.assertEqual(400, response.status_code, msg=msg)
-        self.assertIn("Invalid password", content["error"], msg=msg)
+        self.assertEqual(200, response.status_code)
 
     def test_min_password_lenght_400(self):
         current_users = User.objects.count()
 
-        # register new user with invalid password
+        # register new user with invalid password (too short)
         body = {
             **self.creds,
             "email": self.testregisteruser["email"],
@@ -361,39 +367,56 @@ class TestUserAuth(CustomOAuthTestCase):
 
         # response assertions
         self.assertEqual(400, response.status_code)
-        self.assertIn(
-            "Invalid password",
-            content["errors"]["password"],
-        )
+        self.assertIn("password", content["errors"])
 
         # db assertions
         self.assertEqual(User.objects.count(), current_users, msg="no new user was created")
 
-    def test_special_characters_password_400(self):
+    def test_low_diversity_password_400(self):
+        """Passwords with insufficient character diversity should be rejected."""
         current_users = User.objects.count()
 
-        # register new user with invalid password
         body = {
-            **self.creds,
-            "email": self.testregisteruser["email"],
-            "username": "blahblah",
-            "first_name": "blahblah",
-            "last_name": "blahblah",
-            "password": "intelowlintelowl$",
+            "email": "lowdiversity@test.com",
+            "username": "lowdiversity",
+            "first_name": "lowdiv",
+            "last_name": "user",
+            "password": "aaaaaaaaaaaa",
+            "profile": self.testregisteruser["profile"],
         }
 
-        response = self.client.post(register_uri, body)
+        response = self.client.post(register_uri, body, format="json")
         content = response.json()
 
         # response assertions
         self.assertEqual(400, response.status_code)
-        self.assertIn(
-            "Invalid password",
-            content["errors"]["password"],
-        )
+        self.assertIn("password", content["errors"])
 
         # db assertions
         self.assertEqual(User.objects.count(), current_users, msg="no new user was created")
+
+    def test_special_characters_password_201(self):
+        """Passwords with special characters should now be accepted."""
+        current_users = User.objects.count()
+
+        body = {
+            "email": "specialcharuser@test.com",
+            "username": "specialcharuser",
+            "first_name": "special",
+            "last_name": "charuser",
+            "password": "MyStr0ng!Pass#",
+            "profile": self.testregisteruser["profile"],
+        }
+
+        self.__register_user(body=body)
+
+        # db assertions
+        self.assertEqual(
+            User.objects.count(),
+            current_users + 1,
+            msg="user with special chars should be created",
+        )
+        User.objects.get(username="specialcharuser").delete()
 
     # utils
     def __register_user(self, body: dict):

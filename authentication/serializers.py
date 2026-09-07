@@ -193,7 +193,11 @@ class RegistrationSerializer(rest_email_auth.serializers.RegistrationSerializer)
 
     def validate_password(self, password):
         """
-        Validate the user's password against a regex pattern.
+        Validate the user's password using Django's AUTH_PASSWORD_VALIDATORS.
+
+        Constructs a temporary User object from initial_data so that
+        UserAttributeSimilarityValidator can check for similarity to
+        username, email, first_name, and last_name.
 
         Args:
             password (str): The password to validate.
@@ -202,10 +206,19 @@ class RegistrationSerializer(rest_email_auth.serializers.RegistrationSerializer)
             str: The validated password.
 
         Raises:
-            ValidationError: If the password does not match the regex pattern.
+            ValidationError: If the password fails any validator.
         """
         super().validate_password(password)
-        validate_password_strength(password)
+        # Build a temporary user for context-aware validation
+        from certego_saas.models import User
+
+        temp_user = User(
+            username=self.initial_data.get("username", ""),
+            email=self.initial_data.get("email", ""),
+            first_name=self.initial_data.get("first_name", ""),
+            last_name=self.initial_data.get("last_name", ""),
+        )
+        validate_password_strength(password, user=temp_user)
         return password
 
     def create(self, validated_data):

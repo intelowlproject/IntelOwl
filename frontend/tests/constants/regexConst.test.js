@@ -110,9 +110,12 @@ describe("Regex constant", () => {
   });
 
   test("test passwords regex", () => {
-    expect(PASSWORD_REGEX.test("thisisvalidd")).toBeTruthy();
-    expect(PASSWORD_REGEX.test("thisisvalidd1")).toBeTruthy();
-    expect(PASSWORD_REGEX.test("THISISVALIDD")).toBeTruthy();
+    expect(PASSWORD_REGEX.test("ThisIsValid12")).toBeTruthy();
+    expect(PASSWORD_REGEX.test("ThisIsValid!@")).toBeTruthy();
+    expect(PASSWORD_REGEX.test("ThisIsValid1!")).toBeTruthy();
+    expect(PASSWORD_REGEX.test("thisisvalidd")).toBeFalsy();
+    expect(PASSWORD_REGEX.test("thisisvalidd1")).toBeFalsy();
+    expect(PASSWORD_REGEX.test("THISISVALIDD")).toBeFalsy();
     expect(PASSWORD_REGEX.test("tooshort")).toBeFalsy();
     expect(PASSWORD_REGEX.test("111111111111")).toBeFalsy();
     expect(PASSWORD_REGEX.test("")).toBeFalsy();

@@ -11,4 +11,4 @@ export const HASH_REGEX = /^[a-zA-Z0-9]{32,}$/;
 export const PHONE_REGEX = /^\+[1-9]\d{1,14}$/;
 
 export const EMAIL_REGEX = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
-export const PASSWORD_REGEX = /^(?=.*[a-zA-Z])[a-zA-Z0-9]{12,}$/i;
+export const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9\W]).{12,}$/;

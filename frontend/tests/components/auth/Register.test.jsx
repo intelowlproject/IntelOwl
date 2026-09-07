@@ -52,8 +52,8 @@ describe("Registration component", () => {
     await user.type(lastNameInputElement, "lastname");
     await user.type(emailInputElement, "test@test.com");
     await user.type(usernameInputElement, "test_user");
-    await user.type(passwordInputElement, "intelowlpassword");
-    await user.type(confirmPasswordInputElement, "intelowlpassword");
+    await user.type(passwordInputElement, "IntelOwlPass1");
+    await user.type(confirmPasswordInputElement, "IntelOwlPass1");
     await user.type(companyNameInputElement, "companyname");
     await user.type(companyRoleInputElement, "companyrole");
     await user.click(submitButtonElement);
@@ -65,7 +65,7 @@ describe("Registration component", () => {
         last_name: "lastname",
         username: "test_user",
         email: "test@test.com",
-        password: "intelowlpassword",
+        password: "IntelOwlPass1",
         profile: {
           company_name: "companyname",
           company_role: "companyrole",

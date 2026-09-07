@@ -1,6 +1,7 @@
+import hashlib
 import json
 import logging
-from typing import Dict, Type, Union
+from typing import Any, Dict, Type, Union
 
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
@@ -24,6 +25,14 @@ from api_app.data_model_manager.queryset import BaseDataModelQuerySet
 from certego_saas.apps.user.models import User
 
 logger = logging.getLogger(__name__)
+
+
+def normalize_dict(obj: Any) -> Any:
+    if isinstance(obj, dict):
+        return {k: normalize_dict(v) for k, v in sorted(obj.items())}
+    if isinstance(obj, list):
+        return [normalize_dict(i) for i in obj]
+    return obj
 
 
 class IETFReport(models.Model):
@@ -91,6 +100,7 @@ class BaseDataModel(models.Model):
         default=dict
     )  # field for additional information related to a specific analyzer
     date = models.DateTimeField(default=now)
+    fingerprint = models.CharField(max_length=64, db_index=True, blank=True, default="")
     analyzers_report = GenericRelation(
         to="analyzers_manager.AnalyzerReport",
         object_id_field="data_model_object_id",
@@ -124,6 +134,30 @@ class BaseDataModel(models.Model):
             return self.analyzers_report.first().user
         elif self.jobs.exists():
             return self.jobs.first().user
+
+    def get_content_map(self, data: Dict = None) -> Dict:
+        if data is None:
+            data = {}
+            for field in self._meta.fields:
+                name = field.name
+                if name in ["id", "date", "fingerprint"]:
+                    continue
+                value = getattr(self, name)
+                if hasattr(value, "isoformat"):
+                    value = value.isoformat()
+                data[name] = value
+        data.pop("id", None)
+        data.pop("date", None)
+        data.pop("fingerprint", None)
+        data.pop("analyzers_report", None)
+        data.pop("jobs", None)
+        data.pop("user_events", None)
+        return normalize_dict(data)
+
+    def generate_fingerprint(self, data: Dict = None) -> str:
+        content_map = self.get_content_map(data)
+        encoded_data = json.dumps(content_map, sort_keys=True).encode("utf-8")
+        return hashlib.sha256(encoded_data).hexdigest()
 
     def merge(self, other: Union["BaseDataModel", Dict], append: bool = True) -> "BaseDataModel":
         if not self.pk:

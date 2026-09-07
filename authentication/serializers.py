@@ -210,8 +210,6 @@ class RegistrationSerializer(rest_email_auth.serializers.RegistrationSerializer)
         """
         super().validate_password(password)
         # Build a temporary user for context-aware validation
-        from certego_saas.models import User
-
         temp_user = User(
             username=self.initial_data.get("username", ""),
             email=self.initial_data.get("email", ""),

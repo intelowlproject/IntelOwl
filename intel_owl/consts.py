@@ -9,10 +9,15 @@ REGEX_CVE = r"CVE-\d{4}-\d{4,7}"
 
 
 def validate_password_strength(password: str, user=None) -> None:
-    """Validate password using Django's AUTH_PASSWORD_VALIDATORS.
+    """
+    Validate password using Django's AUTH_PASSWORD_VALIDATORS.
 
-    Raises ValidationError if invalid. Optionally accepts a user object
-    to enable UserAttributeSimilarityValidator checks.
+    Args:
+        password (str): The password to validate.
+        user (User, optional): Optional user object for context-aware validation.
+
+    Raises:
+        ValidationError: If the password fails any of the configured validators.
     """
     try:
         validate_password(password, user=user)

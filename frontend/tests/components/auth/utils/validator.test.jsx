@@ -10,13 +10,13 @@ import { HACKER_MEME_STRING } from "../../../../src/constants/miscConst";
 
 describe("Compare Password", () => {
   test("Password do match", () => {
-    const password = "intelowlpassword";
-    const confirmPassword = "intelowlpassword";
+    const password = "IntelOwlPass1";
+    const confirmPassword = "IntelOwlPass1";
     expect(ComparePassword(password, confirmPassword)).toEqual({});
   });
   test("Password do not match", () => {
-    const password = "intelowlpassword";
-    const confirmPassword = "IntelowlPassword";
+    const password = "IntelOwlPass1";
+    const confirmPassword = "intelowlPassword2";
     expect(ComparePassword(password, confirmPassword)).toEqual({
       password: "Passwords do not match.",
       confirmPassword: "Passwords do not match.",
@@ -26,7 +26,7 @@ describe("Compare Password", () => {
 
 describe("Password", () => {
   test("Valid password", () => {
-    const password = "intelowlpassword";
+    const password = "IntelOwlPass1";
     expect(PasswordValidator(password)).toEqual({});
   });
   test("Required password", () => {
@@ -43,13 +43,17 @@ describe("Password", () => {
     const numericPassword = "123456123456";
     expect(PasswordValidator(numericPassword)).toEqual({
       password:
-        "The password is entirely numeric or contains special characters",
+        "Must contain at least one uppercase letter, one lowercase letter, and one digit or special character",
     });
-    const password = "intelowlpassword$";
-    expect(PasswordValidator(password)).toEqual({
+    const lowercaseOnly = "intelowlpassword";
+    expect(PasswordValidator(lowercaseOnly)).toEqual({
       password:
-        "The password is entirely numeric or contains special characters",
+        "Must contain at least one uppercase letter, one lowercase letter, and one digit or special character",
     });
+  });
+  test("Password with special characters is valid", () => {
+    const password = "IntelOwlPass$1";
+    expect(PasswordValidator(password)).toEqual({});
   });
 });
 

@@ -171,7 +171,6 @@ class ChangePasswordView(APIView):
 
     @staticmethod
     def post(request: Request) -> Response:
-        # Get the old password and new password from the request data
         """
         Handles POST request for changing user password.
 
@@ -181,6 +180,7 @@ class ChangePasswordView(APIView):
         Returns:
             Response: The response object.
         """
+        # Get the old password and new password from the request data
         old_password = request.data.get("old_password")
         new_password = request.data.get("new_password")
 

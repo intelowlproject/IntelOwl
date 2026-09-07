@@ -6,4 +6,4 @@ services:
     expose:
       - '3000'
     depends_on:
-      - uwsgi
+      - gunicorn

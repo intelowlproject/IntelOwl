@@ -49,6 +49,7 @@ export const analyzablesTableColumns = [
     disableSortBy: true,
     maxWidth: 60,
     Filter: DefaultColumnFilter,
+    filterPlaceholder: "Search ID",
   },
   {
     Header: "Name",

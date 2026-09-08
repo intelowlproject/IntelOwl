@@ -1,0 +1,15 @@
+# All additional integrations should be added following this format only.
+
+services:
+  sogen_analyzer:
+    image: intelowlproject/sogen_analyzer:${REACT_APP_INTELOWL_VERSION}
+    container_name: sogen_analyzer
+    restart: unless-stopped
+    expose:
+      - "4009"
+    env_file:
+      - env_file_integrations
+    volumes:
+      - generic_logs:/var/log/intel_owl
+    depends_on:
+      - uwsgi

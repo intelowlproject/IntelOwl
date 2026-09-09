@@ -10,6 +10,7 @@ _PHISHING_BASE_URL = "http://phishing_analyzers:4005"
 _ENGINE_ENDPOINTS = {
     "selenium": f"{_PHISHING_BASE_URL}/phishing_extractor",
     "playwright": f"{_PHISHING_BASE_URL}/phishing_extractor_playwright",
+    "cloakbrowser": f"{_PHISHING_BASE_URL}/phishing_extractor_cloakbrowser",
 }
 
 

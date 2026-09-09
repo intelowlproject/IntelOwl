@@ -58,3 +58,8 @@ shell2http.register_command(
     endpoint="phishing_extractor_playwright",
     command_name="/usr/local/bin/python3 /opt/deploy/phishing_analyzers/analyzers/extract_phishing_site_playwright.py",
 )
+
+shell2http.register_command(
+    endpoint="phishing_extractor_cloakbrowser",
+    command_name="/usr/local/bin/python3 /opt/deploy/phishing_analyzers/analyzers/extract_phishing_site_cloakbrowser.py",
+)

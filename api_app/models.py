@@ -1019,6 +1019,31 @@ class PluginConfig(OwnershipAbstractModel):
         """Returns whether the parameter is marked as secret."""
         return self.parameter.is_secret
 
+    @staticmethod
+    def _encrypt_value(value):
+        """Fernet-encrypt a value (serialized as JSON)."""
+        from cryptography.fernet import Fernet
+
+        f = Fernet(settings.PLUGIN_CONFIG_FERNET_KEY)
+        return f.encrypt(json.dumps(value).encode()).decode()
+
+    @staticmethod
+    def _decrypt_value(encrypted_value):
+        """Fernet-decrypt a value back to its original Python object."""
+        from cryptography.fernet import Fernet
+
+        f = Fernet(settings.PLUGIN_CONFIG_FERNET_KEY)
+        return json.loads(f.decrypt(encrypted_value.encode()).decode())
+
+    def save(self, *args, **kwargs):
+        if (
+            self.is_secret()
+            and self.value is not None
+            and not (isinstance(self.value, str) and self.value.startswith("gAAAAA"))
+        ):
+            self.value = self._encrypt_value(self.value)
+        super().save(*args, **kwargs)
+
     @property
     def plugin_name(self):
         """Returns the name of the plugin associated with this configuration."""

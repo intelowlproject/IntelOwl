@@ -678,7 +678,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
 
         for config in [*org_config, *user_config]:
             if config["attribute"] == "mynewparameter":
-                self.assertEqual(config["value"], "supersecret")
+                self.assertEqual(PluginConfig._decrypt_value(config["value"]), "supersecret")
 
         # if the user is admin of an org, he should get the org secret
         self.client.force_authenticate(user=self.admin)
@@ -690,7 +690,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
 
         for config in [*org_config, *user_config]:
             if config["attribute"] == "mynewparameter":
-                self.assertEqual(config["value"], "supersecret")
+                self.assertEqual(PluginConfig._decrypt_value(config["value"]), "supersecret")
 
         # second personal item
         secret_owner = PluginConfig(
@@ -712,10 +712,10 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
 
         for config in org_config:
             if config["attribute"] == "mynewparameter":
-                self.assertEqual(config["value"], "supersecret")
+                self.assertEqual(PluginConfig._decrypt_value(config["value"]), "supersecret")
         for config in user_config:
             if config["attribute"] == "mynewparameter":
-                self.assertEqual(config["value"], "supersecret_user_only")
+                self.assertEqual(PluginConfig._decrypt_value(config["value"]), "supersecret_user_only")
 
         # other users cannot see user's personal items
         self.client.force_authenticate(user=self.admin)
@@ -727,11 +727,11 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
 
         for config in org_config:
             if config["attribute"] == "mynewparameter":
-                self.assertEqual(config["value"], "supersecret")
+                self.assertEqual(PluginConfig._decrypt_value(config["value"]), "supersecret")
         for config in user_config:
             if config["attribute"] == "mynewparameter":
-                self.assertNotEqual(config["value"], "supersecret_user_only")
-                self.assertEqual(config["value"], "supersecret")
+                self.assertNotEqual(PluginConfig._decrypt_value(config["value"]), "supersecret_user_only")
+                self.assertEqual(PluginConfig._decrypt_value(config["value"]), "supersecret")
 
         # if a standard user who does not belong to any org tries to get a secret,
         # they should not find anything
@@ -768,7 +768,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
                 self.assertEqual(config["value"], "redacted")
 
         secret_owner.refresh_from_db()
-        self.assertEqual(secret_owner.value, "supersecret_user_only")
+        self.assertEqual(PluginConfig._decrypt_value(secret_owner.value), "supersecret_user_only")
 
         # third superuser secret
         secret_owner = PluginConfig(
@@ -790,10 +790,10 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
                 self.assertEqual(config["value"], "redacted")
         for config in user_config:
             if config["attribute"] == "mynewparameter":
-                self.assertEqual(config["value"], "supersecret_low_privilege")
+                self.assertEqual(PluginConfig._decrypt_value(config["value"]), "supersecret_low_privilege")
 
         param.delete()
-        PluginConfig.objects.filter(value__startswith="supersecret").delete()
+        PluginConfig.objects.filter(value__startswith="gAAAAA").delete()
         org.delete()
 
     def test_plugin_config_list(self):
@@ -856,7 +856,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.assertIn("organization", needle)
         self.assertEqual(needle["organization"], "testorg0")
         self.assertIn("value", needle)
-        self.assertEqual(needle["value"], "value")
+        self.assertEqual(PluginConfig._decrypt_value(needle["value"]), "value")
         self.assertIn("attribute", needle)
         self.assertEqual(needle["attribute"], "test")
         self.assertIn("required", needle)
@@ -883,7 +883,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.assertIn("organization", needle)
         self.assertEqual(needle["organization"], "testorg0")
         self.assertIn("value", needle)
-        self.assertEqual(needle["value"], "value")
+        self.assertEqual(PluginConfig._decrypt_value(needle["value"]), "value")
         self.assertIn("attribute", needle)
         self.assertEqual(needle["attribute"], "test")
         self.assertIn("required", needle)
@@ -998,7 +998,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         response = self.client.patch(uri, payload, format="json")
         self.assertEqual(response.status_code, 200)
         pc1 = PluginConfig.objects.get(id=pc.pk)
-        self.assertEqual(pc1.value, "new_org_supersecret")
+        self.assertEqual(PluginConfig._decrypt_value(pc1.value), "new_org_supersecret")
 
         # admin can update org secret
         self.client.force_authenticate(user=self.admin)
@@ -1012,7 +1012,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         response = self.client.patch(uri, payload, format="json")
         self.assertEqual(response.status_code, 200)
         pc1 = PluginConfig.objects.get(id=pc.pk)
-        self.assertEqual(pc1.value, "new_org_supersecret_admin")
+        self.assertEqual(PluginConfig._decrypt_value(pc1.value), "new_org_supersecret_admin")
 
         # user can not update org secret
         self.client.force_authenticate(user=self.user)
@@ -1049,7 +1049,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         response = self.client.patch(uri, payload, format="json")
         self.assertEqual(response.status_code, 200)
         pc_user = PluginConfig.objects.get(id=secret_owner.pk)
-        self.assertEqual(pc_user.value, "new_supersecret_user_only")
+        self.assertEqual(PluginConfig._decrypt_value(pc_user.value), "new_supersecret_user_only")
 
         # other users cannot update user's personal items
         self.client.force_authenticate(user=self.guest)
@@ -1063,14 +1063,14 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         response = self.client.patch(uri, payload, format="json")
         self.assertEqual(response.status_code, 403)
         pc_user = PluginConfig.objects.get(id=secret_owner.pk)
-        self.assertEqual(pc_user.value, "new_supersecret_user_only")
-        self.assertNotEqual(pc_user.value, "new_supersecret")
+        self.assertEqual(PluginConfig._decrypt_value(pc_user.value), "new_supersecret_user_only")
+        self.assertNotEqual(PluginConfig._decrypt_value(pc_user.value), "new_supersecret")
 
         secret_owner.delete()
         pc.delete()
 
         param.delete()
-        PluginConfig.objects.filter(value__startswith="supersecret").delete()
+        PluginConfig.objects.filter(value__startswith="gAAAAA").delete()
         org.delete()
 
     def test_create(self):
@@ -1121,7 +1121,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         response = self.client.post(uri, payload, format="json")
         self.assertEqual(response.status_code, 201)
         content = response.json()
-        self.assertEqual(content[0]["value"], "new_org_supersecret")
+        self.assertEqual(PluginConfig._decrypt_value(content[0]["value"]), "new_org_supersecret")
         self.assertEqual(content[0]["owner"], self.superuser.username)
         pc = PluginConfig.objects.get(id=content[0]["id"])
         pc2 = PluginConfig.objects.get(id=content[1]["id"])
@@ -1144,7 +1144,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         response = self.client.post(uri, payload, format="json")
         self.assertEqual(response.status_code, 201)
         content = response.json()
-        self.assertEqual(content[0]["value"], "new_org_supersecret_admin")
+        self.assertEqual(PluginConfig._decrypt_value(content[0]["value"]), "new_org_supersecret_admin")
         self.assertEqual(content[0]["owner"], self.admin.username)
         pc = PluginConfig.objects.get(id=content[0]["id"])
         self.assertTrue(pc.for_organization)
@@ -1162,7 +1162,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         response = self.client.post(uri, payload, format="json")
         self.assertEqual(response.status_code, 201)
         content = response.json()
-        self.assertEqual(content[0]["value"], "new_supersecret_admin")
+        self.assertEqual(PluginConfig._decrypt_value(content[0]["value"]), "new_supersecret_admin")
         self.assertEqual(content[0]["owner"], self.admin.username)
         pc1 = PluginConfig.objects.get(id=content[0]["id"])
         self.assertFalse(pc1.for_organization)
@@ -1197,7 +1197,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         response = self.client.post(uri, payload, format="json")
         self.assertEqual(response.status_code, 201)
         content = response.json()
-        self.assertEqual(content[0]["value"], "new_supersecret_user_only")
+        self.assertEqual(PluginConfig._decrypt_value(content[0]["value"]), "new_supersecret_user_only")
         self.assertEqual(content[0]["owner"], self.user.username)
         pc = PluginConfig.objects.get(id=content[0]["id"])
         self.assertFalse(pc.for_organization)
@@ -1244,7 +1244,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         response = self.client.post(uri, payload, format="json")
         self.assertEqual(response.status_code, 201)
         content = response.json()
-        self.assertEqual(content[0]["value"], "new_user_secret")
+        self.assertEqual(PluginConfig._decrypt_value(content[0]["value"]), "new_user_secret")
         self.assertEqual(content[0]["owner"], self.user.username)
         pc1 = PluginConfig.objects.get(id=content[0]["id"])
         self.assertFalse(pc1.for_organization)
@@ -1252,7 +1252,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
 
         pc.delete()
         param.delete()
-        PluginConfig.objects.filter(value__startswith="supersecret").delete()
+        PluginConfig.objects.filter(value__startswith="gAAAAA").delete()
         org.delete()
 
     def test_delete(self):

@@ -337,6 +337,22 @@ class TestUserAuth(CustomOAuthTestCase):
         self.assertEqual(400, response.status_code, msg=msg)
         self.assertIn("error", content, msg=msg)
 
+    def test_change_password_missing_old_password_400(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(
+            change_password_uri,
+            {
+                "new_password": "n3w_p4ssword!",
+            },
+        )
+        content = response.json()
+        msg = (response, content)
+
+        self.assertEqual(400, response.status_code, msg=msg)
+        self.assertIn("error", content, msg=msg)
+        # must report the field as missing, not the misleading "Invalid old password"
+        self.assertEqual("Old password is required.", content["error"], msg=msg)
+
     def test_change_password_special_chars_200(self):
         """Special characters in passwords should now be accepted."""
         self.client.force_authenticate(user=self.user)

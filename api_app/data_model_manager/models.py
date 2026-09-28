@@ -9,7 +9,6 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import ForeignKey, ManyToManyField, PositiveIntegerField
-from django.forms import JSONField
 from django.utils.timezone import now
 from rest_framework.serializers import ModelSerializer
 
@@ -148,7 +147,7 @@ class BaseDataModel(models.Model):
                     if not result_attr:
                         result_attr = []
                     result_attr.extend(other_attr)
-                elif isinstance(field, (JSONField, SetField)):
+                elif isinstance(field, models.JSONField):
                     if not result_attr:
                         result_attr = {}
                     result_attr |= other_attr

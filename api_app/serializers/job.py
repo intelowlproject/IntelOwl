@@ -814,16 +814,22 @@ class FileJobSerializer(_AbstractJobCreateSerializer):
             pk__in=[config.pk for config in analyzers_to_execute]
         )
         if file_mimetype in [MimeTypes.ZIP1.value, MimeTypes.ZIP2.value]:
-            EXCEL_OFFICE_FILES = r"\.[xl]\w{0,3}$"
-            DOC_OFFICE_FILES = r"\.[doc]\w{0,3}$"
-            if re.search(DOC_OFFICE_FILES, file_name):
-                # its an excel file
-                file_mimetype = MimeTypes.DOC.value
-            elif re.search(EXCEL_OFFICE_FILES, file_name):
-                # its an excel file
-                file_mimetype = MimeTypes.EXCEL1.value
-            else:
-                # its an android file
+            DOC_OFFICE_FILES = r"\.(?:doc|docx|docm|dot|dotx)$"
+            EXCEL_OFFICE_FILES = r"\.(?:xls|xlsx|xlsm|xlt|xltx)$"
+            APK_FILES = r"\.apk$"
+            if re.search(DOC_OFFICE_FILES, file_name, re.IGNORECASE):
+                file_mimetype = (
+                    MimeTypes.WORD2.value
+                    if file_name.lower().endswith((".docx", ".docm", ".dotx"))
+                    else MimeTypes.WORD1.value
+                )
+            elif re.search(EXCEL_OFFICE_FILES, file_name, re.IGNORECASE):
+                file_mimetype = (
+                    MimeTypes.DOC.value
+                    if file_name.lower().endswith((".xlsx", ".xlsm", ".xltx"))
+                    else MimeTypes.EXCEL1.value
+                )
+            elif re.search(APK_FILES, file_name, re.IGNORECASE):
                 file_mimetype = MimeTypes.APK.value
 
         supported_query = (

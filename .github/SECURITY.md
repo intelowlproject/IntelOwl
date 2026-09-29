@@ -9,8 +9,13 @@
 
 ## Reporting a Vulnerability
 
-Please contact privately via Twitter one of the current maintainers.
-Current list of maintainers is available here: https://github.com/intelowlproject/IntelOwl#about-the-author-and-maintainers
+Please report vulnerabilities privately through GitHub's private vulnerability reporting:
+open the [Security tab](https://github.com/intelowlproject/IntelOwl/security) and click **Report a vulnerability**,
+or go directly to https://github.com/intelowlproject/IntelOwl/security/advisories/new.
+
+Please do not open a public issue or pull request for a vulnerability before it has been fixed.
+
+The current list of maintainers is available here: https://github.com/intelowlproject/IntelOwl#about-the-author-and-maintainers
 
 Then we would:
 * verify the vulnerability

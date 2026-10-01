@@ -213,9 +213,14 @@ class PythonConfigListSerializer(rfs.ListSerializer):
             plugin_representation["params"] = {}
             total_parameters = 0
             parameter_required_not_configured = []
+            # For ingestors, PluginConfig entries are always owned by the
+            # ingestor's dedicated user (see PluginConfigSerializer.validate),
+            # so we must check configuration visibility from that user's
+            # perspective rather than the requesting user's.
+            config_user = plugin.user if isinstance(plugin, IngestorConfig) else user
             for param in plugin.python_module.parameters.annotate_configured(
-                plugin, user
-            ).annotate_value_for_user(plugin, user):
+                plugin, config_user
+            ).annotate_value_for_user(plugin, config_user):
                 total_parameters += 1
                 if param.required and not param.configured:
                     parameter_required_not_configured.append(param.name)

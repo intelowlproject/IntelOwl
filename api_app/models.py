@@ -939,7 +939,14 @@ class PluginConfig(OwnershipAbstractModel):
             # this happens if the configuration/user was deleted before this instance
             return
         if self.owner:
-            if self.owner.has_membership() and self.owner.membership.is_admin:
+            # For ingestor configs, the owner is always the ingestor's
+            # dedicated user (set by PluginConfigSerializer.validate), but
+            # the config panel is viewed by admin users whose caches also
+            # need to be invalidated. Refresh cache for all users.
+            if self.ingestor_config_id is not None:
+                self.config.delete_class_cache_keys()
+                self.config.refresh_cache_keys()
+            elif self.owner.has_membership() and self.owner.membership.is_admin:
                 for user in User.objects.filter(membership__organization=self.owner.membership.organization):
                     self.config.delete_class_cache_keys(user)
                     self.config.refresh_cache_keys(user)

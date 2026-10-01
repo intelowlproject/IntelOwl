@@ -721,6 +721,10 @@ class MultipleFileJobSerializer(MultipleJobSerializer):
             data_to_check.getlist("files")
         ):
             raise ValidationError({"detail": "file_names and files must have the same length."})
+        if data_to_check.getlist("file_mimetypes", []) and len(
+            data_to_check.getlist("file_mimetypes")
+        ) != len(data_to_check.getlist("files")):
+            raise ValidationError({"detail": "file_mimetypes and files must have the same length."})
 
         for index, file in enumerate(data_to_check.getlist("files")):
             # `deepcopy` here ensures that this code doesn't
@@ -730,10 +734,17 @@ class MultipleFileJobSerializer(MultipleJobSerializer):
             item["file"] = file
             if data_to_check.getlist("file_names", []):
                 item["file_name"] = data_to_check.getlist("file_names")[index]
-            if data_to_check.get("file_mimetypes", []):
-                item["file_mimetype"] = data_to_check["file_mimetypes"][index]
-            if delay := data_to_check.get("delay", datetime.timedelta()):
-                item["delay"] = int(delay * index)
+            if data_to_check.getlist("file_mimetypes", []):
+                item["file_mimetype"] = data_to_check.getlist("file_mimetypes")[index]
+            if delay := data_to_check.get("delay"):
+                try:
+                    if isinstance(delay, datetime.timedelta):
+                        delay_seconds = delay.total_seconds()
+                    else:
+                        delay_seconds = float(delay)
+                    item["delay"] = int(delay_seconds * index)
+                except (ValueError, TypeError):
+                    pass
             try:
                 validated = self.child.run_validation(item)
             except ValidationError as exc:
@@ -775,7 +786,8 @@ class FileJobSerializer(_AbstractJobCreateSerializer):
         file_obj = attrs["file"].file
         file_obj.seek(0)
         file_buffer = file_obj.read()
-        attrs["file_mimetype"] = MimeTypes.calculate(file_buffer, attrs["file_name"])
+        if not attrs.get("file_mimetype"):
+            attrs["file_mimetype"] = MimeTypes.calculate(file_buffer, attrs["file_name"])
         attrs["md5"] = calculate_md5(file_buffer)
         attrs = super().validate(attrs)
         logger.debug(f"after attrs: {attrs}")
@@ -869,8 +881,15 @@ class MultipleObservableJobSerializer(MultipleJobSerializer):
             item = copy.deepcopy(data)
             item["observable_name"] = name
 
-            if delay := data.get("delay", datetime.timedelta()):
-                item["delay"] = int(delay * index)
+            if delay := data.get("delay"):
+                try:
+                    if isinstance(delay, datetime.timedelta):
+                        delay_seconds = delay.total_seconds()
+                    else:
+                        delay_seconds = float(delay)
+                    item["delay"] = int(delay_seconds * index)
+                except (ValueError, TypeError):
+                    pass
 
             try:
                 validated = self.child.run_validation(item)

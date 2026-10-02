@@ -118,7 +118,7 @@ langchain==1.3.11
 langchain-ollama==1.1.0
 
 # others
-dateparser==1.2.0
+dateparser==1.4.3
 DeepDiff==8.6.1
 # phishing form compiler module
 lxml==6.0.2

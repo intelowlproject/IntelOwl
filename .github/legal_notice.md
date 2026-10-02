@@ -62,7 +62,8 @@ license terms.
 [telfhash](https://github.com/trendmicro/telfhash),
 [Authlib](https://github.com/lepture/authlib),
 [Fangfrisch](https://github.com/rseichter/fangfrisch),
-[pyOneNote](https://github.com/DissectMalware/pyOneNote)
+[pyOneNote](https://github.com/DissectMalware/pyOneNote),
+[Sogen](https://github.com/momo5502/sogen)
 
 #### Media
 [notification.mp3](https://notificationsounds.com/message-tones/relax-message-tone),

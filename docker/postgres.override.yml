@@ -15,7 +15,7 @@ services:
       start_period: 3s
 
 
-  uwsgi:
+  gunicorn:
     depends_on:
       postgres:
         condition: service_healthy

@@ -14,4 +14,4 @@ services:
       - ../integrations/pcap_analyzers/config/suricata/etc:/etc/suricata:ro
       - ../integrations/pcap_analyzers/config/suricata/rules:/var/lib/suricata/rules/
     depends_on:
-      - uwsgi
+      - gunicorn

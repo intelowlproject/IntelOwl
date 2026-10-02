@@ -7,7 +7,7 @@ services:
     logging:
       driver: none
 
-  uwsgi:
+  gunicorn:
     environment:
       - BROKER_URL="amqp://guest:guest@rabbitmq:5672"
     depends_on:

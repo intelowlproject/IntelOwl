@@ -116,19 +116,19 @@ jobs:
         if: always()
         run: |
           docker ps -a
-          docker logs intelowl_uwsgi
+          docker logs intelowl_gunicorn
           docker logs intelowl_daphne
 
       - name: Setup coverage
         run: |
-          docker exec intelowl_uwsgi pip3 install coverage
+          docker exec intelowl_gunicorn pip3 install coverage
 
       - name: Run test
         run: |
-          docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests
+          docker exec intelowl_gunicorn coverage run manage.py test --keepdb tests
       - name: Run async tests
         run: |
-          docker exec intelowl_uwsgi coverage run manage.py test --keepdb async_tests
+          docker exec intelowl_gunicorn coverage run manage.py test --keepdb async_tests
 
   frontend-tests:
     runs-on: ubuntu-latest

@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    # NOTE: this command is runned by uwsgi startup script
+    # NOTE: this command is run by gunicorn startup script
 
     help = "Create or update the index templates in Elasticsearch"
 

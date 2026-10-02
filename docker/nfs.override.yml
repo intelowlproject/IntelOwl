@@ -1,5 +1,5 @@
 services:
-  uwsgi:
+  gunicorn:
     volumes:
       - nfs_files:/opt/deploy/files_required
     environment:

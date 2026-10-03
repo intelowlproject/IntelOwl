@@ -175,6 +175,103 @@ class PluginConfigSerializerTestCase(CustomTestCase):
         m3.delete()
         org.delete()
 
+    def test_secret_redaction_owner_none_for_organization(self):
+        ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
+        param = Parameter.objects.create(
+            is_secret=True,
+            name="secret_param_null_owner",
+            python_module=ac.python_module,
+            required=True,
+            type="str",
+        )
+        pc = PluginConfig.objects.create(
+            value="topsecretvalue",
+            owner=None,
+            parameter=param,
+            analyzer_config=ac,
+            for_organization=True,
+        )
+
+        data = PluginConfigSerializer(pc, context={"request": MockUpRequest(user=self.user)}).data
+        self.assertEqual(data["value"], "redacted")
+
+        # Serializing without request in context should also safely redact
+        data_no_req = PluginConfigSerializer(pc, context={}).data
+        self.assertEqual(data_no_req["value"], "redacted")
+
+        pc.delete()
+        param.delete()
+
+    def test_secret_redaction_owner_without_membership(self):
+        org = Organization.objects.create(name="test_org_secret")
+        m_admin = Membership.objects.create(user=self.admin, organization=org, is_owner=False, is_admin=True)
+        ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
+        param = Parameter.objects.create(
+            is_secret=True,
+            name="secret_param_no_membership",
+            python_module=ac.python_module,
+            required=True,
+            type="str",
+        )
+        pc = PluginConfig.objects.create(
+            value="topsecretvalue",
+            owner=self.user,
+            parameter=param,
+            analyzer_config=ac,
+            for_organization=True,
+        )
+
+        # Admin of org serializes it -> owner has no membership, so should redact without ObjectDoesNotExist error
+        data_admin = PluginConfigSerializer(pc, context={"request": MockUpRequest(user=self.admin)}).data
+        self.assertEqual(data_admin["value"], "redacted")
+
+        # Owner themselves serializes it -> should see actual value
+        data_owner = PluginConfigSerializer(pc, context={"request": MockUpRequest(user=self.user)}).data
+        self.assertEqual(data_owner["value"], "topsecretvalue")
+
+        pc.delete()
+        param.delete()
+        m_admin.delete()
+        org.delete()
+
+    def test_secret_visibility_to_owner_and_same_org_admin(self):
+        org = Organization.objects.create(name="test_org_secret_vis")
+        m_admin = Membership.objects.create(user=self.admin, organization=org, is_owner=False, is_admin=True)
+        m_owner = Membership.objects.create(user=self.user, organization=org, is_owner=False, is_admin=False)
+        ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
+        param = Parameter.objects.create(
+            is_secret=True,
+            name="secret_param_org_vis",
+            python_module=ac.python_module,
+            required=True,
+            type="str",
+        )
+        pc = PluginConfig.objects.create(
+            value="topsecretvalue",
+            owner=self.user,
+            parameter=param,
+            analyzer_config=ac,
+            for_organization=True,
+        )
+
+        # Owner gets actual value
+        data_owner = PluginConfigSerializer(pc, context={"request": MockUpRequest(user=self.user)}).data
+        self.assertEqual(data_owner["value"], "topsecretvalue")
+
+        # Admin of same org gets actual value
+        data_admin = PluginConfigSerializer(pc, context={"request": MockUpRequest(user=self.admin)}).data
+        self.assertEqual(data_admin["value"], "topsecretvalue")
+
+        # Guest (not owner and not in org) gets redacted
+        data_guest = PluginConfigSerializer(pc, context={"request": MockUpRequest(user=self.guest)}).data
+        self.assertEqual(data_guest["value"], "redacted")
+
+        pc.delete()
+        param.delete()
+        m_owner.delete()
+        m_admin.delete()
+        org.delete()
+
 
 class RestJobSerializerTestCase(CustomTestCase):
     def test_validate(self):

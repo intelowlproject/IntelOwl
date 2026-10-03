@@ -8,3 +8,5 @@ selenium==4.25.0
 selenium-wire==5.1.0
 blinker==1.7.0 # selenium-wire depends on this library version <1.8
 playwright==1.62.0
+cloakbrowser==0.5.7
+

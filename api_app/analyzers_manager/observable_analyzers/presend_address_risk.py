@@ -31,7 +31,7 @@ class PresendAddressRisk(ObservableAnalyzer):
         params = {"address": self.observable_name}
 
         try:
-            response = requests.get(self.url, params=params)
+            response = requests.get(self.url, params=params, timeout=10)
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e:

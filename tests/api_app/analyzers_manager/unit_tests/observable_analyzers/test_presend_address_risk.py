@@ -19,10 +19,30 @@ class PresendAddressRiskTestCase(BaseAnalyzerTest):
         "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
         "format": "evm",
         "sanctioned": False,
-        "lists_checked": ["ETH", "BSC", "ARB"],
-        "list_size": 122,
-        "source": "OFAC Specially Designated Nationals (SDN) list, digital currency addresses (ETH/BSC/ARB), republished nightly by 0xB10C/ofac-sanctioned-digital-currency-addresses from the official sdn_advanced.xml.",
-        "note": "Not on the checked OFAC SDN lists. This is one specific, US-government sanctions list -- not a full risk score, and a clean result here does not mean the address is otherwise trustworthy.",
+        "matched_lists": [],
+        "lists_checked": [
+            "ARB",
+            "BCH",
+            "BSC",
+            "BSV",
+            "BTG",
+            "DASH",
+            "ETC",
+            "ETH",
+            "LTC",
+            "SOL",
+            "TRX",
+            "USDC",
+            "USDT",
+            "XBT",
+            "XMR",
+            "XRP",
+            "XVG",
+            "ZEC",
+        ],
+        "list_size": 1060,
+        "source": "OFAC Specially Designated Nationals (SDN) list, digital currency addresses (all per-asset lists), republished nightly by 0xB10C/ofac-sanctioned-digital-currency-addresses from the official sdn_advanced.xml.",
+        "note": "Not on any OFAC SDN digital currency address list. This is one specific, US-government sanctions list -- not a full risk score, and a clean result here does not mean the address is otherwise trustworthy.",
     }
 
     @staticmethod
@@ -42,6 +62,15 @@ class PresendAddressRiskTestCase(BaseAnalyzerTest):
             analyzer.observable_classification = Classification.GENERIC
             result = analyzer.run()
             self.assertEqual(result["address"], self.mock_json_response["address"])
+
+    def test_request_has_timeout(self):
+        """Test that the HTTP request is sent with a timeout"""
+        with self.get_mocked_response() as mocked_get:
+            analyzer = self.analyzer_class(None)
+            analyzer.observable_name = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+            analyzer.observable_classification = Classification.GENERIC
+            analyzer.run()
+            self.assertEqual(mocked_get.call_args.kwargs["timeout"], 10)
 
     def test_invalid_evm_address(self):
         """Test that an invalid EVM address raises an AnalyzerRunException"""

@@ -137,7 +137,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("api_app", "0073_alter_updatecheckstatus_last_checked_at_and_more"),
-        ("analyzers_manager", "0197_analyzer_config_scanmalware"),
+        ("analyzers_manager", "0196_data_model_phishing_lists"),
     ]
 
     operations = [

@@ -6,6 +6,7 @@ import ipaddress
 import logging
 import re
 import typing
+
 from django.db import models
 
 logger = logging.getLogger(__name__)

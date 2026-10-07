@@ -49,3 +49,15 @@ class BaseDataModelTestCase(CustomTestCase):
         self.assertEqual(ip.asn, 4)
         self.assertCountEqual(ip.resolutions, ["1.1.1.1"])
         ip.delete()
+
+    def test_merge_set_field_no_duplicates(self):
+        ip1 = IPDataModel.objects.create(resolutions=["1.1.1.1"])
+        ip2 = IPDataModel.objects.create(resolutions=["1.1.1.1", "2.2.2.2"])
+
+        ip1.merge(ip2, append=True)
+        ip1.refresh_from_db()
+
+        self.assertEqual(ip1.resolutions, ["1.1.1.1", "2.2.2.2"])
+
+        ip1.delete()
+        ip2.delete()

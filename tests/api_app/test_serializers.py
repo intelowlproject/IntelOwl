@@ -240,19 +240,23 @@ class PluginConfigSerializerTestCase(CustomTestCase):
 
         # A user with NO connection to the org (self.guest) must be redacted.
         # This exercises the is_same_org_admin=False path and must not raise
-        # ObjectDoesNotExist when evaluating instance.owner.has_membership().
+        # ObjectDoesNotExist when evaluating instance.owner.has_membership()
+        # or serializing instance.organization in to_representation().
         data_guest = PluginConfigSerializer(pc, context={"request": MockUpRequest(user=self.guest)}).data
         self.assertEqual(data_guest["value"], "redacted")
+        self.assertIsNone(data_guest["organization"])
 
         # The org admin serializes it: owner.has_membership() is now False, so the
         # serializer safely redacts without raising ObjectDoesNotExist.
         data_admin = PluginConfigSerializer(pc, context={"request": MockUpRequest(user=self.admin)}).data
         self.assertEqual(data_admin["value"], "redacted")
+        self.assertIsNone(data_admin["organization"])
 
         # The owner (now membership-less) serializes their own config: is_owner=True
         # path fires before is_same_org_admin, so value is visible to owner.
         data_owner = PluginConfigSerializer(pc, context={"request": MockUpRequest(user=self.user)}).data
         self.assertEqual(data_owner["value"], "topsecretvalue")
+        self.assertIsNone(data_owner["organization"])
 
         pc.delete()
         param.delete()

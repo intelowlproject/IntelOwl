@@ -4,7 +4,7 @@ import logging
 from typing import Any
 
 from django.core.cache import cache
-from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import SerializerMethodField
@@ -174,7 +174,10 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
 
     def to_representation(self, instance: PluginConfig):
         result = super().to_representation(instance)
-        result["organization"] = instance.organization.name if instance.organization is not None else None
+        try:
+            result["organization"] = instance.organization.name if instance.organization is not None else None
+        except (AttributeError, ObjectDoesNotExist):
+            result["organization"] = None
         return result
 
 

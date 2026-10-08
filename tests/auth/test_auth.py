@@ -349,6 +349,46 @@ class TestUserAuth(CustomOAuthTestCase):
         )
         self.assertEqual(200, response.status_code)
 
+    def test_change_password_missing_old_password_400(self):
+        """Omitting old_password should return 400."""
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(
+            change_password_uri,
+            {
+                "new_password": "veryStrongPassword123",
+            },
+        )
+        content = response.json()
+        self.assertEqual(400, response.status_code)
+        self.assertIn("error", content)
+
+    def test_change_password_missing_new_password_400(self):
+        """Omitting new_password should return 400."""
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(
+            change_password_uri,
+            {
+                "old_password": "hunter2",
+            },
+        )
+        content = response.json()
+        self.assertEqual(400, response.status_code)
+        self.assertIn("error", content)
+
+    def test_change_password_same_password_400(self):
+        """Changing to the same password should return 400."""
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(
+            change_password_uri,
+            {
+                "old_password": "hunter2",
+                "new_password": "hunter2",
+            },
+        )
+        content = response.json()
+        self.assertEqual(400, response.status_code)
+        self.assertIn("error", content)
+
     def test_min_password_lenght_400(self):
         current_users = User.objects.count()
 

@@ -45,17 +45,24 @@ class TLP(models.TextChoices):
         return order[tlp]
 
     def __compare(self, other, operator):
-        if not isinstance(other, TLP):
-            raise TypeError(f"Can sum {self.__class__.__name__} with {type(other)}")
+        if isinstance(other, str) and other in self.__class__.values:
+            other = self.__class__(other)
+        elif not isinstance(other, TLP):
+            raise TypeError(f"Cannot compare {self.__class__.__name__} with {type(other)}")
 
         return operator(self.get_priority(self), self.get_priority(other))
 
     def __gt__(self, other):
         return self.__compare(other, _operator.gt)
 
+    def __ge__(self, other):
+        return self.__compare(other, _operator.ge)
+
     def __lt__(self, other):
         return self.__compare(other, _operator.lt)
 
+    def __le__(self, other):
+        return self.__compare(other, _operator.le)
 
 class Status(models.TextChoices):
     PENDING = "pending", "pending"

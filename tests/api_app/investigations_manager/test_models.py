@@ -1,5 +1,5 @@
 from api_app.analyzables_manager.models import Analyzable
-from api_app.choices import Classification
+from api_app.choices import Classification, TLP
 from api_app.helpers import gen_random_colorhex
 from api_app.investigations_manager.models import Investigation
 from api_app.models import Job, Tag
@@ -104,6 +104,10 @@ class InvestigationTestCase(CustomTestCase):
         an.delete()
 
     def test_tlp(self):
+        an: Investigation = Investigation.objects.create(name="Test", owner=self.user)
+        self.assertEqual(an.tlp, TLP.CLEAR)
+        self.assertIsInstance(an.tlp, TLP)
+
         job = Job.objects.create(
             analyzable=self.an,
             user=self.user,
@@ -114,17 +118,33 @@ class InvestigationTestCase(CustomTestCase):
             user=self.user,
             tlp="RED",
         )
-        an: Investigation = Investigation.objects.create(name="Test", owner=self.user)
         an.jobs.add(job)
         self.assertEqual(an.tlp.value, "CLEAR")
+
+        child_job = job.add_child(
+            analyzable=self.an,
+            user=self.user,
+            tlp="AMBER",
+        )
+        an.refresh_from_db()
+        self.assertEqual(an.tlp, TLP.AMBER)
+
         an.jobs.add(job2)
         an.refresh_from_db()
         self.assertEqual(an.tlp.value, "RED")
         job.delete()
         an.refresh_from_db()
-        self.assertEqual(an.tlp.value, "RED")
+        self.assertEqual(an.tlp, TLP.RED)
         job2.delete()
         an.delete()
+
+    def test_tlp_comparison_accepts_values(self):
+        self.assertLess(TLP.CLEAR, TLP.GREEN)
+        self.assertLessEqual(TLP.GREEN, TLP.GREEN)
+        self.assertGreater(TLP.RED, "AMBER")
+        self.assertGreaterEqual(TLP.RED, "RED")
+        with self.assertRaisesRegex(TypeError, "Cannot compare"):
+            TLP.RED < "invalid"
 
     def test_tags(self):
         job = Job.objects.create(
@@ -144,6 +164,10 @@ class InvestigationTestCase(CustomTestCase):
         an.jobs.add(job)
         an.refresh_from_db()
         self.assertCountEqual(an.tags, [tag1.label])
+        child = job.add_child(analyzable=self.an, user=self.user)
+        child.tags.add(tag2)
+        an.refresh_from_db()
+        self.assertCountEqual(an.tags, [tag1.label, tag2.label])
         an.jobs.add(job2)
         an.refresh_from_db()
         self.assertCountEqual(an.tags, [tag1.label, tag2.label])

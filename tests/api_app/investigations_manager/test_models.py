@@ -1,5 +1,5 @@
 from api_app.analyzables_manager.models import Analyzable
-from api_app.choices import Classification, TLP
+from api_app.choices import TLP, Classification
 from api_app.helpers import gen_random_colorhex
 from api_app.investigations_manager.models import Investigation
 from api_app.models import Job, Tag
@@ -121,7 +121,7 @@ class InvestigationTestCase(CustomTestCase):
         an.jobs.add(job)
         self.assertEqual(an.tlp.value, "CLEAR")
 
-        child_job = job.add_child(
+        job.add_child(
             analyzable=self.an,
             user=self.user,
             tlp="AMBER",

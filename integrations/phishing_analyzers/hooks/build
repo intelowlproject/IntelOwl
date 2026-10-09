@@ -10,7 +10,7 @@ echo "$SOURCE_BRANCH"
 version_regex='^v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'
 if [[ "$SOURCE_BRANCH" == "master" || "$SOURCE_BRANCH" == "test_arm" || "$SOURCE_BRANCH" =~ $version_regex ]]; then
   echo "The branch is master, proceeding with multi-arch build"
-  docker buildx create --name multiarch --use
+  docker buildx create --name multiarch --driver-opt image=moby/buildkit:v0.30.0 --use
   docker buildx build -f "$DOCKERFILE_PATH" -t "$IMAGE_NAME" --platform linux/arm64,linux/amd64 --push .
 else
   echo "The branch is not master, proceeding with classic build"

@@ -112,14 +112,19 @@ class Investigation(OwnershipAbstractModel, ListCachable):
 
     @property
     def tags(self) -> List[str]:
-        return list(set(self.jobs.values_list("tags__label", flat=True)))
+        tags = set(self.jobs.values_list("tags__label", flat=True))
+        for root in self.jobs.all():
+            tags.update(root.get_descendants().values_list("tags__label", flat=True))
+        return [label for label in tags if label]
 
     @property
     def tlp(self) -> TLP:
-        return (
-            max(TLP[tlp_string] for tlp_string in self.jobs.values_list("tlp", flat=True))
-            if self.jobs.exists()
-            else TLP.CLEAR.value
+        tlp_values = set(self.jobs.values_list("tlp", flat=True))
+        for root in self.jobs.all():
+            tlp_values.update(root.get_descendants().values_list("tlp", flat=True))
+        return max(
+            (TLP(value) for value in tlp_values if value in TLP.values),
+            default=TLP.CLEAR,
         )
 
     @property

@@ -82,7 +82,7 @@ class AnalyzerReportTestCase(CustomTestCase):
         data_model.refresh_from_db()
         self.assertIsNotNone(data_model)
         self.assertEqual(data_model.evaluation, "malicious")
-        self.assertCountEqual(data_model.external_references, ["www.intelowl.com", "www.intelowl.com"])
+        self.assertCountEqual(data_model.external_references, ["www.intelowl.com"])
         self.assertCountEqual([], ar.errors)
         data_model.delete()
         ar.delete()

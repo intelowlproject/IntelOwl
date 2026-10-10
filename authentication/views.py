@@ -168,6 +168,7 @@ class ChangePasswordView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
+    throttle_classes: List = [POSTUserRateThrottle]
 
     @staticmethod
     def post(request: Request) -> Response:
@@ -183,6 +184,14 @@ class ChangePasswordView(APIView):
         # Get the old password and new password from the request data
         old_password = request.data.get("old_password")
         new_password = request.data.get("new_password")
+
+        # validating the old password in provide and not empty
+        if not old_password:
+            return Response({"error": "Old password is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # validating the new password in provide and not empty
+        if not new_password:
+            return Response({"error": "New password is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Validate new password strength
         if not new_password:
@@ -205,6 +214,14 @@ class ChangePasswordView(APIView):
             logger.info(f"'{uname}' has inputted invalid old password.")
             # Return an error response if the old password doesn't match
             return Response({"error": "Invalid old password"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Checking that new password must be different from the old password
+        if check_password(new_password, user.password):
+            logger.info(f"'{uname}' has inputted the same password as the old one.")
+            return Response(
+                {"error": "New password must be different from the old password"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         # Wrap DB mutations in a transaction to ensure atomicity
         with transaction.atomic():

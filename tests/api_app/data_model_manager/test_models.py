@@ -50,6 +50,22 @@ class BaseDataModelTestCase(CustomTestCase):
         self.assertCountEqual(ip.resolutions, ["1.1.1.1"])
         ip.delete()
 
+    def test_merge_set_field_no_duplicates(self):
+        ip1 = IPDataModel.objects.create(resolutions=["1.1.1.1"])
+        ip2 = IPDataModel.objects.create(resolutions=["1.1.1.1", "2.2.2.2"])
+        ip1.merge(ip2, append=True)
+        ip1.refresh_from_db()
+        self.assertCountEqual(ip1.resolutions, ["1.1.1.1", "2.2.2.2"])
+        ip1.delete()
+        ip2.delete()
+
+    def test_merge_set_field_no_duplicates_dict(self):
+        ip = IPDataModel.objects.create(resolutions=["1.1.1.1"])
+        ip.merge({"resolutions": ["1.1.1.1", "2.2.2.2"]}, append=True)
+        ip.refresh_from_db()
+        self.assertCountEqual(ip.resolutions, ["1.1.1.1", "2.2.2.2"])
+        ip.delete()
+
     def test_merge_json_field_obj(self):
         ip1 = IPDataModel.objects.create(
             additional_info={"shodan": {"ports": [80]}},

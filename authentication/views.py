@@ -192,7 +192,7 @@ class ChangePasswordView(APIView):
         # validating the new password in provide and not empty
         if not new_password:
             return Response({"error": "New password is required"}, status=status.HTTP_400_BAD_REQUEST)
-        
+
 
         # Validate new password strength
         try:
@@ -207,7 +207,7 @@ class ChangePasswordView(APIView):
             logger.info(f"'{uname}' has inputted invalid old password.")
             # Return an error response if the old password doesn't match
             return Response({"error": "Invalid old password"}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         # Checking that new password must be different from the old password
         if check_password(new_password, user.password):
             logger.info(f"'{uname}' has inputted the same password as the old one.")

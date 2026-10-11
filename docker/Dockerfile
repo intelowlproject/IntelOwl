@@ -49,11 +49,13 @@ RUN apt-get update \
 
 COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
 COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
+COPY requirements/constraints.txt $PYTHONPATH/constraints.txt
 WORKDIR $PYTHONPATH
 
-RUN pip3 install --no-cache-dir --use-pep517 --compile -r project-requirements.txt \
-    && pip3 install --no-cache-dir pycti==${PYCTI_VERSION} \
-    && pip3 install --no-cache-dir --compile -r certego-requirements.txt
+RUN pip3 install --no-cache-dir --use-pep517 --compile -c constraints.txt -r project-requirements.txt \
+    && pip3 install --no-cache-dir -c constraints.txt pycti==${PYCTI_VERSION} \
+    && pip3 install --no-cache-dir --compile -c constraints.txt -r certego-requirements.txt \
+    && pip3 check
 
 COPY api_app/analyzers_manager/repo_downloader.sh ${PYTHONPATH}/api_app/analyzers_manager/repo_downloader.sh
 
@@ -82,5 +84,4 @@ COPY --from=frontend-build /build /var/www/reactapp
 # so we have to set the home env variable to allow to create its directory
 ENV HOME="${PYTHONPATH}"
 ENV XDG_CACHE_HOME="${PYTHONPATH}/.cache"
-
 

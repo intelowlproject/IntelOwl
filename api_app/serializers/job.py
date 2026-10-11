@@ -821,7 +821,15 @@ class FileJobSerializer(_AbstractJobCreateSerializer):
                 file_mimetype = MimeTypes.DOC.value
             elif re.search(EXCEL_OFFICE_FILES, file_name):
                 # its an excel file
-                file_mimetype = MimeTypes.EXCEL1.value
+                file_mimetype = (
+                    MimeTypes.EXCEL_MACRO2.value
+                    if file_name.lower().endswith(".xlsm")
+                    else (
+                        MimeTypes.DOC.value
+                        if file_name.lower().endswith((".xlsx", ".xltx"))
+                        else MimeTypes.EXCEL1.value
+                    )
+                )
             else:
                 # its an android file
                 file_mimetype = MimeTypes.APK.value

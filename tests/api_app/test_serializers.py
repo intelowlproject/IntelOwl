@@ -7,7 +7,7 @@ from django.utils.timezone import now
 from rest_framework.exceptions import ValidationError
 
 from api_app.analyzables_manager.models import Analyzable
-from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.analyzers_manager.models import AnalyzerConfig, MimeTypes
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 from api_app.choices import Classification, PythonModuleBasePaths
 from api_app.connectors_manager.models import ConnectorConfig
@@ -494,6 +494,31 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
         )
         self.assertCountEqual(analyzers, [a])
         a.delete()
+
+    def test_zip_disambiguation_xlsm_macro_enabled(self):
+        excel_macro_analyzer = AnalyzerConfig.objects.create(
+            name="test_excel_macro",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.FileAnalyzer.value,
+                module="yara_scan.YaraScan",
+            ),
+            description="test excel macro",
+            disabled=False,
+            supported_filetypes=[MimeTypes.EXCEL_MACRO2.value],
+            type="file",
+            run_hash=False,
+        )
+        try:
+            selected = FileJobSerializer.set_analyzers_to_execute(
+                self.fas,
+                [excel_macro_analyzer],
+                tlp="CLEAR",
+                file_mimetype=MimeTypes.ZIP1.value,
+                file_name="malware.xlsm",
+            )
+            self.assertCountEqual(selected, [excel_macro_analyzer])
+        finally:
+            excel_macro_analyzer.delete()
 
 
 class ObservableJobCreateSerializerTestCase(CustomTestCase):

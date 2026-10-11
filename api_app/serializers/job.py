@@ -819,6 +819,8 @@ class FileJobSerializer(_AbstractJobCreateSerializer):
             if re.search(DOC_OFFICE_FILES, file_name):
                 # its an excel file
                 file_mimetype = MimeTypes.DOC.value
+            elif file_name.lower().endswith(".xlsm"):
+                file_mimetype = MimeTypes.EXCEL_MACRO2.value
             elif re.search(EXCEL_OFFICE_FILES, file_name):
                 # its an excel file
                 file_mimetype = MimeTypes.EXCEL1.value

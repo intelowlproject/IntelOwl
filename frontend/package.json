@@ -34,7 +34,7 @@
     "reactstrap": "^9.2.3",
     "recharts": "^2.13.0",
     "remark-gfm": "^3.0.1",
-    "zustand": "^4.5.4"
+    "zustand": "^5.0.15"
   },
   "scripts": {
     "start": "PORT=3001 react-scripts start",

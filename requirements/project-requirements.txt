@@ -19,7 +19,7 @@ django-watchfiles==1.4.0
 django-ipware==7.0.1
 jsonschema==4.26.0
 # django rest framework libs
-Authlib==1.6.5
+Authlib==1.8.0
 djangorestframework==3.15.2
 djangorestframework-filters==1.0.0.dev2
 drf-spectacular==0.28.0

@@ -13,7 +13,7 @@ services:
     volumes:
       - generic_logs:/var/log/intel_owl
     depends_on:
-      - uwsgi
+      - gunicorn
 
   chromium-webdriver:
     # tagging convention for chrome webdriver

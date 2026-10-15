@@ -3,7 +3,7 @@ x-no-healthcheck: &no-healthcheck
     disable: true
 
 services:
-  uwsgi:
+  gunicorn:
     environment:
       - CELERY_QUEUES=default,local,long
 
@@ -22,7 +22,7 @@ services:
     env_file:
       - env_file_app
     depends_on:
-      uwsgi:
+      gunicorn:
         condition: service_healthy
     <<: *no-healthcheck
 
@@ -41,7 +41,7 @@ services:
     env_file:
       - env_file_app
     depends_on:
-      uwsgi:
+      gunicorn:
         condition: service_healthy
     <<: *no-healthcheck
 
@@ -60,6 +60,6 @@ services:
     env_file:
       - env_file_app
     depends_on:
-      uwsgi:
+      gunicorn:
         condition: service_healthy
     <<: *no-healthcheck

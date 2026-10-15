@@ -1,5 +1,5 @@
 services:
-  uwsgi:
+  gunicorn:
     environment:
       - BROKER_URL_API=http://guest:guest@rabbitmq:15672/api/
 
@@ -25,7 +25,7 @@ services:
       - "5555"
     depends_on:
       - rabbitmq
-      - uwsgi
+      - gunicorn
     entrypoint:
       - ./docker/entrypoints/flower.sh
     env_file:

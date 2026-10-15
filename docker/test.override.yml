@@ -1,5 +1,5 @@
 services:
-  uwsgi:
+  gunicorn:
     build:
       context: ..
       dockerfile: docker/Dockerfile

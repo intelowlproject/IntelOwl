@@ -177,6 +177,110 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
         ac.delete()
 
 
+class IngestorConfigQuerySetTestCase(CustomTestCase):
+    def test_annotate_configured_ingestor_visible_for_admin(self):
+        """
+        Regression test for #3956.
+        When an admin configures an ingestor's required parameters, the
+        PluginConfig entries are owned by ingestor.user (not the admin).
+        The configured annotation must still report all parameters as
+        satisfied when viewed from the admin's perspective.
+        """
+        schedule = CrontabSchedule.objects.create()
+        pm = PythonModule.objects.get(
+            base_path=PythonModuleBasePaths.Ingestor.value,
+            module="greedybear.GreedyBear",
+        )
+        ic = IngestorConfig.objects.create(
+            name="test_ingestor_configured",
+            python_module=pm,
+            description="test",
+            disabled=False,
+            schedule=schedule,
+        )
+        ic.playbooks_choice.add(PlaybookConfig.objects.first())
+
+        # Configure any existing required parameters on pm for ic.user
+        extra_pcs = []
+        for req_param in pm.parameters.filter(required=True):
+            extra_pcs.append(
+                PluginConfig.objects.create(
+                    value="dummy_required_value",
+                    for_organization=False,
+                    owner=ic.user,
+                    parameter=req_param,
+                    ingestor_config=ic,
+                )
+            )
+
+        param = Parameter.objects.create(
+            name="test_secret",
+            type="str",
+            description="test secret parameter",
+            is_secret=True,
+            required=True,
+            python_module=pm,
+        )
+
+        # Simulate what PluginConfigSerializer.validate does: owner is
+        # reassigned to ingestor.user, even when the admin creates the config.
+        pc = PluginConfig.objects.create(
+            value="my_secret_value",
+            for_organization=False,
+            owner=ic.user,
+            parameter=param,
+            ingestor_config=ic,
+        )
+
+        try:
+            # ParameterQuerySet: check that ingestor.user sees it as configured
+            self.assertTrue(Parameter.objects.annotate_configured(ic, ic.user).get(pk=param.pk).configured)
+
+            # ParameterQuerySet: the admin (superuser) cannot see it directly
+            # because visible_for_user filters by owner
+            self.assertFalse(
+                Parameter.objects.annotate_configured(ic, self.superuser).get(pk=param.pk).configured
+            )
+
+            # PythonConfigQuerySet: using ingestor.user (the fix path),
+            # the ingestor is correctly marked as configured
+            total_required = pm.parameters.filter(required=True).count()
+            ic_retrieved = (
+                IngestorConfig.objects.annotate_configured(ic.user)
+                .annotate(
+                    required_configured_params=F("required_configured_params"),
+                    required_params=F("required_params"),
+                )
+                .get(name="test_ingestor_configured")
+            )
+            self.assertTrue(ic_retrieved.configured)
+            self.assertEqual(total_required, ic_retrieved.required_params)
+            self.assertEqual(total_required, ic_retrieved.required_configured_params)
+
+            # Serializer representation (the fix for #3956):
+            # Even when requested by the superuser/admin, parameters for an
+            # IngestorConfig must be annotated from ingestor.user's perspective
+            from api_app.ingestors_manager.serializers import IngestorConfigSerializer
+            from api_app.serializers.plugin import PythonConfigListSerializer
+
+            data = PythonConfigListSerializer(
+                child=IngestorConfigSerializer()
+            ).to_representation_single_plugin(ic, self.superuser)
+            # Secret params are stored under data["secrets"][param_name]
+            self.assertIn("test_secret", data["secrets"])
+            self.assertEqual(data["secrets"]["test_secret"]["value"], "my_secret_value")
+            # The overall verification must report configured=True
+            self.assertTrue(data["verification"]["configured"])
+        finally:
+            # Cleanup
+            pc.delete()
+            for extra_pc in extra_pcs:
+                extra_pc.delete()
+            param.delete()
+            ic.delete()
+            schedule.delete()
+
+
 class ParameterQuerySetTestCase(CustomTestCase):
     def test_configured_for_user(self):
         ac = AnalyzerConfig.objects.first()

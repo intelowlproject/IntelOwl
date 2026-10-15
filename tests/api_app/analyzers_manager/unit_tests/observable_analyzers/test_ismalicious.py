@@ -111,61 +111,73 @@ class IsMaliciousContractTestCase(TestCase):
             },
         ]
         for report in reports:
-            with self.subTest(report=report):
-                with patch(
+            with (
+                self.subTest(report=report),
+                patch(
                     "api_app.analyzers_manager.observable_analyzers.ismalicious.requests.get",
                     return_value=self.make_response(report=report),
-                ):
-                    self.assertEqual(check_indicator("example.com", "synthetic-credential"), report)
+                ),
+            ):
+                self.assertEqual(check_indicator("example.com", "synthetic-credential"), report)
 
     def test_http_failures_are_explicit(self):
         for status_code in [401, 403, 429, 500, 503]:
-            with self.subTest(status_code=status_code):
-                with patch(
+            with (
+                self.subTest(status_code=status_code),
+                patch(
                     "api_app.analyzers_manager.observable_analyzers.ismalicious.requests.get",
                     return_value=self.make_response(status_code, {"error": "upstream failure"}),
-                ):
-                    with self.assertRaises(AnalyzerRunException):
-                        check_indicator("example.com", "synthetic-credential")
+                ),
+                self.assertRaises(AnalyzerRunException),
+            ):
+                check_indicator("example.com", "synthetic-credential")
 
     def test_redirects_are_explicit_failures(self):
         for status_code in [301, 302, 307, 308]:
-            with self.subTest(status_code=status_code):
-                with patch(
+            with (
+                self.subTest(status_code=status_code),
+                patch(
                     "api_app.analyzers_manager.observable_analyzers.ismalicious.requests.get",
                     return_value=self.make_response(status_code, SAMPLE_REPORT),
-                ) as mocked_get:
-                    with self.assertRaisesRegex(AnalyzerRunException, "redirect"):
-                        check_indicator("example.com", "synthetic-credential")
-                    self.assertFalse(mocked_get.call_args.kwargs["allow_redirects"])
+                ) as mocked_get,
+            ):
+                with self.assertRaisesRegex(AnalyzerRunException, "redirect"):
+                    check_indicator("example.com", "synthetic-credential")
+                self.assertFalse(mocked_get.call_args.kwargs["allow_redirects"])
 
     def test_network_failures_are_explicit(self):
         for error in [requests.Timeout("timed out"), requests.ConnectionError("connection failed")]:
-            with self.subTest(error=type(error).__name__):
-                with patch(
+            with (
+                self.subTest(error=type(error).__name__),
+                patch(
                     "api_app.analyzers_manager.observable_analyzers.ismalicious.requests.get",
                     side_effect=error,
-                ):
-                    with self.assertRaises(AnalyzerRunException):
-                        check_indicator("example.com", "synthetic-credential")
+                ),
+                self.assertRaises(AnalyzerRunException),
+            ):
+                check_indicator("example.com", "synthetic-credential")
 
     def test_invalid_json_is_an_explicit_failure(self):
-        with patch(
-            "api_app.analyzers_manager.observable_analyzers.ismalicious.requests.get",
-            return_value=self.make_response(content=b"not JSON"),
+        with (
+            patch(
+                "api_app.analyzers_manager.observable_analyzers.ismalicious.requests.get",
+                return_value=self.make_response(content=b"not JSON"),
+            ),
+            self.assertRaises(AnalyzerRunException),
         ):
-            with self.assertRaises(AnalyzerRunException):
-                check_indicator("example.com", "synthetic-credential")
+            check_indicator("example.com", "synthetic-credential")
 
     def test_invalid_response_shapes_are_explicit_failures(self):
         for report in [None, [], [SAMPLE_REPORT], "unexpected", 1, True, {}]:
-            with self.subTest(report=report):
-                with patch(
+            with (
+                self.subTest(report=report),
+                patch(
                     "api_app.analyzers_manager.observable_analyzers.ismalicious.requests.get",
                     return_value=self.make_response(report=report),
-                ):
-                    with self.assertRaisesRegex(AnalyzerRunException, "non-empty JSON object"):
-                        check_indicator("example.com", "synthetic-credential")
+                ),
+                self.assertRaisesRegex(AnalyzerRunException, "non-empty JSON object"),
+            ):
+                check_indicator("example.com", "synthetic-credential")
 
     def test_missing_input_is_rejected_before_network_io(self):
         for query, credential in [
@@ -173,23 +185,27 @@ class IsMaliciousContractTestCase(TestCase):
             ("   ", "synthetic-credential"),
             ("example.com", ""),
         ]:
-            with self.subTest(query=query, credential=credential):
-                with patch(
+            with (
+                self.subTest(query=query, credential=credential),
+                patch(
                     "api_app.analyzers_manager.observable_analyzers.ismalicious.requests.get"
-                ) as mocked_get:
-                    with self.assertRaises(ValueError):
-                        check_indicator(query, credential)
-                    mocked_get.assert_not_called()
+                ) as mocked_get,
+            ):
+                with self.assertRaises(ValueError):
+                    check_indicator(query, credential)
+                mocked_get.assert_not_called()
 
     def test_invalid_destination_is_rejected_before_network_io(self):
         for api_url in [*INVALID_API_URLS, None]:
-            with self.subTest(api_url=api_url):
-                with patch(
+            with (
+                self.subTest(api_url=api_url),
+                patch(
                     "api_app.analyzers_manager.observable_analyzers.ismalicious.requests.get"
-                ) as mocked_get:
-                    with self.assertRaisesRegex(AnalyzerRunException, "must target"):
-                        check_indicator("example.com", "synthetic-credential", api_url=api_url)
-                    mocked_get.assert_not_called()
+                ) as mocked_get,
+            ):
+                with self.assertRaisesRegex(AnalyzerRunException, "must target"):
+                    check_indicator("example.com", "synthetic-credential", api_url=api_url)
+                mocked_get.assert_not_called()
 
 
 @override_settings(STAGE_CI=True, MOCK_CONNECTIONS=True)

@@ -168,6 +168,7 @@ class ChangePasswordView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
+    throttle_classes = [POSTUserRateThrottle]
 
     @staticmethod
     def post(request: Request) -> Response:
@@ -184,12 +185,27 @@ class ChangePasswordView(APIView):
         old_password = request.data.get("old_password")
         new_password = request.data.get("new_password")
 
+        # Validate that old_password is provided
+        if not old_password:
+            return Response(
+                {"error": "Old password is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         # Validate new password strength
         if not new_password:
             return Response(
                 {"error": "New password is required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+        # Reject reuse of the same password
+        if old_password == new_password:
+            return Response(
+                {"error": "New password must be different from the old password."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         try:
             validate_password(new_password, user=request.user)
         except ValidationError as e:

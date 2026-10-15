@@ -39,11 +39,19 @@ def check_indicator(
                 "User-Agent": USER_AGENT,
             },
             timeout=timeout,
+            allow_redirects=False,
         )
         response.raise_for_status()
-        return response.json()
+        if 300 <= response.status_code < 400:
+            raise AnalyzerRunException("isMalicious returned a redirect; credentials were not forwarded")
+        report = response.json()
     except requests.RequestException as exc:
         raise AnalyzerRunException(exc) from exc
+    if not isinstance(report, dict) or not report:
+        raise AnalyzerRunException(
+            "isMalicious returned an invalid response: expected a non-empty JSON object"
+        )
+    return report
 
 
 class IsMalicious(ObservableAnalyzer):

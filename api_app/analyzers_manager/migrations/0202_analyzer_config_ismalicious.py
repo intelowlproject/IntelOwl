@@ -20,7 +20,7 @@ plugin = {
     "name": "IsMalicious",
     "description": "Enrich IPs, domains, and URLs with [isMalicious](https://ismalicious.com) "
     "threat intelligence: malicious flag, risk score, categories, and detection sources "
-    "via `GET /check`. Requires an API key from the isMalicious dashboard.",
+    "via `GET /check`. Requires Base64(apiKey:apiSecret) from the isMalicious dashboard.",
     "disabled": False,
     "soft_time_limit": 60,
     "routing_key": "default",
@@ -45,7 +45,7 @@ params = [
         },
         "name": "api_key_name",
         "type": "str",
-        "description": "isMalicious API credential (X-API-KEY). Dashboard → Account → Team Management.",
+        "description": "Base64(apiKey:apiSecret) for X-API-KEY. Create the key pair at https://ismalicious.com/app/account.",
         "is_secret": True,
         "required": True,
     },
@@ -148,7 +148,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0073_alter_updatecheckstatus_last_checked_at_and_more"),
-        ("analyzers_manager", "0200_analyzer_config_presend_addressrisk"),
+        ("analyzers_manager", "0201_remove_hudsonrock_parameters"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

@@ -56,13 +56,25 @@ params = [
         },
         "name": "url",
         "type": "str",
-        "description": "isMalicious API base URL",
+        "description": "isMalicious API base URL; must be https://api.ismalicious.com",
         "is_secret": False,
         "required": False,
     },
 ]
 
-values = []
+values = [
+    {
+        "parameter": params[1],
+        "for_organization": False,
+        "value": "https://api.ismalicious.com",
+        "owner": None,
+        "analyzer_config": "IsMalicious",
+        "connector_config": None,
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": None,
+    },
+]
 
 
 def _get_real_obj(Model, field, value):

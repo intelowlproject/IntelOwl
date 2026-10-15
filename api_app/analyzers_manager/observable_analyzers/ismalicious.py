@@ -28,6 +28,8 @@ def check_indicator(
         raise ValueError("query is required")
     if not api_key:
         raise ValueError("api_key is required")
+    if not isinstance(api_url, str) or api_url.rstrip("/") != DEFAULT_API_URL:
+        raise AnalyzerRunException("isMalicious requests must target https://api.ismalicious.com")
 
     try:
         response = requests.get(

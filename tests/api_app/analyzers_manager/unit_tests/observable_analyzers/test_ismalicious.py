@@ -2,10 +2,13 @@
 # See the file 'LICENSE' for copying permission.
 
 import json
+from types import SimpleNamespace
 from unittest import TestCase
 from unittest.mock import patch
 
 import requests
+from django.test import TestCase as DjangoTestCase
+from django.test import override_settings
 
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.models import AnalyzerConfig
@@ -15,6 +18,7 @@ from api_app.analyzers_manager.observable_analyzers.ismalicious import (
     IsMalicious,
     check_indicator,
 )
+from api_app.models import PluginConfig
 from tests.api_app.analyzers_manager.unit_tests.observable_analyzers.base_test_class import (
     BaseAnalyzerTest,
 )
@@ -30,6 +34,18 @@ SAMPLE_REPORT = {
     "sources": [{"name": "feed-a", "category": "c2"}],
     "reputation": {"malicious": 1, "suspicious": 0, "harmless": 0, "undetected": 0},
 }
+INVALID_API_URLS = [
+    "https://intelowl.com",
+    "https://attacker.example",
+    "http://api.ismalicious.com",
+    "https://api.ismalicious.com.attacker.example",
+    "https://api.ismalicious.com@attacker.example",
+    "https://attacker.example@api.ismalicious.com",
+    "https://api.ismalicious.com:444",
+    "https://api.ismalicious.com/other-path",
+    "https://api.ismalicious.com?redirect=attacker.example",
+    "https://api.ismalicious.com#fragment",
+]
 
 
 class IsMaliciousTestCase(BaseAnalyzerTest):
@@ -164,3 +180,72 @@ class IsMaliciousContractTestCase(TestCase):
                     with self.assertRaises(ValueError):
                         check_indicator(query, credential)
                     mocked_get.assert_not_called()
+
+    def test_invalid_destination_is_rejected_before_network_io(self):
+        for api_url in [*INVALID_API_URLS, None]:
+            with self.subTest(api_url=api_url):
+                with patch(
+                    "api_app.analyzers_manager.observable_analyzers.ismalicious.requests.get"
+                ) as mocked_get:
+                    with self.assertRaisesRegex(AnalyzerRunException, "must target"):
+                        check_indicator("example.com", "synthetic-credential", api_url=api_url)
+                    mocked_get.assert_not_called()
+
+
+@override_settings(STAGE_CI=True, MOCK_CONNECTIONS=True)
+class IsMaliciousConfigurationTestCase(DjangoTestCase):
+    @staticmethod
+    def configured_analyzer(runtime_configuration):
+        config = AnalyzerConfig.objects.get(name="IsMalicious")
+        analyzer = IsMalicious(config)
+        analyzer._job = SimpleNamespace(
+            user=None,
+            is_sample=False,
+            analyzable=SimpleNamespace(name="example.com", classification="domain"),
+        )
+        analyzer.config({"api_key_name": "synthetic-credential", **runtime_configuration})
+        return analyzer
+
+    def test_native_ci_configuration_resolves_official_default(self):
+        analyzer = self.configured_analyzer({})
+        self.assertEqual(analyzer.url, DEFAULT_API_URL)
+        default = PluginConfig.objects.get(
+            analyzer_config=analyzer._config,
+            parameter__name="url",
+            owner=None,
+            for_organization=False,
+        )
+        self.assertEqual(default.value, DEFAULT_API_URL)
+        self.assertFalse(default.parameter.is_secret)
+        with patch(
+            "api_app.analyzers_manager.observable_analyzers.ismalicious.requests.get",
+            return_value=MockUpResponse(SAMPLE_REPORT, 200),
+        ) as mocked_get:
+            self.assertEqual(analyzer.run(), SAMPLE_REPORT)
+            self.assertEqual(mocked_get.call_args.args[0], f"{DEFAULT_API_URL}/check")
+
+    def test_native_runtime_override_cannot_send_credentials_to_another_host(self):
+        for api_url in INVALID_API_URLS:
+            with self.subTest(api_url=api_url):
+                analyzer = self.configured_analyzer({"url": api_url})
+                self.assertEqual(analyzer.url, api_url)
+                with patch(
+                    "api_app.analyzers_manager.observable_analyzers.ismalicious.requests.get"
+                ) as mocked_get:
+                    with self.assertRaisesRegex(AnalyzerRunException, "must target"):
+                        analyzer.run()
+                    mocked_get.assert_not_called()
+
+    def test_missing_default_cannot_send_credentials_to_ci_placeholder(self):
+        PluginConfig.objects.filter(
+            analyzer_config__name="IsMalicious",
+            parameter__name="url",
+            owner=None,
+            for_organization=False,
+        ).delete()
+        analyzer = self.configured_analyzer({})
+        self.assertEqual(analyzer.url, "https://intelowl.com")
+        with patch("api_app.analyzers_manager.observable_analyzers.ismalicious.requests.get") as mocked_get:
+            with self.assertRaisesRegex(AnalyzerRunException, "must target"):
+                analyzer.run()
+            mocked_get.assert_not_called()

@@ -13,45 +13,74 @@ from api_app.choices import Classification
 
 class PhishStats(ObservableAnalyzer):
     """
-    Analyzer that uses PhishStats API to check if the observable is a phishing site.
+    Analyzer that uses PhishStats API to check if the observable
+    is a phishing site.
     """
 
-    url: str = "https://api.phishstats.info/api"
+    url: str = "https://api.phishstats.info/api/phishing"
 
     @classmethod
     def update(cls) -> bool:
-        pass
+        return True
 
-    # Gate on a real listing hit: the $malicious mapping constant would otherwise
-    # stamp MALICIOUS on every clean lookup.
+    # Mark the observable as malicious only when PhishStats returns
+    # an actual matching record.
     def _do_create_data_model(self) -> bool:
         return super()._do_create_data_model() and bool(self.report.report.get("results"))
 
-    def __build_phishstats_url(self) -> str:
-        to_analyze_observable_classification = self.observable_classification
-        to_analyze_observable_name = self.observable_name
-        if self.observable_classification == Classification.URL:
-            to_analyze_observable_name = urlparse(self.observable_name).hostname
-            try:
-                IPv4Address(to_analyze_observable_name)
-            except AddressValueError:
-                to_analyze_observable_classification = Classification.DOMAIN
-            else:
-                to_analyze_observable_classification = Classification.IP
+    def __build_phishstats_url(self) -> tuple[str, dict]:
+        observable_classification = self.observable_classification
+        observable_name = self.observable_name
 
-        if to_analyze_observable_classification == Classification.IP:
-            endpoint = f"phishing?_where=(ip,eq,{to_analyze_observable_name})&_sort=-date"
-        elif to_analyze_observable_classification == Classification.DOMAIN:
-            endpoint = f"phishing?_where=(url,like,~{to_analyze_observable_name}~)&_sort=-date"
-        elif to_analyze_observable_classification == Classification.GENERIC:
-            endpoint = f"phishing?_where=(title,like,~{to_analyze_observable_name}~)&_sort=-date"
+        if observable_classification == Classification.URL:
+            parsed_url = urlparse(observable_name)
+            observable_name = parsed_url.hostname
+
+            if not observable_name or not parsed_url.scheme:
+                raise AnalyzerRunException("Invalid URL observable")
+
+            try:
+                IPv4Address(observable_name)
+            except AddressValueError:
+                observable_classification = Classification.DOMAIN
+            else:
+                observable_classification = Classification.IP
+
+        if not observable_name:
+            raise AnalyzerRunException("Invalid PhishStats observable")
+
+        if observable_classification == Classification.IP:
+            where = f"(ip,eq,{observable_name})"
+
+        elif observable_classification == Classification.DOMAIN:
+            where = f"(url,like,~{observable_name}~)"
+
+        elif observable_classification == Classification.GENERIC:
+            where = f"(title,like,~{observable_name}~)"
+
         else:
-            raise AnalyzerRunException("Phishstats require either of IP, URL, Domain or Generic")
-        return f"{self.url}/{endpoint}"
+            raise AnalyzerRunException("PhishStats requires an IP, URL, Domain or Generic observable")
+
+        params = {
+            "_where": where,
+            "_sort": "-date",
+        }
+
+        return self.url, params
 
     def run(self):
-        api_url = self.__build_phishstats_url()
-        response = requests.get(api_url)
+        api_url, params = self.__build_phishstats_url()
+
+        response = requests.get(
+            api_url,
+            params=params,
+            timeout=30,
+        )
         response.raise_for_status()
 
-        return {"api_url": api_url, "results": response.json()}
+        results = response.json()
+
+        return {
+            "api_url": response.url,
+            "results": results,
+        }

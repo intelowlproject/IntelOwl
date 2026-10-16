@@ -17,6 +17,23 @@ DEFAULT_API_URL = "https://api.ismalicious.com"
 USER_AGENT = "ismalicious-intelowl/1.0.1 (+https://ismalicious.com)"
 
 
+def refusal_message(response: requests.Response) -> str:
+    """Preserve the API's quota or rate-limit explanation and next step."""
+    try:
+        body = response.json()
+    except ValueError:
+        body = None
+    if isinstance(body, dict):
+        message = body.get("message") or body.get("error")
+        if isinstance(message, str) and message:
+            cta = body.get("cta")
+            url = cta.get("url") if isinstance(cta, dict) else None
+            if isinstance(url, str) and url and url not in message:
+                return f"{message} {url}"
+            return message
+    return "Rate limit exceeded"
+
+
 def check_indicator(
     query: str,
     api_key: str,
@@ -43,6 +60,8 @@ def check_indicator(
             timeout=timeout,
             allow_redirects=False,
         )
+        if response.status_code == 429:
+            raise AnalyzerRunException(refusal_message(response))
         response.raise_for_status()
         if 300 <= response.status_code < 400:
             raise AnalyzerRunException("isMalicious returned a redirect; credentials were not forwarded")
@@ -70,3 +89,28 @@ class IsMalicious(ObservableAnalyzer):
             api_key=self._api_key_name,
             api_url=self.url,
         )
+
+    def _update_data_model(self, data_model) -> None:
+        """Keep provider evidence without deriving an IntelOwl trust evaluation.
+
+        isMalicious risk and confidence are separate scores. Neither supplies
+        an IntelOwl reliability value, and a non-hit does not establish trust.
+        The complete response remains available in the analyzer report.
+        """
+        super()._update_data_model(data_model)
+        report = self.report.report
+        data_model.additional_info = {
+            key: report[key]
+            for key in (
+                "enrichmentLevel",
+                "malicious",
+                "lookupStatus",
+                "confidence",
+                "riskScore",
+                "classification",
+                "sources",
+                "reputation",
+                "contradictions",
+            )
+            if key in report
+        }

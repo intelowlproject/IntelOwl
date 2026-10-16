@@ -2,23 +2,26 @@
 # See the file 'LICENSE' for copying permission.
 
 import json
+from copy import deepcopy
 from types import SimpleNamespace
 from unittest import TestCase
 from unittest.mock import patch
+from uuid import uuid4
 
 import requests
 from django.test import TestCase as DjangoTestCase
 from django.test import override_settings
 
+from api_app.analyzables_manager.models import Analyzable
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.analyzers_manager.observable_analyzers.ismalicious import (
     DEFAULT_API_URL,
     USER_AGENT,
     IsMalicious,
     check_indicator,
 )
-from api_app.models import PluginConfig
+from api_app.models import Job, PluginConfig
 from tests.api_app.analyzers_manager.unit_tests.observable_analyzers.base_test_class import (
     BaseAnalyzerTest,
 )
@@ -145,6 +148,41 @@ class IsMaliciousContractTestCase(TestCase):
                     check_indicator("example.com", "synthetic-credential")
                 self.assertFalse(mocked_get.call_args.kwargs["allow_redirects"])
 
+    def test_quota_refusal_preserves_the_api_message_and_next_step(self):
+        message = "Monthly request quota reached. Resets on 2026-11-01."
+        url = "https://ismalicious.com/pricing"
+        cases = [
+            ({"message": message, "cta": {"url": url}}, f"{message} {url}"),
+            ({"message": f"{message} {url}", "cta": {"url": url}}, f"{message} {url}"),
+            ({"error": "Payment on hold"}, "Payment on hold"),
+            ({"message": message, "cta": None}, message),
+            ({"message": message, "cta": {"url": 1}}, message),
+            ({}, "Rate limit exceeded"),
+            ({"message": {"unexpected": True}}, "Rate limit exceeded"),
+            ([], "Rate limit exceeded"),
+        ]
+        for report, expected in cases:
+            with (
+                self.subTest(report=report),
+                patch(
+                    "api_app.analyzers_manager.observable_analyzers.ismalicious.requests.get",
+                    return_value=self.make_response(429, report),
+                ),
+            ):
+                with self.assertRaises(AnalyzerRunException) as raised:
+                    check_indicator("example.com", "synthetic-credential")
+                self.assertEqual(str(raised.exception), expected)
+
+    def test_non_json_quota_refusal_remains_an_explicit_failure(self):
+        with (
+            patch(
+                "api_app.analyzers_manager.observable_analyzers.ismalicious.requests.get",
+                return_value=self.make_response(429, content=b"not JSON"),
+            ),
+            self.assertRaisesRegex(AnalyzerRunException, "Rate limit exceeded"),
+        ):
+            check_indicator("example.com", "synthetic-credential")
+
     def test_network_failures_are_explicit(self):
         for error in [requests.Timeout("timed out"), requests.ConnectionError("connection failed")]:
             with (
@@ -265,3 +303,77 @@ class IsMaliciousConfigurationTestCase(DjangoTestCase):
             with self.assertRaisesRegex(AnalyzerRunException, "must target"):
                 analyzer.run()
             mocked_get.assert_not_called()
+
+
+class IsMaliciousDataModelTestCase(DjangoTestCase):
+    def save_successful_report(self, classification, name, provider_report):
+        config = AnalyzerConfig.objects.get(name="IsMalicious")
+        observable, _ = Analyzable.objects.get_or_create(name=name, classification=classification)
+        job = Job.objects.create(
+            analyzable=observable,
+            status=Job.STATUSES.ANALYZERS_RUNNING.value,
+        )
+        report = AnalyzerReport.objects.create(
+            job=job,
+            config=config,
+            status=AnalyzerReport.STATUSES.RUNNING.value,
+            task_id=str(uuid4()),
+            parameters={},
+        )
+        analyzer = IsMalicious(config)
+        analyzer._job = job
+        analyzer.report = report
+        analyzer.after_run_success(deepcopy(provider_report))
+        report.refresh_from_db()
+        self.assertEqual(report.status, AnalyzerReport.STATUSES.SUCCESS.value)
+        self.assertEqual(report.report, provider_report)
+        self.assertEqual(job.errors, [])
+        self.assertIsNotNone(report.data_model)
+        report.data_model.refresh_from_db()
+        return report.data_model
+
+    def test_success_creates_evidence_data_models_for_all_supported_observables(self):
+        provider_report = {
+            **SAMPLE_REPORT,
+            "confidence": 35,
+            "contradictions": ["reviewed-delisting"],
+            "extraProviderField": {"kept": "in raw report"},
+        }
+        expected_evidence = {
+            key: value for key, value in provider_report.items() if key != "extraProviderField"
+        }
+        for classification, name in [
+            ("ip", "192.0.2.1"),
+            ("domain", "example.com"),
+            ("url", "https://example.com/path"),
+        ]:
+            with self.subTest(classification=classification):
+                data_model = self.save_successful_report(classification, name, provider_report)
+                self.assertEqual(data_model.additional_info, expected_evidence)
+                self.assertIsNone(data_model.evaluation)
+                self.assertEqual(data_model.reliability, 5)
+
+    def test_unknown_safe_and_false_values_never_become_a_trusted_evaluation(self):
+        reports = [
+            {
+                "malicious": False,
+                "lookupStatus": "unknown",
+                "riskScore": None,
+                "confidence": None,
+                "sources": [],
+            },
+            {
+                "malicious": False,
+                "lookupStatus": "safe",
+                "riskScore": {"score": 0, "level": "low"},
+                "confidence": 0,
+                "sources": [],
+                "contradictions": [],
+            },
+        ]
+        for provider_report in reports:
+            with self.subTest(lookup_status=provider_report["lookupStatus"]):
+                data_model = self.save_successful_report("domain", "example.com", provider_report)
+                self.assertEqual(data_model.additional_info, provider_report)
+                self.assertIsNone(data_model.evaluation)
+                self.assertEqual(data_model.reliability, 5)

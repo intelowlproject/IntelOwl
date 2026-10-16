@@ -1,4 +1,3 @@
-
 from unittest.mock import MagicMock, patch
 
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
@@ -48,9 +47,7 @@ class PhishStatsTestCase(BaseAnalyzerTest):
         mock_get.return_value.url = "https://api.phishstats.info/api/phishing"
         mock_get.return_value.json.return_value = []
 
-        analyzer = self._make_analyzer(
-            Classification.URL, "https://example.com/login"
-        )
+        analyzer = self._make_analyzer(Classification.URL, "https://example.com/login")
         result = analyzer.run()
 
         mock_get.assert_called_once_with(
@@ -69,9 +66,7 @@ class PhishStatsTestCase(BaseAnalyzerTest):
         mock_get.return_value.url = "https://api.phishstats.info/api/phishing"
         mock_get.return_value.json.return_value = []
 
-        analyzer = self._make_analyzer(
-            Classification.URL, "https://8.8.8.8/login"
-        )
+        analyzer = self._make_analyzer(Classification.URL, "https://8.8.8.8/login")
         analyzer.run()
 
         self.assertEqual(

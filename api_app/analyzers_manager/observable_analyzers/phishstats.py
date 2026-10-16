@@ -1,4 +1,3 @@
-
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
@@ -27,10 +26,7 @@ class PhishStats(ObservableAnalyzer):
     # Mark the observable as malicious only when PhishStats returns
     # an actual matching record.
     def _do_create_data_model(self) -> bool:
-        return (
-            super()._do_create_data_model()
-            and bool(self.report.report.get("results"))
-        )
+        return super()._do_create_data_model() and bool(self.report.report.get("results"))
 
     def __build_phishstats_url(self) -> tuple[str, dict]:
         observable_classification = self.observable_classification
@@ -63,9 +59,7 @@ class PhishStats(ObservableAnalyzer):
             where = f"(title,like,~{observable_name}~)"
 
         else:
-            raise AnalyzerRunException(
-                "PhishStats requires an IP, URL, Domain or Generic observable"
-            )
+            raise AnalyzerRunException("PhishStats requires an IP, URL, Domain or Generic observable")
 
         params = {
             "_where": where,

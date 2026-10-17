@@ -3,6 +3,8 @@
 import datetime
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.http import QueryDict
 from django.utils.timezone import now
 from rest_framework.exceptions import ValidationError
 
@@ -18,6 +20,8 @@ from api_app.serializers.job import (
     FileJobSerializer,
     JobRecentScanSerializer,
     JobResponseSerializer,
+    MultipleFileJobSerializer,
+    MultipleObservableJobSerializer,
     ObservableAnalysisSerializer,
     RestJobSerializer,
     _AbstractJobCreateSerializer,
@@ -758,3 +762,96 @@ class AbstractListConfigSerializerTestCase(CustomTestCase):
         self.assertEqual("test", result["verification"]["missing_secrets"][0])
         param.delete()
         ac.delete()
+
+
+class MultipleJobSerializerTestCase(CustomTestCase):
+    def setUp(self) -> None:
+        self.f1 = SimpleUploadedFile("sample1.txt", b"content1", content_type="text/plain")
+        self.f2 = SimpleUploadedFile("sample2.txt", b"content2", content_type="text/plain")
+        self.f3 = SimpleUploadedFile("sample3.txt", b"content3", content_type="text/plain")
+
+    def test_multiple_file_job_serializer_string_delay(self):
+        data = QueryDict(mutable=True)
+        data.setlist("files", [self.f1, self.f2, self.f3])
+        data.setlist("analyzers_requested", ["File_Info"])
+        data.setlist("connectors_requested", [])
+        data["tlp"] = "CLEAR"
+        data["delay"] = "5"
+        serializer = MultipleFileJobSerializer(
+            child=FileJobSerializer(context={"request": MockUpRequest(self.user)}),
+            context={"request": MockUpRequest(self.user)},
+        )
+        validated = serializer.to_internal_value(data)
+        self.assertEqual(len(validated), 3)
+        self.assertEqual(validated[0]["delay"], 0)
+        self.assertEqual(validated[1]["delay"], 5)
+        self.assertEqual(validated[2]["delay"], 10)
+
+    def test_multiple_file_job_serializer_file_mimetypes_getlist(self):
+        data = QueryDict(mutable=True)
+        data.setlist("files", [self.f1, self.f2])
+        data.setlist("file_mimetypes", ["text/plain", "application/octet-stream"])
+        data.setlist("analyzers_requested", ["File_Info"])
+        data.setlist("connectors_requested", [])
+        data["tlp"] = "CLEAR"
+        serializer = MultipleFileJobSerializer(
+            child=FileJobSerializer(context={"request": MockUpRequest(self.user)}),
+            context={"request": MockUpRequest(self.user)},
+        )
+        validated = serializer.to_internal_value(data)
+        self.assertEqual(len(validated), 2)
+        self.assertEqual(validated[0]["file_mimetype"], "text/plain")
+        self.assertEqual(validated[1]["file_mimetype"], "application/octet-stream")
+
+    def test_multiple_file_job_serializer_file_mimetypes_length_mismatch(self):
+        data = QueryDict(mutable=True)
+        data.setlist("files", [self.f1, self.f2])
+        data.setlist("file_mimetypes", ["text/plain"])
+        serializer = MultipleFileJobSerializer(
+            child=FileJobSerializer(context={"request": MockUpRequest(self.user)}),
+            context={"request": MockUpRequest(self.user)},
+        )
+        with self.assertRaises(ValidationError) as exc:
+            serializer.to_internal_value(data)
+        self.assertIn("file_mimetypes and files must have the same length.", str(exc.exception.detail))
+
+    def test_multiple_observable_job_serializer_delay_string(self):
+        a = AnalyzerConfig.objects.get(name="Tranco")
+        a.type = "observable"
+        a.disabled = False
+        a.observable_supported = ["domain"]
+        a.save()
+        data = {
+            "observables": [
+                ["domain", "example1.com"],
+                ["domain", "example2.com"],
+                ["domain", "example3.com"],
+            ],
+            "analyzers_requested": ["Tranco"],
+            "connectors_requested": [],
+            "delay": "15",
+            "tlp": "CLEAR",
+        }
+        serializer = MultipleObservableJobSerializer(
+            child=ObservableAnalysisSerializer(context={"request": MockUpRequest(self.user)}),
+            context={"request": MockUpRequest(self.user)},
+        )
+        validated = serializer.to_internal_value(data)
+        self.assertEqual(len(validated), 3)
+        self.assertEqual(validated[0]["delay"], 0)
+        self.assertEqual(validated[1]["delay"], 15)
+        self.assertEqual(validated[2]["delay"], 30)
+
+    def test_file_job_serializer_preserves_provided_mimetype(self):
+        file_analyzer = AnalyzerConfig.objects.get(name="File_Info")
+        fas = FileJobSerializer(data={}, context={"request": MockUpRequest(self.user)})
+        attrs = {
+            "file": self.f1,
+            "file_name": "sample1.txt",
+            "file_mimetype": "application/x-custom-mimetype",
+            "analyzers_requested": [file_analyzer],
+            "connectors_requested": [],
+            "tlp": "CLEAR",
+        }
+        validated = fas.validate(attrs)
+        self.assertEqual(validated["file_mimetype"], "application/x-custom-mimetype")

@@ -7,9 +7,9 @@ from django.test import TestCase
 
 from api_app.analyzables_manager.models import Analyzable
 from api_app.chatbot_manager.agent.tools import build_tools
-from api_app.choices import Classification
+from api_app.choices import TLP, Classification
 from api_app.investigations_manager.models import Investigation
-from api_app.models import Job
+from api_app.models import Job, Tag
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.user.models import User
@@ -168,3 +168,16 @@ class InvestigationToolsTestCase(TestCase):
         data = json.loads(self.summarize_investigation.invoke({"investigation_id": self.inv_private.pk}))
         self.assertIsNone(data["summary"])
         self.assertTrue(data["errors"])
+
+    def test_summarize_investigation_reflects_descendant_tlp_and_tags(self):
+        # Update descendant child1 with higher TLP and a new tag
+        self.child1.tlp = TLP.RED.value
+        self.child1.save()
+        tag, _ = Tag.objects.get_or_create(label="apt29", defaults={"color": "#ff0000"})
+        self.child1.tags.add(tag)
+
+        data = json.loads(self.summarize_investigation.invoke({"investigation_id": self.inv_created.pk}))
+        self.assertEqual(data["errors"], [])
+        summary = data["summary"]
+        self.assertIn("TLP        : RED", summary)
+        self.assertIn("Tags       : apt29", summary)

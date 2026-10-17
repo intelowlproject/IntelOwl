@@ -1,3 +1,5 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
 import datetime
 import logging
 from typing import List
@@ -112,14 +114,25 @@ class Investigation(OwnershipAbstractModel, ListCachable):
 
     @property
     def tags(self) -> List[str]:
-        return list(set(self.jobs.values_list("tags__label", flat=True)))
+        if not self.jobs.exists():
+            return []
+        tags_set = set(self.jobs.values_list("tags__label", flat=True))
+        for root in self.jobs.all():
+            if root.get_descendant_count() > 0:
+                tags_set.update(root.get_descendants().values_list("tags__label", flat=True))
+        return [label for label in tags_set if label]
 
     @property
     def tlp(self) -> TLP:
-        return (
-            max(TLP[tlp_string] for tlp_string in self.jobs.values_list("tlp", flat=True))
-            if self.jobs.exists()
-            else TLP.CLEAR.value
+        if not self.jobs.exists():
+            return TLP.CLEAR
+        tlp_strings = set(self.jobs.values_list("tlp", flat=True))
+        for root in self.jobs.all():
+            if root.get_descendant_count() > 0:
+                tlp_strings.update(root.get_descendants().values_list("tlp", flat=True))
+        return max(
+            (TLP(t) for t in tlp_strings if t and t in TLP.values),
+            default=TLP.CLEAR,
         )
 
     @property

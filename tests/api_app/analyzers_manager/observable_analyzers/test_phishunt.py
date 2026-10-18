@@ -120,6 +120,12 @@ class PhishuntTestCase(CustomTestCase):
         self.assertEqual(len(result["results"]), 1)
         self.assertEqual(result["results"][0]["ip"], "1.2.3.4")
 
+        mock_get.assert_called_once_with(
+            Phishunt.url,
+            params={"ip": "1.2.3.4"},
+            timeout=30,
+        )
+
     @patch("api_app.analyzers_manager.observable_analyzers.phishunt.requests.get")
     def test_substring_match_is_ignored(self, mock_get):
         mock_get.return_value = self._ok(

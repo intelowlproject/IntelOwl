@@ -42,6 +42,7 @@ export const investigationTableColumns = [
       </div>
     ),
     Filter: DefaultColumnFilter,
+    filterPlaceholder: "Search ID",
   },
   {
     Header: "Created",

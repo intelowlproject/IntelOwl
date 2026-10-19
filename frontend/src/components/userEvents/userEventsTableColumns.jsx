@@ -24,6 +24,7 @@ export const userEventsTableStartColumns = [
       </div>
     ),
     Filter: DefaultColumnFilter,
+    filterPlaceholder: "Search ID",
   },
   {
     Header: "Date",

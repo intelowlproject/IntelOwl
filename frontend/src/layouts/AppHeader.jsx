@@ -12,7 +12,7 @@ import {
 } from "reactstrap";
 import { NavLink as RRNavLink, useLocation } from "react-router-dom";
 import { AiOutlineDashboard } from "react-icons/ai";
-import { MdShare } from "react-icons/md";
+import { MdShare, MdCompareArrows } from "react-icons/md";
 import {
   RiPlugFill,
   RiBookReadFill,
@@ -93,6 +93,12 @@ function AuthLinks() {
         <RRNavLink className="d-flex-start-center nav-link" to="/history">
           <TbReport />
           <span className="ms-1">History</span>
+        </RRNavLink>
+      </NavItem>
+      <NavItem>
+        <RRNavLink className="d-flex-start-center nav-link" to="/jobs/compare">
+          <MdCompareArrows />
+          <span className="ms-1">Compare</span>
         </RRNavLink>
       </NavItem>
       <NavItem>

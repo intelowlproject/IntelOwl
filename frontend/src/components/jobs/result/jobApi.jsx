@@ -3,7 +3,7 @@ import axios from "axios";
 
 import { addToast } from "@certego/certego-ui";
 
-import { JOB_BASE_URI } from "../../../constants/apiURLs";
+import { JOB_BASE_URI, JOB_COMPARE_URI } from "../../../constants/apiURLs";
 import { areYouSureConfirmDialog } from "../../common/areYouSureConfirmDialog";
 
 export async function downloadJobSample(jobId) {
@@ -150,4 +150,11 @@ export async function retryPlugin(jobId, plugin) {
     );
   }
   return success;
+}
+
+export async function fetchJobComparison(jobAId, jobBId) {
+  const response = await axios.get(JOB_COMPARE_URI, {
+    params: { id1: jobAId, id2: jobBId, job_a: jobAId, job_b: jobBId },
+  });
+  return response.data;
 }

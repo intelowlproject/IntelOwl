@@ -16,6 +16,7 @@ const ResetPassword = React.lazy(() => import("./auth/ResetPassword"));
 const Organization = React.lazy(() => import("./organization/Organization"));
 const TokenPage = React.lazy(() => import("./user/token/TokenPage"));
 const JobResult = React.lazy(() => import("./jobs/result/JobResult"));
+const JobCompare = React.lazy(() => import("./jobs/compare/JobCompare"));
 const CommentResult = React.lazy(
   () => import("./jobs/result/bar/comment/CommentResult"),
 );
@@ -152,6 +153,14 @@ const authRoutesLazy = [
     ),
   },
   /* Jobs */
+  {
+    path: "/jobs/compare",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <JobCompare />
+      </Suspense>
+    ),
+  },
   // this is needed for retrocompatibility
   {
     path: `/jobs/:id`,

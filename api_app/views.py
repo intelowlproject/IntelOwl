@@ -77,6 +77,7 @@ from .serializers.plugin import (
     PluginConfigSerializer,
     PythonConfigSerializer,
 )
+from .services.job_compare import compare_jobs
 
 logger = logging.getLogger(__name__)
 
@@ -333,6 +334,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     - **destroy**: Delete a job by ID, allowed only for the job owner or anyone in the same organization.
     - **recent_scans**: Retrieve recent jobs based on an MD5 hash, limited by a maximum temporal distance.
     - **recent_scans_user**: Retrieve recent jobs for the authenticated user, filtered by sample status.
+    - **compare**: Compare two jobs side by side.
     - **retry**: Retry a job if its status is in a final state.
     - **kill**: Kill a running job by closing celery tasks and marking it as killed.
     - **download_sample**: Download a file/sample associated with a job.
@@ -443,6 +445,44 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             :limit
         ]
         return Response(JobRecentScanSerializer(jobs, many=True).data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["get"])
+    def compare(self, request):
+        """
+        Compare two jobs side by side.
+
+        Parameters:
+        - job_a: ID of the first job.
+        - job_b: ID of the second job.
+        """
+        job_a_id = request.query_params.get("id1") or request.query_params.get("job_a")
+        job_b_id = request.query_params.get("id2") or request.query_params.get("job_b")
+
+        if not job_a_id or not job_b_id:
+            raise ValidationError({"detail": "Both job IDs (id1/job_a and id2/job_b) are required."})
+
+        try:
+            job_a_id = int(job_a_id)
+            job_b_id = int(job_b_id)
+        except (ValueError, TypeError):
+            raise ValidationError({"detail": "Job IDs must be valid integers."})
+
+        if job_a_id == job_b_id:
+            raise ValidationError({"detail": "Cannot compare a job with itself."})
+
+        visible_jobs = self.get_queryset()
+        try:
+            job_a = visible_jobs.get(pk=job_a_id)
+        except Job.DoesNotExist:
+            raise NotFound({"detail": f"Job with id {job_a_id} not found."})
+
+        try:
+            job_b = visible_jobs.get(pk=job_b_id)
+        except Job.DoesNotExist:
+            raise NotFound({"detail": f"Job with id {job_b_id} not found."})
+
+        comparison_data = compare_jobs(job_a, job_b)
+        return Response(comparison_data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["patch"])
     def retry(self, request, pk=None):

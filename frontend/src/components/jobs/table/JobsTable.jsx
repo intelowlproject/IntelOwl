@@ -1,7 +1,8 @@
 /* eslint-disable react/prop-types */
 import React from "react";
 import { Container, Row, Col, UncontrolledTooltip } from "reactstrap";
-import { MdInfoOutline } from "react-icons/md";
+import { MdInfoOutline, MdCompareArrows } from "react-icons/md";
+import { Link } from "react-router-dom";
 
 import { fromZonedTime } from "date-fns-tz";
 import {
@@ -13,28 +14,52 @@ import {
 } from "@certego/certego-ui";
 
 import useTitle from "react-use/lib/useTitle";
-import { jobTableColumns } from "./jobTableColumns";
+import { getJobTableColumns } from "./jobTableColumns";
 import { JOB_BASE_URI } from "../../../constants/apiURLs";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { localTimezone } from "../../../constants/miscConst";
 import { TimePicker } from "../../common/TimePicker";
 
 // constants
-const toPassTableProps = {
-  columns: jobTableColumns,
-  tableEmptyNode: (
-    <>
-      <h4>No Data</h4>
-      <small className="text-muted">Note: Try changing time filter.</small>
-    </>
-  ),
-};
+const defaultTableEmptyNode = (
+  <>
+    <h4>No Data</h4>
+    <small className="text-muted">Note: Try changing time filter.</small>
+  </>
+);
 
 export default function JobsTable({ searchFromDateValue, searchToDateValue }) {
   useTitle("IntelOwl | Jobs History", { restoreOnUnmount: true });
 
   const [playbooksLoading, playbooksError] = usePluginConfigurationStore(
     (state) => [state.playbooksLoading, state.playbooksError],
+  );
+
+  const [selectedJobIds, setSelectedJobIds] = React.useState([]);
+
+  const toggleSelectJob = React.useCallback((jobId) => {
+    setSelectedJobIds((previousIds) => {
+      if (previousIds.includes(jobId)) {
+        return previousIds.filter((item) => item !== jobId);
+      }
+      if (previousIds.length >= 2) {
+        return [previousIds[1], jobId];
+      }
+      return [...previousIds, jobId];
+    });
+  }, []);
+
+  const columns = React.useMemo(
+    () => getJobTableColumns(selectedJobIds, toggleSelectJob),
+    [selectedJobIds, toggleSelectJob],
+  );
+
+  const toPassTableProps = React.useMemo(
+    () => ({
+      columns,
+      tableEmptyNode: defaultTableEmptyNode,
+    }),
+    [columns],
   );
 
   const [
@@ -94,6 +119,58 @@ export default function JobsTable({ searchFromDateValue, searchToDateValue }) {
     onChangeFilter,
   );
 
+  const renderCompareAction = () => {
+    if (selectedJobIds.length === 2) {
+      return (
+        <>
+          <Link
+            to={`/jobs/compare?id1=${selectedJobIds[0]}&id2=${selectedJobIds[1]}`}
+            className="btn btn-sm btn-info d-flex align-items-center fw-bold"
+            id="jobs-table-compare-selected-btn"
+          >
+            <MdCompareArrows className="me-1" size={16} />
+            Compare #{selectedJobIds[0]} vs #{selectedJobIds[1]}
+          </Link>
+          <button
+            type="button"
+            onClick={() => setSelectedJobIds([])}
+            className="btn btn-sm btn-outline-secondary py-1 px-2"
+          >
+            Clear
+          </button>
+        </>
+      );
+    }
+
+    if (selectedJobIds.length === 1) {
+      return (
+        <>
+          <span className="text-light small">
+            Selected #{selectedJobIds[0]} (pick 1 more to compare)
+          </span>
+          <button
+            type="button"
+            onClick={() => setSelectedJobIds([])}
+            className="btn btn-sm btn-outline-secondary py-0 px-2"
+          >
+            Clear
+          </button>
+        </>
+      );
+    }
+
+    return (
+      <Link
+        to="/jobs/compare"
+        className="btn btn-sm btn-outline-info d-flex align-items-center"
+        id="jobs-table-compare-btn"
+      >
+        <MdCompareArrows className="me-1" size={16} />
+        Compare Jobs
+      </Link>
+    );
+  };
+
   return (
     // this loader is required to correctly get the name of the playbook executed
     <Loader
@@ -135,9 +212,14 @@ export default function JobsTable({ searchFromDateValue, searchToDateValue }) {
             </Col>
           </Row>
           {/* Actions */}
-          <div className="px-3 bg-dark d-flex justify-content-end align-items-center">
-            <TableHintIcon />
-            <SyncButton onClick={refetch} className="ms-auto m-0 py-1" />
+          <div className="px-3 bg-dark d-flex justify-content-between align-items-center">
+            <div className="d-flex align-items-center gap-2 my-1">
+              {renderCompareAction()}
+            </div>
+            <div className="d-flex align-items-center">
+              <TableHintIcon />
+              <SyncButton onClick={refetch} className="ms-auto m-0 py-1" />
+            </div>
           </div>
           <div style={{ height: "80vh", overflowY: "scroll" }}>
             {/* Table */}

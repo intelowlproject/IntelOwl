@@ -99,6 +99,7 @@ class JobViewSetTests(CustomViewSetTestCase):
     agg_top_playbook = reverse("jobs-aggregate-top-playbook")
     agg_top_user = reverse("jobs-aggregate-top-user")
     agg_top_tlp = reverse("jobs-aggregate-top-tlp")
+    jobs_compare_uri = reverse("jobs-compare")
 
     def setUp(self):
         super().setUp()
@@ -229,6 +230,40 @@ class JobViewSetTests(CustomViewSetTestCase):
 
         j1.delete()
         j2.delete()
+
+    def test_compare_missing_params(self):
+        response = self.client.get(self.jobs_compare_uri)
+        self.assertEqual(400, response.status_code)
+
+    def test_compare_invalid_ids(self):
+        response = self.client.get(self.jobs_compare_uri, {"job_a": "abc", "job_b": "xyz"})
+        self.assertEqual(400, response.status_code)
+
+    def test_compare_same_job(self):
+        response = self.client.get(self.jobs_compare_uri, {"job_a": self.job.pk, "job_b": self.job.pk})
+        self.assertEqual(400, response.status_code)
+
+    def test_compare_not_found(self):
+        response = self.client.get(self.jobs_compare_uri, {"job_a": self.job.pk, "job_b": 999999})
+        self.assertEqual(404, response.status_code)
+
+    def test_compare_success(self):
+        response = self.client.get(self.jobs_compare_uri, {"job_a": self.job.pk, "job_b": self.job2.pk})
+        self.assertEqual(200, response.status_code)
+        data = response.json()
+        self.assertIn("job_a", data)
+        self.assertIn("job_b", data)
+        self.assertIn("summary", data)
+        self.assertIn("analyzers", data)
+        self.assertEqual(data["job_a"]["id"], self.job.pk)
+        self.assertEqual(data["job_b"]["id"], self.job2.pk)
+
+    def test_compare_success_id1_id2(self):
+        response = self.client.get(self.jobs_compare_uri, {"id1": self.job.pk, "id2": self.job2.pk})
+        self.assertEqual(200, response.status_code)
+        data = response.json()
+        self.assertEqual(data["job_a"]["id"], self.job.pk)
+        self.assertEqual(data["job_b"]["id"], self.job2.pk)
 
     def test_list_200(self):
         response = self.client.get(self.jobs_list_uri)

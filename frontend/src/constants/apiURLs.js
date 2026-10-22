@@ -31,6 +31,7 @@ export const JOB_AGG_TOP_TLP_URI = `${JOB_BASE_URI}${AGGREGATE_PATH}/top_tlp`;
 
 export const JOB_RECENT_SCANS = `${JOB_BASE_URI}/recent_scans`;
 export const JOB_RECENT_SCANS_USER = `${JOB_BASE_URI}/recent_scans_user`;
+export const JOB_COMPARE_URI = `${JOB_BASE_URI}/compare`;
 
 export const PLUGIN_REPORT_QUERIES = `${API_BASE_URI}/plugin_report_queries`;
 

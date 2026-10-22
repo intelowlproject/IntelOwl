@@ -25,6 +25,30 @@ import { PlaybookInfoPopoverIcon } from "./playbookJobInfo";
 import { processTimeMMSS } from "../../../utils/time";
 import TableCell from "../../common/TableCell";
 
+export const getJobTableColumns = (
+  selectedJobIds = [],
+  toggleSelectJob = () => {},
+) => [
+  {
+    Header: () => "Compare",
+    id: "compare_select",
+    maxWidth: 55,
+    disableSortBy: true,
+    Cell: ({ row: { original: job } }) => (
+      <div className="d-flex justify-content-center">
+        <input
+          type="checkbox"
+          className="form-check-input cursor-pointer"
+          checked={Boolean(selectedJobIds.includes(job.id))}
+          onChange={() => toggleSelectJob(job.id)}
+          title="Select job for comparison"
+        />
+      </div>
+    ),
+  },
+  ...jobTableColumns,
+];
+
 export const jobTableColumns = [
   {
     Header: () => "ID", // No header
@@ -45,6 +69,15 @@ export const jobTableColumns = [
         <UncontrolledTooltip target={`job-${id}`} placement="top" fade={false}>
           View Job Report
         </UncontrolledTooltip>
+        <a
+          href={`/jobs/compare?job_a=${id}`}
+          target="_blank"
+          rel="noreferrer"
+          className="text-muted small text-decoration-none"
+          title="Compare this job"
+        >
+          Compare
+        </a>
       </div>
     ),
     Filter: DefaultColumnFilter,

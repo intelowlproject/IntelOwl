@@ -11,7 +11,12 @@ import { useNavigate } from "react-router-dom";
 import { TiThMenu } from "react-icons/ti";
 import { IoMdSave } from "react-icons/io";
 import { IconButton, addToast } from "@certego/certego-ui";
-import { MdDelete, MdOutlineRefresh, MdFileDownload } from "react-icons/md";
+import {
+  MdDelete,
+  MdOutlineRefresh,
+  MdFileDownload,
+  MdCompareArrows,
+} from "react-icons/md";
 import { FaFileDownload } from "react-icons/fa";
 
 import { downloadJobSample, deleteJob, rescanJob } from "../jobApi";
@@ -100,6 +105,16 @@ export function JobActionsBar({ job, relatedInvestigationNumber }) {
           </Badge>
         )}
       </div>
+      <IconButton
+        id="comparebtn"
+        Icon={MdCompareArrows}
+        size="sm"
+        color="gray"
+        className="me-1 text-light"
+        title="Compare with another job"
+        titlePlacement="top"
+        onClick={() => navigate(`/jobs/compare?id1=${job.id}`)}
+      />
       <UncontrolledDropdown inNavbar>
         <DropdownToggle nav className="text-center">
           <IconButton
@@ -116,6 +131,13 @@ export function JobActionsBar({ job, relatedInvestigationNumber }) {
             name={job.is_sample ? job.file_name : job.observable_name}
             relatedInvestigationNumber={relatedInvestigationNumber}
           />
+          <DropdownItem
+            onClick={() => navigate(`/jobs/compare?id1=${job.id}`)}
+            className="d-flex align-items-center text-light"
+          >
+            <MdCompareArrows className="me-1 text-info" />
+            Compare
+          </DropdownItem>
           <DropdownItem divider />
           <DropdownItem
             onClick={onDownloadReport}

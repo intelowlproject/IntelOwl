@@ -85,6 +85,111 @@ class PluginConfigSerializerTestCase(CustomTestCase):
         org.delete()
         pc.delete()
 
+    def test_to_representation_secret_for_organization(self):
+        org = Organization.objects.create(name="test_org")
+        other_org = Organization.objects.create(name="other_org")
+        owner = User.objects.create_user(
+            username="config_owner",
+            email="config_owner@intelowl.com",
+            password="test",
+        )
+        Membership.objects.create(user=owner, organization=org, is_owner=True)
+        Membership.objects.create(user=self.admin, organization=org, is_owner=False, is_admin=True)
+        Membership.objects.create(user=self.user, organization=org, is_owner=False, is_admin=False)
+        Membership.objects.create(user=self.guest, organization=other_org, is_owner=True)
+        ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
+        param = Parameter.objects.create(
+            is_secret=True,
+            name="mynewparameter",
+            python_module=ac.python_module,
+            required=True,
+            type="str",
+        )
+        pc = PluginConfig.objects.create(
+            value="supersecret",
+            owner=owner,
+            parameter=param,
+            analyzer_config=ac,
+            for_organization=True,
+        )
+
+        def get_value(user):
+            return PluginConfigSerializer(pc, context={"request": MockUpRequest(user=user)}).data["value"]
+
+        # the owner and an admin of the owner's organization can read the value
+        self.assertEqual(get_value(owner), "supersecret")
+        self.assertEqual(get_value(self.admin), "supersecret")
+        # other members of the organization and users of other organizations cannot
+        self.assertEqual(get_value(self.user), "redacted")
+        self.assertEqual(get_value(self.guest), "redacted")
+
+        # an owner whose membership was removed after the config was created
+        # (org deleted / member removed) - the realistic way this state occurs
+        orphan_owner = User.objects.create_user(
+            username="orphan_owner",
+            email="orphan_owner@intelowl.com",
+            password="test",
+        )
+        Membership.objects.create(
+            user=orphan_owner,
+            organization=Organization.objects.create(name="orphan_org"),
+            is_owner=True,
+        )
+        pc_no_membership = PluginConfig.objects.create(
+            value="supersecret",
+            owner=orphan_owner,
+            parameter=param,
+            analyzer_config=ac,
+            for_organization=True,
+        )
+        orphan_owner.membership.delete()
+        self.assertEqual(
+            PluginConfigSerializer(
+                pc_no_membership,
+                context={"request": MockUpRequest(user=self.admin)},
+            ).data["value"],
+            "redacted",
+        )
+        # the owner can still read their own value
+        self.assertEqual(
+            PluginConfigSerializer(
+                pc_no_membership,
+                context={"request": MockUpRequest(user=orphan_owner)},
+            ).data["value"],
+            "supersecret",
+        )
+
+        # an owner-less org configuration can only arise through bulk writes
+        # (bulk_create bypasses save/clean) - serializing it must not raise
+        pc_no_owner = PluginConfig.objects.bulk_create(
+            [
+                PluginConfig(
+                    value="supersecret",
+                    owner=None,
+                    parameter=param,
+                    analyzer_config=ac,
+                    for_organization=True,
+                )
+            ]
+        )[0]
+        self.assertEqual(
+            PluginConfigSerializer(
+                pc_no_owner,
+                context={"request": MockUpRequest(user=self.admin)},
+            ).data["value"],
+            "redacted",
+        )
+
+        # missing request or request user also results in a redacted value
+        self.assertEqual(PluginConfigSerializer(pc_no_owner).data["value"], "redacted")
+        self.assertEqual(
+            PluginConfigSerializer(
+                pc_no_owner,
+                context={"request": MockUpRequest(user=None)},
+            ).data["value"],
+            "redacted",
+        )
+
     def test_create(self):
         org = Organization.objects.create(name="test_org")
         m1 = Membership.objects.create(user=self.user, organization=org, is_owner=True)
@@ -174,6 +279,39 @@ class PluginConfigSerializerTestCase(CustomTestCase):
         m2.delete()
         m3.delete()
         org.delete()
+
+    def test_secret_no_owner_global_config(self):
+        # owner=None + for_organization=True is forbidden by clean_for_organization().
+        # The real edge-case the defensive code guards against is a global secret
+        # (owner=None, for_organization=False): serializing it must never raise
+        # AttributeError on instance.owner.pk.
+        ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
+        param = Parameter.objects.create(
+            is_secret=True,
+            name="secret_param_null_owner",
+            python_module=ac.python_module,
+            required=True,
+            type="str",
+        )
+        pc = PluginConfig.objects.create(
+            value="topsecretvalue",
+            owner=None,
+            parameter=param,
+            analyzer_config=ac,
+            for_organization=False,
+        )
+
+        # Not a for_organization secret, so value should be returned directly
+        # (no redaction path), but critically it must not raise AttributeError.
+        data = PluginConfigSerializer(pc, context={"request": MockUpRequest(user=self.user)}).data
+        self.assertIn("value", data)
+
+        # Serializing without a request in context must also be safe.
+        data_no_req = PluginConfigSerializer(pc, context={}).data
+        self.assertIn("value", data_no_req)
+
+        pc.delete()
+        param.delete()
 
 
 class RestJobSerializerTestCase(CustomTestCase):

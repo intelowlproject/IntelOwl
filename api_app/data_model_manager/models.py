@@ -147,6 +147,8 @@ class BaseDataModel(models.Model):
                     if not result_attr:
                         result_attr = []
                     result_attr.extend(other_attr)
+                    if isinstance(field, SetField):
+                        result_attr = list(dict.fromkeys(result_attr))
                 elif isinstance(field, models.JSONField):
                     if not result_attr:
                         result_attr = {}

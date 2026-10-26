@@ -177,8 +177,17 @@ describe("Observable validators tests", () => {
     "test valid date (%s)",
     (valueToValidate) => {
       const validationResult = observableValidators(valueToValidate);
-      // 2024-05-40 matches IP addess regex.
-      expect(["ip", "generic"]).toContain(validationResult.classification);
+      expect(validationResult.classification).toBe("generic");
+    },
+  );
+
+  test.each(["10-0-0-1", "2024-05-40", "1a2a3a4"])(
+    "test non-IP strings (%s)",
+    (valueToValidate) => {
+      expect(observableValidators(valueToValidate)).toStrictEqual({
+        classification: "generic",
+        observable: valueToValidate,
+      });
     },
   );
 });

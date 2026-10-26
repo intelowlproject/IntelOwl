@@ -23,6 +23,10 @@ describe("Regex constant", () => {
     expect(IP_REGEX.test("0.0.0")).toBeFalsy();
     expect(IP_REGEX.test("1.1.1.1.1")).toBeFalsy();
     expect(IP_REGEX.test("256.256.256.256")).toBeFalsy();
+    // the separator must be a dot; otherwise dates and hyphenated ids look like IPs
+    expect(IP_REGEX.test("10-0-0-1")).toBeFalsy();
+    expect(IP_REGEX.test("2024-05-40")).toBeFalsy();
+    expect(IP_REGEX.test("1a2a3a4")).toBeFalsy();
     // IPv6 shortened
     expect(IP_REGEX.test("0:0:0:0:0:ffff:0:0")).toBeTruthy();
     expect(IP_REGEX.test("0:0:0:0:0:ffff:0101:0101")).toBeTruthy();

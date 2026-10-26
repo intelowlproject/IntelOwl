@@ -38,6 +38,21 @@ class HelperTests(TestCase):
         result = Classification.calculate_observable(observable)
         self.assertEqual(result, Classification.HASH)
 
+        # SHA-512 (128 hex chars). Must stay a hash, including when uppercased.
+        observable = (
+            "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce"
+            "47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"
+        )
+        result = Classification.calculate_observable(observable)
+        self.assertEqual(result, Classification.HASH)
+        result = Classification.calculate_observable(observable.upper())
+        self.assertEqual(result, Classification.HASH)
+
+        # SHA-384 is not a supported observable hash type.
+        observable = "a" * 96
+        result = Classification.calculate_observable(observable)
+        self.assertEqual(result, Classification.GENERIC)
+
         observable = "iammeia"
         result = Classification.calculate_observable(observable)
         self.assertEqual(result, Classification.GENERIC)

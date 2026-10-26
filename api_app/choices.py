@@ -114,7 +114,7 @@ class Classification(models.TextChoices):
     def calculate_observable(cls, value: str) -> str:
         """Returns observable classification for the given value.\n
         Only following types are supported:
-        ip, domain, url, hash (md5, sha1, sha256), generic (if no match)
+        ip, domain, url, hash (md5, sha1, sha256, sha512), generic (if no match)
 
         Args:
             value (str):
@@ -145,6 +145,7 @@ class Classification(models.TextChoices):
                 re.match(r"^[a-f\d]{32}$", value, re.IGNORECASE)
                 or re.match(r"^[a-f\d]{40}$", value, re.IGNORECASE)
                 or re.match(r"^[a-f\d]{64}$", value, re.IGNORECASE)
+                or re.match(r"^[a-f\d]{128}$", value, re.IGNORECASE)
             ):
                 classification = cls.HASH
             else:

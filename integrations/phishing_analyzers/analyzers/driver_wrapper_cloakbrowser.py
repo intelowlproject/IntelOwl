@@ -312,7 +312,8 @@ class CloakbrowserDriverWrapper:
                 except PlaywrightError:
                     pass
                 time.sleep(0.5)
-            return ""
+        logger.error(f"Failed after 3 attempts for {self.last_url}")
+        return ""
 
     @playwright_exception_handler
     def get_current_url(self) -> str:

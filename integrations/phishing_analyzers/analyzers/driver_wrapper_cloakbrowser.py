@@ -169,7 +169,7 @@ class CloakbrowserDriverWrapper:
     def _init_driver(self):
         """Launch the Chromium browser and create the initial context and page."""
         logger.info(f"Initialising Cloakbrowser (proxy={self.proxy!r})")
-        self._browser = launch()
+        self._browser = launch(proxy=self.proxy) if self.proxy else launch()
         self._create_context_and_page()
         logger.info(f"Cloakbrowser driver initialised successfully for {self.last_url}")
 
@@ -269,7 +269,7 @@ class CloakbrowserDriverWrapper:
         """Close and re-launch the browser, then re-navigate to the last visited URL if available."""
         logger.info(f"Restarting driver: {motivation=}")
         self._close_browser()
-        self._browser = launch()
+        self._browser = launch(proxy=self.proxy) if self.proxy else launch()
         self._create_context_and_page()
 
         if self.last_url:

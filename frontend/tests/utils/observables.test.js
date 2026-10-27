@@ -41,16 +41,17 @@ describe("test observables utilities functions", () => {
 
 describe("Observable validators tests", () => {
   test.each([
-    "1.1.1.1",
-    "1.1.1.1,",
-    ",1.1.1.1,",
-    "1.1.1.1 ",
-    "1.1.1.1;",
-    " 1.1.1.1 ",
-  ])("test IP addresses (%s)", (valueToValidate) => {
+    ["1.1.1.1", "1.1.1.1"],
+    ["1.1.1.1,", "1.1.1.1"],
+    [",1.1.1.1,", "1.1.1.1"],
+    ["1.1.1.1 ", "1.1.1.1"],
+    ["1.1.1.1;", "1.1.1.1"],
+    [" 1.1.1.1 ", "1.1.1.1"],
+    ["255.255.255.255", "255.255.255.255"],
+  ])("test IP addresses (%s)", (valueToValidate, expectedObservable) => {
     expect(observableValidators(valueToValidate)).toStrictEqual({
       classification: "ip",
-      observable: "1.1.1.1",
+      observable: expectedObservable,
     });
   });
 
@@ -75,8 +76,10 @@ describe("Observable validators tests", () => {
     ",test.js,",
     "256.256.256.256",
     "google(.)com",
-  ])("test invalid domains (%s)", (valueToValidate) => {
-    expect(observableValidators(valueToValidate).classification).toStrictEqual(
+    "10-0-0-1",
+    "1a2a3a4",
+  ])("test generic observables (%s)", (valueToValidate) => {
+    expect(observableValidators(valueToValidate).classification).toBe(
       "generic",
     );
   });
@@ -174,11 +177,10 @@ describe("Observable validators tests", () => {
   );
 
   test.each(["2024-05-40", "10/13/21", "2024-05-10 56:30:40"])(
-    "test valid date (%s)",
+    "test invalid date formats are not classified as IP (%s)",
     (valueToValidate) => {
       const validationResult = observableValidators(valueToValidate);
-      // 2024-05-40 matches IP addess regex.
-      expect(["ip", "generic"]).toContain(validationResult.classification);
+      expect(validationResult.classification).toBe("generic");
     },
   );
 });

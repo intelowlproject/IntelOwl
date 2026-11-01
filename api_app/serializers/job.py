@@ -321,15 +321,14 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         warnings = validated_data.pop("warnings")
         delay = validated_data.pop("delay")
         send_task = validated_data.pop("send_task", False)
-        parent_job = validated_data.pop("parent_job", None)
+        parent_job = validated_data.pop("parent_job", None) or validated_data.get("parent", None)
+        if parent_job:
+            validated_data["parent"] = parent_job
 
         # if we have a parent job and a new playbook to excute force new analysis
         # in order to avoid graph related issues
         if validated_data["scan_mode"] == ScanMode.CHECK_PREVIOUS_ANALYSIS.value and not (
-            "parent" in validated_data
-            and validated_data["parent"]
-            and "playbook_to_execute" in validated_data
-            and validated_data["playbook_to_execute"]
+            parent_job and "playbook_to_execute" in validated_data and validated_data["playbook_to_execute"]
         ):
             try:
                 return self.check_previous_jobs(validated_data)
@@ -344,7 +343,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         from api_app.pivots_manager.models import PivotMap
 
         if parent_job:
-            PivotMap.objects.create(starting_job=validated_data["parent"], ending_job=job, pivot_config=None)
+            PivotMap.objects.create(starting_job=parent_job, ending_job=job, pivot_config=None)
         if send_task:
             from intel_owl.tasks import job_pipeline
 

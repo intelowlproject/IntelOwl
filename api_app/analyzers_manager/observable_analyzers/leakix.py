@@ -10,9 +10,7 @@ class LeakIX(ObservableAnalyzer):
     base_url = "https://leakix.net"
 
     def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get(
-            "api_key_name", "LEAKIX_API_KEY"
-        )
+        self.api_key_name = additional_config_params.get("api_key_name", "LEAKIX_API_KEY")
         if hasattr(self, "get_secret"):
             self.api_key = self.get_secret(self.api_key_name)
         else:
@@ -38,13 +36,10 @@ class LeakIX(ObservableAnalyzer):
                 }
 
             if response.status_code == 429:
-                raise AnalyzerRunException(
-                    "LeakIX rate limit reached. Consider configuring an API key."
-                )
+                raise AnalyzerRunException("LeakIX rate limit reached. Consider configuring an API key.")
 
             response.raise_for_status()
             return response.json()
 
         except requests.exceptions.RequestException as e:
             raise AnalyzerRunException(f"Error querying LeakIX: {str(e)}")
-        

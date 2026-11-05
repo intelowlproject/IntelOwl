@@ -34,3 +34,4 @@ class TestLeakIX(TestCase):
 
         report = self.analyzer.run()
         self.assertEqual(report["status"], "not_found")
+        

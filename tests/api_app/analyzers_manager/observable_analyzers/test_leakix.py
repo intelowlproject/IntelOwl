@@ -7,7 +7,7 @@ from api_app.analyzers_manager.observable_analyzers.leakix import LeakIX
 
 class TestLeakIX(TestCase):
     def setUp(self):
-        self.analyzer = LeakIX()
+        self.analyzer = LeakIX(config={})
         self.analyzer.observable_name = "1.1.1.1"
         self.analyzer.set_config({})
 

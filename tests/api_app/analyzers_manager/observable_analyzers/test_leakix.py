@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, patch
+
 from django.test import TestCase
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
+
 from api_app.analyzers_manager.observable_analyzers.leakix import LeakIX
 
 
@@ -17,7 +18,7 @@ class TestLeakIX(TestCase):
         mock_response.json.return_value = {
             "ip": "1.1.1.1",
             "services": [{"port": 80, "protocol": "http"}],
-            "leaks": []
+            "leaks": [],
         }
         mock_get.return_value = mock_response
 

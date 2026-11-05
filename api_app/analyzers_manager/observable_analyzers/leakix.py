@@ -1,4 +1,6 @@
 import requests
+
+
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 

@@ -51,10 +51,12 @@ class STIX2ConnectorTestCase(BaseConnectorTest):
         self.assertIn("ipv4-addr", types)
         self.assertIn("indicator", types)
 
-        ipv4_obj = next(obj for obj in objects if obj["type"] == "ipv4-addr")
+        ipv4_obj = next((obj for obj in objects if obj["type"] == "ipv4-addr"), None)
+        self.assertIsNotNone(ipv4_obj)
         self.assertEqual(ipv4_obj["value"], connector.observable_value)
 
-        indicator_obj = next(obj for obj in objects if obj["type"] == "indicator")
+        indicator_obj = next((obj for obj in objects if obj["type"] == "indicator"), None)
+        self.assertIsNotNone(indicator_obj)
         self.assertIn(connector.observable_value, indicator_obj["pattern"])
         self.assertEqual(indicator_obj["pattern_type"], "stix")
 
@@ -70,7 +72,8 @@ class STIX2ConnectorTestCase(BaseConnectorTest):
         types = [obj["type"] for obj in objects]
 
         self.assertIn("domain-name", types)
-        domain_obj = next(obj for obj in objects if obj["type"] == "domain-name")
+        domain_obj = next((obj for obj in objects if obj["type"] == "domain-name"), None)
+        self.assertIsNotNone(domain_obj)
         self.assertEqual(domain_obj["value"], "malicious-c2.example.com")
 
     def test_run_with_malware_family(self):
@@ -94,8 +97,10 @@ class STIX2ConnectorTestCase(BaseConnectorTest):
         self.assertIn("malware", types)
         self.assertIn("relationship", types)
 
-        malware_obj = next(obj for obj in objects if obj["type"] == "malware")
+        malware_obj = next((obj for obj in objects if obj["type"] == "malware"), None)
+        self.assertIsNotNone(malware_obj)
         self.assertEqual(malware_obj["name"], "Emotet")
 
-        rel_obj = next(obj for obj in objects if obj["type"] == "relationship")
+        rel_obj = next((obj for obj in objects if obj["type"] == "relationship"), None)
+        self.assertIsNotNone(rel_obj)
         self.assertEqual(rel_obj["relationship_type"], "indicates")

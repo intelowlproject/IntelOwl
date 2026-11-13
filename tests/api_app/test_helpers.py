@@ -34,6 +34,14 @@ class HelperTests(TestCase):
         result = Classification.calculate_observable(observable)
         self.assertEqual(result, Classification.URL)
 
+        observable = "https://Example.com/malware.exe"
+        result = Classification.calculate_observable(observable)
+        self.assertEqual(result, Classification.URL)
+
+        observable = "http://WWW.test.com/path"
+        result = Classification.calculate_observable(observable)
+        self.assertEqual(result, Classification.URL)
+
         observable = "b318ff1839771c22e50d316af613dc70"
         result = Classification.calculate_observable(observable)
         self.assertEqual(result, Classification.HASH)

@@ -49,7 +49,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("analyzers_manager", "0201_remove_hudsonrock_parameters"),
+        ("analyzers_manager", "0202_analyzer_config_scan_malware"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

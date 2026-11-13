@@ -4,7 +4,7 @@ import logging
 from typing import Any
 
 from django.core.cache import cache
-from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import SerializerMethodField
@@ -47,25 +47,29 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
                     raise ValidationError({"detail": "Value is not JSON-compliant."})
 
         def get_attribute(self, instance: PluginConfig):
-            # We return `redacted` when
+            # We return `redacted` when:
             # 1) is a secret AND
             # 2) is a value for the organization AND
             # (NOR OPERATOR)
             # 3) we are not its owner OR
             # 4) we are not an admin of the same organization
-            if (
-                instance.is_secret()
-                and instance.for_organization
-                and not (
-                    self.context["request"].user.pk == instance.owner.pk
-                    or (
-                        self.context["request"].user.has_membership()
-                        and self.context["request"].user.membership.organization.pk
-                        == instance.owner.membership.organization.pk
-                        and self.context["request"].user.membership.is_admin
-                    )
-                )
-            ):
+            request = self.context.get("request")
+            user = getattr(request, "user", None) if request else None
+
+            is_owner = bool(
+                user and user.is_authenticated and instance.owner and user.pk == instance.owner.pk
+            )
+            is_same_org_admin = bool(
+                user
+                and user.is_authenticated
+                and user.has_membership()
+                and user.membership.is_admin
+                and instance.owner
+                and instance.owner.has_membership()
+                and user.membership.organization_id == instance.owner.membership.organization_id
+            )
+
+            if instance.is_secret() and instance.for_organization and not (is_owner or is_same_org_admin):
                 return "redacted"
             return super().get_attribute(instance)
 
@@ -170,7 +174,10 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
 
     def to_representation(self, instance: PluginConfig):
         result = super().to_representation(instance)
-        result["organization"] = instance.organization.name if instance.organization is not None else None
+        try:
+            result["organization"] = instance.organization.name if instance.organization is not None else None
+        except (AttributeError, ObjectDoesNotExist):
+            result["organization"] = None
         return result
 
 

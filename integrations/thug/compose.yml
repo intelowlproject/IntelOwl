@@ -10,5 +10,5 @@ services:
     volumes:
       - generic_logs:/var/log/intel_owl
     depends_on:
-      - uwsgi
+      - gunicorn
 

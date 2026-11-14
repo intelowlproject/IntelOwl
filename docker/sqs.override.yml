@@ -1,5 +1,5 @@
 services:
-  uwsgi:
+  gunicorn:
     environment:
       - AWS_SQS=True
       - BROKER_URL=sqs://

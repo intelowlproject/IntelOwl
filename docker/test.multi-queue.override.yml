@@ -1,4 +1,9 @@
 services:
+  gunicorn:
+    image: intelowlproject/intelowl:test
+    volumes:
+      - ../:/opt/deploy/intel_owl
+
   celery_worker_local:
     image: intelowlproject/intelowl:test
     volumes:

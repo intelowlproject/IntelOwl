@@ -1,5 +1,12 @@
 services:
+  gunicorn:
+    image: intelowlproject/intelowl:test
+    volumes:
+      - ../:/opt/deploy/intel_owl
+
   flower:
     image: intelowlproject/intelowl:test
     volumes:
       - ../:/opt/deploy/intel_owl
+    depends_on:
+      - gunicorn

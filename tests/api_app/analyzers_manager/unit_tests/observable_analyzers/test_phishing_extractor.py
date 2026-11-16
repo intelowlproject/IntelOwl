@@ -64,6 +64,11 @@ class PhishingExtractorTestCase(BaseAnalyzerTest):
         self._config_analyzer(analyzer)
         self.assertEqual(analyzer.url, _ENGINE_ENDPOINTS["playwright"])
 
+    def test_cloakbrowser_engine_sets_cloakbrowser_url(self):
+        analyzer = self._make_analyzer(phishing_engine="cloakbrowser")
+        self._config_analyzer(analyzer)
+        self.assertEqual(analyzer.url, _ENGINE_ENDPOINTS["cloakbrowser"])
+
     def test_invalid_engine_falls_back_to_selenium(self):
         analyzer = self._make_analyzer(phishing_engine="unknown_engine")
         self._config_analyzer(analyzer)
@@ -73,6 +78,10 @@ class PhishingExtractorTestCase(BaseAnalyzerTest):
         analyzer = self._make_analyzer(phishing_engine="Playwright")
         self._config_analyzer(analyzer)
         self.assertEqual(analyzer.url, _ENGINE_ENDPOINTS["playwright"])
+
+        analyzer = self._make_analyzer(phishing_engine="CloakBrowser")
+        self._config_analyzer(analyzer)
+        self.assertEqual(analyzer.url, _ENGINE_ENDPOINTS["cloakbrowser"])
 
     def test_domain_target_prefixed_with_http(self):
         analyzer = self._make_analyzer()

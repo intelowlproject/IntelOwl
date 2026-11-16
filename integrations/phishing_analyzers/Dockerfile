@@ -30,7 +30,8 @@ RUN chmod u+x entrypoint.sh \
     && playwright install chromium --with-deps \
     && chmod -R o+rX /ms-playwright
 
-
+# The cloakbrowser binary is installed only with launch. Else the first run will timeout
+RUN gosu ${USER} python3 -c "from cloakbrowser import launch; b = launch(); b.close()"
 # Serve Flask application using gunicorn as low-privileged user
 EXPOSE 4005
 ENTRYPOINT ["./entrypoint.sh"]

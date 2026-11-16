@@ -27,12 +27,13 @@ django-rest-email-auth==4.0.0
 
 # infra
 boto3==1.39.4
-celery[sqs,redis]==5.4.0
+celery[sqs]==5.4.0
+redis==6.1.0
 dataclasses==0.6
 # https://github.com/advisories/GHSA-q4qm-xhf9-4p8f
 # unpatched CVE: noproblem, we just use this for debugging purposes
 flower==2.0.0
-uWSGI==2.0.28
+uWSGI==2.0.29
 uwsgitop==0.12
 whitenoise==6.9.0
 daphne==4.2.1

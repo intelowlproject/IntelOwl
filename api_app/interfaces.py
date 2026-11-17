@@ -4,7 +4,7 @@ import logging
 from typing import TYPE_CHECKING, Any, Generator, Iterable, Optional, Union
 
 from django.conf import settings
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 from django.db.models import QuerySet
 from django.utils.functional import cached_property
@@ -260,6 +260,9 @@ class OwnershipAbstractModel(models.Model):
         Returns:
             Optional[Organization]: The organization associated with the owner, or None if not applicable.
         """
-        if self.for_organization:
-            return self.owner.membership.organization
+        if self.for_organization and self.owner and self.owner.has_membership():
+            try:
+                return self.owner.membership.organization
+            except ObjectDoesNotExist:
+                return None
         return None

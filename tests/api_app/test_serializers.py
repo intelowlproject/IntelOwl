@@ -12,6 +12,7 @@ from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 from api_app.choices import Classification, PythonModuleBasePaths
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.models import Job, Parameter, PluginConfig, PythonModule
+from api_app.pivots_manager.models import PivotMap
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers.job import (
     CommentSerializer,
@@ -612,6 +613,65 @@ class ObservableJobCreateSerializerTestCase(CustomTestCase):
             self.oass, [a], tlp="CLEAR", observable_classification="domain"
         )
         self.assertCountEqual(analyzers, [a])
+
+    def test_create_with_parent_job_in_data_creates_pivot_map(self):
+        a = AnalyzerConfig.objects.get(name="Tranco")
+        a.observable_supported = ["domain"]
+        a.type = "observable"
+        a.disabled = False
+        a.save()
+
+        parent_an = Analyzable.objects.create(name="parent.com", classification="domain")
+        parent_job = Job.objects.create(analyzable=parent_an, user=self.user)
+
+        data = {
+            "observable_name": "child.com",
+            "analyzers_requested": ["Tranco"],
+            "parent_job": parent_job.pk,
+            "tlp": "CLEAR",
+        }
+        serializer = ObservableAnalysisSerializer(data=data, context={"request": MockUpRequest(self.user)})
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        job = serializer.save()
+
+        self.assertIsNotNone(job)
+        parent_job.refresh_from_db()
+        self.assertIn(job.pk, list(parent_job.get_children().values_list("pk", flat=True)))
+        pivot = PivotMap.objects.filter(starting_job=parent_job, ending_job=job, pivot_config=None).first()
+        self.assertIsNotNone(pivot)
+
+        job.delete()
+        parent_job.delete()
+        parent_an.delete()
+
+    def test_create_with_parent_in_save_kwargs_creates_pivot_map(self):
+        a = AnalyzerConfig.objects.get(name="Tranco")
+        a.observable_supported = ["domain"]
+        a.type = "observable"
+        a.disabled = False
+        a.save()
+
+        parent_an = Analyzable.objects.create(name="parent2.com", classification="domain")
+        parent_job = Job.objects.create(analyzable=parent_an, user=self.user)
+
+        data = {
+            "observable_name": "child2.com",
+            "analyzers_requested": ["Tranco"],
+            "tlp": "CLEAR",
+        }
+        serializer = ObservableAnalysisSerializer(data=data, context={"request": MockUpRequest(self.user)})
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        job = serializer.save(parent=parent_job)
+
+        self.assertIsNotNone(job)
+        parent_job.refresh_from_db()
+        self.assertIn(job.pk, list(parent_job.get_children().values_list("pk", flat=True)))
+        pivot = PivotMap.objects.filter(starting_job=parent_job, ending_job=job, pivot_config=None).first()
+        self.assertIsNotNone(pivot)
+
+        job.delete()
+        parent_job.delete()
+        parent_an.delete()
 
 
 class CommentSerializerTestCase(CustomTestCase):

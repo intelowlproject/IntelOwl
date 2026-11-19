@@ -1,3 +1,5 @@
+import signal
+
 from kombu import uuid
 
 from api_app.analyzables_manager.models import Analyzable
@@ -26,12 +28,14 @@ class PivotTestCase(CustomTestCase):
         )
 
     def test_subclasses(self):
-        def handler(signum, frame):
-            raise TimeoutError("end of time")
+        has_sigalrm = hasattr(signal, "SIGALRM") and hasattr(signal, "alarm")
+        if has_sigalrm:
 
-        import signal
+            def handler(signum, frame):
+                raise TimeoutError("end of time")
 
-        signal.signal(signal.SIGALRM, handler)
+            signal.signal(signal.SIGALRM, handler)
+
         self._create_jobs()
         subclasses = Pivot.all_subclasses()
         for subclass in Pivot.all_subclasses():
@@ -45,10 +49,12 @@ class PivotTestCase(CustomTestCase):
                 print(f"\tTesting with config {config.name} for {timeout_seconds} seconds")
                 job = Job.objects.get(analyzable__classification="domain")
                 sub = subclass(config)
-                signal.alarm(timeout_seconds)
+                if has_sigalrm:
+                    signal.alarm(timeout_seconds)
                 try:
                     sub.start(job.pk, {}, uuid())
                 except Exception as e:
                     self.fail(f"Pivot {subclass.__name__} with config {config.name} failed {e}")
                 finally:
-                    signal.alarm(0)
+                    if has_sigalrm:
+                        signal.alarm(0)

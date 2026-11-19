@@ -1,3 +1,5 @@
+import signal
+
 from api_app.ingestors_manager.classes import Ingestor
 from api_app.ingestors_manager.models import IngestorConfig
 from tests import CustomTestCase
@@ -9,16 +11,17 @@ class IngestorTestCase(CustomTestCase):
     ]
 
     def test_subclasses(self):
-        def handler(signum, frame):
-            raise TimeoutError("end of time")
+        has_sigalrm = hasattr(signal, "SIGALRM") and hasattr(signal, "alarm")
+        if has_sigalrm:
 
-        import signal
+            def handler(signum, frame):
+                raise TimeoutError("end of time")
 
-        signal.signal(signal.SIGALRM, handler)
+            signal.signal(signal.SIGALRM, handler)
 
         subclasses = Ingestor.all_subclasses()
         for subclass in subclasses:
-            print(f"\nTesting Connector {subclass.__name__}")
+            print(f"\nTesting Ingestor {subclass.__name__}")
             configs = IngestorConfig.objects.filter(python_module=subclass.python_module)
             if not configs.exists():
                 self.fail(f"There is a python module {subclass.python_module} without any configuration")
@@ -27,10 +30,12 @@ class IngestorTestCase(CustomTestCase):
                 timeout_seconds = min(timeout_seconds, 60)
                 print(f"\tTesting with config {config.name} for {timeout_seconds} seconds")
                 sub = subclass(config)
-                signal.alarm(timeout_seconds)
+                if has_sigalrm:
+                    signal.alarm(timeout_seconds)
                 try:
                     sub.start(None, {}, None)
                 except Exception as e:
                     self.fail(f"Ingestor {subclass.__name__} with config {config.name} failed {e}")
                 finally:
-                    signal.alarm(0)
+                    if has_sigalrm:
+                        signal.alarm(0)

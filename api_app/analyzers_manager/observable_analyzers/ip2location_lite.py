@@ -281,6 +281,7 @@ class IP2LocationLITE(classes.ObservableAnalyzer):
             temporary = handle.name
             with handle:
                 handle.write(bin_bytes)
+            os.chmod(temporary, 0o644)
             os.replace(temporary, destination)
         except Exception:
             if temporary and os.path.exists(temporary):

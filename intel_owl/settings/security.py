@@ -2,6 +2,9 @@
 # See the file 'LICENSE' for copying permission.
 
 # Security Stuff
+import base64
+import hashlib
+
 from django.core.management.utils import get_random_secret_key
 
 from ._util import get_secret
@@ -25,6 +28,11 @@ if STAGE_LOCAL:
     # required to allow requests from port 3001 (frontend development)
     CSRF_TRUSTED_ORIGINS = [f"{WEB_CLIENT_URL}:80/"]
 ALLOWED_HOSTS = ["*"]
+
+# Fernet key for encrypting plugin secrets at rest.
+# Falls back to SECRET_KEY if PLUGIN_CONFIG_SECRET_KEY is not set.
+_raw_secret = get_secret("PLUGIN_CONFIG_SECRET_KEY", SECRET_KEY)
+PLUGIN_CONFIG_FERNET_KEY = base64.urlsafe_b64encode(hashlib.sha256(_raw_secret.encode()).digest())
 
 # https://docs.djangoproject.com/en/4.2/ref/settings/#data-upload-max-memory-size
 DATA_UPLOAD_MAX_MEMORY_SIZE = 100 * (10**6)

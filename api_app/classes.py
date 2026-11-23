@@ -145,16 +145,16 @@ class Plugin(metaclass=ABCMeta):
             return f"{self.__class__.__name__}"
 
     def config(self, runtime_configuration: typing.Dict):
-        """
-        Configure the plugin with runtime parameters.
-
-        Args:
-            runtime_configuration (dict): Runtime configuration parameters.
-        """
         self.__parameters = self._config.read_configured_params(self._user, runtime_configuration)
         for parameter in self.__parameters:
             attribute_name = f"_{parameter.name}" if parameter.is_secret else parameter.name
-            setattr(self, attribute_name, parameter.value)
+            value = parameter.value
+            # decrypt secrets that were stored encrypted
+            if parameter.is_secret and isinstance(value, str) and value.startswith("gAAAAA"):
+                from api_app.models import PluginConfig
+
+                value = PluginConfig._decrypt_value(value)
+            setattr(self, attribute_name, value)
             logger.debug(
                 f"Adding to {self.__class__.__name__} param {attribute_name} with value {parameter.value} "
             )
@@ -354,6 +354,14 @@ class Plugin(metaclass=ABCMeta):
             if not param.configured or not param.value:
                 continue
             url = param.value
+            # Decrypt if the value is Fernet-encrypted (secret parameter)
+            if isinstance(url, str) and url.startswith("gAAAAA"):
+                try:
+                    from api_app.models import PluginConfig
+
+                    url = PluginConfig._decrypt_value(url)
+                except Exception:
+                    pass
             logger.info(f"Url retrieved to verify is {param.name} for {self}")
             return url
         if hasattr(self, "url") and self.url:

@@ -64,10 +64,8 @@ class VPNDetection(ObservableAnalyzer):
         super()._update_data_model(data_model)
         report = self.report.report
 
-        tags = [DataModelTags.ANONYMIZER.value]
-        if report.get("is_tor"):
-            tags.append(DataModelTags.TOR_EXIT_NODE.value)
-        data_model.tags = tags
+        # is_tor covers every Tor relay, not only exits, so no tor_exit_node tag.
+        data_model.tags = [DataModelTags.ANONYMIZER.value]
 
         asn = report.get("asn") or {}
         data_model.asn = asn.get("asn")

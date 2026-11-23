@@ -122,9 +122,11 @@ class VPNDetectionTestCase(BaseAnalyzerTest):
         self.assertEqual((dm.asn, dm.org_name, dm.country_code), (9009, "M247 Europe SRL", "AT"))
         self.assertTrue(dm.additional_info["is_vpn"])
 
-    def test_tor_is_tagged(self):
+    def test_tor_is_an_anonymizer_not_an_exit_node(self):
         self.assertTrue(self._creates(TOR))
-        self.assertEqual(self._mapped(TOR).tags, ["anonymizer", "tor_exit_node"])
+        dm = self._mapped(TOR)
+        self.assertEqual(dm.tags, ["anonymizer"])
+        self.assertTrue(dm.additional_info["is_tor"])
 
     def test_a_paid_proxy_flag_and_the_provider_reach_additional_info(self):
         report = dict(CLEAN, is_resproxy=True, vpn={"provider_name": "Mullvad"})

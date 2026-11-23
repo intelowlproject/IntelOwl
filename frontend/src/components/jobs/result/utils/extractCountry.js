@@ -4,12 +4,20 @@ export function extractCountry(job) {
   let maxmindAnalyzerReport = {};
   let abuseIpdbReport = {};
   let ip2LocationReport = {};
+  let ip2LocationLiteReport = {};
 
   job.analyzer_reports.forEach((report) => {
     if (report.name === "MaxMindGeoIP") maxmindAnalyzerReport = report;
     if (report.name === "AbuseIPDB") abuseIpdbReport = report;
     if (report.name === "Ip2location") ip2LocationReport = report;
+    if (report.name === "IP2Location_LITE") ip2LocationLiteReport = report;
   });
+  if (ip2LocationLiteReport) {
+    countryName =
+      ip2LocationLiteReport.report?.country_long || countryName;
+    countryCode =
+      ip2LocationLiteReport.report?.country_short || countryCode;
+  }
   if (maxmindAnalyzerReport) {
     countryName =
       maxmindAnalyzerReport.report?.country?.names?.en || countryName;

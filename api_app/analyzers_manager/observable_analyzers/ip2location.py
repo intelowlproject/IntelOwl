@@ -67,18 +67,16 @@ class Ip2location(classes.ObservableAnalyzer):
         return location_info.json()
 
     def _update_data_model(self, data_model) -> None:
-            super()._update_data_model(data_model)
-            report = _as_dict(getattr(self.report, "report", None))
-            proxy = _as_dict(report.get("proxy"))
+        super()._update_data_model(data_model)
+        report = _as_dict(getattr(self.report, "report", None))
+        proxy = _as_dict(report.get("proxy"))
 
-            asn = _parse_asn(report.get("asn"))
-            if asn is not None:
-                data_model.asn = asn
+        asn = _parse_asn(report.get("asn"))
+        if asn is not None:
+            data_model.asn = asn
 
-            data_model.tags = _merge_tags(data_model.tags, report, proxy)
-            data_model.additional_info = _merge_additional_info(
-                data_model.additional_info, report, proxy
-            )
+        data_model.tags = _merge_tags(data_model.tags, report, proxy)
+        data_model.additional_info = _merge_additional_info(data_model.additional_info, report, proxy)
 
 
 def _as_dict(value) -> dict:

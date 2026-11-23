@@ -13,10 +13,8 @@ export function extractCountry(job) {
     if (report.name === "IP2Location_LITE") ip2LocationLiteReport = report;
   });
   if (ip2LocationLiteReport) {
-    countryName =
-      ip2LocationLiteReport.report?.country_long || countryName;
-    countryCode =
-      ip2LocationLiteReport.report?.country_short || countryCode;
+    countryName = ip2LocationLiteReport.report?.country_long || countryName;
+    countryCode = ip2LocationLiteReport.report?.country_short || countryCode;
   }
   if (maxmindAnalyzerReport) {
     countryName =

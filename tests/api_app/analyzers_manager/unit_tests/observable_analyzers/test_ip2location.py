@@ -104,9 +104,11 @@ class Ip2locationTestCase(BaseAnalyzerTest):
         for blank in ("", " ", "   ", "\t\n"):
             with self.subTest(key=repr(blank)):
                 analyzer = self._analyzer("keyed", api_key=blank)
-                with patch("requests.get") as mocked:
-                    with self.assertRaises(AnalyzerConfigurationException):
-                        analyzer.run()
+                with (
+                    patch("requests.get") as mocked,
+                    self.assertRaises(AnalyzerConfigurationException),
+                ):
+                    analyzer.run()
                 mocked.assert_not_called()
 
     def test_keyed_strips_surrounding_whitespace(self):

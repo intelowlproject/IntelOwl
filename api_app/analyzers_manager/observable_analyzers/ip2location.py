@@ -51,7 +51,7 @@ class Ip2location(classes.ObservableAnalyzer):
             payload = {"ip": self.observable_name}
             # keyless works without a key. Only the keyed version sends one.
             if self.api_version == "keyed":
-                api_key = getattr(self, "_api_key_name", None)
+                api_key = (getattr(self, "_api_key_name", None) or "").strip()
                 if not api_key:
                     raise AnalyzerConfigurationException(
                         "Ip2location api_version is keyed but api_key_name is not configured"

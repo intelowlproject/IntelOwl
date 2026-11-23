@@ -48,6 +48,7 @@ export const jobTableColumns = [
       </div>
     ),
     Filter: DefaultColumnFilter,
+    filterPlaceholder: "Search ID",
   },
   {
     Header: "Created",

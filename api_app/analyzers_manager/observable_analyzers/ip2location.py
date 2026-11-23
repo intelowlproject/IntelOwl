@@ -81,36 +81,36 @@ class Ip2location(classes.ObservableAnalyzer):
             )
 
 
-    def _as_dict(value) -> dict:
-        return value if isinstance(value, dict) else {}
+def _as_dict(value) -> dict:
+    return value if isinstance(value, dict) else {}
 
 
-    def _is_anonymizer(report: dict, proxy: dict) -> bool:
-        if report.get("is_proxy") is True:
-            return True
-        return any(proxy.get(flag) is True for flag in _ANONYMIZER_FLAGS)
+def _is_anonymizer(report: dict, proxy: dict) -> bool:
+    if report.get("is_proxy") is True:
+        return True
+    return any(proxy.get(flag) is True for flag in _ANONYMIZER_FLAGS)
 
 
-    def _merge_tags(existing_tags, report: dict, proxy: dict) -> list:
-        tags = list(existing_tags) if existing_tags else []
-        candidates = (
-            (_is_anonymizer(report, proxy), DataModelTags.ANONYMIZER.value),
-            (proxy.get("is_tor") is True, DataModelTags.TOR_EXIT_NODE.value),
-            (proxy.get("is_scanner") is True, DataModelTags.SCANNER.value),
-        )
-        for condition, tag in candidates:
-            if condition and tag not in tags:
-                tags.append(tag)
-        return tags
+def _merge_tags(existing_tags, report: dict, proxy: dict) -> list:
+    tags = list(existing_tags) if existing_tags else []
+    candidates = (
+        (_is_anonymizer(report, proxy), DataModelTags.ANONYMIZER.value),
+        (proxy.get("is_tor") is True, DataModelTags.TOR_EXIT_NODE.value),
+        (proxy.get("is_scanner") is True, DataModelTags.SCANNER.value),
+    )
+    for condition, tag in candidates:
+        if condition and tag not in tags:
+            tags.append(tag)
+    return tags
 
 
-    def _merge_additional_info(existing_info, report: dict, proxy: dict) -> dict:
-        info = dict(existing_info) if existing_info else {}
-        if "is_proxy" in report:
-            info["is_proxy"] = report["is_proxy"]
-        if proxy:
-            info["proxy"] = proxy
-        return info
+def _merge_additional_info(existing_info, report: dict, proxy: dict) -> dict:
+    info = dict(existing_info) if existing_info else {}
+    if "is_proxy" in report:
+        info["is_proxy"] = report["is_proxy"]
+    if proxy:
+        info["proxy"] = proxy
+    return info
 
 
 def _parse_asn(value):

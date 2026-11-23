@@ -58,7 +58,7 @@ class _FakeReader:
         )
 
     @staticmethod
-    def close(self):
+    def close():
         return None
 
 
@@ -193,7 +193,7 @@ class IP2LocationLITETestCase(BaseAnalyzerTest):
         self.assertFalse(os.path.exists(destination))
 
     @staticmethod
-    def _destination(self, filename):
+    def _destination(filename):
         directory = os.path.join("/tmp", "ip2location-lite-tests")
         os.makedirs(directory, exist_ok=True)
         return os.path.join(directory, filename)

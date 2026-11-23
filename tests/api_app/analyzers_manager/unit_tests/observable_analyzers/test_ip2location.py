@@ -100,6 +100,24 @@ class Ip2locationTestCase(BaseAnalyzerTest):
         with self.assertRaises(AnalyzerConfigurationException):
             analyzer.run()
 
+    def test_keyed_with_whitespace_key_fails(self):
+        for blank in ("", " ", "   ", "\t\n"):
+            with self.subTest(key=repr(blank)):
+                analyzer = self._analyzer("keyed", api_key=blank)
+                with patch("requests.get") as mocked:
+                    with self.assertRaises(AnalyzerConfigurationException):
+                        analyzer.run()
+                mocked.assert_not_called()
+
+    def test_keyed_strips_surrounding_whitespace(self):
+        analyzer = self._analyzer("keyed", api_key="  real-key \n")
+        with patch("requests.get", return_value=MockUpResponse(MOCK_RESPONSE, 200)) as mocked:
+            analyzer.run()
+        self.assertEqual(
+            mocked.call_args.kwargs["params"],
+            {"ip": "8.8.8.8", "key": "real-key"},
+        )
+
     def test_proxy_flags_map_into_the_data_model(self):
         analyzer = self._analyzer()
         analyzer.report = SimpleNamespace(

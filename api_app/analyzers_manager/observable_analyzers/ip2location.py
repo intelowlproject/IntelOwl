@@ -67,32 +67,50 @@ class Ip2location(classes.ObservableAnalyzer):
         return location_info.json()
 
     def _update_data_model(self, data_model) -> None:
-        super()._update_data_model(data_model)
-        report = self.report.report if isinstance(getattr(self.report, "report", None), dict) else {}
-        proxy = report.get("proxy") if isinstance(report.get("proxy"), dict) else {}
+            super()._update_data_model(data_model)
+            report = _as_dict(getattr(self.report, "report", None))
+            proxy = _as_dict(report.get("proxy"))
 
-        asn = _parse_asn(report.get("asn"))
-        if asn is not None:
-            data_model.asn = asn
+            asn = _parse_asn(report.get("asn"))
+            if asn is not None:
+                data_model.asn = asn
 
-        tags = list(data_model.tags or [])
-        anonymizer = report.get("is_proxy") is True or any(
-            proxy.get(flag) is True for flag in _ANONYMIZER_FLAGS
+            data_model.tags = _merge_tags(data_model.tags, report, proxy)
+            data_model.additional_info = _merge_additional_info(
+                data_model.additional_info, report, proxy
+            )
+
+
+    def _as_dict(value) -> dict:
+        return value if isinstance(value, dict) else {}
+
+
+    def _is_anonymizer(report: dict, proxy: dict) -> bool:
+        if report.get("is_proxy") is True:
+            return True
+        return any(proxy.get(flag) is True for flag in _ANONYMIZER_FLAGS)
+
+
+    def _merge_tags(existing_tags, report: dict, proxy: dict) -> list:
+        tags = list(existing_tags) if existing_tags else []
+        candidates = (
+            (_is_anonymizer(report, proxy), DataModelTags.ANONYMIZER.value),
+            (proxy.get("is_tor") is True, DataModelTags.TOR_EXIT_NODE.value),
+            (proxy.get("is_scanner") is True, DataModelTags.SCANNER.value),
         )
-        if anonymizer and DataModelTags.ANONYMIZER.value not in tags:
-            tags.append(DataModelTags.ANONYMIZER.value)
-        if proxy.get("is_tor") is True and DataModelTags.TOR_EXIT_NODE.value not in tags:
-            tags.append(DataModelTags.TOR_EXIT_NODE.value)
-        if proxy.get("is_scanner") is True and DataModelTags.SCANNER.value not in tags:
-            tags.append(DataModelTags.SCANNER.value)
-        data_model.tags = tags
+        for condition, tag in candidates:
+            if condition and tag not in tags:
+                tags.append(tag)
+        return tags
 
-        info = dict(data_model.additional_info or {})
+
+    def _merge_additional_info(existing_info, report: dict, proxy: dict) -> dict:
+        info = dict(existing_info) if existing_info else {}
         if "is_proxy" in report:
             info["is_proxy"] = report["is_proxy"]
         if proxy:
             info["proxy"] = proxy
-        data_model.additional_info = info
+        return info
 
 
 def _parse_asn(value):

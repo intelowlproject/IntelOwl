@@ -57,6 +57,7 @@ class _FakeReader:
             timezone="-07:00",
         )
 
+    @staticmethod
     def close(self):
         return None
 
@@ -180,15 +181,18 @@ class IP2LocationLITETestCase(BaseAnalyzerTest):
 
     def test_download_rejects_non_zip_body(self):
         destination = self._destination("rejected.bin")
-        with patch(
-            "api_app.analyzers_manager.observable_analyzers.ip2location_lite.requests.get",
-            return_value=_BinaryResponse(b"INVALID TOKEN"),
+        with (
+            patch(
+                "api_app.analyzers_manager.observable_analyzers.ip2location_lite.requests.get",
+                return_value=_BinaryResponse(b"INVALID TOKEN"),
+            ),
+            self.assertRaises(AnalyzerRunException) as caught,
         ):
-            with self.assertRaises(AnalyzerRunException) as caught:
-                IP2LocationLITE._download_database(DB11_LITE_IPV6_CODE, "secret-token", destination)
+            IP2LocationLITE._download_database(DB11_LITE_IPV6_CODE, "secret-token", destination)
         self.assertNotIn("secret-token", str(caught.exception))
         self.assertFalse(os.path.exists(destination))
 
+    @staticmethod
     def _destination(self, filename):
         directory = os.path.join("/tmp", "ip2location-lite-tests")
         os.makedirs(directory, exist_ok=True)

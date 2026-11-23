@@ -30,11 +30,7 @@ DOWNLOAD_URL = "https://www.ip2location.com/download"
 DB11_LITE_IPV6_CODE = "DB11LITEBINIPV6"
 DB11_LITE_IPV6_FILENAME = "IP2LOCATION-LITE-DB11.IPV6.BIN"
 
-# Not published on the LITE FAQ (that page only lists the DB11 codes and says
-# the package code is on the account Download page). This follows the DB11
-# pattern (DB11LITEBINIPV6) from the documented IPv4 CSV code DBASNLITE, which
-# downloads IP2LOCATION-LITE-ASN.CSV. Confirm DBASNLITEBINIPV6 in the account
-# Download page before relying on the ASN refresh.
+# LITE ASN IPv6 BIN package code, as listed on the LITE Download page.
 ASN_LITE_IPV6_CODE = "DBASNLITEBINIPV6"
 ASN_LITE_IPV6_FILENAME = "IP2LOCATION-LITE-ASN.IPV6.BIN"
 

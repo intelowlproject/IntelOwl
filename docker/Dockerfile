@@ -47,6 +47,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && pip3 install --no-cache-dir --upgrade pip
 
+COPY --from=trufflesecurity/trufflehog:3.88.24 /usr/bin/trufflehog /usr/local/bin/trufflehog
 COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
 COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
 WORKDIR $PYTHONPATH

@@ -158,7 +158,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0073_alter_updatecheckstatus_last_checked_at_and_more"),
-        ("analyzers_manager", "0205_remove_bitcoinabuse_analyzer"),
+        ("analyzers_manager", "0206_remove_auth0_analyzer"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

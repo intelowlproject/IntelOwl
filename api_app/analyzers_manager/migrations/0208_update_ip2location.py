@@ -131,7 +131,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0073_alter_updatecheckstatus_last_checked_at_and_more"),
-        ("analyzers_manager", "0206_analyzer_config_ip2location_lite"),
+        ("analyzers_manager", "0207_analyzer_config_ip2location_lite"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

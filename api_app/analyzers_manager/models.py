@@ -121,14 +121,20 @@ class AnalyzerReport(AbstractReport):
         return result
 
     def create_data_model(self) -> Optional[BaseDataModel]:
-        # TODO we don't need to actually crate a new object every time.
-        #  if the report is the same of the previous one, we can just link it
         if not self._validation_before_data_model():
             return None
         dictionary = self._create_data_model_dictionary()
+        temp_instance = self.data_model_class()
+        fingerprint = temp_instance.generate_fingerprint(data=dictionary)
+        existing_data_model = self.data_model_class.objects.filter(fingerprint=fingerprint).first()
 
-        self.data_model: BaseDataModel = self.data_model_class.objects.create()
-        self.data_model.merge(dictionary)
+        if existing_data_model:
+            logger.info(f"Deduplicated: Linking existing Data Model {existing_data_model.pk}")
+            self.data_model = existing_data_model
+        else:
+            self.data_model: BaseDataModel = self.data_model_class.objects.create(fingerprint=fingerprint)
+            self.data_model.merge(dictionary)
+
         self.save()
         return self.data_model
 

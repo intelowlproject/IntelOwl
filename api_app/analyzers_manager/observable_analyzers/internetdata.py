@@ -91,25 +91,31 @@ class InternetData(ObservableAnalyzer):
         if any(report.get(flag) for flag in _ANONYMIZER_FLAGS):
             data_model.tags = [DataModelTags.ANONYMIZER.value]
 
-        asn = report.get("asn") or {}
+        asn = _section(report, "asn")
         data_model.asn = asn.get("asn") or None
         data_model.org_name = asn.get("name") or None
-        data_model.isp = (report.get("company") or {}).get("name") or None
-        data_model.country_code = (report.get("location") or {}).get("country") or None
+        data_model.isp = _section(report, "company").get("name") or None
+        data_model.country_code = _section(report, "location").get("country") or None
+        data_model.additional_info = _additional_info(report)
 
-        info = {
-            flag: report[flag] for flag in (*_ANONYMIZER_FLAGS, *_OTHER_FLAGS) if report.get(flag) is not None
-        }
-        for key in _PROVIDERS:
-            provider = (report.get(key) or {}).get("provider_name")
-            if provider:
-                info[f"{key}_provider"] = provider
-        for key, value in (
-            ("prefix", asn.get("prefix")),
-            ("company_domain", (report.get("company") or {}).get("domain")),
-            ("abuse_email", (report.get("abuse") or {}).get("email")),
-            ("hostname", report.get("hostname")),
-        ):
-            if value:
-                info[key] = value
-        data_model.additional_info = info
+
+def _section(report: dict, key: str) -> dict:
+    return report.get(key) or {}
+
+
+def _additional_info(report: dict) -> dict:
+    info = {
+        flag: report[flag] for flag in (*_ANONYMIZER_FLAGS, *_OTHER_FLAGS) if report.get(flag) is not None
+    }
+    for key in _PROVIDERS:
+        provider = _section(report, key).get("provider_name")
+        if provider:
+            info[f"{key}_provider"] = provider
+    details = {
+        "prefix": _section(report, "asn").get("prefix"),
+        "company_domain": _section(report, "company").get("domain"),
+        "abuse_email": _section(report, "abuse").get("email"),
+        "hostname": report.get("hostname"),
+    }
+    info.update({key: value for key, value in details.items() if value})
+    return info

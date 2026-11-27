@@ -401,4 +401,47 @@ describe("extractCountry test", () => {
     expect(country.countryCode).toBe("US");
     expect(country.countryName).toBe("United States of America");
   });
+
+  test("IP2Location LITE report", () => {
+    const job = {
+      analyzer_reports: [
+        {
+          name: "IP2Location_LITE",
+          report: {
+            country_short: "US",
+            country_long: "United States of America",
+          },
+        },
+      ],
+    };
+
+    const country = extractCountry(job);
+    expect(country.countryCode).toBe("US");
+    expect(country.countryName).toBe("United States of America");
+  });
+
+  test("IP2Location API result is kept when LITE also ran", () => {
+    const job = {
+      analyzer_reports: [
+        {
+          name: "IP2Location_LITE",
+          report: {
+            country_short: "US",
+            country_long: "United States of America",
+          },
+        },
+        {
+          name: "Ip2location",
+          report: {
+            country_code: "DE",
+            country_name: "Germany",
+          },
+        },
+      ],
+    };
+
+    const country = extractCountry(job);
+    expect(country.countryCode).toBe("DE");
+    expect(country.countryName).toBe("Germany");
+  });
 });

@@ -14,21 +14,14 @@ from tests.api_app.analyzers_manager.unit_tests.observable_analyzers.base_test_c
 from tests.mock_utils import MockUpResponse
 
 # Shapes copied from live responses of https://api.internetdata.io/<ip> (2026-11-25),
-# trimmed of the location's currency and flag fields.
+# trimmed of the location's currency and flag fields. With no key the answer has only
+# the core fields: no is_bot, is_carrier, is_satellite, service flags or asn.type.
 TOR = {
     "ip": "185.220.101.1",
     "is_bogon": False,
     "is_tor": True,
     "is_relay": False,
-    "is_bot": False,
     "is_anycast": False,
-    "is_carrier": False,
-    "is_satellite": False,
-    "is_ssh": False,
-    "is_smtp": False,
-    "is_web": True,
-    "is_dns_resolver": False,
-    "is_bittorrent": False,
     "location": {"continent": "EU", "country": "DE", "country_name": "Germany", "timezone": "Europe/Berlin"},
     "tor": {"provider": "", "provider_name": "", "confidence": "high", "last_seen": "2026-11-25"},
     "relay": {},
@@ -36,7 +29,6 @@ TOR = {
         "asn": 60729,
         "name": "Stiftung Erneuerbare Freiheit",
         "domain": "zwiebelfreunde.de",
-        "type": "hosting",
         "prefix": "185.220.101.0/24",
         "country": "DE",
         "rpki_status": "valid",
@@ -50,7 +42,6 @@ ANYCAST = dict(
     ip="8.8.8.8",
     is_tor=False,
     is_anycast=True,
-    is_dns_resolver=True,
     location={"continent": "NA", "country": "US", "country_name": "United States"},
     tor={},
     asn={"asn": 15169, "name": "Google LLC", "domain": "google.com", "prefix": "8.8.8.0/24", "country": "US"},
@@ -58,7 +49,8 @@ ANYCAST = dict(
     hostname="dns.google",
     abuse={"email": "network-abuse@google.com"},
 )
-# With a key on a paid plan: the VPN, proxy and hosting flags and their providers.
+# With a key on a paid plan: the VPN, proxy and hosting flags and their providers, and the
+# bot, carrier, satellite and service flags.
 VPN = dict(
     TOR,
     ip="146.70.116.130",
@@ -70,11 +62,25 @@ VPN = dict(
     is_pubproxy=False,
     is_hosting=True,
     is_cdn=False,
+    is_bot=False,
+    is_carrier=False,
+    is_satellite=False,
+    is_ssh=False,
+    is_smtp=False,
+    is_web=True,
+    is_dns_resolver=False,
+    is_bittorrent=False,
     location={"continent": "EU", "country": "AT", "country_name": "Austria", "city": "Vienna"},
     vpn={"provider": "mullvad", "provider_name": "Mullvad", "confidence": "high", "last_seen": "2026-11-25"},
     tor={},
     hosting={"provider": "m247", "provider_name": "M247", "confidence": "high", "last_seen": "2026-11-25"},
-    asn={"asn": 9009, "name": "M247 Europe SRL", "domain": "m247global.com", "prefix": "146.70.116.0/24"},
+    asn={
+        "asn": 9009,
+        "name": "M247 Europe SRL",
+        "domain": "m247global.com",
+        "type": "hosting",
+        "prefix": "146.70.116.0/24",
+    },
     company={"name": "M247 LTD Vienna Infrastructure", "domain": "m247.ro", "type": "hosting"},
     hostname="",
     abuse={"email": "abuse@m247.ro", "name": "M247 Europe"},
@@ -175,6 +181,7 @@ class InternetDataTestCase(BaseAnalyzerTest):
         dm = self._mapped(TOR)
         self.assertEqual(dm.tags, ["anonymizer"])
         self.assertTrue(dm.additional_info["is_tor"])
+        self.assertNotIn("is_bot", dm.additional_info)
         self.assertEqual(dm.isp, "Artikel10 e.V.")
 
     def test_a_paid_vpn_is_an_anonymizer_with_its_providers(self):
@@ -183,6 +190,8 @@ class InternetDataTestCase(BaseAnalyzerTest):
         info = dm.additional_info
         self.assertTrue(info["is_vpn"])
         self.assertFalse(info["is_resproxy"])
+        self.assertFalse(info["is_bot"])
+        self.assertFalse(info["is_carrier"])
         self.assertEqual(info["vpn_provider"], "Mullvad")
         self.assertEqual(info["hosting_provider"], "M247")
         self.assertNotIn("hostname", info)

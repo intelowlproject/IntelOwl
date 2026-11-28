@@ -18,7 +18,7 @@ plugin = {
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },
     "name": "InternetData",
-    "description": "Look up an IP address's country, ASN and prefix, the company using it, its abuse contact and reverse DNS, and whether it is Tor, a privacy relay, anycast, carrier or satellite space, on [InternetData](https://internetdata.io/). Free, no API key ([terms](https://internetdata.io/terms#no-key), [privacy](https://internetdata.io/privacy)); a key on a paid plan adds the city and coordinates, the VPN, residential, datacenter, mobile and public proxy flags, and hosting.",
+    "description": "Look up an IP address's country, ASN and prefix, the company using it, its abuse contact and reverse DNS, and whether it is Tor, a privacy relay or anycast, on [InternetData](https://internetdata.io/). Free, no API key ([terms](https://internetdata.io/terms#no-key), [privacy](https://internetdata.io/privacy)); a key on a paid plan adds the city and coordinates, the VPN, residential, datacenter, mobile and public proxy flags, hosting, carrier and satellite space, bots, and the services an address runs.",
     "disabled": False,
     "soft_time_limit": 60,
     "routing_key": "default",

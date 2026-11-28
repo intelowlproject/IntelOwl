@@ -44,9 +44,10 @@ class InternetData(ObservableAnalyzer):
     One request to https://api.internetdata.io/<ip>. With no API key
     (https://internetdata.io/terms#no-key, https://internetdata.io/privacy) it
     answers the country, the ASN and prefix, the company using the address, its
-    abuse contact and reverse DNS, and whether it is Tor, a privacy relay,
-    anycast, carrier or satellite space; a key on a paid plan adds the city and
-    coordinates, the VPN, proxy and hosting flags and their providers.
+    abuse contact and reverse DNS, and whether it is Tor, a privacy relay or
+    anycast; a key on a paid plan adds the city and coordinates, the VPN, proxy
+    and hosting flags and their providers, carrier and satellite space, bots
+    and the services an address runs.
     """
 
     url: str = "https://api.internetdata.io/"
